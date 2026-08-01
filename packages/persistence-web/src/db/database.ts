@@ -8,6 +8,7 @@ import type {
   ContextEventV1,
   FiveDayUvForecast,
   ProductSafetyEventV1,
+  ProductCatalogRecordV1,
   ProtectionSessionRecord,
   SessionEndedEventV1,
   SessionStartedEventV1,
@@ -19,12 +20,6 @@ import type {
 } from "@sunshield/contracts";
 
 export const DEFAULT_DATABASE_NAME = "sunshield-advisor-p0";
-
-export type SunscreenProductRecord = {
-  id: string;
-  usageStatus: string;
-  updatedAt: string;
-};
 
 export type WeatherSnapshotRecord = {
   id: string;
@@ -71,7 +66,7 @@ export type ProjectionChecksumRecord = {
 };
 
 export class SunshieldDatabase extends Dexie {
-  SunscreenProducts!: Table<SunscreenProductRecord, string>;
+  SunscreenProducts!: Table<ProductCatalogRecordV1, string>;
   ProtectionSessions!: Table<ProtectionSessionRecord, string>;
   ProtectionZoneStates!: Table<ZoneProjection, [string, string]>;
   SessionStartedEvents!: Table<SessionStartedEventV1, string>;
@@ -141,6 +136,11 @@ export class SunshieldDatabase extends Dexie {
       ZoneIdentityLocks:
         "[sessionId+bodyZoneCode], zoneInstanceId",
       ProjectionChecksums: "[sessionId+revision]"
+    });
+
+    this.version(2).stores({
+      SunscreenProducts:
+        "&productId, status, updatedAt, [status+updatedAt]"
     });
   }
 }

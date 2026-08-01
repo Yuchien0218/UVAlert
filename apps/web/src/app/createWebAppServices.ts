@@ -1,6 +1,7 @@
 import {
   BroadcastChannelNotifier,
   LocalProductSettingsRepository,
+  LocalProductCatalogRepository,
   LocalRegionPreferenceRepository,
   LocalSetupDraftRepository,
   LocalSessionRepository,
@@ -43,6 +44,10 @@ import {
   type RegionController
 } from "../features/region/createRegionController";
 import { LazyTaiwanRegionResolver } from "../features/region/LazyTaiwanRegionResolver";
+import {
+  createReapplicationController,
+  type ReapplicationController
+} from "../features/reapplication/createReapplicationController";
 import type { RegionDirectoryEntry } from "../features/region/TaiwanRegionResolver";
 
 export interface WebAppServices {
@@ -53,6 +58,7 @@ export interface WebAppServices {
   readonly sessionControl: SessionControlController;
   readonly uvForecast: UvForecastController;
   readonly region: RegionController;
+  readonly reapplication: ReapplicationController;
   dispose(): void;
 }
 
@@ -91,8 +97,12 @@ export function createWebAppServices(
   const appearance = createAppearanceController();
   const productRepository =
     new LocalProductSettingsRepository(database);
+  const productCatalog = new LocalProductCatalogRepository(database);
   const productSettings = createProductSettingsController({
-    repository: productRepository
+    repository: productRepository,
+    catalog: productCatalog,
+    createId,
+    now: () => new Date()
   });
   const setup = createSetupController({
     draftRepository: new LocalSetupDraftRepository(database),
@@ -105,6 +115,14 @@ export function createWebAppServices(
     getConnectivity: () => boot.connectivity.value
   });
   const sessionControl = createSessionControlController({
+    repository,
+    identity,
+    boot,
+    createId,
+    now: () => new Date(),
+    getConnectivity: () => boot.connectivity.value
+  });
+  const reapplication = createReapplicationController({
     repository,
     identity,
     boot,
@@ -157,7 +175,9 @@ export function createWebAppServices(
     sessionControl,
     uvForecast,
     region,
+    reapplication,
     dispose(): void {
+      reapplication.dispose();
       region.dispose();
       uvForecast.dispose();
       sessionControl.dispose();

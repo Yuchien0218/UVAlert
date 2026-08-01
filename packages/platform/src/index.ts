@@ -1,9 +1,12 @@
 import type {
   CommandResult,
+  ApplicationEventV1,
   EndSessionCommandV1,
   FiveDayUvForecast,
   ProductLabelSnapshotV1,
+  ProductCatalogRecordV1,
   RegionPreferenceV1,
+  ReapplyCommandV1,
   ReducerClock,
   SessionProjection,
   SetupDraftV1,
@@ -52,6 +55,32 @@ export interface ProductSettingsPort {
     snapshot: ProductLabelSnapshotV1
   ): Promise<void>;
   clearCurrentProductSnapshot(): Promise<void>;
+}
+
+export interface ReapplicationContext {
+  session: SessionProjection;
+  currentApplications: ApplicationEventV1[];
+  products: ProductCatalogRecordV1[];
+}
+
+export interface ReapplicationRepositoryPort {
+  getReapplicationContext(localVisitorId: string): Promise<ReapplicationContext | null>;
+  reapply(
+    command: ReapplyCommandV1,
+    clock: ReducerClock
+  ): Promise<CommandResult<SessionProjection>>;
+}
+
+export interface ProductCatalogPort {
+  listProducts(): Promise<ProductCatalogRecordV1[]>;
+  getProduct(productId: string): Promise<ProductCatalogRecordV1 | null>;
+  saveProduct(input: {
+    productId: string;
+    displayName: string;
+    snapshot: ProductLabelSnapshotV1;
+    now: string;
+  }): Promise<ProductCatalogRecordV1>;
+  stopProduct(productId: string, now: string): Promise<void>;
 }
 
 export interface RegionPreferencePort {

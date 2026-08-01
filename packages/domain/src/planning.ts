@@ -4,6 +4,7 @@ import type {
   ContextEventV1,
   EndSessionCommandV1,
   ProtectionSessionRecord,
+  ReapplyCommandV1,
   ReducerClock,
   SessionEndedEventV1,
   SessionEventStreamV1,
@@ -14,6 +15,7 @@ import type {
 } from "@sunshield/contracts";
 import {
   EVENT_SCHEMA_VERSION,
+  ReapplyCommandV1Schema,
   StartSessionCommandV1Schema
 } from "@sunshield/contracts";
 import { reduceSession } from "./reducer";
@@ -46,6 +48,84 @@ export type StartSessionPlan = {
   projection: SessionProjection;
   committedEventIds: string[];
 };
+
+export type ReapplicationPlan = {
+  group: ApplicationConfirmationGroupV1;
+  events: ApplicationEventV1[];
+  stream: SessionEventStreamV1;
+  session: ProtectionSessionRecord;
+  projection: SessionProjection;
+  committedEventIds: string[];
+};
+
+export function planReapplication(
+  rawCommand: ReapplyCommandV1,
+  currentStream: SessionEventStreamV1,
+  currentSession: ProtectionSessionRecord,
+  clock: ReducerClock
+): ReapplicationPlan {
+  const command = ReapplyCommandV1Schema.parse(rawCommand);
+  const revision = currentSession.revision + 1;
+  const eventBase = (id: string) => ({
+    schemaVersion: EVENT_SCHEMA_VERSION,
+    id,
+    sessionId: command.sessionId,
+    commandId: command.commandId,
+    idempotencyKey: command.idempotencyKey,
+    effectiveOccurredAt: command.payload.appliedAt,
+    clientCreatedAt: command.clientCreatedAt,
+    clientSequence: command.clientSequence,
+    localAppliedSequence: command.clientSequence
+  });
+  const group: ApplicationConfirmationGroupV1 = {
+    ...eventBase(command.payload.applicationConfirmationId),
+    eventType: "application_confirmation_group",
+    appliedAt: command.payload.appliedAt,
+    confirmedZoneInstanceIds: command.payload.applications.flatMap(
+      (application) => application.zoneInstanceIds
+    ),
+    correctionAction: "create",
+    correctionOfGroupId: null
+  };
+  const events: ApplicationEventV1[] = command.payload.applications.map(
+    (application) => ({
+      ...eventBase(application.eventId),
+      eventType: "application_recorded",
+      applicationConfirmationId: group.id,
+      zoneInstanceIds: application.zoneInstanceIds,
+      appliedAt: command.payload.appliedAt,
+      sourceProductId: application.sourceProductId,
+      productSnapshotFingerprint: application.productSnapshotFingerprint,
+      productLabelSnapshot: application.productLabelSnapshot
+    })
+  );
+  const stream: SessionEventStreamV1 = {
+    ...currentStream,
+    applicationConfirmationGroups: [
+      ...currentStream.applicationConfirmationGroups,
+      group
+    ],
+    applicationEvents: [...currentStream.applicationEvents, ...events]
+  };
+  const projection = reduceSession({ stream, revision, clock });
+  const session: ProtectionSessionRecord = {
+    ...currentSession,
+    overallStatus: projection.overallStatus,
+    sessionNextDueAt: projection.sessionNextDueAt,
+    primaryAction: projection.primaryAction,
+    derivedFromEventRefs: projection.derivedFromEventRefs,
+    revision,
+    updatedAt: clock.trustedNow
+  };
+  return {
+    group,
+    events,
+    stream,
+    session,
+    projection,
+    committedEventIds: [group.id, ...events.map((event) => event.id)]
+  };
+}
 
 export function planStartSession(
   rawCommand: StartSessionCommandV1,

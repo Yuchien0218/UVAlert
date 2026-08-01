@@ -2,6 +2,7 @@ import type {
   CommandReceiptRecord,
   CommandResult,
   EndSessionCommandV1,
+  ReapplyCommandV1,
   ReducerClock,
   SessionEventStreamV1,
   SessionProjection,
@@ -10,6 +11,8 @@ import type {
 } from "@sunshield/contracts";
 import {
   EndSessionCommandV1Schema,
+  ReapplyCommandV1Schema,
+  fingerprintProductLabelSnapshot,
   StartSessionCommandV1Schema
 } from "@sunshield/contracts";
 import {
@@ -17,6 +20,7 @@ import {
   makeSessionEndedEvent,
   ownerKeyFor,
   planStartSession,
+  planReapplication,
   reduceSession
 } from "@sunshield/domain";
 import {
@@ -24,6 +28,7 @@ import {
   NoopCrossContextNotifier
 } from "../cross-context";
 import { SunshieldDatabase } from "../db/database";
+import { LocalProductCatalogRepository } from "./local-product-catalog-repository";
 
 type TransactionOutcome = {
   result: CommandResult<SessionProjection>;
@@ -391,6 +396,108 @@ export class LocalSessionRepository {
     }
   }
 
+  async reapply(
+    rawCommand: ReapplyCommandV1,
+    clock: ReducerClock
+  ): Promise<CommandResult<SessionProjection>> {
+    const parsed = ReapplyCommandV1Schema.safeParse(rawCommand);
+    if (!parsed.success) return validationFailure(parsed.error.issues);
+    if (Date.parse(parsed.data.payload.appliedAt) > Date.parse(clock.trustedNow)) {
+      return { ok: false, code: "VALIDATION_ERROR", fieldErrors: { "payload.appliedAt": ["實際塗抹時間不得晚於可信現在"] }, retryable: false };
+    }
+
+    try {
+      const outcome = await this.#database.transaction(
+        "rw",
+        [
+          this.#database.ProtectionSessions,
+          this.#database.ProtectionZoneStates,
+          this.#database.SessionStartedEvents,
+          this.#database.ZoneTrackingEvents,
+          this.#database.ZoneMethodEvents,
+          this.#database.ApplicationConfirmationGroups,
+          this.#database.ApplicationEvents,
+          this.#database.ProductSafetyEvents,
+          this.#database.ContextEvents,
+          this.#database.SessionEndedEvents,
+          this.#database.ActiveSessionLocks,
+          this.#database.ClientSequences,
+          this.#database.CommandReceipts,
+          this.#database.SunscreenProducts
+        ],
+        async (): Promise<TransactionOutcome> => {
+          const existingReceipt = await this.#database.CommandReceipts.get(parsed.data.idempotencyKey);
+          if (existingReceipt !== undefined) {
+            return { result: existingReceipt.result as CommandResult<SessionProjection>, committed: false };
+          }
+          const session = await this.#database.ProtectionSessions.get(parsed.data.sessionId);
+          if (session === undefined || session.endedAt !== null) {
+            return { result: { ok: false, code: "NOT_FOUND", retryable: false }, committed: false };
+          }
+          const ownerKey = ownerKeyFor(parsed.data.owner.localVisitorId);
+          const lock = await this.#database.ActiveSessionLocks.get(ownerKey);
+          if (session.ownerKey !== ownerKey || lock?.sessionId !== session.id) {
+            return { result: { ok: false, code: "NOT_FOUND", retryable: false }, committed: false };
+          }
+          if (session.revision !== parsed.data.expectedRevision) {
+            return { result: { ok: false, code: "REVISION_CONFLICT", currentRevision: session.revision, retryable: false }, committed: false };
+          }
+          const sequenceKey: [string, string] = [parsed.data.deviceLocalId, parsed.data.sessionId];
+          const sequence = await this.#database.ClientSequences.get(sequenceKey);
+          if (sequence !== undefined && parsed.data.clientSequence <= sequence.lastSequence) {
+            return { result: { ok: false, code: "CLIENT_SEQUENCE_CONFLICT", retryable: false }, committed: false };
+          }
+
+          const currentZones = await this.#database.ProtectionZoneStates.where("sessionId").equals(session.id).toArray();
+          const validTopicalZones = new Set(currentZones.filter((zone) =>
+            zone.trackingStatus === "active" &&
+            zone.skinExposureStatus === "exposed" &&
+            zone.methodCertainty === "confirmed" &&
+            zone.methodComponents.some((component) => component === "sunscreen" || component === "other_topical")
+          ).map((zone) => zone.zoneInstanceId));
+          for (const application of parsed.data.payload.applications) {
+            if (application.zoneInstanceIds.some((zoneId) => !validTopicalZones.has(zoneId))) {
+              return { result: { ok: false, code: "VALIDATION_ERROR", retryable: false }, committed: false };
+            }
+            if (application.sourceProductId !== null) {
+              const product = await this.#database.SunscreenProducts.get(application.sourceProductId);
+              if (product === undefined || product.status !== "active" ||
+                product.snapshotFingerprint !== application.productSnapshotFingerprint ||
+                JSON.stringify(product.currentSnapshot) !== JSON.stringify(application.productLabelSnapshot)) {
+                return { result: { ok: false, code: "PRODUCT_CONFLICT", retryable: false }, committed: false };
+              }
+            } else if (fingerprintProductLabelSnapshot(application.productLabelSnapshot) !== application.productSnapshotFingerprint) {
+              return { result: { ok: false, code: "PRODUCT_CONFLICT", retryable: false }, committed: false };
+            }
+          }
+
+          const stream = await this.#loadEventStream(session.id);
+          const plan = planReapplication(parsed.data, stream, session, clock);
+          await this.#database.ApplicationConfirmationGroups.add(plan.group);
+          await this.#database.ApplicationEvents.bulkAdd(plan.events);
+          await this.#database.ProtectionZoneStates.bulkPut(plan.projection.zones);
+          await this.#database.ProtectionSessions.put(plan.session);
+          await this.#database.ClientSequences.put({ deviceLocalId: parsed.data.deviceLocalId, sessionId: parsed.data.sessionId, lastSequence: parsed.data.clientSequence });
+
+          const result: CommandResult<SessionProjection> = {
+            ok: true,
+            data: plan.projection,
+            sessionId: session.id,
+            revision: plan.session.revision,
+            committedEventIds: plan.committedEventIds
+          };
+          await this.#database.CommandReceipts.add({ idempotencyKey: parsed.data.idempotencyKey, commandId: parsed.data.commandId, sessionId: session.id, result, createdAt: clock.trustedNow });
+          return { result, committed: true };
+        }
+      );
+      if (outcome.committed && outcome.result.ok) this.#publishCommit(outcome.result.sessionId, outcome.result.revision);
+      return outcome.result;
+    } catch (error) {
+      if (error instanceof DomainInvariantError) return mapPlanningError(error);
+      return { ok: false, code: "PERSISTENCE_ERROR", retryable: true };
+    }
+  }
+
   async getCurrentSession(
     localVisitorId: string
   ): Promise<SessionProjection | null> {
@@ -433,6 +540,22 @@ export class LocalSessionRepository {
       primaryAction: session.primaryAction,
       derivedFromEventRefs: session.derivedFromEventRefs
     };
+  }
+
+  async getReapplicationContext(localVisitorId: string) {
+    const session = await this.getCurrentSession(localVisitorId);
+    if (session === null) return null;
+    const stream = await this.#loadEventStream(session.sessionId);
+    const currentIds = new Set(
+      session.zones
+        .map((zone) => zone.currentApplicationId)
+        .filter((id): id is string => id !== null)
+    );
+    const currentApplications = stream.applicationEvents.filter((event) =>
+      currentIds.has(event.id)
+    );
+    const products = await new LocalProductCatalogRepository(this.#database).listProducts();
+    return { session, currentApplications, products };
   }
 
   async #loadEventStream(sessionId: string): Promise<SessionEventStreamV1> {

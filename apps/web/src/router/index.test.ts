@@ -72,4 +72,15 @@ describe("createAppRouter", () => {
       "地區設定｜防曬晴報員"
     );
   });
+
+  it("S-08 沒有 active Session 時回到提醒頁", async () => {
+    const boot = {
+      phase: shallowReadonly(shallowRef("ready")), errorCode: shallowReadonly(shallowRef(null)), connectivity: shallowReadonly(shallowRef("online")), currentSession: shallowReadonly(shallowRef(null)),
+      ensureBooted: vi.fn(async () => undefined), refresh: vi.fn(async () => undefined), dispose: vi.fn()
+    } as AppBootController;
+    const router = createAppRouter(boot, createMemoryHistory());
+    await router.push("/reminder/reapply");
+    await router.isReady();
+    expect(router.currentRoute.value.name).toBe("reminder");
+  });
 });

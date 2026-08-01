@@ -31,6 +31,12 @@ export function createAppRouter(
         meta: { title: "目前提醒" }
       },
       {
+        path: "/reminder/reapply",
+        name: "reminder-reapply",
+        component: () => import("../pages/ReapplyPage.vue"),
+        meta: { title: "記錄實際補擦", hideNavigation: true, requiresActiveSession: true }
+      },
+      {
         path: "/products",
         name: "products",
         component: () => import("../pages/ProductsPage.vue"),
@@ -124,6 +130,10 @@ export function createAppRouter(
       boot.currentSession.value !== null
     ) {
       return { name: "home" };
+    }
+
+    if (to.meta.requiresActiveSession === true && boot.currentSession.value === null) {
+      return { name: "reminder" };
     }
 
     if (typeof to.meta.setupStep === "string" && setup !== undefined) {

@@ -72,6 +72,7 @@ export type CommandResult<T> =
         | "REVISION_CONFLICT"
         | "CLIENT_SEQUENCE_CONFLICT"
         | "CORRECTION_CONFLICT"
+        | "PRODUCT_CONFLICT"
         | "NOT_FOUND"
         | "PERSISTENCE_ERROR";
       fieldErrors?: Record<string, string[]>;

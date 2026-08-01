@@ -66,7 +66,7 @@ P0 的提醒只保證 App 開啟期間的前景狀態與重新開啟後的恢復
 | P0-08 | `/reminder/reapply` | 記錄已補擦 | 預選建議部位，確認實際部位、產品與時間 |
 | P0-09 | `/reminder/report` | 回報狀況 | 回報活動、事件、衣物狀態或產品安全事件 |
 | P0-10 | `/reminder/event/:id/correct` | 最近事件更正 | 更正目前 Session 最近提交的事件 |
-| P0-11 | `/products` | 我的防曬裝備 | 防曬裝備清單：sunscreen／clothing／eyewear／other_gear 四品類，含購買月份、到期日、備忘與過去用過 |
+| P0-11 | `/products` | 我的防曬裝備 | 防曬裝備清單：sunscreen／clothing／eyewear／other_gear 四品類，含購買月份、到期日、備忘與過去用過。目前已有具穩定 ID、名稱與 snapshot 的本機 product catalog |
 | P0-12 | `/products/new` | 新增防曬裝備 | 建立本機產品或裝備紀錄 |
 | P0-13 | `/products/:id/edit` | 編輯防曬裝備 | 修改、封存、停止使用或刪除 |
 | P0-14 | `/more` | 更多 | 說明、特殊狀況、安裝、顯示設定、隱私與資料管理 |
@@ -149,6 +149,8 @@ P0 的提醒只保證 App 開啟期間的前景狀態與重新開啟後的恢復
 
 2026-08-06 裁決：本頁由「提醒用產品主檔」擴為「防曬裝備清單」。
 
+- [x] 本機 product catalog 保存穩定 productId、顯示名稱、目前 snapshot／fingerprint 與 active／stopped 狀態。
+- [x] 既有「目前使用產品」snapshot 以中性名稱匯入 catalog，不捏造品牌或防曬宣稱。
 - [ ] 支援四個品類：`sunscreen`、`clothing`、`eyewear`、`other_gear`。
 - [ ] `sunscreen` 進 reducer；`clothing` 為 methodComponent（覆蓋期間不倒數）；`eyewear` 與 `other_gear` 為純紀錄，不影響提醒。
 - [ ] UI 明示哪些欄位會影響倒數；記錄純紀錄類裝備不得讓使用者以為提醒行為改變。
@@ -158,7 +160,7 @@ P0 的提醒只保證 App 開啟期間的前景狀態與重新開啟後的恢復
 - [ ] 已被 active Session 或既有事件引用的 `sunscreen` 不得改為純紀錄品類。
 - [ ] 顯示 `目前使用` 與 `過去紀錄`。
 - [ ] 新增、編輯、封存、停止使用及刪除產品。
-- [ ] 支援 `這次先不保存產品` 的 Session-only snapshot。
+- [x] 支援 `這次先不保存產品` 的 Session-only snapshot。
 - [ ] 保存產品身分、SPF、PA、廣效文字、曝曬前等待、一般補擦標示及耐水標示。
 - [ ] SPF、PA 與 broad-spectrum 分欄，不互相推定。
 - [ ] 同一未修改產品不重問產品身分。
@@ -176,8 +178,9 @@ P0 的提醒只保證 App 開啟期間的前景狀態與重新開啟後的恢復
 - [ ] 已到期改用靜態到期卡，不顯示負數或閃爍 `00:00`。
 - [ ] 無可信期限使用非時間型行動卡。
 - [ ] 其他部位依 `需要處理`、`即將需要處理`、`其他狀態` 分組。
-- [ ] 局部補擦只更新最後確認的部位。
-- [ ] 提交後顯示部位與時間摘要，並提供更正。
+- [x] 局部補擦只更新最後確認的部位；不同部位可選不同產品／immutable snapshot。
+- [x] 補擦以單一 IndexedDB transaction 原子寫入 confirmation group、ApplicationEvents、projection、Session revision、client sequence 與 receipt。
+- [x] 提交後顯示部位與時間摘要，並保留更正所需 group ID；完整更正 transaction 尚未實作。
 - [ ] 提醒頁提供最近事件清單：純文字，預設只顯示最新一筆，其餘收合可展開。（2026-08-07 裁決；PRD v3.11 已將「時間軸」放寬為清單）
 - [ ] 每列可點擊進入 S-10 更正該筆事件——這是更正流程的**唯一入口**，缺了它 §5.11 的「更正本機資料」無法達成。
 - [ ] 只顯示已發生事實，不得把推測狀態畫成事件。

@@ -101,10 +101,10 @@ AC-94, AC-96, AC-97, AC-98, AC-99, AC-100
 | F-02 | 定位、手動地區與略過 | S-01、S-02 | NLSC 7441 裝置內界線解析；RegionPreferenceV1；精確座標不保存或傳送 | CP-UVI-001、CP-REGION-* | 01、19、21、32、55、100 | BrowserGeolocation、TaiwanRegionResolver、region-flow integration、RegionPage tests | IMPLEMENTED／PARTIALLY_VERIFIED／LEGAL_REVIEW |
 | F-03 | CWA 觀測資料 | S-01、S-02 | O-A0003-001、cache、freshness | CP-UVI-002～007 | 02、03、04、21、30 | IT-CWA-002～006 | SPECIFIED |
 | F-04 | UV 風險卡 | S-01 | CWA boundary mapping；不影響期限 | CP-UVI-007～012 | 02、05、38、66、68、69 | IT-CWA-007、A11Y-P0-001 | SPECIFIED／REVIEW_BLOCKED |
-| F-05 | 我的防曬品 | S-05、S-11～13 | ProductLabelSnapshotV1、eligibility | CP-PRODUCT-*、CP-SETUP-010～012 | 18、35、43、47、48、50、53、87、97 | UT-VALIDATION-001～004、E2E-P0-003 | IMPLEMENTED（session-only subset）／REVIEW_BLOCKED |
+| F-05 | 我的防曬品 | S-05、S-11～13 | ProductLabelSnapshotV1、eligibility | CP-PRODUCT-*、CP-SETUP-010～012 | 18、35、43、47、48、50、53、87、97 | UT-VALIDATION-001～004、IT-IDB-PRODUCT-001、E2E-P0-003 | IMPLEMENTED（本機 catalog／session-only subset；完整管理仍待完成）／PARTIALLY_VERIFIED／REVIEW_BLOCKED |
 | F-06 | 塗抹紀錄與部位狀態 | S-04～08 | BODY_ZONE_V3、Application group、zone reducer | CP-SETUP-006～016、CP-REMINDER-* | 07、26、34、36、37、52、79、81、82、85、87、88、94 | UT-RULE-TV-001～040、E2E-P0-004 | IMPLEMENTED／PARTIALLY_VERIFIED |
 | F-07 | 活動與事件 | S-07～10 | ContextEvent、correction chain | CP-EVENT-* | 06、28、37、39、41、44、45、51、83、85 | UT-RULE-TV-015～029、E2E-P0-005 | SPECIFIED |
-| F-08 | 補擦提醒引擎 | S-07～09 | RR-P0-*、primaryAction | CP-REMINDER-*、CP-REAPPLY-* | 05、06、07、16、17、23、31、36、40、51、65、66、82、85～88、97、98 | UT-RULE-TV-001～040 | SPECIFIED／REVIEW_BLOCKED |
+| F-08 | 補擦提醒引擎 | S-07～09 | RR-P0-*、primaryAction | CP-REMINDER-*、CP-REAPPLY-* | 05、06、07、16、17、23、31、36、40、51、65、66、82、85～88、97、98 | UT-RULE-TV-001～040、UT-REAPPLY-001、IT-IDB-REAPPLY-001 | IMPLEMENTED（S-07／S-08 subset）／PARTIALLY_VERIFIED／REVIEW_BLOCKED |
 | F-09 | 前景計時與狀態恢復 | S-07 | ClockCalibration、absolute timestamps | CP-REMINDER-CLOCK-*、CP-TIME-API-001 | 09、23、40、67、89 | IT-TIME-001～006、IT-IDB-001 | SPECIFIED |
 | F-10 | 權限與錯誤降級 | 全部核心頁 | feature detection、transaction result | CP-REGION-*、CP-STORAGE-*、CP-GENERIC-ERROR | 01、12、23、31、32、39、54、89 | E2E-P0-006、SEC-P0-003 | SPECIFIED |
 | F-11 | 基本離線降級 | S-01、S-03～20 | App Shell、IDB、WeatherSnapshot | CP-OFFLINE-001、CP-UVI-013 | 09、12、23、40、89 | IT-IDB-002、E2E-P0-007、DEVICE-P0-001 | SPECIFIED |
@@ -128,7 +128,7 @@ AC-94, AC-96, AC-97, AC-98, AC-99, AC-100
 | S-05 快速提醒、塗抹時間與開始提醒 | F-05、F-06、F-08 | preset 自動套用、S-11 current-product snapshot、`pendingTiming`、ClockCalibration、StartSessionCommandV1、固定操作列 | CP-SETUP-006、013～018 | 05、23、33～35、39～42、50、53、79、85、87、88、97 | UT-WEB-SETUP-001、IT-WEB-SETUP-001、UT-VALIDATION-002、UT-VALIDATION-003、E2E-P0-003、E2E-P0-009 | IMPLEMENTED（current-product subset）／PARTIALLY_VERIFIED／REVIEW_BLOCKED；**待改為兩步** |
 | ~~S-06 最終確認~~ | — | — | — | — | — | **2026-08-06 廢除**，併入 S-05 |
 | S-07 進行中提醒 | F-08、F-09 | primaryAction、zone／Session summary；最近事件清單（收合預設、S-10 唯一入口） | CP-REMINDER-*、CP-REMINDER-EVENTS-001～003 | 05、07、09、12、23、31、36、38、40、51、57、64～67、81、82、85、86、96 | UT-RULE-TV-*、A11Y-P0-002 | SPECIFIED／REVIEW_BLOCKED |
-| S-08 記錄已補擦 | F-06～08 | ApplicationConfirmationGroup | CP-REAPPLY-* | 07、28、37、39、40、45、65、82、85、87 | UT-RULE-TV-022、037～039 | SPECIFIED |
+| S-08 記錄已補擦 | F-06～08 | ReapplyCommandV1、ApplicationConfirmationGroup、per-zone immutable snapshot、atomic IndexedDB transaction | CP-REAPPLY-* | 07、28、37、39、40、45、65、82、85、87 | UT-REAPPLY-001、IT-IDB-REAPPLY-001、UT-WEB-REAPPLY-001 | IMPLEMENTED／PARTIALLY_VERIFIED |
 | S-09 回報狀況 | F-07、F-08 | ContextEvent、ProductSafetyEvent | CP-EVENT-*、CP-PRODUCT-SAFETY | 06、28、37、39、41、44、51、83、85、97 | UT-RULE-TV-015～029 | SPECIFIED／REVIEW_BLOCKED |
 | S-10 更正最近事件 | F-07 | correction leaf、replace／void；入口為 S-07 最近事件清單 | CP-EVENT-CORRECT-* | 28、39、44、45、85 | UT-RULE-TV-039、IT-IDB-003 | SPECIFIED |
 | S-11 防曬裝備 | F-05 | current-product snapshot；`gearCategory` 四品類、`purchaseMonth`／`expiryDate`／`note`／`archivedAt`；recent sorting 待實作 | CP-PRODUCT-*、CP-PRODUCT-CATEGORY-001～003、CP-PRODUCT-FIELDS-001 | 18、35、43、47、50、53、55、87、97 | Setup controller integration、E2E-P0-003 | IMPLEMENTED（single current-product subset）／PARTIALLY_VERIFIED；**待擴充品類** |
@@ -236,7 +236,7 @@ AC-94, AC-96, AC-97, AC-98, AC-99, AC-100
 | AC | Requirement／Screen | Spec evidence | Planned verification | 目前狀態 |
 | --- | --- | --- | --- | --- |
 | AC-06 | F-07、F-08；S-05、S-07～09 | DT-WATER、RR-P0-WATER | TV-015～021 | SPECIFIED／REVIEW_BLOCKED |
-| AC-07 | F-06、F-08；S-08 | Application group partition | TV-037～038 | SPECIFIED |
+| AC-07 | F-06、F-08；S-08 | Application group partition | contracts／domain／IndexedDB reapply tests | PARTIALLY_VERIFIED |
 | AC-16 | F-05、F-08；S-05、S-07、S-15 | water label unknown copy／rule | TV-019 | SPECIFIED／REVIEW_BLOCKED |
 | AC-17 | F-05、F-08；S-05～07 | DT-LABEL；CP-REMINDER-LABEL | TV-013～014 | SPECIFIED／REVIEW_BLOCKED |
 | AC-18 | F-05；S-05、S-12 | snapshot 欄位分離、未知可繼續 | UT-VALIDATION-002 | SPECIFIED／REVIEW_BLOCKED |
@@ -245,7 +245,7 @@ AC-94, AC-96, AC-97, AC-98, AC-99, AC-100
 | AC-33 | F-UX-01；S-03～06 | recent setting 不沿用時間 | E2E-P0-008 | SPECIFIED |
 | AC-34 | F-06、F-UX-01；S-04～05 | preset 自動套用、group mapping、batch method、最終確認 | UT-WEB-SETUP-001、UX-P0-002 | IMPLEMENTED／PARTIALLY_VERIFIED |
 | AC-35 | F-05、F-UX-01；S-05、S-11～13 | session-only snapshot、unknown value | UT-VALIDATION-002、E2E-P0-003 | SPECIFIED |
-| AC-37 | F-06、F-07；S-08、S-09 | 預選不提交；final confirmation | E2E-P0-005 | SPECIFIED |
+| AC-37 | F-06、F-07；S-08、S-09 | 預選不提交；final confirmation | reapplication controller tests；正式 E2E 待補 | PARTIALLY_VERIFIED |
 | AC-41 | F-07；S-03、S-09 | water preparing／active／unknown | TV-018～021 | SPECIFIED |
 | AC-42 | F-01、F-06；S-03、S-05、S-07 | one active Session、conflict copy | E2E-P0-012 | SPECIFIED |
 | AC-43 | F-05；S-05、S-11 | 90-day／top-3 deterministic sorting | UT-VALIDATION-005 | SPECIFIED |
@@ -259,7 +259,7 @@ AC-94, AC-96, AC-97, AC-98, AC-99, AC-100
 | AC-53 | F-05；S-11～13 | product state filtering／safety restore | TV-027～029、E2E-P0-010 | SPECIFIED／REVIEW_BLOCKED |
 | AC-79 | F-UX-01；S-03～06 | three-stage flow、推薦自動套用、Bottom Sheet、contextual fields、final confirmation | UT-WEB-SETUP-001、UX-P0-001 | IMPLEMENTED／PARTIALLY_VERIFIED |
 | AC-81 | F-06、F-UX-01；S-07 | one primary action＋group summary | UX-P0-004 | SPECIFIED |
-| AC-82 | F-06、F-08；S-08 | only confirmed zones reset | TV-037～038 | SPECIFIED |
+| AC-82 | F-06、F-08；S-08 | only confirmed zones reset | domain planning／IndexedDB reapply tests | PARTIALLY_VERIFIED |
 | AC-83 | F-07；S-09 | event preset final confirmation | E2E-P0-005 | SPECIFIED |
 | AC-85 | F-06～08；S-07～10 | activation、strict later cause | TV-010～012、022、025～026 | SPECIFIED |
 | AC-87 | F-05、F-08；S-05～08、S-13 | immutable snapshot、shorter label | TV-002、004、006 | SPECIFIED／REVIEW_BLOCKED |
@@ -334,6 +334,10 @@ AC-94, AC-96, AC-97, AC-98, AC-99, AC-100
 | UT-WEB-SETUP-002 | `apps/web/src/components/setup/SetupFlowComponents.test.ts` | `passed` | 推薦部位自動套用後仍可調整；ProtectionAdjustmentSheet dialog 語意、關閉事件與 Teleport 邊界 |
 | UT-WEB-PRODUCT-001 | `apps/web/src/components/product/SetupProcessBanner.test.ts` | `passed` | 未完成 SetupDraft 的產品頁 Process Banner 與返回設定事件 |
 | IT-WEB-SETUP-002 | `apps/web/src/features/setup/createSetupController.integration.test.ts` | `passed` | `pendingTiming` 在沒有產品時保存、IndexedDB 重新載入後恢復，且不建立 Application 或 Session |
+| UT-REAPPLY-001 | `packages/contracts/src/reapply-command.test.ts`＋`packages/domain/src/reapplication-planning.test.ts` | `passed` | ReapplyCommand 多產品互斥分區、單一 confirmation group、不同 immutable snapshot 與只更新已選部位 |
+| IT-IDB-PRODUCT-001 | `packages/persistence-web/src/repositories/local-product-catalog-repository.test.ts` | `passed` | 本機產品建立／更新／停止、穩定 productId、legacy current snapshot 中性匯入 |
+| IT-IDB-REAPPLY-001 | `packages/persistence-web/src/repositories/local-session-repository.reapply.test.ts` | `passed` | group／events／projection／revision／sequence／receipt 原子提交、冪等重送、stale snapshot 拒絕與中途失敗回滾 |
+| UT-WEB-REAPPLY-001 | `apps/web/src/features/reapplication/createReapplicationController.test.ts`＋`apps/web/src/router/index.test.ts` | `passed` | due／soon 預選、不同部位產品保留、穩定 idempotent retry、active Session route guard |
 | MANUAL-WEB-SETUP-001 | 本機 in-app browser `S-03 → S-05（含選用 S-04）→ S-06 → S-07` | `passed；console 0 errors` | 真實 IndexedDB projection、active Session guard、三畫面路由與最終提醒呈現。**此紀錄對應改為兩步之前的實作**，改版後需重跑為 `S-03 → S-05 → S-07` |
 | TypeScript boundary | root `pnpm typecheck` | `passed` | contracts、domain、persistence-web、platform、ui、test-fixtures、web strict TypeScript |
 | Web production build | root `pnpm build` | `passed` | `vue-tsc`＋Vite production bundle |
@@ -341,10 +345,10 @@ AC-94, AC-96, AC-97, AC-98, AC-99, AC-100
 | MANUAL-WEB-UV-001 | 本機 in-app browser 首頁無地區狀態 | `passed` | 不顯示 UV 數字、原提醒仍存在、573px viewport 無橫向溢出 |
 | UT-WEB-HOME-REMINDER-001 | `homeReminderClockPresentation.test.ts`＋`HomeReminderSummary.test.ts` | `9 tests passed` | 到期時間不同時顯示優先部位；全部 active 計時部位時間一致時顯示全面補擦；單一／到期／未計時混合邊界、圓環進度及 action event |
 | MANUAL-WEB-HOME-REMINDER-001 | 本機 in-app browser 首頁真實 Session | `passed；console 0 errors` | 8 個同時到期部位顯示單一全面補擦提醒環；標題／卡片無溢位，圓內文字下移 4px 且仍完整位於圓環內 |
-| Full local Gate | root `pnpm test` | `22 test files, 134 tests passed` | foundation＋目前 Web Shell／local Setup／Bottom Sheet／pendingTiming／Process Banner／Session end／Five-day UV／首頁提醒範圍判斷自動測試集合 |
+| Full local Gate | root `pnpm typecheck`＋`pnpm test`＋`pnpm build` | `47 test files, 228 tests passed；typecheck／production build passed` | foundation＋Web Shell／local Setup／Reminder／S-08 multi-product snapshot／atomic reapply transaction／產品 catalog／地區與 UV 自動測試集合 |
 
-上述證據不包含可重跑的正式 UI E2E、真實瀏覽器 multi-context、recent／
-saved-product Setup 分支、DB migration／quota、CWA、可信時間 API、PWA、Accessibility、Device 或專業審查；fake-indexeddb
+上述證據不包含可重跑的正式 UI E2E、真實瀏覽器 multi-context、recent top-3 排序、
+完整產品編輯／刪除流程、quota、CWA、可信時間 API、PWA、Accessibility、Device 或專業審查；fake-indexeddb
 restore test 不得替代 E2E-P0-007。
 
 ### 8.1 Rule／validation

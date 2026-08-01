@@ -24,6 +24,8 @@ const product = ref<ProductSnapshotFormValue>({
 });
 const localError = shallowRef<string | null>(null);
 const saved = shallowRef(false);
+const displayName = ref("我的防曬產品");
+const editingProductId = shallowRef<string | null>(null);
 const returnTo = computed(() =>
   route.query.returnTo === "/setup/timing"
     ? "/setup/timing"
@@ -73,7 +75,15 @@ async function save(): Promise<void> {
     product.value,
     new Date().toISOString()
   );
-  saved.value = await productSettings.save(snapshot);
+  if (displayName.value.trim().length === 0) {
+    localError.value = "請輸入方便辨識的產品名稱。";
+    return;
+  }
+  saved.value = await productSettings.saveProduct(
+    displayName.value,
+    snapshot,
+    editingProductId.value ?? undefined
+  );
   if (!saved.value) {
     localError.value = "產品標示目前無法保存，請再試一次。";
   }
@@ -96,6 +106,29 @@ function validate(): string | null {
   }
   return null;
 }
+
+function editProduct(productId: string): void {
+  const record = productSettings.products.value.find(
+    (item) => item.productId === productId
+  );
+  if (record === undefined) return;
+  editingProductId.value = record.productId;
+  displayName.value = record.displayName;
+  product.value = productSnapshotToFormValue(record.currentSnapshot);
+  saved.value = false;
+  window.scrollTo({ top: 0, behavior: "smooth" });
+}
+
+async function stopProduct(productId: string): Promise<void> {
+  await productSettings.stopProduct(productId);
+  if (editingProductId.value === productId) editingProductId.value = null;
+}
+
+function startNewProduct(): void {
+  editingProductId.value = null;
+  displayName.value = "我的防曬產品";
+  saved.value = false;
+}
 </script>
 
 <template>
@@ -111,6 +144,15 @@ function validate(): string | null {
       v-if="hasActiveSetupDraft"
       @resume="resumeSetup"
     />
+
+    <label class="product-name app-card">
+      <span>產品名稱</span>
+      <input v-model="displayName" type="text" maxlength="80" autocomplete="off" />
+      <small>只用於這台裝置上的產品選擇，不會寫入歷史 snapshot。</small>
+      <button v-if="editingProductId" class="button button--quiet" type="button" @click="startNewProduct">
+        改為新增另一項產品
+      </button>
+    </label>
 
     <ProductSnapshotEditor
       v-model="product"
@@ -138,9 +180,25 @@ function validate(): string | null {
       {{
         productSettings.phase.value === "saving"
           ? "保存中…"
-          : "保存產品標示"
+          : editingProductId
+            ? "更新產品標示"
+            : "保存產品標示"
       }}
     </button>
+
+    <section v-if="productSettings.products.value.length > 0" class="catalog" aria-labelledby="catalog-title">
+      <h2 id="catalog-title">裝置內產品</h2>
+      <article v-for="item in productSettings.products.value" :key="item.productId" class="app-card catalog-item">
+        <div>
+          <h3>{{ item.displayName }}</h3>
+          <p>{{ item.status === "active" ? "可供補擦紀錄選擇" : "已停止使用" }}</p>
+        </div>
+        <div class="catalog-actions">
+          <button class="button button--quiet" type="button" @click="editProduct(item.productId)">編輯</button>
+          <button v-if="item.status === 'active'" class="text-link" type="button" @click="stopProduct(item.productId)">停止使用</button>
+        </div>
+      </article>
+    </section>
 
     <RouterLink
       v-if="saved && returnTo"
@@ -158,6 +216,18 @@ function validate(): string | null {
   margin: 0;
   line-height: 1.7;
 }
+
+.product-name { display: grid; gap: var(--space-2); padding: var(--space-5); }
+.product-name span { font-weight: 700; }
+.product-name input { min-height: var(--tap-target); padding-inline: var(--space-3); border: 1px solid var(--border-strong); border-radius: var(--radius-sm); color: var(--text-primary); background: var(--surface-primary); }
+.product-name small { color: var(--text-secondary); line-height: 1.6; }
+.catalog { display: grid; gap: var(--space-4); }
+.catalog h2, .catalog-item h3, .catalog-item p { margin: 0; }
+.catalog-item { display: grid; gap: var(--space-4); padding: var(--space-5); }
+.catalog-item > div:first-child { display: grid; gap: var(--space-2); }
+.catalog-item p { color: var(--text-secondary); }
+.catalog-actions { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-3); }
+.catalog-actions .text-link { border: 0; background: transparent; color: var(--text-primary); cursor: pointer; }
 
 .form-error {
   color: var(--color-due);

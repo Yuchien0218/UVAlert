@@ -349,7 +349,59 @@ export const EndSessionCommandV1Schema = z.object({
   })
 });
 
+export const ReapplyApplicationInputV1Schema = z.object({
+  eventId: NonEmptyIdSchema,
+  zoneInstanceIds: z.array(NonEmptyIdSchema).min(1),
+  sourceProductId: NonEmptyIdSchema.nullable(),
+  productSnapshotFingerprint: NonEmptyIdSchema,
+  productLabelSnapshot: ProductLabelSnapshotV1Schema
+});
+
+export const ReapplyCommandV1Schema = z
+  .object({
+    ...CommandEnvelopeFields,
+    commandType: z.literal("record_reapplication"),
+    expectedRevision: z.number().int().positive(),
+    payload: z.object({
+      applicationConfirmationId: NonEmptyIdSchema,
+      appliedAt: UtcInstantSchema,
+      applications: z.array(ReapplyApplicationInputV1Schema).min(1)
+    })
+  })
+  .superRefine((command, context) => {
+    const zoneIds = new Set<string>();
+    const eventIds = new Set<string>();
+    for (const [applicationIndex, application] of command.payload.applications.entries()) {
+      if (application.eventId === command.payload.applicationConfirmationId) {
+        context.addIssue({
+          code: "custom",
+          path: ["payload", "applications", applicationIndex, "eventId"],
+          message: "Application event ID 不得等於 confirmation group ID"
+        });
+      }
+      if (eventIds.has(application.eventId)) {
+        context.addIssue({
+          code: "custom",
+          path: ["payload", "applications", applicationIndex, "eventId"],
+          message: "同一 command 的 Application event ID 不得重複"
+        });
+      }
+      eventIds.add(application.eventId);
+      for (const [zoneIndex, zoneId] of application.zoneInstanceIds.entries()) {
+        if (zoneIds.has(zoneId)) {
+          context.addIssue({
+            code: "custom",
+            path: ["payload", "applications", applicationIndex, "zoneInstanceIds", zoneIndex],
+            message: "同一補擦確認內每個部位只能出現一次"
+          });
+        }
+        zoneIds.add(zoneId);
+      }
+    }
+  });
+
 export type StartSessionCommandV1 = z.infer<
   typeof StartSessionCommandV1Schema
 >;
 export type EndSessionCommandV1 = z.infer<typeof EndSessionCommandV1Schema>;
+export type ReapplyCommandV1 = z.infer<typeof ReapplyCommandV1Schema>;

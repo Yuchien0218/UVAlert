@@ -11,6 +11,10 @@ const { boot, sessionControl } = useWebAppServices();
 const router = useRouter();
 
 function handleAction(kind: ActionKind): void {
+  if (kind === "record_reapplication") {
+    void router.push({ name: "reminder-reapply" });
+    return;
+  }
   void router.push({
     name: "reminder-action",
     params: { kind }

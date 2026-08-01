@@ -130,5 +130,31 @@ export const ProductLabelSnapshotV1Schema = z
 export type ProductLabelSnapshotV1 = z.infer<
   typeof ProductLabelSnapshotV1Schema
 >;
+
+export const ProductCatalogRecordV1Schema = z.object({
+  schemaVersion: z.literal("1.0.0"),
+  productId: z.string().trim().min(1),
+  displayName: z.string().trim().min(1).max(80),
+  currentSnapshot: ProductLabelSnapshotV1Schema,
+  snapshotFingerprint: z.string().trim().min(1),
+  createdAt: z.string().datetime({ offset: true }),
+  updatedAt: z.string().datetime({ offset: true }),
+  status: z.enum(["active", "stopped"])
+});
+
+export type ProductCatalogRecordV1 = z.infer<
+  typeof ProductCatalogRecordV1Schema
+>;
+
+export function fingerprintProductLabelSnapshot(snapshot: ProductLabelSnapshotV1): string {
+  const parsed = ProductLabelSnapshotV1Schema.parse(snapshot);
+  const source = JSON.stringify(parsed);
+  let hash = 0x811c9dc5;
+  for (let index = 0; index < source.length; index += 1) {
+    hash ^= source.charCodeAt(index);
+    hash = Math.imul(hash, 0x01000193);
+  }
+  return `snapshot-v1-${(hash >>> 0).toString(16).padStart(8, "0")}`;
+}
 export type ProductEligibility = z.infer<typeof ProductEligibilitySchema>;
 

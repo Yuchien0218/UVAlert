@@ -1,0 +1,106 @@
+<script setup lang="ts">
+import { nextTick, onMounted, watch } from "vue";
+import { useRouter } from "vue-router";
+import { useWebAppServices } from "../app/injection";
+import ReapplicationZoneSelector from "../components/reapplication/ReapplicationZoneSelector.vue";
+import ReapplicationProductAssignments from "../components/reapplication/ReapplicationProductAssignments.vue";
+import ApplicationTimeSelector from "../components/reapplication/ApplicationTimeSelector.vue";
+import ReapplicationReview from "../components/reapplication/ReapplicationReview.vue";
+import { getZoneLabel } from "../features/reminder/reminderPresentation";
+
+const { reapplication } = useWebAppServices();
+const router = useRouter();
+
+onMounted(() => { void reapplication.load(); });
+watch(() => reapplication.error.value, (value) => { if (value === "not_found") void router.replace({ name: "reminder" }); });
+watch(() => reapplication.phase.value, async (value) => { if (value === "success") { await nextTick(); document.querySelector<HTMLElement>("#reapply-success-title")?.focus(); } });
+
+function cancel(): void { void router.push({ name: "reminder" }); }
+function finish(): void { void router.push({ name: "reminder" }); }
+function zoneNames(zoneIds: string[]): string {
+  return zoneIds.map((zoneId) => {
+    const zone = reapplication.session.value?.zones.find((item) => item.zoneInstanceId === zoneId);
+    return zone ? getZoneLabel(zone) : zoneId;
+  }).join("、");
+}
+</script>
+
+<template>
+  <div class="page-stack reapply-page">
+    <header class="flow-heading">
+      <button class="button button--quiet" type="button" @click="cancel">返回提醒</button>
+      <div><p class="eyebrow">REAPPLICATION</p><h1>記錄實際補擦</h1><p>請確認實際補擦的部位、產品與時間；尚未確認前不會更新提醒。</p></div>
+    </header>
+
+    <p v-if="reapplication.phase.value === 'loading'" role="status">正在讀取目前部位與產品…</p>
+
+    <section v-else-if="reapplication.phase.value === 'success' && reapplication.success.value" class="app-card success-panel">
+      <h2 id="reapply-success-title" tabindex="-1">補擦紀錄已更新</h2>
+      <p>已更新 {{ reapplication.success.value.zoneIds.length }} 個部位，{{ new Date(reapplication.success.value.appliedAt).toLocaleString('zh-TW') }}。其他未選部位保持原本狀態。</p>
+      <ul class="success-groups"><li v-for="group in reapplication.success.value.productGroups" :key="`${group.displayName}-${group.zoneIds.join('-')}`"><strong>{{ group.displayName }}</strong>：{{ zoneNames(group.zoneIds) }}</li></ul>
+      <div v-if="reapplication.error.value === 'refresh_failed'" class="refresh-warning" role="alert">
+        <p>紀錄已保存，但目前提醒尚未重新讀取。重新整理只會讀取已提交結果，不會再次送出補擦紀錄。</p>
+        <button class="button button--quiet" type="button" @click="reapplication.refreshCommitted">重新整理提醒</button>
+      </div>
+      <button class="button button--primary" type="button" @click="finish">返回目前提醒</button>
+      <p class="correction-note">若紀錄有誤，稍後可從事件更正功能處理；本頁目前不會直接改寫已提交紀錄。</p>
+    </section>
+
+    <template v-else-if="reapplication.session.value">
+      <ReapplicationZoneSelector
+        :zones="reapplication.session.value.zones"
+        :selected-zone-ids="reapplication.selectedZoneIds.value"
+        :suggested-zone-ids="reapplication.suggestedZoneIds.value"
+        :error="reapplication.fieldErrors.value.zones?.[0]"
+        @suggested="reapplication.selectSuggested"
+        @all="reapplication.selectAll"
+        @toggle="reapplication.toggleZone"
+      />
+      <ReapplicationProductAssignments
+        :zones="reapplication.session.value.zones"
+        :selected-zone-ids="reapplication.selectedZoneIds.value"
+        :choices="reapplication.productChoices.value"
+        :assignments="reapplication.assignments.value"
+        :errors="reapplication.fieldErrors.value"
+        @assign="reapplication.assignProduct"
+      />
+      <ApplicationTimeSelector :applied-at="reapplication.appliedAt.value" :reference-now="reapplication.referenceNow.value" :error="reapplication.fieldErrors.value.appliedAt?.[0]" @change="reapplication.setAppliedAt" @quick="reapplication.setQuickTime" />
+      <ReapplicationReview :zones="reapplication.session.value.zones" :selected-zone-ids="reapplication.selectedZoneIds.value" :choices="reapplication.productChoices.value" :assignments="reapplication.assignments.value" :applied-at="reapplication.appliedAt.value" />
+
+      <div v-if="reapplication.error.value && reapplication.error.value !== 'validation'" class="app-card submit-error" role="alert">
+        <p>{{ reapplication.error.value === 'persistence' ? '紀錄尚未保存。草稿仍保留，請再試一次。' : reapplication.error.value === 'product_changed' ? '產品標示已變更，請重新讀取並確認產品後再提交。' : reapplication.error.value === 'state_changed' ? '提醒狀態已變更，請重新讀取後確認。' : '紀錄已提交，但目前無法重新讀取提醒。' }}</p>
+        <button v-if="reapplication.error.value === 'product_changed' || reapplication.error.value === 'state_changed'" class="button button--quiet" type="button" @click="reapplication.load">重新讀取</button>
+        <button v-else-if="reapplication.error.value === 'persistence'" class="button button--quiet" type="button" @click="reapplication.resetError">保留草稿並重試</button>
+      </div>
+      <div class="submit-actions">
+        <button class="button button--primary" type="button" :disabled="reapplication.phase.value === 'submitting'" @click="reapplication.submit">{{ reapplication.phase.value === 'submitting' ? '保存中…' : '確認補擦紀錄' }}</button>
+        <span v-if="reapplication.phase.value === 'submitting'" class="screen-reader-only" role="status">正在保存補擦紀錄</span>
+        <button class="button button--quiet" type="button" :disabled="reapplication.phase.value === 'submitting'" @click="cancel">取消</button>
+      </div>
+      <p class="safety-note">記錄補擦只協助回看時間與部位，不代表防護已足夠或可以安全曝曬。</p>
+    </template>
+  </div>
+</template>
+
+<style scoped>
+.reapply-page { max-width: 46rem; margin-inline: auto; }
+.flow-heading { display: grid; gap: var(--space-5); }
+.flow-heading .button { justify-self: start; }
+.flow-heading h1, .flow-heading p { margin: 0; }
+.flow-heading h1 { font-size: var(--font-size-page-title); }
+.flow-heading div { display: grid; gap: var(--space-3); }
+.flow-heading div > p:last-child { color: var(--text-secondary); line-height: 1.7; }
+.eyebrow { letter-spacing: .16em; }
+.submit-actions { display: grid; gap: var(--space-3); }
+.submit-actions .button { width: 100%; }
+.submit-error, .success-panel { padding: var(--space-5); }
+.submit-error { display: grid; justify-items: start; gap: var(--space-3); }
+.submit-error p { margin: 0; }
+.success-panel { display: grid; gap: var(--space-4); border-top: .35rem solid var(--color-success); }
+.success-panel h2, .success-panel p { margin: 0; }
+.correction-note { color: var(--text-secondary); line-height: 1.7; }
+.success-groups { margin: 0; padding-inline-start: 1.3rem; line-height: 1.7; }
+.refresh-warning { display: grid; justify-items: start; gap: var(--space-3); padding: var(--space-4); background: var(--color-untimed-soft); }
+.refresh-warning p { margin: 0; line-height: 1.7; }
+@media (min-width: 36rem) { .submit-actions { grid-template-columns: 1fr auto; } }
+</style>
