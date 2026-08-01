@@ -1,0 +1,249 @@
+#app {
+  min-height: 100vh;
+  min-height: 100svh;
+}
+
+.page-stack {
+  display: grid;
+  gap: var(--space-6);
+  max-width: var(--content-max);
+  margin-inline: auto;
+}
+
+.page-heading {
+  display: grid;
+  gap: var(--space-3);
+}
+
+.page-heading__eyebrow {
+  margin: 0;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+}
+
+.page-heading__title {
+  max-width: 14ch;
+  margin: 0;
+  font-size: var(--font-size-page-title);
+  font-weight: 500;
+  line-height: 0.98;
+  letter-spacing: -0.055em;
+}
+
+.page-heading__body {
+  max-width: 38rem;
+  margin: 0;
+  color: var(--text-secondary);
+  line-height: 1.75;
+}
+
+/*
+ * Instrument numerals — repurposes --font-mono as a "readout" face for
+ * actual data (countdown minutes, UVI value, timestamps), not as a
+ * decorative uppercase label. This gives the mono font a job that means
+ * something (precision / station-reading) instead of just looking techy.
+ */
+.stat-figure {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+  line-height: 0.95;
+  letter-spacing: -0.02em;
+  color: var(--text-primary);
+}
+
+.stat-figure--display {
+  font-size: clamp(3rem, 18vw, 4.75rem);
+}
+
+.stat-figure--inline {
+  font-size: 1.05em;
+  color: inherit;
+}
+
+.app-card {
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  background: var(--surface-primary);
+  box-shadow: var(--shadow-card);
+}
+
+/* Primary card gets more visual weight so it doesn't read as one of many
+   identical cards — use for the single most important task on a screen
+   (e.g. the reapplication countdown), not everything. */
+.app-card--primary {
+  padding: var(--space-8);
+  box-shadow: var(--shadow-float);
+}
+
+/*
+ * Status-tinted cards — surface the reminder semantic colors that were
+ * already defined in styles.css (--color-tracking/soon/due/untimed/success)
+ * but had no corresponding UI. Left accent + soft background communicates
+ * urgency at a glance instead of relying on body copy alone.
+ */
+.status-card {
+  --status-color: var(--text-primary);
+  --status-soft: var(--surface-primary);
+  border: 1px solid var(--border-subtle);
+  border-left: 0.25rem solid var(--status-color);
+  border-radius: var(--radius-lg);
+  background: var(--status-soft);
+  box-shadow: var(--shadow-card);
+}
+
+.status-card__label {
+  color: var(--status-color);
+  font-weight: 600;
+}
+
+.status-card--tracking {
+  --status-color: var(--color-tracking);
+  --status-soft: var(--color-tracking-soft);
+}
+
+.status-card--soon {
+  --status-color: var(--color-soon);
+  --status-soft: var(--color-soon-soft);
+}
+
+.status-card--due {
+  --status-color: var(--color-due);
+  --status-soft: var(--color-due-soft);
+}
+
+.status-card--untimed {
+  --status-color: var(--color-untimed);
+  --status-soft: var(--color-untimed-soft);
+}
+
+.status-card--success {
+  --status-color: var(--color-success);
+  --status-soft: var(--color-success-soft);
+}
+
+/*
+ * UVI risk badge — surfaces --color-uvi-low..extreme, which were defined
+ * but unused. This should be the one saturated color moment above the
+ * fold on the home screen when a region is set.
+ */
+.uvi-badge {
+  --uvi-color: var(--text-primary);
+  --uvi-soft: var(--surface-primary);
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-4);
+  border-radius: var(--radius-pill);
+  background: var(--uvi-soft);
+  color: var(--uvi-color);
+  font-weight: 600;
+}
+
+.uvi-badge--low {
+  --uvi-color: var(--color-uvi-low);
+  --uvi-soft: color-mix(in srgb, var(--color-uvi-low) 14%, var(--surface-primary));
+}
+
+.uvi-badge--moderate {
+  --uvi-color: var(--color-uvi-moderate);
+  --uvi-soft: color-mix(in srgb, var(--color-uvi-moderate) 14%, var(--surface-primary));
+}
+
+.uvi-badge--high {
+  --uvi-color: var(--color-uvi-high);
+  --uvi-soft: color-mix(in srgb, var(--color-uvi-high) 14%, var(--surface-primary));
+}
+
+.uvi-badge--very-high {
+  --uvi-color: var(--color-uvi-very-high);
+  --uvi-soft: color-mix(in srgb, var(--color-uvi-very-high) 14%, var(--surface-primary));
+}
+
+.uvi-badge--extreme {
+  --uvi-color: var(--color-uvi-extreme);
+  --uvi-soft: color-mix(in srgb, var(--color-uvi-extreme) 14%, var(--surface-primary));
+}
+
+.button {
+  display: inline-flex;
+  min-height: var(--tap-target);
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  padding: var(--space-3) var(--space-5);
+  border: 1px solid var(--text-primary);
+  border-radius: var(--radius-pill);
+  background: transparent;
+  color: var(--text-primary);
+  font-weight: 500;
+  line-height: 1.2;
+  text-align: center;
+  text-decoration: none;
+  cursor: pointer;
+  transition:
+    transform var(--duration-fast) var(--ease-out),
+    background-color var(--duration-fast) var(--ease-out),
+    color var(--duration-fast) var(--ease-out);
+}
+
+.button:hover {
+  transform: translateY(-0.1rem);
+}
+
+.button--primary {
+  background: var(--surface-inverse);
+  color: var(--text-inverse);
+}
+
+.button--quiet {
+  border-color: var(--border-subtle);
+}
+
+.button-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+}
+
+.text-link {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-weight: 500;
+  text-underline-offset: 0.25rem;
+}
+
+.safety-note {
+  margin: 0;
+  padding-left: var(--space-4);
+  border-left: 0.2rem solid var(--color-line);
+  color: var(--text-secondary);
+  font-size: 0.875rem;
+  line-height: 1.7;
+}
+
+.screen-reader-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+@media (max-width: 31rem) {
+  .button-group {
+    display: grid;
+  }
+
+  .button {
+    width: 100%;
+  }
+}

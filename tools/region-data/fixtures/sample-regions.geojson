@@ -1,0 +1,53 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {
+        "TOWNID": "A01",
+        "TOWNCODE": "63000010",
+        "COUNTYNAME": "臺北市",
+        "TOWNNAME": "松山區",
+        "COUNTYID": "A",
+        "COUNTYCODE": "63000"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [121.5, 25.0],
+            [121.6, 25.0],
+            [121.6, 25.1],
+            [121.5, 25.1],
+            [121.5, 25.0]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "TOWNID": "W01",
+        "TOWNCODE": "09007010",
+        "COUNTYNAME": "連江縣",
+        "TOWNNAME": "南竿鄉",
+        "COUNTYID": "Z",
+        "COUNTYCODE": "09007"
+      },
+      "geometry": {
+        "type": "MultiPolygon",
+        "coordinates": [
+          [
+            [
+              [119.9, 26.1],
+              [120.0, 26.1],
+              [120.0, 26.2],
+              [119.9, 26.2],
+              [119.9, 26.1]
+            ]
+          ]
+        ]
+      }
+    }
+  ]
+}

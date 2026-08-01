@@ -1,0 +1,1168 @@
+import { describe, expect, it } from "vitest";
+import type {
+  ApplicationEventV1,
+  ContextEventV1,
+  MethodComponent,
+  ProductLabelSnapshotV1,
+  SessionEventStreamV1,
+  ZoneMethodEventV1
+} from "@sunshield/contracts";
+import { EVENT_SCHEMA_VERSION } from "@sunshield/contracts";
+import {
+  DomainInvariantError,
+  planStartSession,
+  reduceSession,
+  validateCorrectionGraph
+} from "@sunshield/domain";
+import {
+  makeClock,
+  makeProductSnapshot,
+  makeStartSessionCommand
+} from "./index";
+
+function makeStream(options: {
+  idPrefix?: string;
+  appliedAt?: string;
+  effectiveStartedAt?: string;
+  snapshot?: ProductLabelSnapshotV1;
+  zones?: ReturnType<
+    typeof makeStartSessionCommand
+  >["payload"]["zones"];
+  applicationGroup?: ReturnType<
+    typeof makeStartSessionCommand
+  >["payload"]["applicationGroup"];
+} = {}): SessionEventStreamV1 {
+  const command = makeStartSessionCommand({
+    ...(options.idPrefix === undefined
+      ? {}
+      : { idPrefix: options.idPrefix }),
+    ...(options.appliedAt === undefined
+      ? {}
+      : { appliedAt: options.appliedAt }),
+    ...(options.effectiveStartedAt === undefined
+      ? {}
+      : { effectiveStartedAt: options.effectiveStartedAt }),
+    ...(options.snapshot === undefined
+      ? {}
+      : { snapshot: options.snapshot }),
+    ...(options.zones === undefined ? {} : { zones: options.zones }),
+    ...(options.applicationGroup === undefined
+      ? {}
+      : { applicationGroup: options.applicationGroup })
+  });
+  return planStartSession(command, makeClock()).stream;
+}
+
+function eventBase(
+  stream: SessionEventStreamV1,
+  id: string,
+  effectiveOccurredAt: string,
+  sequence: number
+) {
+  return {
+    schemaVersion: EVENT_SCHEMA_VERSION,
+    id,
+    sessionId: stream.sessionStarted.sessionId,
+    commandId: `command-${sequence}`,
+    idempotencyKey: `idempotency-${sequence}-${id}`,
+    effectiveOccurredAt,
+    clientCreatedAt: effectiveOccurredAt,
+    clientSequence: sequence,
+    localAppliedSequence: sequence
+  } as const;
+}
+
+function addApplication(
+  stream: SessionEventStreamV1,
+  options: {
+    id: string;
+    zoneInstanceIds: string[];
+    appliedAt: string;
+    sequence: number;
+    snapshot?: ProductLabelSnapshotV1;
+    sourceProductId?: string | null;
+    fingerprint?: string;
+  }
+): ApplicationEventV1 {
+  const groupId = `${options.id}-group`;
+  stream.applicationConfirmationGroups.push({
+    ...eventBase(stream, groupId, options.appliedAt, options.sequence),
+    eventType: "application_confirmation_group",
+    appliedAt: options.appliedAt,
+    confirmedZoneInstanceIds: options.zoneInstanceIds,
+    correctionAction: "create",
+    correctionOfGroupId: null
+  });
+  const application: ApplicationEventV1 = {
+    ...eventBase(stream, options.id, options.appliedAt, options.sequence),
+    eventType: "application_recorded",
+    applicationConfirmationId: groupId,
+    zoneInstanceIds: options.zoneInstanceIds,
+    appliedAt: options.appliedAt,
+    sourceProductId:
+      options.sourceProductId === undefined
+        ? "product-a"
+        : options.sourceProductId,
+    productSnapshotFingerprint: options.fingerprint ?? "snapshot-a",
+    productLabelSnapshot: options.snapshot ?? makeProductSnapshot()
+  };
+  stream.applicationEvents.push(application);
+  return application;
+}
+
+function addMethod(
+  stream: SessionEventStreamV1,
+  options: {
+    id: string;
+    zoneInstanceId: string;
+    at: string;
+    sequence: number;
+    exposure: ZoneMethodEventV1["skinExposureStatus"];
+    components: MethodComponent[];
+    certainty?: ZoneMethodEventV1["methodCertainty"];
+  }
+): void {
+  const previous = [...stream.zoneMethodEvents]
+    .reverse()
+    .find((event) => event.zoneInstanceId === options.zoneInstanceId)!;
+  stream.zoneMethodEvents.push({
+    ...eventBase(stream, options.id, options.at, options.sequence),
+    eventType: "zone_method",
+    zoneInstanceId: options.zoneInstanceId,
+    bodyZoneCode: previous.bodyZoneCode,
+    customLabel: previous.customLabel,
+    skinExposureStatus: options.exposure,
+    methodCertainty: options.certainty ?? "confirmed",
+    methodComponents: options.components,
+    correctionAction: "create",
+    correctionOfEventId: null
+  });
+}
+
+function addTracking(
+  stream: SessionEventStreamV1,
+  options: {
+    id: string;
+    zoneInstanceId: string;
+    at: string;
+    sequence: number;
+    status: "active" | "ended";
+  }
+): void {
+  stream.zoneTrackingEvents.push({
+    ...eventBase(stream, options.id, options.at, options.sequence),
+    eventType: "zone_tracking",
+    zoneInstanceId: options.zoneInstanceId,
+    trackingStatus: options.status,
+    correctionAction: "create",
+    correctionOfEventId: null
+  });
+}
+
+function addContext(
+  stream: SessionEventStreamV1,
+  event: ContextEventV1
+): void {
+  stream.contextEvents.push(event);
+}
+
+function causeEvent(
+  stream: SessionEventStreamV1,
+  options: {
+    id: string;
+    type: "heavy_sweat" | "towel" | "friction" | "hand_wash";
+    at: string;
+    sequence: number;
+    zones: string[];
+  }
+): ContextEventV1 {
+  return {
+    ...eventBase(stream, options.id, options.at, options.sequence),
+    eventType: "context_event",
+    contextType: options.type,
+    zoneInstanceIds: options.zones,
+    correctionAction: "create",
+    correctionOfEventId: null
+  };
+}
+
+function addWaterStart(
+  stream: SessionEventStreamV1,
+  options: {
+    id?: string;
+    at: string;
+    sequence: number;
+    zones: string[];
+    confidence?: "confirmed" | "unknown";
+  }
+): void {
+  const confidence = options.confidence ?? "confirmed";
+  addContext(stream, {
+    ...eventBase(
+      stream,
+      options.id ?? "water-start",
+      options.at,
+      options.sequence
+    ),
+    eventType: "context_event",
+    contextType: "water_start",
+    activityIntervalId: "water-interval-1",
+    zoneInstanceIds: options.zones,
+    startConfidence: confidence,
+    activityStartedAt: confidence === "confirmed" ? options.at : null,
+    correctionAction: "create",
+    correctionOfEventId: null
+  });
+}
+
+function projection(
+  stream: SessionEventStreamV1,
+  now = "2026-07-29T11:00:00.000Z"
+) {
+  return reduceSession({ stream, revision: 1, clock: makeClock(now) });
+}
+
+function firstZone(
+  stream: SessionEventStreamV1,
+  now = "2026-07-29T11:00:00.000Z"
+) {
+  return projection(stream, now).zones[0]!;
+}
+
+describe("P0 reminder reducer fixed vectors", () => {
+  it.each([
+    {
+      name: "TV-001 一般 120 分鐘",
+      snapshot: makeProductSnapshot(),
+      due: "2026-07-29T12:00:00.000Z"
+    },
+    {
+      name: "TV-002 明確較短 90 分鐘",
+      snapshot: makeProductSnapshot({
+        reapplicationIntervalStatus: "explicit_minutes",
+        reapplicationIntervalMinutes: 90
+      }),
+      due: "2026-07-29T11:30:00.000Z"
+    },
+    {
+      name: "TV-004 180 分鐘不得延長",
+      snapshot: makeProductSnapshot({
+        reapplicationIntervalStatus: "explicit_minutes",
+        reapplicationIntervalMinutes: 180
+      }),
+      due: "2026-07-29T12:00:00.000Z"
+    }
+  ])("$name", ({ snapshot, due }) => {
+    const zone = firstZone(makeStream({ snapshot }));
+    expect(zone.generalDueAt).toBe(due);
+    expect(zone.zoneTimerStartedAt).toBe(
+      "2026-07-29T10:00:00.000Z"
+    );
+  });
+
+  it("TV-003 剩餘 30 分鐘為 reapply_soon", () => {
+    const snapshot = makeProductSnapshot({
+      reapplicationIntervalStatus: "explicit_minutes",
+      reapplicationIntervalMinutes: 90
+    });
+    expect(
+      firstZone(
+        makeStream({ snapshot }),
+        "2026-07-29T11:00:00.000Z"
+      ).timingStatus
+    ).toBe("reapply_soon");
+  });
+
+  it("距到期超過 30 分鐘時仍為 tracking", () => {
+    const snapshot = makeProductSnapshot({
+      reapplicationIntervalStatus: "explicit_minutes",
+      reapplicationIntervalMinutes: 90
+    });
+    expect(
+      firstZone(
+        makeStream({ snapshot }),
+        "2026-07-29T10:59:00.000Z"
+      ).timingStatus
+    ).toBe("tracking");
+  });
+
+  it.each([
+    {
+      name: "TV-005 身分未知",
+      snapshot: makeProductSnapshot({
+        identityStatus: "identity_unconfirmed"
+      }),
+      reason: "PRODUCT_IDENTITY_UNKNOWN"
+    },
+    {
+      name: "TV-007 產品過期",
+      snapshot: makeProductSnapshot({ expiryStatus: "expired" }),
+      reason: "PRODUCT_EXPIRED"
+    }
+  ])("$name 不建立期限", ({ snapshot, reason }) => {
+    const zone = firstZone(makeStream({ snapshot }));
+    expect(zone.currentApplicationId).not.toBeNull();
+    expect(zone.generalDueAt).toBeNull();
+    expect(zone.timingStatus).toBe("untimed_action");
+    expect(zone.reasonCodes).toContain(reason);
+  });
+
+  it("TV-006 最新不合格 Application 不回退", () => {
+    const stream = makeStream({ appliedAt: "2026-07-29T09:00:00.000Z" });
+    const newer = addApplication(stream, {
+      id: "application-b",
+      zoneInstanceIds: [stream.sessionStarted.zoneInstanceIds[0]!],
+      appliedAt: "2026-07-29T10:00:00.000Z",
+      sequence: 2,
+      sourceProductId: "product-b",
+      fingerprint: "snapshot-b",
+      snapshot: makeProductSnapshot({
+        identityStatus: "identity_unconfirmed"
+      })
+    });
+    const zone = firstZone(stream);
+    expect(zone.currentApplicationId).toBe(newer.id);
+    expect(zone.generalDueAt).toBeNull();
+  });
+
+  it("TV-008 效期未知仍可由其他欄位判為 eligible", () => {
+    const zone = firstZone(
+      makeStream({
+        snapshot: makeProductSnapshot({ expiryStatus: "unknown" })
+      })
+    );
+    expect(zone.currentApplicationEligibility).toBe("eligible");
+    expect(zone.generalDueAt).toBe("2026-07-29T12:00:00.000Z");
+  });
+
+  it("TV-009 clothing-only 沒有產品期限", () => {
+    const stream = makeStream({
+      zones: [
+        {
+          zoneInstanceId: "arms",
+          trackingEventId: "tracking-arms",
+          methodEventId: "method-arms",
+          bodyZoneCode: "arms",
+          customLabel: null,
+          skinExposureStatus: "clothing_covered",
+          methodCertainty: "confirmed",
+          methodComponents: ["clothing"]
+        }
+      ],
+      applicationGroup: null
+    });
+    const zone = firstZone(stream);
+    expect(zone.generalDueAt).toBeNull();
+    expect(zone.activeWaterDeadline).toBeNull();
+    expect(zone.timingStatus).toBe("not_applicable");
+    expect(zone.recordStatus).toBe("physical_method_reported");
+  });
+
+  it("TV-010 重新外露沿用原 appliedAt", () => {
+    const stream = makeStream({
+      appliedAt: "2026-07-29T09:30:00.000Z",
+      effectiveStartedAt: "2026-07-29T09:40:00.000Z"
+    });
+    const zoneId = stream.sessionStarted.zoneInstanceIds[0]!;
+    addMethod(stream, {
+      id: "covered",
+      zoneInstanceId: zoneId,
+      at: "2026-07-29T09:45:00.000Z",
+      sequence: 2,
+      exposure: "clothing_covered",
+      components: ["clothing", "sunscreen"]
+    });
+    addMethod(stream, {
+      id: "exposed-again",
+      zoneInstanceId: zoneId,
+      at: "2026-07-29T10:30:00.000Z",
+      sequence: 3,
+      exposure: "exposed",
+      components: ["sunscreen"]
+    });
+    expect(firstZone(stream).generalDueAt).toBe(
+      "2026-07-29T11:30:00.000Z"
+    );
+  });
+
+  it("TV-011 sunscreen 移除後重加不復活舊 Application", () => {
+    const stream = makeStream({ appliedAt: "2026-07-29T09:00:00.000Z" });
+    const zoneId = stream.sessionStarted.zoneInstanceIds[0]!;
+    addMethod(stream, {
+      id: "sunscreen-removed",
+      zoneInstanceId: zoneId,
+      at: "2026-07-29T10:00:00.000Z",
+      sequence: 2,
+      exposure: "clothing_covered",
+      components: ["clothing"]
+    });
+    addMethod(stream, {
+      id: "sunscreen-restored",
+      zoneInstanceId: zoneId,
+      at: "2026-07-29T11:00:00.000Z",
+      sequence: 3,
+      exposure: "exposed",
+      components: ["sunscreen"]
+    });
+    const zone = firstZone(stream);
+    expect(zone.currentApplicationId).toBeNull();
+    expect(zone.generalDueAt).toBeNull();
+  });
+
+  it("TV-012 同 command 回填時間可早於 Session 建立", () => {
+    const stream = makeStream({
+      appliedAt: "2026-07-29T09:30:00.000Z"
+    });
+    expect(firstZone(stream).generalDueAt).toBe(
+      "2026-07-29T11:30:00.000Z"
+    );
+  });
+
+  it("TV-013 明確等待建立 LABEL_WAIT", () => {
+    const stream = makeStream({
+      appliedAt: "2026-07-29T10:55:00.000Z",
+      snapshot: makeProductSnapshot({
+        preExposureWaitStatus: "explicit_minutes",
+        preExposureWaitMinutes: 15
+      })
+    });
+    const zone = firstZone(stream);
+    expect(zone.activeLabelReadyAt).toBe("2026-07-29T11:10:00.000Z");
+    expect(zone.timingStatus).toBe("label_wait");
+    expect(zone.zoneNextActionAt).toBe("2026-07-29T11:10:00.000Z");
+  });
+
+  it("TV-014 已到期優先於 LABEL_WAIT", () => {
+    const stream = makeStream({
+      appliedAt: "2026-07-29T10:55:00.000Z",
+      snapshot: makeProductSnapshot({
+        reapplicationIntervalStatus: "explicit_minutes",
+        reapplicationIntervalMinutes: 5,
+        preExposureWaitStatus: "explicit_minutes",
+        preExposureWaitMinutes: 15
+      })
+    });
+    expect(firstZone(stream).timingStatus).toBe("reapply_due");
+  });
+
+  it.each([
+    {
+      name: "TV-015 耐水 40 分鐘",
+      snapshot: makeProductSnapshot({
+        waterResistanceStatus: "40",
+        waterResistanceMinutes: 40
+      }),
+      waterDue: "2026-07-29T10:40:00.000Z",
+      zoneDue: "2026-07-29T10:40:00.000Z"
+    },
+    {
+      name: "TV-016 耐水 80 分鐘",
+      snapshot: makeProductSnapshot({
+        waterResistanceStatus: "80",
+        waterResistanceMinutes: 80
+      }),
+      waterDue: "2026-07-29T11:20:00.000Z",
+      zoneDue: "2026-07-29T11:20:00.000Z"
+    }
+  ])("$name", ({ snapshot, waterDue, zoneDue }) => {
+    const stream = makeStream({
+      appliedAt: "2026-07-29T09:30:00.000Z",
+      snapshot
+    });
+    addWaterStart(stream, {
+      at: "2026-07-29T10:00:00.000Z",
+      sequence: 2,
+      zones: stream.sessionStarted.zoneInstanceIds
+    });
+    const zone = firstZone(stream, "2026-07-29T10:20:00.000Z");
+    expect(zone.activeWaterDeadline).toBe(waterDue);
+    expect(zone.zoneDueAt).toBe(zoneDue);
+    expect(zone.zoneTimerStartedAt).toBe(
+      "2026-07-29T10:00:00.000Z"
+    );
+  });
+
+  it("TV-017 塗抹晚於入水時不建立水上期限", () => {
+    const stream = makeStream({
+      appliedAt: "2026-07-29T10:10:00.000Z",
+      snapshot: makeProductSnapshot({
+        waterResistanceStatus: "40",
+        waterResistanceMinutes: 40
+      })
+    });
+    addWaterStart(stream, {
+      at: "2026-07-29T10:00:00.000Z",
+      sequence: 2,
+      zones: stream.sessionStarted.zoneInstanceIds
+    });
+    expect(
+      firstZone(stream, "2026-07-29T10:20:00.000Z").activeWaterDeadline
+    ).toBeNull();
+  });
+
+  it("TV-018 入水起點未知產生無時間行動", () => {
+    const stream = makeStream();
+    addWaterStart(stream, {
+      at: "2026-07-29T10:00:00.000Z",
+      sequence: 2,
+      zones: stream.sessionStarted.zoneInstanceIds,
+      confidence: "unknown"
+    });
+    const result = projection(stream);
+    const zone = result.zones[0]!;
+    expect(zone.activeWaterDeadline).toBeNull();
+    expect(zone.reasonCodes).toContain("WATER_START_UNKNOWN");
+    expect(result.primaryAction.presentationType).toBe(
+      "untimed_action_card"
+    );
+  });
+
+  it("TV-019 耐水未知不移除一般期限", () => {
+    const stream = makeStream();
+    addWaterStart(stream, {
+      at: "2026-07-29T10:10:00.000Z",
+      sequence: 2,
+      zones: stream.sessionStarted.zoneInstanceIds
+    });
+    const zone = firstZone(stream);
+    expect(zone.activeWaterDeadline).toBeNull();
+    expect(zone.generalDueAt).toBe("2026-07-29T12:00:00.000Z");
+    expect(zone.reasonCodes).toContain("WATER_RESISTANCE_UNKNOWN");
+  });
+
+  it("TV-020 水中補擦不重設目前水上期限", () => {
+    const snapshot = makeProductSnapshot({
+      waterResistanceStatus: "40",
+      waterResistanceMinutes: 40
+    });
+    const stream = makeStream({
+      appliedAt: "2026-07-29T09:30:00.000Z",
+      snapshot
+    });
+    const zoneId = stream.sessionStarted.zoneInstanceIds[0]!;
+    addWaterStart(stream, {
+      at: "2026-07-29T10:00:00.000Z",
+      sequence: 2,
+      zones: [zoneId]
+    });
+    addApplication(stream, {
+      id: "water-reapplication",
+      zoneInstanceIds: [zoneId],
+      appliedAt: "2026-07-29T10:20:00.000Z",
+      sequence: 3,
+      snapshot
+    });
+    const zone = firstZone(stream, "2026-07-29T10:30:00.000Z");
+    expect(zone.activeWaterDeadline).toBe(
+      "2026-07-29T10:40:00.000Z"
+    );
+    expect(zone.generalDueAt).toBe("2026-07-29T12:20:00.000Z");
+    expect(zone.zoneDueAt).toBe("2026-07-29T10:40:00.000Z");
+  });
+
+  it("TV-021 water_end 建立立即原因", () => {
+    const stream = makeStream({
+      appliedAt: "2026-07-29T09:30:00.000Z",
+      snapshot: makeProductSnapshot({
+        waterResistanceStatus: "40",
+        waterResistanceMinutes: 40
+      })
+    });
+    const zones = stream.sessionStarted.zoneInstanceIds;
+    addWaterStart(stream, {
+      at: "2026-07-29T10:00:00.000Z",
+      sequence: 2,
+      zones
+    });
+    addContext(stream, {
+      ...eventBase(
+        stream,
+        "water-end",
+        "2026-07-29T10:25:00.000Z",
+        3
+      ),
+      eventType: "context_event",
+      contextType: "water_end",
+      activityIntervalId: "water-interval-1",
+      zoneInstanceIds: zones,
+      endedAt: "2026-07-29T10:25:00.000Z",
+      correctionAction: "create",
+      correctionOfEventId: null
+    });
+    const zone = firstZone(stream, "2026-07-29T10:30:00.000Z");
+    expect(zone.eventTriggeredDeadline).toBe(
+      "2026-07-29T10:25:00.000Z"
+    );
+    expect(zone.timingStatus).toBe("reapply_due");
+  });
+
+  it.each([
+    ["2026-07-29T09:59:00.000Z", true],
+    ["2026-07-29T10:00:00.000Z", true],
+    ["2026-07-29T10:01:00.000Z", false]
+  ])(
+    "TV-022 cause=10:00、Application=%s 的 unresolved=%s",
+    (appliedAt, unresolved) => {
+      const stream = makeStream({ appliedAt });
+      addContext(
+        stream,
+        causeEvent(stream, {
+          id: "hand-wash",
+          type: "hand_wash",
+          at: "2026-07-29T10:00:00.000Z",
+          sequence: 2,
+          zones: stream.sessionStarted.zoneInstanceIds
+        })
+      );
+      expect(firstZone(stream).eventTriggeredDeadline !== null).toBe(
+        unresolved
+      );
+    }
+  );
+
+  it("TV-023 hand_wash 只影響事件指定的 hand_backs", () => {
+    const zones = [
+      {
+        zoneInstanceId: "face",
+        trackingEventId: "tracking-face",
+        methodEventId: "method-face",
+        bodyZoneCode: "face_forehead" as const,
+        customLabel: null,
+        skinExposureStatus: "exposed" as const,
+        methodCertainty: "confirmed" as const,
+        methodComponents: ["sunscreen"] as const
+      },
+      {
+        zoneInstanceId: "hands",
+        trackingEventId: "tracking-hands",
+        methodEventId: "method-hands",
+        bodyZoneCode: "hand_backs" as const,
+        customLabel: null,
+        skinExposureStatus: "exposed" as const,
+        methodCertainty: "confirmed" as const,
+        methodComponents: ["sunscreen"] as const
+      }
+    ].map((zone) => ({ ...zone, methodComponents: [...zone.methodComponents] }));
+    const stream = makeStream({ zones });
+    addContext(
+      stream,
+      causeEvent(stream, {
+        id: "wash-hands-only",
+        type: "hand_wash",
+        at: "2026-07-29T10:30:00.000Z",
+        sequence: 2,
+        zones: ["hands"]
+      })
+    );
+    const result = projection(stream);
+    expect(
+      result.zones.find((zone) => zone.zoneInstanceId === "face")!.zoneDueAt
+    ).toBe("2026-07-29T12:00:00.000Z");
+    expect(
+      result.zones.find((zone) => zone.zoneInstanceId === "hands")!.zoneDueAt
+    ).toBe("2026-07-29T10:30:00.000Z");
+  });
+
+  it("TV-024 多個原因取最早未解除時間", () => {
+    const stream = makeStream({ appliedAt: "2026-07-29T09:00:00.000Z" });
+    const zones = stream.sessionStarted.zoneInstanceIds;
+    for (const [id, type, at, sequence] of [
+      ["towel", "towel", "2026-07-29T10:20:00.000Z", 2],
+      ["friction", "friction", "2026-07-29T10:10:00.000Z", 3],
+      ["sweat", "heavy_sweat", "2026-07-29T10:30:00.000Z", 4]
+    ] as const) {
+      addContext(
+        stream,
+        causeEvent(stream, { id, type, at, sequence, zones })
+      );
+    }
+    expect(firstZone(stream).eventTriggeredDeadline).toBe(
+      "2026-07-29T10:10:00.000Z"
+    );
+  });
+
+  it("TV-025 衣物只暫停原因，再外露後恢復", () => {
+    const stream = makeStream({ appliedAt: "2026-07-29T09:00:00.000Z" });
+    const zoneId = stream.sessionStarted.zoneInstanceIds[0]!;
+    addContext(
+      stream,
+      causeEvent(stream, {
+        id: "wash-before-cover",
+        type: "hand_wash",
+        at: "2026-07-29T10:00:00.000Z",
+        sequence: 2,
+        zones: [zoneId]
+      })
+    );
+    addMethod(stream, {
+      id: "cover",
+      zoneInstanceId: zoneId,
+      at: "2026-07-29T10:01:00.000Z",
+      sequence: 3,
+      exposure: "clothing_covered",
+      components: ["clothing", "sunscreen"]
+    });
+    expect(firstZone(stream).eventTriggeredDeadline).toBeNull();
+    addMethod(stream, {
+      id: "expose",
+      zoneInstanceId: zoneId,
+      at: "2026-07-29T10:30:00.000Z",
+      sequence: 4,
+      exposure: "exposed",
+      components: ["sunscreen"]
+    });
+    expect(firstZone(stream).eventTriggeredDeadline).toBe(
+      "2026-07-29T10:00:00.000Z"
+    );
+  });
+
+  it("TV-026 停止後重新追蹤不復活舊 Application 或清除原因", () => {
+    const stream = makeStream({ appliedAt: "2026-07-29T09:00:00.000Z" });
+    const zoneId = stream.sessionStarted.zoneInstanceIds[0]!;
+    addContext(
+      stream,
+      causeEvent(stream, {
+        id: "towel-before-stop",
+        type: "towel",
+        at: "2026-07-29T10:00:00.000Z",
+        sequence: 2,
+        zones: [zoneId]
+      })
+    );
+    addTracking(stream, {
+      id: "tracking-ended",
+      zoneInstanceId: zoneId,
+      at: "2026-07-29T10:01:00.000Z",
+      sequence: 3,
+      status: "ended"
+    });
+    addTracking(stream, {
+      id: "tracking-restarted",
+      zoneInstanceId: zoneId,
+      at: "2026-07-29T10:30:00.000Z",
+      sequence: 4,
+      status: "active"
+    });
+
+    const zone = firstZone(stream);
+    expect(zone.currentApplicationId).toBeNull();
+    expect(zone.generalDueAt).toBeNull();
+    expect(zone.activeCauseRefs).toContain("towel-before-stop");
+    expect(zone.eventTriggeredDeadline).toBe(
+      "2026-07-29T10:00:00.000Z"
+    );
+  });
+
+  it("TV-027／028 同一產品安全封鎖使期限失效且重擦不解除", () => {
+    const stream = makeStream();
+    const zoneId = stream.sessionStarted.zoneInstanceIds[0]!;
+    stream.productSafetyEvents.push({
+      ...eventBase(
+        stream,
+        "abnormal-a",
+        "2026-07-29T10:30:00.000Z",
+        2
+      ),
+      eventType: "product_safety",
+      safetyKind: "abnormal_reported",
+      sourceProductId: "fixture-product-a",
+      productSnapshotFingerprint: null,
+      zoneInstanceIds: [zoneId],
+      correctionAction: "create",
+      correctionOfEventId: null
+    });
+    addApplication(stream, {
+      id: "same-product-again",
+      zoneInstanceIds: [zoneId],
+      appliedAt: "2026-07-29T10:40:00.000Z",
+      sequence: 3,
+      sourceProductId: "fixture-product-a",
+      fingerprint: "new-snapshot-a"
+    });
+    const zone = firstZone(stream);
+    expect(zone.activeProductSafetyBlock).toBe(true);
+    expect(zone.generalDueAt).toBeNull();
+    expect(zone.reasonCodes).toContain("PRODUCT_ABNORMAL_REPORTED");
+  });
+
+  it("TV-029 改用產品 B 可建立期限，但 A safety event 保留", () => {
+    const stream = makeStream();
+    const zoneId = stream.sessionStarted.zoneInstanceIds[0]!;
+    stream.productSafetyEvents.push({
+      ...eventBase(
+        stream,
+        "abnormal-a",
+        "2026-07-29T10:30:00.000Z",
+        2
+      ),
+      eventType: "product_safety",
+      safetyKind: "abnormal_reported",
+      sourceProductId: "fixture-product-a",
+      productSnapshotFingerprint: null,
+      zoneInstanceIds: [zoneId],
+      correctionAction: "create",
+      correctionOfEventId: null
+    });
+    addApplication(stream, {
+      id: "product-b-application",
+      zoneInstanceIds: [zoneId],
+      appliedAt: "2026-07-29T10:40:00.000Z",
+      sequence: 3,
+      sourceProductId: "product-b",
+      fingerprint: "snapshot-b"
+    });
+    const zone = firstZone(stream);
+    expect(zone.activeProductSafetyBlock).toBe(false);
+    expect(zone.generalDueAt).toBe("2026-07-29T12:40:00.000Z");
+    expect(stream.productSafetyEvents).toHaveLength(1);
+  });
+
+  it("TV-030～032 context／UVI／weather 不參與 reducer deadline", () => {
+    const stream = makeStream();
+    addContext(stream, {
+      ...eventBase(
+        stream,
+        "indoor",
+        "2026-07-29T10:30:00.000Z",
+        2
+      ),
+      eventType: "context_event",
+      contextType: "context_changed",
+      context: "indoor_away",
+      shade: "full",
+      correctionAction: "create",
+      correctionOfEventId: null
+    });
+    expect(firstZone(stream).zoneDueAt).toBe(
+      "2026-07-29T12:00:00.000Z"
+    );
+  });
+
+  it("TV-033 sessionNextDueAt 忽略 null 並取最早", () => {
+    const zones = [
+      {
+        zoneInstanceId: "face",
+        trackingEventId: "tf",
+        methodEventId: "mf",
+        bodyZoneCode: "face_forehead" as const,
+        customLabel: null,
+        skinExposureStatus: "exposed" as const,
+        methodCertainty: "confirmed" as const,
+        methodComponents: ["sunscreen" as const]
+      },
+      {
+        zoneInstanceId: "hands",
+        trackingEventId: "th",
+        methodEventId: "mh",
+        bodyZoneCode: "hand_backs" as const,
+        customLabel: null,
+        skinExposureStatus: "clothing_covered" as const,
+        methodCertainty: "confirmed" as const,
+        methodComponents: ["clothing" as const]
+      },
+      {
+        zoneInstanceId: "neck",
+        trackingEventId: "tn",
+        methodEventId: "mn",
+        bodyZoneCode: "neck_front" as const,
+        customLabel: null,
+        skinExposureStatus: "exposed" as const,
+        methodCertainty: "confirmed" as const,
+        methodComponents: ["sunscreen" as const]
+      }
+    ];
+    const group = {
+      groupId: "partition-group",
+      appliedAt: "2026-07-29T10:00:00.000Z",
+      applications: [
+        {
+          eventId: "face-app",
+          zoneInstanceIds: ["face"],
+          sourceProductId: "product-a",
+          productSnapshotFingerprint: "snapshot-face",
+          productLabelSnapshot: makeProductSnapshot()
+        },
+        {
+          eventId: "neck-app",
+          zoneInstanceIds: ["neck"],
+          sourceProductId: "product-a",
+          productSnapshotFingerprint: "snapshot-neck",
+          productLabelSnapshot: makeProductSnapshot({
+            reapplicationIntervalStatus: "explicit_minutes",
+            reapplicationIntervalMinutes: 90
+          })
+        }
+      ]
+    };
+    const result = projection(makeStream({ zones, applicationGroup: group }));
+    expect(result.sessionNextDueAt).toBe(
+      "2026-07-29T11:30:00.000Z"
+    );
+  });
+
+  it("TV-034 無時間狀態優先於其他部位的數字期限", () => {
+    const zones = [
+      {
+        zoneInstanceId: "face",
+        trackingEventId: "tf",
+        methodEventId: "mf",
+        bodyZoneCode: "face_forehead" as const,
+        customLabel: null,
+        skinExposureStatus: "exposed" as const,
+        methodCertainty: "confirmed" as const,
+        methodComponents: ["sunscreen" as const]
+      },
+      {
+        zoneInstanceId: "ear",
+        trackingEventId: "te",
+        methodEventId: "me",
+        bodyZoneCode: "ears" as const,
+        customLabel: null,
+        skinExposureStatus: "exposed" as const,
+        methodCertainty: "confirmed" as const,
+        methodComponents: ["sunscreen" as const]
+      }
+    ];
+    const group = {
+      groupId: "two-products",
+      appliedAt: "2026-07-29T10:00:00.000Z",
+      applications: [
+        {
+          eventId: "face-app",
+          zoneInstanceIds: ["face"],
+          sourceProductId: "a",
+          productSnapshotFingerprint: "a",
+          productLabelSnapshot: makeProductSnapshot({
+            reapplicationIntervalStatus: "explicit_minutes",
+            reapplicationIntervalMinutes: 90
+          })
+        },
+        {
+          eventId: "ear-app",
+          zoneInstanceIds: ["ear"],
+          sourceProductId: null,
+          productSnapshotFingerprint: "unknown",
+          productLabelSnapshot: makeProductSnapshot({
+            identityStatus: "identity_unconfirmed"
+          })
+        }
+      ]
+    };
+    const result = projection(makeStream({ zones, applicationGroup: group }));
+    expect(result.sessionNextDueAt).toBe(
+      "2026-07-29T11:30:00.000Z"
+    );
+    expect(result.primaryAction.affectedZoneInstanceIds).toEqual(["ear"]);
+    expect(result.primaryAction.presentationType).toBe(
+      "untimed_action_card"
+    );
+  });
+
+  it("TV-035 同呈現層級的不同動作合併為 multi_action", () => {
+    const zones = [
+      {
+        zoneInstanceId: "ear",
+        trackingEventId: "te",
+        methodEventId: "me",
+        bodyZoneCode: "ears" as const,
+        customLabel: null,
+        skinExposureStatus: "clothing_covered" as const,
+        methodCertainty: "confirmed" as const,
+        methodComponents: ["clothing" as const]
+      },
+      {
+        zoneInstanceId: "hands",
+        trackingEventId: "th",
+        methodEventId: "mh",
+        bodyZoneCode: "hand_backs" as const,
+        customLabel: null,
+        skinExposureStatus: "clothing_covered" as const,
+        methodCertainty: "confirmed" as const,
+        methodComponents: ["clothing" as const]
+      }
+    ];
+    const stream = makeStream({ zones, applicationGroup: null });
+    const earMethod = stream.zoneMethodEvents.find(
+      (event) => event.zoneInstanceId === "ear"
+    )!;
+    earMethod.skinExposureStatus = "unknown";
+    earMethod.methodCertainty = "unknown";
+    earMethod.methodComponents = [];
+    const handMethod = stream.zoneMethodEvents.find(
+      (event) => event.zoneInstanceId === "hands"
+    )!;
+    handMethod.skinExposureStatus = "exposed";
+    handMethod.methodCertainty = "unrecorded";
+    handMethod.methodComponents = [];
+    const action = projection(stream).primaryAction;
+    expect(action.variant).toBe("multi_action");
+    expect(action.actionKind).toBe("review_required_zones");
+  });
+
+  it("TV-036 CLOCK_UNTRUSTED 覆蓋 zone due", () => {
+    const stream = makeStream({
+      appliedAt: "2026-07-29T09:00:00.000Z"
+    });
+    const result = reduceSession({
+      stream,
+      revision: 1,
+      clock: makeClock("2026-07-29T11:00:00.000Z", {
+        status: "clock_untrusted"
+      })
+    });
+    expect(result.zones[0]!.timingStatus).toBe("reapply_due");
+    expect(result.primaryAction.actionKind).toBe("recalibrate_clock");
+  });
+
+  it("TV-037 局部補擦只更新被選部位", () => {
+    const zones = [
+      {
+        zoneInstanceId: "face",
+        trackingEventId: "tf",
+        methodEventId: "mf",
+        bodyZoneCode: "face_forehead" as const,
+        customLabel: null,
+        skinExposureStatus: "exposed" as const,
+        methodCertainty: "confirmed" as const,
+        methodComponents: ["sunscreen" as const]
+      },
+      {
+        zoneInstanceId: "hands",
+        trackingEventId: "th",
+        methodEventId: "mh",
+        bodyZoneCode: "hand_backs" as const,
+        customLabel: null,
+        skinExposureStatus: "exposed" as const,
+        methodCertainty: "confirmed" as const,
+        methodComponents: ["sunscreen" as const]
+      }
+    ];
+    const snapshot = makeProductSnapshot({
+      reapplicationIntervalStatus: "explicit_minutes",
+      reapplicationIntervalMinutes: 60
+    });
+    const stream = makeStream({ zones, snapshot });
+    addApplication(stream, {
+      id: "hands-reapplication",
+      zoneInstanceIds: ["hands"],
+      appliedAt: "2026-07-29T11:05:00.000Z",
+      sequence: 2,
+      snapshot
+    });
+    const result = projection(stream, "2026-07-29T11:05:00.000Z");
+    expect(
+      result.zones.find((zone) => zone.zoneInstanceId === "face")!
+        .timingStatus
+    ).toBe("reapply_due");
+    expect(
+      result.zones.find((zone) => zone.zoneInstanceId === "hands")!
+        .generalDueAt
+    ).toBe("2026-07-29T12:05:00.000Z");
+    expect(result.primaryAction.affectedZoneInstanceIds).toEqual(["face"]);
+  });
+
+  it("TV-038 非互斥 Application group 整組拒絕", () => {
+    const zones = [
+      {
+        zoneInstanceId: "face",
+        trackingEventId: "tf",
+        methodEventId: "mf",
+        bodyZoneCode: "face_forehead" as const,
+        customLabel: null,
+        skinExposureStatus: "exposed" as const,
+        methodCertainty: "confirmed" as const,
+        methodComponents: ["sunscreen" as const]
+      },
+      {
+        zoneInstanceId: "hands",
+        trackingEventId: "th",
+        methodEventId: "mh",
+        bodyZoneCode: "hand_backs" as const,
+        customLabel: null,
+        skinExposureStatus: "exposed" as const,
+        methodCertainty: "confirmed" as const,
+        methodComponents: ["sunscreen" as const]
+      }
+    ];
+    const stream = makeStream({ zones });
+    const group = stream.applicationConfirmationGroups[0]!;
+    stream.applicationEvents.push({
+      ...stream.applicationEvents[0]!,
+      id: "overlap",
+      zoneInstanceIds: ["hands"],
+      applicationConfirmationId: group.id
+    });
+    expect(() => projection(stream)).toThrow(DomainInvariantError);
+  });
+
+  it("TV-039 correction target 只能有唯一 successor", () => {
+    const stream = makeStream();
+    const original = stream.zoneMethodEvents[0]!;
+    const replacement = {
+      ...original,
+      id: "replacement-1",
+      correctionAction: "replace" as const,
+      correctionOfEventId: original.id
+    };
+    const competing = {
+      ...original,
+      id: "replacement-2",
+      correctionAction: "replace" as const,
+      correctionOfEventId: original.id
+    };
+    expect(() =>
+      validateCorrectionGraph(
+        [original, replacement, competing],
+        () => "zone_method"
+      )
+    ).toThrowError(/successor/);
+  });
+
+  it("correction graph 明確拒絕 cycle", () => {
+    const stream = makeStream();
+    const template = stream.zoneMethodEvents[0]!;
+    const first = {
+      ...template,
+      id: "cycle-a",
+      correctionAction: "replace" as const,
+      correctionOfEventId: "cycle-b"
+    };
+    const second = {
+      ...template,
+      id: "cycle-b",
+      correctionAction: "replace" as const,
+      correctionOfEventId: "cycle-a"
+    };
+    expect(() =>
+      validateCorrectionGraph([first, second], () => "zone_method")
+    ).toThrowError(/cycle/);
+  });
+
+  it("TV-040 Session 結束後事件不會重開 Session", () => {
+    const stream = makeStream();
+    stream.sessionEndedEvents.push({
+      ...eventBase(
+        stream,
+        "session-ended",
+        "2026-07-29T11:00:00.000Z",
+        2
+      ),
+      eventType: "session_ended",
+      endedAt: "2026-07-29T11:00:00.000Z",
+      endedReason: "user_ended"
+    });
+    addContext(
+      stream,
+      causeEvent(stream, {
+        id: "later-cause",
+        type: "friction",
+        at: "2026-07-29T11:01:00.000Z",
+        sequence: 3,
+        zones: stream.sessionStarted.zoneInstanceIds
+      })
+    );
+    const result = projection(stream, "2026-07-29T11:02:00.000Z");
+    expect(result.overallStatus).toBe("ended");
+    expect(result.primaryAction.actionKind).toBe("view_ended_state");
+  });
+});

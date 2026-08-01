@@ -1,0 +1,193 @@
+<script setup lang="ts">
+import { computed } from "vue";
+import { LocateFixed } from "@lucide/vue";
+import type {
+  RegionError,
+  RegionPhase
+} from "../../features/region/createRegionController";
+import type { RegionSelection } from "@sunshield/contracts";
+
+interface Props {
+  phase: RegionPhase;
+  error: RegionError;
+  candidate: RegionSelection | null;
+  approximateAccuracyMeters: number | null;
+}
+
+const props = defineProps<Props>();
+const emit = defineEmits<{
+  locate: [];
+  confirm: [];
+}>();
+
+const errorMessage = computed(() => {
+  switch (props.error) {
+    case "permission_denied":
+      return "你沒有允許定位。可以改用下方手動選擇地區。";
+    case "position_unavailable":
+      return "目前無法取得位置。請稍後重試，或手動選擇地區。";
+    case "timeout":
+      return "無法取得位置。請確認定位權限，或移到訊號較好的地方重試；你也可以手動選擇地區。";
+    case "unsupported":
+      return "這個瀏覽器不支援定位，請改用手動選擇。";
+    case "outside_supported_area":
+      return "無法將目前位置配對到臺灣行政區，請改用手動選擇。";
+    case "boundary_ambiguous":
+      return "目前位置可能接近行政區邊界，請手動確認地區。";
+    case "storage_error":
+      return "目前無法保存地區設定，請再試一次。";
+    case "invalid_region":
+      return "找不到這個行政區，請重新選擇。";
+    case null:
+      return "";
+  }
+});
+</script>
+
+<template>
+  <section class="location-panel app-card" aria-labelledby="location-title">
+    <div class="location-panel__heading">
+      <div>
+        <p class="eyebrow">DEVICE LOCATION</p>
+        <h2 id="location-title" class="location-panel__title">
+          使用目前位置
+        </h2>
+      </div>
+      <LocateFixed :size="25" :stroke-width="1.6" aria-hidden="true" />
+    </div>
+
+    <p class="location-panel__body">
+      按下按鈕後，系統會短暫取得位置，用來配對所在行政區。位置不會被保存或用於分析；你也可以手動選擇或略過。
+    </p>
+
+    <button
+      v-if="candidate === null"
+      data-testid="use-current-position"
+      class="button button--primary location-panel__action"
+      type="button"
+      :disabled="phase === 'locating' || phase === 'saving'"
+      @click="emit('locate')"
+    >
+      {{ phase === "locating" ? "正在取得位置…" : "使用目前位置" }}
+    </button>
+
+    <div
+      v-if="candidate !== null"
+      class="location-panel__candidate"
+      role="region"
+      aria-labelledby="location-candidate-title"
+      aria-live="polite"
+    >
+      <h3 id="location-candidate-title">確認所在行政區</h3>
+      <p>
+        系統配對為 <strong>{{ candidate.displayName }}</strong>
+        <template v-if="approximateAccuracyMeters !== null">
+          ，這次定位精度約 {{ approximateAccuracyMeters }} 公尺
+        </template>
+        。請確認後再保存。
+      </p>
+      <button
+        class="button button--primary"
+        type="button"
+        :disabled="phase === 'saving'"
+        @click="emit('confirm')"
+      >
+        {{ phase === "saving" ? "正在保存…" : "確認並使用此地區" }}
+      </button>
+      <button
+        data-testid="relocate"
+        class="text-link location-panel__relocate location-panel__relocate--centered"
+        type="button"
+        :disabled="phase === 'saving'"
+        @click="emit('locate')"
+      >
+        重新定位
+      </button>
+    </div>
+
+    <p
+      v-if="errorMessage"
+      class="location-panel__error"
+      role="alert"
+    >
+      {{ errorMessage }}
+    </p>
+  </section>
+</template>
+
+<style scoped>
+.location-panel {
+  display: grid;
+  gap: var(--space-4);
+  padding: clamp(1.25rem, 5vw, 1.75rem);
+}
+
+.location-panel__heading {
+  display: flex;
+  align-items: start;
+  justify-content: space-between;
+  gap: var(--space-4);
+}
+
+.eyebrow,
+.location-panel__title,
+.location-panel__body,
+.location-panel__candidate h3,
+.location-panel__candidate p,
+.location-panel__error {
+  margin: 0;
+}
+
+.eyebrow {
+  color: var(--text-secondary);
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  letter-spacing: 0.12em;
+}
+
+.location-panel__title {
+  margin-top: var(--space-1);
+  font-size: 1.3rem;
+  font-weight: 600;
+}
+
+.location-panel__body,
+.location-panel__candidate p {
+  color: var(--text-secondary);
+  line-height: 1.7;
+}
+
+.location-panel__action,
+.location-panel__candidate .button {
+  min-height: 2.75rem;
+}
+
+.location-panel__candidate {
+  display: grid;
+  gap: var(--space-3);
+  padding-top: var(--space-4);
+  border-top: 1px solid var(--border-subtle);
+}
+
+.location-panel__candidate h3 {
+  font-size: 1.1rem;
+}
+
+.location-panel__relocate {
+  min-height: 2.75rem;
+  padding-inline: var(--space-2);
+  text-decoration: underline;
+  text-underline-offset: 0.2rem;
+}
+
+.location-panel__relocate--centered {
+  justify-self: center;
+}
+
+.location-panel__error {
+  padding: var(--space-3);
+  border-radius: var(--radius-sm);
+  background: var(--color-due-soft);
+  line-height: 1.7;
+}
+</style>

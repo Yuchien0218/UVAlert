@@ -1,0 +1,37 @@
+{
+  "name": "sunshield-advisor",
+  "version": "0.1.0",
+  "private": true,
+  "packageManager": "pnpm@11.9.0",
+  "engines": {
+    "node": ">=24.0.0",
+    "pnpm": ">=11.0.0"
+  },
+  "scripts": {
+    "build": "pnpm -r build",
+    "typecheck": "pnpm -r typecheck",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "region-data:build": "node tools/region-data/build-region-data.mjs",
+    "region-data:verify": "node tools/region-data/build-region-data.mjs --verify",
+    "check": "pnpm typecheck && pnpm test"
+  },
+  "devDependencies": {
+    "@turf/boolean-valid": "^7.3.5",
+    "@turf/clean-coords": "^7.3.5",
+    "@turf/rewind": "^7.3.5",
+    "@turf/simplify": "^7.3.5",
+    "@types/node": "^24.0.0",
+    "@vitejs/plugin-vue": "^6.0.0",
+    "@vue/test-utils": "^2.4.6",
+    "adm-zip": "^0.6.0",
+    "fake-indexeddb": "^6.2.4",
+    "happy-dom": "^20.0.0",
+    "proj4": "^2.21.0",
+    "shapefile": "^0.6.6",
+    "typescript": "^5.9.0",
+    "vite": "^7.0.0",
+    "vitest": "^4.0.0",
+    "vue": "^3.5.0"
+  }
+}

@@ -1,0 +1,102 @@
+// @vitest-environment happy-dom
+
+import { mount } from "@vue/test-utils";
+import { describe, expect, it } from "vitest";
+import SessionEndControl from "./SessionEndControl.vue";
+
+describe("SessionEndControl", () => {
+  it("先顯示影響摘要，取消時不送出結束操作", async () => {
+    const wrapper = mount(SessionEndControl, {
+      attachTo: document.body,
+      props: {
+        phase: "idle",
+        error: null
+      }
+    });
+
+    const trigger = getButton(wrapper, "停止本次提醒");
+    expect(trigger.classes()).toContain("text-link");
+    expect(wrapper.find('[role="region"]').exists()).toBe(false);
+
+    await trigger.trigger("click");
+
+    const confirmation = wrapper.get('[role="region"]');
+    expect(confirmation.classes()).not.toContain("app-card");
+    expect(
+      confirmation.get("p.session-end__confirm-title").text()
+    ).toBe("結束本次提醒？");
+    expect(confirmation.attributes("tabindex")).toBeUndefined();
+    expect(document.activeElement).toBe(
+      confirmation.get("p.session-end__confirm-title").element
+    );
+    expect(confirmation.text()).toContain(
+      "結束後不再接受這次提醒的一般事件"
+    );
+    expect(wrapper.text()).toContain(
+      "不會被當成已補擦或防護完成"
+    );
+
+    await getButton(wrapper, "取消").trigger("click");
+
+    expect(wrapper.find('[role="region"]').exists()).toBe(false);
+    expect(wrapper.emitted("confirm")).toBeUndefined();
+    wrapper.unmount();
+  });
+
+  it("只有按下確認才送出一次結束操作", async () => {
+    const wrapper = mount(SessionEndControl, {
+      props: {
+        phase: "idle",
+        error: null
+      }
+    });
+
+    await getButton(wrapper, "停止本次提醒").trigger("click");
+    await getButton(wrapper, "結束本次提醒").trigger("click");
+
+    expect(wrapper.emitted("confirm")).toEqual([[]]);
+  });
+
+  it("提交期間鎖定重複操作，失敗時說明提醒仍在運作", async () => {
+    const wrapper = mount(SessionEndControl, {
+      props: {
+        phase: "idle",
+        error: null
+      }
+    });
+    await getButton(wrapper, "停止本次提醒").trigger("click");
+    await wrapper.setProps({
+      phase: "ending",
+      error: null
+    });
+
+    expect(getButton(wrapper, "正在結束…").attributes()).toHaveProperty(
+      "disabled"
+    );
+    expect(getButton(wrapper, "取消").attributes()).toHaveProperty(
+      "disabled"
+    );
+
+    await wrapper.setProps({
+      phase: "error",
+      error: "persistence_error"
+    });
+
+    expect(wrapper.get('[role="alert"]').text()).toContain(
+      "這次提醒仍在運作"
+    );
+  });
+});
+
+function getButton(
+  wrapper: ReturnType<typeof mount>,
+  label: string
+) {
+  const button = wrapper
+    .findAll("button")
+    .find((candidate) => candidate.text() === label);
+  if (button === undefined) {
+    throw new Error(`Button not found: ${label}`);
+  }
+  return button;
+}

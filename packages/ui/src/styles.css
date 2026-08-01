@@ -1,0 +1,204 @@
+:root {
+  color-scheme: light;
+
+  /* IRKA-inspired brand primitives */
+  --color-paper: #f9f9f9;
+  --color-surface: #ffffff;
+  --color-ink: #121212;
+  --color-dark: #121817;
+  --color-deep: #0b0b0b;
+  --color-text-secondary: #5a5a5a;
+  --color-decoration-muted: #8f8f8f;
+  --color-line: #e3e3e3;
+  --color-white: #ffffff;
+
+  /* Reminder semantics remain independent from brand color. */
+  --color-tracking: #2f6fbb;
+  --color-tracking-soft: #eaf3fc;
+  --color-soon: #a86100;
+  --color-soon-soft: #fff3d6;
+  --color-due: #cc3333;
+  --color-due-soft: #fdecea;
+  --color-untimed: #5b3cc4;
+  --color-untimed-soft: #f1edff;
+  --color-success: #147d64;
+  --color-success-soft: #e9f7f1;
+  --color-uvi-low: #507aa8;
+  --color-uvi-moderate: #bd8500;
+  --color-uvi-high: #d16627;
+  --color-uvi-very-high: #c43d3d;
+  --color-uvi-extreme: #7d4bb3;
+
+  --page-background: var(--color-paper);
+  --surface-primary: var(--color-surface);
+  --surface-inverse: var(--color-dark);
+  --text-primary: var(--color-ink);
+  --text-secondary: var(--color-text-secondary);
+  --text-inverse: var(--color-white);
+  --border-subtle: var(--color-line);
+  --focus-ring: var(--color-ink);
+
+  --font-sans:
+    "Helvetica Neue", Inter, "Noto Sans TC", "PingFang TC",
+    "Microsoft JhengHei", system-ui, sans-serif;
+  --font-mono:
+    "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+  --font-size-page-title: clamp(1.75rem, 6vw, 2rem);
+
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-5: 1.25rem;
+  --space-6: 1.5rem;
+  --space-8: 2rem;
+  --space-10: 2.5rem;
+  --space-12: 3rem;
+
+  --radius-sm: 0.5rem;
+  --radius-md: 0.875rem;
+  --radius-lg: 1.25rem;
+  --radius-pill: 999px;
+
+  --shadow-card: 0 1rem 3rem rgb(18 18 18 / 7%);
+  --shadow-float: 0 1.25rem 3rem rgb(11 11 11 / 16%);
+
+  --content-max: 47rem;
+  --tap-target: 2.75rem;
+  --bottom-nav-height: 4.5rem;
+  --duration-fast: 160ms;
+  --duration-base: 240ms;
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+:root[data-theme="light"] {
+  color-scheme: only light;
+}
+
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --page-background: #0f0e0c;
+  --surface-primary: #1c1a17;
+  --surface-inverse: #f9f9f9;
+  --text-primary: #f5f3ef;
+  --text-secondary: #a8a29b;
+  --text-inverse: #121212;
+  --border-subtle: rgb(255 250 240 / 12%);
+  --focus-ring: #f5f3ef;
+
+  --color-tracking: #6ba3e0;
+  --color-soon: #e0a23f;
+  --color-due: #e2585f;
+  --color-untimed: #a084e8;
+  --color-success: #35c19a;
+
+  --color-uvi-low: #6f9bd4;
+  --color-uvi-moderate: #e0ab35;
+  --color-uvi-high: #e3803e;
+  --color-uvi-very-high: #e0555a;
+  --color-uvi-extreme: #a878e0;
+
+  --color-tracking-soft: #17293d;
+  --color-soon-soft: #3a2a11;
+  --color-due-soft: #3c1c1e;
+  --color-untimed-soft: #271f42;
+  --color-success-soft: #143329;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme]) {
+    color-scheme: dark;
+    --page-background: #0f0e0c;
+    --surface-primary: #1c1a17;
+    --surface-inverse: #f9f9f9;
+    --text-primary: #f5f3ef;
+    --text-secondary: #a8a29b;
+    --text-inverse: #121212;
+    --border-subtle: rgb(255 250 240 / 12%);
+    --focus-ring: #f5f3ef;
+
+    --color-tracking: #6ba3e0;
+    --color-soon: #e0a23f;
+    --color-due: #e2585f;
+    --color-untimed: #a084e8;
+    --color-success: #35c19a;
+
+    --color-uvi-low: #6f9bd4;
+    --color-uvi-moderate: #e0ab35;
+    --color-uvi-high: #e3803e;
+    --color-uvi-very-high: #e0555a;
+    --color-uvi-extreme: #a878e0;
+
+    --color-tracking-soft: #17293d;
+    --color-soon-soft: #3a2a11;
+    --color-due-soft: #3c1c1e;
+    --color-untimed-soft: #271f42;
+    --color-success-soft: #143329;
+  }
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  min-width: 20rem;
+  background: var(--page-background);
+  font-family: var(--font-sans);
+  color: var(--text-primary);
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+}
+
+body {
+  min-width: 20rem;
+  min-height: 100vh;
+  min-height: 100svh;
+  margin: 0;
+  background: var(--page-background);
+  line-height: 1.7;
+  letter-spacing: normal;
+}
+
+button,
+a,
+input,
+select,
+textarea {
+  font: inherit;
+}
+
+button,
+a {
+  -webkit-tap-highlight-color: transparent;
+}
+
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+  outline: 0.15rem solid var(--focus-ring);
+  outline-offset: 0.2rem;
+}
+
+a {
+  color: inherit;
+}
+
+button {
+  color: inherit;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+  }
+}

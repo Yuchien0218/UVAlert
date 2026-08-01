@@ -1,0 +1,29 @@
+{
+  "name": "@sunshield/web",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vue-tsc --noEmit -p tsconfig.json && vite build",
+    "typecheck": "vue-tsc --noEmit -p tsconfig.json"
+  },
+  "dependencies": {
+    "@lucide/vue": "^1.27.0",
+    "@sunshield/contracts": "workspace:*",
+    "@sunshield/persistence-web": "workspace:*",
+    "@sunshield/platform": "workspace:*",
+    "@sunshield/ui": "workspace:*",
+    "@turf/boolean-point-in-polygon": "^7.3.5",
+    "@turf/helpers": "^7.3.5",
+    "vue": "^3.5.0",
+    "vue-router": "^4.5.0"
+  },
+  "devDependencies": {
+    "@sunshield/test-fixtures": "workspace:*",
+    "@types/geojson": "^7946.0.16",
+    "@vitejs/plugin-vue": "^6.0.0",
+    "vite": "^7.0.0",
+    "vue-tsc": "^3.0.0"
+  }
+}

@@ -1,0 +1,583 @@
+import type {
+  CommandReceiptRecord,
+  CommandResult,
+  EndSessionCommandV1,
+  ReducerClock,
+  SessionEventStreamV1,
+  SessionProjection,
+  StartSessionCommandV1,
+  ZoneProjection
+} from "@sunshield/contracts";
+import {
+  EndSessionCommandV1Schema,
+  StartSessionCommandV1Schema
+} from "@sunshield/contracts";
+import {
+  DomainInvariantError,
+  makeSessionEndedEvent,
+  ownerKeyFor,
+  planStartSession,
+  reduceSession
+} from "@sunshield/domain";
+import {
+  type CrossContextNotifier,
+  NoopCrossContextNotifier
+} from "../cross-context";
+import { SunshieldDatabase } from "../db/database";
+
+type TransactionOutcome = {
+  result: CommandResult<SessionProjection>;
+  committed: boolean;
+};
+
+export class LocalSessionRepository {
+  readonly #database: SunshieldDatabase;
+  readonly #notifier: CrossContextNotifier;
+  readonly #sourceContextId: string;
+
+  constructor(options: {
+    database: SunshieldDatabase;
+    sourceContextId: string;
+    notifier?: CrossContextNotifier;
+  }) {
+    this.#database = options.database;
+    this.#sourceContextId = options.sourceContextId;
+    this.#notifier = options.notifier ?? new NoopCrossContextNotifier();
+  }
+
+  async open(): Promise<void> {
+    await this.#database.open();
+  }
+
+  async startSession(
+    rawCommand: StartSessionCommandV1,
+    clock: ReducerClock
+  ): Promise<CommandResult<SessionProjection>> {
+    const parsed = StartSessionCommandV1Schema.safeParse(rawCommand);
+    if (!parsed.success) {
+      return validationFailure(parsed.error.issues);
+    }
+
+    let plan;
+    try {
+      plan = planStartSession(parsed.data, clock);
+    } catch (error) {
+      return mapPlanningError(error);
+    }
+
+    try {
+      const outcome = await this.#database.transaction(
+        "rw",
+        [
+          this.#database.ProtectionSessions,
+          this.#database.ProtectionZoneStates,
+          this.#database.SessionStartedEvents,
+          this.#database.ZoneTrackingEvents,
+          this.#database.ZoneMethodEvents,
+          this.#database.ApplicationConfirmationGroups,
+          this.#database.ApplicationEvents,
+          this.#database.ContextEvents,
+          this.#database.ActiveSessionLocks,
+          this.#database.ClientSequences,
+          this.#database.CommandReceipts,
+          this.#database.ZoneIdentityLocks
+        ],
+        async (): Promise<TransactionOutcome> => {
+          const existingReceipt =
+            await this.#database.CommandReceipts.get(
+              parsed.data.idempotencyKey
+            );
+          if (existingReceipt !== undefined) {
+            return {
+              result:
+                existingReceipt.result as CommandResult<SessionProjection>,
+              committed: false
+            };
+          }
+
+          const ownerKey = ownerKeyFor(
+            parsed.data.owner.localVisitorId
+          );
+          const activeLock =
+            await this.#database.ActiveSessionLocks.get(ownerKey);
+          if (activeLock !== undefined) {
+            return {
+              result: {
+                ok: false,
+                code: "ACTIVE_SESSION_CONFLICT",
+                retryable: false
+              },
+              committed: false
+            };
+          }
+
+          const sequenceKey: [string, string] = [
+            parsed.data.deviceLocalId,
+            parsed.data.sessionId
+          ];
+          const currentSequence =
+            await this.#database.ClientSequences.get(sequenceKey);
+          if (
+            currentSequence !== undefined &&
+            parsed.data.clientSequence <= currentSequence.lastSequence
+          ) {
+            return {
+              result: {
+                ok: false,
+                code: "CLIENT_SEQUENCE_CONFLICT",
+                retryable: false
+              },
+              committed: false
+            };
+          }
+
+          await this.#database.ActiveSessionLocks.add({
+            ownerKey,
+            sessionId: parsed.data.sessionId,
+            createdAt: clock.trustedNow
+          });
+          await this.#database.ProtectionSessions.add(plan.session);
+          await this.#database.SessionStartedEvents.add(
+            plan.stream.sessionStarted
+          );
+          await this.#database.ZoneTrackingEvents.bulkAdd(
+            plan.stream.zoneTrackingEvents
+          );
+          await this.#database.ZoneMethodEvents.bulkAdd(
+            plan.stream.zoneMethodEvents
+          );
+          if (plan.stream.applicationConfirmationGroups.length > 0) {
+            await this.#database.ApplicationConfirmationGroups.bulkAdd(
+              plan.stream.applicationConfirmationGroups
+            );
+          }
+          if (plan.stream.applicationEvents.length > 0) {
+            await this.#database.ApplicationEvents.bulkAdd(
+              plan.stream.applicationEvents
+            );
+          }
+          if (plan.stream.contextEvents.length > 0) {
+            await this.#database.ContextEvents.bulkAdd(
+              plan.stream.contextEvents
+            );
+          }
+          await this.#database.ProtectionZoneStates.bulkPut(
+            plan.projection.zones
+          );
+
+          for (const zone of parsed.data.payload.zones) {
+            if (zone.bodyZoneCode !== "custom") {
+              await this.#database.ZoneIdentityLocks.add({
+                sessionId: parsed.data.sessionId,
+                bodyZoneCode: zone.bodyZoneCode,
+                zoneInstanceId: zone.zoneInstanceId
+              });
+            }
+          }
+          await this.#database.ClientSequences.put({
+            deviceLocalId: parsed.data.deviceLocalId,
+            sessionId: parsed.data.sessionId,
+            lastSequence: parsed.data.clientSequence
+          });
+
+          const result: CommandResult<SessionProjection> = {
+            ok: true,
+            data: plan.projection,
+            sessionId: parsed.data.sessionId,
+            revision: 1,
+            committedEventIds: plan.committedEventIds
+          };
+          const receipt: CommandReceiptRecord = {
+            idempotencyKey: parsed.data.idempotencyKey,
+            commandId: parsed.data.commandId,
+            sessionId: parsed.data.sessionId,
+            result,
+            createdAt: clock.trustedNow
+          };
+          await this.#database.CommandReceipts.add(receipt);
+          return { result, committed: true };
+        }
+      );
+
+      if (outcome.committed && outcome.result.ok) {
+        this.#publishCommit(
+          outcome.result.sessionId,
+          outcome.result.revision
+        );
+      }
+      return outcome.result;
+    } catch {
+      return {
+        ok: false,
+        code: "PERSISTENCE_ERROR",
+        retryable: true
+      };
+    }
+  }
+
+  async endSession(
+    rawCommand: EndSessionCommandV1,
+    clock: ReducerClock
+  ): Promise<CommandResult<SessionProjection>> {
+    const parsed = EndSessionCommandV1Schema.safeParse(rawCommand);
+    if (!parsed.success) {
+      return validationFailure(parsed.error.issues);
+    }
+
+    try {
+      const outcome = await this.#database.transaction(
+        "rw",
+        [
+          this.#database.ProtectionSessions,
+          this.#database.ProtectionZoneStates,
+          this.#database.SessionStartedEvents,
+          this.#database.ZoneTrackingEvents,
+          this.#database.ZoneMethodEvents,
+          this.#database.ApplicationConfirmationGroups,
+          this.#database.ApplicationEvents,
+          this.#database.ProductSafetyEvents,
+          this.#database.ContextEvents,
+          this.#database.SessionEndedEvents,
+          this.#database.ActiveSessionLocks,
+          this.#database.ClientSequences,
+          this.#database.CommandReceipts
+        ],
+        async (): Promise<TransactionOutcome> => {
+          const existingReceipt =
+            await this.#database.CommandReceipts.get(
+              parsed.data.idempotencyKey
+            );
+          if (existingReceipt !== undefined) {
+            return {
+              result:
+                existingReceipt.result as CommandResult<SessionProjection>,
+              committed: false
+            };
+          }
+
+          const session = await this.#database.ProtectionSessions.get(
+            parsed.data.sessionId
+          );
+          if (session === undefined) {
+            return {
+              result: {
+                ok: false,
+                code: "NOT_FOUND",
+                retryable: false
+              },
+              committed: false
+            };
+          }
+          const commandOwnerKey = ownerKeyFor(
+            parsed.data.owner.localVisitorId
+          );
+          if (session.ownerKey !== commandOwnerKey) {
+            return {
+              result: {
+                ok: false,
+                code: "NOT_FOUND",
+                retryable: false
+              },
+              committed: false
+            };
+          }
+          if (session.revision !== parsed.data.expectedRevision) {
+            return {
+              result: {
+                ok: false,
+                code: "REVISION_CONFLICT",
+                currentRevision: session.revision,
+                retryable: false
+              },
+              committed: false
+            };
+          }
+
+          const sequenceKey: [string, string] = [
+            parsed.data.deviceLocalId,
+            parsed.data.sessionId
+          ];
+          const currentSequence =
+            await this.#database.ClientSequences.get(sequenceKey);
+          if (
+            currentSequence !== undefined &&
+            parsed.data.clientSequence <= currentSequence.lastSequence
+          ) {
+            return {
+              result: {
+                ok: false,
+                code: "CLIENT_SEQUENCE_CONFLICT",
+                retryable: false
+              },
+              committed: false
+            };
+          }
+
+          const stream = await this.#loadEventStream(parsed.data.sessionId);
+          const endedEvent = makeSessionEndedEvent(parsed.data);
+          stream.sessionEndedEvents.push(endedEvent);
+          const revision = session.revision + 1;
+          const projection = reduceSession({ stream, revision, clock });
+
+          await this.#database.SessionEndedEvents.add(endedEvent);
+          await this.#database.ProtectionZoneStates.bulkPut(
+            projection.zones
+          );
+          await this.#database.ProtectionSessions.put({
+            ...session,
+            endedAt: parsed.data.payload.effectiveOccurredAt,
+            endedReason: parsed.data.payload.endedReason,
+            overallStatus: projection.overallStatus,
+            sessionNextDueAt: projection.sessionNextDueAt,
+            primaryAction: projection.primaryAction,
+            derivedFromEventRefs: projection.derivedFromEventRefs,
+            revision,
+            updatedAt: clock.trustedNow
+          });
+          const activeLock =
+            await this.#database.ActiveSessionLocks.get(commandOwnerKey);
+          if (activeLock?.sessionId === parsed.data.sessionId) {
+            await this.#database.ActiveSessionLocks.delete(
+              commandOwnerKey
+            );
+          }
+          await this.#database.ClientSequences.put({
+            deviceLocalId: parsed.data.deviceLocalId,
+            sessionId: parsed.data.sessionId,
+            lastSequence: parsed.data.clientSequence
+          });
+
+          const result: CommandResult<SessionProjection> = {
+            ok: true,
+            data: projection,
+            sessionId: parsed.data.sessionId,
+            revision,
+            committedEventIds: [endedEvent.id]
+          };
+          await this.#database.CommandReceipts.add({
+            idempotencyKey: parsed.data.idempotencyKey,
+            commandId: parsed.data.commandId,
+            sessionId: parsed.data.sessionId,
+            result,
+            createdAt: clock.trustedNow
+          });
+          return { result, committed: true };
+        }
+      );
+
+      if (outcome.committed && outcome.result.ok) {
+        this.#publishCommit(
+          outcome.result.sessionId,
+          outcome.result.revision
+        );
+      }
+      return outcome.result;
+    } catch (error) {
+      if (error instanceof DomainInvariantError) {
+        return {
+          ok: false,
+          code:
+            error.code === "CORRECTION_CONFLICT"
+              ? "CORRECTION_CONFLICT"
+              : "VALIDATION_ERROR",
+          retryable: false
+        };
+      }
+      return {
+        ok: false,
+        code: "PERSISTENCE_ERROR",
+        retryable: true
+      };
+    }
+  }
+
+  async getCurrentSession(
+    localVisitorId: string
+  ): Promise<SessionProjection | null> {
+    const lock = await this.#database.ActiveSessionLocks.get(
+      ownerKeyFor(localVisitorId)
+    );
+    if (lock === undefined) return null;
+    const session = await this.#database.ProtectionSessions.get(
+      lock.sessionId
+    );
+    if (session === undefined) return null;
+    const zones = await this.#database.ProtectionZoneStates.where(
+      "sessionId"
+    )
+      .equals(session.id)
+      .toArray();
+    let hydratedZones = zones;
+    if (
+      zones.some(
+        (zone) =>
+          (
+            zone as ZoneProjection & {
+              zoneTimerStartedAt?: string | null;
+            }
+          ).zoneTimerStartedAt === undefined
+      )
+    ) {
+      const stream = await this.#loadEventStream(session.id);
+      hydratedZones = zones.map((zone) =>
+        hydrateZoneTimerStartedAt(zone, stream)
+      );
+    }
+    return {
+      sessionId: session.id,
+      rulesetVersion: session.rulesetVersion,
+      revision: session.revision,
+      overallStatus: session.overallStatus,
+      sessionNextDueAt: session.sessionNextDueAt,
+      zones: hydratedZones,
+      primaryAction: session.primaryAction,
+      derivedFromEventRefs: session.derivedFromEventRefs
+    };
+  }
+
+  async #loadEventStream(sessionId: string): Promise<SessionEventStreamV1> {
+    const [
+      sessionStartedEvents,
+      zoneMethodEvents,
+      zoneTrackingEvents,
+      applicationConfirmationGroups,
+      applicationEvents,
+      productSafetyEvents,
+      contextEvents,
+      sessionEndedEvents
+    ] = await Promise.all([
+      this.#database.SessionStartedEvents.where("sessionId")
+        .equals(sessionId)
+        .toArray(),
+      this.#database.ZoneMethodEvents.where("sessionId")
+        .equals(sessionId)
+        .toArray(),
+      this.#database.ZoneTrackingEvents.where("sessionId")
+        .equals(sessionId)
+        .toArray(),
+      this.#database.ApplicationConfirmationGroups.where("sessionId")
+        .equals(sessionId)
+        .toArray(),
+      this.#database.ApplicationEvents.where("sessionId")
+        .equals(sessionId)
+        .toArray(),
+      this.#database.ProductSafetyEvents.where("sessionId")
+        .equals(sessionId)
+        .toArray(),
+      this.#database.ContextEvents.where("sessionId")
+        .equals(sessionId)
+        .toArray(),
+      this.#database.SessionEndedEvents.where("sessionId")
+        .equals(sessionId)
+        .toArray()
+    ]);
+    const sessionStarted = sessionStartedEvents[0];
+    if (sessionStarted === undefined || sessionStartedEvents.length !== 1) {
+      throw new DomainInvariantError(
+        "INVALID_EVENT_STREAM",
+        "SessionStartedEvent 必須恰好一筆"
+      );
+    }
+    return {
+      sessionStarted,
+      zoneMethodEvents,
+      zoneTrackingEvents,
+      applicationConfirmationGroups,
+      applicationEvents,
+      productSafetyEvents,
+      contextEvents,
+      sessionEndedEvents
+    };
+  }
+
+  #publishCommit(sessionId?: string, revision?: number): void {
+    this.#notifier.publish({
+      kind: "data-committed",
+      sourceContextId: this.#sourceContextId,
+      ...(sessionId === undefined ? {} : { sessionId }),
+      ...(revision === undefined ? {} : { revision })
+    });
+  }
+}
+
+function hydrateZoneTimerStartedAt(
+  zone: ZoneProjection,
+  stream: SessionEventStreamV1
+): ZoneProjection {
+  const legacyZone = zone as ZoneProjection & {
+    zoneTimerStartedAt?: string | null;
+  };
+  if (legacyZone.zoneTimerStartedAt !== undefined) {
+    return zone;
+  }
+
+  let zoneTimerStartedAt: string | null = null;
+  if (
+    zone.zoneDueAt !== null &&
+    zone.zoneDueAt === zone.generalDueAt &&
+    zone.currentApplicationId !== null
+  ) {
+    zoneTimerStartedAt =
+      stream.applicationEvents.find(
+        (event) => event.id === zone.currentApplicationId
+      )?.appliedAt ?? null;
+  } else if (
+    zone.zoneDueAt !== null &&
+    zone.zoneDueAt === zone.activeWaterDeadline
+  ) {
+    const waterStart = stream.contextEvents.find(
+      (event) =>
+        event.contextType === "water_start" &&
+        event.startConfidence === "confirmed" &&
+        zone.derivedFromEventRefs.includes(event.id)
+    );
+    zoneTimerStartedAt =
+      waterStart?.contextType === "water_start"
+        ? waterStart.activityStartedAt
+        : null;
+  } else if (
+    zone.zoneDueAt !== null &&
+    zone.zoneDueAt === zone.eventTriggeredDeadline
+  ) {
+    zoneTimerStartedAt = zone.eventTriggeredDeadline;
+  }
+
+  return {
+    ...zone,
+    zoneTimerStartedAt
+  };
+}
+
+function validationFailure(
+  issues: ReadonlyArray<{ path: PropertyKey[]; message: string }>
+): CommandResult<never> {
+  const fieldErrors: Record<string, string[]> = {};
+  for (const issue of issues) {
+    const path = issue.path.join(".") || "_root";
+    (fieldErrors[path] ??= []).push(issue.message);
+  }
+  return {
+    ok: false,
+    code: "VALIDATION_ERROR",
+    fieldErrors,
+    retryable: false
+  };
+}
+
+function mapPlanningError(error: unknown): CommandResult<never> {
+  if (error instanceof DomainInvariantError) {
+    return {
+      ok: false,
+      code:
+        error.code === "CORRECTION_CONFLICT"
+          ? "CORRECTION_CONFLICT"
+          : "VALIDATION_ERROR",
+      retryable: false
+    };
+  }
+  return {
+    ok: false,
+    code: "VALIDATION_ERROR",
+    retryable: false
+  };
+}
