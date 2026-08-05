@@ -9,7 +9,7 @@ defineProps<Props>();
 </script>
 
 <template>
-  <section id="outdoor-context" class="context-card app-card" aria-labelledby="context-title">
+  <section id="outdoor-context" class="context-card" aria-labelledby="context-title">
     <div class="context-card__heading">
       <div>
         <h2 id="context-title" class="context-card__title">
@@ -49,16 +49,9 @@ defineProps<Props>();
 <style scoped>
 .context-card {
   display: grid;
-  gap: var(--space-5);
-  padding: var(--space-5);
-  border-radius: var(--radius-lg);
-  border: 1px solid var(--border-subtle);
-  background: var(--surface-primary);
-  transition: all var(--duration-fast) var(--ease-out);
-}
-
-.context-card:hover {
-  border-color: var(--text-secondary);
+  gap: var(--space-4);
+  padding-top: var(--space-5);
+  border-top: 1px solid var(--border-subtle);
 }
 
 .context-card__heading {

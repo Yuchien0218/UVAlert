@@ -72,7 +72,7 @@ function getUnavailableMessage(error: UvForecastError): string {
 <template>
   <section
     id="five-day-uv"
-    class="uv-forecast app-card"
+    class="uv-forecast"
     aria-labelledby="five-day-uv-title"
   >
     <div class="uv-forecast__heading">
@@ -175,7 +175,8 @@ function getUnavailableMessage(error: UvForecastError): string {
 .uv-forecast {
   display: grid;
   gap: var(--space-5);
-  padding: clamp(1.25rem, 5vw, 1.75rem);
+  padding-top: var(--space-5);
+  border-top: 1px solid var(--border-subtle);
   scroll-margin-top: var(--space-6);
 }
 

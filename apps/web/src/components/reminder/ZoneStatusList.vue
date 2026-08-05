@@ -146,6 +146,8 @@ function getTimingTone(
 .zone-list {
   display: grid;
   gap: var(--space-5);
+  padding-top: var(--space-5);
+  border-top: 1px solid var(--border-subtle);
   scroll-margin-top: var(--space-8);
 }
 
@@ -165,8 +167,6 @@ function getTimingTone(
 .zone-list__groups {
   display: grid;
   gap: var(--space-4);
-  padding-top: var(--space-4);
-  border-top: 1px solid var(--border-subtle);
 }
 
 .zone-group {
