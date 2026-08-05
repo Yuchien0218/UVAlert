@@ -217,7 +217,7 @@ function getUnavailableMessage(error: UvForecastError): string {
 
 .uv-forecast__state span {
   display: block;
-  font-size: 0.95rem;
+  font-size: var(--font-size-body);
 }
 
 .uv-forecast__state--error strong {
@@ -239,7 +239,7 @@ function getUnavailableMessage(error: UvForecastError): string {
   min-height: 2.5rem;
   margin-top: var(--space-3);
   padding: var(--space-3) var(--space-4);
-  font-size: 0.95rem;
+  font-size: var(--font-size-body);
   font-weight: 500;
 }
 
