@@ -142,17 +142,14 @@ function getUnavailableMessage(error: UvForecastError): string {
           class="uv-day"
           :class="riskClass(day.riskLevel)"
         >
-          <span class="uv-day__weekday">
-            {{ formatForecastDate(day.localDate).weekday }}
-          </span>
-          <span class="uv-day__date stat-figure stat-figure--inline">
+          <span class="uv-day__date stat-figure">
             {{ formatForecastDate(day.localDate).date }}
           </span>
           <strong class="uv-day__value stat-figure">
             <span class="screen-reader-only">紫外線指數</span>
             {{ day.uvi }}
           </strong>
-          <span class="uv-day__level">
+          <span class="uv-day__level-badge" :class="`uv-day__level-badge--${day.riskLevel}`" :aria-label="`風險等級：${getUvRiskLevelLabel(day.riskLevel)}`">
             {{ getUvRiskLevelLabel(day.riskLevel) }}
           </span>
         </li>
@@ -268,49 +265,96 @@ function getUnavailableMessage(error: UvForecastError): string {
 }
 
 .uv-day {
+  position: relative;
   display: grid;
+  grid-template-rows: auto 1fr auto;
   justify-items: center;
-  gap: var(--space-1);
+  gap: var(--space-3);
   min-width: 0;
-  padding: var(--space-3) var(--space-1);
-  border-top: 0.22rem solid var(--color-uvi-low);
-  border-radius: var(--radius-sm);
-  background: var(--page-background);
+  padding: var(--space-4) var(--space-2);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  background: var(--surface-primary);
   text-align: center;
+  transition: all var(--duration-fast) var(--ease-out);
+}
+
+.uv-day:hover {
+  border-color: var(--text-secondary);
+}
+
+.uv-day--low {
+  border-color: var(--color-uvi-low);
 }
 
 .uv-day--moderate {
-  border-top-color: var(--color-uvi-moderate);
+  border-color: var(--color-uvi-moderate);
 }
 
 .uv-day--high {
-  border-top-color: var(--color-uvi-high);
+  border-color: var(--color-uvi-high);
 }
 
 .uv-day--very-high {
-  border-top-color: var(--color-uvi-very-high);
+  border-color: var(--color-uvi-very-high);
 }
 
 .uv-day--extreme {
-  border-top-color: var(--color-uvi-extreme);
+  border-color: var(--color-uvi-extreme);
 }
 
-.uv-day__weekday {
-  font-weight: 500;
-}
-
-.uv-day__date,
-.uv-day__level {
-  overflow-wrap: anywhere;
+.uv-day__date {
+  position: absolute;
+  top: var(--space-2);
+  right: var(--space-2);
   color: var(--text-secondary);
-  font-size: 0.72rem;
+  font-size: var(--font-size-label);
+  font-weight: 500;
+  line-height: 1;
 }
 
 .uv-day__value {
-  margin-block: var(--space-1);
-  font-size: clamp(1.5rem, 7vw, 2rem);
-  font-weight: 500;
+  font-size: clamp(1.8rem, 8vw, 2.5rem);
+  font-weight: 600;
   line-height: 1;
+}
+
+.uv-day__level-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 2rem;
+  height: 2rem;
+  padding: 0 var(--space-2);
+  border-radius: var(--radius-pill);
+  font-size: var(--font-size-caption);
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.uv-day__level-badge--low {
+  background: var(--color-uvi-low);
+  color: var(--text-inverse);
+}
+
+.uv-day__level-badge--moderate {
+  background: var(--color-uvi-moderate);
+  color: var(--text-inverse);
+}
+
+.uv-day__level-badge--high {
+  background: var(--color-uvi-high);
+  color: var(--text-inverse);
+}
+
+.uv-day__level-badge--very-high {
+  background: var(--color-uvi-very-high);
+  color: var(--text-inverse);
+}
+
+.uv-day__level-badge--extreme {
+  background: var(--color-uvi-extreme);
+  color: var(--text-inverse);
 }
 
 .uv-forecast__source,
@@ -327,14 +371,27 @@ function getUnavailableMessage(error: UvForecastError): string {
 
 @media (max-width: 24rem) {
   .uv-forecast__days {
-    gap: var(--space-1);
+    gap: var(--space-2);
   }
 
   .uv-day {
-    padding-inline: 0.15rem;
+    padding: var(--space-3) var(--space-1);
+    gap: var(--space-2);
   }
 
-  .uv-day__level {
+  .uv-day__date {
+    top: var(--space-1);
+    right: var(--space-1);
+    font-size: 0.7rem;
+  }
+
+  .uv-day__value {
+    font-size: clamp(1.5rem, 6vw, 2rem);
+  }
+
+  .uv-day__level-badge {
+    min-width: 1.75rem;
+    height: 1.75rem;
     font-size: 0.65rem;
   }
 }
