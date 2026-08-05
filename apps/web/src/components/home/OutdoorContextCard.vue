@@ -9,7 +9,7 @@ defineProps<Props>();
 </script>
 
 <template>
-  <section id="outdoor-context" class="context-card" aria-labelledby="context-title">
+  <section id="outdoor-context" class="context-card app-card" aria-labelledby="context-title">
     <div class="context-card__heading">
       <div>
         <h2 id="context-title" class="context-card__title">
@@ -19,23 +19,23 @@ defineProps<Props>();
       <Wind :size="25" :stroke-width="1.5" aria-hidden="true" />
     </div>
     <div class="context-card__row">
-      <MapPin :size="18" :stroke-width="1.7" aria-hidden="true" />
-      <span>
-        <strong>
+      <MapPin :size="20" :stroke-width="1.6" aria-hidden="true" class="context-card__icon" />
+      <div class="context-card__content">
+        <strong class="context-card__label">
           {{
             regionName === null
               ? "目前未設定地區"
               : `目前地區・${regionName}`
           }}
         </strong>
-        <small>
+        <p class="context-card__description">
           {{
             regionName === null
               ? "不影響已保存的本機提醒"
               : "五日 UV 採用此地區的區域預報"
           }}
-        </small>
-      </span>
+        </p>
+      </div>
       <RouterLink
         class="button button--quiet context-card__cta"
         to="/region"
@@ -50,8 +50,15 @@ defineProps<Props>();
 .context-card {
   display: grid;
   gap: var(--space-5);
-  padding-block: var(--space-5);
-  border-block: 1px solid var(--border-subtle);
+  padding: var(--space-5);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border-subtle);
+  background: var(--surface-primary);
+  transition: all var(--duration-fast) var(--ease-out);
+}
+
+.context-card:hover {
+  border-color: var(--text-secondary);
 }
 
 .context-card__heading {
@@ -69,29 +76,40 @@ defineProps<Props>();
 
 .context-card__row {
   display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: var(--space-3);
+  align-items: flex-start;
+  gap: var(--space-4);
+}
+
+.context-card__icon {
+  flex-shrink: 0;
+  margin-top: 0.125rem;
+  color: var(--text-secondary);
+}
+
+.context-card__content {
+  flex: 1;
+  min-width: 0;
+}
+
+.context-card__label {
+  display: block;
+  margin: 0;
+  font-weight: 500;
+  font-size: var(--font-size-body);
+}
+
+.context-card__description {
+  display: block;
+  margin: var(--space-2) 0 0;
+  color: var(--text-secondary);
+  font-size: var(--font-size-body);
+  line-height: 1.6;
 }
 
 .context-card__cta {
-  margin-left: auto;
-  min-height: 2.25rem;
+  flex-shrink: 0;
+  min-height: 2.5rem;
   padding: var(--space-2) var(--space-4);
   white-space: nowrap;
-}
-
-.context-card__row span,
-.context-card__row small {
-  display: block;
-}
-
-.context-card__row strong {
-  font-weight: 500;
-}
-
-.context-card__row small {
-  margin-top: var(--space-1);
-  color: var(--text-secondary);
 }
 </style>
