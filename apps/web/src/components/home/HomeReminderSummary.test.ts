@@ -133,7 +133,7 @@ describe("HomeReminderSummary", () => {
     expect(wrapper.find(".home-summary__time").exists()).toBe(false);
     expect(
       wrapper.get(".countdown-time__copy").element.children
-    ).toHaveLength(3);
+    ).toHaveLength(2);
     expect(
       wrapper.find(".home-summary__message .home-summary__time").exists()
     ).toBe(false);

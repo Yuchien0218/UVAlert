@@ -42,8 +42,8 @@ describe("FiveDayUvCard", () => {
       }
     });
 
-    expect(wrapper.text()).toContain("設定地區後即可查看");
-    expect(wrapper.text()).toContain("不顯示假數值");
+    expect(wrapper.text()).toContain("設定地區");
+    expect(wrapper.text()).toContain("方可查看五日紫外線預報");
     expect(wrapper.findAll(".uv-day")).toHaveLength(0);
   });
 });

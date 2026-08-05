@@ -35,6 +35,23 @@ const groupNames = {
 <template>
   <div class="product-editor">
     <section class="session-product app-card">
+      <!-- 絕對定位的大太陽背景裝飾 -->
+      <svg
+        class="session-product__sun-decor"
+        viewBox="0 0 48 48"
+        aria-hidden="true"
+      >
+        <circle cx="24" cy="24" r="11" />
+        <line
+          v-for="rayIndex in 8"
+          :key="rayIndex"
+          x1="24"
+          y1="2"
+          x2="24"
+          y2="7"
+          :transform="`rotate(${(rayIndex - 1) * 45} 24 24)`"
+        />
+      </svg>
       <PackageCheck :size="25" :stroke-width="1.6" aria-hidden="true" />
       <div>
         <p class="session-product__eyebrow">{{ eyebrow }}</p>
@@ -277,10 +294,31 @@ const groupNames = {
 }
 
 .session-product {
+  position: relative;
   display: grid;
   grid-template-columns: auto minmax(0, 1fr);
   gap: var(--space-4);
   padding: var(--space-5);
+  overflow: hidden;
+}
+
+.session-product__sun-decor {
+  position: absolute;
+  right: -1.5rem;
+  bottom: -1.5rem;
+  width: 8rem;
+  height: 8rem;
+  color: var(--color-tracking);
+  opacity: 0.05;
+  pointer-events: none;
+}
+
+.session-product__sun-decor circle,
+.session-product__sun-decor line {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.5;
+  stroke-linecap: round;
 }
 
 .session-product__eyebrow {
@@ -357,16 +395,31 @@ const groupNames = {
   border: 1px solid var(--border-subtle);
   border-radius: var(--radius-sm);
   cursor: pointer;
+  transition: background-color var(--duration-fast) var(--ease-out),
+              color var(--duration-fast) var(--ease-out),
+              border-color var(--duration-fast) var(--ease-out);
+}
+
+.choice-grid label:hover {
+  background-color: var(--border-subtle);
+}
+
+.choice-grid label:active {
+  filter: brightness(0.85);
 }
 
 .choice-grid label:has(input:checked) {
-  border-color: var(--text-primary);
-  background: var(--page-background);
-  box-shadow: inset 0 0 0 1px var(--text-primary);
+  border-color: var(--surface-inverse);
+  background: var(--surface-inverse);
+  color: var(--text-inverse);
 }
 
 .choice-grid input {
   accent-color: var(--text-primary);
+}
+
+.choice-grid label:has(input:checked) input {
+  accent-color: var(--text-inverse);
 }
 
 @media (min-width: 42rem) {

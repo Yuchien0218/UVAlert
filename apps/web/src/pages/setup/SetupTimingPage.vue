@@ -146,7 +146,6 @@ onMounted(async () => {
 <template>
   <SetupStepShell
     :step="2"
-    eyebrow="Setup / Time"
     title="實際塗抹時間"
     description="確認這些部位實際塗抹的時間，用來建立本次提醒。產品標示請在產品頁設定。"
     back-to="/setup/context"

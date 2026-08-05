@@ -5,6 +5,10 @@ import {
   Menu,
   Package
 } from "@lucide/vue";
+import { computed } from "vue";
+import { useWebAppServices } from "../../app/injection";
+
+const { boot } = useWebAppServices();
 
 const navigationItems = [
   { to: "/", label: "首頁", icon: House },
@@ -12,6 +16,12 @@ const navigationItems = [
   { to: "/products", label: "產品", icon: Package },
   { to: "/more", label: "更多", icon: Menu }
 ] as const;
+
+const hasDueReminder = computed(() => {
+  const session = boot.currentSession.value;
+  if (session === null) return false;
+  return session.zones.some((zone) => zone.timingStatus === "reapply_due");
+});
 </script>
 
 <template>
@@ -23,12 +33,20 @@ const navigationItems = [
       :to="item.to"
       :aria-label="item.label"
     >
-      <component
-        :is="item.icon"
-        :size="21"
-        :stroke-width="1.6"
-        aria-hidden="true"
-      />
+      <div class="bottom-nav__icon-wrapper">
+        <component
+          :is="item.icon"
+          :size="21"
+          :stroke-width="1.6"
+          aria-hidden="true"
+        />
+        <div
+          v-if="item.to === '/reminder' && hasDueReminder"
+          class="bottom-nav__badge"
+          data-testid="bottom-nav-badge"
+          aria-hidden="true"
+        />
+      </div>
       <span>{{ item.label }}</span>
     </RouterLink>
   </nav>
@@ -63,28 +81,35 @@ const navigationItems = [
   justify-items: center;
   gap: var(--space-1);
   border-radius: var(--radius-sm);
-  color: var(--text-secondary);
+  color: var(--text-primary);
+  opacity: 0.45;
   font-size: 0.75rem;
   text-decoration: none;
+  transition: opacity var(--duration-fast) var(--ease-out);
 }
 
-.bottom-nav__item::after {
-  position: absolute;
-  bottom: 0.15rem;
-  left: 50%;
-  width: 0;
-  height: 0.12rem;
-  background: var(--text-primary);
-  content: "";
-  transform: translateX(-50%);
-  transition: width var(--duration-fast) var(--ease-out);
+.bottom-nav__item:hover {
+  opacity: 0.8;
 }
 
 .bottom-nav__item.router-link-exact-active {
-  color: var(--text-primary);
+  opacity: 1;
 }
 
-.bottom-nav__item.router-link-exact-active::after {
-  width: 1.5rem;
+.bottom-nav__icon-wrapper {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.bottom-nav__badge {
+  position: absolute;
+  top: -0.15rem;
+  right: -0.15rem;
+  width: 0.45rem;
+  height: 0.45rem;
+  border-radius: 50%;
+  background: var(--color-due);
 }
 </style>

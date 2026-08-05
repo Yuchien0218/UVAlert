@@ -70,6 +70,7 @@ describe("PrimaryReminderPanel", () => {
     const panel = wrapper.get('[data-testid="primary-reminder"]');
     expect(panel.classes()).toContain("reminder-panel--tracking");
     expect(panel.classes()).not.toContain("app-card");
+    expect(panel.classes()).not.toContain("due-panel");
     expect(wrapper.get(".reminder-panel__eyebrow").text()).toBe(
       "補擦倒數"
     );
@@ -92,7 +93,7 @@ describe("PrimaryReminderPanel", () => {
     expect(wrapper.find(".reminder-panel__time").exists()).toBe(false);
     expect(
       wrapper.get(".countdown-time__copy").element.children
-    ).toHaveLength(3);
+    ).toHaveLength(2);
     expect(
       wrapper.find(".reminder-panel__message .reminder-panel__time").exists()
     ).toBe(false);
@@ -159,7 +160,7 @@ describe("PrimaryReminderPanel", () => {
 
     const panel = wrapper.get('[data-testid="primary-reminder"]');
     expect(panel.attributes("data-presentation")).toBe("due");
-    expect(panel.classes()).toContain("due-panel--due");
+    expect(panel.classes()).toContain("reminder-panel--due");
     expect(wrapper.get(".countdown-time__value strong").text()).toBe("0");
     expect(wrapper.find(".countdown-sun").exists()).toBe(true);
     expect(
@@ -167,7 +168,7 @@ describe("PrimaryReminderPanel", () => {
         .findAll(".countdown-sun__ray")
         .filter((ray) => ray.attributes("data-visible") === "true")
     ).toHaveLength(0);
-    expect(wrapper.find(".due-panel__action svg").exists()).toBe(true);
+    expect(wrapper.find(".reminder-panel__action svg").exists()).toBe(true);
 
     await wrapper.get("button").trigger("click");
     expect(wrapper.emitted("action")).toEqual([
@@ -220,7 +221,7 @@ describe("PrimaryReminderPanel", () => {
     ).toBe("due");
     expect(
       due.get('[data-testid="primary-reminder"]').classes()
-    ).toContain("due-panel--due");
+    ).toContain("reminder-panel--due");
     expect(due.findAll("button")).toHaveLength(1);
     expect(due.find('a[href="#zone-status"]').exists()).toBe(false);
     expect(due.text()).toContain("建議現在補擦");
@@ -230,8 +231,8 @@ describe("PrimaryReminderPanel", () => {
     expect(due.get(".countdown-time__estimate").text()).toBe(
       "現在"
     );
-    expect(due.find(".due-panel__time").exists()).toBe(false);
-    expect(due.find(".due-panel__copy .due-panel__time").exists()).toBe(
+    expect(due.find(".reminder-panel__time").exists()).toBe(false);
+    expect(due.find(".reminder-panel__message .reminder-panel__time").exists()).toBe(
       false
     );
   });

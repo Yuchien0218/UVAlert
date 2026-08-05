@@ -97,9 +97,10 @@ function getUnavailableMessage(error: UvForecastError): string {
       v-else-if="phase === 'no_region'"
       class="uv-forecast__state"
     >
-      <strong>設定地區後即可查看</strong>
       <span>
-        這裡會顯示中央氣象署未來 5 個白日時段的區域預報；目前不顯示假數值。
+        需先
+        <a class="text-link" href="#outdoor-context">設定地區</a>
+        方可查看五日紫外線預報。
       </span>
     </div>
 
@@ -108,7 +109,10 @@ function getUnavailableMessage(error: UvForecastError): string {
       class="uv-forecast__state uv-forecast__state--error"
       role="status"
     >
-      <strong>五日 UV 暫時無法顯示</strong>
+      <strong>
+        <span class="uv-forecast__status-dot" aria-hidden="true" />
+        五日 UV 暫時無法顯示
+      </strong>
       <span>{{ getUnavailableMessage(error) }}</span>
       <button
         class="button button--quiet uv-forecast__retry"
@@ -195,26 +199,50 @@ function getUnavailableMessage(error: UvForecastError): string {
 .uv-forecast__state {
   display: grid;
   justify-items: start;
-  gap: var(--space-2);
+  gap: var(--space-4);
   color: var(--text-secondary);
   line-height: 1.7;
 }
 
 .uv-forecast__state strong,
 .uv-forecast__meta strong {
+  display: block;
+  margin: 0;
   color: var(--text-primary);
   font-weight: 500;
+  font-size: 1rem;
 }
 
-.uv-forecast__state--error {
-  padding-left: var(--space-4);
-  border-left: 0.2rem solid var(--color-due);
+.uv-forecast__state strong {
+  margin-bottom: var(--space-1);
+}
+
+.uv-forecast__state span {
+  display: block;
+  font-size: 0.95rem;
+}
+
+.uv-forecast__state--error strong {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin-bottom: var(--space-3);
+}
+
+.uv-forecast__status-dot {
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 50%;
+  background: var(--color-due);
+  flex: 0 0 auto;
 }
 
 .uv-forecast__retry {
   min-height: 2.5rem;
-  margin-top: var(--space-2);
-  padding: var(--space-2) var(--space-4);
+  margin-top: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  font-size: 0.95rem;
+  font-weight: 500;
 }
 
 .uv-forecast__meta {

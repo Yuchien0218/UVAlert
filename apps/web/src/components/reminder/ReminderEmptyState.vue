@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ArrowRight, CheckCircle2 } from "@lucide/vue";
+import { ArrowRight } from "@lucide/vue";
 </script>
 
 <template>
@@ -7,9 +7,23 @@ import { ArrowRight, CheckCircle2 } from "@lucide/vue";
     class="empty-state empty-state--tracking"
     data-testid="reminder-empty"
   >
-    <div class="empty-state__icon" aria-hidden="true">
-      <CheckCircle2 :size="27" :stroke-width="1.6" />
-    </div>
+    <!-- 絕對定位的大太陽背景裝飾 -->
+    <svg
+      class="empty-state__sun-decor"
+      viewBox="0 0 48 48"
+      aria-hidden="true"
+    >
+      <circle cx="24" cy="24" r="11" />
+      <line
+        v-for="rayIndex in 8"
+        :key="rayIndex"
+        x1="24"
+        y1="2"
+        x2="24"
+        y2="7"
+        :transform="`rotate(${(rayIndex - 1) * 45} 24 24)`"
+      />
+    </svg>
     <div>
       <h2 class="empty-state__title empty-state__title--single-line">
         尚未建立提醒
@@ -19,7 +33,7 @@ import { ArrowRight, CheckCircle2 } from "@lucide/vue";
       </p>
     </div>
     <RouterLink
-      class="button button--primary empty-state__action empty-state__action--end empty-state__action--compact"
+      class="button button--primary empty-state__action empty-state__action--compact"
       to="/setup"
     >
       新增提醒
@@ -30,6 +44,7 @@ import { ArrowRight, CheckCircle2 } from "@lucide/vue";
 
 <style scoped>
 .empty-state {
+  position: relative;
   display: grid;
   justify-items: start;
   gap: var(--space-5);
@@ -38,18 +53,30 @@ import { ArrowRight, CheckCircle2 } from "@lucide/vue";
   overflow: hidden;
 }
 
-.empty-state--tracking {
-  background: var(--color-tracking-soft);
+/* 太陽背景裝飾樣式：垂直置中略偏下，確保完整圓心露出，
+   不會像原本 bottom: -2rem 那樣把圓心推到卡片邊界外只剩零散光芒 */
+.empty-state__sun-decor {
+  position: absolute;
+  right: -1.5rem;
+  top: 58%;
+  transform: translateY(-50%);
+  width: 12rem;
+  height: 12rem;
+  color: var(--color-tracking);
+  opacity: 0.08;
+  pointer-events: none;
 }
 
-.empty-state__icon {
-  display: grid;
-  width: 3.25rem;
-  height: 3.25rem;
-  place-content: center;
-  border-radius: 50%;
-  background: var(--surface-primary);
-  color: var(--color-tracking);
+.empty-state__sun-decor circle,
+.empty-state__sun-decor line {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.5;
+  stroke-linecap: round;
+}
+
+.empty-state--tracking {
+  background: var(--color-tracking-soft);
 }
 
 .empty-state__title {
@@ -69,10 +96,6 @@ import { ArrowRight, CheckCircle2 } from "@lucide/vue";
   margin: var(--space-4) 0 0;
   color: var(--text-secondary);
   line-height: 1.7;
-}
-
-.empty-state__action--end {
-  justify-self: end;
 }
 
 .empty-state__action--compact {

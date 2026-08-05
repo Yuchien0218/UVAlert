@@ -9,9 +9,7 @@ import { computed } from "vue";
 import { useCurrentTime } from "../../composables/useCurrentTime";
 import { calculateRemainingProgress } from "../../features/reminder/homeReminderClockPresentation";
 import { buildReminderPresentation } from "../../features/reminder/reminderPresentation";
-import DueReminderPanel from "./DueReminderPanel.vue";
-import TimedReminderPanel from "./TimedReminderPanel.vue";
-import UntimedReminderPanel from "./UntimedReminderPanel.vue";
+import ReminderPanel from "./ReminderPanel.vue";
 
 interface Props {
   primaryAction: PrimaryAction;
@@ -64,20 +62,7 @@ const countdownProgressPercent = computed(() =>
 </script>
 
 <template>
-  <DueReminderPanel
-    v-if="presentation.tone === 'due'"
-    :presentation="presentation"
-    :remaining-fraction="countdownProgress"
-    :progress-percent="countdownProgressPercent"
-    @action="emit('action', $event)"
-  />
-  <UntimedReminderPanel
-    v-else-if="presentation.tone === 'untimed'"
-    :presentation="presentation"
-    @action="emit('action', $event)"
-  />
-  <TimedReminderPanel
-    v-else
+  <ReminderPanel
     :presentation="presentation"
     :remaining-fraction="countdownProgress"
     :progress-percent="countdownProgressPercent"

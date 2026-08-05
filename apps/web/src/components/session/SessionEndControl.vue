@@ -64,17 +64,19 @@ function getErrorMessage(error: SessionEndError): string {
       提醒控制
     </h2>
 
-    <p v-if="!isConfirming" class="session-end__summary">
-      不再需要這次倒數時，可以手動停止；既有產品與紀錄仍會保留。
+    <div v-if="!isConfirming" class="session-end__body">
+      <p class="session-end__summary">
+        不再需要這次倒數時，可以手動停止；既有產品與紀錄仍會保留。
+      </p>
       <button
         ref="stopButton"
-        class="text-link session-end__trigger"
+        class="button button--quiet session-end__trigger"
         type="button"
         @click="openConfirmation"
       >
         停止本次提醒
       </button>
-    </p>
+    </div>
 
     <div
       v-else
@@ -140,6 +142,11 @@ function getErrorMessage(error: SessionEndError): string {
   font-weight: 500;
 }
 
+.session-end__body {
+  display: grid;
+  gap: var(--space-3);
+}
+
 .session-end__summary,
 .session-end__confirm-body {
   margin: 0;
@@ -148,15 +155,12 @@ function getErrorMessage(error: SessionEndError): string {
 }
 
 .session-end__trigger {
-  display: inline-flex;
-  align-items: center;
-  min-height: 2.75rem;
-  margin-left: var(--space-1);
-  padding-inline: var(--space-2);
+  width: fit-content;
+  padding: var(--space-3) var(--space-4);
+  border-color: var(--border-subtle);
+  background: var(--surface-primary);
   color: var(--text-primary);
   font-weight: 500;
-  text-decoration: underline;
-  text-underline-offset: 0.2rem;
 }
 
 .session-end__confirmation {

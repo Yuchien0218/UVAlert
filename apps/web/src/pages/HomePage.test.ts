@@ -64,7 +64,7 @@ const session: SessionProjection = {
 };
 
 describe("HomePage", () => {
-  it("只呈現提醒摘要，不承載完整部位與結束提醒控制", async () => {
+  it("呈現提醒摘要，並承載完整部位與結束提醒控制", async () => {
     vi.mocked(useWebAppServices).mockReturnValue({
       boot: {
         phase: shallowReadonly(shallowRef("ready")),
@@ -107,7 +107,7 @@ describe("HomePage", () => {
     });
 
     expect(wrapper.findComponent(HomeReminderSummary).exists()).toBe(true);
-    expect(wrapper.findComponent(ZoneStatusList).exists()).toBe(false);
-    expect(wrapper.findComponent(SessionEndControl).exists()).toBe(false);
+    expect(wrapper.findComponent(ZoneStatusList).exists()).toBe(true);
+    expect(wrapper.findComponent(SessionEndControl).exists()).toBe(true);
   });
 });

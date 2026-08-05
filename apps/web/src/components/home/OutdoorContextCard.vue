@@ -9,7 +9,7 @@ defineProps<Props>();
 </script>
 
 <template>
-  <section class="context-card" aria-labelledby="context-title">
+  <section id="outdoor-context" class="context-card" aria-labelledby="context-title">
     <div class="context-card__heading">
       <div>
         <h2 id="context-title" class="context-card__title">

@@ -199,7 +199,7 @@ function getTimingTone(
 .zone-group__status {
   margin: 0;
   color: var(--tone);
-  font-size: 0.875rem;
+  font-size: var(--font-size-label);
   font-weight: 600;
 }
 
@@ -217,7 +217,7 @@ function getTimingTone(
   border-radius: var(--radius-pill);
   background: var(--tone-soft);
   color: var(--text-primary);
-  font-size: 0.875rem;
+  font-size: var(--font-size-body);
   font-weight: 500;
   line-height: 1.4;
 }

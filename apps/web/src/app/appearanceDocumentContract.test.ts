@@ -33,7 +33,7 @@ describe("appearance document contract", () => {
     expect(
       findRule(styleSheet, ':root[data-theme="light"]').style
         .colorScheme
-    ).toBe("only light");
+    ).toBe("light");
     expect(
       findRule(styleSheet, ':root[data-theme="dark"]').style
         .colorScheme

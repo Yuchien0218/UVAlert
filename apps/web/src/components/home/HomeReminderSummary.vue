@@ -137,7 +137,7 @@ const remainingFraction = computed(
   --home-summary-tone-soft: var(--color-tracking-soft);
   --countdown-tone: var(--home-summary-tone);
   display: grid;
-  justify-items: center;
+  justify-items: start;
   gap: var(--space-5);
   padding: clamp(1.5rem, 7vw, 2.5rem) clamp(1.25rem, 5vw, 2rem);
   border-radius: var(--radius-lg);
@@ -175,13 +175,13 @@ const remainingFraction = computed(
 .home-summary__countdown {
   display: grid;
   width: 100%;
-  justify-items: center;
+  justify-items: start;
   gap: var(--space-5);
-  text-align: center;
+  text-align: left;
 }
 
 .home-summary__message {
-  text-align: center;
+  text-align: left;
 }
 
 .home-summary__time-group {
@@ -191,10 +191,10 @@ const remainingFraction = computed(
 
 .home-summary__title {
   margin: 0;
-  font-size: clamp(1.1rem, 4vw, 1.4rem);
+  font-size: clamp(1.3rem, 5vw, 1.8rem);
   font-weight: 500;
-  line-height: 1.3;
-  letter-spacing: -0.025em;
+  line-height: 1.2;
+  letter-spacing: -0.03em;
 }
 
 .home-summary__body {

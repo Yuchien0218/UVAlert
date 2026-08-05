@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed } from "vue";
+import { computed, ref, watch } from "vue";
 
 interface Props {
   remainingFraction: number | null;
@@ -10,6 +10,21 @@ interface Props {
 }
 
 const props = defineProps<Props>();
+
+const isPulseActive = ref(false);
+
+watch(
+  () => props.remainingMinutes,
+  (newVal, oldVal) => {
+    // 當剩餘分鐘數從一個較小的值（比如低於 15）跳到較大的重設值，代表成功補擦
+    if (oldVal !== undefined && newVal > oldVal && oldVal < 15) {
+      isPulseActive.value = true;
+      setTimeout(() => {
+        isPulseActive.value = false;
+      }, 800);
+    }
+  }
+);
 
 const visibleRayCount = computed(() =>
   Math.ceil(
@@ -39,6 +54,7 @@ const estimateValue = computed(() =>
   >
     <svg
       class="countdown-sun"
+      :class="{ 'countdown-sun--pulse': isPulseActive }"
       viewBox="0 0 48 48"
       aria-hidden="true"
     >
@@ -150,5 +166,28 @@ const estimateValue = computed(() =>
   font-size: 0.8rem;
   line-height: 1.4;
   text-align: left;
+}
+
+/* 微調光芒線條的 transition，支援變粗動畫 */
+.countdown-sun__ray {
+  transition: opacity 0.3s ease, stroke-width 0.2s ease;
+}
+
+/* 補擦成功：讓 8 條光芒瞬間全亮並變粗閃爍 */
+.countdown-sun--pulse .countdown-sun__ray {
+  animation: sun-ray-pulse-success 0.8s ease-out forwards;
+}
+
+@keyframes sun-ray-pulse-success {
+  0% {
+    /* 保持當前狀態 */
+  }
+  20% {
+    opacity: 1 !important;
+    stroke-width: 2.5;
+  }
+  100% {
+    /* 漸漸回歸原本狀態 */
+  }
 }
 </style>

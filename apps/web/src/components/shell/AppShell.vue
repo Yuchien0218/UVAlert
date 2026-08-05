@@ -106,7 +106,7 @@ watch(
 
 @media (min-width: 48rem) {
   .app-shell {
-    box-shadow: var(--shadow-card);
+    box-shadow: none;
   }
 }
 </style>

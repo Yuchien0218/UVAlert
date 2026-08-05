@@ -1,0 +1,14 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "web-dev",
+      "runtimeExecutable": "pnpm",
+      "runtimeArgs": ["--filter", "@sunshield/web", "dev"],
+      "port": 5173,
+      "env": {
+        "CI": "true"
+      }
+    }
+  ]
+}

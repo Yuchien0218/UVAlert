@@ -112,22 +112,23 @@ withDefaults(defineProps<Props>(), {
   font-weight: 500;
 }
 
-.brand-header__context--tracking {
-  color: var(--color-tracking);
-}
-
-.brand-header__context--soon {
-  color: var(--color-soon);
-}
-
-.brand-header__context--due {
-  color: var(--color-due);
-}
-
 .brand-header__status-dot {
   width: 0.45rem;
   height: 0.45rem;
   border-radius: 50%;
-  background: currentColor;
+  background: var(--text-secondary);
+  transition: background-color 0.2s ease;
+}
+
+.brand-header__context--tracking .brand-header__status-dot {
+  background: var(--color-tracking);
+}
+
+.brand-header__context--soon .brand-header__status-dot {
+  background: var(--color-soon);
+}
+
+.brand-header__context--due .brand-header__status-dot {
+  background: var(--color-due);
 }
 </style>
