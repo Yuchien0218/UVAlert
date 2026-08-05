@@ -39,16 +39,15 @@ const highestDay = computed(() =>
         晚上先看接下來 5 天 UV
       </h2>
       <p class="evening-prompt__body">
-        {{ forecast.region.displayName }}接下來的白日時段，最高預報為
-        UVI
+        {{ forecast.region.displayName }}的白日時段，最高預報為 UVI
         <span class="stat-figure stat-figure--inline">
           {{ highestDay.uvi }}
         </span>（{{
           getUvRiskLevelLabel(highestDay.riskLevel)
-        }}）。可以先安排遮蔭、衣物、帽子與防曬用品。
+        }}）。建議準備遮蔭和防曬用品。
       </p>
       <button
-        class="evening-prompt__view"
+        class="button button--quiet evening-prompt__view"
         type="button"
         @click="emit('view')"
       >
@@ -71,22 +70,30 @@ const highestDay = computed(() =>
 .evening-prompt {
   display: grid;
   grid-template-columns: auto 1fr auto;
-  align-items: start;
-  gap: var(--space-3);
+  align-items: flex-start;
+  gap: var(--space-4);
   padding: var(--space-5);
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border-subtle);
   background: var(--color-untimed-soft);
+  transition: all var(--duration-fast) var(--ease-out);
+}
+
+.evening-prompt:hover {
+  border-color: var(--color-untimed);
 }
 
 .evening-prompt__icon {
-  margin-top: var(--space-1);
+  margin-top: 0.125rem;
   color: var(--color-untimed);
+  flex-shrink: 0;
 }
 
 .evening-prompt__content {
   display: grid;
   justify-items: start;
-  gap: var(--space-2);
+  gap: var(--space-3);
+  min-width: 0;
 }
 
 .evening-prompt__eyebrow,
@@ -96,22 +103,15 @@ const highestDay = computed(() =>
 }
 
 .evening-prompt__title {
-  font-size: 1.1rem;
-  font-weight: 500;
+  font-size: 1.15rem;
+  font-weight: 600;
+  color: var(--text-primary);
 }
 
 .evening-prompt__body {
   color: var(--text-secondary);
-  font-size: 0.9rem;
-  line-height: 1.7;
-}
-
-.evening-prompt__view,
-.evening-prompt__dismiss {
-  border: 0;
-  background: transparent;
-  color: var(--text-primary);
-  cursor: pointer;
+  font-size: var(--font-size-body);
+  line-height: 1.6;
 }
 
 .evening-prompt__view {
@@ -119,28 +119,43 @@ const highestDay = computed(() =>
   align-items: center;
   gap: var(--space-2);
   min-height: 2.5rem;
-  padding: var(--space-2) 0;
+  padding: var(--space-2) var(--space-3);
   font-weight: 500;
-  text-decoration: underline;
-  text-underline-offset: 0.25rem;
+  margin-top: var(--space-1);
 }
 
 .evening-prompt__dismiss {
   display: grid;
-  width: var(--tap-target);
-  height: var(--tap-target);
+  width: 2.5rem;
+  height: 2.5rem;
   place-items: center;
   padding: 0;
-  border-radius: var(--radius-pill);
+  border: 0;
+  border-radius: var(--radius-md);
+  background: transparent;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all var(--duration-fast) var(--ease-out);
+}
+
+.evening-prompt__dismiss:hover {
+  background: var(--border-subtle);
+  color: var(--text-primary);
 }
 
 @media (max-width: 24rem) {
   .evening-prompt {
     grid-template-columns: 1fr auto;
+    gap: var(--space-3);
   }
 
   .evening-prompt__icon {
     display: none;
+  }
+
+  .evening-prompt__view {
+    width: 100%;
+    justify-content: center;
   }
 }
 </style>
