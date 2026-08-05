@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { MapPin, Wind } from "@lucide/vue";
+import { Wind } from "@lucide/vue";
 
 interface Props {
   regionName: string | null;
@@ -19,7 +19,6 @@ defineProps<Props>();
       <Wind :size="25" :stroke-width="1.5" aria-hidden="true" />
     </div>
     <div class="context-card__row">
-      <MapPin :size="20" :stroke-width="1.6" aria-hidden="true" class="context-card__icon" />
       <div class="context-card__content">
         <strong class="context-card__label">
           {{
@@ -73,12 +72,6 @@ defineProps<Props>();
   gap: var(--space-4);
 }
 
-.context-card__icon {
-  flex-shrink: 0;
-  margin-top: 0.125rem;
-  color: var(--text-secondary);
-}
-
 .context-card__content {
   flex: 1;
   min-width: 0;
@@ -89,11 +82,12 @@ defineProps<Props>();
   margin: 0;
   font-weight: 500;
   font-size: var(--font-size-body);
+  line-height: 1.4;
 }
 
 .context-card__description {
   display: block;
-  margin: var(--space-2) 0 0;
+  margin: var(--space-1) 0 0;
   color: var(--text-secondary);
   font-size: var(--font-size-body);
   line-height: 1.6;
