@@ -92,10 +92,10 @@ function getErrorMessage(error: SessionEndError): string {
         class="session-end__confirm-title"
         tabindex="-1"
       >
-        結束本次提醒？
+        確認結束本次提醒？
       </p>
       <p id="session-end-confirm-body" class="session-end__confirm-body">
-        結束後不再接受這次提醒的一般事件，未來的待處理提示也會停止。產品與既有紀錄不會被當成已補擦或防護完成。
+        結束後將停止所有待處理提示。產品紀錄和既有資訊不會受影響。
       </p>
 
       <p
@@ -173,41 +173,55 @@ function getErrorMessage(error: SessionEndError): string {
 
 .session-end__confirm-title {
   margin: 0;
-  color: var(--text-secondary);
-  font-size: 0.95rem;
-  font-weight: 400;
+  color: var(--text-primary);
+  font-size: 1.1rem;
+  font-weight: 600;
 }
 
 .session-end__confirm-title:focus {
   outline: none;
 }
 
+.session-end__confirm-body {
+  font-size: var(--font-size-body);
+}
+
 .session-end__error {
   margin: 0;
-  padding: var(--space-3);
-  border-radius: var(--radius-sm);
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-md);
   background: var(--color-due-soft);
+  border-left: 3px solid var(--color-due);
   color: var(--text-primary);
-  font-size: 0.875rem;
-  line-height: 1.7;
+  font-size: var(--font-size-body);
+  line-height: 1.6;
 }
 
 .session-end__actions {
   display: flex;
   flex-wrap: wrap;
   gap: var(--space-3);
+  align-items: center;
+  margin-top: var(--space-2);
 }
 
 .session-end__confirm-button {
+  flex: 1;
+  min-width: 10rem;
   border-color: var(--color-due);
   background: var(--color-due);
   color: var(--color-white);
+  font-weight: 600;
+}
+
+.session-end__actions .button--quiet {
+  flex: 0 1 auto;
 }
 
 .session-end__confirm-button:disabled,
 .session-end__actions .button:disabled {
   cursor: wait;
-  opacity: 0.65;
+  opacity: 0.6;
 }
 
 @media (max-width: 31rem) {
