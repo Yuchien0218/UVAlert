@@ -118,9 +118,18 @@ function formatDateTime(value: string): string {
 <template>
   <div class="review-summary page-stack">
     <section class="review-card review-card--plain">
-      <p class="review-card__eyebrow">目前情境</p>
-      <h2>{{ CONTEXT_LABELS[draft.initialContext!] }}</h2>
-      <RouterLink to="/setup/context">修改情境</RouterLink>
+      <div class="review-card__heading">
+        <div>
+          <p class="review-card__eyebrow">目前情境</p>
+          <h2>{{ CONTEXT_LABELS[draft.initialContext!] }}</h2>
+        </div>
+        <RouterLink
+          class="review-card__edit-link"
+          to="/setup/context"
+        >
+          修改
+        </RouterLink>
+      </div>
     </section>
 
     <section class="review-card app-card">
@@ -135,6 +144,7 @@ function formatDateTime(value: string): string {
           </h2>
         </div>
         <RouterLink
+          class="review-card__edit-link"
           :to="{
             name: 'setup-timing',
             query: { adjustProtection: '1' }
@@ -261,9 +271,19 @@ function formatDateTime(value: string): string {
     </section>
 
     <section v-else class="clothing-summary clothing-summary--success">
-      <p class="review-card__eyebrow">產品與時間</p>
-      <h2>已記錄衣物覆蓋</h2>
-      <p>
+      <div class="review-card__heading">
+        <div>
+          <p class="review-card__eyebrow">產品與時間</p>
+          <h2>已記錄衣物覆蓋</h2>
+        </div>
+        <RouterLink
+          class="review-card__edit-link"
+          to="/setup/timing"
+        >
+          修改
+        </RouterLink>
+      </div>
+      <p class="clothing-summary__note">
         已記錄為衣物完整遮蔽。目前不會為這個部位顯示產品補擦倒數；遮蔽狀態改變時，請重新回報。
       </p>
     </section>
@@ -287,8 +307,14 @@ function formatDateTime(value: string): string {
 .clothing-summary--success {
   border: none;
   border-radius: var(--radius-lg);
-  box-shadow: none;
   background: var(--color-success-soft);
+}
+
+.clothing-summary__note {
+  color: var(--text-secondary);
+  font-size: 0.95rem;
+  line-height: 1.7;
+  margin: 0;
 }
 
 .review-card--plain {
