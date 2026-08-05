@@ -293,7 +293,7 @@ function formatDateTime(value: string): string {
 <style scoped>
 .review-summary {
   display: grid;
-  gap: var(--space-4);
+  gap: var(--space-5);
   width: 100% !important;
 }
 
@@ -318,7 +318,7 @@ function formatDateTime(value: string): string {
 }
 
 .review-card--plain {
-  padding: 0 0 var(--space-5);
+  padding: var(--space-5) 0;
   border-bottom: 1px solid var(--border-subtle);
 }
 
