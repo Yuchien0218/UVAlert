@@ -369,10 +369,9 @@ function makeDraftZone(
       </section>
 
       <section class="method-list" aria-labelledby="method-heading">
-        <div class="method-list__heading">
-          <p>目前防護方式</p>
-          <h2 id="method-heading">逐群組確認</h2>
-        </div>
+        <p id="method-heading" class="method-list__heading">
+          目前防護方式
+        </p>
 
         <article
           v-for="groupId in selectedGroupIds"
@@ -522,17 +521,22 @@ function makeDraftZone(
 }
 
 .preset-card__eyebrow,
-.batch-method__eyebrow,
-.method-list__heading p {
+.batch-method__eyebrow {
   margin: 0 0 var(--space-2);
   color: var(--text-secondary);
   font-size: 0.8rem;
   font-weight: 500;
 }
 
+.method-list__heading {
+  margin: 0;
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
 .preset-card__title,
-.batch-method h2,
-.method-list__heading h2 {
+.batch-method h2 {
   margin: 0;
   font-size: 1.5rem;
   font-weight: 500;
