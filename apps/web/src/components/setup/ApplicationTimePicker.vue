@@ -67,9 +67,9 @@ function toLocalInputValue(date: Date): string {
 
 <template>
   <fieldset class="time-picker app-card">
-    <legend>這些部位實際何時塗抹？</legend>
+    <legend>塗抹時間</legend>
     <p>
-      請確認實際時間。系統會保存絕對時間，重新開啟後再計算提醒狀態。
+      請選擇實際塗抹時間。系統會以此重新計算提醒狀態。
     </p>
 
     <div class="time-picker__quick">
@@ -84,16 +84,16 @@ function toLocalInputValue(date: Date): string {
         type="button"
         @click="selectQuick(option.minutesAgo)"
       >
-        <strong>
+        <span class="time-option__label">
           <template v-if="option.figure === null">{{ option.label }}</template>
           <template v-else>
             <span class="stat-figure stat-figure--inline">{{ option.figure }}</span>
             {{ option.suffix }}
           </template>
-        </strong>
-        <small class="stat-figure stat-figure--inline">
+        </span>
+        <span class="time-option__time stat-figure stat-figure--inline">
           {{ formatAbsolute(option.minutesAgo) }}
-        </small>
+        </span>
       </button>
     </div>
 
@@ -113,7 +113,7 @@ function toLocalInputValue(date: Date): string {
 <style scoped>
 .time-picker {
   display: grid;
-  gap: var(--space-4);
+  gap: var(--space-5);
   min-width: 0;
   margin: 0;
   padding: var(--space-5);
@@ -122,73 +122,108 @@ function toLocalInputValue(date: Date): string {
 
 .time-picker legend {
   padding: 0;
-  font-size: 1.08rem;
+  font-size: clamp(0.95rem, 4vw, 1.05rem);
   font-weight: 500;
+  margin-bottom: calc(var(--space-3) * -1);
 }
 
 .time-picker > p {
   margin: 0;
   color: var(--text-secondary);
-  font-size: 0.875rem;
-  line-height: 1.7;
+  font-size: 0.8rem;
+  line-height: 1.6;
 }
 
 .time-picker__quick {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: var(--space-2);
+  grid-template-columns: 1fr;
+  gap: var(--space-3);
 }
 
 .time-option {
   display: grid;
-  min-height: 4.25rem;
-  align-content: center;
-  gap: var(--space-1);
-  padding: var(--space-3);
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  gap: var(--space-4);
+  padding: var(--space-3) var(--space-4);
   border: 1px solid var(--border-subtle);
   border-radius: var(--radius-sm);
   background: transparent;
   color: var(--text-primary);
   cursor: pointer;
   text-align: left;
+  transition: background-color var(--duration-fast) var(--ease-out),
+              border-color var(--duration-fast) var(--ease-out);
+}
+
+.time-option:hover {
+  background-color: var(--border-subtle);
+}
+
+.time-option:active {
+  filter: brightness(0.92);
 }
 
 .time-option--selected {
-  border: 2px solid var(--text-primary);
-  background: var(--page-background);
+  border: 2px solid var(--color-tracking);
+  background: var(--color-tracking-soft);
+  color: var(--text-primary);
 }
 
-.time-option strong {
+.time-option__label {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-2);
   font-weight: 500;
 }
 
-.time-option small {
+.time-option__time {
+  color: var(--text-secondary);
+  font-size: 0.85rem;
+  white-space: nowrap;
+}
+
+.time-option--selected .time-option__time {
   color: var(--text-secondary);
 }
 
 .time-picker__custom {
   display: grid;
   gap: var(--space-2);
+  margin-top: var(--space-2);
 }
 
 .time-picker__custom span {
   color: var(--text-secondary);
-  font-size: 0.875rem;
+  font-size: 0.8rem;
+  font-weight: 500;
 }
 
 .time-picker__custom input {
   min-height: var(--tap-target);
-  padding: var(--space-3);
+  padding: var(--space-3) var(--space-4);
   border: 1px solid var(--border-subtle);
   border-radius: var(--radius-sm);
   background: var(--page-background);
   color: var(--text-primary);
   color-scheme: light dark;
+  font-size: 1rem;
 }
 
-@media (max-width: 24rem) {
+@media (min-width: 36rem) {
   .time-picker__quick {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--space-2);
+  }
+
+  .time-option {
     grid-template-columns: 1fr;
+    gap: var(--space-1);
+    padding: var(--space-3);
+  }
+
+  .time-option__time {
+    font-size: 0.75rem;
   }
 }
 </style>
