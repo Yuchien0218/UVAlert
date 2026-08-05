@@ -4,7 +4,6 @@ import type { SetupSaveStatus } from "../../features/setup/createSetupController
 
 interface Props {
   step: 1 | 2 | 3;
-  eyebrow: string;
   title: string;
   description: string;
   backTo?: string | null;
@@ -174,15 +173,16 @@ button.setup-shell__quiet-action {
   gap: var(--space-2);
   color: var(--text-secondary);
   text-align: center;
+  font-size: 0.9rem;
 }
 
 .setup-shell__progress-item::before {
   position: absolute;
   z-index: 0;
-  top: 0.78rem;
+  top: 1.125rem;
   right: 50%;
   left: -50%;
-  height: 1px;
+  height: 1.5px;
   background: var(--border-subtle);
   content: "";
 }
@@ -195,13 +195,14 @@ button.setup-shell__quiet-action {
 .setup-shell__progress-link > span {
   z-index: 1;
   display: grid;
-  width: 1.6rem;
-  height: 1.6rem;
+  width: 2.25rem;
+  height: 2.25rem;
   place-content: center;
-  border: 1px solid var(--border-subtle);
+  border: 1.5px solid var(--border-subtle);
   border-radius: 50%;
   background: var(--page-background);
-  font-size: 0.7rem;
+  font-size: 0.875rem;
+  font-weight: 600;
 }
 
 .setup-shell__progress-link {
@@ -270,8 +271,15 @@ button.setup-shell__quiet-action {
     display: none;
   }
 
-  .setup-shell__progress-item small {
-    font-size: 0.68rem;
+  .setup-shell__progress-item {
+    font-size: 0.8rem;
+  }
+
+  .setup-shell__progress-item > span,
+  .setup-shell__progress-link > span {
+    width: 2rem;
+    height: 2rem;
+    font-size: 0.8rem;
   }
 
   .setup-shell__actions {
