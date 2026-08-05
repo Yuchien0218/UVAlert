@@ -75,22 +75,6 @@ function handleViewForecast(): void {
         :connectivity="boot.connectivity.value"
         @action="handleAction"
       />
-      <!-- 太陽低調放射轉場線 -->
-      <div v-if="boot.currentSession.value !== null" class="sun-divider" aria-hidden="true">
-        <div class="sun-divider__line"></div>
-        <svg class="sun-divider__sun" viewBox="0 0 48 48">
-          <circle cx="24" cy="24" r="10" />
-          <line x1="24" y1="2" x2="24" y2="8" />
-          <line x1="24" y1="40" x2="24" y2="46" />
-          <line x1="2" y1="24" x2="8" y2="24" />
-          <line x1="40" y1="24" x2="46" y2="24" />
-          <line x1="8.4" y1="8.4" x2="12.7" y2="12.7" />
-          <line x1="35.3" y1="35.3" x2="39.6" y2="39.6" />
-          <line x1="8.4" y1="39.6" x2="12.7" y2="35.3" />
-          <line x1="35.3" y1="12.7" x2="39.6" y2="8.4" />
-        </svg>
-        <div class="sun-divider__line"></div>
-      </div>
       <ZoneStatusList
         v-if="boot.currentSession.value !== null"
         :primary-action="boot.currentSession.value.primaryAction"
@@ -159,33 +143,4 @@ function handleViewForecast(): void {
   font-weight: 500;
 }
 
-/* 太陽低調放射轉場線：卡片之間的裝飾分隔，維持極輕的存在感，
-   不跟真正代表狀態的太陽圖示（CountdownSunTime）搶戲 */
-.sun-divider {
-  display: flex;
-  align-items: center;
-  gap: var(--space-3);
-  padding: var(--space-1) 0;
-}
-
-.sun-divider__line {
-  flex: 1;
-  height: 1px;
-  background: var(--border-subtle);
-}
-
-.sun-divider__sun {
-  width: 1.25rem;
-  height: 1.25rem;
-  flex: 0 0 auto;
-  opacity: 0.5;
-}
-
-.sun-divider__sun circle,
-.sun-divider__sun line {
-  fill: none;
-  stroke: var(--text-secondary);
-  stroke-width: 1.75;
-  stroke-linecap: round;
-}
 </style>
