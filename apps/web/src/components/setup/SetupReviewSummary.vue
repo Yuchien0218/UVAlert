@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { computed } from "vue";
+import { ChevronDown } from "@lucide/vue";
+import { computed, shallowRef } from "vue";
 import type {
   ProductLabelSnapshotV1,
   SetupDraftV1,
@@ -19,6 +20,7 @@ interface Props {
 }
 
 const props = defineProps<Props>();
+const productDetailsExpanded = shallowRef(false);
 
 interface ReviewLine {
   id: string;
@@ -114,8 +116,8 @@ function formatDateTime(value: string): string {
 </script>
 
 <template>
-  <div class="review-summary">
-    <section class="review-card app-card">
+  <div class="review-summary page-stack">
+    <section class="review-card review-card--plain">
       <p class="review-card__eyebrow">目前情境</p>
       <h2>{{ CONTEXT_LABELS[draft.initialContext!] }}</h2>
       <RouterLink to="/setup/context">修改情境</RouterLink>
@@ -150,14 +152,33 @@ function formatDateTime(value: string): string {
     </section>
 
     <section v-if="hasTopical && snapshot" class="review-card app-card">
-      <div class="review-card__heading">
+      <button
+        class="review-card__accordion-header"
+        type="button"
+        :aria-expanded="productDetailsExpanded"
+        @click="productDetailsExpanded = !productDetailsExpanded"
+      >
         <div>
           <p class="review-card__eyebrow">產品與實際時間</p>
           <h2>本次使用的產品標示</h2>
         </div>
-        <RouterLink to="/setup/timing">修改</RouterLink>
-      </div>
-      <dl class="review-list">
+        <div class="review-card__controls">
+          <RouterLink
+            class="review-card__edit-link"
+            to="/setup/timing"
+          >
+            修改
+          </RouterLink>
+          <ChevronDown
+            class="review-card__chevron"
+            :class="{ 'review-card__chevron--expanded': productDetailsExpanded }"
+            :size="20"
+            aria-hidden="true"
+          />
+        </div>
+      </button>
+
+      <dl v-if="productDetailsExpanded" class="review-list review-list--animated">
         <div>
           <dt>產品</dt>
           <dd>目前使用產品</dd>
@@ -239,7 +260,7 @@ function formatDateTime(value: string): string {
       </dl>
     </section>
 
-    <section v-else class="clothing-summary status-card status-card--success">
+    <section v-else class="clothing-summary clothing-summary--success">
       <p class="review-card__eyebrow">產品與時間</p>
       <h2>已記錄衣物覆蓋</h2>
       <p>
@@ -253,6 +274,7 @@ function formatDateTime(value: string): string {
 .review-summary {
   display: grid;
   gap: var(--space-4);
+  width: 100% !important;
 }
 
 .review-card,
@@ -262,11 +284,77 @@ function formatDateTime(value: string): string {
   padding: var(--space-5);
 }
 
+.clothing-summary--success {
+  border: none;
+  border-radius: var(--radius-lg);
+  box-shadow: none;
+  background: var(--color-success-soft);
+}
+
+.review-card--plain {
+  padding: 0 0 var(--space-5);
+  border-bottom: 1px solid var(--border-subtle);
+}
+
 .review-card__heading {
   display: flex;
   align-items: start;
   justify-content: space-between;
   gap: var(--space-4);
+}
+
+.review-card__accordion-header {
+  display: flex;
+  width: 100%;
+  align-items: start;
+  justify-content: space-between;
+  gap: var(--space-4);
+  padding: 0;
+  border: 0;
+  background: transparent;
+  text-align: left;
+  cursor: pointer;
+  transition: opacity var(--duration-fast) var(--ease-out);
+}
+
+.review-card__accordion-header:hover {
+  opacity: 0.8;
+}
+
+.review-card__accordion-header > div:first-child {
+  min-width: 0;
+}
+
+.review-card__controls {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  flex-shrink: 0;
+}
+
+.review-card__edit-link {
+  color: var(--text-primary);
+  font-size: 0.95rem;
+  font-weight: 500;
+  text-decoration: none;
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  transition: all var(--duration-fast) var(--ease-out);
+}
+
+.review-card__edit-link:hover {
+  border-color: var(--text-primary);
+  background: var(--page-background);
+}
+
+.review-card__chevron {
+  color: var(--text-secondary);
+  transition: transform var(--duration-fast) var(--ease-out);
+}
+
+.review-card__chevron--expanded {
+  transform: rotate(180deg);
 }
 
 .review-card__eyebrow {
@@ -298,12 +386,27 @@ function formatDateTime(value: string): string {
   margin: 0;
 }
 
+.review-list--animated {
+  animation: slideDown var(--duration-normal) var(--ease-out);
+}
+
 .review-list > div {
   display: grid;
   grid-template-columns: minmax(7rem, 0.8fr) minmax(0, 1.5fr);
   gap: var(--space-3);
   padding: var(--space-3) 0;
   border-top: 1px solid var(--border-subtle);
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-0.5rem);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .review-list dt {
