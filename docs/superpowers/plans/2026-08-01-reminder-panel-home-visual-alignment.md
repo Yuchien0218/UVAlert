@@ -4,7 +4,7 @@
 
 **Goal:** Make the reminder page's primary reminder block use the same quiet, state-soft visual hierarchy as `HomeReminderSummary.vue` without modifying other pages.
 
-**Architecture:** Keep `PrimaryReminderPanel.vue` as the state dispatcher and update its three presentation children. Extend the existing reminder presentation with a derived `remainingMinutes` value so timed/due panels can render a large minute value without reimplementing reminder rules in Vue templates.
+**Architecture:** Keep `PrimaryReminderPanel.vue` as the state dispatcher and update the unified `ReminderPanel.vue` component. Extend the existing reminder presentation with a derived `remainingMinutes` value so the panel can render a large minute value without reimplementing reminder rules in Vue templates.
 
 **Tech Stack:** Vue 3, TypeScript, scoped CSS, Vitest, Vue Test Utils.
 
@@ -22,9 +22,7 @@
 **Files:**
 - Modify: `apps/web/src/features/reminder/reminderPresentation.ts`
 - Modify: `apps/web/src/components/reminder/PrimaryReminderPanel.vue`
-- Modify: `apps/web/src/components/reminder/TimedReminderPanel.vue`
-- Modify: `apps/web/src/components/reminder/DueReminderPanel.vue`
-- Modify: `apps/web/src/components/reminder/UntimedReminderPanel.vue`
+- Modify: `apps/web/src/components/reminder/ReminderPanel.vue` (now the unified component)
 - Modify: `apps/web/src/components/reminder/PrimaryReminderPanel.test.ts`
 - Modify: `apps/web/src/pages/ReminderPage.vue`
 - Modify: `apps/web/src/pages/ReminderPage.test.ts`
