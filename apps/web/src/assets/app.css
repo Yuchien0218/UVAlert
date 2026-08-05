@@ -10,6 +10,56 @@
   margin-inline: auto;
 }
 
+/*
+ * 分層淡入：page-stack 底下的每個直接子區塊，依序淡入而不是一次全部
+ * 蹦出來。純 opacity 動畫，符合 ICON_DESIGN_SYSTEM.md 的「無位移/縮放」
+ * 規則。fill-mode: backwards 讓元素在自己的 delay 期間維持 opacity: 0，
+ * 不會先閃一下滿版內容才淡出重來。
+ */
+.page-stack > * {
+  animation: page-stack-fade-in 0.45s ease-out backwards;
+}
+
+.page-stack > *:nth-child(1) {
+  animation-delay: 0s;
+}
+
+.page-stack > *:nth-child(2) {
+  animation-delay: 0.08s;
+}
+
+.page-stack > *:nth-child(3) {
+  animation-delay: 0.16s;
+}
+
+.page-stack > *:nth-child(4) {
+  animation-delay: 0.24s;
+}
+
+.page-stack > *:nth-child(5) {
+  animation-delay: 0.32s;
+}
+
+.page-stack > *:nth-child(n + 6) {
+  animation-delay: 0.4s;
+}
+
+@keyframes page-stack-fade-in {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .page-stack > * {
+    animation: none;
+  }
+}
+
 .page-heading {
   display: grid;
   gap: var(--space-3);
@@ -17,11 +67,9 @@
 
 .page-heading__eyebrow {
   margin: 0;
-  font-family: var(--font-mono);
-  font-size: 0.75rem;
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
   color: var(--text-secondary);
+  font-size: 0.8rem;
+  font-weight: 500;
 }
 
 .page-heading__title {
@@ -61,38 +109,26 @@
 
 .stat-figure--inline {
   font-size: 1.05em;
-  color: inherit;
 }
 
 .app-card {
   border: 1px solid var(--border-subtle);
   border-radius: var(--radius-lg);
   background: var(--surface-primary);
-  box-shadow: var(--shadow-card);
 }
 
-/* Primary card gets more visual weight so it doesn't read as one of many
-   identical cards — use for the single most important task on a screen
-   (e.g. the reapplication countdown), not everything. */
-.app-card--primary {
-  padding: var(--space-8);
-  box-shadow: var(--shadow-float);
-}
 
 /*
- * Status-tinted cards — surface the reminder semantic colors that were
- * already defined in styles.css (--color-tracking/soon/due/untimed/success)
- * but had no corresponding UI. Left accent + soft background communicates
- * urgency at a glance instead of relying on body copy alone.
+ * Status-tinted cards — use soft background color to communicate urgency
+ * at a glance. Pure background fill, no left border or shadow.
  */
 .status-card {
   --status-color: var(--text-primary);
   --status-soft: var(--surface-primary);
-  border: 1px solid var(--border-subtle);
-  border-left: 0.25rem solid var(--status-color);
+  border: none;
   border-radius: var(--radius-lg);
   background: var(--status-soft);
-  box-shadow: var(--shadow-card);
+  padding: var(--space-4);
 }
 
 .status-card__label {
@@ -176,7 +212,7 @@
   gap: var(--space-2);
   padding: var(--space-3) var(--space-5);
   border: 1px solid var(--text-primary);
-  border-radius: var(--radius-pill);
+  border-radius: var(--radius-md);
   background: transparent;
   color: var(--text-primary);
   font-weight: 500;
@@ -185,18 +221,19 @@
   text-decoration: none;
   cursor: pointer;
   transition:
-    transform var(--duration-fast) var(--ease-out),
     background-color var(--duration-fast) var(--ease-out),
-    color var(--duration-fast) var(--ease-out);
+    color var(--duration-fast) var(--ease-out),
+    filter var(--duration-fast) var(--ease-out);
 }
 
-.button:hover {
-  transform: translateY(-0.1rem);
+.button:active {
+  filter: brightness(0.92);
 }
 
 .button--primary {
-  background: var(--surface-inverse);
-  color: var(--text-inverse);
+  background: var(--color-tracking);
+  color: #ffffff;
+  border-color: var(--color-tracking);
 }
 
 .button--quiet {
@@ -219,11 +256,10 @@
 
 .safety-note {
   margin: 0;
-  padding-left: var(--space-4);
-  border-left: 0.2rem solid var(--color-line);
   color: var(--text-secondary);
-  font-size: 0.875rem;
-  line-height: 1.7;
+  font-size: 0.72rem;
+  line-height: 1.6;
+  opacity: 0.8;
 }
 
 .screen-reader-only {

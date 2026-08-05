@@ -4,11 +4,13 @@ import type {
   SessionProjection
 } from "@sunshield/contracts";
 import type { ConnectivityStatus } from "@sunshield/platform";
-import { ArrowRight, CheckCircle2 } from "@lucide/vue";
+import { CheckCircle2 } from "@lucide/vue";
 import { computed } from "vue";
 import { useCurrentTime } from "../../composables/useCurrentTime";
 import { buildHomeReminderClockPresentation } from "../../features/reminder/homeReminderClockPresentation";
 import { buildReminderPresentation } from "../../features/reminder/reminderPresentation";
+import CountdownSunTime from "../reminder/CountdownSunTime.vue";
+import ReminderEmptyState from "../reminder/ReminderEmptyState.vue";
 
 interface Props {
   session: SessionProjection | null;
@@ -22,8 +24,6 @@ const emit = defineEmits<{
 }>();
 
 const currentTime = useCurrentTime();
-const ringRadius = 52;
-const ringCircumference = 2 * Math.PI * ringRadius;
 
 const clockPresentation = computed(() => {
   if (props.session === null) return null;
@@ -43,20 +43,16 @@ const reminderPresentation = computed(() => {
   });
 });
 
-const ringStyle = computed(() => {
-  const progress = clockPresentation.value?.progress;
-  return {
-    strokeDasharray: `${ringCircumference}`,
-    strokeDashoffset:
-      progress === null || progress === undefined
-        ? `${ringCircumference}`
-        : `${ringCircumference * (1 - progress)}`
-  };
-});
+const remainingFraction = computed(
+  () => clockPresentation.value?.progress ?? 0
+);
+
 </script>
 
 <template>
+  <ReminderEmptyState v-if="session === null" />
   <section
+    v-else
     class="home-summary"
     :class="{
       [`home-summary--${clockPresentation?.tone}`]:
@@ -77,46 +73,13 @@ const ringStyle = computed(() => {
 
       <div class="home-summary__countdown">
         <div class="home-summary__time-group">
-          <div
-            class="countdown-clock"
-            role="progressbar"
-            aria-valuemin="0"
-            aria-valuemax="100"
-            :aria-valuenow="
-              clockPresentation.progressPercent ?? undefined
-            "
-            :aria-label="clockPresentation.ariaLabel"
-          >
-            <svg
-              class="countdown-clock__ring"
-              viewBox="0 0 120 120"
-              aria-hidden="true"
-            >
-              <circle
-                class="countdown-clock__track"
-                cx="60"
-                cy="60"
-                :r="ringRadius"
-              />
-              <circle
-                class="countdown-clock__progress"
-                cx="60"
-                cy="60"
-                :r="ringRadius"
-                :style="ringStyle"
-              />
-            </svg>
-            <span class="countdown-clock__value">
-              <strong class="stat-figure">{{ clockPresentation.remainingMinutes }}</strong>
-              <small>分鐘</small>
-            </span>
-          </div>
-          <p class="home-summary__time">
-            預計
-            <span class="stat-figure stat-figure--inline">
-              {{ clockPresentation.timeLabel.replace("預計 ", "") }}
-            </span>
-          </p>
+          <CountdownSunTime
+            :remaining-fraction="remainingFraction"
+            :progress-percent="clockPresentation.progressPercent"
+            :remaining-minutes="clockPresentation.remainingMinutes"
+            :progress-aria-label="clockPresentation.ariaLabel"
+            :time-label="clockPresentation.timeLabel"
+          />
         </div>
 
         <div class="home-summary__message">
@@ -135,6 +98,7 @@ const ringStyle = computed(() => {
         type="button"
         @click="emit('action', reminderPresentation.actionKind)"
       >
+        <CheckCircle2 :size="18" aria-hidden="true" />
         {{ reminderPresentation.actionLabel }}
       </button>
     </template>
@@ -159,26 +123,11 @@ const ringStyle = computed(() => {
         type="button"
         @click="emit('action', reminderPresentation.actionKind)"
       >
+        <CheckCircle2 :size="18" aria-hidden="true" />
         {{ reminderPresentation.actionLabel }}
       </button>
     </template>
 
-    <template v-else>
-      <div class="home-summary__mark" aria-hidden="true">
-        <CheckCircle2 :size="27" :stroke-width="1.6" />
-      </div>
-      <div>
-        <p class="home-summary__eyebrow">本機提醒</p>
-        <h1 class="home-summary__title">尚未開始本機提醒</h1>
-        <p class="home-summary__body">
-          建立後，提醒會保存在這台裝置的 IndexedDB；重新開啟仍可恢復。
-        </p>
-      </div>
-      <RouterLink class="button button--primary" to="/setup">
-        開始防曬提醒
-        <ArrowRight :size="18" aria-hidden="true" />
-      </RouterLink>
-    </template>
   </section>
 </template>
 
@@ -186,8 +135,9 @@ const ringStyle = computed(() => {
 .home-summary {
   --home-summary-tone: var(--color-tracking);
   --home-summary-tone-soft: var(--color-tracking-soft);
+  --countdown-tone: var(--home-summary-tone);
   display: grid;
-  justify-items: start;
+  justify-items: center;
   gap: var(--space-5);
   padding: clamp(1.5rem, 7vw, 2.5rem) clamp(1.25rem, 5vw, 2rem);
   border-radius: var(--radius-lg);
@@ -227,61 +177,7 @@ const ringStyle = computed(() => {
   width: 100%;
   justify-items: center;
   gap: var(--space-5);
-}
-
-.countdown-clock {
-  position: relative;
-  display: grid;
-  width: clamp(9rem, 42vw, 11rem);
-  aspect-ratio: 1;
-  place-items: center;
-  color: var(--home-summary-tone);
-}
-
-.countdown-clock__ring {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  transform: rotate(-90deg);
-}
-
-.countdown-clock__track,
-.countdown-clock__progress {
-  fill: none;
-  stroke-width: 6;
-}
-
-.countdown-clock__track {
-  stroke: var(--border-subtle);
-}
-
-.countdown-clock__progress {
-  stroke: currentColor;
-  stroke-linecap: round;
-  transition: stroke-dashoffset 1s linear;
-}
-
-.countdown-clock__value {
-  display: grid;
-  position: relative;
-  justify-items: center;
-  line-height: 1;
-  transform: translateY(0.25rem);
-}
-
-.countdown-clock__value strong {
-  color: var(--text-primary);
-  font-size: clamp(2rem, 10vw, 2.75rem);
-  font-weight: 500;
-  letter-spacing: -0.04em;
-}
-
-.countdown-clock__value small {
-  margin-top: var(--space-2);
-  color: var(--text-secondary);
-  font-size: 0.75rem;
-  letter-spacing: 0.08em;
+  text-align: center;
 }
 
 .home-summary__message {
@@ -295,17 +191,10 @@ const ringStyle = computed(() => {
 
 .home-summary__title {
   margin: 0;
-  font-size: clamp(1.35rem, 5.5vw, 1.8rem);
+  font-size: clamp(1.1rem, 4vw, 1.4rem);
   font-weight: 500;
   line-height: 1.3;
   letter-spacing: -0.025em;
-}
-
-.home-summary__time {
-  margin: var(--space-2) 0 0;
-  color: var(--text-secondary);
-  font-size: 0.95rem;
-  line-height: 1.7;
 }
 
 .home-summary__body {
@@ -316,6 +205,10 @@ const ringStyle = computed(() => {
 
 .home-summary__action {
   width: 100%;
+  max-width: 32rem;
+  border-color: var(--home-summary-tone);
+  background: var(--home-summary-tone);
+  color: var(--color-white);
 }
 
 @media (min-width: 38rem) {
@@ -323,6 +216,7 @@ const ringStyle = computed(() => {
     grid-template-columns: auto minmax(0, 1fr);
     align-items: center;
     justify-items: start;
+    text-align: left;
   }
 
   .home-summary__message {

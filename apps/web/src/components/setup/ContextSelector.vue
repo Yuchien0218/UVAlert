@@ -231,8 +231,7 @@ watch(
 }
 
 .context-choice--selected {
-  border-color: var(--text-primary);
-  box-shadow: inset 0 0 0 1px var(--text-primary);
+  border: 2px solid var(--text-primary);
 }
 
 .context-choice__input {

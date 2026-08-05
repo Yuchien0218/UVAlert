@@ -131,7 +131,7 @@ function buildAriaLabel(
     : `建議全面補擦，${timingLabel}，預計 ${absoluteTime}。`;
 }
 
-function calculateRemainingProgress(
+export function calculateRemainingProgress(
   startedAt: string | null,
   dueMs: number,
   nowMs: number

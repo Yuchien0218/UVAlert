@@ -154,9 +154,8 @@ function toLocalInputValue(date: Date): string {
 }
 
 .time-option--selected {
-  border-color: var(--text-primary);
+  border: 2px solid var(--text-primary);
   background: var(--page-background);
-  box-shadow: inset 0 0 0 1px var(--text-primary);
 }
 
 .time-option strong {

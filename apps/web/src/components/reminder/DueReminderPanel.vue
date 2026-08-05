@@ -1,8 +1,12 @@
 <script setup lang="ts">
+import { CheckCircle2 } from "@lucide/vue";
 import type { ReminderPresentation } from "../../features/reminder/reminderPresentation";
+import CountdownSunTime from "./CountdownSunTime.vue";
 
 interface Props {
   presentation: ReminderPresentation;
+  remainingFraction: number | null;
+  progressPercent: number | null;
 }
 
 defineProps<Props>();
@@ -22,11 +26,13 @@ const emit = defineEmits<{
     <p class="due-panel__eyebrow">補擦倒數</p>
     <div class="due-panel__content">
       <div class="due-panel__time-group">
-        <div class="due-panel__minutes" aria-hidden="true">
-          <strong class="stat-figure">{{ presentation.remainingMinutes ?? 0 }}</strong>
-          <small>分鐘</small>
-        </div>
-        <p class="due-panel__time">{{ presentation.timeLabel }}</p>
+        <CountdownSunTime
+          :remaining-fraction="remainingFraction"
+          :progress-percent="progressPercent"
+          :remaining-minutes="presentation.remainingMinutes ?? 0"
+          :progress-aria-label="presentation.ariaLabel"
+          :time-label="presentation.timeLabel"
+        />
       </div>
       <div class="due-panel__copy">
         <h2 class="due-panel__title">{{ presentation.title }}</h2>
@@ -38,6 +44,7 @@ const emit = defineEmits<{
       type="button"
       @click="emit('action', presentation.actionKind)"
     >
+      <CheckCircle2 :size="18" aria-hidden="true" />
       {{ presentation.actionLabel }}
     </button>
   </article>
@@ -45,6 +52,8 @@ const emit = defineEmits<{
 
 <style scoped>
 .due-panel {
+  --reminder-tone: var(--color-due);
+  --countdown-tone: var(--reminder-tone);
   display: grid;
   gap: var(--space-5);
   padding: clamp(1.25rem, 5vw, 2rem);
@@ -67,30 +76,9 @@ const emit = defineEmits<{
   gap: var(--space-5);
 }
 
-.due-panel__minutes {
-  display: grid;
-  justify-items: center;
-  min-width: 5rem;
-  line-height: 1;
-}
-
 .due-panel__time-group {
   display: grid;
   justify-items: center;
-}
-
-.due-panel__minutes strong {
-  color: var(--text-primary);
-  font-size: clamp(2.5rem, 12vw, 4rem);
-  font-weight: 500;
-  letter-spacing: -0.05em;
-}
-
-.due-panel__minutes small {
-  margin-top: var(--space-2);
-  color: var(--text-secondary);
-  font-size: 0.75rem;
-  letter-spacing: 0.08em;
 }
 
 .due-panel__title {
@@ -107,15 +95,11 @@ const emit = defineEmits<{
   line-height: 1.7;
 }
 
-.due-panel__time {
-  margin: var(--space-2) 0 0;
-  color: var(--text-secondary);
-  font-size: 0.95rem;
-  line-height: 1.7;
-}
-
 .due-panel__action {
   width: 100%;
+  border-color: var(--reminder-tone);
+  background: var(--reminder-tone);
+  color: var(--color-white);
 }
 
 @media (max-width: 36rem) {

@@ -1,8 +1,12 @@
 <script setup lang="ts">
+import { CheckCircle2 } from "@lucide/vue";
 import type { ReminderPresentation } from "../../features/reminder/reminderPresentation";
+import CountdownSunTime from "./CountdownSunTime.vue";
 
 interface Props {
   presentation: ReminderPresentation;
+  remainingFraction: number | null;
+  progressPercent: number | null;
 }
 
 defineProps<Props>();
@@ -28,16 +32,13 @@ const emit = defineEmits<{
 
     <div class="reminder-panel__content">
       <div class="reminder-panel__time-group">
-        <div class="reminder-panel__minutes" aria-hidden="true">
-          <strong class="stat-figure">{{ presentation.remainingMinutes ?? "—" }}</strong>
-          <small>分鐘</small>
-        </div>
-        <p class="reminder-panel__time">
-          預計
-          <span class="stat-figure stat-figure--inline">
-            {{ presentation.timeLabel }}
-          </span>
-        </p>
+        <CountdownSunTime
+          :remaining-fraction="remainingFraction"
+          :progress-percent="progressPercent"
+          :remaining-minutes="presentation.remainingMinutes ?? 0"
+          :progress-aria-label="presentation.ariaLabel"
+          :time-label="`預計 ${presentation.timeLabel}`"
+        />
       </div>
       <div class="reminder-panel__message">
         <h2 class="reminder-panel__title">{{ presentation.title }}</h2>
@@ -50,6 +51,7 @@ const emit = defineEmits<{
       type="button"
       @click="emit('action', presentation.actionKind)"
     >
+      <CheckCircle2 :size="18" aria-hidden="true" />
       {{ presentation.actionLabel }}
     </button>
   </article>
@@ -59,6 +61,7 @@ const emit = defineEmits<{
 .reminder-panel {
   --reminder-tone: var(--color-tracking);
   --reminder-tone-soft: var(--color-tracking-soft);
+  --countdown-tone: var(--reminder-tone);
   display: grid;
   gap: var(--space-5);
   padding: clamp(1.25rem, 5vw, 2rem);
@@ -86,31 +89,9 @@ const emit = defineEmits<{
   gap: var(--space-5);
 }
 
-.reminder-panel__minutes {
-  display: grid;
-  justify-items: center;
-  min-width: 5rem;
-  color: var(--reminder-tone);
-  line-height: 1;
-}
-
 .reminder-panel__time-group {
   display: grid;
   justify-items: center;
-}
-
-.reminder-panel__minutes strong {
-  color: var(--text-primary);
-  font-size: clamp(2.5rem, 12vw, 4rem);
-  font-weight: 500;
-  letter-spacing: -0.05em;
-}
-
-.reminder-panel__minutes small {
-  margin-top: var(--space-2);
-  color: var(--text-secondary);
-  font-size: 0.75rem;
-  letter-spacing: 0.08em;
 }
 
 .reminder-panel__title {
@@ -127,15 +108,11 @@ const emit = defineEmits<{
   line-height: 1.7;
 }
 
-.reminder-panel__time {
-  margin: var(--space-2) 0 0;
-  color: var(--text-secondary);
-  font-size: 0.95rem;
-  line-height: 1.7;
-}
-
 .reminder-panel__action {
   width: 100%;
+  border-color: var(--reminder-tone);
+  background: var(--reminder-tone);
+  color: var(--color-white);
 }
 
 @media (max-width: 36rem) {

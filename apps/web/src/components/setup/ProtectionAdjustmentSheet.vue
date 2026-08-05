@@ -165,7 +165,6 @@ onBeforeUnmount(releasePageLock);
   border-bottom: 0;
   border-radius: 1.5rem 1.5rem 0 0;
   background: var(--surface-primary);
-  box-shadow: var(--shadow-float);
 }
 
 .sheet:focus {
@@ -222,15 +221,12 @@ onBeforeUnmount(releasePageLock);
 
 .sheet-enter-active,
 .sheet-leave-active {
-  transition:
-    opacity 180ms ease,
-    transform 220ms var(--ease-out);
+  transition: opacity 180ms ease;
 }
 
 .sheet-enter-from,
 .sheet-leave-to {
   opacity: 0;
-  transform: translateY(1.5rem);
 }
 
 @media (min-width: 48rem) {

@@ -74,8 +74,6 @@ const highestDay = computed(() =>
   align-items: start;
   gap: var(--space-3);
   padding: var(--space-5);
-  border: 1px solid var(--border-subtle);
-  border-left: 0.25rem solid var(--color-untimed);
   border-radius: var(--radius-md);
   background: var(--color-untimed-soft);
 }

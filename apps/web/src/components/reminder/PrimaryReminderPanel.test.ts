@@ -74,16 +74,25 @@ describe("PrimaryReminderPanel", () => {
       "補擦倒數"
     );
     expect(wrapper.find(".reminder-panel__dot").exists()).toBe(false);
-    expect(wrapper.find("svg").exists()).toBe(false);
-    expect(wrapper.get(".reminder-panel__minutes strong").text()).toBe(
+    expect(wrapper.find(".countdown-sun").exists()).toBe(true);
+    expect(wrapper.get(".countdown-time__value strong").text()).toBe(
       "60"
     );
     expect(
-      wrapper.get(".reminder-panel__minutes strong").classes()
+      wrapper.get(".countdown-time__value strong").classes()
     ).toContain("stat-figure");
     expect(
-      wrapper.get(".reminder-panel__time-group .reminder-panel__time .stat-figure").text()
+      wrapper
+        .findAll(".countdown-sun__ray")
+        .filter((ray) => ray.attributes("data-visible") === "true")
+    ).toHaveLength(4);
+    expect(
+      wrapper.get(".countdown-time__estimate .stat-figure").text()
     ).toMatch(/^\d{2}:\d{2}$/);
+    expect(wrapper.find(".reminder-panel__time").exists()).toBe(false);
+    expect(
+      wrapper.get(".countdown-time__copy").element.children
+    ).toHaveLength(3);
     expect(
       wrapper.find(".reminder-panel__message .reminder-panel__time").exists()
     ).toBe(false);
@@ -94,9 +103,10 @@ describe("PrimaryReminderPanel", () => {
     expect(wrapper.find('a[href="#zone-status"]').exists()).toBe(false);
 
     await vi.advanceTimersByTimeAsync(60_000);
-    expect(wrapper.get(".reminder-panel__minutes strong").text()).toBe(
+    expect(wrapper.get(".countdown-time__value strong").text()).toBe(
       "59"
     );
+    expect(wrapper.find(".reminder-panel__action svg").exists()).toBe(true);
 
     await wrapper.get("button").trigger("click");
     expect(wrapper.emitted("action")).toEqual([
@@ -121,7 +131,7 @@ describe("PrimaryReminderPanel", () => {
       }
     });
 
-    expect(wrapper.get(".reminder-panel__time").text()).toContain(
+    expect(wrapper.get(".countdown-time__estimate").text()).toContain(
       "預計"
     );
     expect(wrapper.get(".reminder-panel__title").text()).not.toContain(
@@ -150,7 +160,14 @@ describe("PrimaryReminderPanel", () => {
     const panel = wrapper.get('[data-testid="primary-reminder"]');
     expect(panel.attributes("data-presentation")).toBe("due");
     expect(panel.classes()).toContain("due-panel--due");
-    expect(wrapper.get(".due-panel__minutes strong").text()).toBe("0");
+    expect(wrapper.get(".countdown-time__value strong").text()).toBe("0");
+    expect(wrapper.find(".countdown-sun").exists()).toBe(true);
+    expect(
+      wrapper
+        .findAll(".countdown-sun__ray")
+        .filter((ray) => ray.attributes("data-visible") === "true")
+    ).toHaveLength(0);
+    expect(wrapper.find(".due-panel__action svg").exists()).toBe(true);
 
     await wrapper.get("button").trigger("click");
     expect(wrapper.emitted("action")).toEqual([
@@ -207,12 +224,13 @@ describe("PrimaryReminderPanel", () => {
     expect(due.findAll("button")).toHaveLength(1);
     expect(due.find('a[href="#zone-status"]').exists()).toBe(false);
     expect(due.text()).toContain("建議現在補擦");
-    expect(due.get(".due-panel__minutes strong").classes()).toContain(
+    expect(due.get(".countdown-time__value strong").classes()).toContain(
       "stat-figure"
     );
-    expect(due.get(".due-panel__time-group .due-panel__time").text()).toBe(
+    expect(due.get(".countdown-time__estimate").text()).toBe(
       "現在"
     );
+    expect(due.find(".due-panel__time").exists()).toBe(false);
     expect(due.find(".due-panel__copy .due-panel__time").exists()).toBe(
       false
     );

@@ -211,8 +211,7 @@ async function save(): Promise<void> {
 }
 
 .manual-region__field select[aria-invalid="true"] {
-  border-color: var(--color-due);
-  box-shadow: 0 0 0 2px var(--color-due-soft);
+  border: 2px solid var(--color-due);
 }
 
 .manual-region .button {
