@@ -109,10 +109,7 @@ function getUnavailableMessage(error: UvForecastError): string {
       class="uv-forecast__state uv-forecast__state--error"
       role="status"
     >
-      <strong>
-        <span class="uv-forecast__status-dot" aria-hidden="true" />
-        五日 UV 暫時無法顯示
-      </strong>
+      <strong>五日 UV 暫時無法顯示</strong>
       <span>{{ getUnavailableMessage(error) }}</span>
       <button
         class="button button--quiet uv-forecast__retry"
@@ -197,7 +194,7 @@ function getUnavailableMessage(error: UvForecastError): string {
 .uv-forecast__state {
   display: grid;
   justify-items: start;
-  gap: var(--space-4);
+  gap: var(--space-3);
   color: var(--text-secondary);
   line-height: 1.7;
 }
@@ -207,12 +204,8 @@ function getUnavailableMessage(error: UvForecastError): string {
   display: block;
   margin: 0;
   color: var(--text-primary);
-  font-weight: 500;
-  font-size: 1rem;
-}
-
-.uv-forecast__state strong {
-  margin-bottom: var(--space-1);
+  font-weight: 600;
+  font-size: var(--font-size-body);
 }
 
 .uv-forecast__state span {
@@ -221,23 +214,11 @@ function getUnavailableMessage(error: UvForecastError): string {
 }
 
 .uv-forecast__state--error strong {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--space-2);
-  margin-bottom: var(--space-3);
-}
-
-.uv-forecast__status-dot {
-  width: 0.5rem;
-  height: 0.5rem;
-  border-radius: 50%;
-  background: var(--color-due);
-  flex: 0 0 auto;
+  color: var(--color-due);
 }
 
 .uv-forecast__retry {
   min-height: 2.5rem;
-  margin-top: var(--space-3);
   padding: var(--space-3) var(--space-4);
   font-size: var(--font-size-body);
   font-weight: 500;
