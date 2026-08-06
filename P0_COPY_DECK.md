@@ -3,13 +3,13 @@
 | 文件資訊 | 內容 |
 | --- | --- |
 | 對應 PRD | `防曬晴報員PRD.md` v3.9 |
-| 對應畫面規格 | `P0_SCREEN_INVENTORY.md` v0.2 |
+| 對應畫面規格 | `P0_SCREEN_INVENTORY.md` v0.3 |
 | 對應提醒規則 | `P0_REMINDER_RULE_DECISION_TABLE.md` v0.2 |
-| 文件版本 | 0.2 |
+| 文件版本 | 0.3 |
 | 語系 | 繁體中文 `zh-TW` |
 | 狀態 | 文案與審查基準草案 |
 | 建立日期 | 2026-07-29 |
-| 最近更新 | 2026-07-31 |
+| 最近更新 | 2026-08-05 |
 
 > 本文件提供 P0 介面文案、CTA、錯誤與狀態模板。標記為 `BLOCKED` 的文案在相應專業審查完成前不得發布。任何文案不得改變 reducer 規則、建立新期限或被用來抵銷誤導性的畫面設計。
 
@@ -141,6 +141,10 @@ version
 | CP-NAV-002 | 底部導覽 | 提醒 | PRODUCT_DRAFT |
 | CP-NAV-003 | 底部導覽 | 防曬品 | PRODUCT_DRAFT |
 | CP-NAV-004 | 底部導覽 | 更多 | PRODUCT_DRAFT |
+| CP-HEADER-001 | 頁首狀態 | 本機提醒 | PRODUCT_DRAFT |
+| CP-HEADER-002 | 頁首狀態（tracking） | 提醒進行中 | PRODUCT_DRAFT |
+| CP-HEADER-003 | 頁首狀態（soon） | 即將需要檢查 | PRODUCT_DRAFT |
+| CP-HEADER-004 | 頁首狀態（due） | 建議現在處理 | PRODUCT_DRAFT |
 | CP-ACTION-001 | 返回 | 返回 | PRODUCT_DRAFT |
 | CP-ACTION-002 | 取消 | 取消 | PRODUCT_DRAFT |
 | CP-ACTION-003 | 繼續 | 下一步 | PRODUCT_DRAFT |
