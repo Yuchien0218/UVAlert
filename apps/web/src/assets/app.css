@@ -258,9 +258,8 @@
 .safety-note {
   margin: 0;
   color: var(--text-secondary);
-  font-size: 0.72rem;
+  font-size: var(--font-size-caption);
   line-height: 1.6;
-  opacity: 0.8;
 }
 
 .screen-reader-only {

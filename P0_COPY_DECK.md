@@ -145,6 +145,7 @@ version
 | CP-HEADER-002 | 頁首狀態（tracking） | 提醒進行中 | PRODUCT_DRAFT |
 | CP-HEADER-003 | 頁首狀態（soon） | 即將需要檢查 | PRODUCT_DRAFT |
 | CP-HEADER-004 | 頁首狀態（due） | 建議現在處理 | PRODUCT_DRAFT |
+| CP-HOME-SAFETY-001 | 首頁免責聲明 | 防曬提醒是協助你回看紀錄的工具，不是安全曝曬時間或防護效果保證。 | CONTENT_REVIEW |
 | CP-ACTION-001 | 返回 | 返回 | PRODUCT_DRAFT |
 | CP-ACTION-002 | 取消 | 取消 | PRODUCT_DRAFT |
 | CP-ACTION-003 | 繼續 | 下一步 | PRODUCT_DRAFT |
