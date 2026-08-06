@@ -1,80 +1,143 @@
 # Sunshield Advisor 設計語言規範
 
-這份文件整理專案這一路的視覺調整，是全站設計決策的**唯一權威來源**。任何人（包含 AI 助手）修改畫面前，先讀這份文件，不要憑印象或舊版畫面去猜規則。
+## 這份文件的地位
 
-**給 AI 助手的使用方式**：修改任何元件前，先問使用者拿「目前專案裡實際的檔案」，不要用你記憶中或先前對話裡的版本去改——這個專案已經發生多次「改好的東西過幾輪又跑掉」的狀況，起因都是在過時版本上疊修改。改完之後，對照這份文件的檢查清單（見文末）逐條確認，不要自己發明新樣式。
+**這份文件不是真實來源，程式碼才是。**
+
+真實來源只有兩個檔案：
+
+| 檔案 | 內容 |
+|---|---|
+| `packages/ui/src/styles.css` | 設計 token：字級、間距、顏色、圓角、動畫時間 |
+| `apps/web/src/assets/app.css` | 共用類別：`.app-card`、`.button`、`.text-link`、`.stat-figure`、`.safety-note` |
+
+這份文件的工作是記錄**為什麼**這樣寫，以及**哪些地方還沒照著寫**。任何時候文件與這兩個檔案衝突，以檔案為準，並回來修文件。
+
+**給 AI 助手**：修改畫面前，先讀上面兩個檔案的實際內容，不要用記憶中或先前對話裡的版本。這個專案發生過多次「改好的東西過幾輪又跑掉」，起因都是在過時版本上疊修改。
+
+**`apps/web/dist/` 是過期建置產物**，內容停留在設計整理之前（還有 `box-shadow`、藥丸按鈕、`.sun-divider`）。不要拿它當現況參考。
+
+本次文件更新對照的程式碼範圍：commit `9f7eebe`（設計系統統一）到 `7883c27`（HEAD）。
 
 ---
 
-## 一、設計哲學
+## 一、四條核心規則
 
-兩句話決定所有視覺判斷：
+這輪整理確立的規則，依序是判斷任何視覺改動的第一準則。
 
-- **重量感極低**：線條構成，無厚度、無陰影、無重力壓迫感，穩定感來自中心對稱結構，不是靠粗重的實心色塊或投影。
-- **材質感純淨**：純數位圖案，表面無紋理、無反光，純色平塗（flat color），屬於無機、非物理性的介面元素，不模擬真實世界的光影或材質。
+### 規則 1：字級只用變數
 
-任何新增或修改，先問：「這個做法有沒有違反上面兩條？」
+```css
+--font-size-page-title:    clamp(1.75rem, 6vw, 2rem);
+--font-size-section-title: 1.15rem;
+--font-size-body:          0.875rem;
+--font-size-label:         0.8rem;
+--font-size-caption:       0.75rem;
+```
 
-**已知例外／未解決的衝突**：`.app-card` 目前仍使用 `box-shadow`（模擬物理光影），跟這個哲學矛盾，是全站唯一還沒決定要不要處理的系統性不一致，見文末「未解決事項」。
+不要寫 `font-size: 0.95rem` 這種自己調出來的中間值。整理前全站有 `0.85 / 0.9 / 0.95 / 1.05 / 1.08 / 1.1 / 1.15 / 1.2 / 1.25 / 1.3 / 1.35 / 1.5rem` 十幾種字級並存，字級數量本身就是視覺雜訊。
+
+**唯一允許的例外**是「資料讀數」的 `clamp()`：補擦倒數的分鐘數、UVI 數值、提醒卡主標題。這些字級隨視窗縮放，本來就不屬於文字階層，而是圖表元素。
+
+### 規則 2：填色與邊框只給需要注意力的元素
+
+整理前首頁同時存在三種容器寫法——主提醒卡（填色無框）、戶外資訊與五日 UV（`.app-card`：邊框＋底色）、各部位狀態（標題下一條線），整頁讀起來是等重量的盒子堆疊，沒有主次。
+
+現在的規則：
+
+| 類型 | 寫法 |
+|---|---|
+| 需要注意力：主提醒卡、警示提示 | 滿版淡底色填滿，**無邊框** |
+| 結構性區塊：戶外資訊、五日 UV、各部位狀態 | **無框**，統一為「上緣細分隔線 → 標題 → 內容」 |
+
+分隔線一律放在**區塊上緣**，不是標題下方——這樣所有區塊的起始位置對齊在同一種視覺信號上。
+
+推論出來的禁令：不用色條／左邊框表達狀態。想標示狀態，改用滿版淡底色，或讓標題文字本身吃語意色。
+
+### 規則 3：同一區塊內所有文字共用一條左對齊線
+
+不要用 icon 在 flex row 裡佔一欄、把文字往右推。這個問題在兩處發生過並修掉：
+
+- `OutdoorContextCard.vue` 的 `MapPin` 把地區文字推離區塊標題的左緣（commit `cb0ed2b`）
+- `FiveDayUvCard.vue` 錯誤狀態的紅色狀態點把標題推右，與下方兩行不齊（commit `7883c27`）
+
+兩處都是直接**移除 icon**，狀態語意改用文字顏色承擔。
+
+區塊右上角的識別 icon（`Wind`、`CloudSun`）不違反這條——它們在 `justify-content: space-between` 的另一端，不影響左緣。
+
+驗證方式：用 DevTools 量同一區塊內標題與各行內文的左邊界 x 座標，應完全相同（首頁目前為 34px）。
+
+### 規則 4：無陰影、無漸層，動畫只用 opacity
+
+- 全站沒有 `box-shadow`（`src/` 下僅存的兩處是 `box-shadow: none`）
+- 沒有 `linear-gradient` / `radial-gradient`
+- 動畫只改 `opacity`，不做位移或縮放
+
+`transform` 允許用在**靜態幾何**（`rotate(180deg)` 翻轉箭頭、`translateY(-50%)` 置中定位），不允許用在**進出場動畫**。
+
+一律加 `@media (prefers-reduced-motion: reduce)`；全域 reset 已在 `styles.css` 把 duration 壓到 0.01ms。
 
 ---
 
-## 二、品牌符號：太陽
+## 二、設計哲學
 
-一個手繪的圓圈＋8 條放射光芒 SVG，是全站唯一的品牌符號，**不是裝飾用途，是承擔功能的符號**。
+兩句話，是上面四條規則的來源：
+
+- **重量感極低**：線條構成，無厚度、無陰影、無重力壓迫感。穩定感來自中心對稱結構，不是粗重色塊或投影。
+- **材質感純淨**：純數位圖案，無紋理、無反光、純色平塗，不模擬真實世界的光影或材質。
+
+---
+
+## 三、品牌符號：太陽
+
+一個圓圈＋8 條放射光芒的 SVG，全站唯一品牌符號，**承擔功能，不是裝飾**。
 
 ```html
 <svg viewBox="0 0 48 48" fill="none">
   <circle cx="24" cy="24" r="11" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" />
   <line x1="24" y1="2" x2="24" y2="7" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" />
-  <!-- 其餘 7 條用 transform="rotate(角度 24 24)" 複製，角度依序 45/90/135/180/225/270/315 -->
+  <!-- 其餘 7 條用 transform="rotate(角度 24 24)" 複製，角度 45/90/135/180/225/270/315 -->
 </svg>
 ```
 
-**目前已套用的地方**（同一份圖形，不是各自畫的相似圖案）：
+目前實際套用的位置（同一份圖形，不是各自畫的相似圖案）：
 
-| 位置 | 用途 |
+| 檔案 | 用途 |
 |---|---|
-| `CountdownSunTime.vue` | 補擦倒數，光芒依剩餘時間比例明滅（`Math.max(1, ...)` 保底，永遠至少留 1 條，不會退化成空心圈） |
-| `BrandHeader.vue` | 頁首 logo，顏色隨 `tone` prop（見第四節）反映全站最高急迫度 |
-| `SunLoader.vue` | 全站 loading 指示器，8 條光芒依序 `opacity` 明滅 |
-| `favicon.svg` / `apple-touch-icon.png` / `icon-*.png` | 網站圖示，內建 `prefers-color-scheme` 自動切換線條顏色 |
-| `ThemeToggle.vue` | 深色模式切換鈕，深色時光芒 `opacity` 降到 0.15，圓心降到 0.6（太陽下山的隱喻，不是燈泡開關） |
-| `HomePage.vue` 的 `.sun-divider` | 卡片之間的低調轉場裝飾，`opacity: 0.5`，極輕 |
+| `CountdownSunTime.vue` | 補擦倒數，光芒依剩餘時間比例明滅 |
+| `BrandHeader.vue` | 頁首 logo，顏色隨 `tone` prop 反映全站最高急迫度 |
+| `SunLoader.vue` | 全站 loading，8 條光芒依序 opacity 明滅 |
+| `favicon.svg` / `apple-touch-icon.png` / `icon-*.png` | 網站圖示，內建 `prefers-color-scheme` 切換線條顏色 |
 
-**使用原則**：符號的力量來自稀有，不是無所不在。只用在真正代表「時間／狀態／核心功能」的地方（倒數、載入、完成回饋、favicon、主題切換），不要每個按鈕、每個圖示都塞一個太陽。
+**符號的力量來自稀有。** `HomePage.vue` 的裝飾性太陽分隔線（`.sun-divider`）已在 commit `d53fa3b` 移除——它不承擔任何功能。不要讓每個按鈕、每個區塊都出現太陽。
 
 ---
 
-## 三、色彩系統
+## 四、Token 對照（`packages/ui/src/styles.css`）
 
-### 品牌中性色
+### 中性色
 
 | Token | 淺色 | 深色 |
 |---|---|---|
-| `--page-background` | `#f9f9f9` | `#0f0e0c`（暖色調近黑，不是純黑） |
+| `--page-background` | `#f9f9f9` | `#0f0e0c` |
 | `--surface-primary` | `#ffffff` | `#1c1a17` |
-| `--text-primary` | `#121212` | `#f5f3ef`（米白，不是純白） |
-| `--text-secondary` | `#5a5a5a` | `#a8a29b`（暖灰，跟背景色調呼應） |
+| `--text-primary` | `#121212` | `#f5f3ef` |
+| `--text-secondary` | `#5a5a5a` | `#a8a29b` |
 | `--border-subtle` | `#e3e3e3` | `rgb(255 250 240 / 12%)` |
 
-**規則**：深色模式的背景/文字絕對不能是純黑 `#000`／純白 `#fff`，一定要帶一點暖色調，跟品牌識別綁在一起，避免變成「沒特別調過的預設深色模式」。
+深色模式的背景與文字**不能**是純黑 `#000` / 純白 `#fff`，一定帶暖色調，否則會變成「沒調過的預設深色模式」。
 
-### 語意色（提醒狀態）：tracking / soon / due / untimed / success
-
-每個狀態有一組「本色」跟「淡底色」：
+### 語意色（提醒狀態）
 
 | 狀態 | 淺色本色 | 淺色淡底 | 深色本色 | 深色淡底 |
 |---|---|---|---|---|
-| tracking（追蹤中） | `#2f6fbb` | `#eaf3fc` | `#6ba3e0` | `#17293d` |
-| soon（即將） | `#a86100` | `#fff3d6` | `#e0a23f` | `#3a2a11` |
-| due（已到期） | `#cc3333` | `#fdecea` | `#e2585f` | `#3c1c1e` |
-| untimed（無計時） | `#5b3cc4` | `#f1edff` | `#a084e8` | `#271f42` |
-| success（完成） | `#147d64` | `#e9f7f1` | `#35c19a` | `#143329` |
+| tracking | `#2f6fbb` | `#eaf3fc` | `#6ba3e0` | `#17293d` |
+| soon | `#a86100` | `#fff3d6` | `#e0a23f` | `#3a2a11` |
+| due | `#cc3333` | `#fdecea` | `#e2585f` | `#3c1c1e` |
+| untimed | `#5b3cc4` | `#f1edff` | `#a084e8` | `#271f42` |
+| success | `#147d64` | `#e9f7f1` | `#35c19a` | `#143329` |
 
-**深色模式規則**：語意色/UVI 色在深色模式底下，不能直接沿用淺色模式的 hex 值——同一個色值在近黑背景上會因為同時對比效應顯得洗白、沒力道。深色模式的每組本色都要**提高明度與飽和度**，淡底色也要重新調（見上表右側兩欄，這是已經調過、可直接用的值，不是隨便寫的）。
-
-### UVI 風險色（low / moderate / high / very-high / extreme）
+### UVI 風險色
 
 | 等級 | 淺色 | 深色 |
 |---|---|---|
@@ -84,220 +147,185 @@
 | very-high | `#c43d3d` | `#e0555a` |
 | extreme | `#7d4bb3` | `#a878e0` |
 
-同樣遵守「深色模式要重新調亮」的規則。
+**深色模式規則**：語意色與 UVI 色在深色模式下不能沿用淺色 hex——同一色值在近黑背景上會因同時對比效應顯得洗白。上表右側兩欄是已經調過明度／飽和度的值，直接用。
 
-### 顏色使用原則
+### 版面與動態
 
-- **不用色條／描邊表達重要性或狀態**。這個模式已經在多處拿掉（`SessionEndControl.vue` 確認框的紅色頂條、`SetupReviewSummary.vue` 審查卡片的藍色左邊條、`QuickProtectionSummary.vue` 的橘色左邊條、`FiveDayUvCard.vue` 錯誤提示的紅色左邊線、`.safety-note` 的灰色左邊線），改用兩種替代做法：
-  1. **滿版淡底色填色**（`tone-soft` 背景，無邊框無陰影）——用在真正需要視覺權重的主要內容，例如首頁 hero 卡片、`.clothing-summary--success`、`.quick-protection`。
-  2. **小圓點**（呼應太陽符號家族的圓形語言）——用在標題文字前面標示狀態，例如部位狀態分組標題、`FiveDayUvCard.vue` 錯誤訊息前的紅點、頁首「本機提醒」旁的狀態點。
-- 中性、非狀態性的審查/摘要內容，用中性的 `.app-card`（白底邊框，無色）或直接不用卡片（純文字＋分隔線），不要為了「看起來有設計感」硬套語意色。
+```css
+--space-1..12: 0.25 / 0.5 / 0.75 / 1 / 1.25 / 1.5 / 2 / 2.5 / 3 rem
+--radius-sm: 0.5rem;  --radius-md: 0.875rem;
+--radius-lg: 1.25rem; --radius-pill: 999px;
+
+--content-max: 47rem;         /* 套在 .page-stack 與 .app-shell */
+--tap-target: 2.75rem;
+--bottom-nav-height: 4.5rem;
+--duration-fast: 160ms; --duration-base: 240ms;
+--ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+```
+
+**`--bottom-nav-height` 是曾經真實壞過的地雷**：這個變數如果沒定義或被刪掉，`BottomNavigation.vue` 與 `AppShell.vue` 裡的 `calc()` 會整條靜默失效（不報錯，但底部導覽列會蓋住內容）。它必須在 `:root` 定義，兩處引用都要帶 fallback，改動前後用 DevTools Computed 面板實測。
+
+### 已定義但無人使用的 token
+
+`--shadow-card`、`--shadow-float`（規則 4 之後沒有任何使用者）、`--color-deep`、`--color-decoration-muted`。留著會誘導下一個人重新引入陰影，建議刪除。
 
 ---
 
-## 四、Token 對照表（`styles.css` / `app.css`）
+## 五、共用類別（`apps/web/src/assets/app.css`）
 
-```css
-/* 間距 */
---space-1: 0.25rem;  --space-2: 0.5rem;   --space-3: 0.75rem;
---space-4: 1rem;     --space-5: 1.25rem;  --space-6: 1.5rem;
---space-8: 2rem;     --space-10: 2.5rem;  --space-12: 3rem;
-
-/* 圓角 */
---radius-sm: 0.5rem; --radius-md: 0.875rem; --radius-lg: 1.25rem; --radius-pill: 999px;
-
-/* 版面 */
---content-max: 47rem;        /* 頁面寬度上限，套在 .page-stack，寬螢幕不會被拉爆 */
---tap-target: 2.75rem;       /* 最小可點擊尺寸 */
---bottom-nav-height: 4.5rem; /* 底部導覽列高度，AppShell 的 padding-bottom 靠這個對齊 */
-
-/* icon（見 ICON_DESIGN_SYSTEM.md，這裡列常用值） */
---icon-stroke-width: 1.75;
---icon-size-sm: 1.25rem;
---icon-size-md: 1.5rem;
---icon-size-lg: 3.25rem;
-```
-
-**`--bottom-nav-height` 是一個曾經真實壞過的地雷**：這個變數如果沒被定義、或被意外刪掉，`BottomNavigation.vue` 跟 `AppShell.vue` 裡引用它的 `calc()` 會整條靜默失效（不報錯，但版面會壞），過去導致底部導覽列長期蓋住頁面內容，改了好幾輪都沒抓到根本原因。這個變數：
-1. 一定要在 `styles.css` 的 `:root` 定義。
-2. 兩處引用都要帶 fallback：`var(--bottom-nav-height, 4.5rem)`。
-3. 改動前後都要用 DevTools 的 Computed 面板實測驗證，不要只看畫面猜。
-
----
-
-## 五、字體排版
-
-### 字體堆疊
-
-```css
---font-sans: "Helvetica Neue", Inter, "Noto Sans TC", "PingFang TC", "Microsoft JhengHei", system-ui, sans-serif;
---font-mono: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
-```
+| 類別 | 現況 |
+|---|---|
+| `.page-stack` | `--content-max` 寬度上限；子元素依序 opacity 淡入（0 / 0.08 / …／0.4s） |
+| `.app-card` | 1px 邊框 + `--surface-primary` 底 + `--radius-lg`，**無陰影**。依規則 2，只用在需要注意力的元素 |
+| `.button` | `--radius-md`（不是藥丸）、1px `--text-primary` 邊框、`:active` 用 `filter: brightness(0.92)` |
+| `.button--primary` | 填 `--color-tracking`，白字 |
+| `.button--quiet` | 邊框降為 `--border-subtle` |
+| `.text-link` | `--color-tracking` 著色（commit `176bdad` 改在共用類別上，6 個檔案共用） |
+| `.stat-figure` | 見下節 |
+| `.safety-note` | 純字級縮小＋`opacity: 0.8`，**無左邊框** |
 
 ### `.stat-figure`：數字專用等寬字體
 
-任何**純數字或時間顯示**（倒數分鐘數、時間戳如 `20:15`、UVI 數值、產品耐水分鐘數等）一律套用：
+任何純數字或時間顯示（倒數分鐘、時間戳 `20:15`、UVI 值、耐水分鐘數）一律套用：
 
 ```css
-.stat-figure {
-  font-family: var(--font-mono);
-  font-variant-numeric: tabular-nums;
-  font-weight: 600; /* 不要用 700，太重，跟「低重量感」哲學衝突 */
-  letter-spacing: -0.02em;
-}
+font-family: var(--font-mono);
+font-variant-numeric: tabular-nums;
+font-weight: 600;   /* 不用 700，太重，與低重量感衝突 */
+letter-spacing: -0.02em;
 ```
 
-**理由**：中文字體（Noto Sans TC / PingFang TC）跟英文字體（Helvetica Neue，排在字體堆疊第一位）的數字粗細、高度不一定對得齊，混排在同一行會有微妙的不協調感。讓所有數字統一走 mono，等於直接繞過這個問題，同時 mono 字體本身有「儀器讀數」的個性，符合「測站觀測」的產品調性。
+理由：中文字體（Noto Sans TC / PingFang TC）與英文字體（Helvetica Neue，堆疊第一位）的數字粗細、高度對不齊，混排會有微妙的不協調。全部走 mono 直接繞過這個問題，同時 mono 本身有「儀器讀數」的個性，符合測站觀測的產品調性。
 
-### CJK 內文排版規則
+### 死類別
 
-- **內文不加正值 `letter-spacing`**。中文字本身每個字是等寬方塊，額外加字距只會讓字距顯得鬆散不自然。這個問題已經在多處修過：`.page-heading__eyebrow`、`.session-end__eyebrow`、`.context-card__eyebrow`、`.zone-list__eyebrow`、`.uv-forecast__eyebrow`、`.home-summary__eyebrow`、`.quick-protection__eyebrow`、`.review-card__eyebrow`，全部拿掉了 `font-family: var(--font-mono)` + `letter-spacing: 0.12em` + `text-transform: uppercase` 這組舊樣板。
-- **大標題（page title 等級）可以用負字距**，例如 `.page-heading__title { letter-spacing: -0.055em; }`，這是對的，不用改。這條規則只針對「一般內文/標籤」，不適用大標題。
-- **內文 `line-height` 至少 1.7**，中文字視覺筆畫密度高，需要比英文更寬的行距。
-- **Eyebrow（小標籤）不是預設要有的裝飾**。如果一個 eyebrow 純粹是重複翻譯旁邊的 h1/h2 標題（零額外資訊），直接刪掉，不要留著（已在 `OutdoorContextCard.vue`、`ZoneStatusList.vue`、`FiveDayUvCard.vue` 這樣處理）。只有在 eyebrow 真的帶有標題沒有的資訊時才保留，且样式只用：
-  ```css
-  font-size: 0.8rem;
-  font-weight: 500;
-  color: var(--text-secondary);
-  /* 不要 font-family: mono，不要 letter-spacing，不要 uppercase */
-  ```
-
-### 免責聲明／次要說明文字（`.safety-note`）
-
-```css
-.safety-note {
-  margin: 0;
-  color: var(--text-secondary);
-  font-size: 0.72rem;
-  line-height: 1.6;
-  opacity: 0.8;
-}
-```
-
-不用邊框線或色條圈起來，純粹靠字級縮小＋透明度降低，讓它自然「退到背景」——這是「用 opacity 表達重要程度」這條動畫哲學延伸到靜態排版的例子。
+`.status-card`（含五個 modifier）與 `.uvi-badge`（含五個 modifier）在 `app.css` 有完整定義，但 `src/` 下沒有任何使用者。它們是規則 2 確立前的產物，建議刪除。
 
 ---
 
-## 六、Icon 規則摘要
+## 六、CJK 排版
 
-完整規則在 `ICON_DESIGN_SYSTEM.md`，重點：
-
-- `stroke-width: 1.75`（24 或 48 viewBox 為基準）、`stroke-linecap/linejoin: round`、預設 `fill: none`，只有選取／啟用狀態才允許實心填色。
-- 顏色預設 `currentColor`，只有代表「狀態」的圖示（太陽、狀態點）才吃語意色變數。
-- 對稱造型用 `transform="rotate(...)"` 複製單一元素畫出來，不要手繪每一份。
-- 尺寸從 `--icon-size-sm/md/lg` 三個 token 選，不寫死 px。
-- 動畫只允許 `opacity`，不做位移／縮放（**唯一的例外**是主題切換的圓形揭露過場，屬於「揭露機制」而非「物體位移」，判斷邏輯見第七節）。
-- 圖示＋文字組合時，多行文字先包成同一個 `grid` 直排區塊再跟圖示對齊，不要用 `margin-left` 手動算縮排（不同元素的 `em` 基準不一樣，容易算錯）；圖示與文字的垂直對齊預設用 `align-items: flex-end`（對齊底線），不要用 `center`，避免圖示視覺重心偏高、跟文字顯得漂浮不平衡。
+- **內文不加正值 `letter-spacing`**。中文本身是等寬方塊，加字距只會鬆散。舊樣板「`font-family: mono` + `letter-spacing: 0.12em` + `text-transform: uppercase`」已在 commit `9f7eebe` 全站移除。
+- **大標題可以用負字距**（`.page-heading__title` 的 `-0.055em`），這條規則只針對一般內文與標籤。
+- **內文 `line-height` 至少 1.6**；相鄰兩行刻意做層次時可用 1.4 / 1.6 的組合（`OutdoorContextCard.vue` 的 label 1.4 / description 1.6）。
+- **Eyebrow 不是預設裝飾**。零資訊量（純粹重複旁邊標題）的 eyebrow 直接刪。保留時只用 `--font-size-label` + `font-weight: 500` + `--text-secondary`，不加 mono、不加字距、不轉大寫。
 
 ---
 
-## 七、動畫規則
+## 七、標題層級
 
-### 只用 opacity，不用位移／縮放
+整理前頁面上最不重要的區塊標題（戶外資訊、未來 5 天 UV，2rem）比最重要的補擦提醒標題還大。現在：
 
-- 太陽光芒明滅（倒數、loading）：純 `opacity` transition/animation。
-- 卡片按下回饋：`filter: brightness(0.92)`（純色彩變化），不做 `scale()` 彈跳，也不要保留 hover 的位移殘留（按下時要把 `transform` 重設回 `translateY(0)`）。
-- 頁面內容分層淡入（`.page-stack > *`）：純 `opacity` + `animation-delay` 錯開，`fill-mode: backwards`，套用在 `.page-stack` 上會全站生效。
+| 層級 | 字級 |
+|---|---|
+| 提醒卡主標題（首頁 `<h1>`） | `clamp(1.3rem, 5vw, 1.8rem)` — 全頁最大 |
+| 區塊標題（`<h2>`） | `--font-size-section-title` + `font-weight: 600` |
+| 內文 | `--font-size-body` |
 
-### 主題切換的圓形揭露：唯一被允許的例外
+區塊標題縮小後靠字重維持辨識度，掃讀順序因此符合資訊重要性。
 
-亮/暗模式切換用 View Transitions API + `clip-path: circle()` 從觸發按鈕位置展開，是刻意的例外，因為：
-1. 概念上是「揭露（reveal）」而非「移動一個物體」，比較接近光圈開合，不是模擬物理慣性。
-2. 呼應太陽符號「日出／日落」的品牌隱喻。
-3. 不支援的瀏覽器會直接無動畫切換，是漸進增強，不影響基本體驗。
-
-**不要**因為這個例外就開始允許其他位移/縮放動畫——這是唯一被論證過、跟品牌隱喻掛鉤才成立的特例。
-
-### 明確被拒絕的動畫語言（曾經參考過但判斷不採用）
-
-- **躁點／雲霧過場**：跟「無紋理、非物理性」哲學正面衝突，紋理與霧氣模擬都是物理質感語言，不採用。
-- **圖示位移重組動畫**（旋轉＋位移做出圖示變形）：本質是物理性移動，不採用；如果想要按鈕圖示有反饋感，改用 opacity 交替顯示。
-- **按鈕按下彈跳**（scale 彈跳＋icon 晃動）：暗示重量與慣性，不採用；用純色彩變化取代。
-
-一律加 `@media (prefers-reduced-motion: reduce)` 處理，把動畫關閉或縮到極短。
+首頁 DOM 順序：提醒 hero（`<h1>`）→ 各部位狀態 → 戶外資訊 → 五日 UV → 免責聲明，視覺順序與 DOM 語意順序一致。
 
 ---
 
-## 八、元件模式
+## 八、Icon 規則摘要
+
+完整規則見 `docs/ICON_DESIGN_SYSTEM.md`，重點：
+
+- `stroke-width: 1.75`、`stroke-linecap/linejoin: round`、預設 `fill: none`
+- 顏色預設 `currentColor`，只有代表狀態的圖示吃語意色變數
+- 對稱造型用 `transform="rotate(...)"` 複製單一元素，不手繪每一份
+- 動畫只用 `opacity`
+- **不承擔資訊的 icon 直接刪**，不要為了「標題旁邊要有東西」而放
+- 依規則 3，icon 不得插在文字左側把文字推開
+
+---
+
+## 九、元件模式
 
 ### Hero 卡片（首頁補擦倒數）
 
-- **不用 `.app-card`**（沒有邊框、沒有陰影），改用滿版 `tone-soft` 底色填滿。這是全頁唯一該有「填色背景」的地方，建立主次視覺層級。
-- 依狀態（tracking/soon/due）動態切換 `--home-summary-tone` / `--home-summary-tone-soft` 兩個 CSS 變數。
-- 太陽圖示＋數字＋預計時間的排列：圖示獨立一欄（固定 rem 尺寸，不用會受字級影響的 `em`），數字＋預計時間包成同一個 grid 直排欄位，兩者 `align-items: flex-end` 對齊底部。
+滿版 tone-soft 底色填滿，無邊框無陰影——全頁唯一該有填色背景的地方。依狀態切換 `--home-summary-tone` / `--home-summary-tone-soft`。
 
-### 中性審查／摘要卡片
+### 結構性區塊
 
-- 內容量大、需要掃描的：`.app-card`（白底邊框，無色，無陰影爭議見「未解決事項」）。
-- 內容量小（2-3 行）：不用卡片框，純文字＋`border-bottom` 分隔線，避免跟旁邊內容量大很多的卡片比高度、造成比例失衡（`SetupReviewSummary.vue` 的「目前情境」就是這樣處理）。
-- 有明確「推薦／完成」語意的：滿版淡色底填色（`--color-soon-soft` / `--color-success-soft`），無邊框（`QuickProtectionSummary.vue`、`.clothing-summary--success`）。
+無框，上緣 `1px solid var(--border-subtle)` 分隔線 → `<h2>` → 內容。
 
 ### 部位／分類狀態清單
 
-不要用「一個部位一列，逐列重複顯示狀態」的長列表（同狀態時會有大量重複、零資訊量的列）。改用**依狀態分組＋橫向可換行的 chip 群組**：狀態文字當群組標題（吃語意色），底下的部位名稱是一排藥丸標籤（`background: var(--tone-soft)`）。同狀態的部位收進同一組，只有狀態真的不同才會分成多組、占用更多垂直空間。
+不要「一個部位一列」的長列表（同狀態時會有大量零資訊量的重複列）。改用**依狀態分組＋橫向可換行 chip**：狀態文字當群組標題（吃語意色），部位名稱是一排藥丸標籤（`background: var(--tone-soft)`）。
 
-### 表單選項（產品標示問卷等）
+### 表單選項
 
-- **2-3 個短選項**：橫向 segmented control（`grid-auto-flow: column`），不要每個選項都是獨立的滿版寬大按鈕。
-- **超過 3 個選項**：兩欄緊湊網格（`grid-template-columns: repeat(2, minmax(0, 1fr))`）。
-- **後續題目依賴前面答案時，條件式隱藏**：如果某個答案會讓後面幾題在邏輯上完全不影響結果（例如「沒有防曬宣稱」時，等待時間／補擦時間／耐水標示都不會拿去算提醒），直接用 `v-if` 整組隱藏，不要不管答案永遠攤開全部題目。
+- 2-3 個短選項：橫向 segmented control
+- 超過 3 個：兩欄緊湊網格
+- 後續題目依賴前面答案時，用 `v-if` 整組隱藏，不要永遠攤開
 
 ### 確認／危險動作
 
-不開獨立卡片或彈窗，用「原地文字替換」：預設顯示摘要文字＋一個文字連結（底線，不是按鈕），點擊後同一個位置換成確認文字＋兩個按鈕（危險動作用實色按鈕＋文字說清楚後果，取消用 `button--quiet`）。不用色條、不用陰影框，純文字排版，跟頁面其他內容視覺語言一致（`SessionEndControl.vue`）。
+不開獨立卡片或彈窗，用**原地文字替換**：預設是摘要文字＋一個文字連結，點擊後同一位置換成確認文字＋兩個按鈕（危險動作用實色，取消用 `.button--quiet`）。
 
-### 空狀態／載入狀態
+### 空狀態／載入／錯誤
 
-- Loading：`SunLoader.vue`（太陽光芒依序 opacity 明滅），不用通用 spinner。
-- 空狀態（例如「尚未建立提醒」）：可以有低調的太陽裝飾背景（`opacity` 極低，例如 0.08，且要確保 SVG 有完整的 `fill: none` 與尺寸限制樣式，否則會變成實心黑色大圓餅——這是真實發生過的 bug，樣式規則寫在元件的 `<style scoped>` 裡一定要跟 template 同步存在，不能只改一邊）。主要行動按鈕跟裝飾圖形要分開，不要疊在一起互相遮擋；按鈕預設靠左（跟主要內文對齊），不要無故靠右跟裝飾圖形打架。
-- 錯誤狀態：不用色條框住整塊，純文字＋按鈕，如果需要顏色提示用小圓點或按鈕本身的顏色，不用整塊邊框變色。
-
----
-
-## 九、版面結構
-
-- `.page-stack` 是共用容器：`max-width: var(--content-max)` + `margin-inline: auto`，避免寬螢幕內容被拉爆、元素之間距離失控。
-- 首頁排列順序：倒數 hero（`<h1>`，語意上的頁面主標題）→ 部位狀態 → 戶外資訊（`<h2>`）→ 提醒控制 → 五日 UV → 免責聲明。Hero 移到最前面後，記得同步把原本在「戶外資訊」上的 `<h1>` 降成 `<h2>`，維持視覺順序與 DOM 語意順序一致，不要讓螢幕閱讀器唸出的標題順序跟畫面顯示順序不一樣。
-- 底部導覽列 `position: fixed`，主要內容容器要留出等高的 `padding-bottom`（見第四節 `--bottom-nav-height`）。
+- Loading：`SunLoader.vue`，不用通用 spinner
+- 空狀態：可有低調太陽裝飾（極低 opacity），SVG 必須有完整的 `fill: none` 與尺寸限制，否則會變成實心黑色圓餅（真實發生過的 bug）
+- 錯誤：不用色框圈住整塊，改讓標題文字吃 `--color-due`，間距一律交給 grid `gap` 控制，不要疊加 margin
 
 ---
 
-## 十、目前設計上不足、建議後續處理的地方
+## 十、已知未套用範圍（誠實清單）
 
-依優先度排序：
+四條規則**只在首頁完整套用**。以下是實際用 grep 驗證出來、尚未收斂的地方：
 
-1. **`.app-card` 的 `box-shadow` 跟「非物理性、無重力壓迫感」哲學矛盾**，是全站唯一還沒決定方向的系統性不一致。建議團隊二選一貫徹到底：拿掉陰影改純邊框分隔，或者明確定義太陽符號是唯一的「無陰影特例」，其他都可以有陰影。目前是懸而未決狀態。
+### 規則 1（字級變數）未套用
 
-2. **「戶外資訊」跟「未來 5 天 UV」職責重疊**：兩者都在催促使用者設定地區，訴求重複。建議整合成一個共用的行動入口，沒設定地區時只在其中一處完整說明+CTA，另一處只用一行簡短文字＋連結指過去。
+以下檔案仍有硬寫字級，且多數是非 token 的中間值（`0.85 / 0.9 / 0.95 / 1.05 / 1.08 / 1.1 / 1.2 / 1.25 / 1.3 / 1.35 / 1.5rem`）：
 
-3. **Setup 流程（`SetupContextPage.vue`、`SetupTimingPage.vue`、`SetupProtectionPage.vue` 等）從未被 audit 過**，只有 `SetupReviewSummary.vue`、`QuickProtectionSummary.vue` 被實際修過。這幾頁很可能還停留在最舊的版本（例如稍早截圖看到的橘色邊框大按鈕選項），需要照第八節的表單規則重新檢查。
+- Setup 流程全部：`SetupStepShell.vue`、`SetupContextPage.vue`、`ContextSelector.vue`、`ApplicationTimePicker.vue`、`WaterStartPicker.vue`、`ZoneProtectionForm.vue`、`SetupReviewSummary.vue`、`QuickProtectionSummary.vue`、`ProtectionAdjustmentSheet.vue`
+- 地區：`RegionLocationPanel.vue`、`RegionManualSelector.vue`、`RegionPreferenceSummary.vue`、`RegionPage.vue`
+- 其他：`ProductSnapshotEditor.vue`、`SetupProcessBanner.vue`、`AppearanceSettings.vue`、`SessionEndControl.vue`、`EveningUvPrompt.vue`、`BrandHeader.vue`、`BottomNavigation.vue`、`GlobalStatusBanner.vue`
+- **連 `app.css` 自己也有兩處**：`.page-heading__eyebrow` 寫死 `0.8rem`（應改用 `--font-size-label`）、`.safety-note` 寫死 `0.72rem`（沒有對應 token，需決定是收進 `--font-size-caption` 還是新增 token）
 
-4. **無障礙對比度從未實際驗證**：深色模式的新色票、五種語意色，這幾輪只顧著調視覺沒有用工具實測是否通過 WCAG AA。
+### 規則 2（填色／邊框）未套用
 
-5. **中等寬度（平板，~768px）斷點沒驗證過**，只確認過手機窄螢幕跟很寬的桌面。
+- `SessionEndControl.vue:193` 錯誤訊息用 `border-left: 3px solid var(--color-due)` — 正是規則禁止的色條
+- `EveningUvPrompt.vue:77` 同時有 `border` 和 `background`，需判斷它算不算「需要注意力的元素」；若算，應拿掉邊框只留填色
+- `FiveDayUvCard.vue` 每格用 `border-color` 表達 UVI 風險等級，且同一資料被編碼三次（彩色邊框＋大數字＋實色藥丸徽章）
+- `.app-card` 仍被 10 個檔案使用（Setup、地區、產品、設定），這些畫面尚未依規則 2 判斷過哪些該保留框
 
-6. **文案審查流程**：專案本身有 `P0_COPY_DECK.md` 定義的審查狀態機制（`PRODUCT_DRAFT → APPROVED`），這幾輪改了不少畫面文字（例如把「現在」改成「已於 20:15 到期」這類建議），這些文字改動要走一遍既有審查流程，不能因為是 AI 建議的就跳過。
+### 規則 4（動畫）未套用
 
-7. **`BottomNavigation.vue` 的選中狀態、頁首狀態反映機制**還在概念階段：討論過「選中分頁用 opacity 差異取代底線」「提醒分頁掛小圓點反映急迫度」，但實際程式碼還沒動手做，只完成了頁首 logo／狀態點的部分（`AppShell.vue` 算出 `highestUrgencyTone` 傳給 `BrandHeader.vue`）。
+- `QuickProtectionSummary.vue:196` 與 `SetupReviewSummary.vue:427` 的 `@keyframes slideDown` 含 `transform: translateY(-0.5rem)` — 進出場位移
+- `CountdownSunTime.vue` 的 `sun-ray-pulse-success` 動畫 `stroke-width` 從 1.75 變 2.5；此外它的 keyframes `0%` 與 `100%` 是空 block，行為是意外正確而非設計正確
+- `SetupReviewPage.vue:125` 的 `@keyframes spin`（`rotate(360deg)`）是持續旋轉動畫，需判斷是否改用 `SunLoader.vue`
 
-8. **`ReminderEmptyState.vue` 的圖示拿掉打勾後，目前留白**，如果之後想要有個小圖示，鈴鐺是合理備案，但還沒實作。
+### 其他待處理
+
+0. **首頁底部免責聲明尚未調整**（`.safety-note`）。方向已確定：加細分隔線、字級降到 `--font-size-caption`、與底部導覽列拉近。**刻意留給獨立 session 處理**——這個改動會動到 `.page-stack` 的間距，而 `.page-stack` 是全站共用容器（MorePage、RegionPage、ReminderPage 等都在用），動手前要先確認對其他頁面的影響。順帶處理上面「規則 1 未套用」提到的 `.safety-note` 字級硬寫問題（目前 `0.72rem`，無對應 token）。
+
+1. `BrandHeader.vue` 的 wordmark 仍有 `letter-spacing: 0.24em`，但內容是中英混排「UVAlert 防曬晴報員」，違反第六節的 CJK 規則。
+2. **無障礙對比度從未實測**。commit `9f7eebe` 的訊息宣稱「深色模式已驗證 WCAG AA+」，但沒有留下驗證方法或數據，不應視為已完成。
+3. **中等寬度（平板 ~768px）斷點沒驗證過**，只確認過手機窄螢幕與寬桌面。`.app-shell` 的 `border-inline` 在這個寬度會形成一個空的「手機殼」外框。
+4. **文案未走審查流程**。`P0_COPY_DECK.md` 定義了 `PRODUCT_DRAFT → APPROVED` 的狀態機制；這輪改了不少畫面文字，這些改動要補走流程。
+5. 整體文案偏向過度解釋與預先防禦（「不影響已保存的本機提醒」「不會影響目前的本機補擦提醒」），是獨立於視覺的另一個問題，尚未處理。
 
 ---
 
-## 十一、給 AI 助手的檢查清單
+## 十一、檢查清單
 
-改動任何畫面前後，過一遍：
+改動任何畫面前後，逐條過：
 
-- [ ] 有沒有「英文/中文 eyebrow 標籤 + letter-spacing + mono 字體」的舊樣板？是不是該直接刪掉 eyebrow（如果它零資訊量）？
-- [ ] 有沒有用色條／描邊表達重要性或狀態？改成滿版底色或小圓點。
-- [ ] 純數字/時間有沒有套用 `.stat-figure`？
-- [ ] 2-3 個短選項是不是該用 segmented control，而不是滿版大按鈕？
-- [ ] 按鈕有沒有純色 `:active` 回饋，沒有殘留 hover 的位移？
-- [ ] 圖示是否符合 `ICON_DESIGN_SYSTEM.md`（線條、留白比例、opacity-only 動畫、對齊邏輯）？
-- [ ] 頁面寬度有沒有受 `--content-max` 限制？
-- [ ] SVG 裝飾元素的 CSS 是否跟 template 同步存在（避免黑色實心圖形 bug）？
-- [ ] 深色模式的新增色票是否重新調過明度/飽和度，不是直接複製淺色模式的 hex？
-- [ ] `--bottom-nav-height` 等關鍵變數改動後，是否用 DevTools Computed 面板實測驗證？
-- [ ] 如果不確定某個檔案的目前狀態，是否已經跟使用者要了「目前專案裡實際的版本」，而不是憑記憶或先前對話的版本去改？
+- [ ] 字級是否只用五個 `--font-size-*` 變數？（資料讀數的 `clamp()` 除外）
+- [ ] 這個容器需要注意力嗎？不需要就無框，用「上緣分隔線 → 標題 → 內容」
+- [ ] 有沒有用色條／左邊框／彩色描邊表達狀態？改用滿版淡底色或文字著色
+- [ ] 同一區塊內每一行文字的左緣是否對齊？有沒有 icon 把文字推開？
+- [ ] 有沒有新增 `box-shadow` 或 gradient？
+- [ ] 動畫是否只改 `opacity`？`transform` 是否只用於靜態幾何？
+- [ ] 純數字／時間有沒有套 `.stat-figure`？
+- [ ] 間距是否統一由 grid `gap` 控制，而非 gap 與多處 margin 疊加？
+- [ ] Eyebrow 是否帶有標題沒有的資訊？沒有就刪
+- [ ] icon 是否承擔資訊？純裝飾就刪
+- [ ] 深色模式的新色票是否重新調過明度／飽和度，不是複製淺色 hex？
+- [ ] 改完是否用 DevTools 實測（左緣 x 座標、computed font-size、`--bottom-nav-height`），而不是只看畫面？
 
-改完後：列出用了清單裡的哪幾條、跳過哪些並說明原因，附上修改前後的畫面或程式碼片段給使用者確認。
+改完後：列出用了清單裡哪幾條、跳過哪些並說明原因，附上實測數據。

@@ -4,7 +4,9 @@
 
 本文件的目的是讓任何人（包含 AI 助手）在新增或修改圖示時，不需要重新判斷風格，直接照規則套用即可，確保全站圖示視覺一致。
 
-參考基準：首頁補擦倒數卡片的太陽圖示（`CountdownSunTime.vue`）。它已經符合以下所有規則，如果不確定某個規則怎麼套用，直接回頭看那支元件的寫法。
+參考基準：首頁補擦倒數卡片的太陽圖示（`CountdownSunTime.vue`）。它的**靜態造型**（線條粗細、留白比例、`rotate()` 對稱複製、光芒隨時間 opacity 遞減）是全站基準，不確定某個規則怎麼套用時回頭看它。**但它的補擦成功動畫是已知例外**，會改 `stroke-width`，不要照抄（見文末「待處理」第 2 點）。
+
+本文件與 `DESIGN_SYSTEM.md` 是同一套設計語言的兩份文件：全站規則看 `DESIGN_SYSTEM.md`，圖示細節看這裡。兩份都是說明「為什麼」的文件，現況的真實來源是 `packages/ui/src/styles.css` 與 `apps/web/src/assets/app.css`。
 
 ---
 
@@ -17,18 +19,31 @@
 
 ---
 
-## Token（請加進 `styles.css`）
+## 尺寸與線條粗細（現況）
 
-```css
-:root {
-  --icon-stroke-width: 1.75;
-  --icon-size-sm: 1.25rem;   /* 列表內小圖示 */
-  --icon-size-md: 1.5rem;    /* 按鈕、導覽列圖示 */
-  --icon-size-lg: 3.25rem;   /* 主視覺圖示，如太陽倒數 */
-}
+> 這一節描述**目前程式碼實際的做法**。先前版本在這裡放了一組 `--icon-*` token 並註明「請加進 `styles.css`」，但那件事從未執行——`packages/ui/src/styles.css` 裡沒有這些變數。照舊版寫法引用會拿到 undefined，只有 `SunLoader.vue` 因為寫了 `var(--icon-size-lg, 3.25rem)` 的 fallback 才沒壞。收斂方案見文末「待處理」。
+
+專案的圖示分兩類，來源不同：
+
+**一、lucide 元件**（`@lucide/vue`，佔絕大多數）
+
+用 props 控制，不走 CSS：
+
+```vue
+<Wind :size="24" :stroke-width="1.6" aria-hidden="true" />
 ```
 
-新圖示的尺寸一律從這三個 token 裡選，不要自己另外寫死 px/rem 數值。如果三個都不合用，跟團隊討論是否要新增一個 token，而不是就地寫一個一次性的數值。
+目前實際使用中的 `:size` 值有 12 種（16、17、18、19、20、21、22、23、24、25、26、27），其中 18 最常見。這個離散程度沒有設計理由，是逐次微調累積的結果。**新增圖示時不要再擴充新數值**，從既有的三個常用檔位選：
+
+| 情境 | 建議值 |
+|---|---|
+| 按鈕內、行內小圖示 | `:size="18"` |
+| 區塊標題、導覽列 | `:size="24"` |
+| 主視覺 | 用手寫 SVG，不用 lucide |
+
+**二、手寫 SVG**（太陽符號家族）
+
+用 CSS 控制尺寸，`stroke-width` 寫在 SVG 屬性或 scoped CSS 裡，值固定 **1.75**（以 24×24 或 48×48 viewBox 為基準）。參考 `CountdownSunTime.vue`、`BrandHeader.vue`、`SunLoader.vue`。
 
 ---
 
@@ -36,13 +51,14 @@
 
 | 項目 | 規則 | 理由 |
 |---|---|---|
-| 線條粗細 | 統一 `stroke-width: var(--icon-stroke-width)`（1.75，以 24x24 或 48x48 viewBox 為基準等比例換算） | 避免不同圖示粗細不一致，小尺寸下差異會很明顯 |
+| 線條粗細 | 手寫 SVG 用 `stroke-width: 1.75`（以 24×24 或 48×48 viewBox 為基準）；lucide 顯式寫 `:stroke-width="1.6"`，**不要省略**——省略會吃 lucide 預設的 2，明顯比周圍圖示重 | 避免不同圖示粗細不一致，小尺寸下差異會很明顯 |
 | 端點/轉角 | `stroke-linecap: round`、`stroke-linejoin: round` | 圓角端點呼應「無機但不生硬」的調性，全站統一，不用尖角 |
-| 填色 | 預設一律 `fill: none`，純線條；只有「已選取／啟用」狀態才允許實心填色（例如底部導覽選中狀態的底線） | 實心色塊只保留給「狀態語意」用，不是裝飾 |
+| 填色 | 預設一律 `fill: none`，純線條；只有「已選取／啟用」狀態才允許實心填色（例如 `BottomNavigation.vue` 的到期紅點 `.bottom-nav__badge`） | 實心色塊只保留給「狀態語意」用，不是裝飾 |
+| 是否該存在 | 不承擔資訊的圖示直接刪，不要為了「標題旁邊要有東西」而放；圖示不得插在文字左側把文字推開（見 `DESIGN_SYSTEM.md` 規則 3） | 裝飾性圖示會稀釋太陽符號的辨識度，並破壞區塊內的左對齊線 |
 | 顏色 | 預設用 `currentColor`，外層用 `color:` 或 `var(--text-primary)` / `var(--text-secondary)` 控制；只有真正代表「狀態」的圖示（如太陽倒數）才吃語意色變數（`var(--countdown-tone)` 等） | 大部分圖示應該是中性的，只有代表狀態的圖示才該變色 |
 | 留白比例 | 圖形主體與 viewBox 邊界至少留 8–10% 邊距，但不超過 20% | 避免有些圖示塞滿、有些圖示中間留一大圈空白，統一視覺密度 |
 | 對稱性 | 優先用「旋轉／鏡射複製」畫出結構（例如太陽的 8 條光芒用 `rotate()` 產生），不要手繪不規則造型 | 呼應中心對稱、無重力壓迫感的哲學，圖示之間才有家族感 |
-| 尺寸 | 從 `--icon-size-sm/md/lg` 三個 token 選，不寫死數值 | 未來要整體調整尺寸時，改 token 就好，不用一個個找 |
+| 尺寸 | lucide 從 `:size="18"`／`:size="24"` 兩個檔位選；手寫 SVG 用 CSS 控制寬高 | 尺寸值越少，全站圖示的視覺密度越一致（現況已散成 12 種值，見文末待處理） |
 | 動畫 | 只允許 `opacity` 淡入淡出（例如太陽光芒隨時間遞減），不用位移／縮放 | 位移、彈跳這類動畫暗示物理慣性與重量，跟「無重力、非物理性」哲學矛盾 |
 
 ---
@@ -54,7 +70,7 @@
 1. 圖示跟文字用同一個 flex/grid 容器包起來，不要各自獨立定位。
 2. 如果文字是**多行堆疊**（例如「28 分鐘」+「預計 20:15」兩行），先把這兩行包成同一個 `grid` 直排區塊，讓它們天生共用同一個左邊界 —— 不要事後用 `margin-left` 手動去算縮排量（不同元素的 `em` 基準不一樣，算出來常常是錯的）。
 3. 圖示與文字區塊的垂直對齊，預設用 `align-items: flex-end`（對齊底部／基準線），不要用 `center`。置中對齊會讓圖示的視覺重心偏高，跟下面文字的關係顯得漂浮、不平衡；底部對齊才有「站穩」的感覺。
-4. 線條圖形天生比同尺寸的粗體實心文字視覺份量輕，如果圖示跟粗體大數字放在一起顯得太小，把圖示尺寸再放大一級（例如從 `--icon-size-md` 換成 `--icon-size-lg`），不要只放大文字或加粗圖示線條來補償。
+4. 線條圖形天生比同尺寸的粗體實心文字視覺份量輕，如果圖示跟粗體大數字放在一起顯得太小，把圖示尺寸再放大一級，不要只放大文字或加粗圖示線條來補償。`CountdownSunTime.vue` 的太陽用 `3.25rem` 搭配 `clamp(1.75rem, 6vw, 2.25rem)` 的數字，是這條規則的參考比例。
 
 ---
 
@@ -63,11 +79,20 @@
 複製這個結構去改造型，規則已經內建在屬性裡：
 
 ```html
-<svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
-     stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"
-     width="var(--icon-size-md)" height="var(--icon-size-md)">
+<svg class="my-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+     stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
   <!-- 圖形內容，只用 path / circle / line，不用 rect 硬邊角 -->
 </svg>
+```
+
+尺寸寫在 scoped CSS，不寫在 `width`／`height` 屬性（屬性不吃 CSS 變數）：
+
+```css
+.my-icon {
+  width: 1.5rem;
+  height: 1.5rem;
+  flex: 0 0 auto;   /* 放在 flex 容器裡時，避免被壓扁 */
+}
 ```
 
 需要對稱造型（例如放射狀、花瓣狀）時，用單一元素＋`transform="rotate(...)"` 複製，不要手繪每一份：
@@ -85,20 +110,28 @@
 
 ## 檢查清單（新增或修改圖示前過一遍）
 
-- [ ] `stroke-width` 是不是 `var(--icon-stroke-width)`（1.75），沒有寫死其他數值？
+- [ ] 這個圖示有承擔資訊嗎？純裝飾就不要加
+- [ ] 它有沒有插在文字左側、把文字推離區塊的左對齊線？
+- [ ] 手寫 SVG 的 `stroke-width` 是 1.75？lucide 有沒有顯式寫 `:stroke-width="1.6"`（不是省略）？
 - [ ] 端點跟轉角是不是都用 `round`？
 - [ ] 預設 `fill: none`，只有狀態圖示才有例外？
 - [ ] 顏色是不是用 `currentColor` 或 token 變數，沒有寫死 hex？
 - [ ] 圖形留白比例跟太陽圖示（基準）差不多，沒有明顯偏空或偏擠？
 - [ ] 如果有對稱結構，是不是用 `rotate()` 複製畫出來，不是手繪？
-- [ ] 尺寸是不是三個 token 之一？
-- [ ] 如果有動畫，是不是只用 `opacity`？
+- [ ] lucide 的 `:size` 是不是從 18／24 這兩個檔位選，沒有再發明新數值？
+- [ ] 如果有動畫，是不是只用 `opacity`？（`transform` 只能用在靜態幾何，例如翻轉箭頭）
 - [ ] 如果圖示旁邊有文字，對齊方式是不是照上面「對齊規則」處理，不是憑感覺手動調 margin？
 
 ---
 
 ## 已知目前不符合這套規則、待處理的地方
 
-（依實際檢查結果持續更新這份清單，不要留空）
+（依實際檢查結果持續更新這份清單，不要留空。以下為 2026-08-05 對照程式碼的結果）
 
-- `.app-card` 目前用 `box-shadow: var(--shadow-card)`，這是模擬物理光影的擬物陰影，跟「非物理性、無重力壓迫感」的哲學衝突。是否要拿掉或降低陰影，需要團隊決定整體方向後再處理，屬於比圖示更大範圍的設計語言決策，不在這份文件的處理範圍內，但務必知會設計負責人。
+1. **尺寸與粗細是否要收斂成 token，尚未決定**。目前 lucide 的 `:size` 有 12 種值（16～27）散落在 47 處，其中只有 14 處顯式寫了 `:stroke-width`，其餘吃 lucide 預設的 2。兩個選項：(a) 把 `--icon-size-*` 真的加進 `packages/ui/src/styles.css` 並改用 CSS 控制 lucide 尺寸；(b) 放棄 token、只靠本文件的 18／24 兩檔位約束。在決定之前，不要再新增新的尺寸數值。
+
+2. **`stroke-width` 的三處例外**：
+   - `ReminderEmptyState.vue:74` 與 `ProductSnapshotEditor.vue:320` 用 `1.5`，不是 1.75。
+   - `CountdownSunTime.vue:187` 的補擦成功動畫把 `stroke-width` 從 1.75 拉到 `2.5`，這同時違反「動畫只用 opacity」。該動畫的 keyframes `0%` 與 `100%` 是空 block，行為是意外正確而非設計正確，需要重寫或明確登記為例外。
+
+3. **`.app-card` 的 `box-shadow` 問題已解決**（舊版本文件把它列為待團隊決定）。全站已無 `box-shadow`，`src/` 下僅存的兩處是 `box-shadow: none`。但 `--shadow-card` 與 `--shadow-float` 兩個 token 仍定義在 `styles.css` 且無人使用，留著會誘導後續開發重新引入陰影，建議刪除。

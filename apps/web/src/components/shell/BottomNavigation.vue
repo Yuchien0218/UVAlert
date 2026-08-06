@@ -22,6 +22,14 @@ const hasDueReminder = computed(() => {
   if (session === null) return false;
   return session.zones.some((zone) => zone.timingStatus === "reapply_due");
 });
+
+// 紅點是 aria-hidden 的純視覺標記，所以「有部位到期」這個資訊必須進到
+// 連結本身的可及名稱，否則螢幕閱讀器使用者完全收不到。
+function navigationLabel(to: string, label: string): string {
+  return to === "/reminder" && hasDueReminder.value
+    ? `${label}（有部位建議現在處理）`
+    : label;
+}
 </script>
 
 <template>
@@ -31,7 +39,7 @@ const hasDueReminder = computed(() => {
       :key="item.to"
       class="bottom-nav__item"
       :to="item.to"
-      :aria-label="item.label"
+      :aria-label="navigationLabel(item.to, item.label)"
     >
       <div class="bottom-nav__icon-wrapper">
         <component

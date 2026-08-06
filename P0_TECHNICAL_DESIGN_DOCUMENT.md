@@ -8,11 +8,11 @@
 | Reminder Rules | `P0_REMINDER_RULE_DECISION_TABLE.md` v0.2 |
 | Copy Deck | `P0_COPY_DECK.md` v0.2 |
 | Requirement Traceability Matrix | `P0_REQUIREMENT_TRACEABILITY_MATRIX.md` v0.7 |
-| 文件版本 | 0.6 |
+| 文件版本 | 0.7 |
 | 狀態 | Phase 0、Phase 1 核心、Phase 2 foundation／SetupDraft 與 Phase 3 Web Shell／S-01／S-03～S-07 local slice 已實作並通過目前自動 Gate；完整 P0 發布仍受未完成流程與專業審查 Gate 約束 |
 | 架構決策 | Web／PWA first，Capacitor-ready |
 | 建立日期 | 2026-07-29 |
-| 最近更新 | 2026-07-31 |
+| 最近更新 | 2026-08-05 |
 
 > 本文件把既有產品規格轉成可實作、可測試、可部署的技術設計，不新增產品功能、醫療推論或提醒分鐘數。若與 PRD、P0 Release Manifest 或 Reminder Rule Decision Table 衝突，必須先修正本文件，不得用工程實作覆蓋上游安全規格。
 
@@ -156,14 +156,43 @@ Reminder semantic token 工作值：
 | Untimed action | `#F1EDFF` | `#5B3CC4` | `--text-primary` | 無可信時間或資料待確認 |
 | Transaction success | `#E9F7F1` | `#147D64` | `--text-primary` | 只表示儲存／提交成功 |
 
+深色模式 semantic 值（2026-08-05 補入，實作見 `packages/ui/src/styles.css`）：
+
+| 狀態 | 深色 Emphasis | 深色 Surface |
+| --- | --- | --- |
+| Tracking | `#6BA3E0` | `#17293D` |
+| Reapply soon | `#E0A23F` | `#3A2A11` |
+| Reapply due | `#E2585F` | `#3C1C1E` |
+| Untimed action | `#A084E8` | `#271F42` |
+| Transaction success | `#35C19A` | `#143329` |
+
+深色中性色：`--page-background` `#0F0E0C`、`--surface-primary` `#1C1A17`、
+`--text-primary` `#F5F3EF`、`--text-secondary` `#A8A29B`、
+`--border-subtle` `rgb(255 250 240 / 12%)`。深色不得使用純黑或純白。
+
+UVI 風險色（淺／深）：low `#507AA8`／`#6F9BD4`、moderate `#BD8500`／`#E0AB35`、
+high `#D16627`／`#E3803E`、very-high `#C43D3D`／`#E0555A`、
+extreme `#7D4BB3`／`#A878E0`。
+
+深色值不得由淺色值直接沿用：同一色值在近黑背景上會因同時對比效應顯得洗白，
+每組都必須重新提高明度與飽和度。
+
 限制：
 
-- `tracking` 不得使用綠色、勾勾圖示或「安全」「有效防護中」等保證性語言。
 - 綠色不得表示皮膚安全、產品仍有效、期限可信或不需行動。
-- 色彩必須同時搭配狀態文字、圖示、邊框或形狀。
+- `tracking` 不得使用綠色或「安全」「有效防護中」等保證性語言，
+  也不得用勾勾圖示**表示狀態**。動作按鈕上的確認圖示（例如「記錄已補擦」
+  按鈕內的 check）屬於操作 affordance，不在此限。
+  （2026-08-05 裁決；原條文一律禁止勾勾圖示，與實作不符。）
+- **顏色不得是狀態的唯一載體**，必須另有文字、可及名稱或形狀承載相同資訊。
+  原條文要求「同時搭配文字、圖示、邊框或形狀」，指定了手段而非結果，
+  與「結構性區塊一律無框」的版面規則衝突；2026-08-05 改為只要求結果。
+  驗證方式：把畫面轉成灰階，狀態是否仍可辨識。
 - `timed_ring` 只使用 Tracking／Reapply soon 的可信時間；Due 與
   Untimed 使用靜態卡片。
 - 元件只能引用 semantic／component token，不得直接引用 hex primitive。
+- 字級只使用 `--font-size-page-title｜section-title｜body｜label｜caption`
+  五個變數，不得寫死中間值；詳見 `DESIGN_SYSTEM.md` 規則 1。
 - `#8F8F8F` 對 `#F9F9F9` 的對比不足以作一般小字；實作使用
   `#5A5A5A` 作可讀次要文字。
 - daylight 與 dark／system mode 使用獨立 semantic mapping，不做單純反相。
@@ -364,42 +393,61 @@ View 不得：
 
 ### 7.2 Component map
 
-| Component／Composable | 單一責任 | 主要輸入 | 主要輸出 |
-| --- | --- | --- | --- |
-| `AppShell` | 提供共用頂部、底部導覽、安全區與全域狀態位置 | route meta、boot state | navigation events |
-| `GlobalStatusBanner` | 顯示 offline、未保存、context 更新等持續限制 | typed status | retry／review action |
-| `UviCard` | 呈現一筆已標準化 WeatherSnapshot | snapshot、freshness、copy | refresh／change region |
-| `FiveDayUvCard` | 呈現五個仍有效的白日時段與 loading／empty／cached／error | FiveDayUvForecast、phase | refresh |
-| `EveningUvPrompt` | 呈現固定晚間區間的一次性 App 內提示 | forecast、dismissal cycle | view／dismiss |
-| `PrimaryReminderPanel` | 依 `primaryAction` 顯示唯一主要狀態 | primaryAction、approved copy | primary／secondary action |
-| `TimedReminderRing` | 呈現可信的 tracking／soon 時間 | actionAt、trustedNow、aria text | focus request |
-| `DueStatusCard` | 呈現已到期的靜態狀態 | zones、reasons、copy | record reapplication |
-| `UntimedActionCard` | 呈現沒有可信期限的下一步 | action kind、zones、reasons | resolve action |
-| `ZoneStatusList` | 分組顯示需要處理／即將處理／其他狀態 | readonly projections | select zone |
-| `SetupStepShell` | 統一設定步驟、返回、取消與草稿狀態 | step、busy、draft status | next／back／cancel |
-| `ContextSelector` | 收集情境與水上子狀態 | model | update／continue |
-| `ZonePresetSelector` | 顯示建議組合並要求明確接受或調整 | preset、groups | accept／adjust |
-| `ZoneMethodEditor` | 編輯合法部位方法組合 | zones、method schema | typed change |
-| `ProductSnapshotEditor` | 收集產品身分與必要標示 snapshot | product／draft context | validated snapshot draft |
-| `ApplicationTimePicker` | 收集實際塗抹時間 | trusted clock、allowed range | confirmed UTC instant |
-| `SetupReviewSummary` | 呈現將成為真值的完整摘要 | readonly command preview | edit section／submit |
-| `ReapplicationForm` | 建立互斥 Application partition | suggested zones、products | confirm command |
-| `ContextEventForm` | 建立水上／汗／擦拭／摩擦／洗手等事件 | current projection | confirm command |
-| `CorrectionForm` | 建立 replace／void 後繼，不修改原事件 | effective leaf、constraints | correction command |
-| `ProductList` | 顯示目前使用與過去紀錄 | readonly products | add／edit／restore |
-| `ProductForm` | 新增／編輯產品主檔 | optional existing product | validated product command |
-| `ConfirmActionSheet` | 最終確認 mutation 或破壞性操作 | summary、busy、destructive | confirm／cancel |
-| `SuccessSummary` | 顯示實際更新範圍與更正入口 | committed result | correct／close |
-| `useAppBoot` | 協調啟動狀態，不保存 domain truth | repositories、ports | readonly boot state |
-| `useCurrentSession` | 讀取目前 Session 與 revision | repository | readonly session projection |
-| `useReminderProjection` | 以 domain reducer 產生顯示模型 | events、trusted clock | readonly projection |
-| `useSetupDraft` | 管理允許保存的草稿欄位與 24 小時到期 | draft repository | readonly draft＋actions |
-| `useCommandMutation` | 執行原子命令、錯誤映射與 commit 後通知 | command service | status＋committed result |
-| `useWeather` | 取得標準化 UVI，離線讀 WeatherSnapshot | API＋repository | typed weather state |
-| `createUvForecastController` | 協調地區、同源 API、IndexedDB 快照、18:00～05:59 與每晚一次 dismissal | ports、clock、local storage | readonly forecast state＋refresh／dismiss |
-| `useTrustedClock` | 校準、偵測跳時鐘並提供 trustedNow | clock port／time API | clock status |
-| `useConnectivity` | 提供 online／offline 狀態與重新連線事件 | connectivity port | readonly status |
-| `usePwaInstall` | 管理 install prompt 與平台說明 | install port | capability＋install action |
+> 2026-08-05 依實際程式碼重寫。先前版本停留在規劃階段的命名：
+> `TimedReminderRing`／`DueStatusCard`／`UntimedActionCard` 已合併為單一
+> `ReminderPanel`（commit 81f1ebc），`UviCard` 等十餘個元件尚未實作，
+> controller 也整批改用 `createXController` 形式。下表分「已實作」與
+> 「規劃中」兩段，不要再把規劃中的名稱當成既有元件引用。
+
+#### 已實作
+
+| Component／Controller | 單一責任 |
+| --- | --- |
+| `AppShell` | 共用頂部、底部導覽、安全區與全域狀態位置；算出 `highestUrgencyTone` 傳給 `BrandHeader` |
+| `BrandHeader` | 品牌列與全站最高急迫度；tone 同時反映在文字與狀態點顏色 |
+| `BottomNavigation` | 四個主要入口與到期紅點；到期狀態同時進入連結的可及名稱 |
+| `GlobalStatusBanner` | 顯示 offline、未保存、context 更新等持續限制 |
+| `HomeReminderSummary` | 首頁主提醒卡；有可信期限走倒數，否則走 untimed 卡 |
+| `CountdownSunTime` | 太陽光芒隨剩餘時間比例明滅的倒數讀數 |
+| `ReminderPanel` | 單一通用提醒面板，支援 timed／soon／due／untimed 四種 tone |
+| `PrimaryReminderPanel` | 依 `primaryAction` 顯示唯一主要狀態 |
+| `ReminderEmptyState` | 尚未建立提醒時的共用空狀態 |
+| `ZoneStatusList` | 依狀態分組的部位 chip 群組 |
+| `SessionEndControl` | 原地文字替換式的結束提醒確認 |
+| `SunLoader` | 全站 loading 指示器 |
+| `OutdoorContextCard` | 首頁地區摘要與變更入口 |
+| `FiveDayUvCard` | 五個白日時段與 loading／empty／cached／error |
+| `EveningUvPrompt` | 固定晚間區間的一次性 App 內提示 |
+| `SetupStepShell` | 統一設定步驟、返回、取消與草稿狀態 |
+| `ContextSelector` | 收集情境與室內／水上子狀態 |
+| `QuickProtectionSummary` | 建議部位組合的接受或調整（可摺疊） |
+| `ProtectionAdjustmentSheet` | 部位與方法調整的 sheet |
+| `ZoneProtectionForm` | 編輯合法部位方法組合 |
+| `ApplicationTimePicker` | 收集實際塗抹時間 |
+| `WaterStartPicker` | 收集入水時間 |
+| `ProductSnapshotEditor` | 收集產品身分與必要標示 snapshot |
+| `SetupProcessBanner` | 設定流程中的產品頁狀態提示 |
+| `SetupReviewSummary` | 呈現將成為真值的完整摘要 |
+| `RegionLocationPanel`／`RegionManualSelector`／`RegionPreferenceSummary` | 定位、手動行政區與目前地區摘要 |
+| `AppearanceSettings` | 本機顯示偏好 |
+| `createAppBootController` | 協調啟動狀態，不保存 domain truth |
+| `createAppearanceController` | 主題偏好與 document 契約 |
+| `createSetupController` | 草稿欄位、24 小時到期與步驟推進 |
+| `createSessionControlController` | 結束 Session 的原子命令與錯誤映射 |
+| `createUvForecastController` | 地區、同源 API、IndexedDB 快照、18:00～05:59 與每晚一次 dismissal |
+| `createRegionController` | 地區解析與偏好保存 |
+| `createProductSettingsController` | 產品設定讀寫 |
+| `useSetup`／`useCurrentTime`／`useAppearance` | 對應 controller 的 Vue 綁定層 |
+
+#### 規劃中（尚未實作，對應 S-08～S-20）
+
+`UviCard`（即時測站觀測；目前只有五日區域預報）、`ReapplicationForm`、
+`ContextEventForm`、`CorrectionForm`、`ProductList`、`ProductForm`、
+`ConfirmActionSheet`、`SuccessSummary`、`usePwaInstall`、`useTrustedClock`
+（可信時間目前由 `useCurrentTime` 以系統時鐘暫代，尚未做校準與跳時鐘偵測）。
+
+實作這些元件時沿用既有慣例：controller 用 `createXController(ports)` 回傳
+readonly state＋明確 action，Vue 綁定層才叫 `useX`。
 
 ### 7.3 Vue state 原則
 

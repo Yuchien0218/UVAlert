@@ -165,6 +165,39 @@ describe("HomeReminderSummary", () => {
     ]);
   });
 
+  it("無可信期限時使用 untimed 色調，不沿用 tracking", () => {
+    const untimedSession: SessionProjection = {
+      ...session,
+      zones: [
+        {
+          ...baseZone,
+          timingStatus: "untimed_action",
+          zoneDueAt: null,
+          zoneNextActionAt: null
+        }
+      ],
+      primaryAction: {
+        ...session.primaryAction,
+        presentationType: "untimed_action_card",
+        actionAt: null,
+        affectedZoneInstanceIds: ["zone-forehead"]
+      }
+    };
+    const wrapper = mount(HomeReminderSummary, {
+      props: {
+        session: untimedSession,
+        connectivity: "online"
+      }
+    });
+    const card = wrapper.get('[data-testid="home-reminder-summary"]');
+
+    expect(card.attributes("data-presentation")).toBe("untimed");
+    expect(card.classes()).toContain("home-summary--untimed");
+    expect(card.classes()).not.toContain("home-summary--tracking");
+    // 圓形打勾標記代表「已完成／安全」，不該出現在需要處理的狀態上
+    expect(wrapper.find(".home-summary__mark").exists()).toBe(false);
+  });
+
   it("部位時間不同時顯示最快到期的優先部位", () => {
     const prioritySession: SessionProjection = {
       ...session,

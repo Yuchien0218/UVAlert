@@ -170,5 +170,15 @@ describe("BottomNavigation", () => {
 
     const badge = wrapper.find('[data-testid="bottom-nav-badge"]');
     expect(badge.exists()).toBe(true);
+
+    // 紅點是 aria-hidden 的純視覺標記，狀態必須另外進到可及名稱，
+    // 否則顏色與形狀就是唯一載體。
+    expect(badge.attributes("aria-hidden")).toBe("true");
+    expect(
+      wrapper.get('a[href="/reminder"]').attributes("aria-label")
+    ).toBe("提醒（有部位建議現在處理）");
+    expect(wrapper.get('a[href="/"]').attributes("aria-label")).toBe(
+      "首頁"
+    );
   });
 });

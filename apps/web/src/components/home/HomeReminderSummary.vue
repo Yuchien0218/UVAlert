@@ -47,6 +47,24 @@ const remainingFraction = computed(
   () => clockPresentation.value?.progress ?? 0
 );
 
+// 沒有倒數可顯示時（clockPresentation 為 null），過去不套任何 tone modifier，
+// 於是 fallback 到 .home-summary 預設的 tracking 藍——把「無可信期限」畫成
+// 「提醒運作中」。改為在這種情況改吃 reminderPresentation 的 tone。
+// 兩邊的命名不同：clock 用 tracking／reminder 用 timed，這裡統一成 CSS 的寫法。
+const toneModifier = computed<string | null>(() => {
+  const clockTone = clockPresentation.value?.tone;
+  if (clockTone !== undefined) {
+    return `home-summary--${clockTone}`;
+  }
+
+  const reminderTone = reminderPresentation.value?.tone;
+  if (reminderTone === undefined) return null;
+
+  return `home-summary--${
+    reminderTone === "timed" ? "tracking" : reminderTone
+  }`;
+});
+
 </script>
 
 <template>
@@ -54,10 +72,7 @@ const remainingFraction = computed(
   <section
     v-else
     class="home-summary"
-    :class="{
-      [`home-summary--${clockPresentation?.tone}`]:
-        clockPresentation !== null
-    }"
+    :class="toneModifier"
     :data-presentation="
       session === null
         ? 'empty'
@@ -104,9 +119,6 @@ const remainingFraction = computed(
     </template>
 
     <template v-else-if="session !== null && reminderPresentation !== null">
-      <div class="home-summary__mark" aria-hidden="true">
-        <CheckCircle2 :size="27" :stroke-width="1.6" />
-      </div>
       <div>
         <p class="home-summary__eyebrow">
           {{ reminderPresentation.eyebrow }}
@@ -155,14 +167,9 @@ const remainingFraction = computed(
   --home-summary-tone-soft: var(--color-due-soft);
 }
 
-.home-summary__mark {
-  display: grid;
-  width: 3.25rem;
-  height: 3.25rem;
-  place-content: center;
-  border-radius: 50%;
-  background: var(--surface-primary);
-  color: var(--home-summary-tone);
+.home-summary--untimed {
+  --home-summary-tone: var(--color-untimed);
+  --home-summary-tone-soft: var(--color-untimed-soft);
 }
 
 .home-summary__eyebrow {

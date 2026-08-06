@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { computed } from "vue";
+
 interface Props {
   /**
    * 反映目前所有提醒裡「最高急迫度」的狀態，由父層（通常是讀取所有
@@ -8,8 +10,24 @@ interface Props {
   tone?: "tracking" | "soon" | "due" | null;
 }
 
-withDefaults(defineProps<Props>(), {
+const props = withDefaults(defineProps<Props>(), {
   tone: null
+});
+
+// 狀態點的顏色不能是唯一的狀態載體，否則對色覺障礙或在強光下看不出
+// 色差的使用者等於沒有這個資訊。文字跟著 tone 走，色彩只是強化。
+// 這裡的字串刻意與 ZoneStatusList.vue 的狀態標籤一致，不另創說法。
+const contextLabel = computed(() => {
+  switch (props.tone) {
+    case "tracking":
+      return "提醒進行中";
+    case "soon":
+      return "即將需要檢查";
+    case "due":
+      return "建議現在處理";
+    case null:
+      return "本機提醒";
+  }
 });
 </script>
 
@@ -44,7 +62,7 @@ withDefaults(defineProps<Props>(), {
       :class="tone ? `brand-header__context--${tone}` : undefined"
     >
       <span class="brand-header__status-dot" aria-hidden="true" />
-      本機提醒
+      {{ contextLabel }}
     </div>
   </header>
 </template>
