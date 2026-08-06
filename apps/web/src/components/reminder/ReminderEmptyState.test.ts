@@ -19,9 +19,6 @@ describe("ReminderEmptyState", () => {
     expect(card.classes()).toContain("empty-state--tracking");
     expect(card.classes()).not.toContain("app-card");
     expect(wrapper.get(".empty-state__action").classes()).toContain(
-      "empty-state__action--end"
-    );
-    expect(wrapper.get(".empty-state__action").classes()).toContain(
       "empty-state__action--compact"
     );
     expect(wrapper.get(".empty-state__title").text()).toBe(

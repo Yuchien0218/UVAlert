@@ -24,7 +24,7 @@ defineEmits<{
   adjust: [];
 }>();
 
-const expanded = shallowRef(false);
+const expanded = shallowRef(true);
 
 const preset = computed(() => recommendedPresetFor(props.context));
 const zoneLabels = computed(() =>

@@ -70,7 +70,7 @@ function getErrorMessage(error: SessionEndError): string {
       </p>
       <button
         ref="stopButton"
-        class="button button--quiet session-end__trigger"
+        class="text-link session-end__trigger"
         type="button"
         @click="openConfirmation"
       >
