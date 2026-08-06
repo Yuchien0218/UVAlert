@@ -3,13 +3,13 @@
 | 文件資訊 | 內容 |
 | --- | --- |
 | 對應 PRD | `防曬晴報員PRD.md` v3.9 |
-| 對應畫面規格 | `P0_SCREEN_INVENTORY.md` v0.3 |
+| 對應畫面規格 | `P0_SCREEN_INVENTORY.md` v0.4 |
 | 對應提醒規則 | `P0_REMINDER_RULE_DECISION_TABLE.md` v0.2 |
-| 文件版本 | 0.3 |
+| 文件版本 | 0.4 |
 | 語系 | 繁體中文 `zh-TW` |
 | 狀態 | 文案與審查基準草案 |
 | 建立日期 | 2026-07-29 |
-| 最近更新 | 2026-08-05 |
+| 最近更新 | 2026-08-06 |
 
 > 本文件提供 P0 介面文案、CTA、錯誤與狀態模板。標記為 `BLOCKED` 的文案在相應專業審查完成前不得發布。任何文案不得改變 reducer 規則、建立新期限或被用來抵銷誤導性的畫面設計。
 
@@ -930,6 +930,21 @@ version
 | title | 記錄實際補擦 |
 | body | 已預選目前到期或即將到期的部位。請確認實際補擦的部位、產品與時間。 |
 | review_status | PRODUCT_DRAFT |
+
+### CP-REAPPLY-001B：入口（首次記錄變體）
+
+`complete_protection_record` 觸發時（`recordStatus === "unrecorded"`）沿用
+S-08 表單，但這是**第一次記錄防護，不是補擦**。CP-REAPPLY-001 的
+「記錄實際補擦」在此會說錯話，必須改用本則。
+
+| 欄位 | 內容 |
+| --- | --- |
+| title | BLOCKED：待撰寫的首次記錄標題 |
+| body | BLOCKED：待撰寫。須說明這些部位尚未有防護紀錄，正在補登實際使用的產品與時間，而非記錄補擦。 |
+| review_status | BLOCKED／PRODUCT_DRAFT |
+
+同理，CP-REAPPLY-003 的 `確認補擦紀錄` 與 CP-REAPPLY-004 的
+`補擦紀錄已更新` 在此變體下也需要對應版本。
 
 ### CP-REAPPLY-002：選擇範圍
 

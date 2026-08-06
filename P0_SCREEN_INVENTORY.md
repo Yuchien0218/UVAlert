@@ -4,10 +4,10 @@
 | --- | --- |
 | 對應 PRD | `防曬晴報員PRD.md` v3.9 |
 | 對應交付清單 | `P0_RELEASE_MANIFEST.md` v0.2 |
-| 文件版本 | 0.3 |
+| 文件版本 | 0.4 |
 | 狀態 | P0 UX／UI 開發基準草案 |
 | 建立日期 | 2026-07-29 |
-| 最近更新 | 2026-08-05 |
+| 最近更新 | 2026-08-06 |
 
 > 本文件定義 P0 畫面、進入條件、主要操作及狀態呈現。提醒公式、事件因果、資料模型、安全邊界與正式驗收仍以 PRD 為準。若本文件與 PRD 衝突，以 PRD 為準並修正本文件。
 
@@ -119,7 +119,7 @@ route 為目前建議識別名稱，可在 Technical Design 階段調整；頁�
 | S-01 | `/` | 首頁 | 顯示 | 已實作 | 開始設定，或直接執行 active Session 的最高優先操作 |
 | S-02 | `/region` | 地區與定位 | 可隱藏 | 已實作 | 保存手動地區、本次定位結果或略過狀態 |
 | S-03 | `/setup/context` | 設定：情境 | 隱藏 | 已實作 | 保存草稿情境 |
-| S-04 | `/setup/timing?adjustProtection=1` | 防護方式與部位（選用展開區） | 隱藏 | 已實作 | 需要時調整草稿部位及合法方法；不再是必經頁面 |
+| S-04 | `/setup/timing?adjustProtection=1`；S-07 原地 sheet | 防護方式與部位（共用展開區） | 隱藏／依宿主 | 設定端已實作 | 調整部位及合法方法；設定端寫入草稿，提醒端寫入 active Session。不是必經頁面 |
 | S-05 | `/setup/timing` | 設定：快速提醒與塗抹時間 | 隱藏 | 已實作 | 自動套用建議部位；引用產品頁 snapshot 並保存本次時間 |
 | S-06 | `/setup/review` | 設定：最終確認 | 隱藏 | 已實作 | 原子建立 Session 或顯示錯誤 |
 | S-07 | `/reminder` | 進行中提醒／提醒空白 | 顯示 | 已實作 | 查看狀態並開始下一個行動 |
@@ -311,11 +311,24 @@ AC-33、41、42、79、88。
 
 ---
 
-## S-04 防護方式與部位（S-05 內的選用展開區）
+## S-04 防護方式與部位（設定與提醒頁共用的展開區）
 
 ### 目的
 
 讓需要不同部位或不同防護方式的使用者進階調整；一般快速提醒不必先經過此區。
+
+### 使用場合
+
+2026-08-06 裁決：本區**不再是設定精靈專屬**，`ZoneProtectionForm` 由兩處共用。
+
+| 場合 | 入口 | 差異 |
+| --- | --- | --- |
+| 設定精靈 | S-05 的 `調整追蹤部位或防護方式` | 寫入 SetupDraft，尚未建立 Session |
+| 進行中提醒 | S-07 的 `確認防護方式`／`查看防護選項` | 寫入 active Session，需經事件與確認流程 |
+
+兩處共用同一份合法方法組合規則與同一個表單元件；差別只在提交後寫入草稿或
+寫入 Session。提醒頁的提交仍受既有 mutation 規則約束：不得略過確認、
+不得在未確認前修改期限。
 
 ### 預設路徑
 
@@ -505,21 +518,65 @@ AC-05、33、34、35、39、41、42、79、85、87、88。
 
 ### `primaryAction` 顯示矩陣
 
-| 主要狀態 | presentation | 主要 CTA | 次要 CTA |
-| --- | --- | --- | --- |
-| REAPPLY_DUE | due card | `記錄已補擦` | `回報狀況` |
-| REAPPLY_SOON | timed ring | `記錄已補擦` | `回報狀況` |
-| TRACKING | timed ring | `回報狀況` | `記錄已補擦` |
-| UNRECORDED 舊資料狀態 | untimed action | `補上防護紀錄` | `回報狀況` |
-| unknown 舊資料狀態 | untimed action | `確認防護方式` | `回報狀況` |
-| none_reported 舊資料狀態 | untimed action | `查看防護選項` | `更新防護紀錄` |
-| WATER_START_UNKNOWN | untimed action | `處理入水時間` | `記錄已補擦` |
-| 產品安全事件 | untimed action | `改用其他防護` | `查看處理說明` |
-| LABEL_WAIT | untimed action，label_wait variant | `查看產品標示` | `回報狀況` |
-| 衣物覆蓋 | untimed action，neutral_physical variant | `回報狀況` | `更新防護方式` |
-| CLOCK_UNTRUSTED 線上 | untimed action | `重新校準時間` | `查看已保存紀錄` |
-| CLOCK_UNTRUSTED 離線 | untimed action | `查看保守提醒` | `查看已保存紀錄` |
-| 多種最高優先行動 | untimed action，multi_action variant | `查看需要處理的部位` | `回報狀況` |
+| 主要狀態 | presentation | 主要 CTA | 主要 CTA 目的地 | 次要 CTA |
+| --- | --- | --- | --- | --- |
+| REAPPLY_DUE | due card | `記錄已補擦` | S-08 | `回報狀況` |
+| REAPPLY_SOON | timed ring | `記錄已補擦` | S-08 | `回報狀況` |
+| TRACKING | timed ring | `回報狀況` | S-09 | `記錄已補擦` |
+| UNRECORDED 舊資料狀態 | untimed action | `補上防護紀錄` | S-08（首次記錄變體） | `回報狀況` |
+| unknown 舊資料狀態 | untimed action | `確認防護方式` | S-07 原地 sheet | `回報狀況` |
+| none_reported 舊資料狀態 | untimed action | `查看防護選項` | S-07 原地 sheet | `更新防護紀錄` |
+| WATER_START_UNKNOWN | untimed action | `處理入水時間` | S-09 | `記錄已補擦` |
+| 產品安全事件 | untimed action | `改用其他防護` | S-08 | `查看處理說明` |
+| LABEL_WAIT | untimed action，label_wait variant | `查看產品標示` | S-07 原地展開 | `回報狀況` |
+| 衣物覆蓋 | untimed action，neutral_physical variant | `回報狀況` | S-09 | `更新防護方式` |
+| CLOCK_UNTRUSTED 線上 | untimed action | `重新校準時間` | S-07 原地執行 | `查看已保存紀錄` |
+| CLOCK_UNTRUSTED 離線 | untimed action | `查看保守提醒` | S-16 | `查看已保存紀錄` |
+| 多種最高優先行動 | untimed action，multi_action variant | `查看需要處理的部位` | S-07 原地錨點 | `回報狀況` |
+
+上表以「主要狀態」為索引，未涵蓋全部 `ActionKind`。權威對照見下一節；
+`ActionKind` 是 `packages/contracts` 的 domain 契約，狀態描述只是它的呈現。
+
+**尚未定義**：次要 CTA 的目的地。`查看已保存紀錄`、`查看處理說明`、
+`更新防護紀錄`、`更新防護方式` 四則目前沒有對應畫面，需另行裁決。
+
+### `ActionKind` 目的地對照（2026-08-06 裁決）
+
+13 個 `ActionKind` 全數對應到既有 P0 畫面或 S-07 原地行為，**不新增畫面**。
+
+| ActionKind | 觸發條件（`reducer.ts`） | 目的地 |
+| --- | --- | --- |
+| `record_reapplication` | `reapply_due`／`reapply_soon` | S-08 |
+| `resolve_cause` | `timingStatus === "untimed_action"` | S-08 |
+| `complete_protection_record` | `recordStatus === "unrecorded"` | S-08（首次記錄變體） |
+| `switch_protection` | 產品安全封鎖且皮膚外露 | S-08 |
+| `report_context_event` | `tracking`／`not_applicable` 且追蹤中 | S-09 |
+| `resolve_water_start` | `WATER_START_UNKNOWN` | S-09 |
+| `confirm_protection_method` | `recordStatus === "unknown"` | S-07 原地 sheet |
+| `view_protection_options` | `none_reported` 或 Application 不具資格 | S-07 原地 sheet |
+| `view_conservative_reminder` | 時鐘不可信且離線 | S-16 |
+| `view_product_label` | `timingStatus === "label_wait"` | S-07 原地展開 |
+| `recalibrate_clock` | 時鐘不可信且在線 | S-07 原地執行 |
+| `view_ended_state` | Session 已結束 | S-07 空白狀態 |
+| `review_required_zones` | 最高層級同時存在多種動作 | S-07 原地錨點 |
+
+裁決理由與實作注意事項：
+
+- **`resolve_cause` → S-08**：由規則推導，非選擇。`RR-P0-CAUSE-002` 明訂
+  只有嚴格較晚的合格 Application 才能解除原因，所以目的地必然是補擦表單。
+- **`switch_protection` → S-08**：產品選單必須排除被安全事件封鎖的產品。
+  改用衣物遮蔽者走 S-09 的 `更新衣物狀態`，屬次要路徑。
+- **`complete_protection_record` → S-08**：表單欄位與補擦相同，但這是首次記錄，
+  **不得沿用「記錄已補擦」標題**。需要新的標題文案並進 Copy Deck 審查。
+- **`confirm_protection_method`／`view_protection_options` → S-07 原地 sheet**：
+  兩者答案空間相同，合併同一目的地。複用 S-04 的 `ZoneProtectionForm`
+  元件；該元件因此不再是設定精靈專屬，S-04 的定義需同步放寬。
+- **`view_product_label` → 原地展開**：此狀態的語意是「正在等待，不要離開」，
+  導航到 S-11 會打斷等待。標示 snapshot 就地摘要顯示即可。
+- **`recalibrate_clock` → 原地執行**：系統操作而非使用者輸入，沒有表單。
+  相依於尚未實作的 `useTrustedClock`。
+- **`resolve_water_start` → S-09**：S-09 第二層確認已涵蓋水上 interval 狀態
+  與實際發生時間；複用既有的 `WaterStartPicker` 元件。
 
 ### 其他狀態
 
