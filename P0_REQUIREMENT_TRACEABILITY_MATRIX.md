@@ -4,10 +4,10 @@
 | --- | --- |
 | 對應 PRD | `防曬晴報員PRD.md` v3.9 |
 | Release Manifest | `P0_RELEASE_MANIFEST.md` v0.2 |
-| Screen Inventory | `P0_SCREEN_INVENTORY.md` v0.2 |
+| Screen Inventory | `P0_SCREEN_INVENTORY.md` v0.3 |
 | Reminder Rules | `P0_REMINDER_RULE_DECISION_TABLE.md` v0.2 |
-| Copy Deck | `P0_COPY_DECK.md` v0.2 |
-| Technical Design | `P0_TECHNICAL_DESIGN_DOCUMENT.md` v0.6 |
+| Copy Deck | `P0_COPY_DECK.md` v0.3 |
+| Technical Design | `P0_TECHNICAL_DESIGN_DOCUMENT.md` v0.7 |
 | 文件版本 | 0.7 |
 | 狀態 | P0 規格追蹤基準；已回填 contracts／reducer／IndexedDB foundation、SetupDraft 與 Phase 3 Web Shell／local Setup slice 證據 |
 | 建立日期 | 2026-07-29 |

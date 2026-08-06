@@ -4,7 +4,7 @@
 | --- | --- |
 | 對應 PRD | `防曬晴報員PRD.md` v3.9 |
 | 對應交付清單 | `P0_RELEASE_MANIFEST.md` v0.2 |
-| 對應畫面規格 | `P0_SCREEN_INVENTORY.md` v0.2 |
+| 對應畫面規格 | `P0_SCREEN_INVENTORY.md` v0.3 |
 | 文件版本 | 0.2 |
 | 狀態 | P0 Reducer／測試基準草案 |
 | 建立日期 | 2026-07-29 |

@@ -4,9 +4,9 @@
 | --- | --- |
 | 對應 PRD | `防曬晴報員PRD.md` v3.9 |
 | Release Manifest | `P0_RELEASE_MANIFEST.md` v0.2 |
-| Screen Inventory | `P0_SCREEN_INVENTORY.md` v0.2 |
+| Screen Inventory | `P0_SCREEN_INVENTORY.md` v0.3 |
 | Reminder Rules | `P0_REMINDER_RULE_DECISION_TABLE.md` v0.2 |
-| Copy Deck | `P0_COPY_DECK.md` v0.2 |
+| Copy Deck | `P0_COPY_DECK.md` v0.3 |
 | Requirement Traceability Matrix | `P0_REQUIREMENT_TRACEABILITY_MATRIX.md` v0.7 |
 | 文件版本 | 0.7 |
 | 狀態 | Phase 0、Phase 1 核心、Phase 2 foundation／SetupDraft 與 Phase 3 Web Shell／S-01／S-03～S-07 local slice 已實作並通過目前自動 Gate；完整 P0 發布仍受未完成流程與專業審查 Gate 約束 |
