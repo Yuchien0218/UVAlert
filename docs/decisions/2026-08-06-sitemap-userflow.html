@@ -275,23 +275,43 @@
     <h1>防曬晴報員 P0 Sitemap 與核心 User Flow</h1>
     <p class="standfirst">
       這是<strong>目標設計</strong>，不是現況盤點。已納入 2026-08-06 的四項裁決：
-      設定流程縮為兩步、產品頁改為防曬裝備清單、Q&amp;A 只做 App 內、P0 不做帳號。
+      設定流程縮為兩步、產品頁改為防曬裝備清單、Q&amp;A 只做 App 內、P0 不做帳號；
+      以及 2026-08-07 的三項：本機匯出納入 P0、S-07 四則次要 CTA 指向現有畫面、
+      最近事件改為純文字清單。
       範圍仍限定在 <code>P0_RELEASE_MANIFEST.md</code> §3 定義的 P0，未加入規格外功能。
     </p>
-    <p class="sourced">P0_RELEASE_MANIFEST.md §3 §8 · P0_SCREEN_INVENTORY.md v0.4 · PRD §5.5 §5.7 · AC-33 AC-34</p>
+    <p class="standfirst">
+      七項裁決<strong>全部已回寫進規格文件，但全部尚未實作</strong>。
+      本圖描述的是規格的目標狀態，不是程式碼現況；
+      每個頁面的狀態標籤才反映實作進度。
+    </p>
+    <p class="sourced">P0_RELEASE_MANIFEST.md v0.3 §3 §8 · P0_SCREEN_INVENTORY.md v0.5 · PRD v3.11 §5.5 §5.7 · AC-33 AC-34</p>
   </header>
 
   <section>
-    <h2>本輪四項裁決</h2>
+    <h2>七項裁決</h2>
     <div class="decided">
-      <p class="decided__label">2026-08-06</p>
+      <p class="decided__label">2026-08-06 · 範圍與版面</p>
       <ol class="decided__list">
-        <li><strong>設定流程 3 步併為 2 步</strong>。原 S-06 最終確認不再是獨立頁，內容併入步驟 2，CTA 改為「開始提醒」——按下即開始計時。</li>
-        <li><strong>產品頁改為防曬裝備清單</strong>。新增裝備品類（衣物、墨鏡）、購買月份、到期日、備忘、過去用過。</li>
+        <li><strong>設定流程 3 步併為 2 步</strong>。原 S-06 最終確認不再是獨立頁，內容併入步驟 2，CTA 改為「開始提醒」——按下即開始計時。確認的實質要求不變：摘要移到按鈕上方，不得摺疊隱藏。</li>
+        <li><strong>產品頁改為防曬裝備清單</strong>。新增裝備品類（衣物、墨鏡）、購買月份、到期日、備忘、過去用過。只有防曬乳進 reducer。</li>
         <li><strong>Q&amp;A 只做 App 內</strong>。不做公開 SEO／GEO 索引——§8 已明確排除，且 SPA 需加 SSG 才可能。</li>
         <li><strong>P0 不做帳號</strong>。改以 PWA 安裝、本機資料管理與誠實告知處理「不想弄丟資料」的需求；登入登出留在 P1。</li>
       </ol>
     </div>
+    <div class="decided">
+      <p class="decided__label">2026-08-07 · 補完缺口</p>
+      <ol class="decided__list" start="5">
+        <li><strong>本機匯出納入 P0</strong>。P0 不做帳號，匯出是「不想註冊」的人唯一的備份手段。入口在 S-19，不新增畫面；匯入不在 P0 範圍。</li>
+        <li><strong>S-07 四則次要 CTA 全指向現有畫面</strong>。與 13 個 <code>ActionKind</code> 裁決同一原則：不新增畫面。</li>
+        <li><strong>最近事件改為純文字清單</strong>。PRD v3.11 把圖形時間軸放寬為清單，預設顯示最新一筆、其餘收合。這是 S-10 更正流程的唯一入口，不能省略。</li>
+      </ol>
+    </div>
+    <p class="lede">
+      同日核對 PRD 後發現前兩項與 v3.9 有落差：兩步流程<strong>直接衝突</strong>、
+      裝備清單<strong>超出 F-05 範圍</strong>。PRD 已修訂至 v3.11 補上上游依據——
+      下游文件不得以工程或 UX 理由覆蓋 PRD。
+    </p>
   </section>
 
   <section>
@@ -359,10 +379,12 @@
         <li class="page">
           <span class="page__route">/setup/timing?adjustProtection=1</span>
           <span class="page__name">部位與方式調整（同頁 sheet，選用）</span>
-          <span class="chip chip--gap">待簡化</span>
-          <span class="page__flag">
-            已依大群組收合，但仍被反映為複雜。需確認是預設全展開、方法選項過多，
-            還是改動後看不出差異。
+          <span class="chip chip--new">改版</span>
+          <span class="page__flag flag--new">
+            實測現況有 <strong>20 個常駐可見單選鈕、需捲 3 屏</strong>，
+            違反 PRD §5.2 第 5 點的層級規定——是實作沒照規格分層，不是選項多餘。
+            改為：預設收合、收合狀態 0 個單選鈕、每組一行狀態文字；
+            點開只顯示兩個主選項，<code>衣物下方也有擦防曬</code> 改為選後追問。
           </span>
         </li>
         <li class="page">
@@ -488,7 +510,8 @@
           <span class="chip chip--none">未實作</span>
           <span class="page__flag flag--new">
             P0 不做帳號後，這頁與 <code>/install</code> 共同承擔「不要弄丟資料」的需求，
-            重要性上升。建議加入本機匯出（需擴 §8 範圍）。
+            重要性上升。<strong>2026-08-07 裁決：本機匯出納入 P0</strong>，入口在本頁，
+            不新增畫面；匯出不上傳、不經後端，匯入不在 P0 範圍。
           </span>
         </li>
         <li class="page">
@@ -639,11 +662,26 @@
             <dd>S-08 補擦 ／ S-09 回報 ／ S-07 原地處理</dd>
           </dl>
           <div class="aside aside--gap">
-            <span class="aside__label">仍未定義</span>
+            <span class="aside__label">2026-08-07 裁決</span>
             <p>
-              四則次要 CTA 沒有目的地：<code>查看已保存紀錄</code>、
-              <code>查看處理說明</code>、<code>更新防護紀錄</code>、<code>更新防護方式</code>。
-              它們不在 <code>ActionKind</code> 契約內，所以上一輪裁決沒涵蓋到。
+              四則次要 CTA 全數指向現有畫面，不新增畫面——與 <code>ActionKind</code>
+              裁決同一原則。<code>查看已保存紀錄</code> → 本頁最近事件清單（原地錨點並展開）；
+              <code>查看處理說明</code> → S-17 特殊狀況；
+              <code>更新防護紀錄</code> → S-08；
+              <code>更新防護方式</code> → S-04 原地 sheet。
+            </p>
+          </div>
+          <div class="aside aside--gap">
+            <span class="aside__label">2026-08-07 裁決 · 最近事件清單</span>
+            <p>
+              PRD §5.7.2 原本要求圖形時間軸，程式碼裡從來沒有這個元件。
+              v3.11 已放寬為<strong>純文字清單</strong>：預設只顯示最新一筆，其餘收合可展開，
+              每列可點進 S-10 更正。放寬的是呈現形式，不是實質要求。
+            </p>
+            <p>
+              不能省略的理由：<code>/reminder/event/:id/correct</code> 需要一個事件 id，
+              這份清單是<strong>唯一入口</strong>。沒有它，S-10 無法到達，
+              Release Manifest §5.11 承諾的「更正本機資料」也落空。
             </p>
           </div>
         </div>
@@ -685,29 +723,37 @@
         <p class="finding__where">防曬晴報員PRD.md §5.5.2</p>
       </li>
       <li class="finding">
-        <p class="finding__title">建議加入本機匯出</p>
+        <p class="finding__title">本機匯出已納入 P0（2026-08-07 裁決）</p>
         <p class="finding__body">
-          P0-19 目前只有「查看及清除」。對想保留產品資訊又不想註冊的人，
-          匯出是沒有帳號時唯一的自救手段。比加登入便宜得多，不違反任何安全條文，
-          但需要擴 §8 與 P0-19 的範圍——待裁決。
+          P0-19 原本只有「查看及清除」。對想保留產品資訊又不想註冊的人，
+          匯出是沒有帳號時唯一的自救手段。已擴 §8 與 P0-19 範圍：
+          使用者主動觸發、不上傳、不經後端、不進分析，不含金鑰與精確座標；
+          清除前必須提示可先匯出。匯入不在 P0 範圍，且不得描述為雲端備份。
         </p>
-        <p class="finding__where">P0_RELEASE_MANIFEST.md §8</p>
+        <p class="finding__where">P0_RELEASE_MANIFEST.md §5.11 §8 · PRD §5.5.1</p>
       </li>
     </ul>
   </section>
 
   <section>
-    <h2>四、仍待處理</h2>
+    <h2>四、規格已定，等待實作</h2>
+    <p class="lede">
+      這一節原本是「仍待處理」。七項裁決回寫完成後，其中五項已有明確規格，
+      剩下的是實作工作，不是待決事項。每項後面標的是規格落點。
+    </p>
     <ul class="findings">
       <li class="finding">
         <p class="finding__title">產品資料模型要擴充，但購買日期與備忘不得進 reducer</p>
         <p class="finding__body">
           <code>product.ts</code> 目前只有會影響提醒的標示欄位，且 <code>expiryStatus</code>
-          是三值列舉不是日期。需新增品類、購買月份、真正的到期日、備忘、封存時間。
+          是三值列舉不是日期。需新增 <code>gearCategory</code>、<code>purchaseMonth</code>、
+          <code>expiryDate</code>、<code>note</code>、<code>archivedAt</code>。
           其中購買日期與私人備註<strong>已被規則明文禁止參與 reducer</strong>，
           UI 必須讓使用者知道填了不會改變倒數。
+          <strong>規格已寫入</strong> TDD §12.2（含 migration 約束：舊資料
+          <code>gearCategory</code> 預設 <code>sunscreen</code>，行為不變）。
         </p>
-        <p class="finding__where">P0_REMINDER_RULE_DECISION_TABLE.md §4.4</p>
+        <p class="finding__where">P0_TECHNICAL_DESIGN_DOCUMENT.md §12.2 · P0_REMINDER_RULE_DECISION_TABLE.md §4.4 §7</p>
       </li>
       <li class="finding">
         <p class="finding__title">墨鏡沒有對應的身體部位</p>
@@ -715,8 +761,10 @@
           <code>BODY_ZONE_V3</code> 全是皮膚部位，眼睛不在其中。墨鏡進來後不會有任何提醒行為，
           純屬紀錄。衣物則不同——它已是 <code>methodComponent</code>，有實際語意（覆蓋期間不倒數）。
           兩者在同一份清單裡但行為不同，分區呈現是為了避免誤解。
+          <strong>規格已寫入</strong> S-11 品類表與 Rule Table §7 的前置過濾：
+          非 <code>sunscreen</code> 品類根本不進入 DT-ELIGIBILITY-01。
         </p>
-        <p class="finding__where">packages/contracts · BODY_ZONE_V3</p>
+        <p class="finding__where">P0_SCREEN_INVENTORY.md S-11 · P0_REMINDER_RULE_DECISION_TABLE.md §7</p>
       </li>
       <li class="finding">
         <p class="finding__title">Q&amp;A 每一則都要標審查狀態</p>
@@ -724,26 +772,38 @@
           防曬知識內容會踩到 PRD §13 的衛教內容治理，Copy Deck 的
           <code>CONTENT_REVIEW</code>／<code>MEDICAL_REVIEW</code>／<code>MARINE_REVIEW</code>
           三種閘門都可能觸發。「需要再詳細」的具體意思是：先列題目清單，逐則標審查類別。
+          <strong>規格已寫入</strong> Copy Deck §18 與 S-15：`/help` 總覽只列出已通過審查
+          且可發布的主題，未核准主題不佔位、不顯示灰階項目。
         </p>
-        <p class="finding__where">防曬晴報員PRD.md §13 · P0_COPY_DECK.md §1</p>
+        <p class="finding__where">防曬晴報員PRD.md §13 · P0_COPY_DECK.md §18 · P0_SCREEN_INVENTORY.md S-15</p>
       </li>
       <li class="finding">
-        <p class="finding__title">最近事件時間軸仍未實作</p>
+        <p class="finding__title">最近事件清單仍未實作（唯一沒有任何程式碼的必要元件）</p>
         <p class="finding__body">
-          PRD §5.7.2 與 S-07 資訊順序第 7 項都要求，程式碼裡沒有任何 timeline 元件。
-          它是「讓使用者理解狀態為何改變」的載體，缺了提醒就是黑箱。
+          程式碼裡 grep 不到任何 timeline 或事件清單元件，
+          <code>components/reminder/</code> 只有倒數、面板、部位清單與空狀態。
+          <strong>2026-08-07 裁決</strong>：PRD v3.11 把呈現形式由圖形時間軸放寬為
+          純文字清單（預設顯示最新一筆、其餘收合），實質要求不變。
+          這是 S-10 更正流程的<strong>唯一入口</strong>——沒有它，
+          <code>/reminder/event/:id/correct</code> 拿不到事件 id，
+          §5.11 承諾的「更正本機資料」也落空。規格已寫入 S-07「最近事件清單」。
         </p>
-        <p class="finding__where">防曬晴報員PRD.md §5.7.2 · ReminderPage.vue</p>
+        <p class="finding__where">防曬晴報員PRD.md v3.11 §5.7.2 · P0_SCREEN_INVENTORY.md S-07 · ReminderPage.vue</p>
       </li>
       <li class="finding">
-        <p class="finding__title">P0-04 的複雜度需要更具體的描述</p>
+        <p class="finding__title">P0-04 的揭露層次已裁決</p>
         <p class="finding__body">
-          <code>ZoneProtectionForm</code> 已依 AC-34 的大群組收合。若仍覺複雜，
-          可能是預設全展開、方法選項過多，或改動後看不出差異——方向不同，改法不同。
+          原本的疑問是「複雜度來源不明」。實測後確認：現況有 <strong>20 個常駐可見單選鈕、
+          需捲 3 屏</strong>，違反 PRD §5.2 第 5 點的層級規定——是實作沒照規格分層，
+          不是選項多餘。<strong>規格已寫入</strong> S-04「揭露層次」：預設收合、
+          收合狀態 0 個單選鈕、兩主選項＋衣物選填追問。
         </p>
-        <p class="finding__where">ZoneProtectionForm.vue · AC-34</p>
+        <p class="finding__where">P0_SCREEN_INVENTORY.md S-04 · ZoneProtectionForm.vue · PRD §5.2 第 5 點</p>
       </li>
     </ul>
+    <p class="lede">
+      對照原型：<code>2026-08-06-p0-04-05-mockup.html</code> 有 S-04 與 S-05 的可操作版本。
+    </p>
   </section>
 
   <footer>
@@ -751,7 +811,11 @@
       本圖只呈現 <code>P0_RELEASE_MANIFEST.md</code> §3 已定義的頁面範圍，
       加上本輪裁決造成的結構調整。標為「未實作」者為規格內、尚未開工，不是新提案。
     </p>
-    <p>對應 main 分支 <code>d69e05b</code>；裁決日 2026-08-06。</p>
+    <p>
+      裁決日 2026-08-06（四項範圍裁決）與 2026-08-07（本機匯出、次要 CTA、最近事件清單）。
+      規格對應 PRD v3.11、Screen Inventory v0.5、Release Manifest v0.3。
+      程式碼現況對應 <code>main</code> 分支——七項裁決<strong>全部尚未實作</strong>。
+    </p>
   </footer>
 
 </div>

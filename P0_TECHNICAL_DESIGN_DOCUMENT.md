@@ -2,7 +2,7 @@
 
 | 文件資訊 | 內容 |
 | --- | --- |
-| 對應 PRD | `防曬晴報員PRD.md` v3.10 |
+| 對應 PRD | `防曬晴報員PRD.md` v3.11 |
 | Release Manifest | `P0_RELEASE_MANIFEST.md` v0.3 |
 | Screen Inventory | `P0_SCREEN_INVENTORY.md` v0.5 |
 | Reminder Rules | `P0_REMINDER_RULE_DECISION_TABLE.md` v0.3 |
@@ -483,7 +483,12 @@ Route guard 只做存取判定與導向，不在背景建立、結束或修改 S
 - 既有 `/setup/review` 網址建議保留 redirect 至 `/setup/timing`，避免使用者書籤與流程中斷。
 - S-05 的固定操作列只在 `hideNavigation: true` 的設定精靈成立，不得套用到 `/reminder`。
 
-首頁有 active Session 時直接以同一份 `primaryAction` projection 決定主要狀態元件與 CTA，不另建首頁專用提醒真值。CTA 依 `primaryAction.actionKind` 導向補擦、回報或相應確認流程；`/reminder` 保留完整部位分組、原因、事件時間軸與 Session 管理。
+首頁有 active Session 時直接以同一份 `primaryAction` projection 決定主要狀態元件與 CTA，不另建首頁專用提醒真值。CTA 依 `primaryAction.actionKind` 導向補擦、回報或相應確認流程；`/reminder` 保留完整部位分組、原因、最近事件清單與 Session 管理。
+
+最近事件清單為 2026-08-07 裁決的純文字清單（PRD v3.11 §5.7.2），
+**目前尚無任何實作**——`apps/web/src/components/reminder/` 底下沒有對應元件。
+它是 S-10 更正流程的唯一入口：`/reminder/event/:id/correct` 需要事件 id，
+沒有清單就無法取得。實作時為純顯示元件，讀既有事件 store，不動 reducer。
 
 ---
 

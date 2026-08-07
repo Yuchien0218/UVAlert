@@ -55,6 +55,7 @@ pnpm check
 > - S-04 揭露層次（收合預設、0 個常駐單選鈕）——現況 20 個常駐單選鈕，違反 PRD §5.2 第 5 點。
 > - S-11 防曬裝備清單（四品類、四個新欄位）——`SunscreenProducts` 尚未加 `gearCategory`。
 > - S-15 `/help` Q&A 總覽——route 未建立。
+> - S-07 最近事件清單——`components/reminder/` 底下沒有任何對應元件。它是 S-10 更正流程的唯一入口。
 >
 > 裁決背景與互動原型見 `docs/decisions/`。實作前先讀那裡，不要只看規格條文。
 

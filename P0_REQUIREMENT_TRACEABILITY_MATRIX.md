@@ -2,7 +2,7 @@
 
 | 文件資訊 | 內容 |
 | --- | --- |
-| 對應 PRD | `防曬晴報員PRD.md` v3.10 |
+| 對應 PRD | `防曬晴報員PRD.md` v3.11 |
 | Release Manifest | `P0_RELEASE_MANIFEST.md` v0.3 |
 | Screen Inventory | `P0_SCREEN_INVENTORY.md` v0.5 |
 | Reminder Rules | `P0_REMINDER_RULE_DECISION_TABLE.md` v0.3 |
@@ -127,10 +127,10 @@ AC-94, AC-96, AC-97, AC-98, AC-99, AC-100
 | S-04 防護方式與部位（S-05 Bottom Sheet） | F-06、F-UX-01 | BODY_ZONE_V3、DT-METHOD、focus／scroll lock；收合預設、兩選項＋追問揭露層次 | CP-SETUP-006～009、007a、008a | 26、34、52、79、88、94 | UT-VALIDATION-001、UT-WEB-SETUP-001、UX-P0-002 | IMPLEMENTED／PARTIALLY_VERIFIED；**待修正揭露層次**（現況違反 PRD §5.2 第 5 點） |
 | S-05 快速提醒、塗抹時間與開始提醒 | F-05、F-06、F-08 | preset 自動套用、S-11 current-product snapshot、`pendingTiming`、ClockCalibration、StartSessionCommandV1、固定操作列 | CP-SETUP-006、013～018 | 05、23、33～35、39～42、50、53、79、85、87、88、97 | UT-WEB-SETUP-001、IT-WEB-SETUP-001、UT-VALIDATION-002、UT-VALIDATION-003、E2E-P0-003、E2E-P0-009 | IMPLEMENTED（current-product subset）／PARTIALLY_VERIFIED／REVIEW_BLOCKED；**待改為兩步** |
 | ~~S-06 最終確認~~ | — | — | — | — | — | **2026-08-06 廢除**，併入 S-05 |
-| S-07 進行中提醒 | F-08、F-09 | primaryAction、zone／Session summary | CP-REMINDER-* | 05、07、09、12、23、31、36、38、40、51、57、64～67、81、82、85、86、96 | UT-RULE-TV-*、A11Y-P0-002 | SPECIFIED／REVIEW_BLOCKED |
+| S-07 進行中提醒 | F-08、F-09 | primaryAction、zone／Session summary；最近事件清單（收合預設、S-10 唯一入口） | CP-REMINDER-*、CP-REMINDER-EVENTS-001～003 | 05、07、09、12、23、31、36、38、40、51、57、64～67、81、82、85、86、96 | UT-RULE-TV-*、A11Y-P0-002 | SPECIFIED／REVIEW_BLOCKED |
 | S-08 記錄已補擦 | F-06～08 | ApplicationConfirmationGroup | CP-REAPPLY-* | 07、28、37、39、40、45、65、82、85、87 | UT-RULE-TV-022、037～039 | SPECIFIED |
 | S-09 回報狀況 | F-07、F-08 | ContextEvent、ProductSafetyEvent | CP-EVENT-*、CP-PRODUCT-SAFETY | 06、28、37、39、41、44、51、83、85、97 | UT-RULE-TV-015～029 | SPECIFIED／REVIEW_BLOCKED |
-| S-10 更正最近事件 | F-07 | correction leaf、replace／void | CP-EVENT-CORRECT-* | 28、39、44、45、85 | UT-RULE-TV-039、IT-IDB-003 | SPECIFIED |
+| S-10 更正最近事件 | F-07 | correction leaf、replace／void；入口為 S-07 最近事件清單 | CP-EVENT-CORRECT-* | 28、39、44、45、85 | UT-RULE-TV-039、IT-IDB-003 | SPECIFIED |
 | S-11 防曬裝備 | F-05 | current-product snapshot；`gearCategory` 四品類、`purchaseMonth`／`expiryDate`／`note`／`archivedAt`；recent sorting 待實作 | CP-PRODUCT-*、CP-PRODUCT-CATEGORY-001～003、CP-PRODUCT-FIELDS-001 | 18、35、43、47、50、53、55、87、97 | Setup controller integration、E2E-P0-003 | IMPLEMENTED（single current-product subset）／PARTIALLY_VERIFIED；**待擴充品類** |
 | S-12 新增防曬裝備 | F-05 | ProductLabelSnapshot source；品類選擇與條件式欄位 | CP-PRODUCT-NEW、NOTE、CATEGORY、FIELDS | 18、35、47、48、55 | UT-VALIDATION-004 | SPECIFIED／REVIEW_BLOCKED |
 | S-13 編輯防曬品 | F-05 | immutable snapshots、safety restore rules | CP-PRODUCT-* | 43、50、53、87、97 | E2E-P0-010 | SPECIFIED／REVIEW_BLOCKED |

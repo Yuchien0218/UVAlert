@@ -2,7 +2,7 @@
 
 | 文件資訊 | 內容 |
 | --- | --- |
-| 對應 PRD | `防曬晴報員PRD.md` v3.10 |
+| 對應 PRD | `防曬晴報員PRD.md` v3.11 |
 | 對應交付清單 | `P0_RELEASE_MANIFEST.md` v0.3 |
 | 對應畫面規格 | `P0_SCREEN_INVENTORY.md` v0.5 |
 | 文件版本 | 0.3 |

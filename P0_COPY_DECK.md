@@ -2,7 +2,7 @@
 
 | 文件資訊 | 內容 |
 | --- | --- |
-| 對應 PRD | `防曬晴報員PRD.md` v3.10 |
+| 對應 PRD | `防曬晴報員PRD.md` v3.11 |
 | 對應畫面規格 | `P0_SCREEN_INVENTORY.md` v0.5 |
 | 對應提醒規則 | `P0_REMINDER_RULE_DECISION_TABLE.md` v0.3 |
 | 文件版本 | 0.5 |
@@ -887,6 +887,38 @@ version
 | body | 結束不代表已補擦、防護完成或可以安全曝曬。需要時可以重新開始一筆新的提醒。 |
 | primary_cta | 開始新的提醒 |
 | review_status | MEDICAL_REVIEW |
+
+### CP-REMINDER-EVENTS-001：最近事件清單（2026-08-07 新增）
+
+| 欄位 | 內容 |
+| --- | --- |
+| section_title | 最近的紀錄 |
+| row_template | {absoluteTime}　{eventLabel}　{zoneNames} |
+| expand_cta | 查看更多 |
+| collapse_cta | 收合 |
+| row_hint | 點一下可以更正這筆紀錄 |
+| review_status | PRODUCT_DRAFT |
+
+`eventLabel` 使用既有 CP-EVENT-* 的事件名稱，不另建一套說法。
+`zoneNames` 超過三個時以「臉部等 5 個部位」收斂，不截斷成無意義的片段。
+
+### CP-REMINDER-EVENTS-002：時鐘不可信時的清單提示
+
+| 欄位 | 內容 |
+| --- | --- |
+| body | 裝置時間目前無法確認，下面的時間可能不準。紀錄本身沒有遺失。 |
+| review_status | MEDICAL_REVIEW |
+
+**不得**因時鐘不可信就隱藏清單——這正是 `查看已保存紀錄` 要到達的地方。
+
+### CP-REMINDER-EVENTS-003：尚無事件
+
+| 欄位 | 內容 |
+| --- | --- |
+| 行為 | 不顯示區塊，不顯示空狀態文字 |
+| review_status | PRODUCT_DRAFT |
+
+剛建立且全為衣物覆蓋的 Session 本來就沒有事件，顯示空殼區塊只會製造雜訊。
 
 ---
 
