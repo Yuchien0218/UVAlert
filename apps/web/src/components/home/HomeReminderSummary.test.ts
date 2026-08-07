@@ -121,7 +121,7 @@ describe("HomeReminderSummary", () => {
       )
     ).toBe("all");
     expect(wrapper.get(".home-summary__title").text()).toBe(
-      "建議進行全面補擦"
+      "接下來需要全面補擦"
     );
     expect(wrapper.get(".stat-figure").text()).toBe("90");
     expect(
@@ -235,7 +235,7 @@ describe("HomeReminderSummary", () => {
       )
     ).toBe("priority");
     expect(wrapper.text()).toContain(
-      "建議優先補擦：鼻部與雙頰"
+      "接下來需要補擦：鼻部與雙頰"
     );
     expect(wrapper.text()).toContain("預計");
   });
