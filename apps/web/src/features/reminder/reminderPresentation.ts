@@ -8,6 +8,26 @@ import type { ConnectivityStatus } from "@sunshield/platform";
 
 export type ReminderTone = "timed" | "soon" | "due" | "untimed";
 
+/**
+ * S-07 的四則次要 CTA（2026-08-07 裁決）。
+ *
+ * 全數指向既有畫面或原地行為，不新增畫面——與 13 個 ActionKind 裁決同一原則。
+ */
+export type SecondaryActionKind =
+  /** 查看已保存紀錄 → 本頁最近事件清單（原地錨點並展開） */
+  | "view_saved_records"
+  /** 查看處理說明 → S-17 特殊狀況 */
+  | "view_handling_guidance"
+  /** 更新防護紀錄 → S-08 首次記錄變體 */
+  | "update_protection_record"
+  /** 更新防護方式 → S-04 原地 sheet */
+  | "update_protection_method";
+
+export interface SecondaryAction {
+  kind: SecondaryActionKind;
+  label: string;
+}
+
 export interface ReminderPresentation {
   tone: ReminderTone;
   eyebrow: string;
@@ -18,9 +38,25 @@ export interface ReminderPresentation {
   actionLabel: string;
   actionKind: ActionKind;
   ariaLabel: string;
+  /** 沒有適用的次要 CTA 時為空陣列，不佔版位。 */
+  secondaryActions: SecondaryAction[];
 }
 
-const BODY_ZONE_LABELS: Record<BodyZoneCode, string> = {
+const SECONDARY_ACTION_LABELS: Record<SecondaryActionKind, string> = {
+  view_saved_records: "查看已保存紀錄",
+  view_handling_guidance: "查看處理說明",
+  update_protection_record: "更新防護紀錄",
+  update_protection_method: "更新防護方式"
+};
+
+function secondary(...kinds: SecondaryActionKind[]): SecondaryAction[] {
+  return kinds.map((kind) => ({
+    kind,
+    label: SECONDARY_ACTION_LABELS[kind]
+  }));
+}
+
+export const BODY_ZONE_LABELS: Record<BodyZoneCode, string> = {
   face_forehead: "額頭",
   face_nose_cheeks: "鼻部與雙頰",
   face_lower: "臉部下半部",
@@ -123,7 +159,8 @@ export function buildReminderPresentation(options: {
         remainingMinutes,
         actionLabel,
         actionKind: primaryAction.actionKind,
-        ariaLabel: `${zoneLabel}即將需要檢查或補擦，預計 ${absoluteTime}。`
+        ariaLabel: `${zoneLabel}即將需要檢查或補擦，預計 ${absoluteTime}。`,
+        secondaryActions: []
       };
     }
 
@@ -140,7 +177,8 @@ export function buildReminderPresentation(options: {
       remainingMinutes,
       actionLabel,
       actionKind: primaryAction.actionKind,
-      ariaLabel: `${zoneLabel}提醒進行中，約在${relativeTime}需要檢查，預計 ${absoluteTime}。`
+      ariaLabel: `${zoneLabel}提醒進行中，約在${relativeTime}需要檢查，預計 ${absoluteTime}。`,
+      secondaryActions: []
     };
   }
 
@@ -154,7 +192,8 @@ export function buildReminderPresentation(options: {
       remainingMinutes: 0,
       actionLabel,
       actionKind: primaryAction.actionKind,
-      ariaLabel: `${zoneLabel}已到建議檢查或補擦時間。`
+      ariaLabel: `${zoneLabel}已到建議檢查或補擦時間。`,
+      secondaryActions: []
     };
   }
 
@@ -186,7 +225,8 @@ function buildUntimedPresentation(options: {
     tone: "untimed" as const,
     remainingMinutes: null,
     actionLabel,
-    actionKind: primaryAction.actionKind
+    actionKind: primaryAction.actionKind,
+    secondaryActions: [] as SecondaryAction[]
   };
 
   if (primaryAction.variant === "multi_action") {
@@ -209,7 +249,10 @@ function buildUntimedPresentation(options: {
         ? "為避免錯誤延長提醒，請重新連線校準。目前採較短的保守狀態。"
         : "目前離線，無法確認可信時間。系統不會因此延長期限，請查看保守提醒。",
       timeLabel: "保守提醒",
-      ariaLabel: "裝置時間可能不正確，目前使用保守提醒。"
+      ariaLabel: "裝置時間可能不正確，目前使用保守提醒。",
+      // 時鐘不可信時使用者要確認的是「我已經記了什麼」，資料就在本頁下方，
+      // 離開頁面反而失去脈絡——所以是原地錨點而不是換頁。
+      secondaryActions: secondary("view_saved_records")
     };
   }
   if (reasons.has("METHOD_UNRECORDED")) {
@@ -233,6 +276,41 @@ function buildUntimedPresentation(options: {
       ariaLabel: `${zoneLabel}防護方式不確定。`
     };
   }
+  // 產品安全事件三則。先前沒有對應分支，全部掉進通用 fallback，
+  // 使用者看不到「為什麼停止計時」與「該怎麼處理」。
+  if (reasons.has("PRODUCT_ABNORMAL_REPORTED")) {
+    return {
+      ...base,
+      eyebrow: "已停止以這項產品計時",
+      title: "已停止使用這項產品建立提醒",
+      body: "你回報產品有異常，因此相關部位不再顯示同一產品的補擦期限。請停止使用並依包裝警語處理。",
+      timeLabel: "未計時",
+      ariaLabel: `${zoneLabel}已回報產品異常，停止以該產品計時。`,
+      secondaryActions: secondary("view_handling_guidance")
+    };
+  }
+  if (reasons.has("PRODUCT_DISCOMFORT_REPORTED")) {
+    return {
+      ...base,
+      eyebrow: "已停止以這項產品計時",
+      title: "已停止使用這項產品建立提醒",
+      body: "你回報使用後感到不適。請停止使用並依包裝警語處理；需要時尋求醫療協助。系統不會判斷不適原因。",
+      timeLabel: "未計時",
+      ariaLabel: `${zoneLabel}已回報使用後不適，停止以該產品計時。`,
+      secondaryActions: secondary("view_handling_guidance")
+    };
+  }
+  if (reasons.has("PRODUCT_EXPIRED")) {
+    return {
+      ...base,
+      eyebrow: "產品已過期",
+      title: "這項產品已超過記錄的有效期限",
+      body: "此產品已過期，無法用來建立新的補擦提醒。請改用標示可確認且未過期的產品。",
+      timeLabel: "未計時",
+      ariaLabel: `${zoneLabel}使用的產品已過期。`,
+      secondaryActions: secondary("update_protection_record")
+    };
+  }
   if (reasons.has("PRODUCT_IDENTITY_UNKNOWN")) {
     return {
       ...base,
@@ -241,7 +319,8 @@ function buildUntimedPresentation(options: {
       body:
         "產品的防曬標示尚未確認，暫時無法建立產品補擦倒數。",
       timeLabel: "未計時",
-      ariaLabel: `${zoneLabel}使用的產品身分尚未確認。`
+      ariaLabel: `${zoneLabel}使用的產品身分尚未確認。`,
+      secondaryActions: secondary("update_protection_record")
     };
   }
   if (reasons.has("PRODUCT_NO_SUNSCREEN_CLAIM")) {
@@ -251,7 +330,8 @@ function buildUntimedPresentation(options: {
       title: `${zoneLabel}記錄的產品沒有明確防曬標示`,
       body: "目前不建立產品補擦倒數。請查看其他防護選項。",
       timeLabel: "未計時",
-      ariaLabel: `${zoneLabel}記錄的產品沒有明確防曬標示。`
+      ariaLabel: `${zoneLabel}記錄的產品沒有明確防曬標示。`,
+      secondaryActions: secondary("update_protection_record")
     };
   }
   if (reasons.has("LABEL_WAIT_ACTIVE")) {
@@ -271,7 +351,8 @@ function buildUntimedPresentation(options: {
       title: `${zoneLabel}目前被衣物完整遮住`,
       body: "目前不計算產品補擦時間。衣物移開或防護方式改變時，請更新實際狀態。",
       timeLabel: "不適用計時",
-      ariaLabel: `${zoneLabel}目前被衣物完整遮住。`
+      ariaLabel: `${zoneLabel}目前被衣物完整遮住。`,
+      secondaryActions: secondary("update_protection_method")
     };
   }
   if (reasons.has("WATER_START_UNKNOWN")) {

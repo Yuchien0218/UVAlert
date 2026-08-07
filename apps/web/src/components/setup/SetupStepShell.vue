@@ -4,6 +4,7 @@ import type { SetupSaveStatus } from "../../features/setup/createSetupController
 
 interface Props {
   step: 1 | 2 | 3;
+  maxStep?: 2 | 3;
   title: string;
   description: string;
   backTo?: string | null;
@@ -11,9 +12,10 @@ interface Props {
   busy?: boolean;
 }
 
-withDefaults(defineProps<Props>(), {
+const props = withDefaults(defineProps<Props>(), {
   backTo: null,
-  busy: false
+  busy: false,
+  maxStep: 3
 });
 
 defineEmits<{
@@ -22,9 +24,13 @@ defineEmits<{
 
 const steps = [
   { label: "情境", to: "/setup/context" },
-  { label: "塗抹時間", to: "/setup/timing" },
+  { label: "塗抹時間與開始提醒", to: "/setup/timing" },
   { label: "確認", to: "/setup/review" }
 ] as const;
+
+const visibleSteps = props.maxStep === 2
+  ? steps.slice(0, 2)
+  : steps;
 </script>
 
 <template>
@@ -69,7 +75,7 @@ const steps = [
 
     <ol class="setup-shell__progress" aria-label="設定進度">
       <li
-        v-for="(progressStep, index) in steps"
+        v-for="(progressStep, index) in visibleSteps"
         :key="progressStep.label"
         class="setup-shell__progress-item"
         :class="{

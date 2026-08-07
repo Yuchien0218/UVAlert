@@ -10,6 +10,7 @@ import SunLoader from "../components/feedback/SunLoader.vue";
 import ZoneStatusList from "../components/reminder/ZoneStatusList.vue";
 import SessionEndControl from "../components/session/SessionEndControl.vue";
 import { useWebAppServices } from "../app/injection";
+import { resolveActionRoute } from "../helpers/resolveActionRoute";
 
 const { boot, sessionControl, uvForecast } = useWebAppServices();
 const router = useRouter();
@@ -19,14 +20,7 @@ onMounted(() => {
 });
 
 function handleAction(kind: ActionKind): void {
-  if (kind === "record_reapplication") {
-    void router.push({ name: "reminder-reapply" });
-    return;
-  }
-  void router.push({
-    name: "reminder-action",
-    params: { kind }
-  });
+  void router.push(resolveActionRoute(kind));
 }
 
 function handleEndSession(): void {

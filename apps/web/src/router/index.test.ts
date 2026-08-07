@@ -73,6 +73,25 @@ describe("createAppRouter", () => {
     );
   });
 
+  it("兩步流程後 /setup/review 轉址到 /setup/timing，舊連結不會 404", async () => {
+    const boot = {
+      phase: shallowReadonly(shallowRef("ready")),
+      errorCode: shallowReadonly(shallowRef(null)),
+      connectivity: shallowReadonly(shallowRef("online")),
+      currentSession: shallowReadonly(shallowRef(null)),
+      ensureBooted: vi.fn(async () => undefined),
+      refresh: vi.fn(async () => undefined),
+      dispose: vi.fn()
+    } as AppBootController;
+    const router = createAppRouter(boot, createMemoryHistory());
+
+    await router.push("/setup/review");
+    await router.isReady();
+
+    expect(router.currentRoute.value.name).toBe("setup-timing");
+    expect(router.currentRoute.value.name).not.toBe("not-found");
+  });
+
   it("S-08 沒有 active Session 時回到提醒頁", async () => {
     const boot = {
       phase: shallowReadonly(shallowRef("ready")), errorCode: shallowReadonly(shallowRef(null)), connectivity: shallowReadonly(shallowRef("online")), currentSession: shallowReadonly(shallowRef(null)),

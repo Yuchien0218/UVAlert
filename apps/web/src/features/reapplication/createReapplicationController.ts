@@ -142,9 +142,14 @@ export function createReapplicationController(dependencies: Dependencies): Reapp
       zone.methodComponents.some((component) => component === "sunscreen" || component === "other_topical") &&
       (zone.timingStatus === "reapply_due" || zone.timingStatus === "reapply_soon")
     ).map((zone) => zone.zoneInstanceId);
+    // 沒有 reapply_due／reapply_soon 部位時，退回 primaryAction 指定的部位。
+    // 不得再以「已有既有 Application」過濾：`complete_protection_record`
+    // （recordStatus === "unrecorded"）的部位本來就沒有 Application，
+    // 過濾掉會讓首次記錄變體開啟時零選取，使用者得自己找回該選哪些部位。
+    // 未指派產品的部位仍會在 submit 時被擋下並顯示就近錯誤，不會靜默送出。
     suggestedZoneIds.value = suggested.length > 0
       ? suggested
-      : context.session.primaryAction.affectedZoneInstanceIds.filter((zoneId) => nextAssignments[zoneId] !== undefined);
+      : context.session.primaryAction.affectedZoneInstanceIds;
     selectedZoneIds.value = [...suggestedZoneIds.value];
     referenceNow.value = dependencies.now().toISOString();
     appliedAt.value = referenceNow.value;

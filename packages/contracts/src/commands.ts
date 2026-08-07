@@ -349,6 +349,100 @@ export const EndSessionCommandV1Schema = z.object({
   })
 });
 
+/**
+ * S-09 回報狀況。
+ *
+ * 涵蓋會縮短或改變目前防護狀態的事件：四種一般原因、入水與離水。
+ * `context_changed` 與產品不適另循其他路徑，不在本命令範圍。
+ *
+ * 安全性約束在 `superRefine` 與 `planContextEvent` 兩層：
+ * 契約層擋掉結構性錯誤（未來時間、起點晚於事件），
+ * 規劃層再依既有事件流擋掉重疊區間與孤兒離水。
+ */
+export const ReportContextEventCommandV1Schema = z
+  .object({
+    ...CommandEnvelopeFields,
+    commandType: z.literal("report_context_event"),
+    expectedRevision: z.number().int().positive(),
+    payload: z.object({
+      eventId: NonEmptyIdSchema,
+      /** 使用者自陳的實際發生時間；不得晚於可信現在。 */
+      effectiveOccurredAt: UtcInstantSchema,
+      detail: z.discriminatedUnion("contextType", [
+        z.object({
+          contextType: z.enum([
+            "heavy_sweat",
+            "towel",
+            "friction",
+            "hand_wash"
+          ]),
+          zoneInstanceIds: z.array(NonEmptyIdSchema).min(1)
+        }),
+        z.object({
+          contextType: z.literal("water_start"),
+          activityIntervalId: NonEmptyIdSchema,
+          zoneInstanceIds: z.array(NonEmptyIdSchema).min(1),
+          startConfidence: z.enum(["confirmed", "unknown"]),
+          activityStartedAt: UtcInstantSchema.nullable()
+        }),
+        z.object({
+          contextType: z.literal("water_end"),
+          activityIntervalId: NonEmptyIdSchema,
+          zoneInstanceIds: z.array(NonEmptyIdSchema).min(1),
+          endedAt: UtcInstantSchema
+        })
+      ])
+    })
+  })
+  .superRefine((command, context) => {
+    const { detail, effectiveOccurredAt } = command.payload;
+
+    const zoneIds = new Set<string>();
+    for (const [index, zoneId] of detail.zoneInstanceIds.entries()) {
+      if (zoneIds.has(zoneId)) {
+        context.addIssue({
+          code: "custom",
+          path: ["payload", "detail", "zoneInstanceIds", index],
+          message: "同一事件內每個部位只能出現一次"
+        });
+      }
+      zoneIds.add(zoneId);
+    }
+
+    if (detail.contextType === "water_start") {
+      const hasConfirmedStart = detail.startConfidence === "confirmed";
+      if (hasConfirmedStart !== (detail.activityStartedAt !== null)) {
+        context.addIssue({
+          code: "custom",
+          path: ["payload", "detail", "activityStartedAt"],
+          message: "confirmed 必須有起點；unknown 起點必須為 null"
+        });
+      }
+      if (
+        detail.activityStartedAt !== null &&
+        Date.parse(detail.activityStartedAt) >
+          Date.parse(effectiveOccurredAt)
+      ) {
+        context.addIssue({
+          code: "custom",
+          path: ["payload", "detail", "activityStartedAt"],
+          message: "水上活動起點不得晚於事件發生時間"
+        });
+      }
+    }
+
+    if (
+      detail.contextType === "water_end" &&
+      Date.parse(detail.endedAt) > Date.parse(effectiveOccurredAt)
+    ) {
+      context.addIssue({
+        code: "custom",
+        path: ["payload", "detail", "endedAt"],
+        message: "離水時間不得晚於事件發生時間"
+      });
+    }
+  });
+
 export const ReapplyApplicationInputV1Schema = z.object({
   eventId: NonEmptyIdSchema,
   zoneInstanceIds: z.array(NonEmptyIdSchema).min(1),

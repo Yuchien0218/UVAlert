@@ -49,6 +49,57 @@ export function createAppRouter(
         meta: { title: "更多設定" }
       },
       {
+        path: "/help",
+        name: "help",
+        component: () => import("../pages/help/HelpIndexPage.vue"),
+        meta: { title: "常見問題" }
+      },
+      {
+        path: "/help/beach",
+        name: "help-beach",
+        component: () => import("../pages/help/HelpTopicPage.vue"),
+        meta: { title: "海邊防曬常見問題", helpTopicSlug: "beach" }
+      },
+      {
+        // S-16。同時是 `view_conservative_reminder` 的目的地（時鐘不可信且離線）。
+        path: "/help/how-it-works",
+        name: "help-how-it-works",
+        component: () => import("../pages/help/HelpTopicPage.vue"),
+        meta: {
+          title: "防曬晴報員怎麼運作",
+          helpTopicSlug: "how-it-works"
+        }
+      },
+      {
+        path: "/special-situation",
+        name: "special-situation",
+        component: () => import("../pages/SpecialSituationPage.vue"),
+        meta: { title: "特殊狀況" }
+      },
+      {
+        path: "/settings/display",
+        name: "settings-display",
+        component: () =>
+          import("../pages/settings/DisplaySettingsPage.vue"),
+        meta: { title: "顯示設定" }
+      },
+      {
+        path: "/settings/data",
+        name: "settings-data",
+        component: () => import("../pages/PlaceholderPage.vue"),
+        meta: {
+          title: "本機資料管理",
+          heading: "本機資料管理",
+          body: "查看、匯出與清除本機資料將在下一個實作切片接上；匯出不上傳、不經後端。"
+        }
+      },
+      {
+        path: "/install",
+        name: "install",
+        component: () => import("../pages/InstallPage.vue"),
+        meta: { title: "安裝到手機" }
+      },
+      {
         path: "/region",
         name: "region",
         component: () => import("../pages/RegionPage.vue"),
@@ -89,14 +140,23 @@ export function createAppRouter(
         }
       },
       {
+        // 2026-08-07 裁決：設定流程縮為兩步，原步驟 3 最終確認廢除，
+        // 內容併入 /setup/timing。保留為 redirect 避免舊連結 404。
         path: "/setup/review",
         name: "setup-review",
-        component: () => import("../pages/setup/SetupReviewPage.vue"),
+        redirect: { name: "setup-timing" }
+      },
+      {
+        // S-10：更正最近事件。入口是 S-07 的最近事件清單（唯一入口）。
+        path: "/reminder/event/:id/correct",
+        name: "reminder-event-correct",
+        component: () => import("../pages/PlaceholderPage.vue"),
         meta: {
-          title: "確認這次提醒",
+          title: "更正事件",
           hideNavigation: true,
-          requiresNoActiveSession: true,
-          setupStep: "review"
+          requiresActiveSession: true,
+          heading: "更正這筆事件",
+          body: "更正表單將在下一個實作切片接上事件流的 replace／void 後繼事件。"
         }
       },
       {
@@ -151,26 +211,6 @@ export function createAppRouter(
         draft?.initialContext === null
       ) {
         return { name: "setup-context" };
-      }
-      if (
-        to.meta.setupStep === "review" &&
-        (draft === null || draft.zones.length === 0)
-      ) {
-        return { name: "setup-timing" };
-      }
-      if (
-        to.meta.setupStep === "timing" &&
-        (draft?.zones.length ?? 0) > 0 &&
-        setup.hasTopicalZones.value === false
-      ) {
-        return { name: "setup-review" };
-      }
-      if (
-        to.meta.setupStep === "review" &&
-        setup.hasTopicalZones.value &&
-        setup.applicationTime.value === null
-      ) {
-        return { name: "setup-timing" };
       }
     }
 

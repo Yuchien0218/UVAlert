@@ -84,7 +84,7 @@ const zoneLabels = computed(() =>
           @click="$emit('adjust')"
         >
           <SlidersHorizontal :size="17" aria-hidden="true" />
-          調整追蹤部位或防護方式
+          調整追蹤部位
         </button>
       </div>
     </div>

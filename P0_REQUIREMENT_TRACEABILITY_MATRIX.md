@@ -66,7 +66,7 @@
 ```text
 AC-01, AC-02, AC-03, AC-04, AC-05, AC-06, AC-07, AC-09,
 AC-12, AC-15, AC-16, AC-17, AC-18, AC-19, AC-20, AC-21,
-AC-22, AC-23, AC-26, AC-28, AC-30, AC-31, AC-32, AC-33,
+AC-22, AC-23, AC-28, AC-30, AC-31, AC-32, AC-33,
 AC-34, AC-35, AC-36, AC-37, AC-38, AC-39, AC-40, AC-41,
 AC-42, AC-43, AC-44, AC-45, AC-46, AC-47, AC-48, AC-49,
 AC-50, AC-51, AC-52, AC-53, AC-54, AC-55, AC-56, AC-57,
@@ -240,7 +240,7 @@ AC-94, AC-96, AC-97, AC-98, AC-99, AC-100
 | AC-16 | F-05、F-08；S-05、S-07、S-15 | water label unknown copy／rule | TV-019 | SPECIFIED／REVIEW_BLOCKED |
 | AC-17 | F-05、F-08；S-05～07 | DT-LABEL；CP-REMINDER-LABEL | TV-013～014 | SPECIFIED／REVIEW_BLOCKED |
 | AC-18 | F-05；S-05、S-12 | snapshot 欄位分離、未知可繼續 | UT-VALIDATION-002 | SPECIFIED／REVIEW_BLOCKED |
-| AC-26 | F-06、F-UX-01；S-04 | DT-METHOD、BODY_ZONE_V3 | UT-VALIDATION-001 | SPECIFIED |
+| AC-26 | （已刪除 2026-08-07） | — | — | REMOVED；斷言改由 AC-07、82、86、94、41-F 覆蓋 |
 | AC-28 | F-07；S-08～10 | effectiveOccurredAt、stable order | TV-022、039 | SPECIFIED |
 | AC-33 | F-UX-01；S-03～06 | recent setting 不沿用時間 | E2E-P0-008 | SPECIFIED |
 | AC-34 | F-06、F-UX-01；S-04～05 | preset 自動套用、group mapping、batch method、最終確認 | UT-WEB-SETUP-001、UX-P0-002 | IMPLEMENTED／PARTIALLY_VERIFIED |
@@ -356,7 +356,7 @@ restore test 不得替代 E2E-P0-007。
 | ID | 內容 | 覆蓋 |
 | --- | --- | --- |
 | UT-RULE-TV-001～040 | Decision Table 固定事件流 | 一般、水上、因果、安全、primaryAction |
-| UT-VALIDATION-001 | StartSession method combinations | AC-26、34、88 |
+| UT-VALIDATION-001 | StartSession method combinations | AC-34、88 |
 | UT-VALIDATION-002 | ProductLabelSnapshotV1 | AC-18、35、87、97 |
 | UT-VALIDATION-003 | StartSession atomicity／idempotency | AC-42、88 |
 | UT-VALIDATION-004 | Product form schema | AC-18、35、47、48 |

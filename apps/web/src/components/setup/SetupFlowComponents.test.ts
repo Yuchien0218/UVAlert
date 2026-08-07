@@ -172,7 +172,7 @@ describe("ProtectionAdjustmentSheet", () => {
 
     expect(wrapper.get('[role="dialog"]').attributes("aria-modal"))
       .toBe("true");
-    expect(wrapper.text()).toContain("調整部位與防護方式");
+    expect(wrapper.text()).toContain("調整追蹤部位");
     await wrapper.get('button[aria-label="關閉調整"]').trigger("click");
     expect(wrapper.emitted("close")).toHaveLength(1);
   });
@@ -192,7 +192,6 @@ describe("S-04 ZoneProtectionForm", () => {
     });
 
     await findButton(wrapper, "使用這組").trigger("click");
-    await findButton(wrapper, "全部已擦防曬").trigger("click");
     await findButton(wrapper, "下一步").trigger("click");
 
     const emitted = wrapper.emitted("submit")?.[0]?.[0] as
@@ -218,6 +217,124 @@ describe("S-04 ZoneProtectionForm", () => {
     ]);
     expect(codes).not.toContain("scalp");
     expect(codes).not.toContain("lips");
+  });
+
+  it("不再詢問防護方式，畫面上沒有任何方式單選鈕", async () => {
+    const wrapper = mount(ZoneProtectionForm, {
+      props: {
+        context: "indoor_away",
+        initialZones: [],
+        initialEntryMode: "quick_preset",
+        initialSuggestedPresetId: null,
+        initialSuggestedPresetVersion: null,
+        initialPresetDecision: null
+      }
+    });
+
+    await findButton(wrapper, "使用這組").trigger("click");
+
+    expect(wrapper.find('input[type="radio"]').exists()).toBe(false);
+    expect(wrapper.text()).not.toContain("已擦防曬產品");
+    expect(wrapper.text()).not.toContain("被衣物完整遮住");
+  });
+
+  it("追蹤中的部位一律送出 exposed 且 methodComponents 只有 sunscreen", async () => {
+    const wrapper = mount(ZoneProtectionForm, {
+      props: {
+        context: "indoor_away",
+        initialZones: [],
+        initialEntryMode: "quick_preset",
+        initialSuggestedPresetId: null,
+        initialSuggestedPresetVersion: null,
+        initialPresetDecision: null
+      }
+    });
+
+    await findButton(wrapper, "使用這組").trigger("click");
+    await findButton(wrapper, "下一步").trigger("click");
+
+    const emitted = wrapper.emitted("submit")?.[0]?.[0] as
+      | ProtectionDraftInput
+      | undefined;
+    expect(emitted?.zones.length).toBeGreaterThan(0);
+    for (const zone of emitted?.zones ?? []) {
+      expect(zone.skinExposureStatus).toBe("exposed");
+      expect(zone.methodComponents).toEqual(["sunscreen"]);
+    }
+  });
+
+  it("取消勾選部位會從送出結果移除，且標記 preset 已調整", async () => {
+    const wrapper = mount(ZoneProtectionForm, {
+      props: {
+        context: "indoor_away",
+        initialZones: [],
+        initialEntryMode: "quick_preset",
+        initialSuggestedPresetId: null,
+        initialSuggestedPresetVersion: null,
+        initialPresetDecision: null
+      }
+    });
+
+    await findButton(wrapper, "使用這組").trigger("click");
+
+    const earsCheckbox = wrapper
+      .findAll('input[type="checkbox"]')
+      .find((_input, index) =>
+        wrapper.findAll(".zone-group-choice")[index]?.text().includes("耳朵")
+      );
+    if (earsCheckbox === undefined) {
+      throw new Error("找不到耳朵的勾選框");
+    }
+    await earsCheckbox.setValue(false);
+    await findButton(wrapper, "下一步").trigger("click");
+
+    const emitted = wrapper.emitted("submit")?.[0]?.[0] as
+      | ProtectionDraftInput
+      | undefined;
+    expect(emitted?.zones.map((zone) => zone.bodyZoneCode)).not.toContain(
+      "ears"
+    );
+    expect(emitted?.presetDecision).toBe("adjusted");
+  });
+
+  it("一個部位都沒選時擋下送出", async () => {
+    const wrapper = mount(ZoneProtectionForm, {
+      props: {
+        context: "indoor_away",
+        initialZones: [],
+        initialEntryMode: "self_select",
+        initialSuggestedPresetId: null,
+        initialSuggestedPresetVersion: null,
+        initialPresetDecision: null
+      }
+    });
+
+    await findButton(wrapper, "自己選擇部位").trigger("click");
+    await findButton(wrapper, "下一步").trigger("click");
+
+    expect(wrapper.emitted("submit")).toBeUndefined();
+    expect(wrapper.text()).toContain("請至少選擇一個實際要追蹤的部位。");
+  });
+
+  it("勾了其他部位卻沒填名稱時擋下送出", async () => {
+    const wrapper = mount(ZoneProtectionForm, {
+      props: {
+        context: "indoor_away",
+        initialZones: [],
+        initialEntryMode: "self_select",
+        initialSuggestedPresetId: null,
+        initialSuggestedPresetVersion: null,
+        initialPresetDecision: null
+      }
+    });
+
+    await findButton(wrapper, "自己選擇部位").trigger("click");
+    const checkboxes = wrapper.findAll('input[type="checkbox"]');
+    await checkboxes[checkboxes.length - 1]?.setValue(true);
+    await findButton(wrapper, "下一步").trigger("click");
+
+    expect(wrapper.emitted("submit")).toBeUndefined();
+    expect(wrapper.text()).toContain("請填寫其他部位名稱。");
   });
 });
 

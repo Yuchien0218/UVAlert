@@ -503,64 +503,35 @@ version
 | title | 快速提醒（推薦） |
 | body | 已依你選擇的情境套用一組常見追蹤部位。請查看摘要；需要時可以調整，並在最後一步確認完整設定。 |
 | primary_cta | null；直接顯示塗抹時間與下一步 |
-| secondary_cta | 調整追蹤部位或防護方式 |
+| secondary_cta | 調整追蹤部位 |
 | tertiary_link | 自己選擇部位 |
 | review_status | PRODUCT_DRAFT |
 
-### CP-SETUP-007：部位方法
+### CP-SETUP-007：追蹤部位（2026-08-07 改寫）
 
 | 欄位 | 內容 |
 | --- | --- |
-| title | 這個部位目前怎麼防護？ |
-| option_1 | 已擦防曬產品 |
-| option_2 | 被衣物完整遮住 |
-| tertiary_link | 其他情況 |
+| title | 追蹤哪些部位？ |
+| body | 選中的部位會開始補擦倒數。被衣物遮住、不需要提醒的部位不用選。 |
+| custom_label | 其他部位 |
+| custom_helper | 自訂文字只保存在本機 Session。 |
 | review_status | PRODUCT_DRAFT |
 
-`option_1`、`option_2` 與 `tertiary_link` 只在群組展開後顯示；收合狀態改用 CP-SETUP-007a。
+原 CP-SETUP-007（部位方法：`這個部位目前怎麼防護？`）與 CP-SETUP-007a
+（收合狀態的群組行）已於 2026-08-07 裁決移除逐部位防護方式選擇後刪除。
 
-### CP-SETUP-007a：收合狀態的群組行（2026-08-06 新增）
+### CP-SETUP-008：（已刪除，2026-08-07）
 
-| 欄位 | 內容 |
-| --- | --- |
-| template | {groupName}　{methodLabel} |
-| method_label_sunscreen | 已擦防曬 |
-| method_label_clothing | 被衣物完整遮住 |
-| method_label_clothing_with_sunscreen | 被衣物完整遮住 · 下方有擦防曬 |
-| method_label_other_topical | 其他外用產品 |
-| method_label_none | 尚未選擇 |
-| review_status | PRODUCT_DRAFT |
-
-`method_label_clothing` 系列**不得**使用 untimed 語意色（紫）。
-衣物覆蓋是中性正常狀態，untimed 在本專案代表「沒有可信期限、需要處理」。
-使用次要文字色即可。
-
-### CP-SETUP-008：衣物完整覆蓋說明
-
-| 欄位 | 內容 |
-| --- | --- |
-| body | 請只在這個部位被衣物、帽子或其他穿戴物完整遮住時選擇。雨傘、建築物或樹蔭不算衣物遮蔽。 |
-| optional_label | 衣物下方也有擦防曬產品 |
-| review_status | MEDICAL_REVIEW／PRODUCT_DRAFT |
-
-### CP-SETUP-008a：衣物覆蓋的選填追問（2026-08-06 新增）
-
-選擇 `被衣物完整遮住` 後就地顯示，不阻斷流程；選 `已擦防曬產品` 則不出現。
-
-| 欄位 | 內容 |
-| --- | --- |
-| question | 衣物下方也有擦防曬產品嗎？（選填） |
-| confirm_cta | 完成 |
-| review_status | MEDICAL_REVIEW／PRODUCT_DRAFT |
-
-本則**不得**改回第一層並列選項。PRD §5.2 第 5 點 明文禁止在第一層另列語義模糊的「兩者都有」。
+原「衣物完整覆蓋說明」與 CP-SETUP-008a「衣物覆蓋的選填追問」隨逐部位防護方式
+選擇移除而刪除。遮蔭不算防護的規則改由 AC-41 Scenario F 承載，
+文案落點在情境選擇而非部位方法。
 
 ### CP-SETUP-009：未確認方法
 
 | 欄位 | 內容 |
 | --- | --- |
-| title | 請先選擇目前已採用的方式 |
-| body | 如果無法確認已擦防曬、被衣物完整遮住或使用其他外用產品，可以返回修改或先離開；系統不會建立空的提醒。 |
+| title | 請先選擇要追蹤的部位 |
+| body | 如果無法確認是否已擦防曬，可以返回修改或先離開；系統不會建立空的提醒。 |
 | primary_cta | 返回修改 |
 | secondary_cta | 先離開 |
 | review_status | PRODUCT_DRAFT |
@@ -620,7 +591,7 @@ version
 | 欄位 | 內容 |
 | --- | --- |
 | title | 確認這次提醒 |
-| body | 請檢查情境、追蹤部位、防護方式、產品與實際塗抹時間。送出後仍可更正最近的紀錄。 |
+| body | 請檢查情境、追蹤部位、產品與實際塗抹時間。送出後仍可更正最近的紀錄。 |
 | primary_cta | 開始提醒 |
 | secondary_cta | 返回修改 |
 | fixed_note | 顯示的時間是檢查／補擦提醒，不代表安全曝曬時間。 |
@@ -1119,7 +1090,7 @@ S-08 表單，但這是**第一次記錄防護，不是補擦**。CP-REAPPLY-001
 
 | 欄位 | 內容 |
 | --- | --- |
-| body | 防曬衣物可以在設定提醒時選為防護方式。被衣物完整遮住的部位不顯示補擦倒數。 |
+| body | 防曬衣物純屬紀錄，不影響提醒。被衣物遮住而不需要提醒的部位，設定時不勾選即可。 |
 | review_status | MEDICAL_REVIEW |
 
 ### CP-PRODUCT-FIELDS-001：新增欄位（2026-08-06 新增）

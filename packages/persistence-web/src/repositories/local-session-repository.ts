@@ -542,6 +542,20 @@ export class LocalSessionRepository {
     };
   }
 
+  /**
+   * 讀取目前 Session 的完整事件流。
+   *
+   * S-07 最近事件清單需要它才能列出可更正的事件；該清單是 S-10
+   * `/reminder/event/:id/correct` 取得事件 id 的唯一入口。
+   */
+  async getCurrentSessionEventStream(
+    localVisitorId: string
+  ): Promise<SessionEventStreamV1 | null> {
+    const session = await this.getCurrentSession(localVisitorId);
+    if (session === null) return null;
+    return this.#loadEventStream(session.sessionId);
+  }
+
   async getReapplicationContext(localVisitorId: string) {
     const session = await this.getCurrentSession(localVisitorId);
     if (session === null) return null;

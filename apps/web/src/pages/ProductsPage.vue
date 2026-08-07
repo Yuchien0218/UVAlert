@@ -58,12 +58,9 @@ onMounted(() => {
 async function resumeSetup(): Promise<void> {
   setup.resumeDraft();
   const step = setup.recommendedResumeStep();
+  // 兩步流程後只剩 context 與 timing；舊草稿的 review 一律回 timing。
   const routeName =
-    step === "context"
-      ? "setup-context"
-      : step === "review"
-        ? "setup-review"
-        : "setup-timing";
+    step === "context" ? "setup-context" : "setup-timing";
   await router.push({ name: routeName });
 }
 

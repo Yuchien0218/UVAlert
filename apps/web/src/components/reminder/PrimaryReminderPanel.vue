@@ -8,7 +8,10 @@ import type { ConnectivityStatus } from "@sunshield/platform";
 import { computed } from "vue";
 import { useCurrentTime } from "../../composables/useCurrentTime";
 import { calculateRemainingProgress } from "../../features/reminder/homeReminderClockPresentation";
-import { buildReminderPresentation } from "../../features/reminder/reminderPresentation";
+import {
+  buildReminderPresentation,
+  type SecondaryActionKind
+} from "../../features/reminder/reminderPresentation";
 import ReminderPanel from "./ReminderPanel.vue";
 
 interface Props {
@@ -21,6 +24,7 @@ const props = defineProps<Props>();
 
 const emit = defineEmits<{
   action: [kind: ActionKind];
+  secondaryAction: [kind: SecondaryActionKind];
 }>();
 
 const currentTime = useCurrentTime();
@@ -67,5 +71,6 @@ const countdownProgressPercent = computed(() =>
     :remaining-fraction="countdownProgress"
     :progress-percent="countdownProgressPercent"
     @action="emit('action', $event)"
+    @secondary-action="emit('secondaryAction', $event)"
   />
 </template>

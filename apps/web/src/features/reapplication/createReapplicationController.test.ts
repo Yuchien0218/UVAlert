@@ -23,7 +23,56 @@ function context() {
   } as any;
 }
 
+/**
+ * 首次記錄變體（`complete_protection_record`）：部位 `recordStatus === "unrecorded"`，
+ * 沒有任何既有 Application，因此不會出現在 `currentApplications` 裡。
+ */
+function firstRecordContext() {
+  const source = context();
+  source.session.zones = [
+    { ...source.session.zones[0], zoneInstanceId: "zone-new", currentApplicationId: null, currentApplicationEligibility: null, recordStatus: "unrecorded", timingStatus: "untimed_action" }
+  ];
+  source.session.primaryAction = {
+    presentationType: "untimed_action", variant: null, actionKind: "complete_protection_record",
+    affectedZoneInstanceIds: ["zone-new"], actionAt: null, reasonCodes: [], derivedFromEventRefs: []
+  };
+  source.currentApplications = [];
+  source.products = [
+    { productId: "product-a", displayName: "常用防曬", status: "active", snapshotFingerprint: "fp-a", currentSnapshot: makeProductSnapshot() }
+  ];
+  return source;
+}
+
 describe("createReapplicationController", () => {
+  it("首次記錄變體：沒有既有 Application 的部位仍被預選", async () => {
+    const source = firstRecordContext();
+    const controller = createReapplicationController({ repository: { getReapplicationContext: vi.fn().mockResolvedValue(source), reapply: vi.fn() }, identity: { getOrCreateLocalVisitorId: vi.fn().mockResolvedValue("visitor"), getOrCreateDeviceLocalId: vi.fn().mockResolvedValue("device") }, boot: { refresh: vi.fn(), currentSession: { value: source.session } } as any, createId: vi.fn(() => crypto.randomUUID()), now: () => new Date("2026-08-01T10:00:00.000Z"), getConnectivity: () => "online" });
+
+    await controller.load();
+
+    // 先前以「已有既有 Application」過濾 primaryAction 部位，
+    // 導致首次記錄開啟時零選取，使用者得自己找回該選哪些部位。
+    expect(controller.selectedZoneIds.value).toEqual(["zone-new"]);
+    expect(controller.assignments.value["zone-new"]).toBeUndefined();
+  });
+
+  it("首次記錄變體：未指派產品時擋下提交並顯示就近錯誤", async () => {
+    const source = firstRecordContext();
+    const reapply = vi.fn().mockResolvedValue({ ok: true, data: { ...source.session, revision: 2 }, sessionId: "session-1", revision: 2, committedEventIds: [] });
+    const boot = { refresh: vi.fn(), currentSession: { value: { ...source.session, revision: 2 } } } as any;
+    const controller = createReapplicationController({ repository: { getReapplicationContext: vi.fn().mockResolvedValue(source), reapply } as any, identity: { getOrCreateLocalVisitorId: vi.fn().mockResolvedValue("visitor"), getOrCreateDeviceLocalId: vi.fn().mockResolvedValue("device") }, boot, createId: vi.fn(() => crypto.randomUUID()), now: () => new Date("2026-08-01T10:00:00.000Z"), getConnectivity: () => "online" });
+    await controller.load();
+
+    expect(await controller.submit()).toBe(false);
+    expect(controller.fieldErrors.value["product.zone-new"]).toBeDefined();
+    // 沒有產品就送出會為從未塗抹的部位建立 Application，進而產生不該存在的倒數。
+    expect(reapply).not.toHaveBeenCalled();
+
+    controller.assignProduct("zone-new", "product:product-a");
+    expect(await controller.submit()).toBe(true);
+    expect(reapply).toHaveBeenCalledTimes(1);
+  });
+
   it("預選 due/soon 並保留不同部位目前的不同產品", async () => {
     const controller = createReapplicationController({ repository: { getReapplicationContext: vi.fn().mockResolvedValue(context()), reapply: vi.fn() }, identity: { getOrCreateLocalVisitorId: vi.fn().mockResolvedValue("visitor"), getOrCreateDeviceLocalId: vi.fn().mockResolvedValue("device") }, boot: { refresh: vi.fn(), currentSession: { value: context().session } } as any, createId: vi.fn(() => crypto.randomUUID()), now: () => new Date("2026-08-01T10:00:00.000Z"), getConnectivity: () => "online" });
     await controller.load();

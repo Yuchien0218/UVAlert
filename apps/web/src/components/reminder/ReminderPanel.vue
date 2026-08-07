@@ -1,6 +1,9 @@
 <script setup lang="ts">
 import { CheckCircle2 } from "@lucide/vue";
-import type { ReminderPresentation } from "../../features/reminder/reminderPresentation";
+import type {
+  ReminderPresentation,
+  SecondaryActionKind
+} from "../../features/reminder/reminderPresentation";
 import CountdownSunTime from "./CountdownSunTime.vue";
 
 interface Props {
@@ -16,6 +19,7 @@ const props = withDefaults(defineProps<Props>(), {
 
 const emit = defineEmits<{
   action: [kind: ReminderPresentation["actionKind"]];
+  secondaryAction: [kind: SecondaryActionKind];
 }>();
 
 function isClockTime(value: string): boolean {
@@ -127,6 +131,25 @@ function getEyebrowText(): string {
       <CheckCircle2 v-if="presentation.tone !== 'untimed'" :size="18" aria-hidden="true" />
       {{ presentation.actionLabel }}
     </button>
+
+    <!--
+      次要 CTA 排在主要操作之後，層級明確。
+      AC-65 要求操作按鈕有清楚層級；急症等主要行動不得被次要內容延後。
+    -->
+    <div
+      v-if="presentation.secondaryActions.length > 0"
+      class="reminder-panel__secondary"
+    >
+      <button
+        v-for="secondary in presentation.secondaryActions"
+        :key="secondary.kind"
+        class="button button--quiet"
+        type="button"
+        @click="emit('secondaryAction', secondary.kind)"
+      >
+        {{ secondary.label }}
+      </button>
+    </div>
   </article>
 </template>
 
@@ -201,6 +224,17 @@ function getEyebrowText(): string {
   border-color: var(--reminder-tone);
   background: var(--reminder-tone);
   color: var(--color-white);
+}
+
+.reminder-panel__secondary {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  margin-top: var(--space-3);
+}
+
+.reminder-panel__secondary .button {
+  flex: 1 1 auto;
 }
 
 .reminder-panel--untimed .reminder-panel__action {

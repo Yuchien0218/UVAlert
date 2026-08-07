@@ -191,6 +191,11 @@ P0 新建 Session 每個 active zone 只接受 `methodCertainty=confirmed`。
 
 ### DT-METHOD-01：合法方法組合
 
+> **2026-08-07 裁決附註**：設定流程移除逐部位防護方式選擇後，只會產生
+> `exposed` + `{sunscreen}` 一種組合。下表其餘合法組合**規則本身不變**，
+> 但在 P0 設定流程中不可達；它們仍適用於既有資料、S-08 補擦流程與未來入口。
+> 規則層不因 UI 收斂而刪除，避免既有 Session 失去判定依據。
+
 | skinExposureStatus | methodCertainty | methodComponents | 新建是否合法 | recordStatus |
 | --- | --- | --- | --- | --- |
 | exposed | confirmed | `{sunscreen}` | 是 | sunscreen_recorded |

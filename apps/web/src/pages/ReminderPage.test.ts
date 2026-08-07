@@ -1,7 +1,7 @@
 // @vitest-environment happy-dom
 
 import type { SessionProjection, ZoneProjection } from "@sunshield/contracts";
-import { shallowMount } from "@vue/test-utils";
+import { flushPromises, shallowMount } from "@vue/test-utils";
 import { shallowReadonly, shallowRef } from "vue";
 import { createMemoryHistory, createRouter } from "vue-router";
 import { describe, expect, it, vi } from "vitest";
@@ -81,14 +81,51 @@ function mockServices(currentSession: SessionProjection | null): void {
       endCurrentSession: vi.fn(async () => true),
       clearEndError: vi.fn(),
       dispose: vi.fn()
+    },
+    sessionEvents: {
+      phase: shallowReadonly(shallowRef("ready")),
+      stream: shallowReadonly(shallowRef(null)),
+      ensureLoaded: vi.fn(async () => undefined),
+      refresh: vi.fn(async () => undefined),
+      dispose: vi.fn()
+    },
+    productSettings: {
+      phase: shallowReadonly(shallowRef("ready")),
+      snapshot: shallowReadonly(shallowRef(null)),
+      products: shallowReadonly(shallowRef([])),
+      ensureLoaded: vi.fn(async () => undefined),
+      save: vi.fn(async () => true),
+      saveProduct: vi.fn(async () => true),
+      stopProduct: vi.fn(async () => true),
+      dispose: vi.fn()
     }
   } as unknown as WebAppServices);
 }
 
 async function mountPage() {
+  const stub = { template: "<div />" };
   const router = createRouter({
     history: createMemoryHistory(),
-    routes: [{ path: "/reminder", component: ReminderPage }]
+    routes: [
+      { path: "/reminder", component: ReminderPage },
+      // 次要 CTA 與原地行為的目的地；解析不到會讓導向靜默失敗。
+      {
+        path: "/reminder/reapply",
+        name: "reminder-reapply",
+        component: stub
+      },
+      {
+        path: "/special-situation",
+        name: "special-situation",
+        component: stub
+      },
+      {
+        path: "/reminder/action/:kind",
+        name: "reminder-action",
+        component: stub
+      },
+      { path: "/products", name: "products", component: stub }
+    ]
   });
   await router.push("/reminder");
   await router.isReady();
@@ -119,5 +156,81 @@ describe("ReminderPage", () => {
 
     expect(wrapper.findComponent(ReminderEmptyState).exists()).toBe(true);
     expect(router.currentRoute.value.path).toBe("/reminder");
+  });
+
+  // S-07 原地行為（2026-08-06 裁決：13 個 ActionKind 不新增畫面）。
+  // 離開頁面會讓使用者失去狀態脈絡，所以「不換頁」本身就是規格要求。
+  it("review_required_zones 就地錨點，不離開提醒頁", async () => {
+    mockServices(session);
+    const { router, wrapper } = await mountPage();
+
+    wrapper
+      .findComponent(PrimaryReminderPanel)
+      .vm.$emit("action", "review_required_zones");
+    await router.isReady();
+
+    expect(router.currentRoute.value.path).toBe("/reminder");
+  });
+
+  it("view_product_label 就地展開產品標示，不離開提醒頁", async () => {
+    mockServices(session);
+    const { router, wrapper } = await mountPage();
+
+    wrapper
+      .findComponent(PrimaryReminderPanel)
+      .vm.$emit("action", "view_product_label");
+    await wrapper.vm.$nextTick();
+
+    expect(router.currentRoute.value.path).toBe("/reminder");
+  });
+
+  it("查看處理說明導向 S-17，不預先帶入任何使用者輸入", async () => {
+    mockServices(session);
+    const { router, wrapper } = await mountPage();
+
+    wrapper
+      .findComponent(PrimaryReminderPanel)
+      .vm.$emit("secondaryAction", "view_handling_guidance");
+    await flushPromises();
+
+    expect(router.currentRoute.value.name).toBe("special-situation");
+    expect(router.currentRoute.value.query).toEqual({});
+  });
+
+  it("更新防護紀錄導向 S-08", async () => {
+    mockServices(session);
+    const { router, wrapper } = await mountPage();
+
+    wrapper
+      .findComponent(PrimaryReminderPanel)
+      .vm.$emit("secondaryAction", "update_protection_record");
+    await flushPromises();
+
+    expect(router.currentRoute.value.name).toBe("reminder-reapply");
+  });
+
+  it("查看已保存紀錄就地展開，不離開提醒頁", async () => {
+    mockServices(session);
+    const { router, wrapper } = await mountPage();
+
+    wrapper
+      .findComponent(PrimaryReminderPanel)
+      .vm.$emit("secondaryAction", "view_saved_records");
+    await wrapper.vm.$nextTick();
+
+    expect(router.currentRoute.value.path).toBe("/reminder");
+  });
+
+  it("recalibrate_clock 在校準子系統未實作時明講現況，不假裝已校準", async () => {
+    mockServices(session);
+    const { router, wrapper } = await mountPage();
+
+    wrapper
+      .findComponent(PrimaryReminderPanel)
+      .vm.$emit("action", "recalibrate_clock");
+    await wrapper.vm.$nextTick();
+
+    expect(router.currentRoute.value.path).toBe("/reminder");
+    expect(wrapper.text()).toContain("目前無法自動校準");
   });
 });

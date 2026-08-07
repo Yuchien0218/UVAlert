@@ -48,6 +48,10 @@ import {
   createReapplicationController,
   type ReapplicationController
 } from "../features/reapplication/createReapplicationController";
+import {
+  createSessionEventsController,
+  type SessionEventsController
+} from "../features/reminder/createSessionEventsController";
 import type { RegionDirectoryEntry } from "../features/region/TaiwanRegionResolver";
 
 export interface WebAppServices {
@@ -59,6 +63,7 @@ export interface WebAppServices {
   readonly uvForecast: UvForecastController;
   readonly region: RegionController;
   readonly reapplication: ReapplicationController;
+  readonly sessionEvents: SessionEventsController;
   dispose(): void;
 }
 
@@ -130,6 +135,10 @@ export function createWebAppServices(
     now: () => new Date(),
     getConnectivity: () => boot.connectivity.value
   });
+  const sessionEvents = createSessionEventsController({
+    repository,
+    identity
+  });
   const directory: readonly RegionDirectoryEntry[] = regionIndex;
   const directoryByCode = new Map(
     directory.map((entry) => [entry.regionCode, entry])
@@ -176,7 +185,9 @@ export function createWebAppServices(
     uvForecast,
     region,
     reapplication,
+    sessionEvents,
     dispose(): void {
+      sessionEvents.dispose();
       reapplication.dispose();
       region.dispose();
       uvForecast.dispose();

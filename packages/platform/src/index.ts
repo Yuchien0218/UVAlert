@@ -8,6 +8,7 @@ import type {
   RegionPreferenceV1,
   ReapplyCommandV1,
   ReducerClock,
+  SessionEventStreamV1,
   SessionProjection,
   SetupDraftV1,
   StartSessionCommandV1
@@ -16,6 +17,13 @@ import type {
 export interface SessionRepositoryPort {
   open(): Promise<void>;
   getCurrentSession(localVisitorId: string): Promise<SessionProjection | null>;
+}
+
+/** S-07 最近事件清單的讀取端口；該清單是 S-10 更正流程的唯一入口。 */
+export interface SessionEventStreamRepositoryPort {
+  getCurrentSessionEventStream(
+    localVisitorId: string
+  ): Promise<SessionEventStreamV1 | null>;
 }
 
 export interface LocalIdentityPort {
