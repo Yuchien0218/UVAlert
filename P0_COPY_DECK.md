@@ -3,13 +3,13 @@
 | 文件資訊 | 內容 |
 | --- | --- |
 | 對應 PRD | `防曬晴報員PRD.md` v3.9 |
-| 對應畫面規格 | `P0_SCREEN_INVENTORY.md` v0.4 |
-| 對應提醒規則 | `P0_REMINDER_RULE_DECISION_TABLE.md` v0.2 |
-| 文件版本 | 0.4 |
+| 對應畫面規格 | `P0_SCREEN_INVENTORY.md` v0.5 |
+| 對應提醒規則 | `P0_REMINDER_RULE_DECISION_TABLE.md` v0.3 |
+| 文件版本 | 0.5 |
 | 語系 | 繁體中文 `zh-TW` |
 | 狀態 | 文案與審查基準草案 |
 | 建立日期 | 2026-07-29 |
-| 最近更新 | 2026-08-06 |
+| 最近更新 | 2026-08-07 |
 
 > 本文件提供 P0 介面文案、CTA、錯誤與狀態模板。標記為 `BLOCKED` 的文案在相應專業審查完成前不得發布。任何文案不得改變 reducer 規則、建立新期限或被用來抵銷誤導性的畫面設計。
 
@@ -517,6 +517,24 @@ version
 | tertiary_link | 其他情況 |
 | review_status | PRODUCT_DRAFT |
 
+`option_1`、`option_2` 與 `tertiary_link` 只在群組展開後顯示；收合狀態改用 CP-SETUP-007a。
+
+### CP-SETUP-007a：收合狀態的群組行（2026-08-06 新增）
+
+| 欄位 | 內容 |
+| --- | --- |
+| template | {groupName}　{methodLabel} |
+| method_label_sunscreen | 已擦防曬 |
+| method_label_clothing | 被衣物完整遮住 |
+| method_label_clothing_with_sunscreen | 被衣物完整遮住 · 下方有擦防曬 |
+| method_label_other_topical | 其他外用產品 |
+| method_label_none | 尚未選擇 |
+| review_status | PRODUCT_DRAFT |
+
+`method_label_clothing` 系列**不得**使用 untimed 語意色（紫）。
+衣物覆蓋是中性正常狀態，untimed 在本專案代表「沒有可信期限、需要處理」。
+使用次要文字色即可。
+
 ### CP-SETUP-008：衣物完整覆蓋說明
 
 | 欄位 | 內容 |
@@ -524,6 +542,18 @@ version
 | body | 請只在這個部位被衣物、帽子或其他穿戴物完整遮住時選擇。雨傘、建築物或樹蔭不算衣物遮蔽。 |
 | optional_label | 衣物下方也有擦防曬產品 |
 | review_status | MEDICAL_REVIEW／PRODUCT_DRAFT |
+
+### CP-SETUP-008a：衣物覆蓋的選填追問（2026-08-06 新增）
+
+選擇 `被衣物完整遮住` 後就地顯示，不阻斷流程；選 `已擦防曬產品` 則不出現。
+
+| 欄位 | 內容 |
+| --- | --- |
+| question | 衣物下方也有擦防曬產品嗎？（選填） |
+| confirm_cta | 完成 |
+| review_status | MEDICAL_REVIEW／PRODUCT_DRAFT |
+
+本則**不得**改回第一層並列選項。PRD §5.2.5 明文禁止在第一層另列語義模糊的「兩者都有」。
 
 ### CP-SETUP-009：未確認方法
 
@@ -542,8 +572,11 @@ version
 | title | 這次用了哪一款？ |
 | helper | 選擇已保存產品，或只為這次記錄產品標示。 |
 | option_session_only | 這次先不保存產品 |
-| option_new | 新增防曬品 |
+| option_new | 新增防曬產品 |
 | review_status | PRODUCT_DRAFT |
+
+設定流程只列出 `gearCategory === "sunscreen"` 的紀錄——這裡要的是能建立倒數的產品，
+不是整份裝備清單。`option_new` 進入 S-12 時品類預設為 `sunscreen`。
 
 ### CP-SETUP-011：確認產品身分
 
@@ -580,7 +613,9 @@ version
 | inline_error | 塗抹時間不能晚於目前可信時間，請重新確認。 |
 | review_status | PRODUCT_DRAFT |
 
-### CP-SETUP-015：最終確認
+### CP-SETUP-015：提交前確認（S-05 併頁後）
+
+2026-08-06 裁決：S-06 廢除，本則由獨立確認頁的文案改為 S-05 固定操作列上方的確認區文案。
 
 | 欄位 | 內容 |
 | --- | --- |
@@ -590,6 +625,27 @@ version
 | secondary_cta | 返回修改 |
 | fixed_note | 顯示的時間是檢查／補擦提醒，不代表安全曝曬時間。 |
 | review_status | MEDICAL_REVIEW／PRODUCT_DRAFT |
+
+### CP-SETUP-015a：部位摘要單行
+
+| 欄位 | 內容 |
+| --- | --- |
+| template | 追蹤 {zoneCount} 個部位：{zoneNames} |
+| inline_cta | 調整 |
+| 說明 | `zoneNames` 以大群組名稱列出，不展開原子部位。AC-34 要求摘要「已揭露」，不要求強迫捲動。 |
+| review_status | PRODUCT_DRAFT |
+
+### CP-SETUP-015b：不建立倒數的 CTA 變體
+
+產品身分未確認（`identity_unconfirmed`）時系統不建立倒數，CTA 必須明示。
+
+| 欄位 | 內容 |
+| --- | --- |
+| primary_cta | 開始提醒（不建立倒數） |
+| helper | 這個產品的包裝標示還沒確認，所以不會顯示補擦倒數。你仍可以記錄防護狀態。 |
+| review_status | MEDICAL_REVIEW |
+
+**不得**在此情況沿用一般的 `開始提醒`，那會讓使用者以為有倒數。
 
 ### CP-SETUP-016：全為衣物覆蓋
 
@@ -983,26 +1039,70 @@ S-08 表單，但這是**第一次記錄防護，不是補擦**。CP-REAPPLY-001
 
 ---
 
-## 12. 產品狀態與我的防曬品
+## 12. 產品狀態與我的防曬裝備
+
+2026-08-06 裁決：S-11 由「提醒用產品主檔」擴為「防曬裝備清單」，
+含 `sunscreen`／`clothing`／`eyewear`／`other_gear` 四品類。
 
 ### CP-PRODUCT-EMPTY-001
 
 | 欄位 | 內容 |
 | --- | --- |
-| title | 還沒有保存的防曬品 |
-| body | 可以新增常用產品，之後快速重用標示。建立提醒時也可以選擇這次先不保存產品。 |
-| primary_cta | 新增防曬品 |
+| title | 還沒有保存的防曬裝備 |
+| body | 可以新增常用的防曬產品或裝備，之後快速重用。建立提醒時也可以選擇這次先不保存產品。 |
+| primary_cta | 新增防曬裝備 |
 | review_status | PRODUCT_DRAFT |
 
 ### CP-PRODUCT-NEW-001
 
 | 欄位 | 內容 |
 | --- | --- |
-| title | 新增防曬品 |
-| helper | 先確認包裝上的防曬標示；品牌、名稱與其他資料可以稍後補充。 |
-| primary_cta | 儲存產品 |
+| title | 新增防曬裝備 |
+| helper | 先選擇種類。防曬乳需要確認包裝標示；品牌、名稱與其他資料可以稍後補充。 |
+| primary_cta | 儲存 |
 | secondary_cta | 取消 |
 | review_status | PRODUCT_DRAFT |
+
+### CP-PRODUCT-CATEGORY-001：品類選擇（2026-08-06 新增）
+
+| 欄位 | 內容 |
+| --- | --- |
+| label | 這是什麼？ |
+| option_sunscreen | 防曬乳／防曬產品 |
+| option_clothing | 防曬衣物 |
+| option_eyewear | 太陽眼鏡 |
+| option_other_gear | 其他防曬裝備 |
+| review_status | PRODUCT_DRAFT |
+
+### CP-PRODUCT-CATEGORY-002：純紀錄品類說明（2026-08-06 新增）
+
+選擇 `eyewear` 或 `other_gear` 時必須顯示，避免使用者以為記錄裝備會改變提醒。
+
+| 欄位 | 內容 |
+| --- | --- |
+| body | 這筆紀錄只保存在你的裝備清單，不會建立或改變補擦提醒。 |
+| review_status | MEDICAL_REVIEW |
+
+### CP-PRODUCT-CATEGORY-003：衣物品類說明（2026-08-06 新增）
+
+| 欄位 | 內容 |
+| --- | --- |
+| body | 防曬衣物可以在設定提醒時選為防護方式。被衣物完整遮住的部位不顯示補擦倒數。 |
+| review_status | MEDICAL_REVIEW |
+
+### CP-PRODUCT-FIELDS-001：新增欄位（2026-08-06 新增）
+
+| 欄位 | 內容 |
+| --- | --- |
+| label_purchase_month | 購買月份 |
+| label_expiry_date | 到期日 |
+| label_note | 備忘 |
+| label_archived | 過去用過 |
+| helper_expiry_date | 只有到期日會影響提醒：過期的防曬產品不會建立補擦倒數。 |
+| review_status | MEDICAL_REVIEW／PRODUCT_DRAFT |
+
+`helper_expiry_date` 是本次擴充的關鍵安全文案——四個新欄位中只有到期日進 reducer，
+其餘為純紀錄，UI 必須讓使用者分得出來。
 
 ### CP-PRODUCT-NOTE-001
 
@@ -1396,7 +1496,34 @@ S-08 表單，但這是**第一次記錄防護，不是補擦**。CP-REAPPLY-001
 
 ---
 
-## 18. 海邊 Q&A 與內容入口
+## 18. Q&A 總覽與內容入口
+
+2026-08-06 裁決：Q&A 由單一主題頁擴為「總覽＋主題」兩層，且**只做 App 內**，
+不做公開索引、SEO 或 GEO。
+
+### CP-HELP-INDEX-001：Q&A 總覽（2026-08-06 新增）
+
+| 欄位 | 內容 |
+| --- | --- |
+| title | 常見問題 |
+| body | 這些內容說明防曬產品、提醒時間與使用限制。閱讀不會修改目前的提醒狀態。 |
+| item_beach | 海邊防曬常見問題 |
+| item_how_it_works | 防曬晴報員怎麼運作 |
+| secondary_cta | 返回 |
+| review_status | PRODUCT_DRAFT |
+
+總覽**只列出已通過審查且可發布的主題**。未核准的主題不佔位、不顯示灰階項目，
+避免使用者以為內容即將出現。每則主題的審查狀態沿用該則自己的標記
+（`CONTENT_REVIEW`／`MEDICAL_REVIEW`／`MARINE_REVIEW`），總覽不覆寫。
+
+### CP-HELP-INDEX-002：總覽無可發布主題
+
+| 欄位 | 內容 |
+| --- | --- |
+| title | 目前沒有可查看的內容 |
+| body | 說明內容尚未完成必要審查。這不影響提醒功能。 |
+| primary_cta | 返回 |
+| review_status | PRODUCT_DRAFT |
 
 ### CP-BEACH-ENTRY-001
 

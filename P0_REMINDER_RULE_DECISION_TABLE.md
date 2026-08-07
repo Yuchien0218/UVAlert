@@ -3,12 +3,12 @@
 | 文件資訊 | 內容 |
 | --- | --- |
 | 對應 PRD | `防曬晴報員PRD.md` v3.9 |
-| 對應交付清單 | `P0_RELEASE_MANIFEST.md` v0.2 |
-| 對應畫面規格 | `P0_SCREEN_INVENTORY.md` v0.4 |
-| 文件版本 | 0.2 |
+| 對應交付清單 | `P0_RELEASE_MANIFEST.md` v0.3 |
+| 對應畫面規格 | `P0_SCREEN_INVENTORY.md` v0.5 |
+| 文件版本 | 0.3 |
 | 狀態 | P0 Reducer／測試基準草案 |
 | 建立日期 | 2026-07-29 |
-| 最近更新 | 2026-07-31 |
+| 最近更新 | 2026-08-07 |
 
 > 本文件把 PRD 的提醒規則整理成工程可執行的決策表與固定測試向量，不新增安全曝曬時間、SPF 乘法、UVI 時間倍率或醫療推論。正式啟用的每個 `ruleId` 仍必須存在於核准的 ReminderRuleSet，並透過 ReminderRuleEvidenceLink 連到有效 Claim Registry 項目。
 
@@ -273,6 +273,25 @@ P0 新建 Session 每個 active zone 只接受 `methodCertainty=confirmed`。
 - water resistance 未知不影響一般期限資格，只使水上期限為 null。
 - eligibility 在 Application 建立時寫入不可變 snapshot；產品主檔日後修改不回溯改寫該 snapshot。
 - 進行中發生 ProductSafetyEvent 時，snapshot 不變，但目前期限被安全封鎖失效。
+
+### 裝備品類的前置過濾（2026-08-06 裁決）
+
+S-11 擴為防曬裝備清單後，`SunscreenProducts` 新增 `gearCategory`。
+本表**只適用於 `gearCategory === "sunscreen"` 的紀錄**。
+
+| `gearCategory` | 是否進入本表 | 說明 |
+| --- | --- | --- |
+| `sunscreen` | 是 | 依 DT-ELIGIBILITY-01 判定 |
+| `clothing` | 否 | 是 methodComponent，覆蓋期間本就不倒數 |
+| `eyewear` | 否 | 無對應 `BODY_ZONE`，純紀錄 |
+| `other_gear` | 否 | 純紀錄 |
+
+非 `sunscreen` 品類不得進入產生期限的 snapshot 路徑，也不會產生
+`identity_unconfirmed` 之類的 eligibility 結果——它們根本不參與本表。
+
+`expiryDate` 取代 `expiryStatus` 後，DT-ELIGIBILITY-01 的
+`expiry < appliedAt` 判定改以 `expiryDate` 為準；**判定結果與既有行為相同**，
+`RR-P0-ELIGIBILITY-002` 與全部固定測試向量不變。
 
 ---
 

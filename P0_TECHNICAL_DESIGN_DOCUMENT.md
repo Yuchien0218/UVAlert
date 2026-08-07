@@ -3,16 +3,16 @@
 | 文件資訊 | 內容 |
 | --- | --- |
 | 對應 PRD | `防曬晴報員PRD.md` v3.9 |
-| Release Manifest | `P0_RELEASE_MANIFEST.md` v0.2 |
-| Screen Inventory | `P0_SCREEN_INVENTORY.md` v0.4 |
-| Reminder Rules | `P0_REMINDER_RULE_DECISION_TABLE.md` v0.2 |
-| Copy Deck | `P0_COPY_DECK.md` v0.4 |
-| Requirement Traceability Matrix | `P0_REQUIREMENT_TRACEABILITY_MATRIX.md` v0.7 |
-| 文件版本 | 0.7 |
+| Release Manifest | `P0_RELEASE_MANIFEST.md` v0.3 |
+| Screen Inventory | `P0_SCREEN_INVENTORY.md` v0.5 |
+| Reminder Rules | `P0_REMINDER_RULE_DECISION_TABLE.md` v0.3 |
+| Copy Deck | `P0_COPY_DECK.md` v0.5 |
+| Requirement Traceability Matrix | `P0_REQUIREMENT_TRACEABILITY_MATRIX.md` v0.8 |
+| 文件版本 | 0.8 |
 | 狀態 | Phase 0、Phase 1 核心、Phase 2 foundation／SetupDraft 與 Phase 3 Web Shell／S-01／S-03～S-07 local slice 已實作並通過目前自動 Gate；完整 P0 發布仍受未完成流程與專業審查 Gate 約束 |
 | 架構決策 | Web／PWA first，Capacitor-ready |
 | 建立日期 | 2026-07-29 |
-| 最近更新 | 2026-08-05 |
+| 最近更新 | 2026-08-07 |
 
 > 本文件把既有產品規格轉成可實作、可測試、可部署的技術設計，不新增產品功能、醫療推論或提醒分鐘數。若與 PRD、P0 Release Manifest 或 Reminder Rule Decision Table 衝突，必須先修正本文件，不得用工程實作覆蓋上游安全規格。
 
@@ -462,7 +462,7 @@ readonly state＋明確 action，Vue 綁定層才叫 `useX`。
 
 | Guard | 行為 |
 | --- | --- |
-| `requiresNoActiveSession` | active Session 存在時阻止 S-03～S-06，導向衝突說明／S-07 |
+| `requiresNoActiveSession` | active Session 存在時阻止 S-03～S-05，導向衝突說明／S-07 |
 | `requiresActiveSession` | 無 active Session 時，S-08～S-10 導向 S-07 空白狀態 |
 | `requiresCorrectableLeaf` | 更正目標不存在、已被更正或 Session ended 時顯示最新真值 |
 | `preserveSetupDraft` | 一般返回保存允許欄位；明確取消刪除；未完成產品設定時以 `pendingTiming` 保存使用者已確認的時間 |
@@ -470,7 +470,18 @@ readonly state＋明確 action，Vue 綁定層才叫 `useX`。
 
 Route guard 只做存取判定與導向，不在背景建立、結束或修改 Session。
 
-`/setup/protection` 僅保留為舊網址相容 redirect，導向 `/setup/timing?adjustProtection=1`。新版必經流程為三個畫面：情境、快速提醒／塗抹時間、最終確認；防護方式與部位編輯由第二個畫面的 Bottom Sheet 按需開啟。進入 S-05 時自動將情境建議 zones 寫入 SetupDraft，時間選擇器立即可用，使用者可再調整。自動套用不建立方法事件、Application 或 Session；正式真值仍只在 S-06 經使用者確認後，由 `StartSessionCommandV1` transaction 原子建立。產品標示由 `/products` 的本機 current-product snapshot 提供，Setup 不重問包裝標示；跨頁前可用 `pendingTiming` 保存已確認的時間，產品頁則顯示返回未完成設定的 Process Banner。
+`/setup/protection` 僅保留為舊網址相容 redirect，導向 `/setup/timing?adjustProtection=1`。
+
+**2026-08-06 裁決：必經流程由三個畫面縮為兩個畫面**——情境、快速提醒／塗抹時間／開始提醒。原 `/setup/review`（S-06）廢除，其必顯內容與提交行為併入 `/setup/timing`。防護方式與部位編輯仍由第二個畫面的 Bottom Sheet 按需開啟。
+
+進入 S-05 時自動將情境建議 zones 寫入 SetupDraft，時間選擇器立即可用，使用者可再調整。自動套用不建立方法事件、Application 或 Session；正式真值仍只在使用者於 S-05 固定操作列按下 `開始提醒` 後，由 `StartSessionCommandV1` transaction 原子建立——**併頁不改變命令、驗證器與交易邊界**。產品標示由 `/products` 的本機 current-product snapshot 提供，Setup 不重問包裝標示；跨頁前可用 `pendingTiming` 保存已確認的時間，產品頁則顯示返回未完成設定的 Process Banner。
+
+移除 `/setup/review` route 時的實作注意事項：
+
+- route meta `setupStep` 的步驟編號由 3 改為 2，返回路徑一併調整。
+- `requiresNoActiveSession` guard 的涵蓋範圍由 S-03～S-06 改為 S-03～S-05。
+- 既有 `/setup/review` 網址建議保留 redirect 至 `/setup/timing`，避免使用者書籤與流程中斷。
+- S-05 的固定操作列只在 `hideNavigation: true` 的設定精靈成立，不得套用到 `/reminder`。
 
 首頁有 active Session 時直接以同一份 `primaryAction` projection 決定主要狀態元件與 CTA，不另建首頁專用提醒真值。CTA 依 `primaryAction.actionKind` 導向補擦、回報或相應確認流程；`/reminder` 保留完整部位分組、原因、事件時間軸與 Session 管理。
 
@@ -806,7 +817,7 @@ authority: current browser profile／installed PWA origin
 
 | Store | Primary key／必要索引 |
 | --- | --- |
-| `SunscreenProducts` | `&id`, `usageStatus`, `updatedAt`, `[usageStatus+updatedAt]` |
+| `SunscreenProducts` | `&id`, `usageStatus`, `updatedAt`, `[usageStatus+updatedAt]`, `gearCategory`, `archivedAt` |
 | `ProtectionSessions` | `&id`, `overallStatus`, `startedAt`, `endedAt`, `revision` |
 | `ProtectionZoneStates` | `&[sessionId+zoneInstanceId]`, `sessionId`, `bodyZoneCode`, `timingStatus`, `zoneDueAt` |
 | `SessionStartedEvents` | `&id`, `sessionId`, `[sessionId+effectiveOccurredAt]`, `idempotencyKey` |
@@ -816,6 +827,28 @@ authority: current browser profile／installed PWA origin
 | `ApplicationEvents` | `&id`, `sessionId`, `applicationConfirmationId`, `*zoneInstanceIds`, `appliedAt` |
 | `ProductSafetyEvents` | `&id`, `sessionId`, `sourceProductId`, `productSnapshotFingerprint` |
 | `ContextEvents` | `&id`, `sessionId`, `eventType`, `activityIntervalId`, `correctionOfEventId` |
+
+#### `SunscreenProducts` 的裝備清單擴充（2026-08-06 裁決）
+
+S-11 由「提醒用產品主檔」擴為「防曬裝備清單」，`SunscreenProducts` 增加下列欄位：
+
+| 欄位 | 型別 | 進 reducer | 說明 |
+| --- | --- | --- | --- |
+| `gearCategory` | `"sunscreen" \| "clothing" \| "eyewear" \| "other_gear"` | **是**（決定是否參與計算） | 只有 `sunscreen` 產生期限；`clothing` 為 methodComponent；其餘為純紀錄 |
+| `purchaseMonth` | `string \| null`（`YYYY-MM`） | 否 | 購買月份 |
+| `expiryDate` | `string \| null`（ISO date） | **是** | 真實日期，取代／補充既有 `expiryStatus` |
+| `note` | `string \| null` | 否 | 備忘 |
+| `archivedAt` | `string \| null`（UTC instant） | 否 | 過去用過 |
+
+實作約束：
+
+- schema 變更需走既有 migration 流程；舊資料 `gearCategory` 預設 `"sunscreen"`，
+  維持既有行為不變。
+- `expiryDate` 取代 `expiryStatus` 時，「過期產品不建立期限」的既有規則不得改變；
+  兩者並存期間以 `expiryDate` 為準，`expiryStatus` 由日期推導。
+- `gearCategory !== "sunscreen"` 的紀錄不得進入產生期限的 snapshot 路徑。
+- 已被 active Session 或既有事件引用的 `sunscreen` 不得改 `gearCategory`；
+  reducer 契約與固定測試向量**不因本次擴充改變**。
 | `SessionEndedEvents` | `&id`, `&sessionId`, `effectiveOccurredAt` |
 | `WeatherSnapshots` | `&id`, `regionId`, `sourceKind`, `fetchedAt`, `usableUntil` |
 | `ClockCalibration` | `&calibrationRequestId`, `status`, `calibratedAtUtc` |
@@ -1745,6 +1778,10 @@ packages/platform-capacitor/
 | Phase 1 | `VERIFIED／REVIEW_BLOCKED` | Zod command／event／projection schemas、BODY_ZONE_V3、純 reducer、correction leaf、水上區間、primaryAction、TV-001～040 | ruleset Evidence Link build Gate 與專業核准 |
 | Phase 2 | `IMPLEMENTED／PARTIALLY_VERIFIED` | Dexie schema v1、Start／End transaction、receipt、active lock、revision CAS、client sequence、projection、BroadcastChannel adapter、SetupDraft 24 小時保存／到期／刪除、fake-indexeddb integration tests | ClockCalibration、migration、quota、reopen replay、其餘 mutation command、真實瀏覽器 multi-context |
 | Phase 3 | `IMPLEMENTED／PARTIALLY_VERIFIED` | Vue 3＋Vue Router App Shell、Studio Mono tokens、四個底部導覽、App Boot、IndexedDB Session restore、S-01、S-03～S-06 三畫面 local Setup flow（推薦部位自動套用、S-04 Bottom Sheet、`pendingTiming`、產品頁 Process Banner）、S-07 Reminder 空白／projection、Timed／Soon／Due／Untimed 元件、首頁依 `primaryAction` 顯示優先部位／全面補擦與相應操作、EndSession 二次確認、F-17 FiveDayUvForecast 前端／快照／固定晚間提示 | S-02、CWA forecast API 實際資料、recent／saved-product Setup 分支、ClockCalibration UI、S-08～S-20 其餘流程、Copy registry、正式 UI E2E、A11Y、Device |
+
+> Phase 3 欄位記錄的是**目前程式碼實際狀態**，其中「S-03～S-06 三畫面 local Setup flow」
+> 對應 2026-08-06 兩步裁決之前的實作。本文件 §7.4 的兩步規格尚未實作，
+> 兩者並存是預期的——規格超前程式碼，不是文件失準。實作完成後再更新本欄。
 | Phase 4～6 | `NOT_STARTED` | 無 | API、PWA、E2E、A11Y、Device、Release Gate |
 
 目前本機 Gate：

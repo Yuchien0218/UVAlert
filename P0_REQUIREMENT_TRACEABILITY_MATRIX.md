@@ -3,17 +3,17 @@
 | 文件資訊 | 內容 |
 | --- | --- |
 | 對應 PRD | `防曬晴報員PRD.md` v3.9 |
-| Release Manifest | `P0_RELEASE_MANIFEST.md` v0.2 |
-| Screen Inventory | `P0_SCREEN_INVENTORY.md` v0.4 |
-| Reminder Rules | `P0_REMINDER_RULE_DECISION_TABLE.md` v0.2 |
-| Copy Deck | `P0_COPY_DECK.md` v0.4 |
-| Technical Design | `P0_TECHNICAL_DESIGN_DOCUMENT.md` v0.7 |
-| 文件版本 | 0.7 |
+| Release Manifest | `P0_RELEASE_MANIFEST.md` v0.3 |
+| Screen Inventory | `P0_SCREEN_INVENTORY.md` v0.5 |
+| Reminder Rules | `P0_REMINDER_RULE_DECISION_TABLE.md` v0.3 |
+| Copy Deck | `P0_COPY_DECK.md` v0.5 |
+| Technical Design | `P0_TECHNICAL_DESIGN_DOCUMENT.md` v0.8 |
+| 文件版本 | 0.8 |
 | 狀態 | P0 規格追蹤基準；已回填 contracts／reducer／IndexedDB foundation、SetupDraft 與 Phase 3 Web Shell／local Setup slice 證據 |
 | 建立日期 | 2026-07-29 |
-| 最近更新 | 2026-07-31 |
+| 最近更新 | 2026-08-07 |
 
-> 本文件追蹤「需求 → 畫面 → 規則 → 文案 → 驗收條件 → 測試／審查證據」。工作區目前已有 contracts、純 reducer、IndexedDB foundation／SetupDraft，以及 Vue Web Shell、首頁、S-03～S-06 local Setup 與 Reminder read-only slice；只有第 8.0 節列出的範圍具有工程證據。Recent／saved-product Setup 分支、可信時間 API、其餘 mutation 流程、PWA、正式 UI E2E、A11Y、Device、內容審查及完整發布驗收仍不得視為已完成。
+> 本文件追蹤「需求 → 畫面 → 規則 → 文案 → 驗收條件 → 測試／審查證據」。工作區目前已有 contracts、純 reducer、IndexedDB foundation／SetupDraft，以及 Vue Web Shell、首頁、S-03～S-05 local Setup 與 Reminder read-only slice；只有第 8.0 節列出的範圍具有工程證據。Recent／saved-product Setup 分支、可信時間 API、其餘 mutation 流程、PWA、正式 UI E2E、A11Y、Device、內容審查及完整發布驗收仍不得視為已完成。
 
 ---
 
@@ -109,7 +109,7 @@ AC-94, AC-96, AC-97, AC-98, AC-99, AC-100
 | F-10 | 權限與錯誤降級 | 全部核心頁 | feature detection、transaction result | CP-REGION-*、CP-STORAGE-*、CP-GENERIC-ERROR | 01、12、23、31、32、39、54、89 | E2E-P0-006、SEC-P0-003 | SPECIFIED |
 | F-11 | 基本離線降級 | S-01、S-03～20 | App Shell、IDB、WeatherSnapshot | CP-OFFLINE-001、CP-UVI-013 | 09、12、23、40、89 | IT-IDB-002、E2E-P0-007、DEVICE-P0-001 | SPECIFIED |
 | F-12 | 基本個資告知 | S-02、S-14、S-19 | ConsentRecord、data lifecycle | CP-REGION-001、CP-PRIVACY-*、CP-DATA-* | 20、22、55、74、90、94、100 | LEGAL-P0-001～004、SEC-P0-004 | SPECIFIED／REVIEW_BLOCKED |
-| F-UX-01 | 低摩擦操作框架 | S-03～10 | preset metadata、自動套用至 SetupDraft、Bottom Sheet、batch partition | CP-SETUP-*、CP-REAPPLY-* | 33～45、50～52、57、59、64、65、79、81～83、88 | UX-P0-001～006、E2E-P0-008 | IMPLEMENTED（S-03～S-06 local subset）／PARTIALLY_VERIFIED |
+| F-UX-01 | 低摩擦操作框架 | S-03～10 | preset metadata、自動套用至 SetupDraft、Bottom Sheet、batch partition | CP-SETUP-*、CP-REAPPLY-* | 33～45、50～52、57、59、64、65、79、81～83、88 | UX-P0-001～006、E2E-P0-008 | IMPLEMENTED（S-03～S-05 local subset）／PARTIALLY_VERIFIED |
 | F-UX-03 | 戶外高對比顯示 | 全部頁面，重點 S-01、S-07、S-18 | Studio Mono Design Tokens、資訊藍 Tracking、presentation types | 所有狀態＋aria templates | 38、54、59、64～71 | UT-WEB-P0-002、A11Y-P0-001～007、DEVICE-P0-002 | IMPLEMENTED／PARTIALLY_VERIFIED |
 | F-CONTENT-01 | 最低內容治理 | S-14～17 | Claim Registry、Evidence Link、publish gate | 全 Copy Deck review status | 15、49、56、61、63、98、99 | CONTENT-P0-001～004、MED-P0-001、LEGAL-P0-005 | SPECIFIED／REVIEW_BLOCKED |
 | F-CONTENT-02 | 最低海邊 Q&A | S-05、S-09、S-15 | FAQ_BEACH_SUN_V1；不改 Session | CP-BEACH-* | 16、46～49、61、63 | MARINE-P0-001、MED-P0-002、CONTENT-P0-005 | SPECIFIED／REVIEW_BLOCKED |
@@ -124,18 +124,18 @@ AC-94, AC-96, AC-97, AC-98, AC-99, AC-100
 | S-01 首頁 | F-01～04 | UVI freshness、active Session、`primaryAction.actionKind` | CP-HOME、CP-UVI | 01～05、19、21、32、36、57、64、65、81 | E2E-P0-001、IT-CWA-*、UT-WEB-HOME-REMINDER-001 | IMPLEMENTED／PARTIALLY_VERIFIED |
 | S-02 地區與定位 | F-02、F-12 | function-local coordinate、NLSC 2025-03-18 Polygon／MultiPolygon、RegionPreferenceV1 | CP-REGION、CP-PRIVACY | 01、19、21、32、55、100 | RegionPage、resolver、geolocation、IndexedDB privacy tests；正式法律審查待完成 | IMPLEMENTED／PARTIALLY_VERIFIED／LEGAL_REVIEW |
 | S-03 情境 | F-UX-01 | SetupDraft、initialContext | CP-SETUP-001～005 | 33、39、41、42、79 | E2E-P0-008、UX-P0-001 | IMPLEMENTED／PARTIALLY_VERIFIED |
-| S-04 防護方式與部位（S-05 Bottom Sheet） | F-06、F-UX-01 | BODY_ZONE_V3、DT-METHOD、focus／scroll lock | CP-SETUP-006～009 | 26、34、52、79、88、94 | UT-VALIDATION-001、UT-WEB-SETUP-001、UX-P0-002 | IMPLEMENTED／PARTIALLY_VERIFIED |
-| S-05 快速提醒與塗抹時間 | F-05、F-06 | preset 自動套用、S-11 current-product snapshot、`pendingTiming`、ClockCalibration | CP-SETUP-006、013～014 | 23、34、35、40、50、53、79、87、97 | UT-WEB-SETUP-001、IT-WEB-SETUP-001、UT-VALIDATION-002、E2E-P0-003 | IMPLEMENTED（current-product subset）／PARTIALLY_VERIFIED／REVIEW_BLOCKED |
-| S-06 最終確認 | F-06、F-08 | StartSessionCommandV1 | CP-SETUP-015～018 | 05、33～35、39、41、42、79、85、87、88 | UT-VALIDATION-003、E2E-P0-009 | IMPLEMENTED／PARTIALLY_VERIFIED |
+| S-04 防護方式與部位（S-05 Bottom Sheet） | F-06、F-UX-01 | BODY_ZONE_V3、DT-METHOD、focus／scroll lock；收合預設、兩選項＋追問揭露層次 | CP-SETUP-006～009、007a、008a | 26、34、52、79、88、94 | UT-VALIDATION-001、UT-WEB-SETUP-001、UX-P0-002 | IMPLEMENTED／PARTIALLY_VERIFIED；**待修正揭露層次**（現況違反 PRD §5.2.5） |
+| S-05 快速提醒、塗抹時間與開始提醒 | F-05、F-06、F-08 | preset 自動套用、S-11 current-product snapshot、`pendingTiming`、ClockCalibration、StartSessionCommandV1、固定操作列 | CP-SETUP-006、013～018 | 05、23、33～35、39～42、50、53、79、85、87、88、97 | UT-WEB-SETUP-001、IT-WEB-SETUP-001、UT-VALIDATION-002、UT-VALIDATION-003、E2E-P0-003、E2E-P0-009 | IMPLEMENTED（current-product subset）／PARTIALLY_VERIFIED／REVIEW_BLOCKED；**待改為兩步** |
+| ~~S-06 最終確認~~ | — | — | — | — | — | **2026-08-06 廢除**，併入 S-05 |
 | S-07 進行中提醒 | F-08、F-09 | primaryAction、zone／Session summary | CP-REMINDER-* | 05、07、09、12、23、31、36、38、40、51、57、64～67、81、82、85、86、96 | UT-RULE-TV-*、A11Y-P0-002 | SPECIFIED／REVIEW_BLOCKED |
 | S-08 記錄已補擦 | F-06～08 | ApplicationConfirmationGroup | CP-REAPPLY-* | 07、28、37、39、40、45、65、82、85、87 | UT-RULE-TV-022、037～039 | SPECIFIED |
 | S-09 回報狀況 | F-07、F-08 | ContextEvent、ProductSafetyEvent | CP-EVENT-*、CP-PRODUCT-SAFETY | 06、28、37、39、41、44、51、83、85、97 | UT-RULE-TV-015～029 | SPECIFIED／REVIEW_BLOCKED |
 | S-10 更正最近事件 | F-07 | correction leaf、replace／void | CP-EVENT-CORRECT-* | 28、39、44、45、85 | UT-RULE-TV-039、IT-IDB-003 | SPECIFIED |
-| S-11 防曬產品 | F-05 | current-product snapshot；recent sorting 待實作 | CP-PRODUCT-* | 18、35、43、47、50、53、55、87、97 | Setup controller integration、E2E-P0-003 | IMPLEMENTED（single current-product subset）／PARTIALLY_VERIFIED |
-| S-12 新增防曬品 | F-05 | ProductLabelSnapshot source | CP-PRODUCT-NEW、NOTE | 18、35、47、48、55 | UT-VALIDATION-004 | SPECIFIED／REVIEW_BLOCKED |
+| S-11 防曬裝備 | F-05 | current-product snapshot；`gearCategory` 四品類、`purchaseMonth`／`expiryDate`／`note`／`archivedAt`；recent sorting 待實作 | CP-PRODUCT-*、CP-PRODUCT-CATEGORY-001～003、CP-PRODUCT-FIELDS-001 | 18、35、43、47、50、53、55、87、97 | Setup controller integration、E2E-P0-003 | IMPLEMENTED（single current-product subset）／PARTIALLY_VERIFIED；**待擴充品類** |
+| S-12 新增防曬裝備 | F-05 | ProductLabelSnapshot source；品類選擇與條件式欄位 | CP-PRODUCT-NEW、NOTE、CATEGORY、FIELDS | 18、35、47、48、55 | UT-VALIDATION-004 | SPECIFIED／REVIEW_BLOCKED |
 | S-13 編輯防曬品 | F-05 | immutable snapshots、safety restore rules | CP-PRODUCT-* | 43、50、53、87、97 | E2E-P0-010 | SPECIFIED／REVIEW_BLOCKED |
 | S-14 更多 | F-CONTENT-01～03 | navigation scope | CP-BEACH、CP-HELP、CP-PRIVACY | 46、58、61、63、80 | UX-P0-003、CONTENT-P0-* | SPECIFIED／REVIEW_BLOCKED |
-| S-15 海邊 Q&A | F-CONTENT-02 | FAQ state-neutrality | CP-BEACH-* | 46～49、61、63 | MARINE-P0-001、MED-P0-002 | SPECIFIED／REVIEW_BLOCKED |
+| S-15 Q&A 總覽與海邊防曬 | F-CONTENT-02 | FAQ state-neutrality；/help 總覽只列已核准主題 | CP-HELP-INDEX-001～002、CP-BEACH-* | 46～49、61、63 | MARINE-P0-001、MED-P0-002 | SPECIFIED／REVIEW_BLOCKED |
 | S-16 運作與倒數說明 | F-CONTENT-03 | absolute timestamp semantics | CP-HELP-* | 05、09、12、31、61、63、66 | CONTENT-P0-006 | SPECIFIED／REVIEW_BLOCKED |
 | S-17 特殊狀況 | F-CONTENT-01 | redFlagCodes、one-time no-store | CP-SPECIAL-* | 20、56、58、99 | MED-P0-003、LEGAL-P0-006 | REVIEW_BLOCKED |
 | S-18 顯示設定 | F-UX-03 | display preference | 顯示設定＋狀態文案 | 38、67～71 | A11Y-P0-003～007、DEVICE-P0-002 | SPECIFIED |
@@ -149,7 +149,7 @@ AC-94, AC-96, AC-97, AC-98, AC-99, AC-100
 | Rule group | 工作 ruleIds | Screens | Copy／reason codes | AC | Test vectors | 狀態 |
 | --- | --- | --- | --- | --- | --- | --- |
 | Eligibility | RR-P0-ELIGIBILITY-001～003 | S-05～07、S-11～13 | PRODUCT_EXPIRED、NO_CLAIM、IDENTITY_UNKNOWN | 18、35、47、48、53、87、97 | TV-005～008、027～029 | VERIFIED／REVIEW_BLOCKED |
-| Activation／current app | RR-P0-ACTIVATION-001、CURRENT-APP-001 | S-06～10 | 無直接使用者代碼；由目前狀態文案呈現 | 07、28、44、85、87、88、97 | TV-006、010～012、026 | VERIFIED |
+| Activation／current app | RR-P0-ACTIVATION-001、CURRENT-APP-001 | S-05、S-07～10 | 無直接使用者代碼；由目前狀態文案呈現 | 07、28、44、85、87、88、97 | TV-006、010～012、026 | VERIFIED |
 | General interval | RR-P0-GENERAL-001～004 | S-05～08 | GENERAL_INTERVAL_REACHED | 05、17、18、35、66、86、87、98 | TV-001～007、009～014 | VERIFIED／REVIEW_BLOCKED |
 | Label wait | RR-P0-LABEL-WAIT-001～002 | S-05～07 | LABEL_WAIT_ACTIVE | 05、17、66、86、87、98 | TV-013～014 | VERIFIED／REVIEW_BLOCKED |
 | Water | RR-P0-WATER-001～004 | S-03、S-05～09 | WATER_START_UNKNOWN、WATER_RESISTANCE_UNKNOWN、WATER_ENDED | 06、16、28、41、46、83、85、86、88、98 | TV-015～021 | VERIFIED／REVIEW_BLOCKED |
@@ -247,7 +247,7 @@ AC-94, AC-96, AC-97, AC-98, AC-99, AC-100
 | AC-35 | F-05、F-UX-01；S-05、S-11～13 | session-only snapshot、unknown value | UT-VALIDATION-002、E2E-P0-003 | SPECIFIED |
 | AC-37 | F-06、F-07；S-08、S-09 | 預選不提交；final confirmation | E2E-P0-005 | SPECIFIED |
 | AC-41 | F-07；S-03、S-09 | water preparing／active／unknown | TV-018～021 | SPECIFIED |
-| AC-42 | F-01、F-06；S-03、S-06、S-07 | one active Session、conflict copy | E2E-P0-012 | SPECIFIED |
+| AC-42 | F-01、F-06；S-03、S-05、S-07 | one active Session、conflict copy | E2E-P0-012 | SPECIFIED |
 | AC-43 | F-05；S-05、S-11 | 90-day／top-3 deterministic sorting | UT-VALIDATION-005 | SPECIFIED |
 | AC-44 | F-06、F-07；S-09、S-10 | immutable method correction | IT-IDB-003 | SPECIFIED |
 | AC-45 | F-07；S-10 | unique correction leaf | TV-039 | SPECIFIED |
@@ -334,7 +334,7 @@ AC-94, AC-96, AC-97, AC-98, AC-99, AC-100
 | UT-WEB-SETUP-002 | `apps/web/src/components/setup/SetupFlowComponents.test.ts` | `passed` | 推薦部位自動套用後仍可調整；ProtectionAdjustmentSheet dialog 語意、關閉事件與 Teleport 邊界 |
 | UT-WEB-PRODUCT-001 | `apps/web/src/components/product/SetupProcessBanner.test.ts` | `passed` | 未完成 SetupDraft 的產品頁 Process Banner 與返回設定事件 |
 | IT-WEB-SETUP-002 | `apps/web/src/features/setup/createSetupController.integration.test.ts` | `passed` | `pendingTiming` 在沒有產品時保存、IndexedDB 重新載入後恢復，且不建立 Application 或 Session |
-| MANUAL-WEB-SETUP-001 | 本機 in-app browser `S-03 → S-05（含選用 S-04）→ S-06 → S-07` | `passed；console 0 errors` | 真實 IndexedDB projection、active Session guard、三畫面路由與最終提醒呈現 |
+| MANUAL-WEB-SETUP-001 | 本機 in-app browser `S-03 → S-05（含選用 S-04）→ S-06 → S-07` | `passed；console 0 errors` | 真實 IndexedDB projection、active Session guard、三畫面路由與最終提醒呈現。**此紀錄對應改為兩步之前的實作**，改版後需重跑為 `S-03 → S-05 → S-07` |
 | TypeScript boundary | root `pnpm typecheck` | `passed` | contracts、domain、persistence-web、platform、ui、test-fixtures、web strict TypeScript |
 | Web production build | root `pnpm build` | `passed` | `vue-tsc`＋Vite production bundle |
 | MANUAL-WEB-SESSION-END-001 | 本機 in-app browser 首頁 | `passed` | 停止入口、alertdialog 影響說明及取消；為保留既有 Session，最終結束由隔離的 integration test 驗證 |

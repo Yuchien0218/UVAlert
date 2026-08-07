@@ -47,5 +47,15 @@ pnpm check
 - `P0_REMINDER_RULE_DECISION_TABLE.md`
 - `P0_SCREEN_INVENTORY.md`（畫面、狀態與 route）
 - `P0_COPY_DECK.md`（介面文案與審查狀態；改動畫面文字要走這裡的流程）
+- `docs/decisions/`（裁決當下的規劃筆記與互動原型，規格回寫的依據）
 
-> 注意：P0 文件的部分內容已落後於程式碼（`P0_SCREEN_INVENTORY.md` 的首頁資訊順序與 route 總表、`P0_TECHNICAL_DESIGN_DOCUMENT.md` §7.2 的 component map），且與 `DESIGN_SYSTEM.md` 有兩處尚未裁決的衝突：**字級下限**（P0 要求內文至少 16px，現行 token 是 14px）與**狀態表達方式**（P0 要求顏色須搭配邊框／圖示，現行規則是結構性區塊無框）。引用 P0 的視覺規定前先確認這兩點。
+> **注意：2026-08-06 的六項裁決已寫進 P0 文件，但尚未實作。** 這些段落的規格**超前**程式碼，不是現況描述：
+>
+> - 設定流程兩步（S-06 廢除併入 S-05）——程式碼仍是三步，`/setup/review` route 還在。
+> - S-04 揭露層次（收合預設、0 個常駐單選鈕）——現況 20 個常駐單選鈕，違反 PRD §5.2.5。
+> - S-11 防曬裝備清單（四品類、四個新欄位）——`SunscreenProducts` 尚未加 `gearCategory`。
+> - S-15 `/help` Q&A 總覽——route 未建立。
+>
+> 裁決背景與互動原型見 `docs/decisions/`。實作前先讀那裡，不要只看規格條文。
+>
+> 另有兩項尚未裁決：**本機匯出是否進 P0**、**S-07 四個次要 CTA 的目的地**。
