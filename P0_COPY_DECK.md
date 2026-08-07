@@ -553,7 +553,7 @@ version
 | confirm_cta | 完成 |
 | review_status | MEDICAL_REVIEW／PRODUCT_DRAFT |
 
-本則**不得**改回第一層並列選項。PRD §5.2.5 明文禁止在第一層另列語義模糊的「兩者都有」。
+本則**不得**改回第一層並列選項。PRD §5.2 第 5 點 明文禁止在第一層另列語義模糊的「兩者都有」。
 
 ### CP-SETUP-009：未確認方法
 
