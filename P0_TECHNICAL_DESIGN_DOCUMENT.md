@@ -2,7 +2,7 @@
 
 | 文件資訊 | 內容 |
 | --- | --- |
-| 對應 PRD | `防曬晴報員PRD.md` v3.9 |
+| 對應 PRD | `防曬晴報員PRD.md` v3.10 |
 | Release Manifest | `P0_RELEASE_MANIFEST.md` v0.3 |
 | Screen Inventory | `P0_SCREEN_INVENTORY.md` v0.5 |
 | Reminder Rules | `P0_REMINDER_RULE_DECISION_TABLE.md` v0.3 |

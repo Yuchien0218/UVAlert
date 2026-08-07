@@ -2,7 +2,7 @@
 
 | 文件資訊 | 內容 |
 | --- | --- |
-| 對應 PRD | `防曬晴報員PRD.md` v3.9 |
+| 對應 PRD | `防曬晴報員PRD.md` v3.10 |
 | Release Manifest | `P0_RELEASE_MANIFEST.md` v0.3 |
 | Screen Inventory | `P0_SCREEN_INVENTORY.md` v0.5 |
 | Reminder Rules | `P0_REMINDER_RULE_DECISION_TABLE.md` v0.3 |
@@ -139,7 +139,7 @@ AC-94, AC-96, AC-97, AC-98, AC-99, AC-100
 | S-16 運作與倒數說明 | F-CONTENT-03 | absolute timestamp semantics | CP-HELP-* | 05、09、12、31、61、63、66 | CONTENT-P0-006 | SPECIFIED／REVIEW_BLOCKED |
 | S-17 特殊狀況 | F-CONTENT-01 | redFlagCodes、one-time no-store | CP-SPECIAL-* | 20、56、58、99 | MED-P0-003、LEGAL-P0-006 | REVIEW_BLOCKED |
 | S-18 顯示設定 | F-UX-03 | display preference | 顯示設定＋狀態文案 | 38、67～71 | A11Y-P0-003～007、DEVICE-P0-002 | SPECIFIED |
-| S-19 本機資料管理 | F-12 | lifecycle、active Session end | CP-DATA-* | 12、22、39、55、74、96、100 | IT-IDB-004、LEGAL-P0-003 | SPECIFIED／REVIEW_BLOCKED |
+| S-19 本機資料管理 | F-12 | lifecycle、active Session end；本機匯出（版本化檔案、不上傳、無匯入） | CP-DATA-*、CP-DATA-EXPORT-001～003 | 12、22、39、55、74、96、100 | IT-IDB-004、LEGAL-P0-003 | SPECIFIED／REVIEW_BLOCKED |
 | S-20 安裝到手機 | F-CONTENT-03 | feature detection、PWA | CP-INSTALL-* | 12、31、32、54、59 | DEVICE-P0-003 | SPECIFIED |
 
 ---
