@@ -130,8 +130,9 @@ async function goToProducts(): Promise<void> {
     }
   }
 
+  // 產品頁改為裝備清單後，這條次要入口要直接落在新增表單上。
   await router.push({
-    name: "products",
+    name: "product-new",
     query: { returnTo: "/setup/timing" }
   });
 }

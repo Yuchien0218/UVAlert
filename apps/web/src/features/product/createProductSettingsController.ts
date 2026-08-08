@@ -1,4 +1,4 @@
-import type { ProductCatalogRecordV1, ProductLabelSnapshotV1 } from "@sunshield/contracts";
+import type { GearCategory, ProductCatalogRecordV1, ProductLabelSnapshotV1 } from "@sunshield/contracts";
 import type { ProductCatalogPort, ProductSettingsPort } from "@sunshield/platform";
 import {
   shallowReadonly,
@@ -21,9 +21,28 @@ export interface ProductSettingsController {
   readonly products: Readonly<ShallowRef<ProductCatalogRecordV1[]>>;
   ensureLoaded(): Promise<void>;
   save(snapshot: ProductLabelSnapshotV1): Promise<boolean>;
-  saveProduct(displayName: string, snapshot: ProductLabelSnapshotV1, productId?: string): Promise<boolean>;
+  saveProduct(input: SaveGearInput): Promise<boolean>;
   stopProduct(productId: string): Promise<boolean>;
+  archiveProduct(productId: string): Promise<boolean>;
+  restoreProduct(productId: string): Promise<boolean>;
+  deleteProduct(productId: string): Promise<boolean>;
+  refresh(): Promise<void>;
   dispose(): void;
+}
+
+export interface SaveGearInput {
+  displayName: string;
+  gearCategory: GearCategory;
+  snapshot: ProductLabelSnapshotV1;
+  purchaseMonth?: string | null | undefined;
+  expiryDate?: string | null | undefined;
+  note?: string | null | undefined;
+  productId?: string | undefined;
+  /**
+   * 只有 sunscreen 會成為「目前使用產品」。記錄一副墨鏡不該改變
+   * 設定流程要沿用的產品，否則使用者會以為提醒行為跟著變了。
+   */
+  setAsCurrent?: boolean;
 }
 
 interface ProductSettingsControllerDependencies {
@@ -60,14 +79,32 @@ export function createProductSettingsController(
     }
   }
 
-  async function saveProduct(displayName: string, snapshot: ProductLabelSnapshotV1, productId?: string): Promise<boolean> {
-    if (dependencies.catalog === undefined || dependencies.createId === undefined) return save(snapshot);
+  function nowIso(): string {
+    return (dependencies.now?.() ?? new Date()).toISOString();
+  }
+
+  async function saveProduct(input: SaveGearInput): Promise<boolean> {
+    if (dependencies.catalog === undefined || dependencies.createId === undefined) return save(input.snapshot);
+    const setAsCurrent = input.setAsCurrent ?? input.gearCategory === "sunscreen";
     phaseState.value = "saving";
     try {
-      await dependencies.repository.saveCurrentProductSnapshot(snapshot);
-      await dependencies.catalog.saveProduct({ productId: productId ?? dependencies.createId(), displayName, snapshot, now: (dependencies.now?.() ?? new Date()).toISOString() });
-      snapshotState.value = snapshot;
-      productsState.value = await dependencies.catalog.listProducts();
+      const now = nowIso();
+      const saved = await dependencies.catalog.saveProduct({
+        productId: input.productId ?? dependencies.createId(),
+        displayName: input.displayName,
+        gearCategory: input.gearCategory,
+        snapshot: input.snapshot,
+        purchaseMonth: input.purchaseMonth ?? null,
+        expiryDate: input.expiryDate ?? null,
+        note: input.note ?? null,
+        now
+      });
+      if (setAsCurrent) {
+        // 保存 catalog 修正過到期狀態後的 snapshot，不是表單原值。
+        await dependencies.repository.saveCurrentProductSnapshot(saved.currentSnapshot);
+        snapshotState.value = saved.currentSnapshot;
+      }
+      productsState.value = await dependencies.catalog.listProducts(now);
       loaded = true;
       phaseState.value = "ready";
       return true;
@@ -77,18 +114,42 @@ export function createProductSettingsController(
     }
   }
 
-  async function stopProduct(productId: string): Promise<boolean> {
+  async function mutate(
+    run: (catalog: ProductCatalogPort, now: string) => Promise<void>
+  ): Promise<boolean> {
     if (dependencies.catalog === undefined) return false;
     phaseState.value = "saving";
     try {
-      await dependencies.catalog.stopProduct(productId, (dependencies.now?.() ?? new Date()).toISOString());
-      productsState.value = await dependencies.catalog.listProducts();
+      const now = nowIso();
+      await run(dependencies.catalog, now);
+      productsState.value = await dependencies.catalog.listProducts(now);
       phaseState.value = "ready";
       return true;
     } catch {
       phaseState.value = "error";
       return false;
     }
+  }
+
+  async function stopProduct(productId: string): Promise<boolean> {
+    return mutate((catalog, now) => catalog.stopProduct(productId, now));
+  }
+
+  async function archiveProduct(productId: string): Promise<boolean> {
+    return mutate((catalog, now) => catalog.archiveProduct(productId, now));
+  }
+
+  async function restoreProduct(productId: string): Promise<boolean> {
+    return mutate((catalog, now) => catalog.restoreProduct(productId, now));
+  }
+
+  async function deleteProduct(productId: string): Promise<boolean> {
+    return mutate((catalog) => catalog.deleteProduct(productId));
+  }
+
+  async function refresh(): Promise<void> {
+    loaded = false;
+    await ensureLoaded();
   }
 
   function ensureLoaded(): Promise<void> {
@@ -129,6 +190,10 @@ export function createProductSettingsController(
     save,
     saveProduct,
     stopProduct,
+    archiveProduct,
+    restoreProduct,
+    deleteProduct,
+    refresh,
     dispose
   };
 }

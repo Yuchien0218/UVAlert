@@ -6,6 +6,11 @@ import type { ProductSnapshotFormValue } from "../../features/setup/productSnaps
 interface Props {
   waterContext: boolean;
   otherTopicalOnly?: boolean;
+  /**
+   * 曝曬前等待、較短補擦間隔與耐水標示只對 sunscreen 有意義（S-12）。
+   * 記錄衣物時必須收起，否則會讓人以為填了就會影響倒數。
+   */
+  sunscreenFields?: boolean;
   eyebrow?: string;
   title?: string;
   description?: string;
@@ -13,6 +18,7 @@ interface Props {
 
 withDefaults(defineProps<Props>(), {
   otherTopicalOnly: false,
+  sunscreenFields: true,
   eyebrow: "本次使用",
   title: "這次先不保存產品",
   description:
@@ -105,7 +111,7 @@ const groupNames = {
     </fieldset>
 
     <aside
-      v-if="value.claimAnswer !== 'yes'"
+      v-if="sunscreenFields && value.claimAnswer !== 'yes'"
       class="identity-warning"
       role="status"
     >
@@ -118,7 +124,7 @@ const groupNames = {
       </div>
     </aside>
 
-    <template v-if="value.claimAnswer === 'yes'">
+    <template v-if="sunscreenFields && value.claimAnswer === 'yes'">
       <fieldset class="question-card app-card">
         <legend>包裝怎麼寫曝曬前等待時間？</legend>
         <p class="question-card__helper">

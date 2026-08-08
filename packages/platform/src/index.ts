@@ -4,6 +4,7 @@ import type {
   EndSessionCommandV1,
   FiveDayUvForecast,
   ProductLabelSnapshotV1,
+  GearCategory,
   ProductCatalogRecordV1,
   RegionPreferenceV1,
   ReapplyCommandV1,
@@ -104,16 +105,34 @@ export interface ContextEventRepositoryPort {
   ): Promise<CommandResult<SessionProjection>>;
 }
 
+export interface SaveProductInput {
+  productId: string;
+  displayName: string;
+  gearCategory: GearCategory;
+  snapshot: ProductLabelSnapshotV1;
+  purchaseMonth?: string | null;
+  expiryDate?: string | null;
+  note?: string | null;
+  now: string;
+}
+
 export interface ProductCatalogPort {
-  listProducts(): Promise<ProductCatalogRecordV1[]>;
-  getProduct(productId: string): Promise<ProductCatalogRecordV1 | null>;
-  saveProduct(input: {
-    productId: string;
-    displayName: string;
-    snapshot: ProductLabelSnapshotV1;
-    now: string;
-  }): Promise<ProductCatalogRecordV1>;
+  /**
+   * `now` 用來把已過到期日的紀錄推導成 expired 並就地修正 snapshot，
+   * 因此讀取側也需要時鐘。
+   */
+  listProducts(now?: string): Promise<ProductCatalogRecordV1[]>;
+  getProduct(
+    productId: string,
+    now?: string
+  ): Promise<ProductCatalogRecordV1 | null>;
+  saveProduct(input: SaveProductInput): Promise<ProductCatalogRecordV1>;
   stopProduct(productId: string, now: string): Promise<void>;
+  /** 移至「過去紀錄」。 */
+  archiveProduct(productId: string, now: string): Promise<void>;
+  /** 從「過去紀錄」恢復；安全狀態被封鎖的產品不得走這條。 */
+  restoreProduct(productId: string, now: string): Promise<void>;
+  deleteProduct(productId: string): Promise<void>;
 }
 
 export interface RegionPreferencePort {

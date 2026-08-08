@@ -43,6 +43,18 @@ export function createAppRouter(
         meta: { title: "回報狀況", hideNavigation: true, requiresActiveSession: true }
       },
       {
+        path: "/products/new",
+        name: "product-new",
+        component: () => import("../pages/GearFormPage.vue"),
+        meta: { title: "新增防曬裝備", hideNavigation: true }
+      },
+      {
+        path: "/products/:id/edit",
+        name: "product-edit",
+        component: () => import("../pages/GearFormPage.vue"),
+        meta: { title: "編輯防曬裝備", hideNavigation: true }
+      },
+      {
         path: "/products",
         name: "products",
         component: () => import("../pages/ProductsPage.vue"),

@@ -1,36 +1,22 @@
 <script setup lang="ts">
-import { Check, Save } from "@lucide/vue";
-import { computed, onMounted, ref, shallowRef, watch } from "vue";
-import { useRoute, useRouter } from "vue-router";
+import { Plus } from "@lucide/vue";
+import { computed, onMounted } from "vue";
+import { useRouter } from "vue-router";
 import { useWebAppServices } from "../app/injection";
-import ProductSnapshotEditor from "../components/product/ProductSnapshotEditor.vue";
 import SetupProcessBanner from "../components/product/SetupProcessBanner.vue";
-import {
-  makeSessionOnlyProductSnapshot,
-  productSnapshotToFormValue,
-  type ProductSnapshotFormValue
-} from "../features/setup/productSnapshot";
+import GearListItem from "../components/product/GearListItem.vue";
+import { GEAR_CATEGORY_LABELS } from "../features/product/gearPresentation";
 
+/**
+ * S-11 我的防曬裝備。
+ *
+ * 2026-08-06 裁決把本頁由「提醒用產品主檔」擴為「防曬裝備清單」。
+ * 四個品類裡只有 sunscreen 會產生倒數，clothing 是 methodComponent，
+ * eyewear 與 other_gear 純紀錄——清單必須把這件事講明白。
+ */
 const { boot, productSettings, setup } = useWebAppServices();
-const route = useRoute();
 const router = useRouter();
-const product = ref<ProductSnapshotFormValue>({
-  claimAnswer: "yes",
-  waitAnswer: "none",
-  waitMinutes: null,
-  intervalAnswer: "none",
-  intervalMinutes: null,
-  waterResistance: "unknown"
-});
-const localError = shallowRef<string | null>(null);
-const saved = shallowRef(false);
-const displayName = ref("我的防曬產品");
-const editingProductId = shallowRef<string | null>(null);
-const returnTo = computed(() =>
-  route.query.returnTo === "/setup/timing"
-    ? "/setup/timing"
-    : null
-);
+
 const hasActiveSetupDraft = computed(
   () =>
     boot.currentSession.value === null &&
@@ -38,14 +24,33 @@ const hasActiveSetupDraft = computed(
     setup.draft.value?.initialContext !== undefined
 );
 
-watch(
-  () => productSettings.snapshot.value,
-  (snapshot) => {
-    if (snapshot !== null) {
-      product.value = productSnapshotToFormValue(snapshot);
-    }
-  },
-  { immediate: true }
+const current = computed(() =>
+  productSettings.products.value.filter(
+    (product) => product.archivedAt === null && product.status === "active"
+  )
+);
+
+const past = computed(() =>
+  productSettings.products.value.filter(
+    (product) => product.archivedAt !== null || product.status === "stopped"
+  )
+);
+
+const hasAnyGear = computed(
+  () => productSettings.products.value.length > 0
+);
+
+/** 「只有非 sunscreen 裝備」是規格明列的狀態，必須明示沒有可建立倒數的產品。 */
+const hasUsableSunscreen = computed(() =>
+  current.value.some(
+    (product) =>
+      product.gearCategory === "sunscreen" &&
+      product.currentSnapshot.ruleEligibilityAtApplication === "eligible"
+  )
+);
+
+const loadFailed = computed(
+  () => productSettings.phase.value === "error"
 );
 
 onMounted(() => {
@@ -55,197 +60,156 @@ onMounted(() => {
   ]);
 });
 
-async function resumeSetup(): Promise<void> {
-  setup.resumeDraft();
-  const step = setup.recommendedResumeStep();
-  // 兩步流程後只剩 context 與 timing；舊草稿的 review 一律回 timing。
-  const routeName =
-    step === "context" ? "setup-context" : "setup-timing";
-  await router.push({ name: routeName });
+function addGear(): void {
+  void router.push({ name: "product-new" });
 }
 
-async function save(): Promise<void> {
-  localError.value = validate();
-  if (localError.value !== null) return;
-
-  const snapshot = makeSessionOnlyProductSnapshot(
-    product.value,
-    new Date().toISOString()
-  );
-  if (displayName.value.trim().length === 0) {
-    localError.value = "請輸入方便辨識的產品名稱。";
-    return;
-  }
-  saved.value = await productSettings.saveProduct(
-    displayName.value,
-    snapshot,
-    editingProductId.value ?? undefined
-  );
-  if (!saved.value) {
-    localError.value = "產品標示目前無法保存，請再試一次。";
-  }
-}
-
-function validate(): string | null {
-  if (
-    product.value.waitAnswer === "explicit" &&
-    (!Number.isInteger(product.value.waitMinutes) ||
-      (product.value.waitMinutes ?? 0) <= 0)
-  ) {
-    return "請填寫包裝上的等待分鐘數。";
-  }
-  if (
-    product.value.intervalAnswer === "explicit" &&
-    (!Number.isInteger(product.value.intervalMinutes) ||
-      (product.value.intervalMinutes ?? 0) <= 0)
-  ) {
-    return "請填寫包裝上的一般補擦分鐘數。";
-  }
-  return null;
-}
-
-function editProduct(productId: string): void {
-  const record = productSettings.products.value.find(
-    (item) => item.productId === productId
-  );
-  if (record === undefined) return;
-  editingProductId.value = record.productId;
-  displayName.value = record.displayName;
-  product.value = productSnapshotToFormValue(record.currentSnapshot);
-  saved.value = false;
-  window.scrollTo({ top: 0, behavior: "smooth" });
-}
-
-async function stopProduct(productId: string): Promise<void> {
-  await productSettings.stopProduct(productId);
-  if (editingProductId.value === productId) editingProductId.value = null;
-}
-
-function startNewProduct(): void {
-  editingProductId.value = null;
-  displayName.value = "我的防曬產品";
-  saved.value = false;
+function editGear(productId: string): void {
+  void router.push({ name: "product-edit", params: { id: productId } });
 }
 </script>
 
 <template>
-  <div class="page-stack">
+  <div class="page-stack gear-page">
     <header class="page-heading">
-      <h1 class="page-heading__title">防曬產品</h1>
-      <p class="page-heading__body">
-        在這裡確認目前使用產品的包裝標示。建立提醒時，只需要再確認實際塗抹時間。
+      <h1>我的防曬裝備</h1>
+      <p>
+        這份清單只保存在這台裝置。只有防曬產品會影響補擦倒數，其他裝備純粹是紀錄。
       </p>
     </header>
 
-    <SetupProcessBanner
-      v-if="hasActiveSetupDraft"
-      @resume="resumeSetup"
-    />
+    <SetupProcessBanner v-if="hasActiveSetupDraft" />
 
-    <label class="product-name app-card">
-      <span>產品名稱</span>
-      <input v-model="displayName" type="text" maxlength="80" autocomplete="off" />
-      <small>只用於這台裝置上的產品選擇，不會寫入歷史 snapshot。</small>
-      <button v-if="editingProductId" class="button button--quiet" type="button" @click="startNewProduct">
-        改為新增另一項產品
-      </button>
-    </label>
-
-    <ProductSnapshotEditor
-      v-model="product"
-      :water-context="true"
-      eyebrow="目前使用"
-      title="產品包裝標示"
-      description="資料只保存在這台裝置，之後建立提醒時會沿用；實際塗抹時間不會沿用。"
-    />
-
-    <p v-if="localError" class="form-error" role="alert">
-      {{ localError }}
-    </p>
-    <p v-if="saved" class="save-success" role="status">
-      <Check :size="18" aria-hidden="true" />
-      產品標示已保存
+    <p v-if="productSettings.phase.value === 'loading'" role="status">
+      正在讀取裝備清單…
     </p>
 
-    <button
-      class="button button--primary save-button"
-      type="button"
-      :disabled="productSettings.phase.value === 'saving'"
-      @click="save"
-    >
-      <Save :size="18" aria-hidden="true" />
-      {{
-        productSettings.phase.value === "saving"
-          ? "保存中…"
-          : editingProductId
-            ? "更新產品標示"
-            : "保存產品標示"
-      }}
-    </button>
-
-    <section v-if="productSettings.products.value.length > 0" class="catalog" aria-labelledby="catalog-title">
-      <h2 id="catalog-title">裝置內產品</h2>
-      <article v-for="item in productSettings.products.value" :key="item.productId" class="app-card catalog-item">
-        <div>
-          <h3>{{ item.displayName }}</h3>
-          <p>{{ item.status === "active" ? "可供補擦紀錄選擇" : "已停止使用" }}</p>
-        </div>
-        <div class="catalog-actions">
-          <button class="button button--quiet" type="button" @click="editProduct(item.productId)">編輯</button>
-          <button v-if="item.status === 'active'" class="text-link" type="button" @click="stopProduct(item.productId)">停止使用</button>
-        </div>
-      </article>
+    <section v-else-if="loadFailed" class="app-card" role="alert">
+      <h2>暫時讀不到裝備清單</h2>
+      <p>
+        本機資料目前無法讀取。這不代表清單是空的，請稍後再試，先不要重新建立同一筆裝備。
+      </p>
     </section>
 
-    <RouterLink
-      v-if="saved && returnTo"
-      class="button button--quiet return-button"
-      :to="returnTo"
-    >
-      返回設定塗抹時間
-    </RouterLink>
+    <template v-else>
+      <!-- 完全沒有裝備 -->
+      <section v-if="!hasAnyGear" class="app-card empty-state">
+        <h2>還沒有任何裝備</h2>
+        <p>
+          記錄常用的防曬產品，建立提醒時就不必重填包裝標示。也可以先不保存產品，直接建立提醒。
+        </p>
+        <button class="button button--primary" type="button" @click="addGear">
+          <Plus :size="18" aria-hidden="true" />
+          新增防曬裝備
+        </button>
+      </section>
+
+      <template v-else>
+        <button class="button button--primary" type="button" @click="addGear">
+          <Plus :size="18" aria-hidden="true" />
+          新增防曬裝備
+        </button>
+
+        <p
+          v-if="!hasUsableSunscreen"
+          class="no-sunscreen-note"
+          role="status"
+        >
+          目前沒有可以建立補擦倒數的防曬產品。清單裡的
+          {{
+            current
+              .map((product) => GEAR_CATEGORY_LABELS[product.gearCategory])
+              .filter((label, index, all) => all.indexOf(label) === index)
+              .join("、")
+          }}
+          都不會產生倒數。
+        </p>
+
+        <section aria-labelledby="gear-current-title">
+          <h2 id="gear-current-title">目前使用</h2>
+          <p v-if="current.length === 0" class="section-empty">
+            目前沒有使用中的裝備。
+          </p>
+          <ul v-else class="gear-list">
+            <li v-for="product in current" :key="product.productId">
+              <GearListItem
+                :product="product"
+                @open="editGear(product.productId)"
+              />
+            </li>
+          </ul>
+        </section>
+
+        <section v-if="past.length > 0" aria-labelledby="gear-past-title">
+          <h2 id="gear-past-title">過去紀錄</h2>
+          <p class="section-empty">
+            這些裝備不會用於新的提醒；需要時可以在編輯頁恢復。
+          </p>
+          <ul class="gear-list">
+            <li v-for="product in past" :key="product.productId">
+              <GearListItem
+                :product="product"
+                @open="editGear(product.productId)"
+              />
+            </li>
+          </ul>
+        </section>
+      </template>
+    </template>
   </div>
 </template>
 
 <style scoped>
-.form-error,
-.save-success {
+.page-heading h1,
+.page-heading p,
+h2,
+p {
   margin: 0;
+}
+
+.page-heading {
+  display: grid;
+  gap: var(--space-2);
+}
+
+.page-heading p {
+  color: var(--text-secondary);
   line-height: 1.7;
 }
 
-.product-name { display: grid; gap: var(--space-2); padding: var(--space-5); }
-.product-name span { font-weight: 700; }
-.product-name input { min-height: var(--tap-target); padding-inline: var(--space-3); border: 1px solid var(--border-strong); border-radius: var(--radius-sm); color: var(--text-primary); background: var(--surface-primary); }
-.product-name small { color: var(--text-secondary); line-height: 1.6; }
-.catalog { display: grid; gap: var(--space-4); }
-.catalog h2, .catalog-item h3, .catalog-item p { margin: 0; }
-.catalog-item { display: grid; gap: var(--space-4); padding: var(--space-5); }
-.catalog-item > div:first-child { display: grid; gap: var(--space-2); }
-.catalog-item p { color: var(--text-secondary); }
-.catalog-actions { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-3); }
-.catalog-actions .text-link { border: 0; background: transparent; color: var(--text-primary); cursor: pointer; }
-
-.form-error {
-  color: var(--color-due);
+.app-card {
+  display: grid;
+  gap: var(--space-4);
+  padding: var(--space-5);
 }
 
-.save-success {
-  display: flex;
-  align-items: center;
-  gap: var(--space-2);
-  color: var(--color-success);
+.empty-state {
+  justify-items: start;
 }
 
-.save-button,
-.return-button {
-  justify-self: start;
+.no-sunscreen-note {
+  padding: var(--space-4);
+  border-radius: var(--radius-sm);
+  background: var(--color-untimed-soft, var(--surface-raised));
+  color: var(--text-secondary);
+  line-height: 1.7;
 }
 
-@media (max-width: 31rem) {
-  .save-button,
-  .return-button {
-    width: 100%;
-  }
+section {
+  display: grid;
+  gap: var(--space-3);
+}
+
+.section-empty {
+  color: var(--text-secondary);
+  line-height: 1.7;
+}
+
+.gear-list {
+  display: grid;
+  gap: var(--space-3);
+  margin: 0;
+  padding: 0;
+  list-style: none;
 }
 </style>
