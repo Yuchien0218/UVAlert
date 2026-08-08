@@ -38,6 +38,17 @@ const PRODUCT_ACTION_KINDS = new Set<ActionKind>([
   "view_protection_options"
 ]);
 
+/**
+ * 目的地是 S-09 回報狀況的 ActionKind。
+ *
+ * `resolve_water_start` 也走這裡：S-09 第二層的「知道實際下水時間嗎」
+ * 就是處理入水時間未知的地方，不需要另開畫面。
+ */
+const REPORT_ACTION_KINDS = new Set<ActionKind>([
+  "report_context_event",
+  "resolve_water_start"
+]);
+
 /** 在提醒頁就地完成、不換頁的行為。 */
 export type InPlaceBehavior =
   | "anchor_zones"
@@ -82,6 +93,9 @@ export function resolveActionRoute(kind: ActionKind): RouteLocationRaw {
   }
   if (PRODUCT_ACTION_KINDS.has(kind)) {
     return { name: "products" };
+  }
+  if (REPORT_ACTION_KINDS.has(kind)) {
+    return { name: "reminder-report" };
   }
   // 時鐘不可信且離線時的保守提醒說明（S-16）。
   if (kind === "view_conservative_reminder") {

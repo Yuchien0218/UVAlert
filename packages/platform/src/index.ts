@@ -7,6 +7,7 @@ import type {
   ProductCatalogRecordV1,
   RegionPreferenceV1,
   ReapplyCommandV1,
+  ReportContextEventCommandV1,
   ReducerClock,
   SessionEventStreamV1,
   SessionProjection,
@@ -75,6 +76,30 @@ export interface ReapplicationRepositoryPort {
   getReapplicationContext(localVisitorId: string): Promise<ReapplicationContext | null>;
   reapply(
     command: ReapplyCommandV1,
+    clock: ReducerClock
+  ): Promise<CommandResult<SessionProjection>>;
+}
+
+export interface OpenWaterInterval {
+  activityIntervalId: string;
+  zoneInstanceIds: string[];
+  startConfidence: "confirmed" | "unknown";
+  activityStartedAt: string | null;
+}
+
+export interface ContextEventContext {
+  session: SessionProjection;
+  /** null 代表沒有可關閉的水上區間，此時不得顯示離水事件。 */
+  openWaterInterval: OpenWaterInterval | null;
+}
+
+export interface ContextEventRepositoryPort {
+  getContextEventContext(
+    localVisitorId: string,
+    trustedNow: string
+  ): Promise<ContextEventContext | null>;
+  reportContextEvent(
+    command: ReportContextEventCommandV1,
     clock: ReducerClock
   ): Promise<CommandResult<SessionProjection>>;
 }

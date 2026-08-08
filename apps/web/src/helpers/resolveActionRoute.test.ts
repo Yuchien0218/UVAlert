@@ -52,11 +52,24 @@ describe("resolveActionRoute", () => {
     });
   });
 
-  it("尚未接上的 ActionKind 導向 placeholder 並保留 kind", () => {
+  it("回報類 ActionKind 導向 S-09", () => {
     expect(resolveActionRoute("report_context_event")).toEqual({
-      name: "reminder-action",
-      params: { kind: "report_context_event" }
+      name: "reminder-report"
     });
+    // 入水時間未知由 S-09 第二層處理，不另開畫面。
+    expect(resolveActionRoute("resolve_water_start")).toEqual({
+      name: "reminder-report"
+    });
+  });
+
+  it("13 個 ActionKind 全部有真實落點，沒有一個落在 placeholder", () => {
+    const allKinds = ActionKindSchema.options as readonly ActionKind[];
+
+    for (const kind of allKinds) {
+      expect(resolveActionRoute(kind)).not.toMatchObject({
+        name: "reminder-action"
+      });
+    }
   });
 
   it("涵蓋契約中全部 ActionKind，沒有漏接的分支", () => {
@@ -68,6 +81,7 @@ describe("resolveActionRoute", () => {
       expect(route).toBeDefined();
       expect([
         "reminder-reapply",
+        "reminder-report",
         "reminder-action",
         "products",
         "reminder",

@@ -37,6 +37,12 @@ export function createAppRouter(
         meta: { title: "記錄實際補擦", hideNavigation: true, requiresActiveSession: true }
       },
       {
+        path: "/reminder/report",
+        name: "reminder-report",
+        component: () => import("../pages/ReportContextEventPage.vue"),
+        meta: { title: "回報狀況", hideNavigation: true, requiresActiveSession: true }
+      },
+      {
         path: "/products",
         name: "products",
         component: () => import("../pages/ProductsPage.vue"),

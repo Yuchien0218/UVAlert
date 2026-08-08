@@ -4,6 +4,7 @@ import type {
   EndSessionCommandV1,
   ReapplyCommandV1,
   ReducerClock,
+  ReportContextEventCommandV1,
   SessionEventStreamV1,
   SessionProjection,
   StartSessionCommandV1,
@@ -12,6 +13,7 @@ import type {
 import {
   EndSessionCommandV1Schema,
   ReapplyCommandV1Schema,
+  ReportContextEventCommandV1Schema,
   fingerprintProductLabelSnapshot,
   StartSessionCommandV1Schema
 } from "@sunshield/contracts";
@@ -19,10 +21,13 @@ import {
   DomainInvariantError,
   makeSessionEndedEvent,
   ownerKeyFor,
+  planContextEvent,
   planStartSession,
   planReapplication,
-  reduceSession
+  reduceSession,
+  validateWaterIntervals
 } from "@sunshield/domain";
+import type { OpenWaterInterval } from "@sunshield/platform";
 import {
   type CrossContextNotifier,
   NoopCrossContextNotifier
@@ -498,6 +503,92 @@ export class LocalSessionRepository {
     }
   }
 
+  async reportContextEvent(
+    rawCommand: ReportContextEventCommandV1,
+    clock: ReducerClock
+  ): Promise<CommandResult<SessionProjection>> {
+    const parsed = ReportContextEventCommandV1Schema.safeParse(rawCommand);
+    if (!parsed.success) return validationFailure(parsed.error.issues);
+    if (Date.parse(parsed.data.payload.effectiveOccurredAt) > Date.parse(clock.trustedNow)) {
+      return { ok: false, code: "VALIDATION_ERROR", fieldErrors: { "payload.effectiveOccurredAt": ["事件發生時間不得晚於可信現在"] }, retryable: false };
+    }
+
+    try {
+      const outcome = await this.#database.transaction(
+        "rw",
+        [
+          this.#database.ProtectionSessions,
+          this.#database.ProtectionZoneStates,
+          this.#database.SessionStartedEvents,
+          this.#database.ZoneTrackingEvents,
+          this.#database.ZoneMethodEvents,
+          this.#database.ApplicationConfirmationGroups,
+          this.#database.ApplicationEvents,
+          this.#database.ProductSafetyEvents,
+          this.#database.ContextEvents,
+          this.#database.SessionEndedEvents,
+          this.#database.ActiveSessionLocks,
+          this.#database.ClientSequences,
+          this.#database.CommandReceipts
+        ],
+        async (): Promise<TransactionOutcome> => {
+          const existingReceipt = await this.#database.CommandReceipts.get(parsed.data.idempotencyKey);
+          if (existingReceipt !== undefined) {
+            return { result: existingReceipt.result as CommandResult<SessionProjection>, committed: false };
+          }
+          const session = await this.#database.ProtectionSessions.get(parsed.data.sessionId);
+          if (session === undefined || session.endedAt !== null) {
+            return { result: { ok: false, code: "NOT_FOUND", retryable: false }, committed: false };
+          }
+          const ownerKey = ownerKeyFor(parsed.data.owner.localVisitorId);
+          const lock = await this.#database.ActiveSessionLocks.get(ownerKey);
+          if (session.ownerKey !== ownerKey || lock?.sessionId !== session.id) {
+            return { result: { ok: false, code: "NOT_FOUND", retryable: false }, committed: false };
+          }
+          if (session.revision !== parsed.data.expectedRevision) {
+            return { result: { ok: false, code: "REVISION_CONFLICT", currentRevision: session.revision, retryable: false }, committed: false };
+          }
+          const sequenceKey: [string, string] = [parsed.data.deviceLocalId, parsed.data.sessionId];
+          const sequence = await this.#database.ClientSequences.get(sequenceKey);
+          if (sequence !== undefined && parsed.data.clientSequence <= sequence.lastSequence) {
+            return { result: { ok: false, code: "CLIENT_SEQUENCE_CONFLICT", retryable: false }, committed: false };
+          }
+
+          // 事件只能掛在這個 Session 仍在追蹤的部位上。
+          const currentZones = await this.#database.ProtectionZoneStates.where("sessionId").equals(session.id).toArray();
+          const trackedZones = new Set(
+            currentZones.filter((zone) => zone.trackingStatus === "active").map((zone) => zone.zoneInstanceId)
+          );
+          if (parsed.data.payload.detail.zoneInstanceIds.some((zoneId: string) => !trackedZones.has(zoneId))) {
+            return { result: { ok: false, code: "VALIDATION_ERROR", fieldErrors: { "payload.detail.zoneInstanceIds": ["含有不屬於目前提醒或已停止追蹤的部位"] }, retryable: false }, committed: false };
+          }
+
+          const stream = await this.#loadEventStream(session.id);
+          const plan = planContextEvent(parsed.data, stream, session, clock);
+          await this.#database.ContextEvents.add(plan.event);
+          await this.#database.ProtectionZoneStates.bulkPut(plan.projection.zones);
+          await this.#database.ProtectionSessions.put(plan.session);
+          await this.#database.ClientSequences.put({ deviceLocalId: parsed.data.deviceLocalId, sessionId: parsed.data.sessionId, lastSequence: parsed.data.clientSequence });
+
+          const result: CommandResult<SessionProjection> = {
+            ok: true,
+            data: plan.projection,
+            sessionId: session.id,
+            revision: plan.session.revision,
+            committedEventIds: plan.committedEventIds
+          };
+          await this.#database.CommandReceipts.add({ idempotencyKey: parsed.data.idempotencyKey, commandId: parsed.data.commandId, sessionId: session.id, result, createdAt: clock.trustedNow });
+          return { result, committed: true };
+        }
+      );
+      if (outcome.committed && outcome.result.ok) this.#publishCommit(outcome.result.sessionId, outcome.result.revision);
+      return outcome.result;
+    } catch (error) {
+      if (error instanceof DomainInvariantError) return mapPlanningError(error);
+      return { ok: false, code: "PERSISTENCE_ERROR", retryable: true };
+    }
+  }
+
   async getCurrentSession(
     localVisitorId: string
   ): Promise<SessionProjection | null> {
@@ -570,6 +661,40 @@ export class LocalSessionRepository {
     );
     const products = await new LocalProductCatalogRepository(this.#database).listProducts();
     return { session, currentApplications, products };
+  }
+
+  /**
+   * S-09 回報狀況的讀取側。
+   *
+   * 除了 Session 本身，還要知道有沒有「未關閉的水上區間」：
+   * 有的話不得再建立入水起點，沒有的話不得顯示離水事件。
+   * 部位集合必須完整沿用起點，離水才不會被 `validateWaterIntervals` 擋下。
+   */
+  async getContextEventContext(localVisitorId: string, trustedNow: string) {
+    const session = await this.getCurrentSession(localVisitorId);
+    if (session === null) return null;
+    const stream = await this.#loadEventStream(session.sessionId);
+    let openWaterInterval: OpenWaterInterval | null = null;
+    try {
+      const intervals = validateWaterIntervals(
+        stream.contextEvents,
+        trustedNow
+      );
+      const open = intervals.find((interval) => interval.end === null);
+      openWaterInterval =
+        open === undefined
+          ? null
+          : {
+              activityIntervalId: open.start.activityIntervalId,
+              zoneInstanceIds: [...open.start.zoneInstanceIds],
+              startConfidence: open.start.startConfidence,
+              activityStartedAt: open.start.activityStartedAt
+            };
+    } catch {
+      // 既有事件流已經不合法時不再往下推導，讓頁面只顯示一般原因事件。
+      openWaterInterval = null;
+    }
+    return { session, openWaterInterval };
   }
 
   async #loadEventStream(sessionId: string): Promise<SessionEventStreamV1> {

@@ -6,6 +6,7 @@ import type {
   ProtectionSessionRecord,
   ReapplyCommandV1,
   ReducerClock,
+  ReportContextEventCommandV1,
   SessionEndedEventV1,
   SessionEventStreamV1,
   SessionProjection,
@@ -14,11 +15,15 @@ import type {
   ZoneTrackingEventV1
 } from "@sunshield/contracts";
 import {
+  ContextEventV1Schema,
   EVENT_SCHEMA_VERSION,
   ReapplyCommandV1Schema,
+  ReportContextEventCommandV1Schema,
   StartSessionCommandV1Schema
 } from "@sunshield/contracts";
+import { DomainInvariantError } from "./errors";
 import { reduceSession } from "./reducer";
+import { validateWaterIntervals } from "./water";
 
 export function ownerKeyFor(localVisitorId: string): string {
   return `guest:${localVisitorId}`;
@@ -124,6 +129,80 @@ export function planReapplication(
     session,
     projection,
     committedEventIds: [group.id, ...events.map((event) => event.id)]
+  };
+}
+
+export type ContextEventPlan = {
+  event: ContextEventV1;
+  stream: SessionEventStreamV1;
+  session: ProtectionSessionRecord;
+  projection: SessionProjection;
+  committedEventIds: string[];
+};
+
+/**
+ * S-09 回報狀況。
+ *
+ * 水上區間的合法性交給 `validateWaterIntervals` 在合併後的事件流上重驗，
+ * 而不是只看這一筆命令：重疊起點與孤兒離水都只有放進既有事件流才看得出來。
+ * 契約層的 superRefine 已擋掉結構性錯誤（未來時間、起點晚於事件）。
+ */
+export function planContextEvent(
+  rawCommand: ReportContextEventCommandV1,
+  currentStream: SessionEventStreamV1,
+  currentSession: ProtectionSessionRecord,
+  clock: ReducerClock
+): ContextEventPlan {
+  const command = ReportContextEventCommandV1Schema.parse(rawCommand);
+  const { detail, effectiveOccurredAt } = command.payload;
+
+  if (Date.parse(effectiveOccurredAt) > Date.parse(clock.trustedNow)) {
+    throw new DomainInvariantError(
+      "FUTURE_EVENT",
+      "事件發生時間不得位於未來"
+    );
+  }
+
+  const revision = currentSession.revision + 1;
+  const envelope = {
+    schemaVersion: EVENT_SCHEMA_VERSION,
+    id: command.payload.eventId,
+    sessionId: command.sessionId,
+    commandId: command.commandId,
+    idempotencyKey: command.idempotencyKey,
+    effectiveOccurredAt,
+    clientCreatedAt: command.clientCreatedAt,
+    clientSequence: command.clientSequence,
+    localAppliedSequence: command.clientSequence,
+    eventType: "context_event",
+    correctionAction: "create",
+    correctionOfEventId: null
+  } as const;
+
+  const event = ContextEventV1Schema.parse({ ...envelope, ...detail });
+  const contextEvents = [...currentStream.contextEvents, event];
+
+  // 併入後才驗證，孤兒離水與重疊區間都會在這裡被擋下。
+  validateWaterIntervals(contextEvents, clock.trustedNow);
+
+  const stream: SessionEventStreamV1 = { ...currentStream, contextEvents };
+  const projection = reduceSession({ stream, revision, clock });
+  const session: ProtectionSessionRecord = {
+    ...currentSession,
+    overallStatus: projection.overallStatus,
+    sessionNextDueAt: projection.sessionNextDueAt,
+    primaryAction: projection.primaryAction,
+    derivedFromEventRefs: projection.derivedFromEventRefs,
+    revision,
+    updatedAt: clock.trustedNow
+  };
+
+  return {
+    event,
+    stream,
+    session,
+    projection,
+    committedEventIds: [event.id]
   };
 }
 

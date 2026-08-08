@@ -499,3 +499,6 @@ export type StartSessionCommandV1 = z.infer<
 >;
 export type EndSessionCommandV1 = z.infer<typeof EndSessionCommandV1Schema>;
 export type ReapplyCommandV1 = z.infer<typeof ReapplyCommandV1Schema>;
+export type ReportContextEventCommandV1 = z.infer<
+  typeof ReportContextEventCommandV1Schema
+>;

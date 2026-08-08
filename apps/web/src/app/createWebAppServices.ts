@@ -49,6 +49,10 @@ import {
   type ReapplicationController
 } from "../features/reapplication/createReapplicationController";
 import {
+  createContextEventController,
+  type ContextEventController
+} from "../features/reminder/createContextEventController";
+import {
   createSessionEventsController,
   type SessionEventsController
 } from "../features/reminder/createSessionEventsController";
@@ -63,6 +67,7 @@ export interface WebAppServices {
   readonly uvForecast: UvForecastController;
   readonly region: RegionController;
   readonly reapplication: ReapplicationController;
+  readonly contextEvent: ContextEventController;
   readonly sessionEvents: SessionEventsController;
   dispose(): void;
 }
@@ -135,6 +140,14 @@ export function createWebAppServices(
     now: () => new Date(),
     getConnectivity: () => boot.connectivity.value
   });
+  const contextEvent = createContextEventController({
+    repository,
+    identity,
+    boot,
+    createId,
+    now: () => new Date(),
+    getConnectivity: () => boot.connectivity.value
+  });
   const sessionEvents = createSessionEventsController({
     repository,
     identity
@@ -185,9 +198,11 @@ export function createWebAppServices(
     uvForecast,
     region,
     reapplication,
+    contextEvent,
     sessionEvents,
     dispose(): void {
       sessionEvents.dispose();
+      contextEvent.dispose();
       reapplication.dispose();
       region.dispose();
       uvForecast.dispose();
