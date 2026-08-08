@@ -2,7 +2,9 @@
 
 這個資料夾是 **2026-08-08 重新設計之前的完整存檔**。目的只有一個：等新版 wireframe 與配色定案後，還能回頭對照舊版長什麼樣、當初為什麼那樣決定。
 
-對應的 commit：`7215e76`（分支 `claude/pre-redesign-p0-work`）。
+對應的 commit：`26dc10a`（分支 `claude/pre-redesign-p0-work`）。
+
+> 截圖已於 2026-08-08 重拍。第一版拍攝時 S-09、S-10、產品頁改版與本機資料管理都還沒實作，那份存檔少了五個畫面、且產品頁與 `/settings/data` 拍到的是舊版與 placeholder。這一版是 sitemap 缺口全部補完後的真實狀態。
 
 ---
 
@@ -18,24 +20,31 @@
 | `02c-reminder-end-confirm.png` | 結束提醒的二次確認 | — |
 | `03-reminder-reapply.png` | S-08 記錄實際補擦 `/reminder/reapply` | 完整表單，8 個部位 |
 | `03b-reapply-success.png` | S-08 提交後的成功狀態 | — |
-| `04-products.png` | 產品頁 `/products` | 已填完包裝標示（**尚未做 gearCategory 改版**） |
+| `04-products.png` | S-11 我的防曬裝備 `/products` | 一件防曬產品＋一副太陽眼鏡，可看出品類差異與「不影響倒數」標示 |
+| `04a-products-empty.png` | 同上，空白狀態 | 完全沒有裝備 |
+| `04b-product-new.png` | S-12 新增防曬裝備 `/products/new` | 防曬品類，含購買月份與到期日 |
+| `04c-product-edit.png` | S-13 編輯防曬裝備 `/products/:id/edit` | 既有防曬產品，品類已鎖定不可改為純紀錄 |
 | `05-more.png` | 更多設定 `/more` | — |
 | `06-help-index.png` | 常見問題總覽 `/help` | 內容被審查閘門擋住 |
 | `07-help-beach.png` | 海邊防曬 Q&A | 「內容正在審查」狀態 |
 | `08-help-how-it-works.png` | 運作說明 | 「內容正在審查」狀態 |
 | `09-special-situation.png` | 特殊狀況 | 「此功能尚未開放」狀態 |
 | `10-settings-display.png` | 顯示設定 `/settings/display` | — |
-| `11-settings-data.png` | 本機資料管理 `/settings/data` | **placeholder，功能未實作** |
+| `11-settings-data.png` | S-19 本機資料管理 `/settings/data` | 摘要、匯出與三段清除 |
 | `12-install.png` | 安裝到手機 `/install` | — |
 | `13-region.png` | 地區設定 `/region` | 未設定地區 |
 | `14-setup-context.png` | 設定步驟 1：情境 `/setup/context` | 已選「一般戶外」 |
 | `15-setup-protection-sheet.png` | 調整追蹤部位 sheet | 兩步流程後 `/setup/protection` 已無入口，改為步驟 2 的原地 sheet |
 | `16-setup-timing.png` | 設定步驟 2：塗抹時間與開始提醒 | 含送出前摘要（AC-34 規定不得摺疊） |
 | `17-not-found.png` | 找不到頁面 | — |
+| `18-reminder-report.png` | S-09 回報狀況 `/reminder/report` | 第一層事件選擇；沒有可關閉的水上活動時不顯示離水 |
+| `18b-report-water-start.png` | 同上，第二層確認 | 已選「游泳／下水」，含水上 interval 狀態與部位預選 |
+| `18c-report-success.png` | S-09 提交後的成功狀態 | — |
+| `19-event-correct.png` | S-10 更正最近事件 `/reminder/event/:id/correct` | 更正入水事件；此例尚無配對離水，部位可調整 |
 
-**截圖裡沒有的畫面**，因為當時還沒實作：`/reminder/report`（S-09）、`/products/new`、`/products/:id/edit`、`/reminder/event/:id/correct` 的表單。
+**所有 sitemap 上的畫面都已實作並拍到。** 這一版沒有缺席的畫面。
 
-**截圖裡有一個已知缺陷**：`01-home.png` 的「戶外資訊」區塊，「目前未設定地區…」那段文字被壓成直排。這是待修的版面 bug，不是設計意圖。
+**截圖裡有一個已知缺陷**：`01-home.png` 的「戶外資訊」區塊，「目前未設定地區…」那段文字被壓成直排。這是待修的版面 bug，不是設計意圖，已有另一個 session 在 worktree `claude/sad-aryabhata-1e3e73` 上處理。
 
 ---
 
