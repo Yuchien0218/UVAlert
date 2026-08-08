@@ -73,7 +73,7 @@ describe("createAppRouter", () => {
     );
   });
 
-  it("兩步流程後 /setup/review 轉址到 /setup/timing，舊連結不會 404", async () => {
+  it("兩步流程的殘留路徑已移除，落到 404 而不是白畫面", async () => {
     const boot = {
       phase: shallowReadonly(shallowRef("ready")),
       errorCode: shallowReadonly(shallowRef(null)),
@@ -85,11 +85,17 @@ describe("createAppRouter", () => {
     } as AppBootController;
     const router = createAppRouter(boot, createMemoryHistory());
 
-    await router.push("/setup/review");
-    await router.isReady();
-
-    expect(router.currentRoute.value.name).toBe("setup-timing");
-    expect(router.currentRoute.value.name).not.toBe("not-found");
+    // 2026-08-08：兩條轉址與 placeholder 路由一併移除。P0 尚未上線、
+    // 沒有外部連結要相容，留著只是讓路由表更難讀。
+    for (const path of [
+      "/setup/review",
+      "/setup/protection",
+      "/reminder/action/record_reapplication"
+    ]) {
+      await router.push(path);
+      await router.isReady();
+      expect(router.currentRoute.value.name).toBe("not-found");
+    }
   });
 
   it("S-08 沒有 active Session 時回到提醒頁", async () => {

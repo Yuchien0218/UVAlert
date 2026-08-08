@@ -92,3 +92,20 @@ export function listPublishableTopics(): HelpTopic[] {
 export function findTopic(slug: string): HelpTopic | undefined {
   return HELP_TOPICS.find((topic) => topic.slug === slug);
 }
+
+/**
+ * S-17 特殊狀況的發布閘門。
+ *
+ * `P0_COPY_DECK.md` §15：CP-SPECIAL-004（破損／起泡／嚴重曬傷）與
+ * CP-SPECIAL-005（急症紅旗）任一仍為 `BLOCKED` 時，整條特殊狀況流程
+ * 不得公開。兩則目前皆為 `BLOCKED`。
+ *
+ * 與 help 主題同樣做成資料驅動：核准後改成 `APPROVED`，
+ * 「更多」頁的入口會自動回來，不必改程式。
+ */
+export const SPECIAL_SITUATION_REVIEW_STATUS: ContentReviewStatus =
+  "BLOCKED";
+
+export function isSpecialSituationPublishable(): boolean {
+  return SPECIAL_SITUATION_REVIEW_STATUS === "APPROVED";
+}

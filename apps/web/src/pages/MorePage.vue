@@ -6,6 +6,11 @@ import {
   Smartphone,
   TriangleAlert
 } from "@lucide/vue";
+import { computed } from "vue";
+import {
+  isSpecialSituationPublishable,
+  listPublishableTopics
+} from "../features/help/helpTopics";
 
 /**
  * 更多設定。
@@ -15,7 +20,7 @@ import {
  * 在 App 裡沒有任何進入點。顯示設定已移到 `/settings/display`。
  */
 
-const entries = [
+const allEntries = [
   {
     to: "/help",
     icon: CircleHelp,
@@ -47,6 +52,24 @@ const entries = [
     description: "查看、匯出與清除這台裝置上的資料。"
   }
 ] as const;
+
+/**
+ * 內容未過審的入口不列出。
+ *
+ * 三個說明頁與特殊狀況目前全部被審查閘門擋住，列出來只會讓使用者
+ * 連撞空門。閘門是資料驅動的——核准後入口會自動回來，不必改這裡。
+ * /help 總覽本身仍可直接到達，顯示「目前沒有可查看的內容」是
+ * S-15 明文要求的行為。
+ */
+const entries = computed(() =>
+  allEntries.filter((entry) => {
+    if (entry.to === "/help") return listPublishableTopics().length > 0;
+    if (entry.to === "/special-situation") {
+      return isSpecialSituationPublishable();
+    }
+    return true;
+  })
+);
 </script>
 
 <template>

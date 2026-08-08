@@ -106,5 +106,8 @@ export function resolveActionRoute(kind: ActionKind): RouteLocationRaw {
       ? { name: "reminder", hash: "#zone-status" }
       : { name: "reminder" };
   }
-  return { name: "reminder-action", params: { kind } };
+  // 13 個 ActionKind 上面全數涵蓋，這行實際不可達；
+  // placeholder 路由已於 2026-08-08 移除，保留提醒頁當防禦性落點，
+  // 未來若契約新增 ActionKind 也不會導到不存在的 route。
+  return { name: "reminder" };
 }

@@ -139,14 +139,9 @@ export function createAppRouter(
         }
       },
       {
-        path: "/setup/protection",
-        name: "setup-protection",
-        redirect: {
-          name: "setup-timing",
-          query: { adjustProtection: "1" }
-        }
-      },
-      {
+        // 2026-08-08：`/setup/protection` 與 `/setup/review` 兩條轉址已移除。
+        // 都是兩步流程改版後的遺跡，P0 尚未上線、沒有外部連結要相容。
+        // 部位 sheet 仍可用 `/setup/timing?adjustProtection=1` 直接開啟。
         path: "/setup/timing",
         name: "setup-timing",
         component: () => import("../pages/setup/SetupTimingPage.vue"),
@@ -156,13 +151,6 @@ export function createAppRouter(
           requiresNoActiveSession: true,
           setupStep: "timing"
         }
-      },
-      {
-        // 2026-08-07 裁決：設定流程縮為兩步，原步驟 3 最終確認廢除，
-        // 內容併入 /setup/timing。保留為 redirect 避免舊連結 404。
-        path: "/setup/review",
-        name: "setup-review",
-        redirect: { name: "setup-timing" }
       },
       {
         // S-10：更正最近事件。入口是 S-07 的最近事件清單（唯一入口）。
@@ -175,16 +163,9 @@ export function createAppRouter(
           requiresActiveSession: true
         }
       },
-      {
-        path: "/reminder/action/:kind",
-        name: "reminder-action",
-        component: () => import("../pages/PlaceholderPage.vue"),
-        meta: {
-          title: "回報提醒",
-          heading: "提醒回報",
-          body: "事件回報表單將在下一個實作切片接上既有 command transaction。"
-        }
-      },
+      // 2026-08-08：`/reminder/action/:kind` placeholder 已移除。
+      // 13 個 ActionKind 全數有真實落點，沒有任何路徑指向它；
+      // `resolveActionRoute.test.ts` 有一則測試守著這件事。
       {
         path: "/:pathMatch(.*)*",
         name: "not-found",

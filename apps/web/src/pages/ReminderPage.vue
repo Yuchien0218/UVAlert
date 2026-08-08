@@ -10,6 +10,12 @@ import RecentEventsList from "../components/reminder/RecentEventsList.vue";
 import ReminderEmptyState from "../components/reminder/ReminderEmptyState.vue";
 import ZoneStatusList from "../components/reminder/ZoneStatusList.vue";
 import SessionEndControl from "../components/session/SessionEndControl.vue";
+import NightWindDownPrompt from "../components/reminder/NightWindDownPrompt.vue";
+import { useCurrentTime } from "../composables/useCurrentTime";
+import { getEveningCycleKey } from "../features/uv/uvForecastRules";
+
+/** 夜間收工提示的每晚一次記憶，比照 EVENING_UV_DISMISSAL_STORAGE_KEY。 */
+const NIGHT_PROMPT_DISMISSAL_KEY = "sunshield.night-wind-down-dismissed-cycle";
 
 const { boot, sessionControl, sessionEvents, productSettings } =
   useWebAppServices();
@@ -135,6 +141,45 @@ function handleEndSession(): void {
   if (currentSession === null) return;
   void sessionControl.endCurrentSession(currentSession);
 }
+
+/**
+ * 夜間收工提示。
+ *
+ * 只在夜間、有進行中 Session、且這個夜間週期還沒關掉時出現。
+ * **不會停止倒數**——見 NightWindDownPrompt 的註解與
+ * `docs/decisions/2026-08-08-night-behavior.md`。
+ */
+const currentTime = useCurrentTime();
+const nightCycle = computed(() => getEveningCycleKey(currentTime.value));
+const dismissedNightCycle = shallowRef<string | null>(
+  readDismissedNightCycle()
+);
+
+const showNightPrompt = computed(
+  () =>
+    nightCycle.value !== null &&
+    boot.currentSession.value !== null &&
+    dismissedNightCycle.value !== nightCycle.value
+);
+
+function readDismissedNightCycle(): string | null {
+  try {
+    return globalThis.localStorage.getItem(NIGHT_PROMPT_DISMISSAL_KEY);
+  } catch {
+    return null;
+  }
+}
+
+function dismissNightPrompt(): void {
+  const cycle = nightCycle.value;
+  if (cycle === null) return;
+  dismissedNightCycle.value = cycle;
+  try {
+    globalThis.localStorage.setItem(NIGHT_PROMPT_DISMISSAL_KEY, cycle);
+  } catch {
+    /* 存不進去頂多這一晚再問一次，不影響功能 */
+  }
+}
 </script>
 
 <template>
@@ -231,6 +276,12 @@ function handleEndSession(): void {
         :events="sessionEvents.stream.value"
         :clock-trusted="clockTrusted"
         @correct="handleCorrectEvent"
+      />
+      <NightWindDownPrompt
+        v-if="showNightPrompt"
+        :ending="sessionControl.endPhase.value === 'ending'"
+        @end="handleEndSession"
+        @keep="dismissNightPrompt"
       />
       <SessionEndControl
         :phase="sessionControl.endPhase.value"

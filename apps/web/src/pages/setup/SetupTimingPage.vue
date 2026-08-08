@@ -16,6 +16,7 @@ import type {
   WaterStartFormValue
 } from "../../features/setup/createSetupController";
 import type { ProductClaimAnswer } from "../../features/setup/productSnapshot";
+import { isFixedEvening } from "../../features/uv/uvForecastRules";
 import {
   makeQuickProtectionDraft,
   type QuickProtectionDraft
@@ -41,6 +42,14 @@ const sunscreenClaim = shallowRef<ProductClaimAnswer | null>(null);
 const needsSunscreenClaim = computed(
   () => productSettings.snapshot.value === null
 );
+
+/**
+ * 夜間建立提醒時說明一下，但**不阻擋**。
+ *
+ * 夜間登山、清晨四點出發、人工 UV 都是合法情境；設定流程剛拿掉一道
+ * 硬關卡，不該再加一道。判定用固定本地時段，離線可用、不需要地區。
+ */
+const isNight = computed(() => isFixedEvening(new Date()));
 
 const context = computed(
   () => setup.draft.value?.initialContext ?? null
@@ -211,6 +220,11 @@ onMounted(async () => {
     </p>
 
     <template v-if="hasConfirmedProtection">
+      <!-- 夜間只是說明，不阻擋建立。 -->
+      <p v-if="isNight" class="night-notice" role="status">
+        現在是夜間，這個時段紫外線通常很低。仍然可以建立提醒——如果你正要夜間出發或想先設定好，直接繼續即可。
+      </p>
+
       <SunscreenClaimQuickQuestion
         v-if="needsSunscreenClaim"
         v-model="sunscreenClaim"
@@ -299,6 +313,15 @@ onMounted(async () => {
 .form-error {
   margin: 0;
   color: var(--color-due);
+  line-height: 1.7;
+}
+
+.night-notice {
+  margin: 0;
+  padding: var(--space-4);
+  border-radius: var(--radius-sm);
+  background: var(--color-untimed-soft, var(--surface-raised));
+  color: var(--text-secondary);
   line-height: 1.7;
 }
 
