@@ -116,6 +116,31 @@ export interface SaveProductInput {
   now: string;
 }
 
+/** S-19 本機資料管理的清單摘要。 */
+export interface LocalDataSummary {
+  productCount: number;
+  hasActiveSession: boolean;
+  endedSessionCount: number;
+  hasSetupDraft: boolean;
+  lastWeatherSnapshotAt: string | null;
+  lastClockCalibrationAt: string | null;
+}
+
+export interface LocalDataPort {
+  getSummary(): Promise<LocalDataSummary>;
+  /**
+   * 匯出本機資料。
+   *
+   * 排除金鑰、精確座標與裝置識別碼（S-19 2026-08-07 裁決）。
+   * 匯出只產生資料，不負責下載——上傳與否由呼叫端決定，
+   * 而 P0 的唯一去處是使用者自己的檔案系統。
+   */
+  exportData(exportedAt: string): Promise<unknown>;
+  clearSetupDrafts(): Promise<void>;
+  clearProductsAndHistory(): Promise<void>;
+  clearAll(): Promise<void>;
+}
+
 export interface ProductCatalogPort {
   /**
    * `now` 用來把已過到期日的紀錄推導成 expired 並就地修正 snapshot，

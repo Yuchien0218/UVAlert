@@ -104,11 +104,11 @@ export function createAppRouter(
       {
         path: "/settings/data",
         name: "settings-data",
-        component: () => import("../pages/PlaceholderPage.vue"),
+        component: () => import("../pages/settings/DataSettingsPage.vue"),
         meta: {
           title: "本機資料管理",
           heading: "本機資料管理",
-          body: "查看、匯出與清除本機資料將在下一個實作切片接上；匯出不上傳、不經後端。"
+          body: "查看、匯出與清除本機資料；匯出不上傳、不經後端。"
         }
       },
       {

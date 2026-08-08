@@ -1,5 +1,6 @@
 import {
   BroadcastChannelNotifier,
+  LocalDataRepository,
   LocalProductSettingsRepository,
   LocalProductCatalogRepository,
   LocalRegionPreferenceRepository,
@@ -53,6 +54,11 @@ import {
   type ContextEventController
 } from "../features/reminder/createContextEventController";
 import {
+  createLocalDataController,
+  type LocalDataController
+} from "../features/settings/createLocalDataController";
+import { downloadTextFile } from "../helpers/downloadTextFile";
+import {
   createSessionEventsController,
   type SessionEventsController
 } from "../features/reminder/createSessionEventsController";
@@ -68,6 +74,7 @@ export interface WebAppServices {
   readonly region: RegionController;
   readonly reapplication: ReapplicationController;
   readonly contextEvent: ContextEventController;
+  readonly localData: LocalDataController;
   readonly sessionEvents: SessionEventsController;
   dispose(): void;
 }
@@ -140,6 +147,12 @@ export function createWebAppServices(
     now: () => new Date(),
     getConnectivity: () => boot.connectivity.value
   });
+  const localData = createLocalDataController({
+    repository: new LocalDataRepository({ database, createId }),
+    boot,
+    now: () => new Date(),
+    saveFile: downloadTextFile
+  });
   const contextEvent = createContextEventController({
     repository,
     identity,
@@ -199,9 +212,11 @@ export function createWebAppServices(
     region,
     reapplication,
     contextEvent,
+    localData,
     sessionEvents,
     dispose(): void {
       sessionEvents.dispose();
+      localData.dispose();
       contextEvent.dispose();
       reapplication.dispose();
       region.dispose();

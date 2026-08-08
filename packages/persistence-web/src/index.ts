@@ -6,3 +6,4 @@ export * from "./repositories/local-region-preference-repository";
 export * from "./repositories/local-product-settings-repository";
 export * from "./repositories/local-product-catalog-repository";
 export * from "./repositories/local-weather-forecast-repository";
+export * from "./repositories/local-data-repository";
