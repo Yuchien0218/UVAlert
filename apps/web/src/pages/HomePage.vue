@@ -1,13 +1,13 @@
 <script setup lang="ts">
 import type { ActionKind } from "@sunshield/contracts";
-import { onMounted } from "vue";
+import { ArrowRight } from "@lucide/vue";
+import { computed, onMounted } from "vue";
 import { useRouter } from "vue-router";
 import EveningUvPrompt from "../components/uv/EveningUvPrompt.vue";
 import FiveDayUvCard from "../components/uv/FiveDayUvCard.vue";
 import HomeReminderSummary from "../components/home/HomeReminderSummary.vue";
 import OutdoorContextCard from "../components/home/OutdoorContextCard.vue";
 import SunLoader from "../components/feedback/SunLoader.vue";
-import ZoneStatusList from "../components/reminder/ZoneStatusList.vue";
 import SessionEndControl from "../components/session/SessionEndControl.vue";
 import { useWebAppServices } from "../app/injection";
 import { resolveActionRoute } from "../helpers/resolveActionRoute";
@@ -17,6 +17,14 @@ const router = useRouter();
 
 onMounted(() => {
   void uvForecast.ensureLoaded();
+});
+
+/** 今日日間溫度；預報缺這個欄位時為 null，戶外資訊整列不顯示。 */
+const todayTemperature = computed(() => {
+  const days = uvForecast.forecast.value?.days ?? [];
+  const today = new Date().toISOString().slice(0, 10);
+  const match = days.find((day) => day.localDate === today) ?? days[0];
+  return match?.temperatureCelsius ?? null;
 });
 
 function handleAction(kind: ActionKind): void {
@@ -73,15 +81,24 @@ function handleViewForecast(): void {
         :connectivity="boot.connectivity.value"
         @action="handleAction"
       />
-      <ZoneStatusList
+      <!--
+        各部位狀態已移到提醒頁（2026-08-08 裁決）。首頁是主要入口，
+        倒數標題本身就帶了範圍（「接下來需要補擦：額頭」／「…全面補擦」），
+        完整的逐部位狀態屬於 S-07。
+      -->
+      <RouterLink
         v-if="boot.currentSession.value !== null"
-        :primary-action="boot.currentSession.value.primaryAction"
-        :zones="boot.currentSession.value.zones"
-      />
+        class="text-link home-full-status"
+        to="/reminder"
+      >
+        查看完整狀態
+        <ArrowRight :size="17" aria-hidden="true" />
+      </RouterLink>
     </template>
 
     <OutdoorContextCard
       :region-name="uvForecast.region.value?.displayName ?? null"
+      :temperature-celsius="todayTemperature"
     />
 
     <EveningUvPrompt

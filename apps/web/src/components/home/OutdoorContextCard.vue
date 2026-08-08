@@ -3,9 +3,18 @@ import { Wind } from "@lucide/vue";
 
 interface Props {
   regionName: string | null;
+  /**
+   * 今日日間溫度（攝氏），與 UV 同源於 CWA F-D0047-091。
+   *
+   * 純資訊，不影響補擦倒數。資料可能缺，缺的時候是 null，
+   * 整列不顯示——不要用 0 或「--」佔位。
+   */
+  temperatureCelsius?: number | null;
 }
 
-defineProps<Props>();
+withDefaults(defineProps<Props>(), {
+  temperatureCelsius: null
+});
 </script>
 
 <template>
@@ -42,6 +51,13 @@ defineProps<Props>();
         {{ regionName === null ? "設定地區" : "變更地區" }}
       </RouterLink>
     </div>
+
+    <p v-if="temperatureCelsius !== null" class="context-card__temperature">
+      今日氣溫 {{ Math.round(temperatureCelsius) }}°C
+      <span class="context-card__temperature-note">
+        僅供出門參考，不影響補擦倒數
+      </span>
+    </p>
   </section>
 </template>
 
@@ -98,5 +114,17 @@ defineProps<Props>();
   min-height: 2.5rem;
   padding: var(--space-2) var(--space-4);
   white-space: nowrap;
+}
+
+.context-card__temperature {
+  margin: 0;
+  font-size: var(--font-size-body);
+  line-height: 1.6;
+}
+
+.context-card__temperature-note {
+  display: block;
+  color: var(--text-secondary);
+  font-size: var(--font-size-caption);
 }
 </style>
