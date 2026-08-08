@@ -7,6 +7,7 @@ import ProtectionAdjustmentSheet from "../../components/setup/ProtectionAdjustme
 import QuickProtectionSummary from "../../components/setup/QuickProtectionSummary.vue";
 import SetupStepShell from "../../components/setup/SetupStepShell.vue";
 import SetupCompletionSummary from "../../components/setup/SetupCompletionSummary.vue";
+import SunscreenClaimQuickQuestion from "../../components/setup/SunscreenClaimQuickQuestion.vue";
 import WaterStartPicker from "../../components/setup/WaterStartPicker.vue";
 import { useSetup } from "../../composables/useSetup";
 import { useWebAppServices } from "../../app/injection";
@@ -14,6 +15,7 @@ import type {
   ProtectionDraftInput,
   WaterStartFormValue
 } from "../../features/setup/createSetupController";
+import type { ProductClaimAnswer } from "../../features/setup/productSnapshot";
 import {
   makeQuickProtectionDraft,
   type QuickProtectionDraft
@@ -33,6 +35,12 @@ const waterStart = shallowRef<WaterStartFormValue | null>(
 const localError = shallowRef<string | null>(null);
 const protectionNotice = shallowRef<string | null>(null);
 const showProtectionAdjustment = shallowRef(false);
+const sunscreenClaim = shallowRef<ProductClaimAnswer | null>(null);
+
+/** 已經在產品頁確認過標示的人不必再被問一次。 */
+const needsSunscreenClaim = computed(
+  () => productSettings.snapshot.value === null
+);
 
 const context = computed(
   () => setup.draft.value?.initialContext ?? null
@@ -58,7 +66,10 @@ async function submit(): Promise<void> {
 
   const saved = await setup.saveTiming({
     appliedAt: applicationTime.value,
-    waterStart: needsWaterStart.value ? waterStart.value : null
+    waterStart: needsWaterStart.value ? waterStart.value : null,
+    ...(needsSunscreenClaim.value && sunscreenClaim.value !== null
+      ? { sunscreenClaim: sunscreenClaim.value }
+      : {})
   });
   if (!saved) return;
 
@@ -126,6 +137,9 @@ async function goToProducts(): Promise<void> {
 }
 
 function validateForm(): string | null {
+  if (needsSunscreenClaim.value && sunscreenClaim.value === null) {
+    return "請先回答包裝上有沒有防曬或 SPF 標示。";
+  }
   if (applicationTime.value === null) {
     return "請確認這次實際的塗抹時間。";
   }
@@ -196,6 +210,11 @@ onMounted(async () => {
     </p>
 
     <template v-if="hasConfirmedProtection">
+      <SunscreenClaimQuickQuestion
+        v-if="needsSunscreenClaim"
+        v-model="sunscreenClaim"
+      />
+
       <ApplicationTimePicker v-model="applicationTime" />
       <WaterStartPicker
         v-if="needsWaterStart"
@@ -217,13 +236,17 @@ onMounted(async () => {
       >
         {{ message }}
       </p>
+      <!--
+        產品頁不再是必經關卡，改為想填完整標示的人的次要入口。
+        包裝有較短的補擦分鐘數時才需要走這條，否則預設 120 分鐘。
+      -->
       <button
-        v-if="(setup.fieldErrors.value.product ?? []).length > 0"
+        v-if="needsSunscreenClaim"
         class="text-link"
         type="button"
         @click="goToProducts"
       >
-        前往產品頁設定
+        改為填寫完整包裝標示
         <ArrowRight :size="17" aria-hidden="true" />
       </button>
     </template>

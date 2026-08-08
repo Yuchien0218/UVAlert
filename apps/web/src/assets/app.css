@@ -255,6 +255,18 @@
   text-underline-offset: 0.25rem;
 }
 
+/*
+  用 <button> 當文字連結時要清掉瀏覽器預設的按鈕外觀，否則會出現
+  一塊灰色底。ZoneProtectionForm 原本各自 scoped 覆寫，改成共用。
+*/
+button.text-link {
+  padding: 0;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  text-decoration: underline;
+}
+
 .safety-note {
   margin: 0;
   color: var(--text-secondary);

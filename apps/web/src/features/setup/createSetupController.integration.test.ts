@@ -222,15 +222,84 @@ describe("SetupDraft to StartSession transaction", () => {
       ]
     });
 
+    // 沒有標示不再阻擋建立提醒，但也不得憑空捏造一份 snapshot：
+    // 沒有 application 就沒有 applicationGroup，reducer 會改走 untimed。
     expect(
       await controller.saveTiming({
         appliedAt: "2026-07-29T10:45:00.000Z",
         waterStart: null
       })
-    ).toBe(false);
-    expect(controller.fieldErrors.value.product).toEqual([
-      "請先到產品頁確認目前使用產品的包裝標示。"
-    ]);
+    ).toBe(true);
+    expect(controller.fieldErrors.value.product).toBeUndefined();
+    expect(controller.draft.value?.applications).toEqual([]);
+  });
+
+  it("步驟 2 答「有防曬標示」時就地建立可產生倒數的標示", async () => {
+    await controller.saveContext("outdoor_general");
+    await controller.saveProtection({
+      setupEntryMode: "quick_preset",
+      suggestedPresetId: "commute_tracked",
+      suggestedPresetVersion: "BODY_ZONE_PRESET_V3@1",
+      presetDecision: "accepted",
+      zones: [
+        {
+          draftZoneKey: "face_forehead",
+          bodyZoneCode: "face_forehead",
+          customLabel: null,
+          skinExposureStatus: "exposed",
+          methodComponents: ["sunscreen"]
+        }
+      ]
+    });
+
+    expect(
+      await controller.saveTiming({
+        appliedAt: "2026-07-29T10:45:00.000Z",
+        waterStart: null,
+        sunscreenClaim: "yes"
+      })
+    ).toBe(true);
+
+    const created =
+      controller.draft.value?.applications[0]?.productLabelSnapshot;
+    expect(created?.sunscreenClaimStatus).toBe("confirmed");
+    expect(created?.ruleEligibilityAtApplication).toBe("eligible");
+    // 其餘三題沒問，必須誠實記為未知，不能假設包裝沒有這些標示。
+    expect(created?.reapplicationIntervalStatus).toBe("unknown");
+    expect(created?.preExposureWaitStatus).toBe("unknown");
+    expect(created?.waterResistanceStatus).toBe("unknown");
+  });
+
+  it("步驟 2 答「不確定」時建立不合格標示而非阻擋流程", async () => {
+    await controller.saveContext("outdoor_general");
+    await controller.saveProtection({
+      setupEntryMode: "quick_preset",
+      suggestedPresetId: "commute_tracked",
+      suggestedPresetVersion: "BODY_ZONE_PRESET_V3@1",
+      presetDecision: "accepted",
+      zones: [
+        {
+          draftZoneKey: "face_forehead",
+          bodyZoneCode: "face_forehead",
+          customLabel: null,
+          skinExposureStatus: "exposed",
+          methodComponents: ["sunscreen"]
+        }
+      ]
+    });
+
+    expect(
+      await controller.saveTiming({
+        appliedAt: "2026-07-29T10:45:00.000Z",
+        waterStart: null,
+        sunscreenClaim: "unknown"
+      })
+    ).toBe(true);
+
+    expect(
+      controller.draft.value?.applications[0]?.productLabelSnapshot
+        ?.ruleEligibilityAtApplication
+    ).not.toBe("eligible");
   });
 
   it("重新開啟有產品草稿時，要求重新確認未持久化的塗抹時間", async () => {
