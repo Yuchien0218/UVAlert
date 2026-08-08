@@ -66,18 +66,19 @@ describe("S-07 RecentEventsList", () => {
       props: {
         zones,
         events: makeStream({
-          applicationEvents: [
+          // 補擦紀錄以 confirmation group 為單位列出，不是個別 application。
+          applicationConfirmationGroups: [
             {
-              id: "evt-a",
+              id: "group-a",
               sessionId: "s-1",
-              effectiveOccurredAt: "2026-08-07T10:00:00.000Z",
-              zoneInstanceIds: ["z-face"]
+              appliedAt: "2026-08-07T10:00:00.000Z",
+              confirmedZoneInstanceIds: ["z-face"]
             },
             {
-              id: "evt-b",
+              id: "group-b",
               sessionId: "s-1",
-              effectiveOccurredAt: "2026-08-07T11:00:00.000Z",
-              zoneInstanceIds: ["z-hands"]
+              appliedAt: "2026-08-07T11:00:00.000Z",
+              confirmedZoneInstanceIds: ["z-hands"]
             }
           ]
         } as unknown as Partial<SessionEventStreamV1>)
@@ -98,12 +99,12 @@ describe("S-07 RecentEventsList", () => {
       props: {
         zones,
         events: makeStream({
-          applicationEvents: [
+          applicationConfirmationGroups: [
             {
-              id: "evt-a",
+              id: "group-a",
               sessionId: "s-1",
-              effectiveOccurredAt: "2026-08-07T10:00:00.000Z",
-              zoneInstanceIds: ["z-face"]
+              appliedAt: "2026-08-07T10:00:00.000Z",
+              confirmedZoneInstanceIds: ["z-face"]
             }
           ]
         } as unknown as Partial<SessionEventStreamV1>)
@@ -113,7 +114,8 @@ describe("S-07 RecentEventsList", () => {
     const row = wrapper.get("button.event-row");
     await row.trigger("click");
 
-    expect(wrapper.emitted("correct")?.[0]).toEqual(["evt-a"]);
+    // 帶出的必須是 group id：個別 application 在契約上不可更正。
+    expect(wrapper.emitted("correct")?.[0]).toEqual(["group-a"]);
   });
 
   it("開始提醒不可更正，該列不是按鈕", () => {

@@ -39,13 +39,18 @@ function buildDisplayEvents(zones: ZoneProjection[], events: SessionEventStreamV
 
   const displayEvents: DisplayEvent[] = [];
 
-  // 補擦事件（來自 applicationEvents）
-  for (const event of events.applicationEvents) {
+  // 事件流由持久層先解析過 correction leaf，這裡拿到的都是目前有效版本。
+  // 已被取代的舊版不得出現：S-10 的 target 必須是唯一有效 leaf，
+  // 點進舊版只會拿到 CORRECTION_CONFLICT。
+
+  // 補擦紀錄以 confirmation group 為單位。個別 applicationEvent 在契約上
+  // 不可更正——可更正的是它所屬的 group，走 correctionOfGroupId。
+  for (const group of events.applicationConfirmationGroups) {
     displayEvents.push({
-      id: event.id,
-      time: new Date(event.effectiveOccurredAt),
+      id: group.id,
+      time: new Date(group.appliedAt),
       label: "記錄補擦",
-      zoneIds: event.zoneInstanceIds,
+      zoneIds: group.confirmedZoneInstanceIds,
       correctable: true
     });
   }
@@ -62,7 +67,7 @@ function buildDisplayEvents(zones: ZoneProjection[], events: SessionEventStreamV
           time: new Date(event.effectiveOccurredAt),
           label: startLabel,
           zoneIds: event.zoneInstanceIds,
-          correctable: (event as any).correctable ?? true
+          correctable: true
         });
       } else if (event.contextType === "water_end") {
         displayEvents.push({
@@ -70,7 +75,7 @@ function buildDisplayEvents(zones: ZoneProjection[], events: SessionEventStreamV
           time: new Date(event.effectiveOccurredAt),
           label: "離開水中",
           zoneIds: event.zoneInstanceIds,
-          correctable: (event as any).correctable ?? true
+          correctable: true
         });
       } else if (event.contextType === "context_changed") {
         displayEvents.push({
@@ -92,7 +97,7 @@ function buildDisplayEvents(zones: ZoneProjection[], events: SessionEventStreamV
           time: new Date(event.effectiveOccurredAt),
           label: causeLabels[event.contextType] || "事件",
           zoneIds: event.zoneInstanceIds,
-          correctable: (event as any).correctable ?? true
+          correctable: true
         });
       }
     }

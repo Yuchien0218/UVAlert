@@ -168,13 +168,11 @@ export function createAppRouter(
         // S-10：更正最近事件。入口是 S-07 的最近事件清單（唯一入口）。
         path: "/reminder/event/:id/correct",
         name: "reminder-event-correct",
-        component: () => import("../pages/PlaceholderPage.vue"),
+        component: () => import("../pages/EventCorrectionPage.vue"),
         meta: {
           title: "更正事件",
           hideNavigation: true,
-          requiresActiveSession: true,
-          heading: "更正這筆事件",
-          body: "更正表單將在下一個實作切片接上事件流的 replace／void 後繼事件。"
+          requiresActiveSession: true
         }
       },
       {

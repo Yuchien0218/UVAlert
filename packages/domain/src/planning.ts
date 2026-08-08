@@ -2,6 +2,8 @@ import type {
   ApplicationConfirmationGroupV1,
   ApplicationEventV1,
   ContextEventV1,
+  CorrectApplicationGroupCommandV1,
+  CorrectContextEventCommandV1,
   EndSessionCommandV1,
   ProtectionSessionRecord,
   ReapplyCommandV1,
@@ -16,6 +18,8 @@ import type {
 } from "@sunshield/contracts";
 import {
   ContextEventV1Schema,
+  CorrectApplicationGroupCommandV1Schema,
+  CorrectContextEventCommandV1Schema,
   EVENT_SCHEMA_VERSION,
   ReapplyCommandV1Schema,
   ReportContextEventCommandV1Schema,
@@ -203,6 +207,171 @@ export function planContextEvent(
     session,
     projection,
     committedEventIds: [event.id]
+  };
+}
+
+/**
+ * S-10 更正回報狀況事件。
+ *
+ * 與 `planContextEvent` 的唯一結構差異是 envelope 的 correction 三欄位。
+ * 「target 存在、同 family、尚未有 successor、不是已 void」全部交給
+ * `resolveEventCorrectionLeaves`——它在 `validateWaterIntervals` 與
+ * `reduceSession` 內部都會跑，不必在這裡重寫一份。
+ */
+export function planContextEventCorrection(
+  rawCommand: CorrectContextEventCommandV1,
+  currentStream: SessionEventStreamV1,
+  currentSession: ProtectionSessionRecord,
+  clock: ReducerClock
+): ContextEventPlan {
+  const command = CorrectContextEventCommandV1Schema.parse(rawCommand);
+  const { detail, effectiveOccurredAt, action, targetEventId } =
+    command.payload;
+
+  if (Date.parse(effectiveOccurredAt) > Date.parse(clock.trustedNow)) {
+    throw new DomainInvariantError(
+      "FUTURE_EVENT",
+      "更正後的事件時間不得位於未來"
+    );
+  }
+
+  const revision = currentSession.revision + 1;
+  const event = ContextEventV1Schema.parse({
+    schemaVersion: EVENT_SCHEMA_VERSION,
+    id: command.payload.correctionEventId,
+    sessionId: command.sessionId,
+    commandId: command.commandId,
+    idempotencyKey: command.idempotencyKey,
+    effectiveOccurredAt,
+    clientCreatedAt: command.clientCreatedAt,
+    clientSequence: command.clientSequence,
+    localAppliedSequence: command.clientSequence,
+    eventType: "context_event",
+    correctionAction: action,
+    correctionOfEventId: targetEventId,
+    ...detail
+  });
+
+  const contextEvents = [...currentStream.contextEvents, event];
+
+  // 併入後才驗證：更正造成的區間重疊與孤兒離水，只有把後繼事件
+  // 放回既有事件流才看得出來。
+  validateWaterIntervals(contextEvents, clock.trustedNow);
+
+  const stream: SessionEventStreamV1 = { ...currentStream, contextEvents };
+  const projection = reduceSession({ stream, revision, clock });
+
+  return {
+    event,
+    stream,
+    session: nextSessionRecord(currentSession, projection, revision, clock),
+    projection,
+    committedEventIds: [event.id]
+  };
+}
+
+/**
+ * S-10 更正補擦紀錄。
+ *
+ * `replace` 必須連同底下的 application 一起重發：reducer 依
+ * `applicationConfirmationId` 過濾，只換群組會讓那次補擦的部位整批消失。
+ * `void` 則相反，只發群組不發 application——被作廢的群組不是 leaf，
+ * 其 target 也因為有了 successor 而不是 leaf，兩者底下的紀錄一併失效。
+ */
+export function planApplicationGroupCorrection(
+  rawCommand: CorrectApplicationGroupCommandV1,
+  currentStream: SessionEventStreamV1,
+  currentSession: ProtectionSessionRecord,
+  clock: ReducerClock
+): ReapplicationPlan {
+  const command = CorrectApplicationGroupCommandV1Schema.parse(rawCommand);
+  const { action, appliedAt, applications, targetGroupId } = command.payload;
+
+  if (Date.parse(appliedAt) > Date.parse(clock.trustedNow)) {
+    throw new DomainInvariantError(
+      "FUTURE_EVENT",
+      "更正後的補擦時間不得位於未來"
+    );
+  }
+
+  const revision = currentSession.revision + 1;
+  const eventBase = (id: string) => ({
+    schemaVersion: EVENT_SCHEMA_VERSION,
+    id,
+    sessionId: command.sessionId,
+    commandId: command.commandId,
+    idempotencyKey: command.idempotencyKey,
+    effectiveOccurredAt: appliedAt,
+    clientCreatedAt: command.clientCreatedAt,
+    clientSequence: command.clientSequence,
+    localAppliedSequence: command.clientSequence
+  });
+
+  const group: ApplicationConfirmationGroupV1 = {
+    ...eventBase(command.payload.correctionGroupId),
+    eventType: "application_confirmation_group",
+    appliedAt,
+    // void 時 schema 仍要求至少一個部位，沿用 target 的部位集合。
+    confirmedZoneInstanceIds:
+      applications.length > 0
+        ? applications.flatMap(
+            (application) => application.zoneInstanceIds
+          )
+        : (currentStream.applicationConfirmationGroups.find(
+            (candidate) => candidate.id === targetGroupId
+          )?.confirmedZoneInstanceIds ?? []),
+    correctionAction: action,
+    correctionOfGroupId: targetGroupId
+  };
+
+  const events: ApplicationEventV1[] = applications.map((application) => ({
+    ...eventBase(application.eventId),
+    eventType: "application_recorded",
+    applicationConfirmationId: group.id,
+    zoneInstanceIds: application.zoneInstanceIds,
+    appliedAt,
+    sourceProductId: application.sourceProductId,
+    productSnapshotFingerprint: application.productSnapshotFingerprint,
+    productLabelSnapshot: application.productLabelSnapshot
+  }));
+
+  const stream: SessionEventStreamV1 = {
+    ...currentStream,
+    applicationConfirmationGroups: [
+      ...currentStream.applicationConfirmationGroups,
+      group
+    ],
+    applicationEvents: [...currentStream.applicationEvents, ...events]
+  };
+
+  // partition 完整性由 reduceSession 的 effectiveStream 檢查。
+  const projection = reduceSession({ stream, revision, clock });
+
+  return {
+    group,
+    events,
+    stream,
+    session: nextSessionRecord(currentSession, projection, revision, clock),
+    projection,
+    committedEventIds: [group.id, ...events.map((event) => event.id)]
+  };
+}
+
+/** 所有 plan 函式共用的 session record 更新。 */
+function nextSessionRecord(
+  currentSession: ProtectionSessionRecord,
+  projection: SessionProjection,
+  revision: number,
+  clock: ReducerClock
+): ProtectionSessionRecord {
+  return {
+    ...currentSession,
+    overallStatus: projection.overallStatus,
+    sessionNextDueAt: projection.sessionNextDueAt,
+    primaryAction: projection.primaryAction,
+    derivedFromEventRefs: projection.derivedFromEventRefs,
+    revision,
+    updatedAt: clock.trustedNow
   };
 }
 

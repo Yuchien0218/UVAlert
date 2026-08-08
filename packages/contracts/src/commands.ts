@@ -359,6 +359,38 @@ export const EndSessionCommandV1Schema = z.object({
  * 契約層擋掉結構性錯誤（未來時間、起點晚於事件），
  * 規劃層再依既有事件流擋掉重疊區間與孤兒離水。
  */
+/**
+ * 回報狀況事件的內容。S-09 建立與 S-10 更正共用同一組定義，
+ * 兩邊各留一份遲早會漂移。
+ */
+export const ContextEventDetailInputV1Schema = z.discriminatedUnion(
+  "contextType",
+  [
+    z.object({
+      contextType: z.enum([
+        "heavy_sweat",
+        "towel",
+        "friction",
+        "hand_wash"
+      ]),
+      zoneInstanceIds: z.array(NonEmptyIdSchema).min(1)
+    }),
+    z.object({
+      contextType: z.literal("water_start"),
+      activityIntervalId: NonEmptyIdSchema,
+      zoneInstanceIds: z.array(NonEmptyIdSchema).min(1),
+      startConfidence: z.enum(["confirmed", "unknown"]),
+      activityStartedAt: UtcInstantSchema.nullable()
+    }),
+    z.object({
+      contextType: z.literal("water_end"),
+      activityIntervalId: NonEmptyIdSchema,
+      zoneInstanceIds: z.array(NonEmptyIdSchema).min(1),
+      endedAt: UtcInstantSchema
+    })
+  ]
+);
+
 export const ReportContextEventCommandV1Schema = z
   .object({
     ...CommandEnvelopeFields,
@@ -368,30 +400,7 @@ export const ReportContextEventCommandV1Schema = z
       eventId: NonEmptyIdSchema,
       /** 使用者自陳的實際發生時間；不得晚於可信現在。 */
       effectiveOccurredAt: UtcInstantSchema,
-      detail: z.discriminatedUnion("contextType", [
-        z.object({
-          contextType: z.enum([
-            "heavy_sweat",
-            "towel",
-            "friction",
-            "hand_wash"
-          ]),
-          zoneInstanceIds: z.array(NonEmptyIdSchema).min(1)
-        }),
-        z.object({
-          contextType: z.literal("water_start"),
-          activityIntervalId: NonEmptyIdSchema,
-          zoneInstanceIds: z.array(NonEmptyIdSchema).min(1),
-          startConfidence: z.enum(["confirmed", "unknown"]),
-          activityStartedAt: UtcInstantSchema.nullable()
-        }),
-        z.object({
-          contextType: z.literal("water_end"),
-          activityIntervalId: NonEmptyIdSchema,
-          zoneInstanceIds: z.array(NonEmptyIdSchema).min(1),
-          endedAt: UtcInstantSchema
-        })
-      ])
+      detail: ContextEventDetailInputV1Schema
     })
   })
   .superRefine((command, context) => {
@@ -497,8 +506,148 @@ export const ReapplyCommandV1Schema = z
 export type StartSessionCommandV1 = z.infer<
   typeof StartSessionCommandV1Schema
 >;
+/**
+ * S-10 更正最近事件。
+ *
+ * 不直接編輯或刪除原事件：一律建立 `replace`／`void` 後繼事件，
+ * 由 reducer 的 correction leaf 解析決定哪一版有效。
+ * 「target 必須是目前唯一有效 leaf」這條在領域層檢查，契約層看不到事件流。
+ */
+export const CorrectionActionInputSchema = z.enum(["replace", "void"]);
+
+export const CorrectContextEventCommandV1Schema = z
+  .object({
+    ...CommandEnvelopeFields,
+    commandType: z.literal("correct_context_event"),
+    expectedRevision: z.number().int().positive(),
+    payload: z.object({
+      /** 後繼事件的 id。 */
+      correctionEventId: NonEmptyIdSchema,
+      targetEventId: NonEmptyIdSchema,
+      action: CorrectionActionInputSchema,
+      effectiveOccurredAt: UtcInstantSchema,
+      /**
+       * `void` 時仍需帶內容：事件 schema 要求 `zoneInstanceIds` 至少一項，
+       * 沿用 target 原值即可。作廢與否由 `action` 決定，不是靠內容留白。
+       */
+      detail: ContextEventDetailInputV1Schema
+    })
+  })
+  .superRefine((command, context) => {
+    const { correctionEventId, targetEventId, detail } = command.payload;
+
+    if (correctionEventId === targetEventId) {
+      context.addIssue({
+        code: "custom",
+        path: ["payload", "correctionEventId"],
+        message: "後繼事件 id 不得等於被更正的事件 id"
+      });
+    }
+
+    const zoneIds = new Set<string>();
+    for (const [index, zoneId] of detail.zoneInstanceIds.entries()) {
+      if (zoneIds.has(zoneId)) {
+        context.addIssue({
+          code: "custom",
+          path: ["payload", "detail", "zoneInstanceIds", index],
+          message: "同一事件內每個部位只能出現一次"
+        });
+      }
+      zoneIds.add(zoneId);
+    }
+  });
+
+export const CorrectApplicationGroupCommandV1Schema = z
+  .object({
+    ...CommandEnvelopeFields,
+    commandType: z.literal("correct_application_group"),
+    expectedRevision: z.number().int().positive(),
+    payload: z.object({
+      correctionGroupId: NonEmptyIdSchema,
+      targetGroupId: NonEmptyIdSchema,
+      action: CorrectionActionInputSchema,
+      appliedAt: UtcInstantSchema,
+      /**
+       * `replace` 必須帶完整的一組；`void` 必須為空。
+       *
+       * reducer 依 `applicationConfirmationId` 過濾 application 事件，
+       * 所以取代一個群組等於重發整組——只換群組不換底下的紀錄，
+       * 那次補擦的部位會整批消失。
+       */
+      applications: z.array(ReapplyApplicationInputV1Schema)
+    })
+  })
+  .superRefine((command, context) => {
+    const { action, applications, correctionGroupId, targetGroupId } =
+      command.payload;
+
+    if (correctionGroupId === targetGroupId) {
+      context.addIssue({
+        code: "custom",
+        path: ["payload", "correctionGroupId"],
+        message: "後繼群組 id 不得等於被更正的群組 id"
+      });
+    }
+
+    if (action === "replace" && applications.length === 0) {
+      context.addIssue({
+        code: "custom",
+        path: ["payload", "applications"],
+        message: "replace 必須帶完整的補擦紀錄，否則該次補擦的部位會全部消失"
+      });
+    }
+    if (action === "void" && applications.length > 0) {
+      context.addIssue({
+        code: "custom",
+        path: ["payload", "applications"],
+        message: "void 不得附帶補擦紀錄"
+      });
+    }
+
+    const zoneIds = new Set<string>();
+    const eventIds = new Set<string>();
+    for (const [applicationIndex, application] of applications.entries()) {
+      if (
+        application.eventId === correctionGroupId ||
+        eventIds.has(application.eventId)
+      ) {
+        context.addIssue({
+          code: "custom",
+          path: ["payload", "applications", applicationIndex, "eventId"],
+          message: "Application event ID 不得重複或等於群組 ID"
+        });
+      }
+      eventIds.add(application.eventId);
+      for (const [zoneIndex, zoneId] of application.zoneInstanceIds.entries()) {
+        if (zoneIds.has(zoneId)) {
+          context.addIssue({
+            code: "custom",
+            path: [
+              "payload",
+              "applications",
+              applicationIndex,
+              "zoneInstanceIds",
+              zoneIndex
+            ],
+            message: "同一補擦確認內每個部位只能出現一次"
+          });
+        }
+        zoneIds.add(zoneId);
+      }
+    }
+  });
+
 export type EndSessionCommandV1 = z.infer<typeof EndSessionCommandV1Schema>;
 export type ReapplyCommandV1 = z.infer<typeof ReapplyCommandV1Schema>;
 export type ReportContextEventCommandV1 = z.infer<
   typeof ReportContextEventCommandV1Schema
+>;
+export type ContextEventDetailInputV1 = z.infer<
+  typeof ContextEventDetailInputV1Schema
+>;
+export type CorrectContextEventCommandV1 = z.infer<
+  typeof CorrectContextEventCommandV1Schema
+>;
+export type CorrectApplicationGroupCommandV1 = z.infer<
+  typeof CorrectApplicationGroupCommandV1Schema
 >;

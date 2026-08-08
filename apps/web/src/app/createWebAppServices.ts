@@ -54,6 +54,10 @@ import {
   type ContextEventController
 } from "../features/reminder/createContextEventController";
 import {
+  createEventCorrectionController,
+  type EventCorrectionController
+} from "../features/reminder/createEventCorrectionController";
+import {
   createLocalDataController,
   type LocalDataController
 } from "../features/settings/createLocalDataController";
@@ -75,6 +79,7 @@ export interface WebAppServices {
   readonly reapplication: ReapplicationController;
   readonly contextEvent: ContextEventController;
   readonly localData: LocalDataController;
+  readonly eventCorrection: EventCorrectionController;
   readonly sessionEvents: SessionEventsController;
   dispose(): void;
 }
@@ -140,6 +145,14 @@ export function createWebAppServices(
     getConnectivity: () => boot.connectivity.value
   });
   const reapplication = createReapplicationController({
+    repository,
+    identity,
+    boot,
+    createId,
+    now: () => new Date(),
+    getConnectivity: () => boot.connectivity.value
+  });
+  const eventCorrection = createEventCorrectionController({
     repository,
     identity,
     boot,
@@ -213,10 +226,12 @@ export function createWebAppServices(
     reapplication,
     contextEvent,
     localData,
+    eventCorrection,
     sessionEvents,
     dispose(): void {
       sessionEvents.dispose();
       localData.dispose();
+      eventCorrection.dispose();
       contextEvent.dispose();
       reapplication.dispose();
       region.dispose();

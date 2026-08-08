@@ -9,6 +9,10 @@ import type {
   RegionPreferenceV1,
   ReapplyCommandV1,
   ReportContextEventCommandV1,
+  CorrectContextEventCommandV1,
+  CorrectApplicationGroupCommandV1,
+  ContextEventV1,
+  ApplicationConfirmationGroupV1,
   ReducerClock,
   SessionEventStreamV1,
   SessionProjection,
@@ -92,6 +96,50 @@ export interface ContextEventContext {
   session: SessionProjection;
   /** null 代表沒有可關閉的水上區間，此時不得顯示離水事件。 */
   openWaterInterval: OpenWaterInterval | null;
+}
+
+/** S-10 更正表單需要的 target 描述。 */
+export type CorrectionContext =
+  | {
+      kind: "context_event";
+      session: SessionProjection;
+      /**
+       * `context_changed` 不在 S-10 更正範圍（它沒有受影響部位可調整），
+       * 讀取側會直接回 null，所以這裡只會是帶部位的那三種。
+       */
+      event: CorrectableContextEvent;
+      /** false 代表這筆已經被更正過，不得再建立第二個 successor。 */
+      isLeaf: boolean;
+      /** 更正入水時部位集合必須沿用，否則配對的離水會變孤兒。 */
+      hasPairedWaterEnd: boolean;
+    }
+  | {
+      kind: "application_group";
+      session: SessionProjection;
+      group: ApplicationConfirmationGroupV1;
+      applications: ApplicationEventV1[];
+      isLeaf: boolean;
+      hasPairedWaterEnd: boolean;
+    };
+
+export type CorrectableContextEvent = Extract<
+  ContextEventV1,
+  { zoneInstanceIds: string[] }
+>;
+
+export interface EventCorrectionRepositoryPort {
+  getCorrectionContext(
+    localVisitorId: string,
+    eventId: string
+  ): Promise<CorrectionContext | null>;
+  correctContextEvent(
+    command: CorrectContextEventCommandV1,
+    clock: ReducerClock
+  ): Promise<CommandResult<SessionProjection>>;
+  correctApplicationGroup(
+    command: CorrectApplicationGroupCommandV1,
+    clock: ReducerClock
+  ): Promise<CommandResult<SessionProjection>>;
 }
 
 export interface ContextEventRepositoryPort {
