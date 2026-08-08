@@ -79,10 +79,10 @@ describe("resolveActionRoute", () => {
     for (const kind of allKinds) {
       const route = resolveActionRoute(kind);
       expect(route).toBeDefined();
+      // placeholder 路由已移除，這裡列的都必須是實際存在的 route name。
       expect([
         "reminder-reapply",
         "reminder-report",
-        "reminder-action",
         "products",
         "reminder",
         "help-how-it-works"

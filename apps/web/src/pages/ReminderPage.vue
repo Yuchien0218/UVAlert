@@ -117,13 +117,14 @@ async function handleSecondaryAction(
       void router.push({ name: "reminder-reapply" });
       return;
     case "update_protection_method":
-      // 規格目的地是 S-04 原地 sheet，但該 sheet 目前只寫入 SetupDraft，
-      // 沒有變更 active Session 部位的命令路徑。先落在 placeholder，
-      // 不假裝已更新。
-      void router.push({
-        name: "reminder-action",
-        params: { kind: "update_protection_method" }
-      });
+      // 規格目的地是 S-04 原地 sheet，但該 sheet 只寫入 SetupDraft，
+      // 沒有變更 active Session 部位的命令路徑。
+      //
+      // 2026-08-08：原本落在 `/reminder/action/:kind` placeholder，該路由
+      // 已隨死路由清理移除，這裡改導向 S-08——記錄實際塗抹是目前唯一
+      // 真的能解除 CLOTHING_COVERED 的動作，比停在說明頁誠實。
+      // 待裁決的另一個選項是補 Session 部位變更命令。
+      void router.push({ name: "reminder-reapply" });
       return;
   }
 }

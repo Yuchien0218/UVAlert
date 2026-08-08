@@ -119,11 +119,6 @@ async function mountPage() {
         name: "special-situation",
         component: stub
       },
-      {
-        path: "/reminder/action/:kind",
-        name: "reminder-action",
-        component: stub
-      },
       { path: "/products", name: "products", component: stub }
     ]
   });

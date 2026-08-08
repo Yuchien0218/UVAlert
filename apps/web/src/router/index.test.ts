@@ -6,6 +6,70 @@ import { describe, expect, it, vi } from "vitest";
 import type { AppBootController } from "../app/createAppBootController";
 import { createAppRouter } from "./index";
 
+function makeReadyBoot(): AppBootController {
+  return {
+    phase: shallowReadonly(shallowRef("ready")),
+    errorCode: shallowReadonly(shallowRef(null)),
+    connectivity: shallowReadonly(shallowRef("online")),
+    currentSession: shallowReadonly(shallowRef(null)),
+    ensureBooted: vi.fn(async () => undefined),
+    refresh: vi.fn(async () => undefined),
+    dispose: vi.fn()
+  } as AppBootController;
+}
+
+/**
+ * 應用程式導向的每個 route name 都必須真的存在於路由表。
+ *
+ * 2026-08-08 踩過一次：刪掉 placeholder 路由後，提醒頁的
+ * 「更新防護方式」次要 CTA 仍 push 到 `reminder-action`，
+ * 但 ReminderPage.test.ts 自己註冊了同名 stub，整套測試照樣是綠的。
+ * 這裡直接對**真實**路由表解析，避免測試 router 與正式 router 分歧。
+ */
+describe("route name 完整性", () => {
+  const referencedNames = [
+    // resolveActionRoute 的所有落點
+    "reminder-reapply",
+    "reminder-report",
+    "products",
+    "reminder",
+    "help-how-it-works",
+    // ReminderPage 次要 CTA 的落點
+    "special-situation",
+    // 其他頁面 push 的目的地
+    "reminder-event-correct",
+    "product-new",
+    "product-edit",
+    "settings-data",
+    "settings-display",
+    "install",
+    "region",
+    "help",
+    "help-beach",
+    "more",
+    "home",
+    "setup-context",
+    "setup-timing",
+    "not-found"
+  ];
+
+  it.each(referencedNames)("%s 存在於路由表", (name) => {
+    const router = createAppRouter(makeReadyBoot(), createMemoryHistory());
+    expect(router.hasRoute(name)).toBe(true);
+  });
+
+  it("已移除的 placeholder 路由不得復活", () => {
+    const router = createAppRouter(makeReadyBoot(), createMemoryHistory());
+    for (const name of [
+      "reminder-action",
+      "setup-protection",
+      "setup-review"
+    ]) {
+      expect(router.hasRoute(name)).toBe(false);
+    }
+  });
+});
+
 describe("createAppRouter", () => {
   it("awaits App Boot before completing navigation", async () => {
     const ensureBooted = vi.fn(async () => undefined);
