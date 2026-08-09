@@ -8,6 +8,33 @@
       content="width=device-width, initial-scale=1, viewport-fit=cover"
     >
     <title>防曬晴報員</title>
+
+    <!--
+      沒有 manifest 就沒有安裝能力：Chrome 不會提供安裝、iOS「加到主畫面」
+      只會得到書籤而不是 standalone。而 S-20 那頁把安裝說成「防止數據遺失
+      的關鍵手段」——IndexedDB 在已安裝的 PWA 裡比較不容易被瀏覽器清掉。
+      icon 檔早就在 public/，先前只是沒有任何東西引用。
+    -->
+    <link rel="manifest" href="/manifest.webmanifest">
+    <link rel="icon" href="/favicon.ico" sizes="32x32">
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+    <!-- iOS 不讀 manifest 的 icons，主畫面圖示只認這一條。 -->
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+
+    <!--
+      manifest 只能有一個 theme_color；瀏覽器工具列的實際配色靠這兩條。
+      值取自 packages/ui/src/styles.css 的 --page-background。
+    -->
+    <meta
+      name="theme-color"
+      media="(prefers-color-scheme: light)"
+      content="#f9f9f9"
+    >
+    <meta
+      name="theme-color"
+      media="(prefers-color-scheme: dark)"
+      content="#0f0e0c"
+    >
     <script>
       try {
         const appearance = localStorage.getItem("sunshield.appearance");
