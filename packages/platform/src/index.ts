@@ -17,7 +17,11 @@ import type {
   SessionEventStreamV1,
   SessionProjection,
   SetupDraftV1,
-  StartSessionCommandV1
+  StartSessionCommandV1,
+  SyncRecordEnvelopeV1,
+  SyncRecordKind,
+  SyncTombstoneV1,
+  UserPreferencesV1
 } from "@sunshield/contracts";
 
 export * from "./cloud";
@@ -213,6 +217,31 @@ export interface ProductCatalogPort {
 export interface RegionPreferencePort {
   getPreference(): Promise<RegionPreferenceV1 | null>;
   savePreference(preference: RegionPreferenceV1): Promise<void>;
+}
+
+export interface LocalSyncMetadata {
+  recordKind: SyncRecordKind;
+  recordId: string;
+  localPayloadFingerprint: string | null;
+  localRevision: number;
+  cloudRevision: number | null;
+  lastSyncedAt: string | null;
+  tombstone: boolean;
+  deletedAt: string | null;
+}
+
+export interface LocalSyncSnapshot {
+  collectedAt: string;
+  records: SyncRecordEnvelopeV1[];
+  tombstones: SyncTombstoneV1[];
+  metadata: LocalSyncMetadata[];
+}
+
+export interface LocalSyncPort {
+  collectSyncSnapshot(): Promise<LocalSyncSnapshot>;
+  getActiveSession(): Promise<SyncRecordEnvelopeV1 | null>;
+  applySelectedRecords(records: SyncRecordEnvelopeV1[]): Promise<void>;
+  applyTombstones(tombstones: SyncTombstoneV1[]): Promise<void>;
 }
 
 export interface DevicePosition {

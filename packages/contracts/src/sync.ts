@@ -48,12 +48,39 @@ export type UserPreferencesV1 = z.infer<typeof UserPreferencesV1Schema>;
  * after a successful download.
  */
 export const CloudProtectionSessionRecordSchema =
-  ProtectionSessionRecordSchema.omit({ ownerKey: true });
+  ProtectionSessionRecordSchema.omit({ ownerKey: true }).superRefine(
+    (session, context) => {
+      if (session.endedAt !== null || session.overallStatus === "ended") {
+        context.addIssue({
+          code: "custom",
+          path: ["endedAt"],
+          message: "active_session 不得包含已結束的 Session"
+        });
+      }
+    }
+  );
 
-export const ActiveSessionSyncPayloadSchema = z.object({
-  session: CloudProtectionSessionRecordSchema,
-  eventStream: SessionEventStreamV1Schema
-});
+export const ActiveSessionSyncPayloadSchema = z
+  .object({
+    session: CloudProtectionSessionRecordSchema,
+    eventStream: SessionEventStreamV1Schema
+  })
+  .superRefine((payload, context) => {
+    if (payload.session.id !== payload.eventStream.sessionStarted.sessionId) {
+      context.addIssue({
+        code: "custom",
+        path: ["eventStream", "sessionStarted", "sessionId"],
+        message: "Session 與事件流必須屬於同一個 session"
+      });
+    }
+    if (payload.eventStream.sessionEndedEvents.length > 0) {
+      context.addIssue({
+        code: "custom",
+        path: ["eventStream", "sessionEndedEvents"],
+        message: "active_session 不得包含結束事件"
+      });
+    }
+  });
 
 export type ActiveSessionSyncPayload = z.infer<
   typeof ActiveSessionSyncPayloadSchema
