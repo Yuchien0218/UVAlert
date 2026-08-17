@@ -46,3 +46,13 @@
 pnpm install
 pnpm check
 ```
+
+## 後端開發入口
+
+第一版後端位於 `supabase/`，提供選配 Google 登入同步、CWA UV 預報代理、匿名問題回報與 UVAlert 雲端資料清除；免登入本機提醒不依賴後端。請先讀：
+
+- `docs/backend/local-development.md`：Supabase CLI、Google OAuth、Edge Function secrets 與本機命令。
+- `docs/backend/deployment-checklist.md`：正式環境 RLS、CORS、`/v1/*` rewrite 與 smoke test。
+- `supabase/README.md`：function 路徑與資料邊界。
+
+前端只使用 `VITE_SUPABASE_URL`、`VITE_SUPABASE_PUBLISHABLE_KEY` 與 `VITE_API_BASE_URL`；CWA API key、service-role key 與 Google client secret 不得放在 `VITE_*` 或 commit。
