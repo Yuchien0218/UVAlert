@@ -132,3 +132,9 @@
 - 確認文章的 `dateModified`、canonical、sitemap、Article 結構化資料與可見文字一致。
 - 確認沒有把一般衛教寫成個人診斷、保證或「安全曝曬時間」。
 - 逐篇檢查手機、公開閱讀版、分享預覽與撤回流程。
+
+## 工程實作狀態
+
+公開頁已接到 Web 路由與 Vite build：`/education`、`/education/:category`、`/education/articles/:slug`。內容由 `tools/education/content-reader.mjs` 統一讀取，並產生 Vue 資料與 `apps/web/dist/education/**/index.html`；同一流程也產生 `robots.txt` 與 `sitemap.xml`。
+
+發布閘門固定為 `status: published` 且 `reviewStatus: approved`。現階段文章仍為草稿，因此所有文章頁與分類頁先以 `noindex,follow` 預覽，sitemap 不會列出草稿。正式部署請參考 [公開衛教頁 SEO 實作說明](./public-seo-implementation.md) 設定 `VITE_PUBLIC_SITE_URL`。

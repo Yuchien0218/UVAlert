@@ -3,6 +3,7 @@ import {
   CircleHelp,
   Cloud,
   Database,
+  BookOpen,
   MessageSquare,
   Palette,
   Smartphone,
@@ -23,6 +24,12 @@ import {
  */
 
 const allEntries = [
+  {
+    to: "/education",
+    icon: BookOpen,
+    label: "防曬衛教",
+    description: "用白話讀懂 UV、防曬乳、補擦與曬後照護。"
+  },
   {
     to: "/help",
     icon: CircleHelp,

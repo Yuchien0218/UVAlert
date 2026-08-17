@@ -20,6 +20,7 @@
 - `docs/decisions/2026-08-15-redesign-sitemap-userflow-current.md`：現行 Sitemap、User Flow、頁面任務與產品結構。
 - `docs/design/current-direction.md`：目前已確認的前端視覺方向。
 - `docs/research/2026-08-13-uvalert-education-seo-aeo-geo.md`：衛教內容的 SEO／AEO／GEO 研究紀錄。
+- `docs/education/public-seo-implementation.md`：公開衛教頁、發布閘門、canonical、Schema、robots 與 sitemap 的實作規則。
 
 舊版 PRD、P0 規格、Sitemap／User Flow、mockup、截圖與實作計畫集中在 `docs/archive/2026-08-pre-redesign/`，只供查閱，不要直接拿來新增畫面或功能。
 
@@ -46,6 +47,8 @@
 pnpm install
 pnpm check
 ```
+
+衛教內容會在 Web build 前由 `tools/education/generate-content.mjs` 產生 Vue 使用資料，build 後再產生公開 HTML、`robots.txt` 與 `sitemap.xml`。正式部署前請設定 `VITE_PUBLIC_SITE_URL`；文章完成專業審閱後才會進入 sitemap。
 
 ## 後端開發入口
 

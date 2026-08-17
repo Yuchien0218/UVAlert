@@ -67,6 +67,24 @@ export function createAppRouter(
         meta: { title: "更多" }
       },
       {
+        path: "/education",
+        name: "education",
+        component: () => import("../pages/education/EducationIndexPage.vue"),
+        meta: { title: "防曬衛教", hideNavigation: true }
+      },
+      {
+        path: "/education/articles/:slug",
+        name: "education-article",
+        component: () => import("../pages/education/EducationArticlePage.vue"),
+        meta: { title: "衛教文章", hideNavigation: true }
+      },
+      {
+        path: "/education/:category",
+        name: "education-category",
+        component: () => import("../pages/education/EducationCategoryPage.vue"),
+        meta: { title: "衛教分類", hideNavigation: true }
+      },
+      {
         path: "/feedback",
         name: "feedback",
         component: () => import("../pages/FeedbackPage.vue"),
