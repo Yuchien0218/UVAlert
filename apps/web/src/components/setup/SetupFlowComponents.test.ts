@@ -172,7 +172,7 @@ describe("ProtectionAdjustmentSheet", () => {
 
     expect(wrapper.get('[role="dialog"]').attributes("aria-modal"))
       .toBe("true");
-    expect(wrapper.text()).toContain("調整追蹤部位");
+    expect(wrapper.text()).toContain("調整要提醒的部位");
     await wrapper.get('button[aria-label="關閉調整"]').trigger("click");
     expect(wrapper.emitted("close")).toHaveLength(1);
   });

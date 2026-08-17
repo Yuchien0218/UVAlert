@@ -102,7 +102,7 @@ onBeforeUnmount(releasePageLock);
           <header class="sheet__header">
             <div>
               <h2 id="protection-sheet-title">
-                調整追蹤部位
+                調整要提醒的部位
               </h2>
             </div>
             <button

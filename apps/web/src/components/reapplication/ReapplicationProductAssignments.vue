@@ -86,13 +86,13 @@ function optionLabel(choice: ReapplicationProductChoice): string {
 
 <template>
   <section class="app-card assignment-section" aria-labelledby="assignment-title">
-    <h2 id="assignment-title">這次用了什麼產品？</h2>
+    <h2 id="assignment-title">這次用了哪瓶防曬乳？</h2>
 
     <template v-if="!perZone">
       <p class="assignment-section__helper">
-        {{ selectedZones.length }} 個部位都會記錄成同一支產品。只有確認當下的包裝標示 snapshot 會寫入紀錄。
+        {{ selectedZones.length }} 個部位都會記錄成同一瓶防曬乳。這次確認的包裝標示會寫入紀錄。
       </p>
-      <label class="visually-hidden" for="product-shared">全部部位使用的產品</label>
+      <label class="visually-hidden" for="product-shared">全部部位使用的防曬乳</label>
       <select
         id="product-shared"
         :value="sharedChoiceId"
@@ -116,13 +116,13 @@ function optionLabel(choice: ReapplicationProductChoice): string {
         {{ sharedRestriction }}
       </p>
       <button class="text-link" type="button" @click="perZone = true">
-        不同部位用了不同產品
+        不同部位使用不同防曬乳
       </button>
     </template>
 
     <template v-else>
       <p class="assignment-section__helper">
-        分別指定每個部位實際使用的產品。
+        分別選擇各部位實際使用的防曬乳。
       </p>
       <div
         v-for="zone in selectedZones"
@@ -187,7 +187,7 @@ function optionLabel(choice: ReapplicationProductChoice): string {
         type="button"
         @click="perZone = false"
       >
-        全部改用同一支產品
+        全部改用同一瓶防曬乳
       </button>
     </template>
   </section>

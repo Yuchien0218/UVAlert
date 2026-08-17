@@ -6,10 +6,10 @@ import type { ProductClaimAnswer } from "../../features/setup/productSnapshot";
 /**
  * 步驟 2 的單題包裝標示確認。
  *
- * 產品頁那四題裡，只有「有沒有防曬／SPF 標示」會決定能不能產生補擦
+ * 裝備頁那四題裡，只有「有沒有防曬／SPF 標示」會決定能不能產生補擦
  * 倒數（`sunscreenClaimStatus !== "confirmed"` 一律推導為
  * `no_sunscreen_claim`）；其餘三題都接受「不確定」，只影響間隔精細度。
- * 所以這裡只問這一題，其他三題留給產品頁補，避免為了開始提醒
+ * 所以這裡只問這一題，其他三題留給裝備頁補，避免為了開始提醒
  * 先離開設定流程。
  */
 const model = defineModel<ProductClaimAnswer | null>({ required: true });
@@ -21,7 +21,7 @@ const groupName = `sunscreen-claim-${useId()}`;
   <fieldset class="question-card app-card">
     <legend>包裝上有明確的防曬或 SPF 標示嗎？</legend>
     <p class="question-card__helper">
-      只需要這一題就能開始提醒。包裝上的等待時間、較短補擦時間與耐水標示可以稍後在產品頁補齊。
+      只需要這一題就能開始提醒。包裝上的等待時間、較短補擦間隔與耐水標示可以稍後在裝備頁補齊。
     </p>
     <div class="choice-grid choice-grid--row">
       <label>
@@ -60,9 +60,9 @@ const groupName = `sunscreen-claim-${useId()}`;
     >
       <AlertTriangle :size="21" aria-hidden="true" />
       <div>
-        <strong>這次不會有補擦倒數</strong>
+        <strong>這次先不建立補擦倒數</strong>
         <p>
-          無法確認是防曬產品時不建立倒數，避免顯示不可信的時間。提醒仍會建立並記錄追蹤部位；之後在產品頁確認標示，就能補上倒數。
+          無法確認是防曬產品時不建立倒數，避免顯示不可信的時間。提醒仍會建立並記錄提醒部位；之後在裝備頁確認標示，就能補上倒數。
         </p>
       </div>
     </aside>

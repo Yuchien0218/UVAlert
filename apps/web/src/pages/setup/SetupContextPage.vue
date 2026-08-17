@@ -112,7 +112,7 @@ function routeForStep(
         class="form-error"
         role="status"
       >
-        草稿目前無法保存；畫面內容仍會保留，你可以再試一次。
+        設定內容目前無法儲存；畫面內容仍會保留，你可以再試一次。
       </p>
     </template>
 

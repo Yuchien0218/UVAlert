@@ -230,7 +230,7 @@ function makeDraftZone(
             <input v-model="includeCustom" type="checkbox">
             <span>
               <strong>其他部位</strong>
-              <small>自訂文字只保存在本機 Session。</small>
+              <small>自訂文字只儲存在這次提醒中。</small>
             </span>
           </label>
           <label v-if="includeCustom" class="field">

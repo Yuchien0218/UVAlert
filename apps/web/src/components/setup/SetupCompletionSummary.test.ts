@@ -87,7 +87,7 @@ describe("S-05 SetupCompletionSummary 必顯內容", () => {
     expect(wrapper.text()).toContain("SPF 50");
     expect(wrapper.text()).toContain("PA++++");
     expect(wrapper.text()).toContain("曝曬前需等待 20 分鐘");
-    expect(wrapper.text()).toContain("包裝標示補擦間隔 80 分鐘");
+    expect(wrapper.text()).toContain("包裝標示的補擦間隔 80 分鐘");
     expect(wrapper.text()).toContain("耐水 80 分鐘");
   });
 

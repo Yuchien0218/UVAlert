@@ -96,7 +96,7 @@ async function runVoid(): Promise<void> {
         <p class="eyebrow">CORRECTION</p>
         <h1>更正這筆紀錄</h1>
         <p>
-          原本的紀錄會保留下來，更正是在它之後補一筆。送出前不會改變目前提醒。
+          原本的紀錄會保留下來，你會在後面新增一筆更正。送出前不會改變目前提醒。
         </p>
       </div>
     </header>
@@ -140,7 +140,7 @@ async function runVoid(): Promise<void> {
       <section v-if="alreadyCorrected" class="app-card" role="alert">
         <h2>這筆紀錄已經被更正過</h2>
         <p>
-          同一筆紀錄只能有一個後繼版本。請返回提醒頁，從最近事件找到最新的那一筆再更正。
+            同一筆紀錄只能更正一次。請返回提醒頁，從最近事件找到最新的一筆再更正。
         </p>
         <button class="button button--primary" type="button" @click="back">
           返回目前提醒
@@ -186,7 +186,7 @@ async function runVoid(): Promise<void> {
             {{ eventCorrection.fieldErrors.value.zones[0] }}
           </p>
           <p v-if="isGroup" class="section-helper">
-            這筆補擦使用的產品會原樣沿用，更正不會改變產品紀錄。
+            這次補擦使用的防曬乳會原樣沿用，更正不會改變防曬乳紀錄。
           </p>
         </section>
 
@@ -252,7 +252,7 @@ async function runVoid(): Promise<void> {
               : eventCorrection.error.value === "state_changed"
                 ? "提醒狀態已經改變，請返回提醒頁重新確認後再更正一次。"
                 : eventCorrection.error.value === "persistence"
-                  ? "資料沒有保存，這次更正尚未寫入。輸入仍會保留，可以再試一次。"
+                  ? "資料沒有儲存，這次更正尚未寫入。輸入仍會保留，可以再試一次。"
                   : "這次更正沒有送出，原本的紀錄維持不變。"
           }}
         </p>

@@ -57,24 +57,24 @@ const eligibilityWarning = computed(() => {
   if (eligibility === null || eligibility === "eligible") return null;
   const copy: Record<string, { title: string; body: string }> = {
     expired: {
-      title: "這項產品已超過記錄的有效期限",
-      body: "此產品已過期，無法用來建立新的補擦提醒。"
+      title: "這瓶防曬乳已超過記錄的有效期限",
+      body: "這瓶防曬乳已過期，無法用來建立新的補擦提醒。"
     },
     abnormal_reported: {
-      title: "已回報這項產品異常",
-      body: "相關部位不再顯示同一產品的補擦期限。請停止使用並依包裝警語處理。"
+      title: "已回報這瓶防曬乳有異常",
+      body: "相關部位不再顯示這瓶防曬乳的補擦期限。請停止使用並依包裝警語處理。"
     },
     discomfort_reported: {
-      title: "已回報使用後不適",
+      title: "已回報使用這瓶防曬乳後不適",
       body: "請停止使用並依包裝警語處理；需要時尋求醫療協助。"
     },
     no_sunscreen_claim: {
-      title: "記錄的產品沒有明確防曬標示",
+      title: "這瓶防曬乳沒有明確防曬標示",
       body: "這筆紀錄不會產生 120、40 或 80 分鐘期限。"
     },
     identity_unconfirmed: {
-      title: "產品身分尚未確認",
-      body: "產品的防曬標示尚未確認，暫時無法建立產品補擦倒數。"
+      title: "這瓶防曬乳的身分尚未確認",
+      body: "這瓶防曬乳的防曬標示尚未確認，暫時無法建立補擦倒數。"
     }
   };
   return copy[eligibility] ?? null;
@@ -104,7 +104,7 @@ const labelLines = computed(() => {
   lines.push(
     snapshot.reapplicationIntervalStatus === "explicit_minutes" &&
       snapshot.reapplicationIntervalMinutes !== null
-      ? `包裝標示補擦間隔 ${snapshot.reapplicationIntervalMinutes} 分鐘`
+        ? `包裝標示的補擦間隔 ${snapshot.reapplicationIntervalMinutes} 分鐘`
       : snapshot.reapplicationIntervalStatus === "no_numeric_interval"
         ? "包裝沒有明確補擦分鐘數"
         : "補擦間隔未確認"
@@ -117,7 +117,7 @@ const labelLines = computed(() => {
       : snapshot.waterResistanceStatus === "not_water_resistant"
         ? "明確標示不耐水"
         : snapshot.waterResistanceStatus === "no_claim"
-          ? "沒有耐水宣稱"
+          ? "沒有耐水標示"
           : "耐水標示未確認"
   );
 
@@ -146,7 +146,7 @@ function formatTime(iso: string | null): string {
   >
     <h2 id="summary-title">確認這次提醒</h2>
     <p class="summary-help">
-      請檢查情境、追蹤部位、產品與實際塗抹時間。送出後仍可更正最近的紀錄。
+      請檢查情境、提醒部位、防曬乳與實際塗抹時間。送出後仍可更正最近的紀錄。
     </p>
 
     <!-- 警示排在最前，沒有警示時不佔版位 -->
@@ -172,17 +172,17 @@ function formatTime(iso: string | null): string {
       </div>
 
       <div class="summary-item">
-        <h3>追蹤部位</h3>
+        <h3>提醒部位</h3>
         <ul v-if="draft.zones.length > 0">
           <li v-for="zone in draft.zones" :key="zone.draftZoneKey">
             {{ getZoneLabel(zone) }}
           </li>
         </ul>
-        <p v-else class="empty-state">無追蹤部位</p>
+        <p v-else class="empty-state">尚未選擇部位</p>
       </div>
 
       <div v-if="labelLines.length > 0" class="summary-item">
-        <h3>產品包裝標示</h3>
+        <h3>防曬乳包裝標示</h3>
         <ul>
           <li v-for="line in labelLines" :key="line">{{ line }}</li>
         </ul>

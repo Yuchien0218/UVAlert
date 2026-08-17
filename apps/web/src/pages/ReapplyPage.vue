@@ -29,17 +29,17 @@ function zoneNames(zoneIds: string[]): string {
   <div class="page-stack reapply-page">
     <header class="flow-heading">
       <button class="button button--quiet" type="button" @click="cancel">返回提醒</button>
-      <div><p class="eyebrow">REAPPLICATION</p><h1>記錄實際補擦</h1><p>請確認實際補擦的部位、產品與時間；尚未確認前不會更新提醒。</p></div>
+      <div><p class="eyebrow">REAPPLICATION</p><h1>記錄實際補擦</h1><p>請確認實際補擦的部位、防曬乳與時間；確認前不會更新提醒。</p></div>
     </header>
 
     <p v-if="reapplication.phase.value === 'loading'" role="status">正在讀取目前部位與產品…</p>
 
     <section v-else-if="reapplication.phase.value === 'success' && reapplication.success.value" class="app-card success-panel">
       <h2 id="reapply-success-title" tabindex="-1">補擦紀錄已更新</h2>
-      <p>已更新 {{ reapplication.success.value.zoneIds.length }} 個部位，{{ new Date(reapplication.success.value.appliedAt).toLocaleString('zh-TW') }}。其他未選部位保持原本狀態。</p>
+        <p>已更新 {{ reapplication.success.value.zoneIds.length }} 個部位，{{ new Date(reapplication.success.value.appliedAt).toLocaleString('zh-TW') }}。其他未選的部位維持原本狀態。</p>
       <ul class="success-groups"><li v-for="group in reapplication.success.value.productGroups" :key="`${group.displayName}-${group.zoneIds.join('-')}`"><strong>{{ group.displayName }}</strong>：{{ zoneNames(group.zoneIds) }}</li></ul>
       <div v-if="reapplication.error.value === 'refresh_failed'" class="refresh-warning" role="alert">
-        <p>紀錄已保存，但目前提醒尚未重新讀取。重新整理只會讀取已提交結果，不會再次送出補擦紀錄。</p>
+        <p>補擦紀錄已儲存，但目前提醒尚未重新讀取。重新整理只會讀取已提交結果，不會再次送出補擦紀錄。</p>
         <button class="button button--quiet" type="button" @click="reapplication.refreshCommitted">重新整理提醒</button>
       </div>
       <button class="button button--primary" type="button" @click="finish">返回目前提醒</button>
@@ -68,13 +68,13 @@ function zoneNames(zoneIds: string[]): string {
       <ReapplicationReview :zones="reapplication.session.value.zones" :selected-zone-ids="reapplication.selectedZoneIds.value" :choices="reapplication.productChoices.value" :assignments="reapplication.assignments.value" :applied-at="reapplication.appliedAt.value" />
 
       <div v-if="reapplication.error.value && reapplication.error.value !== 'validation'" class="app-card submit-error" role="alert">
-        <p>{{ reapplication.error.value === 'persistence' ? '紀錄尚未保存。草稿仍保留，請再試一次。' : reapplication.error.value === 'product_changed' ? '產品標示已變更，請重新讀取並確認產品後再提交。' : reapplication.error.value === 'state_changed' ? '提醒狀態已變更，請重新讀取後確認。' : '紀錄已提交，但目前無法重新讀取提醒。' }}</p>
+        <p>{{ reapplication.error.value === 'persistence' ? '補擦紀錄尚未儲存。草稿仍保留，請再試一次。' : reapplication.error.value === 'product_changed' ? '防曬乳標示已變更，請重新讀取並確認防曬乳後再提交。' : reapplication.error.value === 'state_changed' ? '提醒狀態已變更，請重新讀取後確認。' : '補擦紀錄已提交，但目前無法重新讀取提醒。' }}</p>
         <button v-if="reapplication.error.value === 'product_changed' || reapplication.error.value === 'state_changed'" class="button button--quiet" type="button" @click="reapplication.load">重新讀取</button>
         <button v-else-if="reapplication.error.value === 'persistence'" class="button button--quiet" type="button" @click="reapplication.resetError">保留草稿並重試</button>
       </div>
       <div class="submit-actions">
-        <button class="button button--primary" type="button" :disabled="reapplication.phase.value === 'submitting'" @click="reapplication.submit">{{ reapplication.phase.value === 'submitting' ? '保存中…' : '確認補擦紀錄' }}</button>
-        <span v-if="reapplication.phase.value === 'submitting'" class="screen-reader-only" role="status">正在保存補擦紀錄</span>
+        <button class="button button--primary" type="button" :disabled="reapplication.phase.value === 'submitting'" @click="reapplication.submit">{{ reapplication.phase.value === 'submitting' ? '儲存中…' : '確認補擦紀錄' }}</button>
+        <span v-if="reapplication.phase.value === 'submitting'" class="screen-reader-only" role="status">正在儲存補擦紀錄</span>
         <button class="button button--quiet" type="button" :disabled="reapplication.phase.value === 'submitting'" @click="cancel">取消</button>
       </div>
       <p class="safety-note">記錄補擦只協助回看時間與部位，不代表防護已足夠或可以安全曝曬。</p>

@@ -51,7 +51,7 @@ const visibleSteps = props.maxStep === 2
         class="setup-shell__save-status"
       >
         <CloudCheck :size="17" aria-hidden="true" />
-        草稿已保存
+        草稿已儲存
       </span>
       <span
         v-else-if="saveStatus === 'error'"
@@ -59,7 +59,7 @@ const visibleSteps = props.maxStep === 2
         role="status"
       >
         <CloudOff :size="17" aria-hidden="true" />
-        草稿未保存
+        草稿未儲存
       </span>
 
       <button

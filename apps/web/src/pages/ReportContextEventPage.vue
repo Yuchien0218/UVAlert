@@ -73,7 +73,7 @@ function zoneNames(zoneIds: string[]): string {
         <p class="eyebrow">REPORT</p>
         <h1>回報狀況</h1>
         <p>
-          回報會影響目前防護的實際狀況；確認前不會更新提醒。
+          記下這次狀況後，相關部位的提醒會更新；確認前不會改變提醒。
         </p>
       </div>
     </header>
@@ -102,13 +102,13 @@ function zoneNames(zoneIds: string[]): string {
         class="form-error"
         role="alert"
       >
-        紀錄已保存，但目前提醒尚未重新讀取。
+        狀況紀錄已儲存，但目前提醒尚未重新讀取。
       </p>
       <button class="button button--primary" type="button" @click="cancel">
         返回目前提醒
       </button>
       <p class="correction-note">
-        若紀錄有誤，稍後可從最近事件的更正功能處理；本頁不會改寫已提交紀錄。
+        如果紀錄有誤，稍後可以從最近事件更正；本頁不會改寫已提交紀錄。
       </p>
     </section>
 
@@ -117,7 +117,7 @@ function zoneNames(zoneIds: string[]): string {
       <section class="app-card" aria-labelledby="report-kind-title">
         <h2 id="report-kind-title">發生了什麼？</h2>
         <p class="section-helper">
-          選擇最符合的一項。沒有可關閉的水上活動時不會顯示離水。
+          選擇最符合的一項。沒有可以結束的水上活動時，不會顯示「離水」。
         </p>
         <div class="kind-grid">
           <button
@@ -279,7 +279,7 @@ function zoneNames(zoneIds: string[]): string {
           contextEvent.error.value === "state_changed"
             ? "提醒狀態已改變，請返回提醒頁重新確認後再回報一次。"
             : contextEvent.error.value === "persistence"
-              ? "資料沒有保存，這次回報尚未記錄。輸入仍會保留，可以再試一次。"
+              ? "資料沒有儲存，這次回報尚未記錄。輸入仍會保留，可以再試一次。"
               : "這次回報尚未記錄，請確認後再試一次。"
         }}
       </p>
@@ -291,7 +291,7 @@ function zoneNames(zoneIds: string[]): string {
         @click="contextEvent.submit"
       >
         {{
-          contextEvent.phase.value === "submitting" ? "記錄中…" : "確認回報"
+          contextEvent.phase.value === "submitting" ? "記錄中…" : "確認記錄"
         }}
       </button>
       <p class="safety-note">

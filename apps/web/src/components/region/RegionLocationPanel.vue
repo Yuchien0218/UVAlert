@@ -35,7 +35,7 @@ const errorMessage = computed(() => {
     case "boundary_ambiguous":
       return "目前位置可能接近行政區邊界，請手動確認地區。";
     case "storage_error":
-      return "目前無法保存地區設定，請再試一次。";
+      return "目前無法儲存地區設定，請再試一次。";
     case "invalid_region":
       return "找不到這個行政區，請重新選擇。";
     case null:
@@ -57,7 +57,7 @@ const errorMessage = computed(() => {
     </div>
 
     <p class="location-panel__body">
-      按下按鈕後，系統會短暫取得位置，用來配對所在行政區。位置不會被保存或用於分析；你也可以手動選擇或略過。
+      按下按鈕後，系統會短暫取得位置，用來配對所在行政區。位置不會被儲存或用於分析；你也可以手動選擇或略過。
     </p>
 
     <button
@@ -84,7 +84,7 @@ const errorMessage = computed(() => {
         <template v-if="approximateAccuracyMeters !== null">
           ，這次定位精度約 {{ approximateAccuracyMeters }} 公尺
         </template>
-        。請確認後再保存。
+        。請確認後再儲存。
       </p>
       <button
         class="button button--primary"
@@ -92,7 +92,7 @@ const errorMessage = computed(() => {
         :disabled="phase === 'saving'"
         @click="emit('confirm')"
       >
-        {{ phase === "saving" ? "正在保存…" : "確認並使用此地區" }}
+        {{ phase === "saving" ? "正在儲存…" : "確認並使用此地區" }}
       </button>
       <button
         data-testid="relocate"

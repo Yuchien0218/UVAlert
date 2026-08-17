@@ -20,9 +20,9 @@ withDefaults(defineProps<Props>(), {
   otherTopicalOnly: false,
   sunscreenFields: true,
   eyebrow: "本次使用",
-  title: "這次先不保存產品",
+  title: "這次先不儲存防曬乳",
   description:
-    "這次只保存產生提醒所需的包裝標示快照，不會新增到你的產品清單。"
+    "這次只儲存建立提醒需要的包裝標示，不會新增到你的防曬乳清單。"
 });
 
 const value = defineModel<ProductSnapshotFormValue>({
@@ -126,7 +126,7 @@ const groupNames = {
 
     <template v-if="sunscreenFields && value.claimAnswer === 'yes'">
       <fieldset class="question-card app-card">
-        <legend>包裝怎麼寫曝曬前等待時間？</legend>
+        <legend>包裝怎麼寫擦上後的等待時間？</legend>
         <p class="question-card__helper">
           只填包裝上可確認的內容；看不清楚時請選擇「不確定」。
         </p>
@@ -173,9 +173,9 @@ const groupNames = {
       </fieldset>
 
       <fieldset class="question-card app-card">
-        <legend>包裝有寫較短的一般補擦時間嗎？</legend>
+        <legend>包裝有寫較短的補擦間隔嗎？</legend>
         <p class="question-card__helper">
-          若包裝有明確分鐘數，提醒會採用這項較短標示。
+          如果包裝有明確分鐘數，提醒會採用這個較短的間隔。
         </p>
         <div class="choice-grid choice-grid--row">
           <label>
@@ -276,7 +276,7 @@ const groupNames = {
               :name="groupNames.waterResistance"
               value="no_claim"
             >
-            <span>沒有耐水宣稱</span>
+            <span>沒有耐水標示</span>
           </label>
           <label>
             <input

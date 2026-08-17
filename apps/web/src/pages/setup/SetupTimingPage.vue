@@ -38,7 +38,7 @@ const protectionNotice = shallowRef<string | null>(null);
 const showProtectionAdjustment = shallowRef(false);
 const sunscreenClaim = shallowRef<ProductClaimAnswer | null>(null);
 
-/** 已經在產品頁確認過標示的人不必再被問一次。 */
+/** 已經在裝備頁確認過標示的人不必再被問一次。 */
 const needsSunscreenClaim = computed(
   () => productSettings.snapshot.value === null
 );
@@ -99,7 +99,7 @@ async function saveProtection(
   waterStart.value = null;
   localError.value = null;
   protectionNotice.value =
-    "追蹤部位已更新，請重新確認實際塗抹時間。";
+    "提醒部位已更新，請重新確認實際塗抹時間。";
   showProtectionAdjustment.value = false;
 }
 
@@ -134,12 +134,12 @@ async function goToProducts(): Promise<void> {
       waterStart: needsWaterStart.value ? waterStart.value : null
     });
     if (!saved) {
-      localError.value = "時間尚未保存，請確認後再試一次。";
+      localError.value = "時間尚未儲存，請確認後再試一次。";
       return;
     }
   }
 
-  // 產品頁改為裝備清單後，這條次要入口要直接落在新增表單上。
+  // 裝備頁改為清單後，這條次要入口要直接落在新增表單上。
   await router.push({
     name: "product-new",
     query: { returnTo: "/setup/timing" }
@@ -165,7 +165,7 @@ async function cancel(): Promise<void> {
 }
 
 onMounted(async () => {
-  // 摘要要顯示產品包裝標示與資格警示，需先載入目前產品。
+  // 摘要要顯示防曬乳包裝標示與資格警示，需先載入目前防曬乳。
   await Promise.all([
     setup.ensureRecommendedProtection(),
     productSettings.ensureLoaded()
@@ -252,7 +252,7 @@ onMounted(async () => {
         {{ message }}
       </p>
       <!--
-        產品頁不再是必經關卡，改為想填完整標示的人的次要入口。
+        裝備頁不再是必經關卡，改為想填完整標示時使用的次要入口。
         包裝有較短的補擦分鐘數時才需要走這條，否則預設 120 分鐘。
       -->
       <button
@@ -261,7 +261,7 @@ onMounted(async () => {
         type="button"
         @click="goToProducts"
       >
-        改為填寫完整包裝標示
+        改為填寫完整的防曬乳包裝標示
         <ArrowRight :size="17" aria-hidden="true" />
       </button>
     </template>
@@ -293,7 +293,7 @@ onMounted(async () => {
         setup.submitError.value === "active_session_conflict"
           ? "另一個提醒已經開始；請先查看目前提醒。"
           : setup.submitError.value === "persistence_error"
-            ? "資料沒有完整保存，因此這次提醒尚未開始。畫面輸入仍會保留，可以再試一次。"
+            ? "資料沒有完整儲存，因此這次提醒尚未開始。畫面輸入仍會保留，可以再試一次。"
             : "部分資料需要重新確認，請返回相應步驟修改。"
       }}
     </p>

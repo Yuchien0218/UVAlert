@@ -73,7 +73,7 @@ describe("RegionPage", () => {
 
     expect(region.ensureLoaded).toHaveBeenCalledOnce();
     expect(region.useCurrentPosition).not.toHaveBeenCalled();
-    expect(wrapper.text()).toContain("位置不會被保存或用於分析");
+    expect(wrapper.text()).toContain("位置不會被儲存或用於分析");
   });
 
   it("requests location only after the explicit button press", async () => {

@@ -21,7 +21,7 @@ defineProps<Props>();
           {{ preference.selection.displayName }}
         </template>
         <template v-else-if="preference?.mode === 'skipped'">
-          暫不提供地區
+          先不設定地區
         </template>
         <template v-else>尚未設定地區</template>
       </p>
