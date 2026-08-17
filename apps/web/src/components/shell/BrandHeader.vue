@@ -5,7 +5,7 @@ interface Props {
   /**
    * 反映目前所有提醒裡「最高急迫度」的狀態，由父層（通常是讀取所有
    * session/zone 狀態的地方）算出來傳進來。null／未傳 = 沒有進行中的
-   * 提醒，logo 跟狀態點都維持中性色。
+   * Logo 維持中性色；提醒狀態由文字與狀態點表達。
    */
   tone?: "tracking" | "soon" | "due" | null;
 }
@@ -15,7 +15,8 @@ const props = withDefaults(defineProps<Props>(), {
 });
 
 // 狀態點的顏色不能是唯一的狀態載體，否則對色覺障礙或在強光下看不出
-// 色差的使用者等於沒有這個資訊。文字跟著 tone 走，色彩只是強化。
+// 色差的使用者等於沒有這個資訊。文字跟著 tone 走，色彩只是強化；Logo
+// 不再跟隨提醒狀態變色，保留中性外觀供後續品牌重新設計。
 // 這裡的字串刻意與 ZoneStatusList.vue 的狀態標籤一致，不另創說法。
 const contextLabel = computed(() => {
   switch (props.tone) {
@@ -37,7 +38,6 @@ const contextLabel = computed(() => {
       class="brand-header__brand"
       to="/"
       aria-label="防曬晴報員首頁"
-      :class="tone ? `brand-header__brand--${tone}` : undefined"
     >
       <svg
         class="brand-header__sun"
@@ -98,21 +98,6 @@ const contextLabel = computed(() => {
   stroke: currentColor;
   stroke-width: 1.75;
   stroke-linecap: round;
-}
-
-/* tone 有值時，logo 跟外面的圓點都跟著變色，
-   讓「使用者現在最該注意的事」直接反映在頁首，
-   不用滑到下面才知道目前狀態 */
-.brand-header__brand--tracking {
-  color: var(--color-tracking);
-}
-
-.brand-header__brand--soon {
-  color: var(--color-soon);
-}
-
-.brand-header__brand--due {
-  color: var(--color-due);
 }
 
 .brand-header__wordmark {

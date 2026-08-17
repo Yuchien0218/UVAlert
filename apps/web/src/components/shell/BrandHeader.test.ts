@@ -31,9 +31,11 @@ describe("BrandHeader", () => {
   ] as const)("tone 為 %s 時文字也跟著改變", (tone, expected) => {
     const wrapper = mountHeader(tone);
     const context = wrapper.get(".brand-header__context");
+    const brand = wrapper.get(".brand-header__brand");
 
     expect(context.text()).toBe(expected);
     expect(context.classes()).toContain(`brand-header__context--${tone}`);
+    expect(brand.classes()).not.toContain(`brand-header__brand--${tone}`);
     expect(
       wrapper.get(".brand-header__status-dot").attributes("aria-hidden")
     ).toBe("true");
