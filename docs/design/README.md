@@ -23,20 +23,6 @@ UVAlert 採用「防曬氣象管家 × 防曬生活編輯部」的混合方向�
 
 完整內容見 `current-direction.md`。
 
-## 進行中提醒主頁低擬真 Wireframe
-
-六款灰階草稿使用相同的進行中提醒資料，以不同資訊架構比較首頁方向。每張為獨立直式畫面，不是正式 UI：
-
-- [設計規格](./2026-08-17-home-wireframe-variants-design.md)
-- [A｜大倒數中心型](./wireframes/home-active/home-active-a-countdown-centered.png)
-- [B｜今日播報型](./wireframes/home-active/home-active-b-daily-briefing.png)
-- [C｜部位狀態型](./wireframes/home-active/home-active-c-body-status.png)
-- [D｜行動優先型](./wireframes/home-active/home-active-d-action-first.png)
-- [E｜直向時間軸型](./wireframes/home-active/home-active-e-timeline.png)
-- [F｜儀表摘要型](./wireframes/home-active/home-active-f-dashboard-summary.png)
-
-這些圖片只用來比較資訊順序、主要 CTA 與版型，不代表最後字體、色彩、圖示或元件樣式。
-
 ## 舊資料
 
 舊版 P0 規格、舊版設計系統、舊版 Sitemap／User Flow、mockup、截圖與實作計畫已移至：
