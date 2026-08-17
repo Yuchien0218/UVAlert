@@ -157,7 +157,12 @@ export class SupabaseCloudSyncAdapter implements CloudSyncPort {
     const tokenProvider = this.#auth as AuthPort & {
       getAccessToken?: () => Promise<string | null>;
     };
-    const token = await tokenProvider.getAccessToken?.();
+    let token: string | null | undefined;
+    try {
+      token = await tokenProvider.getAccessToken?.();
+    } catch (error) {
+      throw makeCloudError(401, "AUTH_REQUIRED", "無法取得登入憑證，請重新登入", error);
+    }
     if (token === null || token === undefined || token.trim() === "") {
       throw makeCloudError(401, "AUTH_REQUIRED", "登入狀態已過期，請重新登入");
     }
@@ -281,13 +286,16 @@ function makeCloudError(
   cause?: unknown,
   conflicts?: unknown[]
 ): CloudError {
-  return {
+  const result: CloudError = {
     status,
     code,
-    message,
-    ...(cause === undefined ? {} : { cause }),
-    ...(conflicts === undefined ? {} : { conflicts: conflicts as never })
+    message
   };
+  if (cause !== undefined) result.cause = cause;
+  if (conflicts !== undefined) {
+    result.conflicts = conflicts as NonNullable<CloudError["conflicts"]>;
+  }
+  return result;
 }
 
 function disabledError(): CloudError {
