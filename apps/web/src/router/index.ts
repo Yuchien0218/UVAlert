@@ -67,6 +67,12 @@ export function createAppRouter(
         meta: { title: "更多設定" }
       },
       {
+        path: "/feedback",
+        name: "feedback",
+        component: () => import("../pages/FeedbackPage.vue"),
+        meta: { title: "問題回報與意見回饋" }
+      },
+      {
         path: "/help",
         name: "help",
         component: () => import("../pages/help/HelpIndexPage.vue"),
@@ -110,6 +116,18 @@ export function createAppRouter(
           heading: "本機資料管理",
           body: "查看、匯出與清除本機資料；匯出不上傳、不經後端。"
         }
+      },
+      {
+        path: "/settings/sync",
+        name: "settings-sync",
+        component: () => import("../pages/settings/SyncSettingsPage.vue"),
+        meta: { title: "跨裝置同步" }
+      },
+      {
+        path: "/settings/account-data",
+        name: "settings-account-data",
+        component: () => import("../pages/settings/AccountDataPage.vue"),
+        meta: { title: "登入與雲端資料" }
       },
       {
         path: "/install",

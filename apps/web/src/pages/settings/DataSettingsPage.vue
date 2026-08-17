@@ -46,6 +46,12 @@ async function runClear(scope: ClearScope): Promise<void> {
       </p>
     </header>
 
+    <section class="app-card" aria-labelledby="cloud-data-link-title">
+      <h2 id="cloud-data-link-title">雲端資料是另一回事</h2>
+      <p>本頁只處理這台裝置的本機資料。若你有登入並使用同步，請到登入與雲端資料頁管理。</p>
+      <RouterLink class="button button--quiet" to="/settings/account-data">管理登入與雲端資料</RouterLink>
+    </section>
+
     <p v-if="localData.phase.value === 'loading'" role="status">
       正在讀取本機資料概況…
     </p>

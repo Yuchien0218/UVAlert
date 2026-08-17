@@ -14,6 +14,7 @@ import { BrowserConnectivity } from "../adapters/BrowserConnectivity";
 import { BrowserLifecycle } from "../adapters/BrowserLifecycle";
 import { IndexedDbLocalIdentity } from "../adapters/IndexedDbLocalIdentity";
 import { BrowserUvForecastClient } from "../adapters/BrowserUvForecastClient";
+import { BrowserFeedbackClient } from "../adapters/BrowserFeedbackClient";
 import { BrowserGeolocation } from "../adapters/BrowserGeolocation";
 import { createSupabaseAuthAdapter } from "../adapters/SupabaseAuthAdapter";
 import { createSupabaseCloudSyncAdapter } from "../adapters/SupabaseCloudSyncAdapter";
@@ -78,6 +79,11 @@ import {
   createSyncController,
   type SyncController
 } from "../features/sync/createSyncController";
+import {
+  createFeedbackController,
+  type FeedbackController
+} from "../features/feedback/createFeedbackController";
+import type { CloudSyncPort } from "@sunshield/platform";
 
 export interface WebAppServices {
   readonly boot: AppBootController;
@@ -94,6 +100,8 @@ export interface WebAppServices {
   readonly sessionEvents: SessionEventsController;
   readonly auth: AuthController;
   readonly sync: SyncController;
+  readonly cloudSync: CloudSyncPort;
+  readonly feedback: FeedbackController;
   dispose(): void;
 }
 
@@ -133,6 +141,10 @@ export function createWebAppServices(
     cloud: cloudSync,
     createId,
     now: () => new Date().toISOString()
+  });
+  const feedback = createFeedbackController({
+    feedback: new BrowserFeedbackClient(),
+    appVersion: "web-v1"
   });
   const boot = createAppBootController({
     contextId,
@@ -256,8 +268,11 @@ export function createWebAppServices(
     sessionEvents,
     auth,
     sync,
+    cloudSync,
+    feedback,
     dispose(): void {
       sync.dispose();
+      feedback.dispose();
       auth.dispose();
       sessionEvents.dispose();
       localData.dispose();

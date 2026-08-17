@@ -30,3 +30,7 @@ export function useAuthController() {
 export function useSyncController() {
   return useWebAppServices().sync;
 }
+
+export function useFeedbackController() {
+  return useWebAppServices().feedback;
+}

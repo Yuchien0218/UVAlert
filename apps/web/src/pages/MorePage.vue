@@ -1,7 +1,9 @@
 <script setup lang="ts">
 import {
   CircleHelp,
+  Cloud,
   Database,
+  MessageSquare,
   Palette,
   Smartphone,
   TriangleAlert
@@ -50,6 +52,18 @@ const allEntries = [
     icon: Database,
     label: "本機資料管理",
     description: "查看、匯出與清除這台裝置上的資料。"
+  },
+  {
+    to: "/settings/sync",
+    icon: Cloud,
+    label: "跨裝置同步",
+    description: "選擇性登入；同步前會先讓你確認內容。"
+  },
+  {
+    to: "/feedback",
+    icon: MessageSquare,
+    label: "問題回報與意見回饋",
+    description: "不用登入也可以回報錯誤或提供建議。"
   }
 ] as const;
 
