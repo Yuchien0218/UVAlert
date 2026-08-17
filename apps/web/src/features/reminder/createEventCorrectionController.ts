@@ -108,7 +108,7 @@ export function createEventCorrectionController(
     const value = context.value;
     if (value === null) return "這筆紀錄";
     return value.kind === "context_event"
-      ? (CONTEXT_LABELS[value.event.contextType] ?? "回報狀況")
+      ? (CONTEXT_LABELS[value.event.contextType] ?? "記錄狀況")
       : "記錄補擦";
   }
 

@@ -40,7 +40,7 @@ export function createAppRouter(
         path: "/reminder/report",
         name: "reminder-report",
         component: () => import("../pages/ReportContextEventPage.vue"),
-        meta: { title: "回報狀況", hideNavigation: true, requiresActiveSession: true }
+        meta: { title: "記錄狀況", hideNavigation: true, requiresActiveSession: true }
       },
       {
         path: "/products/new",
@@ -58,13 +58,13 @@ export function createAppRouter(
         path: "/products",
         name: "products",
         component: () => import("../pages/ProductsPage.vue"),
-        meta: { title: "防曬產品" }
+        meta: { title: "防曬裝備" }
       },
       {
         path: "/more",
         name: "more",
         component: () => import("../pages/MorePage.vue"),
-        meta: { title: "更多設定" }
+        meta: { title: "更多" }
       },
       {
         path: "/feedback",
@@ -164,7 +164,7 @@ export function createAppRouter(
         name: "setup-timing",
         component: () => import("../pages/setup/SetupTimingPage.vue"),
         meta: {
-          title: "產品與時間",
+          title: "防曬乳與時間",
           hideNavigation: true,
           requiresNoActiveSession: true,
           setupStep: "timing"

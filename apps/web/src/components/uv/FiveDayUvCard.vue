@@ -58,7 +58,7 @@ function getUnavailableMessage(error: UvForecastError): string {
     case "offline":
       return "目前離線，且這台裝置沒有仍可使用的五日預報。";
     case "storage_error":
-      return "目前無法讀取已保存的地區與預報資料。";
+      return "目前無法讀取已儲存的地區與預報資料。";
     case "network_error":
       return "暫時無法取得中央氣象署五日預報。";
     case "no_usable_data":
@@ -125,7 +125,7 @@ function getUnavailableMessage(error: UvForecastError): string {
       <div class="uv-forecast__meta">
         <strong>{{ forecast.region.displayName }}</strong>
         <span v-if="phase === 'cached'" class="uv-forecast__badge">
-          已保存資料
+          已儲存資料
         </span>
         <span v-else class="uv-forecast__badge">
           區域預報

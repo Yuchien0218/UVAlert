@@ -87,7 +87,7 @@ const ACTION_LABELS: Record<ActionKind, string> = {
   resolve_cause: "查看原因",
   record_reapplication: "記錄補擦",
   view_product_label: "查看防曬乳標示",
-  report_context_event: "回報狀況",
+  report_context_event: "記錄狀況",
   review_required_zones: "查看需要處理的部位"
 };
 
@@ -361,7 +361,7 @@ function buildUntimedPresentation(options: {
       eyebrow: "入水時間不確定",
       title: `無法判斷${zoneLabel}剩餘的耐水時間`,
       body:
-        "無法確認你的實際入水時間，因此不會以回報時間代替。你可以補上或更正入水時間；若仍不確定，請依產品標示保守處理。",
+        "無法確認你的實際入水時間，因此不會以記錄時間代替。你可以補上或更正入水時間；若仍不確定，請依產品標示保守處理。",
       timeLabel: "未計時",
       ariaLabel: `無法判斷${zoneLabel}剩餘的耐水時間。`
     };

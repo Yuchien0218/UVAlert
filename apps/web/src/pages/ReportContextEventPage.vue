@@ -71,7 +71,7 @@ function zoneNames(zoneIds: string[]): string {
       </button>
       <div>
         <p class="eyebrow">REPORT</p>
-        <h1>回報狀況</h1>
+        <h1>記錄這次狀況</h1>
         <p>
           記下這次狀況後，相關部位的提醒會更新；確認前不會改變提醒。
         </p>
@@ -277,10 +277,10 @@ function zoneNames(zoneIds: string[]): string {
       >
         {{
           contextEvent.error.value === "state_changed"
-            ? "提醒狀態已改變，請返回提醒頁重新確認後再回報一次。"
+            ? "提醒狀態已改變，請返回提醒頁重新確認後再記錄一次。"
             : contextEvent.error.value === "persistence"
-              ? "資料沒有儲存，這次回報尚未記錄。輸入仍會保留，可以再試一次。"
-              : "這次回報尚未記錄，請確認後再試一次。"
+              ? "資料沒有儲存，這次狀況尚未記錄。輸入仍會保留，可以再試一次。"
+              : "這次狀況尚未記錄，請確認後再試一次。"
         }}
       </p>
 
@@ -295,7 +295,7 @@ function zoneNames(zoneIds: string[]): string {
         }}
       </button>
       <p class="safety-note">
-        回報只會更新受影響部位的提醒時間，不代表安全曝曬時間。
+        記錄只會更新受影響部位的提醒時間，不代表安全曝曬時間。
       </p>
     </template>
   </div>

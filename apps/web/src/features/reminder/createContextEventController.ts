@@ -272,7 +272,7 @@ export function createContextEventController(
     const kind = selectedKind.value;
     const errors: Record<string, string[]> = {};
     if (kind === null) {
-      errors.kind = ["請選擇要回報的狀況。"];
+      errors.kind = ["請選擇要記錄的狀況。"];
     }
     if (kind !== null && selectedZoneIds.value.length === 0) {
       errors.zones = ["請至少選擇一個受影響的部位。"];

@@ -72,7 +72,7 @@ const groupNames = {
       <legend>
         {{
           otherTopicalOnly
-            ? "這項外用產品有明確的防曬或 SPF 標示嗎？"
+            ? "這瓶防曬乳有明確的防曬或 SPF 標示嗎？"
             : "包裝有明確的防曬或 SPF 標示嗎？"
         }}
       </legend>
@@ -117,9 +117,9 @@ const groupNames = {
     >
       <AlertTriangle :size="21" aria-hidden="true" />
       <div>
-        <strong>目前無法建立產品補擦時間</strong>
+        <strong>目前無法建立防曬乳補擦時間</strong>
         <p>
-          標示確認前，系統暫時無法建立產品補擦倒數；仍會保留這次使用紀錄。
+          標示確認前，系統暫時無法建立防曬乳補擦倒數；仍會保留這次使用紀錄。
         </p>
       </div>
     </aside>

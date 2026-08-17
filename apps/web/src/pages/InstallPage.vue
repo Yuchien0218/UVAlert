@@ -104,7 +104,7 @@ async function install(): Promise<void> {
       </ul>
     </section>
 
-    <RouterLink class="text-link" to="/more">返回更多設定</RouterLink>
+    <RouterLink class="text-link" to="/more">返回更多</RouterLink>
   </div>
 </template>
 

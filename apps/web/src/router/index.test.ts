@@ -90,7 +90,7 @@ describe("createAppRouter", () => {
     expect(ensureBooted).toHaveBeenCalledTimes(1);
     expect(router.currentRoute.value.name).toBe("products");
     expect(globalThis.document.title).toBe(
-      "防曬產品｜防曬晴報員"
+      "防曬裝備｜防曬晴報員"
     );
   });
 

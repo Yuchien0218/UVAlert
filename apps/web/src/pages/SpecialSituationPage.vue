@@ -26,7 +26,7 @@ import ContentUnderReview from "../components/help/ContentUnderReview.vue";
       required-review="醫療／法務"
     />
 
-    <RouterLink class="text-link" to="/more">返回更多設定</RouterLink>
+    <RouterLink class="text-link" to="/more">返回更多</RouterLink>
   </div>
 </template>
 

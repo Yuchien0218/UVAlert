@@ -32,7 +32,7 @@ function zoneNames(zoneIds: string[]): string {
       <div><p class="eyebrow">REAPPLICATION</p><h1>記錄實際補擦</h1><p>請確認實際補擦的部位、防曬乳與時間；確認前不會更新提醒。</p></div>
     </header>
 
-    <p v-if="reapplication.phase.value === 'loading'" role="status">正在讀取目前部位與產品…</p>
+    <p v-if="reapplication.phase.value === 'loading'" role="status">正在讀取目前部位與防曬乳…</p>
 
     <section v-else-if="reapplication.phase.value === 'success' && reapplication.success.value" class="app-card success-panel">
       <h2 id="reapply-success-title" tabindex="-1">補擦紀錄已更新</h2>

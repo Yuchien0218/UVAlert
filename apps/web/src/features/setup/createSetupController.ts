@@ -389,7 +389,7 @@ export function createSetupController(
       ];
     }
     if (topicalZones.length === 0) {
-      fieldErrors.zones = ["目前沒有需要記錄產品時間的部位。"];
+      fieldErrors.zones = ["目前沒有需要記錄防曬乳時間的部位。"];
     }
 
     if (draft.initialContext === "water_active") {
@@ -469,7 +469,7 @@ export function createSetupController(
       ];
     }
     if (topicalZones.length === 0) {
-      fieldErrors.zones = ["目前沒有需要記錄產品的部位。"];
+      fieldErrors.zones = ["目前沒有需要記錄防曬乳的部位。"];
     }
     // 沒有可信的包裝標示不再阻擋建立提醒。少了標示只是產生不了
     // 補擦倒數，Session 仍會以 untimed 卡片建立並引導補齊紀錄；
@@ -642,7 +642,7 @@ export function createSetupController(
     ) {
       fieldErrors.waterStart = [
         waterEligibleDraftZones.length === 0
-          ? "已在水中的提醒至少需要一個外露且已擦防曬產品的部位。"
+          ? "已在水中的提醒至少需要一個外露且已擦防曬乳的部位。"
           : "請重新確認入水時間，或選擇不確定。"
       ];
     }
