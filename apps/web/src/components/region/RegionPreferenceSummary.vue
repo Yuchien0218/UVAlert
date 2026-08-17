@@ -26,7 +26,7 @@ defineProps<Props>();
         <template v-else>尚未設定地區</template>
       </p>
       <p class="region-summary__note">
-        地區只用於區域 UV 資訊，不會改變本機補擦計時。
+        地區只用於顯示 UV 資訊，不會改變本機補擦計時。
       </p>
     </div>
   </section>

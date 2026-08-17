@@ -55,7 +55,7 @@ async function install(): Promise<void> {
     <header class="page-heading">
       <h1 class="page-heading__title">安裝到手機</h1>
       <p class="page-heading__body">
-        安裝後資料比瀏覽器分頁耐久。<strong>不安裝也可以正常使用</strong>。
+        安裝後資料較不容易因關閉瀏覽器分頁而遺失。<strong>不安裝也可以正常使用</strong>。
       </p>
     </header>
 
@@ -66,7 +66,7 @@ async function install(): Promise<void> {
 
     <section v-else-if="deferredPrompt" class="install-card app-card">
       <h2>可以安裝到這台裝置</h2>
-      <p>安裝後會在主畫面出現圖示，開啟速度較快，本機資料也較不易被清掉。</p>
+      <p>安裝後會在主畫面出現圖示，開啟速度較快；本機資料也較不容易因清除瀏覽器資料而遺失。</p>
       <button class="button button--primary" type="button" @click="install">
         安裝到手機
       </button>
@@ -98,7 +98,7 @@ async function install(): Promise<void> {
     <section class="limits app-card">
       <h2>需要知道的限制</h2>
       <ul>
-        <li>不安裝仍可使用全部 P0 功能。</li>
+        <li>不安裝仍可使用全部核心功能。</li>
         <li>安裝不會讓系統在關閉頁面後保證送出通知。</li>
         <li>清除網站資料或解除安裝，可能一併移除這台裝置上的本機資料。</li>
       </ul>

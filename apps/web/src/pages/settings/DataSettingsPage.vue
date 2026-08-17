@@ -42,12 +42,12 @@ async function runClear(scope: ClearScope): Promise<void> {
     <header class="page-heading">
       <h1>本機資料管理</h1>
       <p>
-         這個服務沒有帳號，資料只儲存在這台裝置上。匯出的檔案由你的裝置直接產生，不會上傳、不經後端、不進分析。
+         不用登入也能使用；未同步的資料只儲存在這台裝置上。匯出的檔案由你的裝置直接產生，不會上傳、不經後端、不進分析。
       </p>
     </header>
 
     <section class="app-card" aria-labelledby="cloud-data-link-title">
-      <h2 id="cloud-data-link-title">雲端資料是另一回事</h2>
+      <h2 id="cloud-data-link-title">雲端資料請到另一頁管理</h2>
       <p>本頁只處理這台裝置的本機資料。若你有登入並使用同步，請到登入與雲端資料頁管理。</p>
       <RouterLink class="button button--quiet" to="/settings/account-data">管理登入與雲端資料</RouterLink>
     </section>
@@ -181,7 +181,7 @@ async function runClear(scope: ClearScope): Promise<void> {
               :disabled="busy"
               @click="runClear('drafts')"
             >
-              確定清除草稿
+              清除設定草稿
             </button>
             <button
               class="button button--quiet"
@@ -223,7 +223,7 @@ async function runClear(scope: ClearScope): Promise<void> {
               :disabled="busy"
               @click="runClear('history')"
             >
-              確定清除
+              清除裝備與歷史
             </button>
             <button
               class="button button--quiet"
@@ -274,7 +274,7 @@ async function runClear(scope: ClearScope): Promise<void> {
               :disabled="busy"
               @click="runClear('all')"
             >
-              確定清除全部
+              清除全部本機資料
             </button>
             <button
               class="button button--quiet"

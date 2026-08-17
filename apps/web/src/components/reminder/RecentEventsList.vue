@@ -19,7 +19,7 @@ const emit = defineEmits<{
 
 const isExpanded = ref(false);
 
-/** 供 `查看已儲存紀錄` 次要 CTA 就地展開（S-07 2026-08-07 裁決）。 */
+/** 供 `查看最近紀錄` 次要 CTA 就地展開（S-07 2026-08-07 裁決）。 */
 defineExpose({
   expand(): void {
     isExpanded.value = true;
@@ -89,7 +89,7 @@ function buildDisplayEvents(zones: ZoneProjection[], events: SessionEventStreamV
         const causeLabels: Record<string, string> = {
           heavy_sweat: "流汗",
           towel: "擦拭",
-          friction: "磨擦",
+          friction: "摩擦",
           hand_wash: "洗手"
         };
         displayEvents.push({
@@ -166,7 +166,7 @@ function getZoneNames(zoneIds: string[], zones: ZoneProjection[]): string {
     </div>
 
     <div class="clock-warning" v-if="!clockTrusted" role="alert">
-      <p>時間可能不準，但已儲存的事件仍會列在下方。</p>
+      <p>時間可能不準，但已記錄的事件仍會列在下方。</p>
     </div>
 
     <div class="events-list">
@@ -199,7 +199,7 @@ function getZoneNames(zoneIds: string[], zones: ZoneProjection[]): string {
         :aria-expanded="isExpanded"
         @click="isExpanded = !isExpanded"
       >
-        {{ isExpanded ? "收合" : `展開查看 ${displayEvents.length - 1} 筆事件` }}
+        {{ isExpanded ? "收合" : `查看其他 ${displayEvents.length - 1} 筆事件` }}
       </button>
     </div>
   </section>

@@ -21,7 +21,7 @@
 
 9. [WHO：Radiation: The ultraviolet (UV) index](https://www.who.int/news-room/questions-and-answers/item/radiation-the-ultraviolet-%28uv%29-index) — UVI 的意義、每日高峰與依指數採取防護的概念。
 10. [WHO：Ultraviolet radiation](https://www.who.int/news-room/fact-sheets/detail/ultraviolet-radiation) — UV 對皮膚與眼睛的健康影響，以及遮蔭、衣物、帽子、眼鏡與廣效防曬的整合防護。
-11. [FDA：Sunscreen: How to Help Protect Your Skin from the Sun](https://www.fda.gov/drugs/understanding-over-counter-medicines/sunscreen-how-help-protect-your-skin-sun?linkId=100000002918349) — SPF、廣效、抗水、保存、效期與產品標示。
+11. [FDA：Sunscreen: How to Help Protect Your Skin from the Sun](https://www.fda.gov/drugs/understanding-over-counter-medicines/sunscreen-how-help-protect-your-skin-sun?linkId=100000002918349) — SPF、廣效、抗水、保存方式、效期與產品標示。
 12. [FDA：Tips to Stay Safe in the Sun](https://www.fda.gov/consumers/consumer-updates/tips-stay-safe-sun-sunscreen-sunglasses) — 雲天、反射、眼鏡、補擦、遮蔽與產品標示提醒。
 13. [FDA：Sunscreen labeling and effectiveness testing guide](https://www.fda.gov/regulatory-information/search-fda-guidance-documents/labeling-and-effectiveness-testing-sunscreen-drug-products-over-counter-human-use-small-entity) — 40／80 分鐘抗水測試、破損皮膚警語與標示原則；用於解釋測試意義，不直接套用美國法規作為台灣產品法規。
 14. [FDA：Sunscreen quiz](https://www.accessdata.fda.gov/cder/sunscreen/index.html) — 忘記補擦不會重置已發生的曝曬；查閱 2026-08-16。

@@ -66,7 +66,7 @@ function routeForStep(
   <SetupStepShell
     :step="1"
     :max-step="2"
-    eyebrow="Setup / Context"
+    eyebrow="開始提醒／情境"
     title="你現在主要在哪種情境？"
     description="選擇最符合這次活動的情境；這只會決定接下來要確認哪些資料。"
     :save-status="setup.saveStatus.value"

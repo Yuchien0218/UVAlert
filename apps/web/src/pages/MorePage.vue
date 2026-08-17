@@ -91,7 +91,7 @@ const entries = computed(() =>
     <header class="page-heading">
       <h1 class="page-heading__title">更多</h1>
       <p class="page-heading__body">
-        說明內容與這台裝置上的設定。資料只儲存在本機。
+        說明內容、問題回報與這台裝置上的設定都在這裡。
       </p>
     </header>
 

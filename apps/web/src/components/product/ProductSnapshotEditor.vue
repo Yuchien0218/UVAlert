@@ -20,9 +20,9 @@ withDefaults(defineProps<Props>(), {
   otherTopicalOnly: false,
   sunscreenFields: true,
   eyebrow: "本次使用",
-  title: "這次先不儲存防曬乳",
+  title: "只用在這次提醒",
   description:
-    "這次只儲存建立提醒需要的包裝標示，不會新增到你的防曬乳清單。"
+    "只會記錄這次提醒需要的包裝標示，不會新增到你的防曬乳清單。"
 });
 
 const value = defineModel<ProductSnapshotFormValue>({

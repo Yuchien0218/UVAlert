@@ -126,7 +126,7 @@ onBeforeUnmount(releasePageLock);
                 draft.suggestedPresetVersion
               "
               :initial-preset-decision="draft.presetDecision"
-              submit-label="完成調整"
+              submit-label="儲存調整"
               @submit="emit('save', $event)"
             />
             <button

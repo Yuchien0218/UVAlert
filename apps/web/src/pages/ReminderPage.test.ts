@@ -140,7 +140,7 @@ describe("ReminderPage", () => {
     expect(wrapper.findComponent(PrimaryReminderPanel).exists()).toBe(true);
     expect(wrapper.findComponent(ZoneStatusList).exists()).toBe(true);
     expect(wrapper.findComponent(SessionEndControl).exists()).toBe(true);
-    expect(wrapper.text()).toContain("不代表可以在陽光下待多久");
+    expect(wrapper.text()).toContain("不代表你可以在陽光下待多久");
     expect(wrapper.text()).not.toContain("Session projection");
     expect(wrapper.text()).not.toContain("Vue 元件內重新推算");
   });
@@ -204,7 +204,7 @@ describe("ReminderPage", () => {
     expect(router.currentRoute.value.name).toBe("reminder-reapply");
   });
 
-  it("查看已儲存紀錄就地展開，不離開提醒頁", async () => {
+  it("查看最近紀錄就地展開，不離開提醒頁", async () => {
     mockServices(session);
     const { router, wrapper } = await mountPage();
 

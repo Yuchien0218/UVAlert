@@ -71,7 +71,7 @@ describe("S-03 ContextSelector", () => {
 });
 
 describe("SetupStepShell", () => {
-  it("顯示情境、塗抹時間、確認三步，並讓已完成步驟返回", () => {
+  it("顯示情境、塗抹時間、確認設定三步，並讓已完成步驟返回", () => {
     const wrapper = mount(SetupStepShell, {
       props: {
         step: 2,

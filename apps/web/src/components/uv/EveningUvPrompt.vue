@@ -58,7 +58,7 @@ const highestDay = computed(() =>
     <button
       class="evening-prompt__dismiss"
       type="button"
-      aria-label="今晚不再顯示五日 UV 提醒"
+      aria-label="今晚不再顯示五日 UV 預報"
       @click="emit('dismiss')"
     >
       <X :size="19" aria-hidden="true" />

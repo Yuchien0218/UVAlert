@@ -29,7 +29,7 @@ function zoneNames(zoneIds: string[]): string {
   <div class="page-stack reapply-page">
     <header class="flow-heading">
       <button class="button button--quiet" type="button" @click="cancel">返回提醒</button>
-      <div><p class="eyebrow">REAPPLICATION</p><h1>記錄實際補擦</h1><p>請確認實際補擦的部位、防曬乳與時間；確認前不會更新提醒。</p></div>
+      <div><p class="eyebrow">補擦紀錄</p><h1>記錄補擦</h1><p>請確認要記錄的部位、防曬乳與時間；儲存前不會更新提醒。</p></div>
     </header>
 
     <p v-if="reapplication.phase.value === 'loading'" role="status">正在讀取目前部位與防曬乳…</p>
@@ -73,11 +73,11 @@ function zoneNames(zoneIds: string[]): string {
         <button v-else-if="reapplication.error.value === 'persistence'" class="button button--quiet" type="button" @click="reapplication.resetError">保留草稿並重試</button>
       </div>
       <div class="submit-actions">
-        <button class="button button--primary" type="button" :disabled="reapplication.phase.value === 'submitting'" @click="reapplication.submit">{{ reapplication.phase.value === 'submitting' ? '儲存中…' : '確認補擦紀錄' }}</button>
+        <button class="button button--primary" type="button" :disabled="reapplication.phase.value === 'submitting'" @click="reapplication.submit">{{ reapplication.phase.value === 'submitting' ? '儲存中…' : '儲存補擦紀錄' }}</button>
         <span v-if="reapplication.phase.value === 'submitting'" class="screen-reader-only" role="status">正在儲存補擦紀錄</span>
         <button class="button button--quiet" type="button" :disabled="reapplication.phase.value === 'submitting'" @click="cancel">取消</button>
       </div>
-      <p class="safety-note">記錄補擦只協助回看時間與部位，不代表防護已足夠或可以安全曝曬。</p>
+      <p class="safety-note">記錄補擦只協助回看時間與部位，不代表防護已足夠，也不代表你可以在陽光下待多久。</p>
     </template>
   </div>
 </template>

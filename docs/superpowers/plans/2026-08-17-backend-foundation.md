@@ -17,7 +17,7 @@
 - 不建立自動雲端匿名帳號；OAuth 取消、失敗或離線時本機資料完全不變。
 - 不同步精確座標、裝置識別碼、瀏覽器通知權限、UV 快取與未完成設定草稿。
 - 第一版不建立裝備照片 Storage；分享圖片在使用者裝置上產生。
-- UV API 授權碼、Supabase service role key 與其它 secret 不得進入前端 bundle、git 或 API response。
+- UV API 授權碼、Supabase service role key 與其他 secret 不得進入前端 bundle、git 或 API response。
 - 所有 sync payload 必須通過 `packages/contracts` 的 Zod schema；所有同步寫入使用每筆 record 的 `expectedRevision` 與 `idempotencyKey`。
 - revision 衝突回傳 `409 SYNC_CONFLICT`，整批不提交，不自動覆蓋本機或雲端資料。
 - 後端不可取代本機倒數；PWA 在後端不可用時仍須能倒數、補擦、結束 Session 與使用本機快取。

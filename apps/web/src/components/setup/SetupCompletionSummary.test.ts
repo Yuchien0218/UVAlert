@@ -52,7 +52,7 @@ function makeDraft(overrides: Partial<SetupDraftV1> = {}): SetupDraftV1 {
 }
 
 describe("S-05 SetupCompletionSummary 必顯內容", () => {
-  it("揭露情境、每個追蹤部位與「不代表安全曝曬時間」", () => {
+  it("揭露情境、每個追蹤部位與待在陽光下時間的限制", () => {
     const wrapper = mount(SetupCompletionSummary, {
       props: {
         draft: makeDraft(),
@@ -63,7 +63,7 @@ describe("S-05 SetupCompletionSummary 必顯內容", () => {
     expect(wrapper.text()).toContain("一般戶外");
     expect(wrapper.text()).toContain("額頭");
     expect(wrapper.text()).toContain("手背");
-    expect(wrapper.text()).toContain("不代表安全曝曬時間");
+    expect(wrapper.text()).toContain("不代表你可以在陽光下待多久");
   });
 
   it("揭露產品包裝標示的曝曬前等待、補擦間隔與耐水", () => {

@@ -16,7 +16,7 @@ import { BODY_ZONE_LABELS } from "../../features/reminder/reminderPresentation";
  * 所以 AC-34 Scenario B 要求按鈕上方就地顯示完整摘要，不得摺疊隱藏。
  *
  * 必顯五項：情境與水上狀態、追蹤部位、產品 snapshot 標示、
- * 產品資格警示、以及「不代表安全曝曬時間」。
+ * 產品資格警示，以及「不代表你可以在陽光下待多久」的提醒。
  */
 
 interface Props {
@@ -195,7 +195,7 @@ function formatTime(iso: string | null): string {
     </div>
 
     <p class="summary-note">
-      顯示的時間是檢查／補擦提醒，不代表安全曝曬時間。
+      顯示的時間是檢查／補擦提醒，不代表你可以在陽光下待多久。
     </p>
   </section>
 </template>

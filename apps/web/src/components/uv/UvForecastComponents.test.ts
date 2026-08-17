@@ -7,7 +7,7 @@ import EveningUvPrompt from "./EveningUvPrompt.vue";
 import FiveDayUvCard from "./FiveDayUvCard.vue";
 
 describe("FiveDayUvCard", () => {
-  it("顯示五個白日時段、來源與區域預報限制", () => {
+  it("顯示五個白日時段、來源與地區預報限制", () => {
     const forecast = makeFiveDayUvForecast();
     const wrapper = mount(FiveDayUvCard, {
       props: {
@@ -43,7 +43,7 @@ describe("FiveDayUvCard", () => {
     });
 
     expect(wrapper.text()).toContain("設定地區");
-    expect(wrapper.text()).toContain("方可查看五日紫外線預報");
+    expect(wrapper.text()).toContain("才能查看五日 UV 預報");
     expect(wrapper.findAll(".uv-day")).toHaveLength(0);
   });
 });

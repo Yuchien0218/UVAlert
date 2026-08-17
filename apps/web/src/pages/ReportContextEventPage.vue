@@ -70,7 +70,7 @@ function zoneNames(zoneIds: string[]): string {
         返回提醒
       </button>
       <div>
-        <p class="eyebrow">REPORT</p>
+        <p class="eyebrow">記錄狀況</p>
         <h1>記錄這次狀況</h1>
         <p>
           記下這次狀況後，相關部位的提醒會更新；確認前不會改變提醒。
@@ -295,7 +295,7 @@ function zoneNames(zoneIds: string[]): string {
         }}
       </button>
       <p class="safety-note">
-        記錄只會更新受影響部位的提醒時間，不代表安全曝曬時間。
+        記錄只會更新受影響部位的提醒時間，不代表防護效果或你可以在陽光下停留的時間。
       </p>
     </template>
   </div>

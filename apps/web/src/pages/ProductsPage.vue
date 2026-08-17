@@ -74,7 +74,7 @@ function editGear(productId: string): void {
     <header class="page-heading">
       <h1>我的防曬裝備</h1>
       <p>
-        這份清單只儲存在這台裝置。只有防曬乳會建立補擦倒數；其他裝備只做紀錄。
+        這份清單會先儲存在這台裝置。只有防曬乳會建立補擦倒數；其他裝備只做紀錄。
       </p>
     </header>
 

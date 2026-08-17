@@ -88,7 +88,7 @@ function getTimingLabel(
     reapply_soon: "快到補擦時間",
     reapply_due: "建議現在補擦",
     label_wait: "依產品標示等待",
-    untimed_action: "需要確認",
+    untimed_action: "需要補充資料",
     not_applicable: "不使用倒數"
   };
   return labels[timingStatus];
@@ -133,7 +133,7 @@ function getTimingTone(
               ・<span class="stat-figure stat-figure--inline">
                 {{ chip.reasons }}
               </span>
-              項原因
+              個原因
             </span>
           </li>
         </ul>

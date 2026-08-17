@@ -91,7 +91,7 @@ async function deleteCloudData(): Promise<void> {
         <div v-if="confirmingDelete" class="confirm-note" role="alert">
           <strong>確定要清除雲端資料嗎？</strong>
           <div class="button-row">
-            <button class="button button--primary" type="button" :disabled="busy" @click="deleteCloudData">確定清除</button>
+            <button class="button button--primary" type="button" :disabled="busy" @click="deleteCloudData">清除雲端資料</button>
             <button class="button button--quiet" type="button" :disabled="busy" @click="confirmingDelete = false">取消</button>
           </div>
         </div>

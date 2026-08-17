@@ -195,7 +195,7 @@ function cancel(): void {
       <div>
         <h1>{{ isEdit ? "編輯防曬裝備" : "新增防曬裝備" }}</h1>
         <p>
-          資料只儲存在這台裝置。非必要欄位可以稍後再補。
+          資料會先儲存在這台裝置；若已開啟同步，之後也可以同步到雲端。非必要欄位可以稍後再補。
         </p>
       </div>
     </header>
@@ -331,7 +331,7 @@ function cancel(): void {
           刪除後，曾經使用這件裝備的設定會失去參照；既有提醒紀錄中的包裝標示不會被改寫。確定要刪除嗎？
         </p>
         <button class="button button--primary" type="button" @click="remove">
-          確定刪除
+          刪除這筆裝備
         </button>
         <button
           class="button button--quiet"

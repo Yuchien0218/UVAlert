@@ -89,7 +89,7 @@ PWA（Vue 3／Vite）
 | 資料 | 是否同步 | 說明 |
 | --- | --- | --- |
 | 進行中的 Session、部位狀態與補擦事件 | 是 | 讓換裝置後可以繼續目前提醒 |
-| 防曬乳與其它裝備紀錄 | 是 | 包含文字欄位與封存狀態；不含裝備照片 |
+| 防曬乳與其他裝備紀錄 | 是 | 包含文字欄位與封存狀態；不含裝備照片 |
 | 行政區選擇 | 是 | 只同步行政區代碼與名稱，不同步精確座標 |
 | 提醒頻率、聲音等使用者偏好 | 是 | 只同步 App 偏好，不同步瀏覽器權限 |
 | 已結束 Session 與完整歷史事件 | 否 | 先留在本機，可匯出 |
@@ -275,7 +275,7 @@ Function 會依序執行：驗證身份、驗證 payload、逐筆檢查 revision
 - 所有暴露 schema 的資料表啟用 RLS。
 - `sync_records`／`sync_tombstones` 只允許永久登入者存取自己的 rows；以 `auth.uid()` 比對 `user_id`。
 - `uv_forecast_cache` 與 `feedback_submissions` 不允許公開用戶端直接任意讀寫。
-- Supabase publishable key 可放在前端；service role key、CWA 授權碼與其它 secret 只放 Edge Function secrets。
+- Supabase publishable key 可放在前端；service role key、CWA 授權碼與其他 secret 只放 Edge Function secrets。
 - CORS 只允許正式網域與本機開發網域。
 - 回報與 UV API 加入請求限流；UV 快取依行政區與有效期限降低上游請求量。
 - 日誌遮罩 email、user UUID、完整 payload、精確位置與裝備私人備註。
@@ -305,7 +305,7 @@ Function 會依序執行：驗證身份、驗證 payload、逐筆檢查 revision
 
 - 使用 `packages/contracts` 驗證所有 sync payload。
 - migration 建立後驗證欄位、唯一鍵、foreign key、索引與 RLS policy。
-- 未登入、其它 user、匿名 JWT 均不能讀寫同步資料。
+- 未登入、其他 user、匿名 JWT 均不能讀寫同步資料。
 
 ### 11.2 同步
 

@@ -291,7 +291,7 @@ function dismissNightPrompt(): void {
         @reset-error="sessionControl.clearEndError"
       />
       <p class="safety-note">
-        這是防曬檢查／補擦提醒，不代表可以在陽光下待多久。
+        這是協助你記得補擦的提醒，不代表你可以在陽光下待多久。
       </p>
     </template>
   </div>

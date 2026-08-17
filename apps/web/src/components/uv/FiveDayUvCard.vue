@@ -78,7 +78,7 @@ function getUnavailableMessage(error: UvForecastError): string {
     <div class="uv-forecast__heading">
       <div>
         <h2 id="five-day-uv-title" class="uv-forecast__title">
-          未來 5 天 UV
+          未來 5 天 UV 預報
         </h2>
       </div>
       <CloudSun :size="26" :stroke-width="1.5" aria-hidden="true" />
@@ -98,9 +98,9 @@ function getUnavailableMessage(error: UvForecastError): string {
       class="uv-forecast__state"
     >
       <span>
-        需先
+        請先
         <a class="text-link" href="#outdoor-context">設定地區</a>
-        方可查看五日紫外線預報。
+       ，才能查看五日 UV 預報。
       </span>
     </div>
 
@@ -128,7 +128,7 @@ function getUnavailableMessage(error: UvForecastError): string {
           已儲存資料
         </span>
         <span v-else class="uv-forecast__badge">
-          區域預報
+          地區預報
         </span>
       </div>
 
@@ -155,14 +155,14 @@ function getUnavailableMessage(error: UvForecastError): string {
       <p class="uv-forecast__source">
         {{ forecast.sourceDisplayName }}・F-D0047-091・白日時段
         <span>
-          更新
+          更新時間
           <span class="uv-forecast__updated-at stat-figure stat-figure--inline">
             {{ formatUpdatedAt(forecast.fetchedAt) }}
           </span>
         </span>
       </p>
       <p class="uv-forecast__note">
-        這是區域預報，不是即時測站觀測；UV 高低不會延長或縮短你的補擦計時。
+        這是依地區提供的預報，不是即時測站觀測；UV 高低不會延長或縮短你的補擦計時。
       </p>
     </template>
   </section>

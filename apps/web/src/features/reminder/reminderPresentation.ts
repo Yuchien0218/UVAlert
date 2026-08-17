@@ -14,7 +14,7 @@ export type ReminderTone = "timed" | "soon" | "due" | "untimed";
  * 全數指向既有畫面或原地行為，不新增畫面——與 13 個 ActionKind 裁決同一原則。
  */
 export type SecondaryActionKind =
-  /** 查看已儲存紀錄 → 本頁最近事件清單（原地錨點並展開） */
+  /** 查看最近紀錄 → 本頁最近事件清單（原地錨點並展開） */
   | "view_saved_records"
   /** 查看處理說明 → S-17 特殊狀況 */
   | "view_handling_guidance"
@@ -43,7 +43,7 @@ export interface ReminderPresentation {
 }
 
 const SECONDARY_ACTION_LABELS: Record<SecondaryActionKind, string> = {
-  view_saved_records: "查看已儲存紀錄",
+  view_saved_records: "查看最近紀錄",
   view_handling_guidance: "查看處理說明",
   update_protection_record: "更新防護紀錄",
   update_protection_method: "更新防護方式"

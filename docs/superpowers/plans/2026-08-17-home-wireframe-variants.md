@@ -14,7 +14,7 @@
 - Produce six separate portrait images; do not place multiple phones side by side.
 - Do not use phone device frames, photos, logos, illustrations, brand colors, or polished high-fidelity UI.
 - Use only white, gray, dark gray, black outlines, and simple Traditional Chinese labels.
-- Every variant must include UV information, data time or peak period, `00:42:18` countdown, next-step guidance, `記錄已補擦`, tracked body parts, recent event, reminder status, and the three-item bottom navigation.
+- Every variant must include UV information, data time or peak period, `00:42:18` countdown, next-step guidance, `記錄補擦`, tracked body parts, recent event, reminder status, and the three-item bottom navigation.
 - Only show tracked body parts; do not show stopped or untracked areas.
 - Save accepted outputs under `docs/design/wireframes/home-active/` without modifying application code.
 
@@ -33,7 +33,7 @@
 
 - [ ] **Step 1: Generate variant A**
 
-Use one built-in image generation call for a portrait low-fidelity mobile wireframe whose largest central region is the `00:42:18` countdown, followed by `距離補擦還有 42 分鐘`, `記錄已補擦`, tracked-area summary, recent event, status note, and bottom navigation.
+Use one built-in image generation call for a portrait low-fidelity mobile wireframe whose largest central region is the `00:42:18` countdown, followed by `距離補擦還有 42 分鐘`, `記錄補擦`, tracked-area summary, recent event, status note, and bottom navigation.
 
 - [ ] **Step 2: Generate variant B**
 
@@ -41,7 +41,7 @@ Use one built-in image generation call for a portrait low-fidelity mobile wirefr
 
 - [ ] **Step 3: Generate variant C**
 
-Use one built-in image generation call for a portrait low-fidelity mobile wireframe led by a compact UV/countdown summary and a dominant tracked-area status section for `臉部`, `頸部與耳朵`, `手臂`, and `其它部位`, followed by the main CTA, recent event, status note, and bottom navigation.
+Use one built-in image generation call for a portrait low-fidelity mobile wireframe led by a compact UV/countdown summary and a dominant tracked-area status section for `臉部`, `頸部與耳朵`, `手臂`, and `其他部位`, followed by the main CTA, recent event, status note, and bottom navigation.
 
 - [ ] **Step 4: Inspect A–C**
 
@@ -64,7 +64,7 @@ Copy the accepted generated outputs into the three exact project paths listed ab
 
 - [ ] **Step 1: Generate variant D**
 
-Use one built-in image generation call for a portrait low-fidelity mobile wireframe whose opening statement is `距離補擦還有 42 分鐘`, immediately followed by the largest `記錄已補擦` CTA; keep countdown, tracked areas, UV, recent event, and status information secondary.
+Use one built-in image generation call for a portrait low-fidelity mobile wireframe whose opening statement is `距離補擦還有 42 分鐘`, immediately followed by the largest `記錄補擦` CTA; keep countdown, tracked areas, UV, recent event, and status information secondary.
 
 - [ ] **Step 2: Generate variant E**
 

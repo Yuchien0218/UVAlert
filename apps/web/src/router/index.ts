@@ -22,7 +22,7 @@ export function createAppRouter(
         path: "/",
         name: "home",
         component: () => import("../pages/HomePage.vue"),
-        meta: { title: "首頁" }
+        meta: { title: "提醒" }
       },
       {
         path: "/reminder",
@@ -34,7 +34,7 @@ export function createAppRouter(
         path: "/reminder/reapply",
         name: "reminder-reapply",
         component: () => import("../pages/ReapplyPage.vue"),
-        meta: { title: "記錄實際補擦", hideNavigation: true, requiresActiveSession: true }
+        meta: { title: "記錄補擦", hideNavigation: true, requiresActiveSession: true }
       },
       {
         path: "/reminder/report",
@@ -164,7 +164,7 @@ export function createAppRouter(
         name: "setup-timing",
         component: () => import("../pages/setup/SetupTimingPage.vue"),
         meta: {
-          title: "防曬乳與時間",
+          title: "塗抹時間與開始提醒",
           hideNavigation: true,
           requiresNoActiveSession: true,
           setupStep: "timing"
@@ -176,7 +176,7 @@ export function createAppRouter(
         name: "reminder-event-correct",
         component: () => import("../pages/EventCorrectionPage.vue"),
         meta: {
-          title: "更正事件",
+          title: "更正這筆紀錄",
           hideNavigation: true,
           requiresActiveSession: true
         }
@@ -189,7 +189,7 @@ export function createAppRouter(
         name: "not-found",
         component: () => import("../pages/PlaceholderPage.vue"),
         meta: {
-          title: "找不到頁面",
+          title: "找不到這個頁面",
           heading: "找不到這個頁面",
           body: "請使用下方導覽回到主要功能。"
         }

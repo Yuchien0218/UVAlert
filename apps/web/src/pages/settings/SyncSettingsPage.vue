@@ -45,6 +45,18 @@ function labelFor(kind: string): string {
   }
 }
 
+function statusLabelFor(status: string): string {
+  switch (status) {
+    case "unchanged": return "兩邊相同";
+    case "conflict": return "需要選擇版本";
+    case "local_only": return "只有本機資料";
+    case "remote_only": return "只有雲端資料";
+    case "local_deleted": return "本機已刪除";
+    case "remote_deleted": return "雲端已刪除";
+    default: return "尚未同步";
+  }
+}
+
 function readSyncDisabled(): boolean {
   return globalThis.localStorage?.getItem("uvalert.sync.disabled") === "true";
 }
@@ -92,12 +104,12 @@ function writeSyncDisabled(value: boolean): void {
         <ul class="sync-list" aria-label="同步項目">
           <li v-for="item in preview.items" :key="`${item.key.recordKind}:${item.key.recordId}`">
             <strong>{{ labelFor(item.key.recordKind) }}</strong>
-            <span>{{ item.status === "unchanged" ? "兩邊相同" : item.status === "conflict" ? "需要選擇版本" : item.status }}</span>
+            <span>{{ statusLabelFor(item.status) }}</span>
           </li>
         </ul>
         <div class="button-row">
           <button class="button button--primary" type="button" :disabled="busy" @click="confirm">
-            {{ busy ? "同步中…" : "確認同步" }}
+            {{ busy ? "同步中…" : "同步這些資料" }}
           </button>
           <button class="button button--quiet" type="button" :disabled="busy" @click="cancel">取消</button>
         </div>

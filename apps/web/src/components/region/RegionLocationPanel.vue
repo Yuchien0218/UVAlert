@@ -48,7 +48,7 @@ const errorMessage = computed(() => {
   <section class="location-panel app-card" aria-labelledby="location-title">
     <div class="location-panel__heading">
       <div>
-        <p class="eyebrow">DEVICE LOCATION</p>
+        <p class="eyebrow">裝置定位</p>
         <h2 id="location-title" class="location-panel__title">
           使用目前位置
         </h2>

@@ -93,7 +93,7 @@ async function runVoid(): Promise<void> {
         返回提醒
       </button>
       <div>
-        <p class="eyebrow">CORRECTION</p>
+        <p class="eyebrow">更正紀錄</p>
         <h1>更正這筆紀錄</h1>
         <p>
           原本的紀錄會保留下來，你會在後面新增一筆更正。送出前不會改變目前提醒。
@@ -266,7 +266,7 @@ async function runVoid(): Promise<void> {
           {{
             eventCorrection.phase.value === "submitting"
               ? "更正中…"
-              : "確認更正"
+              : "儲存更正"
           }}
         </button>
 
@@ -286,7 +286,7 @@ async function runVoid(): Promise<void> {
           </template>
           <template v-else>
             <p class="form-error" role="alert">
-              作廢後，這筆紀錄對各部位的影響會被移除，倒數會依剩下的紀錄重新計算。確定嗎？
+              作廢後，這筆紀錄對各部位的影響會被移除，倒數會依剩下的紀錄重新計算。
             </p>
             <button
               class="button button--primary"
@@ -294,7 +294,7 @@ async function runVoid(): Promise<void> {
               :disabled="eventCorrection.phase.value === 'submitting'"
               @click="runVoid"
             >
-              確定作廢
+              作廢這筆紀錄
             </button>
             <button
               class="button button--quiet"
