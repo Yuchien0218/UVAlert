@@ -6,6 +6,7 @@ import {
   LocalRegionPreferenceRepository,
   LocalSetupDraftRepository,
   LocalSessionRepository,
+  LocalSyncRepository,
   LocalWeatherForecastRepository,
   SunshieldDatabase
 } from "@sunshield/persistence-web";
@@ -14,6 +15,8 @@ import { BrowserLifecycle } from "../adapters/BrowserLifecycle";
 import { IndexedDbLocalIdentity } from "../adapters/IndexedDbLocalIdentity";
 import { BrowserUvForecastClient } from "../adapters/BrowserUvForecastClient";
 import { BrowserGeolocation } from "../adapters/BrowserGeolocation";
+import { createSupabaseAuthAdapter } from "../adapters/SupabaseAuthAdapter";
+import { createSupabaseCloudSyncAdapter } from "../adapters/SupabaseCloudSyncAdapter";
 import regionIndex from "../generated/region-index.generated.json";
 import regionManifest from "../generated/region-manifest.generated.json";
 import {
@@ -67,6 +70,14 @@ import {
   type SessionEventsController
 } from "../features/reminder/createSessionEventsController";
 import type { RegionDirectoryEntry } from "../features/region/TaiwanRegionResolver";
+import {
+  createAuthController,
+  type AuthController
+} from "../features/auth/createAuthController";
+import {
+  createSyncController,
+  type SyncController
+} from "../features/sync/createSyncController";
 
 export interface WebAppServices {
   readonly boot: AppBootController;
@@ -81,6 +92,8 @@ export interface WebAppServices {
   readonly localData: LocalDataController;
   readonly eventCorrection: EventCorrectionController;
   readonly sessionEvents: SessionEventsController;
+  readonly auth: AuthController;
+  readonly sync: SyncController;
   dispose(): void;
 }
 
@@ -107,6 +120,19 @@ export function createWebAppServices(
   const identity = new IndexedDbLocalIdentity({
     database,
     createId
+  });
+  const localSync = new LocalSyncRepository({
+    database,
+    localVisitorId: () => identity.getOrCreateLocalVisitorId()
+  });
+  const authPort = createSupabaseAuthAdapter();
+  const auth = createAuthController({ auth: authPort, local: localSync });
+  const cloudSync = createSupabaseCloudSyncAdapter({ auth: authPort });
+  const sync = createSyncController({
+    local: localSync,
+    cloud: cloudSync,
+    createId,
+    now: () => new Date().toISOString()
   });
   const boot = createAppBootController({
     contextId,
@@ -228,7 +254,11 @@ export function createWebAppServices(
     localData,
     eventCorrection,
     sessionEvents,
+    auth,
+    sync,
     dispose(): void {
+      sync.dispose();
+      auth.dispose();
       sessionEvents.dispose();
       localData.dispose();
       eventCorrection.dispose();

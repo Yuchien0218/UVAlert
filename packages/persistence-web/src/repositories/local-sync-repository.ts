@@ -49,16 +49,20 @@ type SyncCandidate = {
  */
 export class LocalSyncRepository implements LocalSyncPort {
   readonly #database: SunshieldDatabase;
-  readonly #localVisitorId: string;
+  readonly #getLocalVisitorId: () => Promise<string>;
   readonly #now: () => string;
 
   constructor(options: {
     database: SunshieldDatabase;
-    localVisitorId: string;
+    localVisitorId: string | (() => Promise<string>);
     now?: () => string;
   }) {
     this.#database = options.database;
-    this.#localVisitorId = options.localVisitorId;
+    const localVisitorId = options.localVisitorId;
+    this.#getLocalVisitorId =
+      typeof localVisitorId === "function"
+        ? localVisitorId
+        : async () => localVisitorId;
     this.#now = options.now ?? (() => new Date().toISOString());
   }
 
@@ -201,6 +205,7 @@ export class LocalSyncRepository implements LocalSyncPort {
       throw new Error("同步資料最多只能包含一個進行中的 Session");
     }
     const syncedAt = this.#now();
+    const localVisitorId = await this.#getLocalVisitorId();
 
     await this.#database.transaction(
       "rw",
@@ -228,7 +233,11 @@ export class LocalSyncRepository implements LocalSyncPort {
         for (const record of records) {
           switch (record.recordKind) {
             case "active_session":
-              await this.#replaceActiveSession(record.payload, syncedAt);
+              await this.#replaceActiveSession(
+                record.payload,
+                syncedAt,
+                localVisitorId
+              );
               break;
             case "product_catalog":
               await this.#database.SunscreenProducts.put(record.payload);
@@ -272,6 +281,7 @@ export class LocalSyncRepository implements LocalSyncPort {
       )
     );
     const syncedAt = this.#now();
+    const localVisitorId = await this.#getLocalVisitorId();
 
     await this.#database.transaction(
       "rw",
@@ -300,7 +310,7 @@ export class LocalSyncRepository implements LocalSyncPort {
           switch (tombstone.recordKind) {
             case "active_session": {
               const lock = await this.#database.ActiveSessionLocks.get(
-                ownerKeyFor(this.#localVisitorId)
+                ownerKeyFor(localVisitorId)
               );
               if (lock?.sessionId === tombstone.recordId) {
                 await this.#deleteSessionData(tombstone.recordId);
@@ -362,8 +372,9 @@ export class LocalSyncRepository implements LocalSyncPort {
   }
 
   async #readActiveSessionCandidate(): Promise<SyncCandidate | null> {
+    const localVisitorId = await this.#getLocalVisitorId();
     const lock = await this.#database.ActiveSessionLocks.get(
-      ownerKeyFor(this.#localVisitorId)
+      ownerKeyFor(localVisitorId)
     );
     if (lock === undefined) return null;
     const session = await this.#database.ProtectionSessions.get(lock.sessionId);
@@ -433,14 +444,15 @@ export class LocalSyncRepository implements LocalSyncPort {
 
   async #replaceActiveSession(
     rawPayload: unknown,
-    syncedAt: string
+    syncedAt: string,
+    localVisitorId: string
   ): Promise<void> {
     const payload = ActiveSessionSyncPayloadSchema.parse(rawPayload);
     await this.#clearActiveSessions();
 
     const session = {
       ...payload.session,
-      ownerKey: ownerKeyFor(this.#localVisitorId)
+      ownerKey: ownerKeyFor(localVisitorId)
     };
     const projection = reduceSession({
       stream: payload.eventStream,
@@ -478,7 +490,7 @@ export class LocalSyncRepository implements LocalSyncPort {
     );
     await this.#database.ProtectionZoneStates.bulkPut(projection.zones);
     await this.#database.ActiveSessionLocks.put({
-      ownerKey: ownerKeyFor(this.#localVisitorId),
+      ownerKey: ownerKeyFor(localVisitorId),
       sessionId: session.id,
       createdAt: syncedAt
     });

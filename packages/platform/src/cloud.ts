@@ -39,6 +39,8 @@ export type CloudError = {
 
 export interface AuthPort {
   getState(): Promise<AuthState>;
+  /** 只供 API adapter 取得 bearer token，不進入 UI state 或本機 snapshot。 */
+  getAccessToken?(): Promise<string | null>;
   signInWithGoogle(): Promise<void>;
   signOut(): Promise<void>;
 }
