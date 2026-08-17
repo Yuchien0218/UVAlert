@@ -20,6 +20,8 @@ import type {
   StartSessionCommandV1
 } from "@sunshield/contracts";
 
+export * from "./cloud";
+
 export interface SessionRepositoryPort {
   open(): Promise<void>;
   getCurrentSession(localVisitorId: string): Promise<SessionProjection | null>;

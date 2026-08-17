@@ -16,6 +16,8 @@ import {
   StartSessionCommandV1Schema
 } from "@sunshield/contracts";
 
+export * from "./sync";
+
 export function makeClock(
   trustedNow = "2026-07-29T11:00:00.000Z",
   overrides: Partial<ReducerClock> = {}
