@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" data-concept="05-weather-bulletin-frame">
+  <title>防曬晴報員 晴報框圖標</title>
+  <desc>像每日生活快報一樣整理陽光資訊，以簡潔幾何呈現陽光與提醒節奏。</desc>
+    <g fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="4">
+      <path d="M17 42V18H41" stroke="#2E2925"/>
+      <circle cx="39" cy="30" r="9" stroke="#9F5E42"/>
+      <path d="M25 48H49" stroke="#9F5E42"/>
+    </g>
+</svg>

@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" data-concept="01-morning-line">
+  <title>防曬晴報員 晨線圖標</title>
+  <desc>每天查看晴報的溫暖起點，以簡潔幾何呈現陽光與提醒節奏。</desc>
+    <g fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="4">
+      <path d="M14 43H50" stroke="#2E2925"/>
+      <path d="M21 43A11 11 0 0 1 43 43" stroke="#9F5E42"/>
+      <path d="M32 17V22M18.5 24.5L22 28M45.5 24.5L42 28" stroke="#9F5E42"/>
+    </g>
+</svg>

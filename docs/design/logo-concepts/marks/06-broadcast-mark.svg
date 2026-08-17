@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" data-concept="06-broadcast-mark">
+  <title>防曬晴報員 播報印記圖標</title>
+  <desc>把陽光提醒濃縮成清楚的短報，以簡潔幾何呈現陽光與提醒節奏。</desc>
+    <g fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="4">
+      <circle cx="18" cy="22" r="6" fill="#9F5E42" stroke="none"/>
+      <path d="M30 22H49" stroke="#2E2925"/>
+      <path d="M23 34H45" stroke="#2E2925"/>
+      <path d="M17 46H37" stroke="#9F5E42"/>
+    </g>
+</svg>
