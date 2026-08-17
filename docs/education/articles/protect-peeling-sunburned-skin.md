@@ -1,5 +1,5 @@
 ---
-title: "脫皮、緊繃或仍然敏感時，怎麼保護肌膚？"
+title: "脫皮、緊繃或仍然敏感時，怎麼保護皮膚？"
 slug: protect-peeling-sunburned-skin
 category: after-sun-care
 categoryTitle: "回家後與皮膚照顧"
