@@ -47,7 +47,7 @@ function getErrorMessage(error: SessionEndError): string {
     case "state_changed":
       return "提醒狀態已在其他畫面更新，請確認最新狀態後再試一次。";
     case "persistence_error":
-      return "目前無法保存停止操作，這次提醒仍在運作。請再試一次。";
+      return "目前無法儲存停止操作，這次提醒仍在運作。請再試一次。";
     case "refresh_failed":
       return "提醒已提交結束，但畫面更新失敗。請重新整理確認最新狀態。";
     case "validation_error":
@@ -66,7 +66,7 @@ function getErrorMessage(error: SessionEndError): string {
 
     <div v-if="!isConfirming" class="session-end__body">
       <p class="session-end__summary">
-        不再需要這次倒數時，可以手動停止；既有產品與紀錄仍會保留。
+        不再需要這次倒數時，可以手動停止；既有裝備與紀錄仍會保留。
       </p>
       <button
         ref="stopButton"
@@ -92,10 +92,10 @@ function getErrorMessage(error: SessionEndError): string {
         class="session-end__confirm-title"
         tabindex="-1"
       >
-        確認結束本次提醒？
+        要結束這次提醒嗎？
       </p>
       <p id="session-end-confirm-body" class="session-end__confirm-body">
-        結束後將停止所有待處理提示。產品紀錄和既有資訊不會受影響。
+        結束後會停止所有待處理提示；裝備紀錄與既有資料不會受影響。
       </p>
 
       <p

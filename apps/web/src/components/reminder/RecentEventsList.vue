@@ -19,7 +19,7 @@ const emit = defineEmits<{
 
 const isExpanded = ref(false);
 
-/** 供 `查看已保存紀錄` 次要 CTA 就地展開（S-07 2026-08-07 裁決）。 */
+/** 供 `查看已儲存紀錄` 次要 CTA 就地展開（S-07 2026-08-07 裁決）。 */
 defineExpose({
   expand(): void {
     isExpanded.value = true;
@@ -166,7 +166,7 @@ function getZoneNames(zoneIds: string[], zones: ZoneProjection[]): string {
     </div>
 
     <div class="clock-warning" v-if="!clockTrusted" role="alert">
-      <p>時間可能不準，但已保存的事件仍在下方。</p>
+      <p>時間可能不準，但已儲存的事件仍會列在下方。</p>
     </div>
 
     <div class="events-list">

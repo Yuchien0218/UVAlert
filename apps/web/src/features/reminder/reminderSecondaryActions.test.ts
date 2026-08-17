@@ -47,11 +47,11 @@ function kinds(reasonCodes: ReasonCode[]): string[] {
 }
 
 describe("S-07 次要 CTA", () => {
-  it("時鐘不可信時提供「查看已保存紀錄」", () => {
+  it("時鐘不可信時提供「查看已儲存紀錄」", () => {
     const presentation = present(["CLOCK_UNTRUSTED"]);
 
     expect(presentation.secondaryActions).toEqual([
-      { kind: "view_saved_records", label: "查看已保存紀錄" }
+      { kind: "view_saved_records", label: "查看已儲存紀錄" }
     ]);
   });
 

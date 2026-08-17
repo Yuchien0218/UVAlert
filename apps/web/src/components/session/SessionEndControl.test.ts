@@ -24,13 +24,13 @@ describe("SessionEndControl", () => {
     expect(confirmation.classes()).not.toContain("app-card");
     expect(
       confirmation.get("p.session-end__confirm-title").text()
-    ).toBe("確認結束本次提醒？");
+    ).toBe("要結束這次提醒嗎？");
     expect(confirmation.attributes("tabindex")).toBeUndefined();
     expect(document.activeElement).toBe(
       confirmation.get("p.session-end__confirm-title").element
     );
     expect(confirmation.text()).toContain(
-      "結束後將停止所有待處理提示"
+      "結束後會停止所有待處理提示"
     );
 
     await getButton(wrapper, "取消").trigger("click");

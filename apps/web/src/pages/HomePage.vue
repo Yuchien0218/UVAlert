@@ -55,8 +55,8 @@ function handleViewForecast(): void {
       class="home-state home-state--loading"
       role="status"
     >
-      <SunLoader label="正在恢復本機提醒" />
-      <p>正在恢復本機提醒…</p>
+      <SunLoader label="正在讀取這台裝置上的提醒" />
+      <p>正在讀取這台裝置上的提醒…</p>
     </section>
 
     <section
@@ -64,14 +64,14 @@ function handleViewForecast(): void {
       class="home-state"
       role="alert"
     >
-      <h2>無法讀取本機提醒</h2>
-      <p>既有資料不會被空白狀態覆蓋，請重新嘗試讀取。</p>
+      <h2>無法讀取提醒</h2>
+      <p>原有資料不會被空白內容取代，請重新讀取。</p>
       <button
         class="button button--primary"
         type="button"
         @click="boot.ensureBooted"
       >
-        重新嘗試
+        重新讀取
       </button>
     </section>
 
@@ -91,7 +91,7 @@ function handleViewForecast(): void {
         class="text-link home-full-status"
         to="/reminder"
       >
-        查看完整狀態
+        查看全部部位
         <ArrowRight :size="17" aria-hidden="true" />
       </RouterLink>
     </template>
@@ -127,7 +127,7 @@ function handleViewForecast(): void {
     />
 
     <p class="safety-note">
-      防曬提醒是協助你回看紀錄的工具，不是安全曝曬時間或防護效果保證。
+      防曬提醒是協助你記得補擦的工具，不是安全曝曬時間或防護效果保證。
     </p>
   </div>
 </template>

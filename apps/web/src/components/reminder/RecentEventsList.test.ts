@@ -127,7 +127,7 @@ describe("S-07 RecentEventsList", () => {
     expect(wrapper.find("button.event-row").exists()).toBe(false);
   });
 
-  it("時鐘不可信時顯示警告，但仍列出已保存的事件", () => {
+  it("時鐘不可信時顯示警告，但仍列出已儲存的事件", () => {
     const wrapper = mount(RecentEventsList, {
       props: { zones, events: makeStream(), clockTrusted: false }
     });

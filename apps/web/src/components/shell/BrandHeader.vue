@@ -23,9 +23,9 @@ const contextLabel = computed(() => {
     case "tracking":
       return "提醒進行中";
     case "soon":
-      return "即將需要檢查";
+      return "快到補擦時間";
     case "due":
-      return "建議現在處理";
+      return "建議現在補擦";
     case null:
       return "本機提醒";
   }
@@ -37,7 +37,7 @@ const contextLabel = computed(() => {
     <RouterLink
       class="brand-header__brand"
       to="/"
-      aria-label="防曬晴報員首頁"
+      aria-label="防曬晴報員提醒頁"
     >
       <svg
         class="brand-header__sun"

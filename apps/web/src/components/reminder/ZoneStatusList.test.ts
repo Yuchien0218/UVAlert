@@ -85,10 +85,10 @@ describe("ZoneStatusList status boundaries", () => {
     expect(groups[0]!.find(".zone-group__status").text()).toBe("提醒進行中");
     expect(groups[0]!.findAll(".zone-chip")).toHaveLength(2);
 
-    expect(groups[1]!.find(".zone-group__status").text()).toBe("建議現在處理");
+    expect(groups[1]!.find(".zone-group__status").text()).toBe("建議現在補擦");
     expect(groups[1]!.findAll(".zone-chip")).toHaveLength(2);
 
-    expect(groups[2]!.find(".zone-group__status").text()).toBe("即將需要檢查");
+    expect(groups[2]!.find(".zone-group__status").text()).toBe("快到補擦時間");
     expect(groups[2]!.findAll(".zone-chip")).toHaveLength(1);
   });
 
@@ -114,7 +114,7 @@ describe("ZoneStatusList status boundaries", () => {
     expect(groups).toHaveLength(2);
     expect(groups[0]!.classes()).toContain("zone-group--due");
     expect(groups[0]!.find(".zone-group__status").text()).toBe(
-      "建議現在處理"
+      "建議現在補擦"
     );
     expect(groups[0]!.findAll(".zone-chip")).toHaveLength(2);
     expect(groups[1]!.classes()).toContain("zone-group--tracking");

@@ -126,13 +126,13 @@ function buildTitle(
 /** `due` 兩則沿用既有核准文案，不隨這次修正變動。 */
 const PRIORITY_LEAD_BY_TONE: Record<HomeReminderClockTone, string> = {
   due: "建議優先補擦",
-  soon: "即將需要優先補擦",
+  soon: "快到補擦時間",
   tracking: "接下來需要補擦"
 };
 
 const ALL_TITLE_BY_TONE: Record<HomeReminderClockTone, string> = {
-  due: "建議進行全面補擦",
-  soon: "即將需要全面補擦",
+  due: "建議全面補擦",
+  soon: "快到全面補擦時間",
   tracking: "接下來需要全面補擦"
 };
 
@@ -154,7 +154,7 @@ function buildAriaLabel(
 
 const ALL_ARIA_LEAD_BY_TONE: Record<HomeReminderClockTone, string> = {
   due: "建議全面補擦",
-  soon: "即將需要全面補擦",
+  soon: "快到全面補擦時間",
   tracking: "接下來需要全面補擦"
 };
 

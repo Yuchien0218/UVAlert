@@ -88,7 +88,7 @@ describe("PrimaryReminderPanel", () => {
       wrapper.find(".reminder-panel__message .reminder-panel__time").exists()
     ).toBe(false);
     expect(wrapper.get(".reminder-panel__title").text()).toBe(
-      "接下來需要檢查"
+      "接下來需要補擦"
     );
     expect(wrapper.findAll("button")).toHaveLength(1);
     expect(wrapper.find('a[href="#zone-status"]').exists()).toBe(false);
@@ -129,7 +129,7 @@ describe("PrimaryReminderPanel", () => {
       "2 個部位"
     );
     expect(wrapper.get(".reminder-panel__title").text()).toBe(
-      "接下來需要檢查"
+      "接下來需要補擦"
     );
     expect(wrapper.get(".reminder-panel__body").text()).not.toContain(
       "預計時間"

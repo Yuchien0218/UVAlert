@@ -59,7 +59,7 @@ describe("NightWindDownPrompt", () => {
 
     // 這是本元件存在的理由：夜間提示收工，但絕不凍結時鐘。
     // 暫停後恢復會讓 12 小時前的防曬顯示成「還有 40 分鐘」。
-    expect(text).toContain("倒數會繼續進行");
+    expect(text).toContain("倒數會繼續");
     expect(text).not.toContain("已暫停");
     expect(text).not.toContain("停止計時");
   });

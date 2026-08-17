@@ -95,10 +95,10 @@ describe("HomeReminderSummary", () => {
 
     expect(wrapper.findComponent(ReminderEmptyState).exists()).toBe(true);
     expect(wrapper.get('[data-testid="reminder-empty"]').text()).toContain(
-      "尚未建立提醒"
+      "還沒有開始防曬提醒"
     );
     expect(wrapper.get(".empty-state__action").text()).toContain(
-      "新增提醒"
+      "開始防曬提醒"
     );
   });
 

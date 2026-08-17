@@ -142,7 +142,7 @@ describe("buildHomeReminderClockPresentation", () => {
     expect(result).toMatchObject({
       tone: "due",
       scope: "all",
-      title: "建議進行全面補擦",
+      title: "建議全面補擦",
       remainingMinutes: 0
     });
   });
@@ -186,7 +186,7 @@ describe("buildHomeReminderClockPresentation", () => {
     expect(result).toMatchObject({
       tone: "soon",
       scope: "priority",
-      title: "即將需要優先補擦：額頭"
+      title: "快到補擦時間：額頭"
     });
   });
 

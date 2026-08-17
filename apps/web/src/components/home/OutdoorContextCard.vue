@@ -33,14 +33,14 @@ withDefaults(defineProps<Props>(), {
           {{
             regionName === null
               ? "目前未設定地區"
-              : `目前地區・${regionName}`
+              : `目前地區：${regionName}`
           }}
         </strong>
         <p class="context-card__description">
           {{
             regionName === null
-              ? "不影響已保存的本機提醒"
-              : "五日 UV 採用此地區的區域預報"
+              ? "不影響這台裝置上已儲存的提醒"
+              : "五日 UV 預報會使用這個地區的資料"
           }}
         </p>
       </div>

@@ -77,7 +77,7 @@ function handleAction(kind: ActionKind): void {
       // 校準子系統尚未實作（platform 沒有對應 port）。
       // 明講現況勝過靜默失敗或假裝已校準。
       clockNotice.value =
-        "目前無法自動校準。請確認裝置的日期與時間設定為自動，再重新開啟本頁。";
+        "目前無法自動校準時間。請將裝置的日期與時間設為自動，再重新開啟本頁。";
       return;
     case "ended_state":
       // Session 結束後 currentSession 會轉為 null，畫面自然落到空白狀態。
@@ -197,7 +197,7 @@ function dismissNightPrompt(): void {
       class="loading-state app-card"
       role="status"
     >
-      正在恢復本機提醒…
+      正在讀取這台裝置上的提醒…
     </section>
 
     <section
@@ -205,10 +205,10 @@ function dismissNightPrompt(): void {
       class="error-state app-card"
       role="alert"
     >
-      <h2>無法讀取本機提醒</h2>
-      <p>資料庫目前無法使用。你可以重新嘗試，但系統不會用空白狀態覆蓋既有資料。</p>
+      <h2>無法讀取提醒</h2>
+      <p>目前無法使用資料庫。你可以重新讀取；原有資料不會被空白內容取代。</p>
       <button class="button button--primary" type="button" @click="boot.ensureBooted">
-        重新嘗試
+        重新讀取
       </button>
     </section>
 
@@ -235,15 +235,15 @@ function dismissNightPrompt(): void {
         class="product-label app-card"
         aria-labelledby="product-label-title"
       >
-        <h2 id="product-label-title">目前產品的包裝標示</h2>
+        <h2 id="product-label-title">目前防曬乳的包裝標示</h2>
         <ul>
           <li>
             {{
               productSettings.snapshot.value.preExposureWaitStatus ===
                 'explicit_minutes' &&
               productSettings.snapshot.value.preExposureWaitMinutes !== null
-                ? `曝曬前需等待 ${productSettings.snapshot.value.preExposureWaitMinutes} 分鐘`
-                : '包裝沒有曝曬前等待說明'
+                ? `擦上後需等待 ${productSettings.snapshot.value.preExposureWaitMinutes} 分鐘`
+                : '包裝沒有寫擦上後要等多久'
             }}
           </li>
           <li>
@@ -252,8 +252,8 @@ function dismissNightPrompt(): void {
                 'explicit_minutes' &&
               productSettings.snapshot.value.reapplicationIntervalMinutes !==
                 null
-                ? `包裝標示補擦間隔 ${productSettings.snapshot.value.reapplicationIntervalMinutes} 分鐘`
-                : '包裝沒有明確補擦分鐘數'
+                ? `包裝標示的補擦間隔為 ${productSettings.snapshot.value.reapplicationIntervalMinutes} 分鐘`
+                : '包裝沒有寫明補擦間隔'
             }}
           </li>
         </ul>
@@ -291,7 +291,7 @@ function dismissNightPrompt(): void {
         @reset-error="sessionControl.clearEndError"
       />
       <p class="safety-note">
-        此時間是防曬檢查／補擦提醒，不代表安全曝曬時間。
+        這是防曬檢查／補擦提醒，不代表可以在陽光下待多久。
       </p>
     </template>
   </div>

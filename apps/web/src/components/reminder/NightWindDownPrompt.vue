@@ -22,11 +22,11 @@ defineEmits<{ end: []; keep: [] }>();
   <section class="night-prompt" role="status" aria-labelledby="night-title">
     <div class="night-prompt__heading">
       <Moon :size="21" aria-hidden="true" />
-      <h2 id="night-title">現在是夜間</h2>
+      <h2 id="night-title">現在是晚上</h2>
     </div>
     <p>
-      這個時段紫外線通常很低。如果今天的戶外活動結束了，可以結束這次提醒；
-      倒數會繼續進行，直到你結束它。
+      現在紫外線通常較低。如果今天已經不會再外出，可以結束這次提醒；
+      倒數會繼續，直到你手動結束。
     </p>
     <div class="night-prompt__actions">
       <button
@@ -38,7 +38,7 @@ defineEmits<{ end: []; keep: [] }>();
         {{ ending ? "結束中…" : "結束本次提醒" }}
       </button>
       <button class="button button--quiet" type="button" @click="$emit('keep')">
-        保持進行中
+        繼續提醒
       </button>
     </div>
   </section>
