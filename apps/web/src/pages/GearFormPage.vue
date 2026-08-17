@@ -149,7 +149,7 @@ async function save(): Promise<void> {
 
   if (!saved) {
     // 儲存失敗時保留表單，不返回列表（S-12）。
-    localError.value = "資料沒有保存，這筆裝備尚未寫入。輸入仍會保留，可以再試一次。";
+    localError.value = "資料沒有儲存，這件裝備尚未寫入。輸入仍會保留，可以再試一次。";
     return;
   }
 
@@ -195,15 +195,15 @@ function cancel(): void {
       <div>
         <h1>{{ isEdit ? "編輯防曬裝備" : "新增防曬裝備" }}</h1>
         <p>
-          資料只保存在這台裝置。非必要欄位可以稍後再補。
+          資料只儲存在這台裝置。非必要欄位可以稍後再補。
         </p>
       </div>
     </header>
 
     <fieldset class="question-card app-card">
-      <legend>這是哪一類裝備？</legend>
+        <legend>這件裝備屬於哪一類？</legend>
       <p v-if="categoryLocked" class="question-card__helper">
-        既有的防曬產品不可改為純紀錄品類，否則已建立的倒數會失去產品依據。需要改品類請另建一筆新紀錄。
+        已使用過的防曬乳不可改為只做紀錄的裝備，否則已建立的倒數會失去依據。需要改類別請另建一筆新紀錄。
       </p>
       <div class="choice-grid">
         <label
@@ -245,18 +245,18 @@ function cancel(): void {
       :water-context="showSunscreenFields"
       :sunscreen-fields="showSunscreenFields"
       eyebrow="包裝標示"
-      title="產品身分確認"
+       title="確認這瓶防曬乳"
       :description="
         showSunscreenFields
-          ? '這些欄位會影響補擦倒數，請只依包裝上可確認的內容填寫。'
+          ? '以下欄位會影響補擦倒數，請只依包裝上看得到的內容填寫。'
           : '衣物只需要確認身分；沒有會影響倒數的標示欄位。'
       "
     />
 
     <section v-else class="app-card no-effect-note" role="status">
-      <strong>這筆紀錄不影響提醒倒數</strong>
+      <strong>這件裝備不會建立補擦倒數</strong>
       <p>
-        {{ GEAR_CATEGORY_LABELS[gearCategory] }}沒有會進入計算的包裝標示，因此不需要填寫防曬標示欄位。
+        {{ GEAR_CATEGORY_LABELS[gearCategory] }}沒有會進入計算的包裝標示，因此不需要填寫防曬乳標示欄位。
       </p>
     </section>
 
@@ -275,7 +275,7 @@ function cancel(): void {
         到期日一過就不會再建立補擦倒數。
       </p>
 
-      <label for="gear-note">備忘（選填）</label>
+      <label for="gear-note">備註（選填）</label>
       <textarea id="gear-note" v-model="note" maxlength="500" rows="3" />
       <p class="field-helper">
         請不要輸入疾病、症狀、用藥或聯絡資料。
@@ -290,7 +290,7 @@ function cancel(): void {
       :disabled="productSettings.phase.value === 'saving'"
       @click="save"
     >
-      {{ productSettings.phase.value === "saving" ? "保存中…" : "保存" }}
+      {{ productSettings.phase.value === "saving" ? "儲存中…" : "儲存" }}
     </button>
 
     <section v-if="isEdit" class="app-card danger-zone">
@@ -328,8 +328,7 @@ function cancel(): void {
       </template>
       <template v-else>
         <p class="form-error" role="alert">
-          刪除後，曾經參照這筆裝備的設定會失去產品參照。既有提醒紀錄裡的
-          snapshot 不會被改寫。確定刪除嗎？
+          刪除後，曾經使用這件裝備的設定會失去參照；既有提醒紀錄中的包裝標示不會被改寫。確定要刪除嗎？
         </p>
         <button class="button button--primary" type="button" @click="remove">
           確定刪除

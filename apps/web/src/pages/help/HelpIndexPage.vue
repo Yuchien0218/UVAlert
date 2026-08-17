@@ -18,7 +18,7 @@ const topics = computed(() => listPublishableTopics());
     <header class="page-heading">
       <h1 class="page-heading__title">常見問題</h1>
       <p class="page-heading__body">
-        這些內容說明防曬產品、提醒時間與使用限制。閱讀不會修改目前的提醒狀態。
+        這些內容說明防曬乳、提醒時間與使用限制。閱讀不會修改目前的提醒狀態。
       </p>
     </header>
 
@@ -36,10 +36,10 @@ const topics = computed(() => listPublishableTopics());
 
     <section v-else class="empty-state app-card" role="status">
       <h2>目前沒有可查看的內容</h2>
-      <p>說明內容尚未完成必要審查。這不影響提醒功能。</p>
+      <p>內容正在審查中，完成前暫不提供。這不影響提醒功能。</p>
     </section>
 
-    <RouterLink class="text-link" to="/more">返回更多設定</RouterLink>
+    <RouterLink class="text-link" to="/more">返回更多</RouterLink>
   </div>
 </template>
 

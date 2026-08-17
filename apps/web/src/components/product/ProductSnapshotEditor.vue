@@ -77,7 +77,7 @@ const groupNames = {
         }}
       </legend>
       <p class="question-card__helper">
-        請確認包裝上是否有 SPF、PA 等防曬標示；僅有品牌、成分或「天然」宣稱，無法確認這是防曬產品。
+        請確認包裝上是否有 SPF、PA 等防曬標示；僅有品牌、成分或「天然」宣稱，無法確認這是防曬乳。
       </p>
       <div class="choice-grid choice-grid--row">
         <label>

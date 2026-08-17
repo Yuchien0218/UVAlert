@@ -20,7 +20,7 @@ withDefaults(defineProps<Props>(), { requiredReview: null });
     <h2>{{ title }}</h2>
     <p>{{ body }}</p>
     <p v-if="requiredReview" class="under-review__meta">
-      需要的審查：{{ requiredReview }}
+      需要完成的審查：{{ requiredReview }}
     </p>
     <p class="under-review__note">
       這不影響提醒功能。

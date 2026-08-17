@@ -42,7 +42,7 @@ async function runClear(scope: ClearScope): Promise<void> {
     <header class="page-heading">
       <h1>本機資料管理</h1>
       <p>
-        這個服務沒有帳號，資料只保存在這台裝置上。匯出的檔案由你的裝置直接產生，不會上傳、不經後端、不進分析。
+         這個服務沒有帳號，資料只儲存在這台裝置上。匯出的檔案由你的裝置直接產生，不會上傳、不經後端、不進分析。
       </p>
     </header>
 
@@ -69,7 +69,7 @@ async function runClear(scope: ClearScope): Promise<void> {
 
     <template v-else-if="summary">
       <section class="app-card" aria-labelledby="data-summary-title">
-        <h2 id="data-summary-title">這台裝置保存了什麼</h2>
+        <h2 id="data-summary-title">這台裝置儲存了什麼</h2>
         <dl class="summary-grid">
           <div>
             <dt>防曬裝備</dt>
@@ -101,7 +101,7 @@ async function runClear(scope: ClearScope): Promise<void> {
       <section class="app-card" aria-labelledby="data-export-title">
         <h2 id="data-export-title">匯出本機資料</h2>
         <p>
-          產生一個 JSON 檔案，包含你的防曬裝備、提醒紀錄、事件與偏好。檔案存到你自己選的位置，不會傳到任何伺服器。
+           產生一個 JSON 檔案，包含你的防曬裝備、提醒紀錄、事件與偏好。檔案會儲存到你選的位置，不會傳到任何伺服器。
         </p>
         <p class="caution">
           匯出檔案<strong>不包含</strong>裝置識別碼、精確座標與任何金鑰。目前版本<strong>只能匯出，不能匯入還原</strong>；還原能力會與帳號遷移政策一起在之後設計。
@@ -121,7 +121,7 @@ async function runClear(scope: ClearScope): Promise<void> {
           class="notice notice--ok"
           role="status"
         >
-          已產生 {{ localData.notice.value.fileName }}。請確認檔案已存到你要的位置。
+          已產生 {{ localData.notice.value.fileName }}。請確認檔案已儲存到你要的位置。
         </p>
         <p
           v-if="localData.error.value === 'export_failed'"
@@ -147,7 +147,7 @@ async function runClear(scope: ClearScope): Promise<void> {
             localData.notice.value.scope === "drafts"
               ? "設定草稿已清除。"
               : localData.notice.value.scope === "history"
-                ? "產品與已結束的提醒歷史已清除。"
+                 ? "裝備與已結束的提醒歷史已清除。"
                 : "這台裝置上的資料已全部清除。"
           }}
         </p>
@@ -193,10 +193,10 @@ async function runClear(scope: ClearScope): Promise<void> {
           </template>
         </div>
 
-        <!-- 清除產品與歷史 -->
+        <!-- 清除裝備與歷史 -->
         <div class="clear-row">
           <div>
-            <strong>清除產品與歷史</strong>
+            <strong>清除裝備與歷史</strong>
             <p>
               刪除所有防曬裝備與已結束的提醒紀錄。
               <template v-if="summary.hasActiveSession">
@@ -211,7 +211,7 @@ async function runClear(scope: ClearScope): Promise<void> {
             :disabled="busy"
             @click="confirming = 'history'"
           >
-            清除產品與歷史
+              清除裝備與歷史
           </button>
           <template v-else>
             <p class="confirm-note" role="alert">

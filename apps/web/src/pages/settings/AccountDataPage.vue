@@ -45,7 +45,7 @@ async function deleteCloudData(): Promise<void> {
   try {
     await cloudSync.deleteAccount();
     await auth.signOut();
-    notice.value = "UVAlert 的雲端資料與登入已清除；本機提醒與資料仍保留。";
+    notice.value = "UVAlert 的雲端資料與登入資訊已清除；本機提醒與資料仍保留。";
     confirmingDelete.value = false;
   } catch (caught) {
     error.value = typeof caught === "object" && caught !== null && "message" in caught && typeof caught.message === "string"
@@ -61,7 +61,7 @@ async function deleteCloudData(): Promise<void> {
   <div class="page-stack">
     <header class="page-heading">
       <h1 class="page-heading__title">登入與雲端資料</h1>
-      <p class="page-heading__body">這裡只管理 UVAlert 雲端資料；清除不會刪除你的 Google 帳號，也不會清除這台裝置的本機提醒。</p>
+      <p class="page-heading__body">這裡只管理 UVAlert 的雲端資料；清除不會刪除你的 Google 帳號，也不會清除這台裝置的本機提醒。</p>
     </header>
 
     <section v-if="!signedIn" class="app-card account-card">
@@ -101,7 +101,7 @@ async function deleteCloudData(): Promise<void> {
 
     <p v-if="notice" class="notice notice--ok" role="status">{{ notice }}</p>
     <p v-if="error" class="notice notice--error" role="alert">{{ error }}</p>
-    <RouterLink class="text-link" to="/more">返回更多設定</RouterLink>
+    <RouterLink class="text-link" to="/more">返回更多</RouterLink>
   </div>
 </template>
 

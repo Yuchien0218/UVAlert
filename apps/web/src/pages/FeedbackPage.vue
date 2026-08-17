@@ -31,33 +31,33 @@ async function submit(): Promise<void> {
 
     <form class="app-card feedback-form" @submit.prevent="submit">
       <label>
-        <span>回報類型</span>
+        <span>問題類型</span>
         <select v-model="feedbackType">
-          <option value="bug">功能好像有問題</option>
+          <option value="bug">功能無法正常使用</option>
           <option value="feature_request">我有功能建議</option>
           <option value="content_correction">衛教內容需要更正</option>
         </select>
       </label>
       <label>
-        <span>你想告訴我們什麼？</span>
-        <textarea v-model="message" rows="6" maxlength="4000" required placeholder="請盡量描述發生了什麼事"></textarea>
+        <span>請描述你遇到的情況</span>
+        <textarea v-model="message" rows="6" maxlength="4000" required placeholder="請描述發生了什麼事，以及你原本想做什麼"></textarea>
       </label>
       <label>
         <span>聯絡信箱（選填）</span>
         <input v-model="contactEmail" type="email" maxlength="320" placeholder="不填也可以回報" />
       </label>
       <button class="button button--primary" type="submit" :disabled="busy">
-        {{ busy ? "送出中…" : "送出回報" }}
+        {{ busy ? "送出中…" : "送出" }}
       </button>
       <p v-if="feedback.state.value.status === 'submitted'" class="notice notice--ok" role="status">
-        已收到，謝謝你的回報。
+      已收到你的回報，謝謝！
       </p>
       <p v-if="feedback.state.value.error" class="notice notice--error" role="alert">
         {{ feedback.state.value.error.message }}
       </p>
     </form>
 
-    <RouterLink class="text-link" to="/more">返回更多設定</RouterLink>
+    <RouterLink class="text-link" to="/more">返回更多</RouterLink>
   </div>
 </template>
 

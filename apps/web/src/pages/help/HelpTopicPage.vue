@@ -32,7 +32,7 @@ const publishable = computed(() =>
     <ContentUnderReview
       v-if="!publishable"
       title="內容正在審查"
-      :body="`這份內容尚未完成必要審查，因此目前不提供未核准版本。`"
+       :body="`這篇內容正在審查中，完成前暫不提供。`"
       :required-review="topic?.requiredReview ?? null"
     />
 

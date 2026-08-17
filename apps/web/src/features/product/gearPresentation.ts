@@ -1,7 +1,7 @@
 import type { GearCategory, ProductCatalogRecordV1 } from "@sunshield/contracts";
 
 export const GEAR_CATEGORY_LABELS: Record<GearCategory, string> = {
-  sunscreen: "防曬產品",
+  sunscreen: "防曬乳",
   clothing: "防曬衣物",
   eyewear: "太陽眼鏡",
   other_gear: "其他裝備"
@@ -14,10 +14,10 @@ export const GEAR_CATEGORY_LABELS: Record<GearCategory, string> = {
  * 不得讓人以為提醒行為會因此改變（S-11）。
  */
 export const GEAR_CATEGORY_REMINDER_EFFECT: Record<GearCategory, string> = {
-  sunscreen: "會影響補擦倒數：到期、耐水、補擦間隔與曝曬前等待都會納入計算。",
-  clothing: "覆蓋期間不倒數，但不會自行產生補擦時間。",
-  eyewear: "純紀錄，不影響提醒倒數。",
-  other_gear: "純紀錄，不影響提醒倒數。"
+  sunscreen: "會建立補擦倒數；到期、耐水、補擦間隔與擦上後等待時間會納入計算。",
+  clothing: "被衣物遮住時不倒數，也不會自己產生補擦時間。",
+  eyewear: "只做紀錄，不會影響補擦倒數。",
+  other_gear: "只做紀錄，不會影響補擦倒數。"
 };
 
 /** 只有這個品類會產生補擦倒數。 */
@@ -45,14 +45,14 @@ export function gearSafetyState(
     return {
       kind: "blocked",
       label: "回報過異常",
-      detail: "這筆紀錄回報過產品異常，不提供直接恢復。"
+      detail: "這筆紀錄曾回報防曬乳異常，無法直接恢復。"
     };
   }
   if (eligibility === "discomfort_reported") {
     return {
       kind: "blocked",
       label: "回報過不適",
-      detail: "這筆紀錄回報過使用後不適，不提供直接恢復。"
+      detail: "這筆紀錄曾回報使用後不適，無法直接恢復。"
     };
   }
   if (!affectsCountdown(product.gearCategory)) {
@@ -62,7 +62,7 @@ export function gearSafetyState(
     return {
       kind: "no_countdown",
       label: "已過期",
-      detail: "已過到期日，不會建立補擦倒數。"
+      detail: "已超過到期日，不會建立補擦倒數。"
     };
   }
   if (eligibility === "identity_unconfirmed") {
@@ -85,5 +85,5 @@ export function gearSafetyState(
 export function formatPurchaseMonth(value: string | null): string | null {
   if (value === null) return null;
   const [year, month] = value.split("-");
-  return `${year} 年 ${Number(month)} 月購入`;
+  return `${year} 年 ${Number(month)} 月購買`;
 }

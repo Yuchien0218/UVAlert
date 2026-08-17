@@ -25,7 +25,7 @@ const purchase = computed(() => formatPurchaseMonth(props.product.purchaseMonth)
         <span
           v-if="!affectsCountdown(product.gearCategory)"
           class="gear-item__badge"
-        >不影響倒數</span>
+        >不會建立倒數</span>
       </p>
       <strong class="gear-item__name">{{ product.displayName }}</strong>
 
@@ -43,7 +43,7 @@ const purchase = computed(() => formatPurchaseMonth(props.product.purchaseMonth)
       <p v-if="purchase || product.expiryDate" class="gear-item__meta">
         <span v-if="purchase">{{ purchase }}</span>
         <span v-if="purchase && product.expiryDate">・</span>
-        <span v-if="product.expiryDate">到期 {{ product.expiryDate }}</span>
+        <span v-if="product.expiryDate">到期日 {{ product.expiryDate }}</span>
       </p>
       <p v-if="product.note" class="gear-item__note">{{ product.note }}</p>
     </div>

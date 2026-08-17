@@ -74,7 +74,7 @@ function editGear(productId: string): void {
     <header class="page-heading">
       <h1>我的防曬裝備</h1>
       <p>
-        這份清單只保存在這台裝置。只有防曬產品會影響補擦倒數，其他裝備純粹是紀錄。
+        這份清單只儲存在這台裝置。只有防曬乳會建立補擦倒數；其他裝備只做紀錄。
       </p>
     </header>
 
@@ -96,7 +96,7 @@ function editGear(productId: string): void {
       <section v-if="!hasAnyGear" class="app-card empty-state">
         <h2>還沒有任何裝備</h2>
         <p>
-          記錄常用的防曬產品，建立提醒時就不必重填包裝標示。也可以先不保存產品，直接建立提醒。
+          把常用的防曬乳與裝備記在這裡，建立提醒時就不必重填包裝標示。也可以先不儲存防曬乳，直接建立提醒。
         </p>
         <button class="button button--primary" type="button" @click="addGear">
           <Plus :size="18" aria-hidden="true" />
@@ -115,7 +115,7 @@ function editGear(productId: string): void {
           class="no-sunscreen-note"
           role="status"
         >
-          目前沒有可以建立補擦倒數的防曬產品。清單裡的
+          目前沒有可以建立補擦倒數的防曬乳。清單裡的
           {{
             current
               .map((product) => GEAR_CATEGORY_LABELS[product.gearCategory])

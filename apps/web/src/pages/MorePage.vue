@@ -27,7 +27,7 @@ const allEntries = [
     to: "/help",
     icon: CircleHelp,
     label: "常見問題",
-    description: "防曬產品、提醒時間與使用限制的說明。"
+    description: "防曬乳、提醒時間與使用限制的說明。"
   },
   {
     to: "/special-situation",
@@ -38,7 +38,7 @@ const allEntries = [
   {
     to: "/install",
     icon: Smartphone,
-    label: "安裝到手機",
+    label: "安裝到手機桌面",
     description: "安裝後資料較不易遺失；不安裝也可正常使用。"
   },
   {
@@ -89,13 +89,13 @@ const entries = computed(() =>
 <template>
   <div class="page-stack">
     <header class="page-heading">
-      <h1 class="page-heading__title">更多設定</h1>
+      <h1 class="page-heading__title">更多</h1>
       <p class="page-heading__body">
-        說明內容與這台裝置上的設定。資料只保存在本機。
+        說明內容與這台裝置上的設定。資料只儲存在本機。
       </p>
     </header>
 
-    <nav class="entry-list" aria-label="更多設定項目">
+    <nav class="entry-list" aria-label="更多項目">
       <RouterLink
         v-for="entry in entries"
         :key="entry.to"

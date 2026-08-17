@@ -60,7 +60,7 @@ function writeSyncDisabled(value: boolean): void {
     <header class="page-heading">
       <h1 class="page-heading__title">跨裝置同步</h1>
       <p class="page-heading__body">
-        防曬提醒不需要帳號。登入只在你主動選擇時，用來同步進行中的提醒、裝備、地區與偏好。
+        使用防曬提醒不需要帳號。只有你選擇同步時才需要登入，用來同步進行中的提醒、裝備、地區與偏好。
       </p>
     </header>
 
@@ -71,7 +71,7 @@ function writeSyncDisabled(value: boolean): void {
         使用 Google 登入同步
       </button>
       <p v-if="auth.state.value.status === 'error'" class="notice notice--error" role="alert">
-        登入沒有完成，請稍後再試（{{ auth.state.value.errorCode }}）。本機資料沒有變動。
+        登入未完成，請稍後再試（{{ auth.state.value.errorCode }}）。本機資料沒有變動。
       </p>
     </section>
 
@@ -110,7 +110,7 @@ function writeSyncDisabled(value: boolean): void {
     </section>
 
     <RouterLink class="text-link" to="/settings/account-data">管理登入與雲端資料</RouterLink>
-    <RouterLink class="text-link" to="/more">返回更多設定</RouterLink>
+    <RouterLink class="text-link" to="/more">返回更多</RouterLink>
   </div>
 </template>
 
