@@ -184,6 +184,16 @@ function renderBroadcastMarkOutlineBody(colorFor) {
   return `<g>${dotMarkup}${rayMarkup}</g>`;
 }
 
+export function renderFilledMarkSvg(concept) {
+  const colorFor = (key) => COLORS[key];
+  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" data-concept="${concept.fileStem}">
+  <title>${escapeXml(titleFor(concept, "圖標（實心底色版）"))}</title>
+  <desc>${escapeXml(concept.tagline)}，暖象牙實心背景，供 App icon／favicon 點陣輸出使用（含 maskable 安全邊界）。</desc>
+  <rect width="64" height="64" fill="${COLORS.ivory}"/>${renderBroadcastMarkOutlineBody(colorFor)}
+</svg>
+`;
+}
+
 export function renderOutlinedMarkSvg(concept) {
   const colorFor = (key) => COLORS[key];
   return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" data-concept="${concept.fileStem}">
@@ -225,6 +235,7 @@ export function generateLogoConcepts(outputRoot = resolve("docs/design/logo-conc
       "utf8"
     );
     writeFileSync(resolve(root, `${SAFE_AREA_CONCEPT_ID}-outlined.svg`), renderOutlinedMarkSvg(safeAreaConcept), "utf8");
+    writeFileSync(resolve(root, `${SAFE_AREA_CONCEPT_ID}-filled.svg`), renderFilledMarkSvg(safeAreaConcept), "utf8");
     writeFileSync(
       resolve(root, `${SAFE_AREA_CONCEPT_ID}-dark-surface.svg`),
       renderDarkSurfaceMarkSvg(safeAreaConcept),

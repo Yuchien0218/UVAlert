@@ -44,8 +44,27 @@
 - **App icon 安全邊界**：Android 自適應圖標在不同遮罩形狀下，只保證中心約 66% 直徑的圓形範圍一定可見。以 64×64 畫布換算，安全圓半徑訂為 20px（約 63% 直徑，留有餘裕）。06 的幾何已收緊到最遠點距中心 18px（含 `stroke-linecap="round"` 造成的線頭外擴），留 2px 安全餘量。這個邊界已寫入 [`verify-logo-concepts.mjs`](../../../tools/logo-concepts/verify-logo-concepts.mjs) 自動檢查（`SAFE_AREA_RADIUS`），並產出視覺參考圖 [`06-broadcast-mark-app-icon-safe-area.svg`](06-broadcast-mark-app-icon-safe-area.svg)，用虛線圓標出邊界。
 - **正式向量重繪**：原本的圖標是靠 `stroke` + `stroke-linecap="round"` 畫出來的，不是最終產線會用的格式。已寫一個 `pillPath()` 幾何轉換函式，把每條描邊線段換算成對應的填色「膠囊」輪廓（兩條平行邊＋兩端半圓弧），確保視覺上跟描邊版完全一致，但不再依賴任何 `stroke` 屬性。產出 [`06-broadcast-mark-outlined.svg`](06-broadcast-mark-outlined.svg)，可直接送進 App icon／favicon 產線工具。
 - **深色底反白版**：使用者的設計系統裡有深咖啡（espresso）產品介面／頁尾等深色版面，原本的深黑咖啡描邊線在深色底上會幾乎看不見。已產出 [`06-broadcast-mark-dark-surface.svg`](06-broadcast-mark-dark-surface.svg)：深咖啡背景＋暖象牙色資訊線＋維持原本的暖琥珀金太陽點與強調線，跟正式向量輪廓共用同一份幾何資料，不會跟亮色版走鐘。
+- **實心底色版**：新增 [`06-broadcast-mark-filled.svg`](06-broadcast-mark-filled.svg)（暖象牙實心背景＋輪廓圖形），專供下面的點陣輸出使用——maskable icon、favicon、apple-touch-icon 都不能有透明背景，需要一份不透明的來源。
 
-第二輪已全部完成。後續若要往正式資產推進，需要的是把這幾份 SVG 幾何交給實際 App icon／favicon 產生工具跑出各尺寸點陣圖，這部分不在目前的手刻 SVG 產生器範圍內。
+## 點陣圖預覽（尺寸對照現有 manifest）
+
+[`06-broadcast-mark-app-icon-preview/`](06-broadcast-mark-app-icon-preview/) 用 [sharp](https://sharp.pixelplumbing.com/) 把上面的 SVG 轉成點陣圖，尺寸對照 `apps/web/public/manifest.webmanifest` 現有規格：
+
+| 檔案 | 尺寸 | 來源 | 對應用途 |
+|---|---|---|---|
+| `icon-192.png` | 192×192 | filled | PWA icon，`purpose: any` |
+| `icon-512.png` | 512×512 | filled | PWA icon，`purpose: any` |
+| `icon-512-maskable.png` | 512×512 | filled | PWA icon，`purpose: maskable`（圖形已在安全邊界內，可直接沿用同一來源） |
+| `apple-touch-icon-180.png` | 180×180 | filled | iOS 主畫面圖示慣用尺寸 |
+| `favicon-48.png` / `favicon-32.png` / `favicon-16.png` | 48／32／16 | filled | 瀏覽器分頁圖示，16px 是可讀性最嚴苛的尺寸 |
+| `mark-transparent-512.png` | 512×512 | outlined（透明背景） | 一般用途去背素材 |
+| `mark-dark-surface-512.png` | 512×512 | dark-surface | 深色底版面預覽 |
+
+所有輸出皆已確認為完全不透明（alpha 全通道 255），符合 maskable／apple-touch-icon 不可透明的規範。16px favicon 縮到最小仍可辨認「圓點＋放射線」輪廓，但細節必然比 32px 版簡化，屬預期內的正常取捨。
+
+**這批檔案只是預覽／審查用途，尚未寫入 `apps/web/public/manifest.webmanifest` 或取代現有的 `apps/web/public/icon-*.png`、`favicon.ico`、`apple-touch-icon.png`。要正式換上新圖示，需要另外確認並更新 apps/web。**
+
+第二輪已全部完成，含 SVG 向量到點陣圖的完整輸出。
 
 ## 選定檢查清單
 
