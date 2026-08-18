@@ -15,8 +15,8 @@
       <path d="M21 43A11 11 0 0 1 43 43" stroke="#9F5E42"/>
       <path d="M32 17V22M18.5 24.5L22 28M45.5 24.5L42 28" stroke="#9F5E42"/>
     </g></g>
-    <text x="278" y="72" fill="#2E2925" font-family="'Noto Serif TC', serif" font-size="26" font-weight="500" lang="zh-Hant-TW">防曬晴報員</text>
-    <text x="280" y="98" fill="#9F5E42" font-family="Inter, sans-serif" font-size="14" font-weight="500" letter-spacing="1.6">UVAlert</text>
+    <text x="279" y="72" fill="#2E2925" font-family="'Noto Serif TC', serif" font-size="26" font-weight="500" letter-spacing="0.5" lang="zh-Hant-TW">防曬晴報員</text>
+    <text x="279" y="98" fill="#9F5E42" font-family="Inter, sans-serif" font-size="14" font-weight="500" letter-spacing="2">UVAlert</text>
     <g data-preview-size="32" transform="translate(32 218) scale(.5)">
     <g fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="4">
       <path d="M14 43H50" stroke="#2E2925"/>
@@ -40,8 +40,8 @@
       <path d="M46 38V46H31" stroke="#2E2925"/>
       <circle cx="36" cy="31" r="8" stroke="#9F5E42"/>
     </g></g>
-    <text x="278" y="72" fill="#2E2925" font-family="'Noto Serif TC', serif" font-size="26" font-weight="500" lang="zh-Hant-TW">防曬晴報員</text>
-    <text x="280" y="98" fill="#9F5E42" font-family="Inter, sans-serif" font-size="14" font-weight="500" letter-spacing="1.6">UVAlert</text>
+    <text x="279" y="72" fill="#2E2925" font-family="'Noto Serif TC', serif" font-size="26" font-weight="500" letter-spacing="0.5" lang="zh-Hant-TW">防曬晴報員</text>
+    <text x="279" y="98" fill="#9F5E42" font-family="Inter, sans-serif" font-size="14" font-weight="500" letter-spacing="2">UVAlert</text>
     <g data-preview-size="32" transform="translate(32 218) scale(.5)">
     <g fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="4">
       <path d="M17 46V18H46V29" stroke="#2E2925"/>
@@ -65,8 +65,8 @@
       <circle cx="32" cy="32" r="8" stroke="#9F5E42"/>
       <circle cx="50" cy="20" r="3" fill="#9F5E42" stroke="none"/>
     </g></g>
-    <text x="278" y="72" fill="#2E2925" font-family="'Noto Serif TC', serif" font-size="26" font-weight="500" lang="zh-Hant-TW">防曬晴報員</text>
-    <text x="280" y="98" fill="#9F5E42" font-family="Inter, sans-serif" font-size="14" font-weight="500" letter-spacing="1.6">UVAlert</text>
+    <text x="279" y="72" fill="#2E2925" font-family="'Noto Serif TC', serif" font-size="26" font-weight="500" letter-spacing="0.5" lang="zh-Hant-TW">防曬晴報員</text>
+    <text x="279" y="98" fill="#9F5E42" font-family="Inter, sans-serif" font-size="14" font-weight="500" letter-spacing="2">UVAlert</text>
     <g data-preview-size="32" transform="translate(32 218) scale(.5)">
     <g fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="4">
       <path d="M46.8 45.4A20 20 0 1 1 49.7 22.6" stroke="#2E2925"/>
@@ -92,8 +92,8 @@
       <circle cx="16" cy="41" r="5" fill="#9F5E42" stroke="none"/>
       <circle cx="49" cy="32" r="4" fill="#2E2925" stroke="none"/>
     </g></g>
-    <text x="278" y="72" fill="#2E2925" font-family="'Noto Serif TC', serif" font-size="26" font-weight="500" lang="zh-Hant-TW">防曬晴報員</text>
-    <text x="280" y="98" fill="#9F5E42" font-family="Inter, sans-serif" font-size="14" font-weight="500" letter-spacing="1.6">UVAlert</text>
+    <text x="279" y="72" fill="#2E2925" font-family="'Noto Serif TC', serif" font-size="26" font-weight="500" letter-spacing="0.5" lang="zh-Hant-TW">防曬晴報員</text>
+    <text x="279" y="98" fill="#9F5E42" font-family="Inter, sans-serif" font-size="14" font-weight="500" letter-spacing="2">UVAlert</text>
     <g data-preview-size="32" transform="translate(32 218) scale(.5)">
     <g fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="4">
       <path d="M17 39C21 25 36 20 47 27" stroke="#2E2925"/>
@@ -118,8 +118,8 @@
       <circle cx="39" cy="30" r="9" stroke="#9F5E42"/>
       <path d="M25 48H49" stroke="#9F5E42"/>
     </g></g>
-    <text x="278" y="72" fill="#2E2925" font-family="'Noto Serif TC', serif" font-size="26" font-weight="500" lang="zh-Hant-TW">防曬晴報員</text>
-    <text x="280" y="98" fill="#9F5E42" font-family="Inter, sans-serif" font-size="14" font-weight="500" letter-spacing="1.6">UVAlert</text>
+    <text x="279" y="72" fill="#2E2925" font-family="'Noto Serif TC', serif" font-size="26" font-weight="500" letter-spacing="0.5" lang="zh-Hant-TW">防曬晴報員</text>
+    <text x="279" y="98" fill="#9F5E42" font-family="Inter, sans-serif" font-size="14" font-weight="500" letter-spacing="2">UVAlert</text>
     <g data-preview-size="32" transform="translate(32 218) scale(.5)">
     <g fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="4">
       <path d="M17 42V18H41" stroke="#2E2925"/>
@@ -133,26 +133,26 @@
   <g data-concept="06-broadcast-mark" transform="translate(1088 664)">
     <g transform="translate(24 40) scale(2)">
     <g fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="4">
-      <circle cx="18" cy="30" r="6" fill="#C1832E" stroke="none"/>
-      <path d="M28 22L52 14" stroke="#33291F"/>
-      <path d="M29 30H51" stroke="#33291F"/>
-      <path d="M27 38L46 46" stroke="#C1832E"/>
+      <circle cx="20" cy="32" r="6" fill="#C1832E" stroke="none"/>
+      <path d="M29 24L39 18" stroke="#33291F"/>
+      <path d="M32 32H46" stroke="#33291F"/>
+      <path d="M29 40L38 45" stroke="#C1832E"/>
     </g></g>
     <g transform="translate(190 44)">
     <g fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="4">
-      <circle cx="18" cy="30" r="6" fill="#C1832E" stroke="none"/>
-      <path d="M28 22L52 14" stroke="#33291F"/>
-      <path d="M29 30H51" stroke="#33291F"/>
-      <path d="M27 38L46 46" stroke="#C1832E"/>
+      <circle cx="20" cy="32" r="6" fill="#C1832E" stroke="none"/>
+      <path d="M29 24L39 18" stroke="#33291F"/>
+      <path d="M32 32H46" stroke="#33291F"/>
+      <path d="M29 40L38 45" stroke="#C1832E"/>
     </g></g>
-    <text x="278" y="72" fill="#2E2925" font-family="'Noto Serif TC', serif" font-size="26" font-weight="500" lang="zh-Hant-TW">防曬晴報員</text>
-    <text x="280" y="98" fill="#9F5E42" font-family="Inter, sans-serif" font-size="14" font-weight="500" letter-spacing="1.6">UVAlert</text>
+    <text x="279" y="72" fill="#2E2925" font-family="'Noto Serif TC', serif" font-size="26" font-weight="500" letter-spacing="0.5" lang="zh-Hant-TW">防曬晴報員</text>
+    <text x="279" y="98" fill="#9F5E42" font-family="Inter, sans-serif" font-size="14" font-weight="500" letter-spacing="2">UVAlert</text>
     <g data-preview-size="32" transform="translate(32 218) scale(.5)">
     <g fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="4">
-      <circle cx="18" cy="30" r="6" fill="#33291F" stroke="none"/>
-      <path d="M28 22L52 14" stroke="#33291F"/>
-      <path d="M29 30H51" stroke="#33291F"/>
-      <path d="M27 38L46 46" stroke="#33291F"/>
+      <circle cx="20" cy="32" r="6" fill="#33291F" stroke="none"/>
+      <path d="M29 24L39 18" stroke="#33291F"/>
+      <path d="M32 32H46" stroke="#33291F"/>
+      <path d="M29 40L38 45" stroke="#33291F"/>
     </g></g>
     <text x="88" y="240" fill="#2E2925" font-family="'Noto Serif TC', serif" font-size="23" font-weight="500" lang="zh-Hant-TW">播報印記</text>
     <text x="32" y="286" fill="#2E2925" font-family="'Noto Serif TC', serif" font-size="17" font-weight="500" lang="zh-Hant-TW">把陽光提醒濃縮成清楚的短報</text>

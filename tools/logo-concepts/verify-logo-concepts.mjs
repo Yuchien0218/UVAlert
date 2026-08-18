@@ -15,6 +15,51 @@ const EXPECTED = [
 const APPROVED_COLORS = new Set(["#FAF5EC", "#9F5E42", "#2E2925", "#C1832E", "#33291F"]);
 const DEFAULT_OUTPUT_ROOT = resolve("docs/design/logo-concepts");
 
+// Selected direction only: Android adaptive icons guarantee roughly the inner
+// 66% diameter circle of the canvas across mask shapes. Radius 20 on a 64
+// viewBox is ~63% diameter, leaving margin inside that guaranteed safe zone.
+const SAFE_AREA_CONCEPT_ID = "06-broadcast-mark";
+const SAFE_AREA_CENTER = { x: 32, y: 32 };
+const SAFE_AREA_RADIUS = 20;
+// Round line caps extend a filled semicircle past the path's own endpoint
+// coordinate, so path-derived points need this padding; filled circles
+// already report their true visual edge via cx/cy/r and need none.
+const STROKE_CAP_PADDING = 2;
+
+function distanceFromSafeAreaCenter(x, y) {
+  return Math.hypot(x - SAFE_AREA_CENTER.x, y - SAFE_AREA_CENTER.y);
+}
+
+function maxDistanceFromSafeAreaCenter(svg) {
+  let maxDistance = 0;
+
+  for (const match of svg.matchAll(/<circle[^>]*\bcx="([-\d.]+)"[^>]*\bcy="([-\d.]+)"[^>]*\br="([-\d.]+)"/g)) {
+    const [, cx, cy, r] = match.map(Number);
+    maxDistance = Math.max(maxDistance, distanceFromSafeAreaCenter(cx, cy) + r);
+  }
+
+  for (const match of svg.matchAll(/<path[^>]*\bd="([^"]+)"/g)) {
+    let x = 0;
+    let y = 0;
+    for (const token of match[1].match(/[MLH][^MLH]*/g) ?? []) {
+      const nums = token
+        .slice(1)
+        .trim()
+        .split(/[\s,]+/)
+        .filter(Boolean)
+        .map(Number);
+      if (token[0] === "H") {
+        x = nums[0];
+      } else {
+        [x, y] = nums;
+      }
+      maxDistance = Math.max(maxDistance, distanceFromSafeAreaCenter(x, y) + STROKE_CAP_PADDING);
+    }
+  }
+
+  return maxDistance;
+}
+
 function readSvg(path, label, failures) {
   if (!existsSync(path)) {
     failures.push(`Missing ${label}: ${path}`);
@@ -81,6 +126,15 @@ export function verifyLogoConcepts(outputRoot = DEFAULT_OUTPUT_ROOT) {
 
     verifyCommonSvg(mark, { label: `Standalone mark ${id}`, viewBox: "0 0 64 64", conceptId: id }, failures);
     if (/<text\b/i.test(mark)) failures.push(`Standalone mark ${id} must not contain editable text`);
+
+    if (id === SAFE_AREA_CONCEPT_ID) {
+      const maxDistance = maxDistanceFromSafeAreaCenter(mark);
+      if (maxDistance > SAFE_AREA_RADIUS) {
+        failures.push(
+          `Standalone mark ${id} breaches the app icon safe area: farthest point is ${maxDistance.toFixed(1)}px from center, limit is ${SAFE_AREA_RADIUS}px`
+        );
+      }
+    }
   }
 
   try {
@@ -115,6 +169,59 @@ export function verifyLogoConcepts(outputRoot = DEFAULT_OUTPUT_ROOT) {
       assert.equal((board.match(/data-preview-size=["']32["']/g) ?? []).length, 6, "Comparison board must contain one 32px preview per concept");
       assert.match(board, /防曬晴報員/, "Comparison board is missing the exact Chinese brand string");
       assert.match(board, /UVAlert/, "Comparison board is missing the exact English brand string");
+    } catch (error) {
+      failures.push(error.message);
+    }
+  }
+
+  const safeAreaGuidePath = resolve(root, `${SAFE_AREA_CONCEPT_ID}-app-icon-safe-area.svg`);
+  const safeAreaGuide = readSvg(safeAreaGuidePath, "app icon safe area guide", failures);
+  if (safeAreaGuide) {
+    verifyCommonSvg(
+      safeAreaGuide,
+      { label: "App icon safe area guide", viewBox: "0 0 64 64", conceptId: SAFE_AREA_CONCEPT_ID },
+      failures
+    );
+    try {
+      assert.match(
+        safeAreaGuide,
+        new RegExp(`r=["']${SAFE_AREA_RADIUS}["']`),
+        `App icon safe area guide must draw the ${SAFE_AREA_RADIUS}px reference circle`
+      );
+    } catch (error) {
+      failures.push(error.message);
+    }
+  }
+
+  const outlinedPath = resolve(root, `${SAFE_AREA_CONCEPT_ID}-outlined.svg`);
+  const outlined = readSvg(outlinedPath, "outlined production mark", failures);
+  if (outlined) {
+    verifyCommonSvg(outlined, { label: "Outlined production mark", viewBox: "0 0 64 64", conceptId: SAFE_AREA_CONCEPT_ID }, failures);
+    if (/stroke-width/.test(outlined)) {
+      failures.push("Outlined production mark must not depend on stroke-width; every visible shape must be filled geometry");
+    }
+    const outlinedReach = maxDistanceFromSafeAreaCenter(outlined);
+    if (outlinedReach > SAFE_AREA_RADIUS) {
+      failures.push(
+        `Outlined production mark breaches the app icon safe area: farthest point is ${outlinedReach.toFixed(1)}px from center, limit is ${SAFE_AREA_RADIUS}px`
+      );
+    }
+  }
+
+  const darkSurfacePath = resolve(root, `${SAFE_AREA_CONCEPT_ID}-dark-surface.svg`);
+  const darkSurface = readSvg(darkSurfacePath, "dark surface reversed mark", failures);
+  if (darkSurface) {
+    verifyCommonSvg(
+      darkSurface,
+      { label: "Dark surface reversed mark", viewBox: "0 0 64 64", conceptId: SAFE_AREA_CONCEPT_ID },
+      failures
+    );
+    try {
+      assert.match(
+        darkSurface,
+        /fill=["']#2E2925["']/i,
+        "Dark surface reversed mark must use the espresso background"
+      );
     } catch (error) {
       failures.push(error.message);
     }
