@@ -1,0 +1,129 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1120 920" role="img">
+  <title>防曬晴報員 圖示系統核心組預覽</title>
+  <desc>依導覽、狀態與更多頁卡片分組，每個圖示同時呈現 48px 與 16px。</desc>
+  <rect width="1120" height="920" fill="#FAF5EC"/>
+  <text x="64" y="56" fill="#2E2925" font-family="'Noto Serif TC', serif" font-size="30" font-weight="500" letter-spacing="0.5" lang="zh-Hant-TW">圖示系統核心組</text>
+  <text x="64" y="96" fill="#2E2925" font-family="'Noto Sans TC', sans-serif" font-size="24" font-weight="500" lang="zh-Hant-TW">下排導覽（雙色）</text>
+  <g data-icon-cell="nav-reminder" transform="translate(64 136)">
+    <g transform="scale(2)"><path d="M7.9 5.1H16.1L12 11.7Z" fill="#C1832E"/><path d="M6.4 3.9H17.6L12 12L17.6 20.1H6.4L12 12Z" fill="none" stroke="#33291F" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></g>
+    <g transform="translate(0 60) scale(0.667)"><path d="M7.9 5.1H16.1L12 11.7Z" fill="#C1832E"/><path d="M6.4 3.9H17.6L12 12L17.6 20.1H6.4L12 12Z" fill="none" stroke="#33291F" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></g>
+    <text x="30" y="72" fill="#6F5A54" font-family="'Noto Sans TC', sans-serif" font-size="13" lang="zh-Hant-TW">16px</text>
+    <text x="0" y="100" fill="#2E2925" font-family="'Noto Sans TC', sans-serif" font-size="16" lang="zh-Hant-TW">提醒</text>
+  </g>
+  <g data-icon-cell="nav-gear" transform="translate(232 136)">
+    <g transform="scale(2)"><g transform="translate(0 -0.3)"><rect x="9.25" y="2.75" width="5.5" height="3.75" rx="1.5" fill="#C1832E"/><rect x="6.75" y="7.5" width="10.5" height="13.25" rx="3.25" fill="none" stroke="#33291F" stroke-width="2.5"/></g></g>
+    <g transform="translate(0 60) scale(0.667)"><g transform="translate(0 -0.3)"><rect x="9.25" y="2.75" width="5.5" height="3.75" rx="1.5" fill="#C1832E"/><rect x="6.75" y="7.5" width="10.5" height="13.25" rx="3.25" fill="none" stroke="#33291F" stroke-width="2.5"/></g></g>
+    <text x="30" y="72" fill="#6F5A54" font-family="'Noto Sans TC', sans-serif" font-size="13" lang="zh-Hant-TW">16px</text>
+    <text x="0" y="100" fill="#2E2925" font-family="'Noto Sans TC', sans-serif" font-size="16" lang="zh-Hant-TW">裝備</text>
+  </g>
+  <g data-icon-cell="nav-more" transform="translate(400 136)">
+    <g transform="scale(2)"><circle cx="6.8" cy="6.8" r="3.05" fill="#33291F"/><circle cx="17.2" cy="6.8" r="3.05" fill="#C1832E"/><circle cx="6.8" cy="17.2" r="3.05" fill="#33291F"/><circle cx="17.2" cy="17.2" r="3.05" fill="#33291F"/></g>
+    <g transform="translate(0 60) scale(0.667)"><circle cx="6.8" cy="6.8" r="3.05" fill="#33291F"/><circle cx="17.2" cy="6.8" r="3.05" fill="#C1832E"/><circle cx="6.8" cy="17.2" r="3.05" fill="#33291F"/><circle cx="17.2" cy="17.2" r="3.05" fill="#33291F"/></g>
+    <text x="30" y="72" fill="#6F5A54" font-family="'Noto Sans TC', sans-serif" font-size="13" lang="zh-Hant-TW">16px</text>
+    <text x="0" y="100" fill="#2E2925" font-family="'Noto Sans TC', sans-serif" font-size="16" lang="zh-Hant-TW">更多</text>
+  </g>
+  <text x="64" y="310" fill="#2E2925" font-family="'Noto Sans TC', sans-serif" font-size="24" font-weight="500" lang="zh-Hant-TW">狀態（單色，繼承語意色）</text>
+  <g data-icon-cell="state-tracking" transform="translate(64 350)">
+    <g transform="scale(2)"><rect x="2.75" y="8.2" width="18.5" height="7.6" rx="3.2" fill="none" stroke="#33291F" stroke-width="2.5"/><rect x="5.6" y="10.6" width="3.2" height="2.8" rx="1.1" fill="#33291F"/><rect x="10.4" y="10.6" width="3.2" height="2.8" rx="1.1" fill="#33291F"/><rect x="15.2" y="10.6" width="3.2" height="2.8" rx="1.1" fill="#33291F"/></g>
+    <g transform="translate(0 60) scale(0.667)"><rect x="2.75" y="8.2" width="18.5" height="7.6" rx="3.2" fill="none" stroke="#33291F" stroke-width="2.5"/><rect x="5.6" y="10.6" width="3.2" height="2.8" rx="1.1" fill="#33291F"/><rect x="10.4" y="10.6" width="3.2" height="2.8" rx="1.1" fill="#33291F"/><rect x="15.2" y="10.6" width="3.2" height="2.8" rx="1.1" fill="#33291F"/></g>
+    <text x="30" y="72" fill="#6F5A54" font-family="'Noto Sans TC', sans-serif" font-size="13" lang="zh-Hant-TW">16px</text>
+    <text x="0" y="100" fill="#2E2925" font-family="'Noto Sans TC', sans-serif" font-size="16" lang="zh-Hant-TW">追蹤中</text>
+  </g>
+  <g data-icon-cell="state-soon" transform="translate(232 350)">
+    <g transform="scale(2)"><rect x="2.75" y="8.2" width="18.5" height="7.6" rx="3.2" fill="none" stroke="#33291F" stroke-width="2.5"/><rect x="5.6" y="10.6" width="3.2" height="2.8" rx="1.1" fill="#33291F"/></g>
+    <g transform="translate(0 60) scale(0.667)"><rect x="2.75" y="8.2" width="18.5" height="7.6" rx="3.2" fill="none" stroke="#33291F" stroke-width="2.5"/><rect x="5.6" y="10.6" width="3.2" height="2.8" rx="1.1" fill="#33291F"/></g>
+    <text x="30" y="72" fill="#6F5A54" font-family="'Noto Sans TC', sans-serif" font-size="13" lang="zh-Hant-TW">16px</text>
+    <text x="0" y="100" fill="#2E2925" font-family="'Noto Sans TC', sans-serif" font-size="16" lang="zh-Hant-TW">即將到期</text>
+  </g>
+  <g data-icon-cell="state-due" transform="translate(400 350)">
+    <g transform="scale(2)"><rect x="2.75" y="8.2" width="18.5" height="7.6" rx="3.2" fill="none" stroke="#33291F" stroke-width="2.5"/></g>
+    <g transform="translate(0 60) scale(0.667)"><rect x="2.75" y="8.2" width="18.5" height="7.6" rx="3.2" fill="none" stroke="#33291F" stroke-width="2.5"/></g>
+    <text x="30" y="72" fill="#6F5A54" font-family="'Noto Sans TC', sans-serif" font-size="13" lang="zh-Hant-TW">16px</text>
+    <text x="0" y="100" fill="#2E2925" font-family="'Noto Sans TC', sans-serif" font-size="16" lang="zh-Hant-TW">已到期</text>
+  </g>
+  <g data-icon-cell="state-untimed" transform="translate(568 350)">
+    <g transform="scale(2)"><rect x="2.75" y="8.2" width="18.5" height="7.6" rx="3.2" fill="none" stroke="#33291F" stroke-width="2.5"/><path d="M5.6 18.4L18.4 5.6" fill="none" stroke="#33291F" stroke-width="2.5" stroke-linecap="round"/></g>
+    <g transform="translate(0 60) scale(0.667)"><rect x="2.75" y="8.2" width="18.5" height="7.6" rx="3.2" fill="none" stroke="#33291F" stroke-width="2.5"/><path d="M5.6 18.4L18.4 5.6" fill="none" stroke="#33291F" stroke-width="2.5" stroke-linecap="round"/></g>
+    <text x="30" y="72" fill="#6F5A54" font-family="'Noto Sans TC', sans-serif" font-size="13" lang="zh-Hant-TW">16px</text>
+    <text x="0" y="100" fill="#2E2925" font-family="'Noto Sans TC', sans-serif" font-size="16" lang="zh-Hant-TW">未計時</text>
+  </g>
+  <g data-icon-cell="state-notification-off" transform="translate(736 350)">
+    <g transform="scale(2)"><g transform="translate(0 -0.2)"><path d="M6.6 15.8V10.2A5.4 5.4 0 0 1 17.4 10.2V15.8Z" fill="none" stroke="#33291F" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M4.8 15.8H19.2" fill="none" stroke="#33291F" stroke-width="2.5" stroke-linecap="round"/><circle cx="12" cy="19" r="1.8" fill="#33291F"/><path d="M5.6 18.4L18.4 5.6" fill="none" stroke="#33291F" stroke-width="2.5" stroke-linecap="round"/></g></g>
+    <g transform="translate(0 60) scale(0.667)"><g transform="translate(0 -0.2)"><path d="M6.6 15.8V10.2A5.4 5.4 0 0 1 17.4 10.2V15.8Z" fill="none" stroke="#33291F" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M4.8 15.8H19.2" fill="none" stroke="#33291F" stroke-width="2.5" stroke-linecap="round"/><circle cx="12" cy="19" r="1.8" fill="#33291F"/><path d="M5.6 18.4L18.4 5.6" fill="none" stroke="#33291F" stroke-width="2.5" stroke-linecap="round"/></g></g>
+    <text x="30" y="72" fill="#6F5A54" font-family="'Noto Sans TC', sans-serif" font-size="13" lang="zh-Hant-TW">16px</text>
+    <text x="0" y="100" fill="#2E2925" font-family="'Noto Sans TC', sans-serif" font-size="16" lang="zh-Hant-TW">通知未開啟</text>
+  </g>
+  <g data-icon-cell="state-notification-pending" transform="translate(904 350)">
+    <g transform="scale(2)"><g transform="translate(0 -0.2)"><path d="M6.6 15.8V10.2A5.4 5.4 0 0 1 17.4 10.2V15.8Z" fill="none" stroke="#33291F" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M4.8 15.8H10.4M13.6 15.8H19.2" fill="none" stroke="#33291F" stroke-width="2.5" stroke-linecap="round"/><circle cx="12" cy="19" r="1.8" fill="#33291F"/></g></g>
+    <g transform="translate(0 60) scale(0.667)"><g transform="translate(0 -0.2)"><path d="M6.6 15.8V10.2A5.4 5.4 0 0 1 17.4 10.2V15.8Z" fill="none" stroke="#33291F" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M4.8 15.8H10.4M13.6 15.8H19.2" fill="none" stroke="#33291F" stroke-width="2.5" stroke-linecap="round"/><circle cx="12" cy="19" r="1.8" fill="#33291F"/></g></g>
+    <text x="30" y="72" fill="#6F5A54" font-family="'Noto Sans TC', sans-serif" font-size="13" lang="zh-Hant-TW">16px</text>
+    <text x="0" y="100" fill="#2E2925" font-family="'Noto Sans TC', sans-serif" font-size="16" lang="zh-Hant-TW">背景通知尚未完成</text>
+  </g>
+  <g data-icon-cell="state-offline" transform="translate(64 500)">
+    <g transform="scale(2)"><g transform="translate(0 -0.45)"><path d="M7.5 18A4.5 4.5 0 0 1 7.5 9A6 6 0 0 1 18.5 11A3.6 3.6 0 0 1 18 18Z" fill="none" stroke="#33291F" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M4.6 19.4L18.4 5.6" fill="none" stroke="#33291F" stroke-width="2.5" stroke-linecap="round"/></g></g>
+    <g transform="translate(0 60) scale(0.667)"><g transform="translate(0 -0.45)"><path d="M7.5 18A4.5 4.5 0 0 1 7.5 9A6 6 0 0 1 18.5 11A3.6 3.6 0 0 1 18 18Z" fill="none" stroke="#33291F" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M4.6 19.4L18.4 5.6" fill="none" stroke="#33291F" stroke-width="2.5" stroke-linecap="round"/></g></g>
+    <text x="30" y="72" fill="#6F5A54" font-family="'Noto Sans TC', sans-serif" font-size="13" lang="zh-Hant-TW">16px</text>
+    <text x="0" y="100" fill="#2E2925" font-family="'Noto Sans TC', sans-serif" font-size="16" lang="zh-Hant-TW">目前離線</text>
+  </g>
+  <g data-icon-cell="state-online" transform="translate(232 500)">
+    <g transform="scale(2)"><path d="M7.5 18A4.5 4.5 0 0 1 7.5 9A6 6 0 0 1 18.5 11A3.6 3.6 0 0 1 18 18Z" fill="none" stroke="#33291F" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></g>
+    <g transform="translate(0 60) scale(0.667)"><path d="M7.5 18A4.5 4.5 0 0 1 7.5 9A6 6 0 0 1 18.5 11A3.6 3.6 0 0 1 18 18Z" fill="none" stroke="#33291F" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></g>
+    <text x="30" y="72" fill="#6F5A54" font-family="'Noto Sans TC', sans-serif" font-size="13" lang="zh-Hant-TW">16px</text>
+    <text x="0" y="100" fill="#2E2925" font-family="'Noto Sans TC', sans-serif" font-size="16" lang="zh-Hant-TW">背景通知已恢復</text>
+  </g>
+  <g data-icon-cell="state-success" transform="translate(400 500)">
+    <g transform="scale(2)"><circle cx="12" cy="12" r="8.5" fill="none" stroke="#33291F" stroke-width="2.5"/><path d="M8 12.3L11 15.2L16 9.5" fill="none" stroke="#33291F" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></g>
+    <g transform="translate(0 60) scale(0.667)"><circle cx="12" cy="12" r="8.5" fill="none" stroke="#33291F" stroke-width="2.5"/><path d="M8 12.3L11 15.2L16 9.5" fill="none" stroke="#33291F" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></g>
+    <text x="30" y="72" fill="#6F5A54" font-family="'Noto Sans TC', sans-serif" font-size="13" lang="zh-Hant-TW">16px</text>
+    <text x="0" y="100" fill="#2E2925" font-family="'Noto Sans TC', sans-serif" font-size="16" lang="zh-Hant-TW">已儲存</text>
+  </g>
+  <g data-icon-cell="state-warning" transform="translate(568 500)">
+    <g transform="scale(2)"><g transform="translate(0 -0.65)"><path d="M10.3 5.1A2 2 0 0 1 13.7 5.1L20.9 18.6A2 2 0 0 1 19.2 21.5H4.8A2 2 0 0 1 3.1 18.6Z" fill="none" stroke="#33291F" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M12 11V13.8" fill="none" stroke="#33291F" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/><circle cx="12" cy="17.1" r="1.15" fill="#33291F"/></g></g>
+    <g transform="translate(0 60) scale(0.667)"><g transform="translate(0 -0.65)"><path d="M10.3 5.1A2 2 0 0 1 13.7 5.1L20.9 18.6A2 2 0 0 1 19.2 21.5H4.8A2 2 0 0 1 3.1 18.6Z" fill="none" stroke="#33291F" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M12 11V13.8" fill="none" stroke="#33291F" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/><circle cx="12" cy="17.1" r="1.15" fill="#33291F"/></g></g>
+    <text x="30" y="72" fill="#6F5A54" font-family="'Noto Sans TC', sans-serif" font-size="13" lang="zh-Hant-TW">16px</text>
+    <text x="0" y="100" fill="#2E2925" font-family="'Noto Sans TC', sans-serif" font-size="16" lang="zh-Hant-TW">警告</text>
+  </g>
+  <g data-icon-cell="state-unverified" transform="translate(736 500)">
+    <g transform="scale(2)"><circle cx="12" cy="12" r="8.5" fill="none" stroke="#33291F" stroke-width="2.5"/><path d="M9.6 9.8A2.4 2.4 0 1 1 12 12.2V13.5" fill="none" stroke="#33291F" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/><circle cx="12" cy="16.4" r="1.25" fill="#33291F"/></g>
+    <g transform="translate(0 60) scale(0.667)"><circle cx="12" cy="12" r="8.5" fill="none" stroke="#33291F" stroke-width="2.5"/><path d="M9.6 9.8A2.4 2.4 0 1 1 12 12.2V13.5" fill="none" stroke="#33291F" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/><circle cx="12" cy="16.4" r="1.25" fill="#33291F"/></g>
+    <text x="30" y="72" fill="#6F5A54" font-family="'Noto Sans TC', sans-serif" font-size="13" lang="zh-Hant-TW">16px</text>
+    <text x="0" y="100" fill="#2E2925" font-family="'Noto Sans TC', sans-serif" font-size="16" lang="zh-Hant-TW">標示尚未確認</text>
+  </g>
+  <text x="64" y="674" fill="#2E2925" font-family="'Noto Sans TC', sans-serif" font-size="24" font-weight="500" lang="zh-Hant-TW">更多頁卡片（雙色）</text>
+  <g data-icon-cell="more-notifications" transform="translate(64 714)">
+    <g transform="scale(2)"><g transform="translate(0 -0.2)"><path d="M6.6 15.8V10.2A5.4 5.4 0 0 1 17.4 10.2V15.8Z" fill="none" stroke="#33291F" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M4.8 15.8H19.2" fill="none" stroke="#33291F" stroke-width="2.5" stroke-linecap="round"/><circle cx="12" cy="19" r="1.8" fill="#C1832E"/></g></g>
+    <g transform="translate(0 60) scale(0.667)"><g transform="translate(0 -0.2)"><path d="M6.6 15.8V10.2A5.4 5.4 0 0 1 17.4 10.2V15.8Z" fill="none" stroke="#33291F" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M4.8 15.8H19.2" fill="none" stroke="#33291F" stroke-width="2.5" stroke-linecap="round"/><circle cx="12" cy="19" r="1.8" fill="#C1832E"/></g></g>
+    <text x="30" y="72" fill="#6F5A54" font-family="'Noto Sans TC', sans-serif" font-size="13" lang="zh-Hant-TW">16px</text>
+    <text x="0" y="100" fill="#2E2925" font-family="'Noto Sans TC', sans-serif" font-size="16" lang="zh-Hant-TW">通知設定</text>
+  </g>
+  <g data-icon-cell="more-education" transform="translate(232 714)">
+    <g transform="scale(2)"><g transform="translate(0 -0.45)"><path d="M12 7.6V18.6" fill="none" stroke="#C1832E" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M12 7.6C10.2 6.6 7.8 6.2 4.8 6.2V17.2C7.8 17.2 10.2 17.6 12 18.6C13.8 17.6 16.2 17.2 19.2 17.2V6.2C16.2 6.2 13.8 6.6 12 7.6Z" fill="none" stroke="#33291F" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></g></g>
+    <g transform="translate(0 60) scale(0.667)"><g transform="translate(0 -0.45)"><path d="M12 7.6V18.6" fill="none" stroke="#C1832E" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M12 7.6C10.2 6.6 7.8 6.2 4.8 6.2V17.2C7.8 17.2 10.2 17.6 12 18.6C13.8 17.6 16.2 17.2 19.2 17.2V6.2C16.2 6.2 13.8 6.6 12 7.6Z" fill="none" stroke="#33291F" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></g></g>
+    <text x="30" y="72" fill="#6F5A54" font-family="'Noto Sans TC', sans-serif" font-size="13" lang="zh-Hant-TW">16px</text>
+    <text x="0" y="100" fill="#2E2925" font-family="'Noto Sans TC', sans-serif" font-size="16" lang="zh-Hant-TW">防曬衛教</text>
+  </g>
+  <g data-icon-cell="more-data" transform="translate(400 714)">
+    <g transform="scale(2)"><path d="M5.25 12A6.75 2.9 0 0 0 18.75 12" fill="none" stroke="#C1832E" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/><ellipse cx="12" cy="7.25" rx="6.75" ry="2.9" fill="none" stroke="#33291F" stroke-width="2.5"/><path d="M5.25 7.25V16.75A6.75 2.9 0 0 0 18.75 16.75V7.25" fill="none" stroke="#33291F" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></g>
+    <g transform="translate(0 60) scale(0.667)"><path d="M5.25 12A6.75 2.9 0 0 0 18.75 12" fill="none" stroke="#C1832E" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/><ellipse cx="12" cy="7.25" rx="6.75" ry="2.9" fill="none" stroke="#33291F" stroke-width="2.5"/><path d="M5.25 7.25V16.75A6.75 2.9 0 0 0 18.75 16.75V7.25" fill="none" stroke="#33291F" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></g>
+    <text x="30" y="72" fill="#6F5A54" font-family="'Noto Sans TC', sans-serif" font-size="13" lang="zh-Hant-TW">16px</text>
+    <text x="0" y="100" fill="#2E2925" font-family="'Noto Sans TC', sans-serif" font-size="16" lang="zh-Hant-TW">本機資料與隱私</text>
+  </g>
+  <g data-icon-cell="more-feedback" transform="translate(568 714)">
+    <g transform="scale(2)"><g transform="translate(0 -0.45)"><path d="M6 4.5H18A2.5 2.5 0 0 1 20.5 7V14.5A2.5 2.5 0 0 1 18 17H12.5L8 20.5V17H6A2.5 2.5 0 0 1 3.5 14.5V7A2.5 2.5 0 0 1 6 4.5Z" fill="none" stroke="#33291F" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/><circle cx="12" cy="10.75" r="2" fill="#C1832E"/></g></g>
+    <g transform="translate(0 60) scale(0.667)"><g transform="translate(0 -0.45)"><path d="M6 4.5H18A2.5 2.5 0 0 1 20.5 7V14.5A2.5 2.5 0 0 1 18 17H12.5L8 20.5V17H6A2.5 2.5 0 0 1 3.5 14.5V7A2.5 2.5 0 0 1 6 4.5Z" fill="none" stroke="#33291F" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/><circle cx="12" cy="10.75" r="2" fill="#C1832E"/></g></g>
+    <text x="30" y="72" fill="#6F5A54" font-family="'Noto Sans TC', sans-serif" font-size="13" lang="zh-Hant-TW">16px</text>
+    <text x="0" y="100" fill="#2E2925" font-family="'Noto Sans TC', sans-serif" font-size="16" lang="zh-Hant-TW">問題回報</text>
+  </g>
+  <g data-icon-cell="more-install" transform="translate(736 714)">
+    <g transform="scale(2)"><g transform="translate(0 -0.65)"><path d="M4.4 13.4V18.4A2.2 2.2 0 0 0 6.6 20.6H17.4A2.2 2.2 0 0 0 19.6 18.4V13.4" fill="none" stroke="#33291F" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M12 4.8V11.9" fill="none" stroke="#C1832E" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M8.3 9.4L12 13.1L15.7 9.4" fill="none" stroke="#C1832E" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></g></g>
+    <g transform="translate(0 60) scale(0.667)"><g transform="translate(0 -0.65)"><path d="M4.4 13.4V18.4A2.2 2.2 0 0 0 6.6 20.6H17.4A2.2 2.2 0 0 0 19.6 18.4V13.4" fill="none" stroke="#33291F" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M12 4.8V11.9" fill="none" stroke="#C1832E" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M8.3 9.4L12 13.1L15.7 9.4" fill="none" stroke="#C1832E" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></g></g>
+    <text x="30" y="72" fill="#6F5A54" font-family="'Noto Sans TC', sans-serif" font-size="13" lang="zh-Hant-TW">16px</text>
+    <text x="0" y="100" fill="#2E2925" font-family="'Noto Sans TC', sans-serif" font-size="16" lang="zh-Hant-TW">安裝到主畫面</text>
+  </g>
+  <g data-icon-cell="more-about" transform="translate(904 714)">
+    <g transform="scale(2)"><circle cx="12" cy="12" r="8.5" fill="none" stroke="#33291F" stroke-width="2.5"/><circle cx="12" cy="8" r="1.5" fill="#C1832E"/><path d="M12 11.75V16.25" fill="none" stroke="#33291F" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></g>
+    <g transform="translate(0 60) scale(0.667)"><circle cx="12" cy="12" r="8.5" fill="none" stroke="#33291F" stroke-width="2.5"/><circle cx="12" cy="8" r="1.5" fill="#C1832E"/><path d="M12 11.75V16.25" fill="none" stroke="#33291F" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></g>
+    <text x="30" y="72" fill="#6F5A54" font-family="'Noto Sans TC', sans-serif" font-size="13" lang="zh-Hant-TW">16px</text>
+    <text x="0" y="100" fill="#2E2925" font-family="'Noto Sans TC', sans-serif" font-size="16" lang="zh-Hant-TW">說明與關於</text>
+  </g>
+</svg>
