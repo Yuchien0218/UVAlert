@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 520 112" role="img" data-concept="01-morning-line">
+  <title>防曬晴報員 晨線橫式標誌</title>
+  <desc>每天查看晴報的溫暖起點，包含獨立圖標、中文品牌名稱與英文副標。</desc>
+  <g transform="translate(24 24)">
+    <g fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="4">
+      <path d="M14 43H50" stroke="#2E2925"/>
+      <path d="M21 43A11 11 0 0 1 43 43" stroke="#9F5E42"/>
+      <path d="M32 17V22M18.5 24.5L22 28M45.5 24.5L42 28" stroke="#9F5E42"/>
+    </g></g>
+  <text x="112" y="51" fill="#2E2925" font-family="'Noto Serif TC', serif" font-size="30" font-weight="500" lang="zh-Hant-TW">防曬晴報員</text>
+  <text x="114" y="79" fill="#9F5E42" font-family="Inter, sans-serif" font-size="15" font-weight="500" letter-spacing="1.8">UVAlert</text>
+</svg>

@@ -12,7 +12,7 @@ const EXPECTED = [
   "06-broadcast-mark",
 ];
 
-const APPROVED_COLORS = new Set(["#FAF5EC", "#9F5E42", "#2E2925"]);
+const APPROVED_COLORS = new Set(["#FAF5EC", "#9F5E42", "#2E2925", "#C1832E", "#33291F"]);
 const DEFAULT_OUTPUT_ROOT = resolve("docs/design/logo-concepts");
 
 function readSvg(path, label, failures) {
@@ -32,10 +32,14 @@ function verifyCommonSvg(svg, { label, viewBox, conceptId }, failures) {
     assert.match(svg, /<desc(?:\s[^>]*)?>[^<]+<\/desc>/, `${label} must have a non-empty description`);
     assert.match(svg, new RegExp(`data-concept=["']${conceptId}["']`), `${label} must identify ${conceptId}`);
 
-    const colors = svg.match(/#[\dA-Fa-f]{6}\b/g) ?? [];
-    assert.ok(colors.length > 0, `${label} must use an approved color`);
-    for (const color of colors) {
-      assert.ok(APPROVED_COLORS.has(color.toUpperCase()), `${label} uses unapproved color ${color}`);
+    const colorAttrValues = [...svg.matchAll(/(?:fill|stroke)=["']([^"']+)["']/g)].map((match) => match[1]);
+    const colorValues = colorAttrValues.filter((value) => value !== "none");
+    assert.ok(colorValues.length > 0, `${label} must use an approved color`);
+    for (const value of colorValues) {
+      assert.ok(
+        /^#[\dA-Fa-f]{6}$/.test(value) && APPROVED_COLORS.has(value.toUpperCase()),
+        `${label} uses unapproved color value ${value}`
+      );
     }
   } catch (error) {
     failures.push(error.message);

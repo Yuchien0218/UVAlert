@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 520 112" role="img" data-concept="06-broadcast-mark">
+  <title>防曬晴報員 播報印記橫式標誌</title>
+  <desc>把陽光提醒濃縮成清楚的短報，包含獨立圖標、中文品牌名稱與英文副標。</desc>
+  <g transform="translate(24 24)">
+    <g fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="4">
+      <circle cx="18" cy="30" r="6" fill="#C1832E" stroke="none"/>
+      <path d="M28 22L52 14" stroke="#33291F"/>
+      <path d="M29 30H51" stroke="#33291F"/>
+      <path d="M27 38L46 46" stroke="#C1832E"/>
+    </g></g>
+  <text x="112" y="51" fill="#2E2925" font-family="'Noto Serif TC', serif" font-size="30" font-weight="500" lang="zh-Hant-TW">防曬晴報員</text>
+  <text x="114" y="79" fill="#9F5E42" font-family="Inter, sans-serif" font-size="15" font-weight="500" letter-spacing="1.8">UVAlert</text>
+</svg>

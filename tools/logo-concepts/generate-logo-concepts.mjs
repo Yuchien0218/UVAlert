@@ -6,6 +6,8 @@ const COLORS = Object.freeze({
   ivory: "#FAF5EC",
   terracotta: "#9F5E42",
   espresso: "#2E2925",
+  amberGold: "#C1832E",
+  warmInk: "#33291F",
 });
 
 const geometry = {
@@ -42,10 +44,10 @@ const geometry = {
     </g>`,
   broadcastMark: () => `
     <g fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="4">
-      <circle cx="18" cy="22" r="6" fill="${COLORS.terracotta}" stroke="none"/>
-      <path d="M30 22H49" stroke="${COLORS.espresso}"/>
-      <path d="M23 34H45" stroke="${COLORS.espresso}"/>
-      <path d="M17 46H37" stroke="${COLORS.terracotta}"/>
+      <circle cx="18" cy="30" r="6" fill="${COLORS.amberGold}" stroke="none"/>
+      <path d="M28 22L52 14" stroke="${COLORS.warmInk}"/>
+      <path d="M29 30H51" stroke="${COLORS.warmInk}"/>
+      <path d="M27 38L46 46" stroke="${COLORS.amberGold}"/>
     </g>`,
 };
 
@@ -73,7 +75,8 @@ function titleFor(concept, asset) {
 
 function renderMarkGeometry(concept, { monochrome = false } = {}) {
   const mark = concept.mark();
-  return monochrome ? mark.replaceAll(COLORS.terracotta, COLORS.espresso) : mark;
+  if (!monochrome) return mark;
+  return mark.replaceAll(COLORS.terracotta, COLORS.espresso).replaceAll(COLORS.amberGold, COLORS.warmInk);
 }
 
 export function renderMarkSvg(concept) {
@@ -124,14 +127,20 @@ export function renderBoardSvg(concepts = CONCEPTS) {
 }
 
 export function generateLogoConcepts(outputRoot = resolve("docs/design/logo-concepts")) {
-  const markDirectory = resolve(outputRoot, "marks");
+  const root = resolve(outputRoot);
+  const markDirectory = resolve(root, "marks");
+  const lockupDirectory = resolve(root, "lockups");
   mkdirSync(markDirectory, { recursive: true });
+  mkdirSync(lockupDirectory, { recursive: true });
 
   for (const concept of CONCEPTS) {
     writeFileSync(resolve(markDirectory, `${concept.fileStem}.svg`), renderMarkSvg(concept), "utf8");
+    writeFileSync(resolve(lockupDirectory, `${concept.fileStem}.svg`), renderLockupSvg(concept), "utf8");
   }
 
-  return { outputRoot: resolve(outputRoot), marks: CONCEPTS.length };
+  writeFileSync(resolve(root, "uvalert-logo-concepts-board.svg"), renderBoardSvg(CONCEPTS), "utf8");
+
+  return { outputRoot: root, marks: CONCEPTS.length, lockups: CONCEPTS.length, board: true };
 }
 
 const isDirectRun = process.argv[1] && fileURLToPath(import.meta.url) === resolve(process.argv[1]);

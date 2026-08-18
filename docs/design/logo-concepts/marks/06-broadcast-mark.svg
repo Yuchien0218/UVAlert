@@ -2,9 +2,9 @@
   <title>防曬晴報員 播報印記圖標</title>
   <desc>把陽光提醒濃縮成清楚的短報，以簡潔幾何呈現陽光與提醒節奏。</desc>
     <g fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="4">
-      <circle cx="18" cy="22" r="6" fill="#9F5E42" stroke="none"/>
-      <path d="M30 22H49" stroke="#2E2925"/>
-      <path d="M23 34H45" stroke="#2E2925"/>
-      <path d="M17 46H37" stroke="#9F5E42"/>
+      <circle cx="18" cy="30" r="6" fill="#C1832E" stroke="none"/>
+      <path d="M28 22L52 14" stroke="#33291F"/>
+      <path d="M29 30H51" stroke="#33291F"/>
+      <path d="M27 38L46 46" stroke="#C1832E"/>
     </g>
 </svg>

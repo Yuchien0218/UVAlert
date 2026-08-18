@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 520 112" role="img" data-concept="03-reapply-ring">
+  <title>防曬晴報員 補擦環橫式標誌</title>
+  <desc>用未完的節奏記住下一次補擦，包含獨立圖標、中文品牌名稱與英文副標。</desc>
+  <g transform="translate(24 24)">
+    <g fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="4">
+      <path d="M46.8 45.4A20 20 0 1 1 49.7 22.6" stroke="#2E2925"/>
+      <circle cx="32" cy="32" r="8" stroke="#9F5E42"/>
+      <circle cx="50" cy="20" r="3" fill="#9F5E42" stroke="none"/>
+    </g></g>
+  <text x="112" y="51" fill="#2E2925" font-family="'Noto Serif TC', serif" font-size="30" font-weight="500" lang="zh-Hant-TW">防曬晴報員</text>
+  <text x="114" y="79" fill="#9F5E42" font-family="Inter, sans-serif" font-size="15" font-weight="500" letter-spacing="1.8">UVAlert</text>
+</svg>

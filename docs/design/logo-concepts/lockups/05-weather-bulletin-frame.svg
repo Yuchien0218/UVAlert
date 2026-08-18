@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 520 112" role="img" data-concept="05-weather-bulletin-frame">
+  <title>防曬晴報員 晴報框橫式標誌</title>
+  <desc>像每日生活快報一樣整理陽光資訊，包含獨立圖標、中文品牌名稱與英文副標。</desc>
+  <g transform="translate(24 24)">
+    <g fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="4">
+      <path d="M17 42V18H41" stroke="#2E2925"/>
+      <circle cx="39" cy="30" r="9" stroke="#9F5E42"/>
+      <path d="M25 48H49" stroke="#9F5E42"/>
+    </g></g>
+  <text x="112" y="51" fill="#2E2925" font-family="'Noto Serif TC', serif" font-size="30" font-weight="500" lang="zh-Hant-TW">防曬晴報員</text>
+  <text x="114" y="79" fill="#9F5E42" font-family="Inter, sans-serif" font-size="15" font-weight="500" letter-spacing="1.8">UVAlert</text>
+</svg>
