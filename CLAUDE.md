@@ -8,17 +8,28 @@ Sunshield Advisor（產品名 UVAlert，中文名「防曬晴報員」）—— 
 
 ## 動手前必讀
 
+- **設計系統唯一權威**：根目錄 `DESIGN.md`——完整色彩 token、字體、間距、元件規範、圖示風格。要改任何視覺相關的東西，先讀這份。
 - **UX／IA 唯一現行基準**：`docs/decisions/2026-08-15-redesign-sitemap-userflow-current.md`
-- **視覺方向**：`docs/design/current-direction.md`（先讀 `docs/design/README.md` 這份索引）
+- **圖示系統**：`docs/design/icon-system/README.md`（幾何真實來源是 Illustrator，不要手改 SVG path）
 - **畫面真實來源只有兩個檔案**：`packages/ui/src/styles.css`（設計 token）與 `apps/web/src/assets/app.css`（共用樣式）。文件與程式碼衝突時以程式碼為準。
 - **`docs/archive/2026-08-pre-redesign/`** 是舊版 P0 規格、舊設計系統、舊 mockup 與截圖的歸檔，只能用來理解「當初為什麼這樣決定」，不可當作目前開發或設計依據。
 
-## 目前設計現況（2026-08-22，如有變動請更新這段）
+## 設計現況：文件是目標，程式碼還沒跟上
 
-- Logo 已定案為「06 播報印記」，配色是暖琥珀金 `#C1832E`、暖黑咖啡 `#33291F`、暖象牙 `#FAF5EC`（見 `docs/design/logo-concepts/README.md`）。
-- App icon／favicon／apple-touch-icon **已經**套用新 logo（commit `8355d11`）。
-- 但新配色**還沒**套進 `packages/ui/src/styles.css` 的品牌色 token，`apps/web/public/manifest.webmanifest` 的 `theme_color`／`background_color` 也還是舊的中性灰階 `#f9f9f9`。也就是說：icon 已換，配色沒換——不要假設兩者同步完成。
-- 若在文件裡看到「配色尚未定案」「icon 尚未套用」之類的敘述，先確認日期，很可能是還沒更新的舊敘述，而不是目前的真實狀態。
+`DESIGN.md` 的色彩與字體是**目標方向**，尚未套用到程式碼。**完整且維護中的落差對照表在 `DESIGN.md` 第十節「與程式碼的落差」——以那份為準，不要在別處另立一份。**
+
+兩件最容易搞混的事：
+
+1. **配色分兩套，範圍不同，不要混用**
+   - **介面**用暖象牙 `#FAF5EC` ＋ 深杏桃 `#9F5E42`（primary／行動色）＋ 深咖啡 `#2E2925`（DESIGN.md §二）
+   - **圖示與 Logo** 用墨咖 `#33291F` ＋ 琥珀金 `#C1832E`（DESIGN.md §八）
+   - 琥珀金 `#C1832E` 是圖示重點色，**不是**品牌主色。要填 primary token 時用 `#9F5E42`。
+
+2. **Logo／icon 已上線，介面配色沒有**
+   - App icon／favicon／apple-touch-icon 已套用 06 播報印記（commit `8355d11`）。
+   - 但 `packages/ui/src/styles.css` 仍是舊的中性灰階（`#f9f9f9`／`#121212`），`manifest.webmanifest` 的 `theme_color` 也還是 `#f9f9f9`。icon 換了不等於配色換了。
+
+若在文件裡看到「配色尚未定案」「icon 尚未套用」之類的敘述，先確認日期與出處，很可能是還沒更新的舊敘述。
 
 ## Session 衛生（這個專案的已知痛點）
 

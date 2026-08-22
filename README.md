@@ -17,8 +17,9 @@
 
 目前重新設計的唯一整合基準是：
 
+- `DESIGN.md`：設計系統唯一權威——色彩 token、字體、間距、元件與圖示規範。
 - `docs/decisions/2026-08-15-redesign-sitemap-userflow-current.md`：現行 Sitemap、User Flow、頁面任務與產品結構。
-- `docs/design/current-direction.md`：目前已確認的前端視覺方向。
+- `docs/design/current-direction.md`：品牌角色與區域視覺任務（色彩／字體細節以 `DESIGN.md` 為準）。
 - `docs/research/2026-08-13-uvalert-education-seo-aeo-geo.md`：衛教內容的 SEO／AEO／GEO 研究紀錄。
 - `docs/education/public-seo-implementation.md`：公開衛教頁、發布閘門、canonical、Schema、robots 與 sitemap 的實作規則。
 
@@ -32,7 +33,7 @@
 
 ## 修改畫面之前
 
-前端視覺設計資料請先讀 `docs/design/README.md` 與 `docs/design/current-direction.md`。
+前端視覺設計的唯一權威是根目錄的 `DESIGN.md`——完整色彩 token、字體、間距、元件規範與圖示風格，第十節列出目前與程式碼的落差。索引與周邊資料見 `docs/design/README.md`。
 
 目前畫面的真實來源只有兩個程式碼檔案：
 

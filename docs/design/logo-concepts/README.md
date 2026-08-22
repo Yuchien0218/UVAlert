@@ -1,6 +1,6 @@
 # UVAlert Logo 概念比較（第一輪）
 
-**狀態**：第一輪方向探索，尚未取代任何正式資產。目前未修改 PWA icon、favicon、wordmark 元件或正式設計 token。
+**狀態**：第一輪方向探索六款，已選定 06 播報印記為正式方向。PWA icon／favicon／apple-touch-icon 已於 2026-08-18（commit `8355d11`）正式套用；其餘五款維持探索留存，未取代任何正式資產。wordmark 元件與 `packages/ui/src/styles.css` 的正式設計 token 尚未套用新配色，見文末更新說明。
 
 依據規格：[`docs/superpowers/specs/2026-08-18-uvalert-logo-concepts-design.md`](../../superpowers/specs/2026-08-18-uvalert-logo-concepts-design.md)
 執行計畫：[`docs/superpowers/plans/2026-08-18-uvalert-logo-concepts.md`](../../superpowers/plans/2026-08-18-uvalert-logo-concepts.md)
