@@ -314,7 +314,7 @@ const groupNames = {
   bottom: -1.5rem;
   width: 8rem;
   height: 8rem;
-  color: var(--color-tracking);
+  color: var(--color-primary);
   opacity: 0.05;
   pointer-events: none;
 }

@@ -1,18 +1,50 @@
 :root {
   color-scheme: light;
 
-  /* IRKA-inspired brand primitives */
-  --color-paper: #f9f9f9;
-  --color-surface: #ffffff;
-  --color-ink: #121212;
-  --color-dark: #121817;
-  --color-deep: #0b0b0b;
-  --color-text-secondary: #5a5a5a;
-  --color-decoration-muted: #8f8f8f;
-  --color-line: #e3e3e3;
+  /*
+   * 品牌與表面色票，來源是根目錄 DESIGN.md 第二節。
+   * 改這裡之前先改 DESIGN.md——那份是設計系統的唯一權威。
+   *
+   * 注意：這裡是「介面」配色。圖示與 Logo 用另一套（墨咖 #33291F ＋
+   * 琥珀金 #C1832E，見 DESIGN.md 第八節），兩者範圍不同，不要互相代入。
+   */
+
+  /* 品牌與陽光 */
+  --color-primary: #9f5e42;
+  --color-primary-active: #804536;
+  --color-primary-disabled: #e8d1c5;
+  --color-apricot: #e8a477;
+  --color-blush: #d79a92;
+  --color-mauve: #8c6f7a;
+  --color-amber: #d9a35f;
+
+  /* 表面：暖象牙地板 → 奶油卡片 → 單一濃縮咖啡深色面板 */
+  --color-canvas: #faf5ec;
+  --color-surface-soft: #f7ede1;
+  --color-surface-card: #f0e2d1;
+  --color-surface-cream-strong: #efd0bc;
+  --color-surface-dark: #2e2925;
+  --color-surface-dark-elevated: #493732;
+  --color-surface-dark-soft: #241f1d;
+
+  /* 文字與分隔線 */
+  --color-ink: #2e2925;
+  --color-body: #5a4540;
+  --color-body-strong: #46342f;
+  --color-muted: #6f5a54;
+  --color-muted-soft: #856d65;
+  --color-hairline: #e7d8cf;
+  --color-hairline-soft: #f0e6de;
+  --color-on-primary: #fff8f0;
+  --color-on-dark: #fff8f0;
+  --color-on-dark-soft: #dcc7bc;
   --color-white: #ffffff;
 
-  /* Reminder semantics remain independent from brand color. */
+  /*
+   * 提醒狀態色與 UV 色階獨立於品牌色，DESIGN.md 第十節列為「已對齊」，
+   * 不要改。--color-tracking 是「追蹤中」這個狀態，不是行動色；
+   * 行動色請用 --color-primary。
+   */
   --color-tracking: #2f6fbb;
   --color-tracking-soft: #eaf3fc;
   --color-soon: #a86100;
@@ -29,14 +61,15 @@
   --color-uvi-very-high: #c43d3d;
   --color-uvi-extreme: #7d4bb3;
 
-  --page-background: var(--color-paper);
-  --surface-primary: var(--color-surface);
-  --surface-inverse: var(--color-dark);
+  --page-background: var(--color-canvas);
+  --surface-primary: var(--color-surface-card);
+  --surface-soft: var(--color-surface-soft);
+  --surface-inverse: var(--color-surface-dark);
   --text-primary: var(--color-ink);
-  --text-secondary: var(--color-text-secondary);
-  --text-inverse: var(--color-white);
-  --border-subtle: var(--color-line);
-  --focus-ring: var(--color-ink);
+  --text-secondary: var(--color-muted);
+  --text-inverse: var(--color-on-dark);
+  --border-subtle: var(--color-hairline);
+  --focus-ring: var(--color-primary);
 
   --font-sans:
     "Helvetica Neue", Inter, "Noto Sans TC", "PingFang TC",
@@ -59,6 +92,7 @@
   --space-10: 2.5rem;
   --space-12: 3rem;
 
+  --radius-xs: 0.25rem;
   --radius-sm: 0.5rem;
   --radius-md: 0.875rem;
   --radius-lg: 1.25rem;

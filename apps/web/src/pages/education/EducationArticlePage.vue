@@ -152,7 +152,7 @@ const relatedArticles = computed(() =>
 }
 
 .education-article-body :deep(a) {
-  color: var(--color-tracking);
+  color: var(--color-primary);
   text-underline-offset: 0.2em;
 }
 

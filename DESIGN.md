@@ -790,18 +790,22 @@ Cormorant Garamond 不可用時，**EB Garamond** 字重 500 加 -0.02em 字距�
 
 ## 十、與程式碼的落差
 
-`README.md` 訂有「文件與程式碼衝突時以程式碼為準」的規則。本文件的色彩與字體是**目標方向**，尚未套用到程式碼，因此以下落差是已知且刻意的：
+`README.md` 訂有「文件與程式碼衝突時以程式碼為準」的規則。本文件的**字體**仍是目標方向，尚未套用到程式碼；**色彩已於 2026-08-22 套用完畢**。目前剩下的落差：
 
 | 項目 | 本文件（目標） | `packages/ui/src/styles.css`（現況） |
 |---|---|---|
-| 底色 | `#FAF5EC` 暖象牙 | `#f9f9f9` 中性灰白 |
-| 主文字 | `#2E2925` 深咖 | `#121212` 近黑 |
-| 行動色 | `#9F5E42` 深杏桃 | 無 primary token，`.button--primary` 借用 `--color-tracking` 藍 |
 | 標題字體 | Cormorant Garamond ＋ Noto Serif TC | 無 serif token |
 | 內文字體 | Inter ＋ Noto Sans TC | `--font-sans` 首位是 Helvetica Neue |
-| 圓角 | 4 / 8 / 14 / 20 / pill | 8 / 14 / 20 / pill（無 xs） |
 
-**已對齊的部分**：UV 五級風險色、倒數五狀態語意色、內容最大寬度 752px、點擊目標 44px、間距基礎單位 4px、單一亮色主題、自訂圖示系統為唯一來源。
+字體之所以還沒動，是因為需要先解決 web font 載入與 CJK 備援測試（本節末的套用順序建議）。另外要注意：Google Fonts 不提供 `Noto Sans Mono CJK TC`，讀數字體的 CJK 備援需要另外確認。
+
+**已對齊的部分**：品牌與表面色票、行動色、文字色、圓角（含 4px xs）、UV 五級風險色、倒數五狀態語意色、內容最大寬度 752px、點擊目標 44px、間距基礎單位 4px、單一亮色主題、自訂圖示系統為唯一來源。
+
+> **2026-08-22 色彩套用**：`packages/ui/src/styles.css` 已改為本文件第二節的完整色票——品牌（primary／active／disabled ＋ 四個 accent）、表面（canvas 到三階深色）、文字與分隔線。語意別名一併重新指向：`--page-background` → canvas、`--text-primary` → ink、`--text-secondary` → muted、`--surface-primary` → surface-card、`--border-subtle` → hairline、`--focus-ring` → primary。`manifest.webmanifest` 的 `theme_color`／`background_color` 也換成 `#faf5ec`。
+>
+> **關鍵修正**：`.button--primary` 原本借用 `--color-tracking`（藍色，那其實是「追蹤中」的狀態色），已改用 `--color-primary`，並補上 active／disabled 狀態。`--color-tracking` 現在只剩狀態色用途。四個元件的「選取／連結／裝飾」用途也一併從 tracking 改為 primary。
+>
+> 對比度實測（暖象牙底）：主要按鈕 4.80:1、文字連結 4.66:1、焦點環 4.66:1、次要文字 5.92:1、標題 12.8–13.2:1，全數通過 WCAG AA。
 
 > **2026-08-22 更正**：「點擊目標 44px」先前寫成已對齊，但實際有三個元件用區域 CSS 覆寫把共用 `.button` 的 `min-height: var(--tap-target)` 壓成 `2.5rem`（40px）——`OutdoorContextCard`、`EveningUvPrompt`、`FiveDayUvCard`。三處皆已改為刪除該行、回歸共用 token（不是改寫成 44px，避免再寫死數值）。
 >
