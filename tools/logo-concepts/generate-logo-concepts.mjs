@@ -11,21 +11,19 @@ const COLORS = Object.freeze({
 });
 
 /**
- * 字標（「防曬晴報員」五個字）的字體。
+ * 這支腳本產生的是**六款概念的探索紀錄與比較板**，不是正式 Logo。
  *
- * 2026-08-22 從 Noto Serif TC 改為思源圓體：明體的尖角收筆與圖標的
- * 「實心圓點＋膠囊線條、端點全圓、不使用尖角」（DESIGN.md 第八節）互相
- * 打架。圓體是黑體的圓角版本——結構不變、只磨圓端點，正好呼應膠囊語言，
- * 又不會滑向可愛化（DESIGN.md 第一節「允許溫度，不允許可愛化」）。
+ * 正式橫式標誌在 `docs/design/logo/`，真實來源是 Illustrator（`.ai`），
+ * 字標已轉外框。**不要用這支腳本的輸出取代它**——腳本做不到 outline，
+ * 它的 <text> 依賴字體安裝。規則見 `docs/design/logo/README.md`。
  *
- * 這**只適用於字標**，不改內文與標題——那兩者仍依 DESIGN.md 第三節使用
- * 襯線體，Logo 有自己的字是正常的。
- *
- * 備援鏈的意義：思源圓體未安裝時退回 Noto Sans TC（結構相同，只少了圓角），
- * 不會掉到完全不同的字。**最終資產必須 outline 成路徑**，不可依賴字體安裝。
+ * 字標字體：源泉圓體（GenSenRounded）TW 月版。2026-08-22 從 Noto Serif TC
+ * 改過來，因為明體的尖角收筆與圖標的「實心圓點＋膠囊線條、端點全圓、
+ * 不使用尖角」（DESIGN.md 第八節）互相打架。備援鏈在字體未安裝時退回
+ * Noto Sans TC（結構相同，只少了圓角），不會掉到完全不同的字。
  */
 const WORDMARK_CJK_FONT =
-  "'Source Han Round TC', 'Noto Sans TC', 'Microsoft JhengHei', sans-serif";
+  "'GenSenRounded TW', 'GenSenRoundedTW-M', 'Noto Sans TC', 'Microsoft JhengHei', sans-serif";
 
 /** 比較板的說明文字（概念名稱、定位句）維持襯線體——那是文件排版，不是品牌資產。 */
 const BOARD_LABEL_FONT = "'Noto Serif TC', serif";

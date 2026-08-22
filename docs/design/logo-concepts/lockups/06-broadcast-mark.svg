@@ -8,6 +8,6 @@
       <path d="M32 32H46" stroke="#33291F"/>
       <path d="M29 40L38 45" stroke="#C1832E"/>
     </g></g>
-  <text x="113" y="51" fill="#2E2925" font-family="'Source Han Round TC', 'Noto Sans TC', 'Microsoft JhengHei', sans-serif" font-size="30" font-weight="500" letter-spacing="0.5" lang="zh-Hant-TW">防曬晴報員</text>
+  <text x="113" y="51" fill="#2E2925" font-family="'GenSenRounded TW', 'GenSenRoundedTW-M', 'Noto Sans TC', 'Microsoft JhengHei', sans-serif" font-size="30" font-weight="500" letter-spacing="0.5" lang="zh-Hant-TW">防曬晴報員</text>
   <text x="113" y="79" fill="#9F5E42" font-family="Inter, sans-serif" font-size="15" font-weight="500" letter-spacing="2.2">UVAlert</text>
 </svg>

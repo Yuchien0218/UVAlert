@@ -7,6 +7,6 @@
       <path d="M46 38V46H31" stroke="#2E2925"/>
       <circle cx="36" cy="31" r="8" stroke="#9F5E42"/>
     </g></g>
-  <text x="113" y="51" fill="#2E2925" font-family="'Source Han Round TC', 'Noto Sans TC', 'Microsoft JhengHei', sans-serif" font-size="30" font-weight="500" letter-spacing="0.5" lang="zh-Hant-TW">防曬晴報員</text>
+  <text x="113" y="51" fill="#2E2925" font-family="'GenSenRounded TW', 'GenSenRoundedTW-M', 'Noto Sans TC', 'Microsoft JhengHei', sans-serif" font-size="30" font-weight="500" letter-spacing="0.5" lang="zh-Hant-TW">防曬晴報員</text>
   <text x="113" y="79" fill="#9F5E42" font-family="Inter, sans-serif" font-size="15" font-weight="500" letter-spacing="2.2">UVAlert</text>
 </svg>
