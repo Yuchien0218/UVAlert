@@ -58,7 +58,7 @@ function getUnavailableMessage(error: UvForecastError): string {
     case "offline":
       return "目前離線，且這台裝置沒有仍可使用的五日預報。";
     case "storage_error":
-      return "目前無法讀取已保存的地區與預報資料。";
+      return "目前無法讀取已儲存的地區與預報資料。";
     case "network_error":
       return "暫時無法取得中央氣象署五日預報。";
     case "no_usable_data":
@@ -78,7 +78,7 @@ function getUnavailableMessage(error: UvForecastError): string {
     <div class="uv-forecast__heading">
       <div>
         <h2 id="five-day-uv-title" class="uv-forecast__title">
-          未來 5 天 UV
+          未來 5 天 UV 預報
         </h2>
       </div>
       <CloudSun :size="26" :stroke-width="1.5" aria-hidden="true" />
@@ -98,9 +98,9 @@ function getUnavailableMessage(error: UvForecastError): string {
       class="uv-forecast__state"
     >
       <span>
-        需先
+        請先
         <a class="text-link" href="#outdoor-context">設定地區</a>
-        方可查看五日紫外線預報。
+       ，才能查看五日 UV 預報。
       </span>
     </div>
 
@@ -125,10 +125,10 @@ function getUnavailableMessage(error: UvForecastError): string {
       <div class="uv-forecast__meta">
         <strong>{{ forecast.region.displayName }}</strong>
         <span v-if="phase === 'cached'" class="uv-forecast__badge">
-          已保存資料
+          已儲存資料
         </span>
         <span v-else class="uv-forecast__badge">
-          區域預報
+          地區預報
         </span>
       </div>
 
@@ -155,14 +155,14 @@ function getUnavailableMessage(error: UvForecastError): string {
       <p class="uv-forecast__source">
         {{ forecast.sourceDisplayName }}・F-D0047-091・白日時段
         <span>
-          更新
+          更新時間
           <span class="uv-forecast__updated-at stat-figure stat-figure--inline">
             {{ formatUpdatedAt(forecast.fetchedAt) }}
           </span>
         </span>
       </p>
       <p class="uv-forecast__note">
-        這是區域預報，不是即時測站觀測；UV 高低不會延長或縮短你的補擦計時。
+        這是依地區提供的預報，不是即時測站觀測；UV 高低不會延長或縮短你的補擦計時。
       </p>
     </template>
   </section>
@@ -217,8 +217,9 @@ function getUnavailableMessage(error: UvForecastError): string {
   color: var(--color-due);
 }
 
+/* 不要在這裡寫 min-height：.button 已經帶 min-height: var(--tap-target)，
+   區域覆寫只會把點擊目標壓到 44px 以下（先前是 2.5rem = 40px）。 */
 .uv-forecast__retry {
-  min-height: 2.5rem;
   padding: var(--space-3) var(--space-4);
   font-size: var(--font-size-body);
   font-weight: 500;

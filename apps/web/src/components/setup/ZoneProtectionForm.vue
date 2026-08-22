@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Check, ChevronDown, Sparkles } from "@lucide/vue";
+import { Sparkles } from "@lucide/vue";
 import type {
   SessionContext,
   SetupDraftV1,
@@ -16,11 +16,16 @@ import {
   type BodyZoneGroupId
 } from "../../features/setup/setupCatalog";
 
-type ProtectionMethodChoice =
-  | "sunscreen"
-  | "clothing"
-  | "clothing_sunscreen"
-  | "other_topical";
+/**
+ * 只選追蹤部位，不問防護方式。
+ *
+ * 2026-08-07 裁決：本 App 聚焦「擦防曬乳的補擦倒數」，逐部位詢問防護方式
+ * （已擦防曬／衣物覆蓋）過於瑣碎。追蹤中的部位一律視為外露且已擦防曬，
+ * 被衣物遮住的部位由使用者選擇不追蹤即可。
+ *
+ * Session 進行中臨時被遮住時不提供暫停：倒數照跑，誤差落在「提醒過頭」
+ * 而非「該提醒沒提醒」。
+ */
 
 interface Props {
   context: SessionContext;
@@ -50,16 +55,6 @@ const initialGroupIds = [
 const selectedGroupIds = shallowRef<BodyZoneGroupId[]>(
   initialGroupIds
 );
-const methodByGroup = shallowRef<
-  Partial<Record<BodyZoneGroupId, ProtectionMethodChoice | null>>
->(
-  Object.fromEntries(
-    initialGroupIds.map((groupId) => [
-      groupId,
-      methodForInitialGroup(groupId)
-    ])
-  )
-);
 const editing = shallowRef(props.initialZones.length > 0);
 const setupEntryMode = shallowRef(props.initialEntryMode);
 const suggestedPresetId = shallowRef(
@@ -76,47 +71,10 @@ const customLabel = shallowRef(
   props.initialZones.find((zone) => zone.bodyZoneCode === "custom")
     ?.customLabel ?? ""
 );
-const customMethod = shallowRef<ProtectionMethodChoice | null>(
-  methodForZone(
-    props.initialZones.find((zone) => zone.bodyZoneCode === "custom")
-  )
-);
 const formError = shallowRef<string | null>(null);
-
-function methodForInitialGroup(
-  groupId: BodyZoneGroupId
-): ProtectionMethodChoice | null {
-  const group = getBodyZoneGroup(groupId);
-  const choices = props.initialZones
-    .filter((zone) => group.zoneCodes.includes(zone.bodyZoneCode))
-    .map(methodForZone)
-    .filter(
-      (choice): choice is ProtectionMethodChoice => choice !== null
-    );
-  return new Set(choices).size === 1 ? (choices[0] ?? null) : null;
-}
-
-function methodForZone(
-  zone: SetupDraftZoneV1 | undefined
-): ProtectionMethodChoice | null {
-  if (zone === undefined) return null;
-  if (zone.skinExposureStatus === "clothing_covered") {
-    return zone.methodComponents.includes("sunscreen")
-      ? "clothing_sunscreen"
-      : "clothing";
-  }
-  return zone.methodComponents.includes("sunscreen")
-    ? "sunscreen"
-    : zone.methodComponents.includes("other_topical")
-      ? "other_topical"
-      : null;
-}
 
 function startWithPreset(decision: "accepted" | "adjusted"): void {
   selectedGroupIds.value = [...preset.groupIds];
-  methodByGroup.value = Object.fromEntries(
-    preset.groupIds.map((groupId) => [groupId, null])
-  );
   editing.value = true;
   setupEntryMode.value = "quick_preset";
   suggestedPresetId.value = preset.id;
@@ -127,7 +85,6 @@ function startWithPreset(decision: "accepted" | "adjusted"): void {
 
 function startSelfSelection(): void {
   selectedGroupIds.value = [];
-  methodByGroup.value = {};
   editing.value = true;
   setupEntryMode.value = "self_select";
   suggestedPresetId.value = null;
@@ -143,35 +100,9 @@ function toggleGroup(
   selectedGroupIds.value = checked
     ? [...selectedGroupIds.value, groupId]
     : selectedGroupIds.value.filter((id) => id !== groupId);
-  if (!checked) {
-    const nextMethods = { ...methodByGroup.value };
-    delete nextMethods[groupId];
-    methodByGroup.value = nextMethods;
-  }
   if (setupEntryMode.value === "quick_preset") {
     presetDecision.value = "adjusted";
   }
-}
-
-function setMethod(
-  groupId: BodyZoneGroupId,
-  method: ProtectionMethodChoice
-): void {
-  methodByGroup.value = {
-    ...methodByGroup.value,
-    [groupId]: method
-  };
-}
-
-function applyMethodToUnset(method: ProtectionMethodChoice): void {
-  methodByGroup.value = {
-    ...methodByGroup.value,
-    ...Object.fromEntries(
-      selectedGroupIds.value
-        .filter((groupId) => methodByGroup.value[groupId] == null)
-        .map((groupId) => [groupId, method])
-    )
-  };
 }
 
 function submit(): void {
@@ -179,36 +110,22 @@ function submit(): void {
     formError.value = "請至少選擇一個實際要追蹤的部位。";
     return;
   }
+  if (includeCustom.value && customLabel.value.trim() === "") {
+    formError.value = "請填寫其他部位名稱。";
+    return;
+  }
 
-  const incompleteGroup = selectedGroupIds.value.find(
-    (groupId) => methodByGroup.value[groupId] == null
+  const zones = selectedGroupIds.value.flatMap((groupId) =>
+    getBodyZoneGroup(groupId).zoneCodes.map((bodyZoneCode) =>
+      makeDraftZone(bodyZoneCode, bodyZoneCode, null)
+    )
   );
-  if (incompleteGroup !== undefined) {
-    formError.value = `請確認「${getBodyZoneGroup(incompleteGroup).label}」目前採用的方式。`;
-    return;
-  }
-  if (
-    includeCustom.value &&
-    (customLabel.value.trim() === "" || customMethod.value === null)
-  ) {
-    formError.value = "請填寫其他部位名稱並確認目前採用的方式。";
-    return;
-  }
-
-  const zones = selectedGroupIds.value.flatMap((groupId) => {
-    const group = getBodyZoneGroup(groupId);
-    const method = methodByGroup.value[groupId]!;
-    return group.zoneCodes.map((bodyZoneCode) =>
-      makeDraftZone(bodyZoneCode, bodyZoneCode, null, method)
-    );
-  });
   if (includeCustom.value) {
     zones.push(
       makeDraftZone(
         "custom-primary",
         "custom",
-        customLabel.value.trim(),
-        customMethod.value!
+        customLabel.value.trim()
       )
     );
   }
@@ -223,28 +140,18 @@ function submit(): void {
   });
 }
 
+/** 追蹤中的部位一律為外露且已擦防曬。 */
 function makeDraftZone(
   draftZoneKey: string,
   bodyZoneCode: SetupDraftZoneV1["bodyZoneCode"],
-  customLabelValue: string | null,
-  method: ProtectionMethodChoice
+  customLabelValue: string | null
 ): SetupDraftZoneV1 {
   return {
     draftZoneKey,
     bodyZoneCode,
     customLabel: customLabelValue,
-    skinExposureStatus:
-      method === "clothing" || method === "clothing_sunscreen"
-        ? "clothing_covered"
-        : "exposed",
-    methodComponents:
-      method === "clothing"
-        ? ["clothing"]
-        : method === "clothing_sunscreen"
-          ? ["clothing", "sunscreen"]
-          : method === "other_topical"
-            ? ["other_topical"]
-            : ["sunscreen"]
+    skinExposureStatus: "exposed",
+    methodComponents: ["sunscreen"]
   };
 }
 </script>
@@ -289,17 +196,13 @@ function makeDraftZone(
     </section>
 
     <template v-else>
-      <details
-        class="zone-groups app-card"
-        :open="setupEntryMode === 'self_select'"
-      >
-        <summary>
-          <span>
-            <strong>調整追蹤部位</strong>
-            <small>目前選擇 {{ selectedGroupIds.length }} 個大群組</small>
-          </span>
-          <ChevronDown :size="20" aria-hidden="true" />
-        </summary>
+      <section class="zone-groups app-card">
+        <div class="zone-groups__heading">
+          <h2>追蹤哪些部位？</h2>
+          <p>
+            選中的部位會開始補擦倒數。被衣物遮住、不需要提醒的部位不用選。
+          </p>
+        </div>
 
         <div class="zone-groups__list">
           <label
@@ -327,7 +230,7 @@ function makeDraftZone(
             <input v-model="includeCustom" type="checkbox">
             <span>
               <strong>其他部位</strong>
-              <small>自訂文字只保存在本機 Session。</small>
+              <small>自訂文字只儲存在這次提醒中。</small>
             </span>
           </label>
           <label v-if="includeCustom" class="field">
@@ -340,146 +243,7 @@ function makeDraftZone(
             >
           </label>
         </div>
-      </details>
-
-      <section class="batch-method app-card">
-        <div>
-          <p class="batch-method__eyebrow">批次設定</p>
-          <h2>先套用目前實際方式</h2>
-          <p>
-            只會填入尚未設定的部位，不會覆蓋你之後做的個別調整。
-          </p>
-        </div>
-        <div class="button-group">
-          <button
-            class="button button--quiet"
-            type="button"
-            @click="applyMethodToUnset('sunscreen')"
-          >
-            全部已擦防曬
-          </button>
-          <button
-            class="button button--quiet"
-            type="button"
-            @click="applyMethodToUnset('clothing')"
-          >
-            全部衣物覆蓋
-          </button>
-        </div>
       </section>
-
-      <section class="method-list" aria-labelledby="method-heading">
-        <p id="method-heading" class="method-list__heading">
-          目前防護方式
-        </p>
-
-        <article
-          v-for="groupId in selectedGroupIds"
-          :key="groupId"
-          class="method-card app-card"
-        >
-          <div class="method-card__title">
-            <span
-              v-if="methodByGroup[groupId]"
-              class="method-card__complete"
-            >
-              <Check :size="16" aria-hidden="true" />
-            </span>
-            <div>
-              <h3>{{ getBodyZoneGroup(groupId).label }}</h3>
-              <p>{{ getBodyZoneGroup(groupId).description }}</p>
-            </div>
-          </div>
-          <div class="method-card__options">
-            <label>
-              <input
-                type="radio"
-                :name="`method-${groupId}`"
-                value="sunscreen"
-                :checked="methodByGroup[groupId] === 'sunscreen'"
-                @change="setMethod(groupId, 'sunscreen')"
-              >
-              已擦防曬產品
-            </label>
-            <label>
-              <input
-                type="radio"
-                :name="`method-${groupId}`"
-                value="clothing"
-                :checked="methodByGroup[groupId] === 'clothing'"
-                @change="setMethod(groupId, 'clothing')"
-              >
-              被衣物完整遮住
-            </label>
-            <label>
-              <input
-                type="radio"
-                :name="`method-${groupId}`"
-                value="clothing_sunscreen"
-                :checked="
-                  methodByGroup[groupId] === 'clothing_sunscreen'
-                "
-                @change="setMethod(groupId, 'clothing_sunscreen')"
-              >
-              衣物下方也有擦防曬
-            </label>
-            <label class="method-card__secondary">
-              <input
-                type="radio"
-                :name="`method-${groupId}`"
-                value="other_topical"
-                :checked="
-                  methodByGroup[groupId] === 'other_topical'
-                "
-                @change="setMethod(groupId, 'other_topical')"
-              >
-              其他外用產品
-            </label>
-          </div>
-        </article>
-
-        <article v-if="includeCustom" class="method-card app-card">
-          <div class="method-card__title">
-            <div>
-              <h3>{{ customLabel || "其他部位" }}</h3>
-              <p>自訂部位</p>
-            </div>
-          </div>
-          <div class="method-card__options">
-            <label>
-              <input
-                v-model="customMethod"
-                type="radio"
-                name="method-custom"
-                value="sunscreen"
-              >
-              已擦防曬產品
-            </label>
-            <label>
-              <input
-                v-model="customMethod"
-                type="radio"
-                name="method-custom"
-                value="clothing"
-              >
-              被衣物完整遮住
-            </label>
-            <label>
-              <input
-                v-model="customMethod"
-                type="radio"
-                name="method-custom"
-                value="other_topical"
-              >
-              其他外用產品
-            </label>
-          </div>
-        </article>
-      </section>
-
-      <p class="safety-note">
-        請只在這個部位被衣物、帽子或其他穿戴物完整遮住時選擇。雨傘、建築物或樹蔭不算衣物遮蔽。
-      </p>
 
       <p v-if="formError" class="form-error" role="alert">
         {{ formError }}
@@ -497,8 +261,7 @@ function makeDraftZone(
 </template>
 
 <style scoped>
-.zone-form,
-.method-list {
+.zone-form {
   display: grid;
   gap: var(--space-5);
 }
@@ -520,31 +283,21 @@ function makeDraftZone(
   color: var(--color-soon);
 }
 
-.preset-card__eyebrow,
-.batch-method__eyebrow {
+.preset-card__eyebrow {
   margin: 0 0 var(--space-2);
   color: var(--text-secondary);
   font-size: 0.8rem;
   font-weight: 500;
 }
 
-.method-list__heading {
-  margin: 0;
-  font-size: 1.05rem;
-  font-weight: 600;
-  color: var(--text-primary);
-}
-
-.preset-card__title,
-.batch-method h2 {
+.preset-card__title {
   margin: 0;
   font-size: 1.5rem;
   font-weight: 500;
 }
 
 .preset-card__body,
-.preset-card__note,
-.batch-method p {
+.preset-card__note {
   margin: var(--space-3) 0 0;
   color: var(--text-secondary);
   line-height: 1.7;
@@ -568,45 +321,26 @@ button.text-link {
 }
 
 .zone-groups {
-  overflow: hidden;
-}
-
-.zone-groups summary {
-  display: flex;
-  min-height: 4.75rem;
-  align-items: center;
-  justify-content: space-between;
+  display: grid;
   gap: var(--space-4);
   padding: var(--space-5);
-  cursor: pointer;
-  list-style: none;
 }
 
-.zone-groups summary::-webkit-details-marker {
-  display: none;
-}
-
-.zone-groups summary strong,
-.zone-groups summary small {
-  display: block;
-}
-
-.zone-groups summary strong {
+.zone-groups__heading h2 {
+  margin: 0;
+  font-size: 1.15rem;
   font-weight: 500;
 }
 
-.zone-groups summary small {
-  margin-top: var(--space-1);
+.zone-groups__heading p {
+  margin: var(--space-2) 0 0;
   color: var(--text-secondary);
-}
-
-.zone-groups[open] summary {
-  border-bottom: 1px solid var(--border-subtle);
+  line-height: 1.7;
+  font-size: 0.875rem;
 }
 
 .zone-groups__list {
   display: grid;
-  padding: var(--space-3) var(--space-5) var(--space-5);
 }
 
 .zone-group-choice {
@@ -660,90 +394,9 @@ button.text-link {
   color: var(--text-primary);
 }
 
-.batch-method {
-  display: grid;
-  gap: var(--space-5);
-  padding: var(--space-5);
-}
-
-.method-card {
-  display: grid;
-  gap: var(--space-4);
-  padding: var(--space-5);
-}
-
-.method-card__title {
-  display: grid;
-  grid-template-columns: auto minmax(0, 1fr);
-  align-items: start;
-  gap: var(--space-3);
-}
-
-.method-card__complete {
-  display: grid;
-  width: 1.5rem;
-  height: 1.5rem;
-  place-content: center;
-  border-radius: 50%;
-  background: var(--color-success-soft);
-  color: var(--color-success);
-}
-
-.method-card h3,
-.method-card p {
-  margin: 0;
-}
-
-.method-card h3 {
-  font-size: 1.1rem;
-  font-weight: 500;
-}
-
-.method-card p {
-  margin-top: var(--space-1);
-  color: var(--text-secondary);
-  font-size: 0.8rem;
-}
-
-.method-card__options {
-  display: grid;
-  gap: var(--space-2);
-}
-
-.method-card__options label {
-  display: grid;
-  min-height: var(--tap-target);
-  grid-template-columns: auto minmax(0, 1fr);
-  align-items: center;
-  gap: var(--space-3);
-  padding: var(--space-3);
-  border: 1px solid var(--border-subtle);
-  border-radius: var(--radius-sm);
-  cursor: pointer;
-}
-
-.method-card__options label:has(input:checked) {
-  border-color: var(--text-primary);
-  background: var(--page-background);
-}
-
-.method-card__options input {
-  accent-color: var(--text-primary);
-}
-
-.method-card__secondary {
-  margin-top: var(--space-2);
-}
-
 .form-error {
   margin: 0;
   color: var(--color-due);
   line-height: 1.7;
-}
-
-@media (max-width: 31rem) {
-  .preset-card {
-    grid-template-columns: 1fr;
-  }
 }
 </style>

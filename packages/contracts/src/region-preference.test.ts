@@ -9,7 +9,7 @@ import {
 describe("region contracts", () => {
   it("accepts a compact region reference in a forecast response", () => {
     const forecast = FiveDayUvForecastSchema.parse({
-      schemaVersion: "five-day-uv-v1",
+      schemaVersion: "five-day-uv-v2",
       region: {
         regionCode: "63000010",
         displayName: "臺北市松山區"

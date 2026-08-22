@@ -16,6 +16,10 @@ import {
   type SetupDraftZoneV1,
   type StartSessionCommandV1
 } from "@sunshield/contracts";
+import {
+  makeSessionOnlyProductSnapshot,
+  type ProductClaimAnswer
+} from "./productSnapshot";
 import type {
   DeviceIdentityPort,
   LocalIdentityPort,
@@ -69,6 +73,12 @@ export interface WaterStartFormValue {
 
 export interface TimingDraftInput {
   productLabelSnapshot?: ProductLabelSnapshotV1;
+  /**
+   * 步驟 2 的單題快速確認。四題包裝標示裡只有這一題會決定能不能
+   * 產生倒數，其餘三題都接受「不確定」，因此併進流程內問，
+   * 不必為了開始提醒先跳到產品頁。快照由控制器以可信時鐘建立。
+   */
+  sunscreenClaim?: ProductClaimAnswer;
   appliedAt: string;
   waterStart: WaterStartFormValue | null;
 }
@@ -379,7 +389,7 @@ export function createSetupController(
       ];
     }
     if (topicalZones.length === 0) {
-      fieldErrors.zones = ["目前沒有需要記錄產品時間的部位。"];
+      fieldErrors.zones = ["目前沒有需要記錄防曬乳時間的部位。"];
     }
 
     if (draft.initialContext === "water_active") {
@@ -436,7 +446,19 @@ export function createSetupController(
       input.productLabelSnapshot ??
       draft.applications[0]?.productLabelSnapshot ??
       (await dependencies.productSettings?.getCurrentProductSnapshot()) ??
-      null;
+      (input.sunscreenClaim === undefined
+        ? null
+        : makeSessionOnlyProductSnapshot(
+            {
+              claimAnswer: input.sunscreenClaim,
+              waitAnswer: "unknown",
+              waitMinutes: null,
+              intervalAnswer: "unknown",
+              intervalMinutes: null,
+              waterResistance: "unknown"
+            },
+            trustedNow.toISOString()
+          ));
 
     if (
       !Number.isFinite(appliedAtMs) ||
@@ -447,13 +469,11 @@ export function createSetupController(
       ];
     }
     if (topicalZones.length === 0) {
-      fieldErrors.zones = ["目前沒有需要記錄產品的部位。"];
+      fieldErrors.zones = ["目前沒有需要記錄防曬乳的部位。"];
     }
-    if (productLabelSnapshot === null) {
-      fieldErrors.product = [
-        "請先到產品頁確認目前使用產品的包裝標示。"
-      ];
-    }
+    // 沒有可信的包裝標示不再阻擋建立提醒。少了標示只是產生不了
+    // 補擦倒數，Session 仍會以 untimed 卡片建立並引導補齊紀錄；
+    // 領域層的 StartSessionCommand 本來就允許 applicationGroup 為 null。
 
     if (draft.initialContext === "water_active") {
       if (input.waterStart === null) {
@@ -488,15 +508,20 @@ export function createSetupController(
     return persistDraft({
       ...draft,
       currentStep: "review",
-      applications: [
-        {
-          draftApplicationKey: dependencies.createId(),
-          draftZoneKeys: topicalZones.map((zone) => zone.draftZoneKey),
-          sourceProductId: null,
-          productSnapshotFingerprint: dependencies.createId(),
-          productLabelSnapshot: productLabelSnapshot!
-        }
-      ],
+      applications:
+        productLabelSnapshot === null
+          ? []
+          : [
+              {
+                draftApplicationKey: dependencies.createId(),
+                draftZoneKeys: topicalZones.map(
+                  (zone) => zone.draftZoneKey
+                ),
+                sourceProductId: null,
+                productSnapshotFingerprint: dependencies.createId(),
+                productLabelSnapshot
+              }
+            ],
       pendingTiming: {
         appliedAt: applicationTimeState.value,
         waterStart: waterStartState.value
@@ -617,7 +642,7 @@ export function createSetupController(
     ) {
       fieldErrors.waterStart = [
         waterEligibleDraftZones.length === 0
-          ? "已在水中的提醒至少需要一個外露且已擦防曬產品的部位。"
+          ? "已在水中的提醒至少需要一個外露且已擦防曬乳的部位。"
           : "請重新確認入水時間，或選擇不確定。"
       ];
     }
@@ -635,8 +660,10 @@ export function createSetupController(
       ])
     );
 
+    // 沒有塗抹部位、或沒有可信包裝標示時都不送出 applicationGroup：
+    // 前者沒東西可記，後者記了也產不出期限，reducer 會改走 untimed。
     const applicationGroup =
-      topicalZones.length === 0
+      topicalZones.length === 0 || draft.applications.length === 0
         ? null
         : {
             groupId: dependencies.createId(),

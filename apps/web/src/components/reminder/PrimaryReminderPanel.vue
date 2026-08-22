@@ -7,8 +7,10 @@ import type {
 import type { ConnectivityStatus } from "@sunshield/platform";
 import { computed } from "vue";
 import { useCurrentTime } from "../../composables/useCurrentTime";
-import { calculateRemainingProgress } from "../../features/reminder/homeReminderClockPresentation";
-import { buildReminderPresentation } from "../../features/reminder/reminderPresentation";
+import {
+  buildReminderPresentation,
+  type SecondaryActionKind
+} from "../../features/reminder/reminderPresentation";
 import ReminderPanel from "./ReminderPanel.vue";
 
 interface Props {
@@ -21,6 +23,7 @@ const props = defineProps<Props>();
 
 const emit = defineEmits<{
   action: [kind: ActionKind];
+  secondaryAction: [kind: SecondaryActionKind];
 }>();
 
 const currentTime = useCurrentTime();
@@ -34,38 +37,12 @@ const presentation = computed(() =>
   })
 );
 
-const countdownProgress = computed(() => {
-  if (presentation.value.tone === "due") return 0;
-  const actionAt = props.primaryAction.actionAt;
-  if (actionAt === null) return null;
-  const dueMs = Date.parse(actionAt);
-  if (!Number.isFinite(dueMs)) return null;
-  const affectedZone = props.zones.find(
-    (zone) =>
-      props.primaryAction.affectedZoneInstanceIds.includes(
-        zone.zoneInstanceId
-      ) && zone.zoneTimerStartedAt !== null
-  );
-  if (affectedZone === undefined) return null;
-  return calculateRemainingProgress(
-    affectedZone.zoneTimerStartedAt,
-    dueMs,
-    currentTime.value.getTime()
-  );
-});
-
-const countdownProgressPercent = computed(() =>
-  countdownProgress.value === null
-    ? null
-    : Math.round(countdownProgress.value * 100)
-);
 </script>
 
 <template>
   <ReminderPanel
     :presentation="presentation"
-    :remaining-fraction="countdownProgress"
-    :progress-percent="countdownProgressPercent"
     @action="emit('action', $event)"
+    @secondary-action="emit('secondaryAction', $event)"
   />
 </template>

@@ -52,16 +52,12 @@ async function cancel(): Promise<void> {
   await router.replace({ name: "reminder" });
 }
 
+/** 兩步流程後只剩 context 與 timing；舊草稿的 review 一律回 timing。 */
 function routeForStep(
   step: SetupDraftStep
 ): { name: string } {
   return {
-    name:
-      step === "context"
-        ? "setup-context"
-        : step === "review"
-          ? "setup-review"
-          : "setup-timing"
+    name: step === "context" ? "setup-context" : "setup-timing"
   };
 }
 </script>
@@ -69,7 +65,8 @@ function routeForStep(
 <template>
   <SetupStepShell
     :step="1"
-    eyebrow="Setup / Context"
+    :max-step="2"
+    eyebrow="開始提醒／情境"
     title="你現在主要在哪種情境？"
     description="選擇最符合這次活動的情境；這只會決定接下來要確認哪些資料。"
     :save-status="setup.saveStatus.value"
@@ -115,7 +112,7 @@ function routeForStep(
         class="form-error"
         role="status"
       >
-        草稿目前無法保存；畫面內容仍會保留，你可以再試一次。
+        設定內容目前無法儲存；畫面內容仍會保留，你可以再試一次。
       </p>
     </template>
 

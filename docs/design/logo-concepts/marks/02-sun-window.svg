@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" data-concept="02-sun-window">
+  <title>防曬晴報員 晴窗圖標</title>
+  <desc>打開一扇生活化的陽光情報窗，以簡潔幾何呈現陽光與提醒節奏。</desc>
+    <g fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="4">
+      <path d="M17 46V18H46V29" stroke="#2E2925"/>
+      <path d="M46 38V46H31" stroke="#2E2925"/>
+      <circle cx="36" cy="31" r="8" stroke="#9F5E42"/>
+    </g>
+</svg>

@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vue-tsc --noEmit -p tsconfig.json && vite build",
+    "build": "node ../../tools/education/generate-content.mjs && vue-tsc --noEmit -p tsconfig.json && vite build && node ../../tools/education/generate-public-site.mjs",
     "typecheck": "vue-tsc --noEmit -p tsconfig.json"
   },
   "dependencies": {
@@ -17,7 +17,8 @@
     "@turf/boolean-point-in-polygon": "^7.3.5",
     "@turf/helpers": "^7.3.5",
     "vue": "^3.5.0",
-    "vue-router": "^4.5.0"
+    "vue-router": "^4.5.0",
+    "@supabase/supabase-js": "^2.57.0"
   },
   "devDependencies": {
     "@sunshield/test-fixtures": "workspace:*",

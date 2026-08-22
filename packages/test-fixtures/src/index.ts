@@ -16,6 +16,8 @@ import {
   StartSessionCommandV1Schema
 } from "@sunshield/contracts";
 
+export * from "./sync";
+
 export function makeClock(
   trustedNow = "2026-07-29T11:00:00.000Z",
   overrides: Partial<ReducerClock> = {}
@@ -216,35 +218,40 @@ export function makeFiveDayUvForecast(
       validFrom: "2026-07-30T22:00:00.000Z",
       validTo: "2026-07-31T10:00:00.000Z",
       uvi: 8,
-      riskLevel: "very_high"
+      riskLevel: "very_high",
+      temperatureCelsius: 34
     },
     {
       localDate: "2026-08-01",
       validFrom: "2026-07-31T22:00:00.000Z",
       validTo: "2026-08-01T10:00:00.000Z",
       uvi: 7,
-      riskLevel: "high"
+      riskLevel: "high",
+      temperatureCelsius: 32
     },
     {
       localDate: "2026-08-02",
       validFrom: "2026-08-01T22:00:00.000Z",
       validTo: "2026-08-02T10:00:00.000Z",
       uvi: 5,
-      riskLevel: "moderate"
+      riskLevel: "moderate",
+      temperatureCelsius: 29
     },
     {
       localDate: "2026-08-03",
       validFrom: "2026-08-02T22:00:00.000Z",
       validTo: "2026-08-03T10:00:00.000Z",
       uvi: 11,
-      riskLevel: "extreme"
+      riskLevel: "extreme",
+      temperatureCelsius: 36
     },
     {
       localDate: "2026-08-04",
       validFrom: "2026-08-03T22:00:00.000Z",
       validTo: "2026-08-04T10:00:00.000Z",
       uvi: 2,
-      riskLevel: "low"
+      riskLevel: "low",
+      temperatureCelsius: 24
     }
   ];
 

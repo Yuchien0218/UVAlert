@@ -1,10 +1,12 @@
 import {
   BroadcastChannelNotifier,
+  LocalDataRepository,
   LocalProductSettingsRepository,
   LocalProductCatalogRepository,
   LocalRegionPreferenceRepository,
   LocalSetupDraftRepository,
   LocalSessionRepository,
+  LocalSyncRepository,
   LocalWeatherForecastRepository,
   SunshieldDatabase
 } from "@sunshield/persistence-web";
@@ -12,17 +14,16 @@ import { BrowserConnectivity } from "../adapters/BrowserConnectivity";
 import { BrowserLifecycle } from "../adapters/BrowserLifecycle";
 import { IndexedDbLocalIdentity } from "../adapters/IndexedDbLocalIdentity";
 import { BrowserUvForecastClient } from "../adapters/BrowserUvForecastClient";
+import { BrowserFeedbackClient } from "../adapters/BrowserFeedbackClient";
 import { BrowserGeolocation } from "../adapters/BrowserGeolocation";
+import { createSupabaseAuthAdapter } from "../adapters/SupabaseAuthAdapter";
+import { createSupabaseCloudSyncAdapter } from "../adapters/SupabaseCloudSyncAdapter";
 import regionIndex from "../generated/region-index.generated.json";
 import regionManifest from "../generated/region-manifest.generated.json";
 import {
   createAppBootController,
   type AppBootController
 } from "./createAppBootController";
-import {
-  createAppearanceController,
-  type AppearanceController
-} from "./createAppearanceController";
 import {
   createSetupController,
   type SetupController
@@ -48,17 +49,54 @@ import {
   createReapplicationController,
   type ReapplicationController
 } from "../features/reapplication/createReapplicationController";
+import {
+  createContextEventController,
+  type ContextEventController
+} from "../features/reminder/createContextEventController";
+import {
+  createEventCorrectionController,
+  type EventCorrectionController
+} from "../features/reminder/createEventCorrectionController";
+import {
+  createLocalDataController,
+  type LocalDataController
+} from "../features/settings/createLocalDataController";
+import { downloadTextFile } from "../helpers/downloadTextFile";
+import {
+  createSessionEventsController,
+  type SessionEventsController
+} from "../features/reminder/createSessionEventsController";
 import type { RegionDirectoryEntry } from "../features/region/TaiwanRegionResolver";
+import {
+  createAuthController,
+  type AuthController
+} from "../features/auth/createAuthController";
+import {
+  createSyncController,
+  type SyncController
+} from "../features/sync/createSyncController";
+import {
+  createFeedbackController,
+  type FeedbackController
+} from "../features/feedback/createFeedbackController";
+import type { CloudSyncPort } from "@sunshield/platform";
 
 export interface WebAppServices {
   readonly boot: AppBootController;
-  readonly appearance: AppearanceController;
   readonly setup: SetupController;
   readonly productSettings: ProductSettingsController;
   readonly sessionControl: SessionControlController;
   readonly uvForecast: UvForecastController;
   readonly region: RegionController;
   readonly reapplication: ReapplicationController;
+  readonly contextEvent: ContextEventController;
+  readonly localData: LocalDataController;
+  readonly eventCorrection: EventCorrectionController;
+  readonly sessionEvents: SessionEventsController;
+  readonly auth: AuthController;
+  readonly sync: SyncController;
+  readonly cloudSync: CloudSyncPort;
+  readonly feedback: FeedbackController;
   dispose(): void;
 }
 
@@ -86,6 +124,23 @@ export function createWebAppServices(
     database,
     createId
   });
+  const localSync = new LocalSyncRepository({
+    database,
+    localVisitorId: () => identity.getOrCreateLocalVisitorId()
+  });
+  const authPort = createSupabaseAuthAdapter();
+  const auth = createAuthController({ auth: authPort, local: localSync });
+  const cloudSync = createSupabaseCloudSyncAdapter({ auth: authPort });
+  const sync = createSyncController({
+    local: localSync,
+    cloud: cloudSync,
+    createId,
+    now: () => new Date().toISOString()
+  });
+  const feedback = createFeedbackController({
+    feedback: new BrowserFeedbackClient(),
+    appVersion: "web-v1"
+  });
   const boot = createAppBootController({
     contextId,
     repository,
@@ -94,7 +149,6 @@ export function createWebAppServices(
     lifecycle,
     crossContext: notifier
   });
-  const appearance = createAppearanceController();
   const productRepository =
     new LocalProductSettingsRepository(database);
   const productCatalog = new LocalProductCatalogRepository(database);
@@ -129,6 +183,32 @@ export function createWebAppServices(
     createId,
     now: () => new Date(),
     getConnectivity: () => boot.connectivity.value
+  });
+  const eventCorrection = createEventCorrectionController({
+    repository,
+    identity,
+    boot,
+    createId,
+    now: () => new Date(),
+    getConnectivity: () => boot.connectivity.value
+  });
+  const localData = createLocalDataController({
+    repository: new LocalDataRepository({ database, createId }),
+    boot,
+    now: () => new Date(),
+    saveFile: downloadTextFile
+  });
+  const contextEvent = createContextEventController({
+    repository,
+    identity,
+    boot,
+    createId,
+    now: () => new Date(),
+    getConnectivity: () => boot.connectivity.value
+  });
+  const sessionEvents = createSessionEventsController({
+    repository,
+    identity
   });
   const directory: readonly RegionDirectoryEntry[] = regionIndex;
   const directoryByCode = new Map(
@@ -169,21 +249,34 @@ export function createWebAppServices(
 
   return {
     boot,
-    appearance,
     setup,
     productSettings,
     sessionControl,
     uvForecast,
     region,
     reapplication,
+    contextEvent,
+    localData,
+    eventCorrection,
+    sessionEvents,
+    auth,
+    sync,
+    cloudSync,
+    feedback,
     dispose(): void {
+      sync.dispose();
+      feedback.dispose();
+      auth.dispose();
+      sessionEvents.dispose();
+      localData.dispose();
+      eventCorrection.dispose();
+      contextEvent.dispose();
       reapplication.dispose();
       region.dispose();
       uvForecast.dispose();
       sessionControl.dispose();
       setup.dispose();
       productSettings.dispose();
-      appearance.dispose();
       boot.dispose();
       notifier.close();
       database.close();

@@ -102,7 +102,7 @@ onBeforeUnmount(releasePageLock);
           <header class="sheet__header">
             <div>
               <h2 id="protection-sheet-title">
-                調整部位與防護方式
+                調整要提醒的部位
               </h2>
             </div>
             <button
@@ -126,7 +126,7 @@ onBeforeUnmount(releasePageLock);
                 draft.suggestedPresetVersion
               "
               :initial-preset-decision="draft.presetDecision"
-              submit-label="完成調整"
+              submit-label="儲存調整"
               @submit="emit('save', $event)"
             />
             <button

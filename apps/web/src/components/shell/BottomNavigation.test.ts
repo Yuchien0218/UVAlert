@@ -27,7 +27,7 @@ describe("BottomNavigation", () => {
       }
     } as unknown as WebAppServices);
   });
-  it("提供首頁、提醒、產品與更多四個主要入口", async () => {
+  it("提供提醒、裝備與更多三個主要入口", async () => {
     const router = createRouter({
       history: createMemoryHistory(),
       routes: [
@@ -48,9 +48,8 @@ describe("BottomNavigation", () => {
     expect(
       links.map((link) => [link.text(), link.attributes("href")])
     ).toEqual([
-      ["首頁", "/"],
-      ["提醒", "/reminder"],
-      ["產品", "/products"],
+      ["提醒", "/"],
+      ["裝備", "/products"],
       ["更多", "/more"]
     ]);
   });
@@ -174,11 +173,8 @@ describe("BottomNavigation", () => {
     // 紅點是 aria-hidden 的純視覺標記，狀態必須另外進到可及名稱，
     // 否則顏色與形狀就是唯一載體。
     expect(badge.attributes("aria-hidden")).toBe("true");
-    expect(
-      wrapper.get('a[href="/reminder"]').attributes("aria-label")
-    ).toBe("提醒（有部位建議現在處理）");
     expect(wrapper.get('a[href="/"]').attributes("aria-label")).toBe(
-      "首頁"
+      "提醒（有部位建議現在補擦）"
     );
   });
 });

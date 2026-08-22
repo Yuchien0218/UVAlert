@@ -22,15 +22,15 @@ describe("ReminderEmptyState", () => {
       "empty-state__action--compact"
     );
     expect(wrapper.get(".empty-state__title").text()).toBe(
-      "尚未建立提醒"
+      "還沒有開始防曬提醒"
     );
     expect(wrapper.get(".empty-state__body").text()).toBe(
-      "建立提醒以追蹤各部位狀態與補擦時機。"
+      "開始提醒後，就能追蹤各部位的補擦時間。"
     );
     expect(wrapper.get(".empty-state__title").classes()).toContain(
       "empty-state__title--single-line"
     );
-    expect(wrapper.text()).toContain("新增提醒");
+    expect(wrapper.text()).toContain("開始防曬提醒");
     expect(
       wrapper.getComponent(RouterLinkStub).props("to")
     ).toBe("/setup");

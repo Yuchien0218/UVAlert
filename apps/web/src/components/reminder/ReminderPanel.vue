@@ -1,21 +1,19 @@
 <script setup lang="ts">
 import { CheckCircle2 } from "@lucide/vue";
-import type { ReminderPresentation } from "../../features/reminder/reminderPresentation";
-import CountdownSunTime from "./CountdownSunTime.vue";
+import type {
+  ReminderPresentation,
+  SecondaryActionKind
+} from "../../features/reminder/reminderPresentation";
 
 interface Props {
   presentation: ReminderPresentation;
-  remainingFraction?: number | null;
-  progressPercent?: number | null;
 }
 
-const props = withDefaults(defineProps<Props>(), {
-  remainingFraction: null,
-  progressPercent: null
-});
+const props = defineProps<Props>();
 
 const emit = defineEmits<{
   action: [kind: ReminderPresentation["actionKind"]];
+  secondaryAction: [kind: SecondaryActionKind];
 }>();
 
 function isClockTime(value: string): boolean {
@@ -93,15 +91,19 @@ function getEyebrowText(): string {
         'reminder-panel__content--with-countdown': hasCountdown()
       }"
     >
-      <div v-if="hasCountdown()" class="reminder-panel__time-group">
-        <CountdownSunTime
-          :remaining-fraction="remainingFraction"
-          :progress-percent="progressPercent"
-          :remaining-minutes="presentation.remainingMinutes ?? 0"
-          :progress-aria-label="presentation.ariaLabel"
-          :time-label="getTimeLabel()"
-        />
-      </div>
+      <!--
+        提醒頁是完整狀態頁，倒數環留在首頁（S-01 資訊順序第 1 項）。
+        這裡只用一行摘要，避免兩頁各放一個一模一樣的大環。
+      -->
+      <p
+        v-if="hasCountdown()"
+        class="reminder-panel__countdown-summary"
+        :aria-label="presentation.ariaLabel"
+      >
+        <span class="stat-figure">{{ presentation.remainingMinutes ?? 0 }}</span>
+        <span class="reminder-panel__countdown-unit">分鐘</span>
+        <span class="reminder-panel__countdown-time">{{ getTimeLabel() }}</span>
+      </p>
 
       <div
         class="reminder-panel__message"
@@ -127,6 +129,25 @@ function getEyebrowText(): string {
       <CheckCircle2 v-if="presentation.tone !== 'untimed'" :size="18" aria-hidden="true" />
       {{ presentation.actionLabel }}
     </button>
+
+    <!--
+      次要 CTA 排在主要操作之後，層級明確。
+      AC-65 要求操作按鈕有清楚層級；急症等主要行動不得被次要內容延後。
+    -->
+    <div
+      v-if="presentation.secondaryActions.length > 0"
+      class="reminder-panel__secondary"
+    >
+      <button
+        v-for="secondary in presentation.secondaryActions"
+        :key="secondary.kind"
+        class="button button--quiet"
+        type="button"
+        @click="emit('secondaryAction', secondary.kind)"
+      >
+        {{ secondary.label }}
+      </button>
+    </div>
   </article>
 </template>
 
@@ -162,9 +183,17 @@ function getEyebrowText(): string {
   grid-column: 1 / -1;
 }
 
-.reminder-panel__time-group {
-  display: grid;
-  justify-items: center;
+.reminder-panel__countdown-summary {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-2);
+  margin: 0;
+  flex-wrap: wrap;
+}
+
+.reminder-panel__countdown-unit,
+.reminder-panel__countdown-time {
+  color: var(--text-secondary);
 }
 
 .reminder-panel__title {
@@ -203,6 +232,17 @@ function getEyebrowText(): string {
   color: var(--color-white);
 }
 
+.reminder-panel__secondary {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  margin-top: var(--space-3);
+}
+
+.reminder-panel__secondary .button {
+  flex: 1 1 auto;
+}
+
 .reminder-panel--untimed .reminder-panel__action {
   background: inherit;
   border-color: inherit;
@@ -214,9 +254,5 @@ function getEyebrowText(): string {
     grid-template-columns: 1fr;
   }
 
-  .reminder-panel__time-group {
-    justify-self: start;
-    justify-items: start;
-  }
 }
 </style>

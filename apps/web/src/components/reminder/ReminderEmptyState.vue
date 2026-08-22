@@ -26,17 +26,17 @@ import { ArrowRight } from "@lucide/vue";
     </svg>
     <div>
       <h2 class="empty-state__title empty-state__title--single-line">
-        尚未建立提醒
+        還沒有開始防曬提醒
       </h2>
       <p class="empty-state__body">
-        建立提醒以追蹤各部位狀態與補擦時機。
+        開始提醒後，就能追蹤各部位的補擦時間。
       </p>
     </div>
     <RouterLink
       class="button button--primary empty-state__action empty-state__action--compact"
       to="/setup"
     >
-      新增提醒
+      開始防曬提醒
       <ArrowRight :size="18" aria-hidden="true" />
     </RouterLink>
   </section>

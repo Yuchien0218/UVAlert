@@ -8,6 +8,26 @@ import type { ConnectivityStatus } from "@sunshield/platform";
 
 export type ReminderTone = "timed" | "soon" | "due" | "untimed";
 
+/**
+ * S-07 的四則次要 CTA（2026-08-07 裁決）。
+ *
+ * 全數指向既有畫面或原地行為，不新增畫面——與 13 個 ActionKind 裁決同一原則。
+ */
+export type SecondaryActionKind =
+  /** 查看最近紀錄 → 本頁最近事件清單（原地錨點並展開） */
+  | "view_saved_records"
+  /** 查看處理說明 → S-17 特殊狀況 */
+  | "view_handling_guidance"
+  /** 更新防護紀錄 → S-08 首次記錄變體 */
+  | "update_protection_record"
+  /** 更新防護方式 → S-04 原地 sheet */
+  | "update_protection_method";
+
+export interface SecondaryAction {
+  kind: SecondaryActionKind;
+  label: string;
+}
+
 export interface ReminderPresentation {
   tone: ReminderTone;
   eyebrow: string;
@@ -18,9 +38,25 @@ export interface ReminderPresentation {
   actionLabel: string;
   actionKind: ActionKind;
   ariaLabel: string;
+  /** 沒有適用的次要 CTA 時為空陣列，不佔版位。 */
+  secondaryActions: SecondaryAction[];
 }
 
-const BODY_ZONE_LABELS: Record<BodyZoneCode, string> = {
+const SECONDARY_ACTION_LABELS: Record<SecondaryActionKind, string> = {
+  view_saved_records: "查看最近紀錄",
+  view_handling_guidance: "查看處理說明",
+  update_protection_record: "更新防護紀錄",
+  update_protection_method: "更新防護方式"
+};
+
+function secondary(...kinds: SecondaryActionKind[]): SecondaryAction[] {
+  return kinds.map((kind) => ({
+    kind,
+    label: SECONDARY_ACTION_LABELS[kind]
+  }));
+}
+
+export const BODY_ZONE_LABELS: Record<BodyZoneCode, string> = {
   face_forehead: "額頭",
   face_nose_cheeks: "鼻部與雙頰",
   face_lower: "臉部下半部",
@@ -36,7 +72,7 @@ const BODY_ZONE_LABELS: Record<BodyZoneCode, string> = {
   hand_backs: "手背",
   legs: "腿部",
   feet: "足部",
-  custom: "自訂部位"
+  custom: "其他部位"
 };
 
 const ACTION_LABELS: Record<ActionKind, string> = {
@@ -49,9 +85,9 @@ const ACTION_LABELS: Record<ActionKind, string> = {
   view_protection_options: "查看防護選項",
   resolve_water_start: "處理入水時間",
   resolve_cause: "查看原因",
-  record_reapplication: "記錄已補擦",
-  view_product_label: "查看產品標示",
-  report_context_event: "回報狀況",
+  record_reapplication: "記錄補擦",
+  view_product_label: "查看防曬乳標示",
+  report_context_event: "記錄狀況",
   review_required_zones: "查看需要處理的部位"
 };
 
@@ -116,14 +152,15 @@ export function buildReminderPresentation(options: {
     if (isSoon) {
       return {
         tone: "soon",
-        eyebrow: "即將需要檢查",
-        title: `${zoneLabel}接近建議補擦時間`,
+        eyebrow: "快到補擦時間",
+        title: `${zoneLabel}快到補擦時間`,
         body: `晴報員提醒：可以準備補擦了。預計時間 ${absoluteTime}。`,
         timeLabel: absoluteTime,
         remainingMinutes,
         actionLabel,
         actionKind: primaryAction.actionKind,
-        ariaLabel: `${zoneLabel}即將需要檢查或補擦，預計 ${absoluteTime}。`
+        ariaLabel: `${zoneLabel}快到補擦時間，預計 ${absoluteTime}。`,
+        secondaryActions: []
       };
     }
 
@@ -134,27 +171,29 @@ export function buildReminderPresentation(options: {
     return {
       tone: "timed",
       eyebrow: "提醒進行中",
-      title: "接下來需要檢查",
+      title: "接下來需要補擦",
       body: "請依產品標示使用，並搭配遮蔭、衣物、帽子或太陽眼鏡。",
       timeLabel: absoluteTime,
       remainingMinutes,
       actionLabel,
       actionKind: primaryAction.actionKind,
-      ariaLabel: `${zoneLabel}提醒進行中，約在${relativeTime}需要檢查，預計 ${absoluteTime}。`
+      ariaLabel: `${zoneLabel}提醒進行中，約在${relativeTime}需要檢查，預計 ${absoluteTime}。`,
+      secondaryActions: []
     };
   }
 
   if (primaryAction.presentationType === "due_card") {
     return {
       tone: "due",
-      eyebrow: "建議現在處理",
+      eyebrow: "建議現在補擦",
       title: `${zoneLabel}建議現在補擦`,
-      body: "已到建議檢查時間。請依實際情況與產品標示確認是否重新塗抹。",
+      body: "已到建議補擦時間。請依實際情況與產品標示，確認是否需要補擦。",
       timeLabel: "現在",
       remainingMinutes: 0,
       actionLabel,
       actionKind: primaryAction.actionKind,
-      ariaLabel: `${zoneLabel}已到建議檢查或補擦時間。`
+      ariaLabel: `${zoneLabel}已到建議補擦時間。`,
+      secondaryActions: []
     };
   }
 
@@ -186,7 +225,8 @@ function buildUntimedPresentation(options: {
     tone: "untimed" as const,
     remainingMinutes: null,
     actionLabel,
-    actionKind: primaryAction.actionKind
+    actionKind: primaryAction.actionKind,
+    secondaryActions: [] as SecondaryAction[]
   };
 
   if (primaryAction.variant === "multi_action") {
@@ -209,7 +249,10 @@ function buildUntimedPresentation(options: {
         ? "為避免錯誤延長提醒，請重新連線校準。目前採較短的保守狀態。"
         : "目前離線，無法確認可信時間。系統不會因此延長期限，請查看保守提醒。",
       timeLabel: "保守提醒",
-      ariaLabel: "裝置時間可能不正確，目前使用保守提醒。"
+      ariaLabel: "裝置時間可能不正確，目前使用保守提醒。",
+      // 時鐘不可信時使用者要確認的是「我已經記了什麼」，資料就在本頁下方，
+      // 離開頁面反而失去脈絡——所以是原地錨點而不是換頁。
+      secondaryActions: secondary("view_saved_records")
     };
   }
   if (reasons.has("METHOD_UNRECORDED")) {
@@ -233,35 +276,72 @@ function buildUntimedPresentation(options: {
       ariaLabel: `${zoneLabel}防護方式不確定。`
     };
   }
+  // 產品安全事件三則。先前沒有對應分支，全部掉進通用 fallback，
+  // 使用者看不到「為什麼停止計時」與「該怎麼處理」。
+  if (reasons.has("PRODUCT_ABNORMAL_REPORTED")) {
+    return {
+      ...base,
+      eyebrow: "已停止使用這項防曬乳",
+      title: "已停止使用這項防曬乳建立提醒",
+      body: "你回報防曬乳有異常，因此相關部位不再顯示這瓶防曬乳的補擦期限。請停止使用並依包裝警語處理。",
+      timeLabel: "未計時",
+      ariaLabel: `${zoneLabel}已回報防曬乳異常，停止使用這瓶防曬乳計時。`,
+      secondaryActions: secondary("view_handling_guidance")
+    };
+  }
+  if (reasons.has("PRODUCT_DISCOMFORT_REPORTED")) {
+    return {
+      ...base,
+      eyebrow: "已停止使用這項防曬乳",
+      title: "已停止使用這項防曬乳建立提醒",
+      body: "你回報使用後感到不適。請停止使用並依包裝警語處理；需要時尋求醫療協助。系統不會判斷不適原因。",
+      timeLabel: "未計時",
+      ariaLabel: `${zoneLabel}已回報使用後不適，停止使用這瓶防曬乳計時。`,
+      secondaryActions: secondary("view_handling_guidance")
+    };
+  }
+  if (reasons.has("PRODUCT_EXPIRED")) {
+    return {
+      ...base,
+      eyebrow: "防曬乳已過期",
+      title: "這瓶防曬乳已超過紀錄的有效期限",
+      body: "這瓶防曬乳已過期，無法用來建立新的補擦提醒。請改用標示清楚且未過期的防曬乳。",
+      timeLabel: "未計時",
+      ariaLabel: `${zoneLabel}使用的防曬乳已過期。`,
+      secondaryActions: secondary("update_protection_record")
+    };
+  }
   if (reasons.has("PRODUCT_IDENTITY_UNKNOWN")) {
     return {
       ...base,
       eyebrow: "無法計算可信時間",
-      title: `${zoneLabel}使用的產品身分尚未確認`,
+      title: `${zoneLabel}使用的防曬乳身分尚未確認`,
       body:
-        "產品的防曬標示尚未確認，暫時無法建立產品補擦倒數。",
+        "防曬乳的標示尚未確認，暫時無法建立補擦倒數。",
       timeLabel: "未計時",
-      ariaLabel: `${zoneLabel}使用的產品身分尚未確認。`
+      ariaLabel: `${zoneLabel}使用的防曬乳身分尚未確認。`,
+      secondaryActions: secondary("update_protection_record")
     };
   }
   if (reasons.has("PRODUCT_NO_SUNSCREEN_CLAIM")) {
     return {
       ...base,
-      eyebrow: "沒有產品補擦計時",
-      title: `${zoneLabel}記錄的產品沒有明確防曬標示`,
-      body: "目前不建立產品補擦倒數。請查看其他防護選項。",
+      eyebrow: "沒有防曬乳補擦倒數",
+      title: `${zoneLabel}記錄的防曬乳沒有明確的防曬標示`,
+      body: "目前不建立防曬乳補擦倒數。請查看其他防護選項。",
       timeLabel: "未計時",
-      ariaLabel: `${zoneLabel}記錄的產品沒有明確防曬標示。`
+      ariaLabel: `${zoneLabel}記錄的防曬乳沒有明確防曬標示。`,
+      secondaryActions: secondary("update_protection_record")
     };
   }
   if (reasons.has("LABEL_WAIT_ACTIVE")) {
     return {
       ...base,
-      eyebrow: "請依產品標示等待",
-      title: `${zoneLabel}仍在產品標示等待時間內`,
-      body: `依包裝標示等待至 ${absoluteTime}。期間請搭配衣物或遮蔭；等待結束不代表系統已確認防護效果或可以安全曝曬。`,
+      eyebrow: "請依防曬乳標示等待",
+      title: `${zoneLabel}仍在防曬乳標示的等待時間內`,
+      body: `依包裝標示等待至 ${absoluteTime}。期間請搭配衣物或遮蔭；等待結束不代表系統已確認防護效果，也不代表可以放心待在陽光下。`,
       timeLabel: absoluteTime,
-      ariaLabel: `${zoneLabel}仍在產品標示等待時間內，標示等待至 ${absoluteTime}。`
+      ariaLabel: `${zoneLabel}仍在防曬乳標示的等待時間內，標示等待至 ${absoluteTime}。`
     };
   }
   if (reasons.has("CLOTHING_COVERED")) {
@@ -269,9 +349,10 @@ function buildUntimedPresentation(options: {
       ...base,
       eyebrow: "已記錄衣物覆蓋",
       title: `${zoneLabel}目前被衣物完整遮住`,
-      body: "目前不計算產品補擦時間。衣物移開或防護方式改變時，請更新實際狀態。",
-      timeLabel: "不適用計時",
-      ariaLabel: `${zoneLabel}目前被衣物完整遮住。`
+      body: "目前不計算防曬乳補擦時間。衣物移開或防護方式改變時，請更新實際狀態。",
+      timeLabel: "不使用倒數",
+      ariaLabel: `${zoneLabel}目前被衣物完整遮住。`,
+      secondaryActions: secondary("update_protection_method")
     };
   }
   if (reasons.has("WATER_START_UNKNOWN")) {
@@ -280,7 +361,7 @@ function buildUntimedPresentation(options: {
       eyebrow: "入水時間不確定",
       title: `無法判斷${zoneLabel}剩餘的耐水時間`,
       body:
-        "無法確認你的實際入水時間，因此不會以回報時間代替。你可以補上或更正入水時間；若仍不確定，請依產品標示保守處理。",
+        "無法確認你的實際入水時間，因此不會以記錄時間代替。你可以補上或更正入水時間；若仍不確定，請依產品標示保守處理。",
       timeLabel: "未計時",
       ariaLabel: `無法判斷${zoneLabel}剩餘的耐水時間。`
     };
@@ -288,11 +369,11 @@ function buildUntimedPresentation(options: {
   if (reasons.has("WATER_RESISTANCE_UNKNOWN")) {
     return {
       ...base,
-      eyebrow: "耐水標示不明",
-      title: "目前不建立水中 40／80 分鐘期限",
-      body: "未看到明確耐水標示，或標示看不清楚時，不能依賴系統判斷水中剩餘防護時間。",
+      eyebrow: "抗水標示不明",
+      title: "目前不建立水中 40／80 分鐘提醒",
+      body: "沒有看到明確的抗水標示，或標示看不清楚時，不能依賴系統判斷水中剩餘防護時間。",
       timeLabel: "未計時",
-      ariaLabel: "耐水標示不明，目前不建立水中期限。"
+      ariaLabel: "抗水標示不明，目前不建立水中期限。"
     };
   }
   if (reasons.has("SESSION_ENDED")) {
@@ -300,7 +381,7 @@ function buildUntimedPresentation(options: {
       ...base,
       eyebrow: "本次提醒已結束",
       title: "本次提醒已結束",
-      body: "結束不代表已補擦、防護完成或可以安全曝曬。需要時可以重新開始一筆新的提醒。",
+      body: "結束不代表已完成補擦，也不代表防護完成或可以放心待在陽光下。需要時可以重新開始新的提醒。",
       timeLabel: "已結束",
       ariaLabel: "本次提醒已結束。"
     };
@@ -325,7 +406,7 @@ function getAffectedZoneLabel(zones: ZoneProjection[]): string {
 }
 
 function formatAbsoluteTime(value: string | null): string {
-  if (value === null) return "尚無時間";
+  if (value === null) return "還沒有時間";
   return new Intl.DateTimeFormat("zh-TW", {
     hour: "2-digit",
     minute: "2-digit",
@@ -339,7 +420,7 @@ function formatRelativeTime(
 ): string {
   const minutes = calculateRemainingMinutes(value, now);
   if (minutes === null) return "稍後";
-  if (minutes <= 0) return "預計時間附近";
+  if (minutes <= 0) return "接近預計時間";
   if (minutes < 60) return `${minutes} 分鐘後`;
   const hours = Math.floor(minutes / 60);
   const remainder = minutes % 60;

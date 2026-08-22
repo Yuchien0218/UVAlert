@@ -26,14 +26,16 @@ describe("BrandHeader", () => {
   // 等於收不到這個資訊，所以文字必須跟著 tone 走。
   it.each([
     ["tracking", "提醒進行中"],
-    ["soon", "即將需要檢查"],
-    ["due", "建議現在處理"]
+    ["soon", "快到補擦時間"],
+    ["due", "建議現在補擦"]
   ] as const)("tone 為 %s 時文字也跟著改變", (tone, expected) => {
     const wrapper = mountHeader(tone);
     const context = wrapper.get(".brand-header__context");
+    const brand = wrapper.get(".brand-header__brand");
 
     expect(context.text()).toBe(expected);
     expect(context.classes()).toContain(`brand-header__context--${tone}`);
+    expect(brand.classes()).not.toContain(`brand-header__brand--${tone}`);
     expect(
       wrapper.get(".brand-header__status-dot").attributes("aria-hidden")
     ).toBe("true");

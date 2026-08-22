@@ -9,10 +9,10 @@ const emit = defineEmits<{ suggested: []; all: []; toggle: [zoneId: string] }>()
 <template>
   <fieldset class="app-card reapply-section" :aria-describedby="error ? 'zone-selection-error' : undefined">
     <legend>這次實際補擦哪些部位？</legend>
-    <p class="section-help">已預選到期或即將到期的部位，你仍需確認後才會更新。</p>
+    <p class="section-help">已預選到期或快到補擦時間的部位，確認後才會更新。</p>
     <div class="mode-actions">
       <button class="button button--quiet" type="button" @click="emit('suggested')">只選建議部位</button>
-      <button class="button button--quiet" type="button" @click="emit('all')">選擇所有追蹤部位</button>
+      <button class="button button--quiet" type="button" @click="emit('all')">選擇所有提醒部位</button>
     </div>
     <label v-for="zone in zones" :key="zone.zoneInstanceId" class="zone-choice">
       <input type="checkbox" :checked="selectedZoneIds.includes(zone.zoneInstanceId)" @change="emit('toggle', zone.zoneInstanceId)" />

@@ -13,6 +13,22 @@
 - `packages/test-fixtures`：跨套件共用的測試資料與契約測試。
 - `tools/region-data`：將官方 NLSC 鄉鎮市區 SHP 固定版本轉成可重現的 WGS84 裝置端界線與索引。
 
+## 文件總入口（給人類與 AI）
+
+開始新對話或接手工作前，請先讀 [`docs/README.md`](docs/README.md)。它會依工作目的導向現行 Sitemap／User Flow、設計系統、後端、衛教研究、規格與實作計畫，並說明哪些文件只是歷史或執行脈絡，不能直接當成目前產品行為。
+
+## 現行產品與資訊架構依據
+
+目前重新設計的唯一整合基準是：
+
+- `DESIGN.md`：設計系統唯一權威——色彩 token、字體、間距、元件與圖示規範。
+- `docs/decisions/2026-08-15-redesign-sitemap-userflow-current.md`：現行 Sitemap、User Flow、頁面任務與產品結構。
+- `docs/design/current-direction.md`：品牌角色與區域視覺任務（色彩／字體細節以 `DESIGN.md` 為準）。
+- `docs/research/2026-08-13-uvalert-education-seo-aeo-geo.md`：衛教內容的 SEO／AEO／GEO 研究紀錄。
+- `docs/education/public-seo-implementation.md`：公開衛教頁、發布閘門、canonical、Schema、robots 與 sitemap 的實作規則。
+
+舊版 PRD、P0 規格、Sitemap／User Flow、mockup、截圖與實作計畫集中在 `docs/archive/2026-08-pre-redesign/`，只供查閱，不要直接拿來新增畫面或功能。
+
 ## 地區設定與定位隱私
 
 `/region` 支援目前位置、手動行政區與明確略過。精確經緯度只在使用者按下按鈕後短暫存在單次函式記憶體中，裝置內界線解析完成後不會保存、加入 URL、記錄或傳送到 UV API。IndexedDB 只保存官方 `TOWNCODE`、縣市／行政區名稱、界線版本與選擇方式。
@@ -21,17 +37,14 @@
 
 ## 修改畫面之前
 
-視覺樣式有兩份規範，**動任何畫面前先讀**：
+前端視覺設計的唯一權威是根目錄的 `DESIGN.md`——完整色彩 token、字體、間距、元件規範與圖示風格，第十節列出目前與程式碼的落差。索引與周邊資料見 `docs/design/README.md`。
 
-- `DESIGN_SYSTEM.md`：字級、容器、對齊、動畫的四條核心規則，以及目前哪些畫面還沒套用。
-- `docs/ICON_DESIGN_SYSTEM.md`：圖示的線條、尺寸、對齊與動畫規則。
+目前畫面的真實來源只有兩個程式碼檔案：
 
-這兩份是**說明「為什麼」的文件，不是真實來源**。現況的真實來源只有兩個檔案：
+- `packages/ui/src/styles.css`：設計 token（字級、間距、顏色、圓角、動畫時間）。
+- `apps/web/src/assets/app.css`：共用類別（`.app-card`、`.button`、`.text-link`、`.stat-figure` 等）。
 
-- `packages/ui/src/styles.css`：設計 token（字級、間距、顏色、圓角、動畫時間）
-- `apps/web/src/assets/app.css`：共用類別（`.app-card`、`.button`、`.text-link`、`.stat-figure`）
-
-文件與這兩個檔案衝突時以檔案為準，並回頭修文件。`apps/web/dist/` 是過期建置產物，不可當作現況參考。
+文件與這兩個檔案衝突時以程式碼為準；若要導入新的品牌方向，先確認 wireframe／UIUX 決策，再同步更新 token 與共用樣式。`apps/web/dist/` 是建置產物，不可當作設計來源。
 
 ## 本機驗證
 
@@ -40,25 +53,14 @@ pnpm install
 pnpm check
 ```
 
-規格依據：
+衛教內容會在 Web build 前由 `tools/education/generate-content.mjs` 產生 Vue 使用資料，build 後再產生公開 HTML、`robots.txt` 與 `sitemap.xml`。正式部署前請設定 `VITE_PUBLIC_SITE_URL`；文章完成專業審閱後才會進入 sitemap。
 
-- `防曬晴報員PRD.md`
-- `P0_TECHNICAL_DESIGN_DOCUMENT.md`
-- `P0_REMINDER_RULE_DECISION_TABLE.md`
-- `P0_SCREEN_INVENTORY.md`（畫面、狀態與 route）
-- `P0_COPY_DECK.md`（介面文案與審查狀態；改動畫面文字要走這裡的流程）
-- `docs/decisions/`（裁決當下的規劃筆記與互動原型，規格回寫的依據）
+## 後端開發入口
 
-> **注意：2026-08-06 的六項裁決已寫進 P0 文件，但尚未實作。** 這些段落的規格**超前**程式碼，不是現況描述：
->
-> - 設定流程兩步（S-06 廢除併入 S-05）——程式碼仍是三步，`/setup/review` route 還在。
-> - S-04 揭露層次（收合預設、0 個常駐單選鈕）——現況 20 個常駐單選鈕，違反 PRD §5.2 第 5 點。
-> - S-11 防曬裝備清單（四品類、四個新欄位）——`SunscreenProducts` 尚未加 `gearCategory`。
-> - S-15 `/help` Q&A 總覽——route 未建立。
-> - S-07 最近事件清單——`components/reminder/` 底下沒有任何對應元件。它是 S-10 更正流程的唯一入口。
->
-> 裁決背景與互動原型見 `docs/decisions/`。實作前先讀那裡，不要只看規格條文。
+第一版後端位於 `supabase/`，提供選配 Google 登入同步、CWA UV 預報代理、匿名問題回報與 UVAlert 雲端資料清除；免登入本機提醒不依賴後端。請先讀：
 
-> PRD 已於 2026-08-07 修訂為 **v3.10**，兩步設定流程與防曬裝備清單都有了上游依據，全部裁決與 PRD 一致。修訂內容：§5.2 改為兩畫面＋提交前確認區（確認的實質要求不變）、F-05 擴為四個裝備品類、§5.5 納入本機匯出。
->
-> 2026-08-07 另追加兩項裁決：**本機匯出納入 P0**（入口在 S-19，不新增畫面）、**S-07 四個次要 CTA 全指向現有畫面**（見 S-07 次要 CTA 目的地表）。
+- `docs/backend/local-development.md`：Supabase CLI、Google OAuth、Edge Function secrets 與本機命令。
+- `docs/backend/deployment-checklist.md`：正式環境 RLS、CORS、`/v1/*` rewrite 與 smoke test。
+- `supabase/README.md`：function 路徑與資料邊界。
+
+前端只使用 `VITE_SUPABASE_URL`、`VITE_SUPABASE_PUBLISHABLE_KEY` 與 `VITE_API_BASE_URL`；CWA API key、service-role key 與 Google client secret 不得放在 `VITE_*` 或 commit。

@@ -4,18 +4,38 @@ import type {
   EndSessionCommandV1,
   FiveDayUvForecast,
   ProductLabelSnapshotV1,
+  GearCategory,
   ProductCatalogRecordV1,
   RegionPreferenceV1,
   ReapplyCommandV1,
+  ReportContextEventCommandV1,
+  CorrectContextEventCommandV1,
+  CorrectApplicationGroupCommandV1,
+  ContextEventV1,
+  ApplicationConfirmationGroupV1,
   ReducerClock,
+  SessionEventStreamV1,
   SessionProjection,
   SetupDraftV1,
-  StartSessionCommandV1
+  StartSessionCommandV1,
+  SyncRecordEnvelopeV1,
+  SyncRecordKind,
+  SyncTombstoneV1,
+  UserPreferencesV1
 } from "@sunshield/contracts";
+
+export * from "./cloud";
 
 export interface SessionRepositoryPort {
   open(): Promise<void>;
   getCurrentSession(localVisitorId: string): Promise<SessionProjection | null>;
+}
+
+/** S-07 最近事件清單的讀取端口；該清單是 S-10 更正流程的唯一入口。 */
+export interface SessionEventStreamRepositoryPort {
+  getCurrentSessionEventStream(
+    localVisitorId: string
+  ): Promise<SessionEventStreamV1 | null>;
 }
 
 export interface LocalIdentityPort {
@@ -71,21 +91,157 @@ export interface ReapplicationRepositoryPort {
   ): Promise<CommandResult<SessionProjection>>;
 }
 
+export interface OpenWaterInterval {
+  activityIntervalId: string;
+  zoneInstanceIds: string[];
+  startConfidence: "confirmed" | "unknown";
+  activityStartedAt: string | null;
+}
+
+export interface ContextEventContext {
+  session: SessionProjection;
+  /** null 代表沒有可關閉的水上區間，此時不得顯示離水事件。 */
+  openWaterInterval: OpenWaterInterval | null;
+}
+
+/** S-10 更正表單需要的 target 描述。 */
+export type CorrectionContext =
+  | {
+      kind: "context_event";
+      session: SessionProjection;
+      /**
+       * `context_changed` 不在 S-10 更正範圍（它沒有受影響部位可調整），
+       * 讀取側會直接回 null，所以這裡只會是帶部位的那三種。
+       */
+      event: CorrectableContextEvent;
+      /** false 代表這筆已經被更正過，不得再建立第二個 successor。 */
+      isLeaf: boolean;
+      /** 更正入水時部位集合必須沿用，否則配對的離水會變孤兒。 */
+      hasPairedWaterEnd: boolean;
+    }
+  | {
+      kind: "application_group";
+      session: SessionProjection;
+      group: ApplicationConfirmationGroupV1;
+      applications: ApplicationEventV1[];
+      isLeaf: boolean;
+      hasPairedWaterEnd: boolean;
+    };
+
+export type CorrectableContextEvent = Extract<
+  ContextEventV1,
+  { zoneInstanceIds: string[] }
+>;
+
+export interface EventCorrectionRepositoryPort {
+  getCorrectionContext(
+    localVisitorId: string,
+    eventId: string
+  ): Promise<CorrectionContext | null>;
+  correctContextEvent(
+    command: CorrectContextEventCommandV1,
+    clock: ReducerClock
+  ): Promise<CommandResult<SessionProjection>>;
+  correctApplicationGroup(
+    command: CorrectApplicationGroupCommandV1,
+    clock: ReducerClock
+  ): Promise<CommandResult<SessionProjection>>;
+}
+
+export interface ContextEventRepositoryPort {
+  getContextEventContext(
+    localVisitorId: string,
+    trustedNow: string
+  ): Promise<ContextEventContext | null>;
+  reportContextEvent(
+    command: ReportContextEventCommandV1,
+    clock: ReducerClock
+  ): Promise<CommandResult<SessionProjection>>;
+}
+
+export interface SaveProductInput {
+  productId: string;
+  displayName: string;
+  gearCategory: GearCategory;
+  snapshot: ProductLabelSnapshotV1;
+  purchaseMonth?: string | null;
+  expiryDate?: string | null;
+  note?: string | null;
+  now: string;
+}
+
+/** S-19 本機資料管理的清單摘要。 */
+export interface LocalDataSummary {
+  productCount: number;
+  hasActiveSession: boolean;
+  endedSessionCount: number;
+  hasSetupDraft: boolean;
+  lastWeatherSnapshotAt: string | null;
+  lastClockCalibrationAt: string | null;
+}
+
+export interface LocalDataPort {
+  getSummary(): Promise<LocalDataSummary>;
+  /**
+   * 匯出本機資料。
+   *
+   * 排除金鑰、精確座標與裝置識別碼（S-19 2026-08-07 裁決）。
+   * 匯出只產生資料，不負責下載——上傳與否由呼叫端決定，
+   * 而 P0 的唯一去處是使用者自己的檔案系統。
+   */
+  exportData(exportedAt: string): Promise<unknown>;
+  clearSetupDrafts(): Promise<void>;
+  clearProductsAndHistory(): Promise<void>;
+  clearAll(): Promise<void>;
+}
+
 export interface ProductCatalogPort {
-  listProducts(): Promise<ProductCatalogRecordV1[]>;
-  getProduct(productId: string): Promise<ProductCatalogRecordV1 | null>;
-  saveProduct(input: {
-    productId: string;
-    displayName: string;
-    snapshot: ProductLabelSnapshotV1;
-    now: string;
-  }): Promise<ProductCatalogRecordV1>;
+  /**
+   * `now` 用來把已過到期日的紀錄推導成 expired 並就地修正 snapshot，
+   * 因此讀取側也需要時鐘。
+   */
+  listProducts(now?: string): Promise<ProductCatalogRecordV1[]>;
+  getProduct(
+    productId: string,
+    now?: string
+  ): Promise<ProductCatalogRecordV1 | null>;
+  saveProduct(input: SaveProductInput): Promise<ProductCatalogRecordV1>;
   stopProduct(productId: string, now: string): Promise<void>;
+  /** 移至「過去紀錄」。 */
+  archiveProduct(productId: string, now: string): Promise<void>;
+  /** 從「過去紀錄」恢復；安全狀態被封鎖的產品不得走這條。 */
+  restoreProduct(productId: string, now: string): Promise<void>;
+  deleteProduct(productId: string): Promise<void>;
 }
 
 export interface RegionPreferencePort {
   getPreference(): Promise<RegionPreferenceV1 | null>;
   savePreference(preference: RegionPreferenceV1): Promise<void>;
+}
+
+export interface LocalSyncMetadata {
+  recordKind: SyncRecordKind;
+  recordId: string;
+  localPayloadFingerprint: string | null;
+  localRevision: number;
+  cloudRevision: number | null;
+  lastSyncedAt: string | null;
+  tombstone: boolean;
+  deletedAt: string | null;
+}
+
+export interface LocalSyncSnapshot {
+  collectedAt: string;
+  records: SyncRecordEnvelopeV1[];
+  tombstones: SyncTombstoneV1[];
+  metadata: LocalSyncMetadata[];
+}
+
+export interface LocalSyncPort {
+  collectSyncSnapshot(): Promise<LocalSyncSnapshot>;
+  getActiveSession(): Promise<SyncRecordEnvelopeV1 | null>;
+  applySelectedRecords(records: SyncRecordEnvelopeV1[]): Promise<void>;
+  applyTombstones(tombstones: SyncTombstoneV1[]): Promise<void>;
 }
 
 export interface DevicePosition {

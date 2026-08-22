@@ -15,9 +15,9 @@ defineEmits<{
       aria-hidden="true"
     />
     <div class="process-banner__content">
-      <p class="process-banner__eyebrow">Setup in progress</p>
+      <p class="process-banner__eyebrow">提醒設定進行中</p>
       <h2 id="setup-process-title">提醒設定尚未完成</h2>
-      <p>完成產品設定後，可以返回繼續確認實際塗抹時間。</p>
+      <p>完成防曬乳設定後，可以返回繼續確認實際塗抹時間。</p>
     </div>
     <button
       class="button button--primary process-banner__action"

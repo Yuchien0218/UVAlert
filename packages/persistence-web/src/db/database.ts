@@ -13,6 +13,7 @@ import type {
   SessionEndedEventV1,
   SessionStartedEventV1,
   SetupDraftV1,
+  SyncRecordKind,
   ZoneIdentityLockRecord,
   ZoneMethodEventV1,
   ZoneProjection,
@@ -65,6 +66,17 @@ export type ProjectionChecksumRecord = {
   checksum: string;
 };
 
+export type SyncMetadataRecord = {
+  recordKind: SyncRecordKind;
+  recordId: string;
+  localPayloadFingerprint: string | null;
+  localRevision: number;
+  cloudRevision: number | null;
+  lastSyncedAt: string | null;
+  tombstone: boolean;
+  deletedAt: string | null;
+};
+
 export class SunshieldDatabase extends Dexie {
   SunscreenProducts!: Table<ProductCatalogRecordV1, string>;
   ProtectionSessions!: Table<ProtectionSessionRecord, string>;
@@ -95,6 +107,7 @@ export class SunshieldDatabase extends Dexie {
   CorrectionSuccessors!: Table<CorrectionSuccessorRecord, string>;
   ZoneIdentityLocks!: Table<ZoneIdentityLockRecord, [string, string]>;
   ProjectionChecksums!: Table<ProjectionChecksumRecord, [string, number]>;
+  SyncMetadata!: Table<SyncMetadataRecord, [SyncRecordKind, string]>;
 
   constructor(databaseName = DEFAULT_DATABASE_NAME) {
     super(databaseName);
@@ -141,6 +154,11 @@ export class SunshieldDatabase extends Dexie {
     this.version(2).stores({
       SunscreenProducts:
         "&productId, status, updatedAt, [status+updatedAt]"
+    });
+
+    this.version(3).stores({
+      SyncMetadata:
+        "[recordKind+recordId], recordKind, recordId, cloudRevision, lastSyncedAt, tombstone"
     });
   }
 }

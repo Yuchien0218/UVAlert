@@ -85,7 +85,7 @@ export function buildHomeReminderClockPresentation(
     now.getTime()
   );
   const tone = getTone(earliest.zone, remainingMs);
-  const title = buildTitle(scope, zoneLabel);
+  const title = buildTitle(scope, zoneLabel, tone);
   const absoluteTime = formatAbsoluteTime(earliest.dueAt);
 
   return {
@@ -101,35 +101,62 @@ export function buildHomeReminderClockPresentation(
       scope,
       zoneLabel,
       remainingMinutes,
-      absoluteTime
+      absoluteTime,
+      tone
     )
   };
 }
 
+/**
+ * 標題必須跟著 tone 走。倒數還剩兩小時卻寫「建議進行全面補擦」，
+ * 會被讀成「現在就去補」，與提醒頁同一時刻的「接下來需要檢查」互相矛盾。
+ * 祈使語氣只留給已到期的情況。
+ */
 function buildTitle(
   scope: HomeReminderClockScope,
-  zoneLabel: string
+  zoneLabel: string,
+  tone: HomeReminderClockTone
 ): string {
   if (scope === "priority") {
-    return `建議優先補擦：${zoneLabel}`;
+    return `${PRIORITY_LEAD_BY_TONE[tone]}：${zoneLabel}`;
   }
-  return "建議進行全面補擦";
+  return ALL_TITLE_BY_TONE[tone];
 }
+
+/** `due` 兩則沿用既有核准文案，不隨這次修正變動。 */
+const PRIORITY_LEAD_BY_TONE: Record<HomeReminderClockTone, string> = {
+  due: "建議優先補擦",
+  soon: "快到補擦時間",
+  tracking: "接下來需要補擦"
+};
+
+const ALL_TITLE_BY_TONE: Record<HomeReminderClockTone, string> = {
+  due: "建議全面補擦",
+  soon: "快到全面補擦時間",
+  tracking: "接下來需要全面補擦"
+};
 
 function buildAriaLabel(
   scope: HomeReminderClockScope,
   zoneLabel: string,
   remainingMinutes: number,
-  absoluteTime: string
+  absoluteTime: string,
+  tone: HomeReminderClockTone
 ): string {
   const timingLabel =
     remainingMinutes === 0
       ? "已到建議補擦時間"
       : `剩 ${remainingMinutes} 分鐘`;
   return scope === "priority"
-    ? `建議優先補擦：${zoneLabel}，${timingLabel}，預計 ${absoluteTime}。`
-    : `建議全面補擦，${timingLabel}，預計 ${absoluteTime}。`;
+    ? `${PRIORITY_LEAD_BY_TONE[tone]}：${zoneLabel}，${timingLabel}，預計 ${absoluteTime}。`
+    : `${ALL_ARIA_LEAD_BY_TONE[tone]}，${timingLabel}，預計 ${absoluteTime}。`;
 }
+
+const ALL_ARIA_LEAD_BY_TONE: Record<HomeReminderClockTone, string> = {
+  due: "建議全面補擦",
+  soon: "快到全面補擦時間",
+  tracking: "接下來需要全面補擦"
+};
 
 export function calculateRemainingProgress(
   startedAt: string | null,

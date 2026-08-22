@@ -4,8 +4,15 @@ import {
   UtcInstantSchema
 } from "./common";
 
+/**
+ * v2 加入日間溫度。
+ *
+ * 版本一改，既有快取就會在 `LocalWeatherForecastRepository.getLatestForecast`
+ * 的 safeParse 落空而被跳過、自動重抓——天氣快照是快取不是使用者資料，
+ * 不需要 migration。
+ */
 export const FIVE_DAY_UV_FORECAST_SCHEMA_VERSION =
-  "five-day-uv-v1" as const;
+  "five-day-uv-v2" as const;
 export const REGION_PREFERENCE_SCHEMA_VERSION =
   "region-preference-v1" as const;
 
@@ -55,7 +62,14 @@ export const DaytimeUvForecastSchema = z.object({
   validFrom: UtcInstantSchema,
   validTo: UtcInstantSchema,
   uvi: z.number().int().nonnegative(),
-  riskLevel: UvRiskLevelSchema
+  riskLevel: UvRiskLevelSchema,
+  /**
+   * 日間溫度（攝氏），與 UV 同樣來自 CWA F-D0047-091。
+   *
+   * 純資訊，**不進 reducer**：溫度不影響補擦倒數。資料可能缺，
+   * 缺的時候是 null，UI 必須整欄不顯示而不是顯示 0 或「--」。
+   */
+  temperatureCelsius: z.number().nullable().default(null)
 }).superRefine((value, context) => {
   if (Date.parse(value.validFrom) >= Date.parse(value.validTo)) {
     context.addIssue({

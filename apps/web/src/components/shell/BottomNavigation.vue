@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import {
   Bell,
-  House,
   Menu,
   Package
 } from "@lucide/vue";
@@ -11,9 +10,8 @@ import { useWebAppServices } from "../../app/injection";
 const { boot } = useWebAppServices();
 
 const navigationItems = [
-  { to: "/", label: "首頁", icon: House },
-  { to: "/reminder", label: "提醒", icon: Bell },
-  { to: "/products", label: "產品", icon: Package },
+  { to: "/", label: "提醒", icon: Bell },
+  { to: "/products", label: "裝備", icon: Package },
   { to: "/more", label: "更多", icon: Menu }
 ] as const;
 
@@ -26,8 +24,8 @@ const hasDueReminder = computed(() => {
 // 紅點是 aria-hidden 的純視覺標記，所以「有部位到期」這個資訊必須進到
 // 連結本身的可及名稱，否則螢幕閱讀器使用者完全收不到。
 function navigationLabel(to: string, label: string): string {
-  return to === "/reminder" && hasDueReminder.value
-    ? `${label}（有部位建議現在處理）`
+  return to === "/" && hasDueReminder.value
+    ? `${label}（有部位建議現在補擦）`
     : label;
 }
 </script>
@@ -49,7 +47,7 @@ function navigationLabel(to: string, label: string): string {
           aria-hidden="true"
         />
         <div
-          v-if="item.to === '/reminder' && hasDueReminder"
+          v-if="item.to === '/' && hasDueReminder"
           class="bottom-nav__badge"
           data-testid="bottom-nav-badge"
           aria-hidden="true"
@@ -72,7 +70,7 @@ function navigationLabel(to: string, label: string): string {
   min-height: calc(
     var(--bottom-nav-height) + env(safe-area-inset-bottom)
   );
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(3, 1fr);
   margin-inline: auto;
   padding: var(--space-2) max(var(--space-2), env(safe-area-inset-right))
     calc(var(--space-2) + env(safe-area-inset-bottom))

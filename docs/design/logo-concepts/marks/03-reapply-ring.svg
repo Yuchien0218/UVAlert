@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" data-concept="03-reapply-ring">
+  <title>防曬晴報員 補擦環圖標</title>
+  <desc>用未完的節奏記住下一次補擦，以簡潔幾何呈現陽光與提醒節奏。</desc>
+    <g fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="4">
+      <path d="M46.8 45.4A20 20 0 1 1 49.7 22.6" stroke="#2E2925"/>
+      <circle cx="32" cy="32" r="8" stroke="#9F5E42"/>
+      <circle cx="50" cy="20" r="3" fill="#9F5E42" stroke="none"/>
+    </g>
+</svg>

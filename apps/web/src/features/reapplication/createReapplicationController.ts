@@ -113,7 +113,7 @@ export function createReapplicationController(dependencies: Dependencies): Reapp
         snapshotFingerprint: product.snapshotFingerprint,
         snapshot: product.currentSnapshot,
         selectable: product.status === "active"
-        ,restriction: product.currentSnapshot.ruleEligibilityAtApplication === "eligible" ? null : "此產品可留下使用紀錄，但不會建立補擦倒數。"
+        ,restriction: product.currentSnapshot.ruleEligibilityAtApplication === "eligible" ? null : "這項裝備只會保留使用紀錄，不會建立補擦倒數。"
       });
     }
     const nextAssignments: Record<string, string> = {};
@@ -125,12 +125,12 @@ export function createReapplicationController(dependencies: Dependencies): Reapp
       if (!choices.has(choiceId)) {
         choices.set(choiceId, {
           choiceId,
-          displayName: "本次使用產品",
+          displayName: "本次使用的防曬乳",
           sourceProductId: null,
           snapshotFingerprint: fingerprintProductLabelSnapshot(application.productLabelSnapshot),
           snapshot: application.productLabelSnapshot,
           selectable: true,
-          restriction: application.productLabelSnapshot.ruleEligibilityAtApplication === "eligible" ? null : "此產品可留下使用紀錄，但不會建立補擦倒數。"
+          restriction: application.productLabelSnapshot.ruleEligibilityAtApplication === "eligible" ? null : "這項裝備只會保留使用紀錄，不會建立補擦倒數。"
         });
       }
       for (const zoneId of application.zoneInstanceIds) nextAssignments[zoneId] = choiceId;
@@ -142,9 +142,14 @@ export function createReapplicationController(dependencies: Dependencies): Reapp
       zone.methodComponents.some((component) => component === "sunscreen" || component === "other_topical") &&
       (zone.timingStatus === "reapply_due" || zone.timingStatus === "reapply_soon")
     ).map((zone) => zone.zoneInstanceId);
+    // 沒有 reapply_due／reapply_soon 部位時，退回 primaryAction 指定的部位。
+    // 不得再以「已有既有 Application」過濾：`complete_protection_record`
+    // （recordStatus === "unrecorded"）的部位本來就沒有 Application，
+    // 過濾掉會讓首次記錄變體開啟時零選取，使用者得自己找回該選哪些部位。
+    // 未指派產品的部位仍會在 submit 時被擋下並顯示就近錯誤，不會靜默送出。
     suggestedZoneIds.value = suggested.length > 0
       ? suggested
-      : context.session.primaryAction.affectedZoneInstanceIds.filter((zoneId) => nextAssignments[zoneId] !== undefined);
+      : context.session.primaryAction.affectedZoneInstanceIds;
     selectedZoneIds.value = [...suggestedZoneIds.value];
     referenceNow.value = dependencies.now().toISOString();
     appliedAt.value = referenceNow.value;
@@ -171,7 +176,7 @@ export function createReapplicationController(dependencies: Dependencies): Reapp
     if (selectedZoneIds.value.length === 0) errors.zones = ["請至少選擇一個實際補擦的部位。"];
     for (const zoneId of selectedZoneIds.value) {
       const choice = productChoices.value.find((item) => item.choiceId === assignments.value[zoneId]);
-      if (choice === undefined || !choice.selectable) errors[`product.${zoneId}`] = ["請選擇這個部位目前可使用的產品。"];
+      if (choice === undefined || !choice.selectable) errors[`product.${zoneId}`] = ["請選擇這個部位目前可使用的防曬乳。"];
     }
     const appliedAtMs = Date.parse(appliedAt.value);
     if (!Number.isFinite(appliedAtMs) || appliedAtMs > dependencies.now().getTime()) errors.appliedAt = ["實際塗抹時間不能晚於目前時間。"];
@@ -203,7 +208,7 @@ export function createReapplicationController(dependencies: Dependencies): Reapp
       zoneIds: [...selectedZoneIds.value],
       appliedAt: committedCommand.payload.appliedAt,
       productGroups: committedCommand.payload.applications.map((application) => ({
-        displayName: productChoices.value.find((choice) => choice.snapshotFingerprint === application.productSnapshotFingerprint && choice.sourceProductId === application.sourceProductId)?.displayName ?? "本次使用產品",
+        displayName: productChoices.value.find((choice) => choice.snapshotFingerprint === application.productSnapshotFingerprint && choice.sourceProductId === application.sourceProductId)?.displayName ?? "本次使用的防曬乳",
         zoneIds: application.zoneInstanceIds
       })),
       committedRevision: result.revision ?? session.value.revision + 1

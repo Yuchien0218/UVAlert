@@ -64,7 +64,7 @@ const zoneLabels = computed(() =>
     >
       <p class="quick-protection__summary">{{ preset.summary }}</p>
       <p class="quick-protection__zones">
-        將本次產品套用至：{{ zoneLabels.join("、") }}
+        這次會套用到：{{ zoneLabels.join("、") }}
       </p>
       <p class="quick-protection__note">
         確認實際塗抹時間後，才會建立正式提醒。
@@ -84,7 +84,7 @@ const zoneLabels = computed(() =>
           @click="$emit('adjust')"
         >
           <SlidersHorizontal :size="17" aria-hidden="true" />
-          調整追蹤部位或防護方式
+          調整要提醒的部位
         </button>
       </div>
     </div>

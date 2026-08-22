@@ -75,7 +75,7 @@ async function save(): Promise<void> {
   <section class="manual-region" aria-labelledby="manual-region-title">
     <header>
       <h2 id="manual-region-title">手動選擇地區</h2>
-      <p>行政區清單已保存在這台裝置，離線時也可以選擇。</p>
+      <p>行政區清單已儲存在這台裝置，離線時也能選擇。</p>
     </header>
 
     <div class="manual-region__field">
@@ -154,7 +154,7 @@ async function save(): Promise<void> {
       :disabled="phase === 'saving'"
       @click="save"
     >
-      {{ phase === "saving" ? "正在保存…" : "保存手動選擇" }}
+      {{ phase === "saving" ? "正在儲存…" : "儲存這個地區" }}
     </button>
   </section>
 </template>

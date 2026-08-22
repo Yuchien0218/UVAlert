@@ -23,7 +23,7 @@ describe("LocalSessionRepository.reapply", () => {
     const start = makeStartSessionCommand({ idPrefix: "atomic" });
     expect((await repository.startSession(start, clock)).ok).toBe(true);
     const snapshot = makeProductSnapshot({ capturedAt: "2026-08-01T10:00:00.000Z" });
-    const product = await catalog.saveProduct({ productId: "product-new", displayName: "戶外防曬", snapshot, now: clock.trustedNow });
+    const product = await catalog.saveProduct({ productId: "product-new", displayName: "戶外防曬", gearCategory: "sunscreen", snapshot, now: clock.trustedNow });
     const command = ReapplyCommandV1Schema.parse({
       commandVersion: "1.0.0",
       commandType: "record_reapplication",
@@ -67,7 +67,7 @@ describe("LocalSessionRepository.reapply", () => {
     const catalog = new LocalProductCatalogRepository(database);
     const start = makeStartSessionCommand({ idPrefix: "stale" });
     await repository.startSession(start, clock);
-    const product = await catalog.saveProduct({ productId: "product-new", displayName: "戶外防曬", snapshot: makeProductSnapshot(), now: clock.trustedNow });
+    const product = await catalog.saveProduct({ productId: "product-new", displayName: "戶外防曬", gearCategory: "sunscreen", snapshot: makeProductSnapshot(), now: clock.trustedNow });
     const command = ReapplyCommandV1Schema.parse({
       commandVersion: "1.0.0", commandType: "record_reapplication", commandId: "stale-command", idempotencyKey: "stale-idem",
       owner: { type: "guest", localVisitorId: "visitor-1" }, deviceLocalId: "device-1", sessionId: start.sessionId,

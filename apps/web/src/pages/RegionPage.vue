@@ -37,10 +37,10 @@ function returnToCaller(): Promise<unknown> {
 <template>
   <div class="page-stack region-page">
     <header class="page-heading">
-      <p class="page-heading__eyebrow">REGION / LOCAL DATA</p>
+      <p class="page-heading__eyebrow">地區／本機資料</p>
       <h1 class="page-heading__title">地區設定</h1>
       <p class="page-heading__body">
-        地區用來顯示區域 UV 資訊；不會延長或縮短你的本機補擦提醒。
+        地區設定只用來顯示 UV 資訊；不會延長或縮短你的本機補擦提醒。
       </p>
     </header>
 
@@ -66,7 +66,7 @@ function returnToCaller(): Promise<unknown> {
     <section class="region-skip" aria-labelledby="region-skip-title">
       <h2 id="region-skip-title">暫時不需要地區資訊</h2>
       <p>
-        略過後，首頁暫不顯示所在地紫外線指數，但補擦提醒仍可正常使用。之後可以隨時回來設定。
+        略過後，提醒頁暫不顯示所在地紫外線指數，但補擦提醒仍可正常使用。之後可以隨時回來設定。
       </p>
       <button
         data-testid="skip-region"

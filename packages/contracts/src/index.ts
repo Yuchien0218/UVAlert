@@ -7,3 +7,5 @@ export * from "./records";
 export * from "./commands";
 export * from "./setup-draft";
 export * from "./weather";
+export * from "./sync";
+export * from "./feedback";

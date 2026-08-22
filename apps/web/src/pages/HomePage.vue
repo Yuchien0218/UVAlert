@@ -1,15 +1,16 @@
 <script setup lang="ts">
 import type { ActionKind } from "@sunshield/contracts";
-import { onMounted } from "vue";
+import { ArrowRight } from "@lucide/vue";
+import { computed, onMounted } from "vue";
 import { useRouter } from "vue-router";
 import EveningUvPrompt from "../components/uv/EveningUvPrompt.vue";
 import FiveDayUvCard from "../components/uv/FiveDayUvCard.vue";
 import HomeReminderSummary from "../components/home/HomeReminderSummary.vue";
 import OutdoorContextCard from "../components/home/OutdoorContextCard.vue";
 import SunLoader from "../components/feedback/SunLoader.vue";
-import ZoneStatusList from "../components/reminder/ZoneStatusList.vue";
 import SessionEndControl from "../components/session/SessionEndControl.vue";
 import { useWebAppServices } from "../app/injection";
+import { resolveActionRoute } from "../helpers/resolveActionRoute";
 
 const { boot, sessionControl, uvForecast } = useWebAppServices();
 const router = useRouter();
@@ -18,15 +19,16 @@ onMounted(() => {
   void uvForecast.ensureLoaded();
 });
 
+/** 今日日間溫度；預報缺這個欄位時為 null，戶外資訊整列不顯示。 */
+const todayTemperature = computed(() => {
+  const days = uvForecast.forecast.value?.days ?? [];
+  const today = new Date().toISOString().slice(0, 10);
+  const match = days.find((day) => day.localDate === today) ?? days[0];
+  return match?.temperatureCelsius ?? null;
+});
+
 function handleAction(kind: ActionKind): void {
-  if (kind === "record_reapplication") {
-    void router.push({ name: "reminder-reapply" });
-    return;
-  }
-  void router.push({
-    name: "reminder-action",
-    params: { kind }
-  });
+  void router.push(resolveActionRoute(kind));
 }
 
 function handleEndSession(): void {
@@ -53,8 +55,8 @@ function handleViewForecast(): void {
       class="home-state home-state--loading"
       role="status"
     >
-      <SunLoader label="正在恢復本機提醒" />
-      <p>正在恢復本機提醒…</p>
+      <SunLoader label="正在讀取這台裝置上的提醒" />
+      <p>正在讀取這台裝置上的提醒…</p>
     </section>
 
     <section
@@ -62,14 +64,14 @@ function handleViewForecast(): void {
       class="home-state"
       role="alert"
     >
-      <h2>無法讀取本機提醒</h2>
-      <p>既有資料不會被空白狀態覆蓋，請重新嘗試讀取。</p>
+      <h2>無法讀取提醒</h2>
+      <p>原有資料不會被空白內容取代，請重新讀取。</p>
       <button
         class="button button--primary"
         type="button"
         @click="boot.ensureBooted"
       >
-        重新嘗試
+        重新讀取
       </button>
     </section>
 
@@ -79,15 +81,24 @@ function handleViewForecast(): void {
         :connectivity="boot.connectivity.value"
         @action="handleAction"
       />
-      <ZoneStatusList
+      <!--
+        各部位狀態已移到提醒頁（2026-08-08 裁決）。提醒入口只保留摘要，
+        倒數標題本身就帶了範圍（「接下來需要補擦：額頭」／「…全面補擦」），
+        完整的逐部位狀態屬於 S-07。
+      -->
+      <RouterLink
         v-if="boot.currentSession.value !== null"
-        :primary-action="boot.currentSession.value.primaryAction"
-        :zones="boot.currentSession.value.zones"
-      />
+        class="text-link home-full-status"
+        to="/reminder"
+      >
+        查看全部部位
+        <ArrowRight :size="17" aria-hidden="true" />
+      </RouterLink>
     </template>
 
     <OutdoorContextCard
       :region-name="uvForecast.region.value?.displayName ?? null"
+      :temperature-celsius="todayTemperature"
     />
 
     <EveningUvPrompt
@@ -116,7 +127,7 @@ function handleViewForecast(): void {
     />
 
     <p class="safety-note">
-      防曬提醒是協助你回看紀錄的工具，不是安全曝曬時間或防護效果保證。
+      這是協助你記得補擦的提醒，不代表你可以在陽光下待多久。
     </p>
   </div>
 </template>

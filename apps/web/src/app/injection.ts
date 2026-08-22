@@ -22,3 +22,15 @@ export function useWebAppServices(): WebAppServices {
   }
   return services;
 }
+
+export function useAuthController() {
+  return useWebAppServices().auth;
+}
+
+export function useSyncController() {
+  return useWebAppServices().sync;
+}
+
+export function useFeedbackController() {
+  return useWebAppServices().feedback;
+}

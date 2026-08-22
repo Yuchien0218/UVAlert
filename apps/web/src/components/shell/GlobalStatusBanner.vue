@@ -31,14 +31,14 @@ const status = computed(() => {
     return {
       tone: "loading",
       icon: Database,
-      message: "正在恢復這台裝置上的提醒…"
+      message: "正在讀取這台裝置上的提醒…"
     };
   }
   if (props.connectivity === "offline") {
     return {
       tone: "offline",
       icon: CloudOff,
-      message: "目前離線；已保存的本機提醒仍可查看。"
+      message: "目前離線；這台裝置上已儲存的提醒仍可查看。"
     };
   }
   return null;

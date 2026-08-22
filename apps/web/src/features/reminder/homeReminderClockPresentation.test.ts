@@ -66,7 +66,7 @@ describe("buildHomeReminderClockPresentation", () => {
 
     expect(result).not.toBeNull();
     expect(result?.scope).toBe("priority");
-    expect(result?.title).toBe("建議優先補擦：鼻部與雙頰");
+    expect(result?.title).toBe("接下來需要補擦：鼻部與雙頰");
     expect(result?.timeLabel).toMatch(/^預計 \d{2}:\d{2}$/);
     expect(result?.remainingMinutes).toBe(30);
     expect(result?.progress).toBeCloseTo(1 / 3);
@@ -85,7 +85,7 @@ describe("buildHomeReminderClockPresentation", () => {
     );
 
     expect(result?.scope).toBe("all");
-    expect(result?.title).toBe("建議進行全面補擦");
+    expect(result?.title).toBe("接下來需要全面補擦");
     expect(result?.timeLabel).toMatch(/^預計 \d{2}:\d{2}$/);
   });
 
@@ -97,7 +97,7 @@ describe("buildHomeReminderClockPresentation", () => {
 
     expect(result).toMatchObject({
       scope: "priority",
-      title: "建議優先補擦：額頭"
+      title: "接下來需要補擦：額頭"
     });
   });
 
@@ -142,7 +142,7 @@ describe("buildHomeReminderClockPresentation", () => {
     expect(result).toMatchObject({
       tone: "due",
       scope: "all",
-      title: "建議進行全面補擦",
+      title: "建議全面補擦",
       remainingMinutes: 0
     });
   });
@@ -168,8 +168,37 @@ describe("buildHomeReminderClockPresentation", () => {
 
     expect(result).toMatchObject({
       scope: "priority",
-      title: "建議優先補擦：額頭"
+      title: "接下來需要補擦：額頭"
     });
+  });
+
+  it("即將到期時用預告語氣，不下達立即補擦的指示", () => {
+    const result = buildHomeReminderClockPresentation(
+      makeSession([
+        {
+          ...baseZone,
+          timingStatus: "reapply_soon"
+        }
+      ]),
+      new Date("2026-07-29T11:20:00.000Z")
+    );
+
+    expect(result).toMatchObject({
+      tone: "soon",
+      scope: "priority",
+      title: "快到補擦時間：額頭"
+    });
+  });
+
+  it("尚未到期時標題不使用祈使語氣，避免與提醒頁互相矛盾", () => {
+    const result = buildHomeReminderClockPresentation(
+      makeSession([baseZone]),
+      new Date("2026-07-29T11:00:00.000Z")
+    );
+
+    expect(result?.tone).toBe("tracking");
+    expect(result?.title).not.toContain("建議");
+    expect(result?.ariaLabel).not.toContain("建議");
   });
 
   it("主要狀態需要先確認時不自行捏造倒數", () => {

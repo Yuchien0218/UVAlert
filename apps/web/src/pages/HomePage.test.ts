@@ -64,7 +64,7 @@ const session: SessionProjection = {
 };
 
 describe("HomePage", () => {
-  it("呈現提醒摘要，並承載完整部位與結束提醒控制", async () => {
+  it("呈現提醒摘要與完整狀態入口，並承載結束提醒控制", async () => {
     vi.mocked(useWebAppServices).mockReturnValue({
       boot: {
         phase: shallowReadonly(shallowRef("ready")),
@@ -107,7 +107,9 @@ describe("HomePage", () => {
     });
 
     expect(wrapper.findComponent(HomeReminderSummary).exists()).toBe(true);
-    expect(wrapper.findComponent(ZoneStatusList).exists()).toBe(true);
+    // 各部位狀態已移到提醒頁；首頁只留前往完整狀態的入口（2026-08-08 裁決）。
+    expect(wrapper.findComponent(ZoneStatusList).exists()).toBe(false);
+    expect(wrapper.find('[to="/reminder"]').exists()).toBe(true);
     expect(wrapper.findComponent(SessionEndControl).exists()).toBe(true);
   });
 });

@@ -26,7 +26,7 @@ const body = computed(() =>
 
     <RouterLink class="text-link" to="/">
       <ArrowLeft :size="18" aria-hidden="true" />
-      返回首頁
+      返回提醒
     </RouterLink>
   </div>
 </template>
