@@ -122,6 +122,23 @@ SessionEventStreamV1（事件）→ packages/domain reducer → SessionProjectio
 
 ## Session 衛生（這個 repo 的已知痛點）
 
-- 這個 repo 常同時有多個 session／worktree 在跑，會互相覆蓋。改設計 token、CSS 或共用元件前，先確認沒有別的 session 在動同一批檔案。
+這個 repo 經常同時有多個 session 在跑——2026-08-22 一天內最多同時 4 個，並且真的因此弄丟了工作。動手前先跑 `ListAgents` 看看還有誰在。
+
+### 刪任何東西之前：`git status` 乾淨 ≠ 安全
+
+**2026-08-22 的實際事故**：移除殘留的 `.claude/worktrees/sad-aryabhata-1e3e73` 前，已先跑 `git -C <worktree> status` 確認 working tree 乾淨，也取得使用者核准，才執行 `git worktree remove`。但當時有另一個 session 正在那個目錄工作，**它的未 commit 變更全部遺失，無法救回**——未 commit 的檔案不會進 git 物件庫，`git stash list` 與 `git fsck` 都撈不到，只能重做。
+
+所以移除 worktree 或刪除目錄前，**兩件事都要做**：
+
+1. `git status` 確認沒有未 commit 的變更
+2. `ListAgents` 確認沒有其他 session 正在那個路徑工作
+
+只做第 1 項不夠——另一個 session 可能正好在你檢查之後、移除之前寫入。
+
+### 其他
+
+- 改設計 token、CSS 或共用元件前，先確認沒有別的 session 在動同一批檔案。
+- 起 dev server 前先確認 port 沒被佔。同日另一起事故：preview 工具佔住 5173，把別的 session 的 server 擠到 5174，對方差點為此去改 `.claude/launch.json`。
 - `.claude/worktrees/` 或根目錄 `.worktrees/` 底下若有殘留資料夾，通常是舊 session 沒清乾淨的 git worktree（被 `.git/info/exclude` 忽略，`git status` 看不到，但檔案系統掃得到），裡面可能是過期的舊版檔案。不要當作現行參考；清理前先跟使用者確認，並用 `git worktree remove` 而不是直接刪資料夾。
+- 工作告一段落就 commit，不要把變更留在 working tree 過夜。同日有兩個 session 結束時留下未 commit 的工作，接手的人得先花力氣判斷「這是誰的、能不能碰」。
 - 做出會改變範圍或畫面結構的裁決後，把規劃筆記與原型放進 `docs/decisions/`，並在該資料夾 `README.md` 補一列「裁決 → 回寫落點」，不要只留在 session 暫存目錄。
