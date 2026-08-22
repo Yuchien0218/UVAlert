@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { AlertTriangle, PackageCheck } from "@lucide/vue";
+import { PackageCheck } from "@lucide/vue";
+import Icon from "../icons/Icon.vue";
 import { useId } from "vue";
 import type { ProductSnapshotFormValue } from "../../features/setup/productSnapshot";
 
@@ -115,7 +116,7 @@ const groupNames = {
       class="identity-warning"
       role="status"
     >
-      <AlertTriangle :size="21" aria-hidden="true" />
+      <Icon name="state-warning" :size="24" />
       <div>
         <strong>目前無法建立防曬乳補擦時間</strong>
         <p>

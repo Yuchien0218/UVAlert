@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Plus } from "@lucide/vue";
+import Icon from "../components/icons/Icon.vue";
 import { computed, onMounted } from "vue";
 import { useRouter } from "vue-router";
 import { useWebAppServices } from "../app/injection";
@@ -99,14 +99,14 @@ function editGear(productId: string): void {
           把常用的防曬乳與裝備記在這裡，建立提醒時就不必重填包裝標示。也可以先不儲存防曬乳，直接建立提醒。
         </p>
         <button class="button button--primary" type="button" @click="addGear">
-          <Plus :size="18" aria-hidden="true" />
+          <Icon name="tool-plus" :size="20" />
           新增防曬裝備
         </button>
       </section>
 
       <template v-else>
         <button class="button button--primary" type="button" @click="addGear">
-          <Plus :size="18" aria-hidden="true" />
+          <Icon name="tool-plus" :size="20" />
           新增防曬裝備
         </button>
 

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Wind } from "@lucide/vue";
+import Icon from "../icons/Icon.vue";
 
 interface Props {
   regionName: string | null;
@@ -25,7 +25,7 @@ withDefaults(defineProps<Props>(), {
           戶外資訊
         </h2>
       </div>
-      <Wind :size="25" :stroke-width="1.5" aria-hidden="true" />
+      <Icon name="context-outdoor" :size="24" />
     </div>
     <div class="context-card__row">
       <div class="context-card__content">

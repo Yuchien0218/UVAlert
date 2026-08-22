@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { ChevronDown, SlidersHorizontal, Sparkles } from "@lucide/vue";
+import { SlidersHorizontal, Sparkles } from "@lucide/vue";
+import Icon from "../icons/Icon.vue";
 import type {
   SessionContext,
   SetupDraftZoneV1
@@ -50,9 +51,9 @@ const zoneLabels = computed(() =>
         <p class="quick-protection__eyebrow">快速提醒（推薦）</p>
         <h2>{{ preset.label }}</h2>
       </div>
-      <ChevronDown
+      <Icon
+        name="tool-chevron-down"
         :size="20"
-        aria-hidden="true"
         class="quick-protection__toggle"
         :class="{ 'quick-protection__toggle--expanded': expanded }"
       />

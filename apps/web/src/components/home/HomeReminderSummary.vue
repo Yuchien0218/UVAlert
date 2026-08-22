@@ -4,13 +4,13 @@ import type {
   SessionProjection
 } from "@sunshield/contracts";
 import type { ConnectivityStatus } from "@sunshield/platform";
-import { CheckCircle2 } from "@lucide/vue";
 import { computed } from "vue";
 import { useCurrentTime } from "../../composables/useCurrentTime";
 import { buildHomeReminderClockPresentation } from "../../features/reminder/homeReminderClockPresentation";
 import { buildReminderPresentation } from "../../features/reminder/reminderPresentation";
 import CountdownSunTime from "../reminder/CountdownSunTime.vue";
 import ReminderEmptyState from "../reminder/ReminderEmptyState.vue";
+import Icon from "../icons/Icon.vue";
 
 interface Props {
   session: SessionProjection | null;
@@ -113,7 +113,7 @@ const toneModifier = computed<string | null>(() => {
         type="button"
         @click="emit('action', reminderPresentation.actionKind)"
       >
-        <CheckCircle2 :size="18" aria-hidden="true" />
+        <Icon name="state-success" :size="20" />
         {{ reminderPresentation.actionLabel }}
       </button>
     </template>
@@ -135,7 +135,7 @@ const toneModifier = computed<string | null>(() => {
         type="button"
         @click="emit('action', reminderPresentation.actionKind)"
       >
-        <CheckCircle2 :size="18" aria-hidden="true" />
+        <Icon name="state-success" :size="20" />
         {{ reminderPresentation.actionLabel }}
       </button>
     </template>

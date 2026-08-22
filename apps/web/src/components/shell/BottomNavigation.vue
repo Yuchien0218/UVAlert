@@ -1,18 +1,14 @@
 <script setup lang="ts">
-import {
-  Bell,
-  Menu,
-  Package
-} from "@lucide/vue";
 import { computed } from "vue";
 import { useWebAppServices } from "../../app/injection";
+import Icon from "../icons/Icon.vue";
 
 const { boot } = useWebAppServices();
 
 const navigationItems = [
-  { to: "/", label: "提醒", icon: Bell },
-  { to: "/products", label: "裝備", icon: Package },
-  { to: "/more", label: "更多", icon: Menu }
+  { to: "/", label: "提醒", icon: "nav-reminder" },
+  { to: "/products", label: "裝備", icon: "nav-gear" },
+  { to: "/more", label: "更多", icon: "nav-more" }
 ] as const;
 
 const hasDueReminder = computed(() => {
@@ -40,12 +36,7 @@ function navigationLabel(to: string, label: string): string {
       :aria-label="navigationLabel(item.to, item.label)"
     >
       <div class="bottom-nav__icon-wrapper">
-        <component
-          :is="item.icon"
-          :size="21"
-          :stroke-width="1.6"
-          aria-hidden="true"
-        />
+        <Icon :name="item.icon" :size="24" />
         <div
           v-if="item.to === '/' && hasDueReminder"
           class="bottom-nav__badge"

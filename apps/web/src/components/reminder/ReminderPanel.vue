@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { CheckCircle2 } from "@lucide/vue";
+import Icon from "../icons/Icon.vue";
 import type {
   ReminderPresentation,
   SecondaryActionKind
@@ -126,7 +126,7 @@ function getEyebrowText(): string {
       type="button"
       @click="emit('action', presentation.actionKind)"
     >
-      <CheckCircle2 v-if="presentation.tone !== 'untimed'" :size="18" aria-hidden="true" />
+      <Icon v-if="presentation.tone !== 'untimed'" name="state-success" :size="20" />
       {{ presentation.actionLabel }}
     </button>
 

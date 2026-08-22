@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { ChevronRight } from "@lucide/vue";
 import { computed } from "vue";
+import Icon from "../icons/Icon.vue";
 import type { ProductCatalogRecordV1 } from "@sunshield/contracts";
 import {
   affectsCountdown,
@@ -47,7 +47,7 @@ const purchase = computed(() => formatPurchaseMonth(props.product.purchaseMonth)
       </p>
       <p v-if="product.note" class="gear-item__note">{{ product.note }}</p>
     </div>
-    <ChevronRight :size="20" aria-hidden="true" />
+    <Icon name="tool-chevron-right" :size="20" />
   </button>
 </template>
 

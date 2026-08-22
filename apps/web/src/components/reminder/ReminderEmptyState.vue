@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ArrowRight } from "@lucide/vue";
+import Icon from "../icons/Icon.vue";
 </script>
 
 <template>
@@ -37,7 +37,7 @@ import { ArrowRight } from "@lucide/vue";
       to="/setup"
     >
       開始防曬提醒
-      <ArrowRight :size="18" aria-hidden="true" />
+      <Icon name="tool-arrow-right" :size="20" />
     </RouterLink>
   </section>
 </template>

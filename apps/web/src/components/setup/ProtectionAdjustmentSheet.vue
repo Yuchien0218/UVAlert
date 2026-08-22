@@ -3,7 +3,7 @@ import type {
   SessionContext,
   SetupDraftV1
 } from "@sunshield/contracts";
-import { X } from "@lucide/vue";
+import Icon from "../icons/Icon.vue";
 import {
   nextTick,
   onBeforeUnmount,
@@ -111,7 +111,7 @@ onBeforeUnmount(releasePageLock);
               aria-label="關閉調整"
               @click="close"
             >
-              <X :size="22" aria-hidden="true" />
+              <Icon name="tool-close" :size="24" />
             </button>
           </header>
 

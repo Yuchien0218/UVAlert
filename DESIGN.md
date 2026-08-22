@@ -771,7 +771,7 @@ Cormorant Garamond 不可用時，**EB Garamond** 字重 500 加 -0.02em 字距�
 
 **不使用任何第三方圖示素材庫。** 所有圖示都來自 `docs/design/icon-system/` 的自訂系統，以 inline SVG 進入程式碼。理由是圖示的造型語言直接繼承 Logo 的實心圓點＋膠囊線條，素材庫的圖示無法承載這個品牌訊號，混用會讓介面看起來像拼裝的。
 
-**現況**：`apps/web/src` 仍有 20 多個元件在 `import { ... } from "@lucide/vue"`，這是舊 demo 版的做法。這些引用要隨著自訂圖示逐步替換掉，全部替換完成後從 `apps/web/package.json` 移除 `@lucide/vue` 依賴。替換進度與尚未涵蓋的圖示需求見 `docs/design/icon-system/README.md` 的待補清單。
+**現況（2026-08-22 更新）**：38 個不重複圖示中 28 個已替換完成，透過 `apps/web/src/components/icons/Icon.vue` 這個單一進入點消費自動產生的 `icons.generated.ts`。剩下 11 個元件、10 個功能型圖示仍在用 `@lucide/vue`——刻意延後到 wireframe 定案，因為它們綁定在可能被重新設計的元件上，先畫有報廢風險。`apps/web/package.json` 的 `@lucide/vue` 依賴要等這批也畫完才能移除。清單見 `docs/design/icon-system/README.md` 第八節。
 
 ## 九、圖像法則（Imagery Rules）
 
@@ -881,7 +881,7 @@ Cormorant Garamond 不可用時，**EB Garamond** 字重 500 加 -0.02em 字距�
 
 以下項目尚未定義或無法驗證，**實作時不要自行填補，先確認**：
 
-1. **Lucide 尚未從程式碼移除。** 政策已定（只用自訂圖示），但 20 多個元件仍在 import `@lucide/vue`。需要盤點這些引用實際用到哪些圖示，對照自訂系統目前的 40 個涵蓋範圍，補齊缺口後才能整批替換。
+1. **Lucide 尚未完全移除。** 28/38 個圖示已替換（2026-08-22），剩下 10 個功能型圖示刻意等 wireframe 定案再畫，`@lucide/vue` 依賴要等那批畫完才能移除。
 2. **焦點環未系統化。** 只有 `text-input-focused` 有定義。程式碼有 `--focus-ring` token，但按鈕、連結、卡片的鍵盤焦點樣式未在此文件規範。可及性要求焦點環，這是缺口。
 3. **停用狀態只定義了主按鈕。** 次要按鈕、輸入框、清單項目的停用樣式未定義。
 4. **錯誤與驗證狀態未展開。** 表單驗證錯誤的視覺（欄位邊框、訊息位置、圖示）需要一個實際的表單流程才能確認。
