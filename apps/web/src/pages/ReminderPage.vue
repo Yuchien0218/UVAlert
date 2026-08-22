@@ -343,7 +343,6 @@ function dismissNightPrompt(): void {
 .product-label h2 {
   margin: 0;
   font-size: 1rem;
-  font-weight: 600;
 }
 
 .product-label ul {

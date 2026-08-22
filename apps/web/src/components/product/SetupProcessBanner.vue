@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { ArrowRight, ClipboardList } from "@lucide/vue";
+import { ClipboardList } from "@lucide/vue";
+import Icon from "../icons/Icon.vue";
 
 defineEmits<{
   resume: [];
@@ -25,7 +26,7 @@ defineEmits<{
       @click="$emit('resume')"
     >
       返回提醒設定
-      <ArrowRight :size="18" aria-hidden="true" />
+      <Icon name="tool-arrow-right" :size="20" />
     </button>
   </aside>
 </template>
@@ -65,7 +66,6 @@ defineEmits<{
 .process-banner h2 {
   margin-top: var(--space-2);
   font-size: 1.15rem;
-  font-weight: 500;
 }
 
 .process-banner__content > p:last-child {

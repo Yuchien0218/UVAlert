@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ArrowLeft } from "@lucide/vue";
+import Icon from "../components/icons/Icon.vue";
 import { computed } from "vue";
 import { useRoute } from "vue-router";
 
@@ -25,7 +25,7 @@ const body = computed(() =>
     </header>
 
     <RouterLink class="text-link" to="/">
-      <ArrowLeft :size="18" aria-hidden="true" />
+      <Icon name="tool-arrow-left" :size="20" />
       返回提醒
     </RouterLink>
   </div>

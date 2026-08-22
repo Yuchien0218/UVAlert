@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { ActionKind } from "@sunshield/contracts";
-import { ArrowRight } from "@lucide/vue";
+import Icon from "../components/icons/Icon.vue";
 import { computed, onMounted } from "vue";
 import { useRouter } from "vue-router";
 import EveningUvPrompt from "../components/uv/EveningUvPrompt.vue";
@@ -92,7 +92,7 @@ function handleViewForecast(): void {
         to="/reminder"
       >
         查看全部部位
-        <ArrowRight :size="17" aria-hidden="true" />
+        <Icon name="tool-arrow-right" :size="20" />
       </RouterLink>
     </template>
 
@@ -155,7 +155,6 @@ function handleViewForecast(): void {
 .home-state h2 {
   color: var(--text-primary);
   font-size: 1.25rem;
-  font-weight: 500;
 }
 
 </style>

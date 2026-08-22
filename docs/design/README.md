@@ -35,7 +35,9 @@ UVAlert 採用「防曬氣象管家 × 防曬生活編輯部」的混合方向�
 
 ## Logo 概念探索
 
-`docs/design/logo-concepts/` 收錄第一輪 Logo 概念比較板與六款獨立圖標／橫式標誌。**更新（2026-08-18）**：已定案選用 06 播報印記，PWA icon／favicon／apple-touch-icon 已正式換上（commit `8355d11`）。
+**正式 Logo 資產在 [`logo/`](logo/README.md)** —— 橫式標誌（含 Illustrator 原始檔）與維護規則。幾何真實來源是 `.ai`，字標用源泉圓體 TW 月版並已轉外框。
+
+`docs/design/logo-concepts/` 是第一輪六款概念的**探索紀錄**，裡面的 `lockups/*.svg` 由腳本產生、仍是 `<text>` 元素，不可當正式資產用。**更新（2026-08-18）**：已定案選用 06 播報印記，PWA icon／favicon／apple-touch-icon 已正式換上（commit `8355d11`）；該概念定案後產出的圖標資產（outlined／filled／dark-surface）仍然有效。
 
 Logo 的墨咖 `#33291F` ＋ 琥珀金 `#C1832E` 是**圖示與 Logo 專用配色**（見 `DESIGN.md` 第八節），與介面配色（暖象牙 `#FAF5EC` ＋ 深杏桃 `#9F5E42` ＋ 深咖啡 `#2E2925`，見 `DESIGN.md` 第二節）是兩套不同範圍的色票，不要互相代入。介面配色目前也尚未套進 `packages/ui/src/styles.css`，完整落差見 `DESIGN.md` 第十節。詳見 [`logo-concepts/README.md`](logo-concepts/README.md)。
 

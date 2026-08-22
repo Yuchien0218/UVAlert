@@ -77,7 +77,6 @@ const topics = computed(() => listPublishableTopics());
 .empty-state h2 {
   margin: 0;
   font-size: 1.15rem;
-  font-weight: 500;
 }
 
 .empty-state p {

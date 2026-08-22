@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ArrowLeft, CloudCheck, CloudOff, X } from "@lucide/vue";
+import Icon from "../icons/Icon.vue";
 import type { SetupSaveStatus } from "../../features/setup/createSetupController";
 
 interface Props {
@@ -41,7 +41,7 @@ const visibleSteps = props.maxStep === 2
         class="setup-shell__quiet-action"
         :to="backTo"
       >
-        <ArrowLeft :size="18" aria-hidden="true" />
+        <Icon name="tool-arrow-left" :size="20" />
         返回
       </RouterLink>
       <span v-else />
@@ -50,7 +50,7 @@ const visibleSteps = props.maxStep === 2
         v-if="saveStatus === 'saved'"
         class="setup-shell__save-status"
       >
-        <CloudCheck :size="17" aria-hidden="true" />
+        <Icon name="state-online" :size="20" />
         草稿已儲存
       </span>
       <span
@@ -58,7 +58,7 @@ const visibleSteps = props.maxStep === 2
         class="setup-shell__save-status setup-shell__save-status--error"
         role="status"
       >
-        <CloudOff :size="17" aria-hidden="true" />
+        <Icon name="state-offline" :size="20" />
         草稿未儲存
       </span>
 
@@ -68,7 +68,7 @@ const visibleSteps = props.maxStep === 2
         :disabled="busy"
         @click="$emit('cancel')"
       >
-        <X :size="18" aria-hidden="true" />
+        <Icon name="tool-close" :size="20" />
         取消
       </button>
     </div>
@@ -244,7 +244,6 @@ button.setup-shell__quiet-action {
   max-width: 16ch;
   margin: 0;
   font-size: var(--font-size-page-title);
-  font-weight: 500;
   letter-spacing: -0.05em;
   line-height: 1;
 }

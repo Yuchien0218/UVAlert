@@ -130,35 +130,48 @@
 
 **政策：不使用任何第三方圖示素材庫。** 所有圖示都來自本系統，以 inline SVG 進入程式碼。理由是圖示的造型語言直接繼承 Logo 的實心圓點＋膠囊線條，素材庫圖示無法承載這個品牌訊號，混用會讓介面看起來像拼裝的。
 
-`apps/web/src` 目前有 38 個不重複的 `@lucide/vue` 圖示待替換（舊 demo 版做法）。以下是完整盤點，替換完成後從 `apps/web/package.json` 移除 `@lucide/vue` 依賴。
+**2026-08-22 更新**：38 個不重複圖示中，**28 個已替換完成**，透過 `apps/web/src/components/icons/Icon.vue` 這個單一進入點消費 `apps/web/src/generated/icons.generated.ts`（由 `generate-icons.mjs` 從 `docs/design/icon-system/icons/` 產生，跟衛教內容、行政區資料同一套「docs/ 是來源、generated/ 是產物」慣例）。`@lucide/vue` 依賴**還不能移除**——剩下 10 個功能型圖示刻意延後（見下方），仍在使用。
 
-### 已有對應，可直接替換
+### 已替換（28 個）
+
+實際採用的對應（部分因為使用情境不同，跟原本規劃的用途略有調整——例如 `Bell` 在程式碼裡其實是下排導覽「提醒」項目，不是通知設定，所以對應 `nav-reminder` 而非 `more-notifications`）：
 
 | Lucide | 用處 | 本系統對應 |
 |---|---|---|
-| `Bell` | 通知設定 | `more-notifications` |
-| `BookOpen` | 防曬衛教 | `more-education` |
-| `Database` | 本機資料 | `more-data` |
-| `MessageSquare` | 問題回報 | `more-feedback` |
-| `Smartphone` | 安裝到主畫面 | `more-install` |
-| `CircleHelp` | 說明與關於 | `more-about` |
-| `Menu` | 下排導覽「更多」 | `nav-more` |
+| `Bell` | 下排導覽「提醒」 | `nav-reminder` |
 | `Package` | 下排導覽「裝備」 | `nav-gear` |
+| `Menu` | 下排導覽「更多」 | `nav-more` |
+| `BookOpen` | 防曬衛教 | `more-education` |
+| `CircleHelp` | 常見問題 | `more-about` |
+| `Smartphone` | 安裝到主畫面 | `more-install` |
+| `Database` | 本機資料／讀取中 | `more-data` |
+| `MessageSquare` | 問題回報 | `more-feedback` |
 | `Dumbbell` | 情境：戶外運動 | `context-exercise` |
 | `Waves` | 情境：水中 | `context-water` |
 | `House` | 情境：室內 | `context-indoor` |
 | `Wind` | 情境：一般戶外 | `context-outdoor` |
-| `CloudOff` | 目前離線 | `state-offline` |
-| `CloudCheck` / `Cloud` | 背景通知已恢復 | `state-online` |
-| `TriangleAlert` / `AlertTriangle` | 警告 | `state-warning` |
-| `CheckCircle2` | 已儲存 | `state-success` |
+| `CloudOff` | 目前離線／草稿未儲存 | `state-offline` |
+| `CloudCheck` / `Cloud` | 已恢復／草稿已儲存／跨裝置同步 | `state-online` |
+| `TriangleAlert` / `AlertTriangle` | 警告／特殊狀況入口 | `state-warning` |
+| `CheckCircle2` | 已儲存／主要 CTA | `state-success` |
+| `ArrowLeft` | 返回 | `tool-arrow-left` |
+| `ArrowRight` | 下一步／繼續 | `tool-arrow-right` |
+| `ArrowDown` | 查看更多 | `tool-arrow-down` |
+| `ChevronDown` | 展開收合 | `tool-chevron-down` |
+| `ChevronRight` | 進入詳情 | `tool-chevron-right` |
+| `X` | 關閉／取消 | `tool-close` |
+| `Plus` | 新增 | `tool-plus` |
+| `Download` | 匯出 | `tool-download` |
+| `RefreshCw` | 重新整理 | `tool-refresh` |
+| `RotateCcw` | 重新開始 | `tool-reset` |
 
-### 需要新設計（20 個）
+用法：`<Icon name="tool-close" :size="20" />`。`decorative`（預設 `true`）對應「旁邊已有文字標籤」的情境，會設 `aria-hidden` 並拿掉圖示自帶的 `<title>`（否則 `<title>` 的文字仍會算進 DOM `textContent`，跟旁邊文字重複）；圖示單獨使用、沒有相鄰文字時傳 `:decorative="false"`，改用 `role="img"` 並保留 `<title>`。
 
-**工具型**（10）：**已完成**，清單見第六節。之所以先畫這批，是因為工具型不受 wireframe 影響——返回箭頭不管版面怎麼改都長一樣。
+### 需要新設計（10 個，刻意延後）
 
-**功能型**（10）：**建議等 wireframe 定案再畫。** 這批綁定在特定元件上，那些元件在重新設計後可能改樣子甚至消失，先畫有報廢風險。
-- `LoaderCircle` — 載入中（`SunLoader.vue`）
+**建議等 wireframe 定案再畫。** 這批綁定在特定元件上，那些元件在重新設計後可能改樣子甚至消失，先畫有報廢風險。
+
+- `LoaderCircle` — 載入中（`SetupTimingPage` 送出提醒時的 spinner；`SunLoader.vue` 是獨立的自訂太陽動畫，不使用這個 lucide 圖示）
 - `Sparkles` — 快速防護摘要（`QuickProtectionSummary` / `ZoneProtectionForm`）
 - `SlidersHorizontal` — 調整防護設定
 - `ClipboardList` — 設定流程橫幅（`SetupProcessBanner`）

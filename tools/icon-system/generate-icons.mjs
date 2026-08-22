@@ -308,13 +308,60 @@ export function renderPreviewBoardSvg(groupKeys, boardTitle, iconBodies) {
 `;
 }
 
-export function buildIcons(outputRoot = resolve("docs/design/icon-system")) {
+/**
+ * 從正規化後的 SVG 取出 <title> 之後、</svg> 之前的內容——也就是可以直接塞進
+ * Vue 元件 <svg> 標籤內的部分（保留 currentColor 與 #C1832E，不轉實色）。
+ */
+function extractInlineBody(normalizedSvg) {
+  return normalizedSvg
+    .replace(/^[\s\S]*?<svg\b[^>]*>\s*/i, "")
+    .replace(/\s*<\/svg>\s*$/i, "")
+    .trim();
+}
+
+/**
+ * 產生 apps/web 可以直接匯入的圖示註冊表。這是 apps/web/src/generated/ 底下
+ * 唯一手動維護以外的圖示來源——和衛教內容、行政區資料同一套「docs/ 是來源、
+ * generated/ 是產物」慣例，改來源、跑產生器，不要手改產出檔。
+ */
+function buildIconRegistry(iconBodies) {
+  const entries = ICONS.filter((icon) => iconBodies.has(icon.id))
+    .map((icon) => {
+      const body = iconBodies.get(icon.id).replaceAll("`", "\\`");
+      return `  "${icon.id}": {\n    viewBox: "0 0 ${GRID} ${GRID}",\n    title: ${JSON.stringify(icon.label)},\n    body: \`${body}\`\n  }`;
+    })
+    .join(",\n");
+
+  return `// 自動產生，請勿手動修改。來源：docs/design/icon-system/icons/。
+// 重新產生：node tools/icon-system/generate-icons.mjs
+
+export interface IconEntry {
+  viewBox: string;
+  title: string;
+  body: string;
+}
+
+// 用 as const（不是 Record<string, IconEntry>）讓 key 保持字面量聯集，
+// 這樣 ICONS[name] 在 name: IconName 時才推得出一定存在，不必判斷 undefined。
+export const ICONS = {
+${entries}
+} as const satisfies Record<string, IconEntry>;
+
+export type IconName = keyof typeof ICONS;
+`;
+}
+
+export function buildIcons(
+  outputRoot = resolve("docs/design/icon-system"),
+  registryPath = resolve("apps/web/src/generated/icons.generated.ts")
+) {
   const root = resolve(outputRoot);
   const iconDirectory = resolve(root, "icons");
 
   const normalized = [];
   const missing = [];
   const iconBodies = new Map();
+  const inlineBodies = new Map();
 
   for (const icon of ICONS) {
     const file = resolve(iconDirectory, `${icon.id}.svg`);
@@ -327,7 +374,10 @@ export function buildIcons(outputRoot = resolve("docs/design/icon-system")) {
     writeFileSync(file, output, "utf8");
     normalized.push(icon.id);
     iconBodies.set(icon.id, extractBoardBody(output, "#33291F"));
+    inlineBodies.set(icon.id, extractInlineBody(output));
   }
+
+  writeFileSync(registryPath, buildIconRegistry(inlineBodies), "utf8");
 
   // 檔案存在但沒登記在 ICONS 裡——通常是改名或忘了刪的殘留
   const registered = new Set(ICONS.map((icon) => icon.id));

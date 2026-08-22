@@ -45,7 +45,8 @@ pnpm --filter @sunshield/web typecheck
 | `pnpm education:generate` | 由 `docs/education/articles/*.md` 產生 Vue 使用的衛教資料 |
 | `pnpm region-data:build` | 由官方 NLSC SHP 產生行政區界線與索引 |
 | `pnpm region-data:verify` | 驗證上面的產出可重現 |
-| `node tools/icon-system/generate-icons.mjs` | 正規化圖示 SVG 並重組預覽板（冪等，不碰幾何） |
+| `node tools/icon-system/generate-icons.mjs` | 正規化圖示 SVG、重組預覽板、產生 Vue 用的圖示註冊表（冪等，不碰幾何） |
+| `node tools/fonts/build-fonts.mjs` | 由完整字型 subset 出自行托管的 woff2（原始字型不進 repo，見 `tools/fonts/README.md`） |
 
 Supabase 本機開發：`pnpm supabase:start`、`pnpm supabase:reset`、`pnpm supabase:functions:serve`。
 
@@ -106,6 +107,7 @@ SessionEventStreamV1（事件）→ packages/domain reducer → SessionProjectio
 ## 設計與文件
 
 - **設計系統唯一權威是根目錄 `DESIGN.md`**：完整色彩 token、字體、間距、元件規範、圖示風格。第十節「與程式碼的落差」是文件與程式碼差異的唯一對照表，不要在別處另立一份。
+- **Claude Design 上有一份由 `DESIGN.md` 產生的 component library**（從 GitHub `main` 同步）。它是下游產物，不是權威——**要改設計先改 `DESIGN.md`**，再讓它重新同步。不要只在 Claude Design 裡調整而沒回寫，否則會多出第四份真相（目前已有 `DESIGN.md`、`styles.css`、`app.css` 三份）。
 - **UX／IA 現行基準**：`docs/decisions/2026-08-15-redesign-sitemap-userflow-current.md`
 - **圖示系統**：`docs/design/icon-system/README.md`。幾何的真實來源是 Illustrator，不要手改 SVG path；改完跑 `generate-icons.mjs`。
 - **畫面的程式碼真實來源**只有 `packages/ui/src/styles.css`（token）與 `apps/web/src/assets/app.css`（共用類別）。文件與程式碼衝突時以程式碼為準。

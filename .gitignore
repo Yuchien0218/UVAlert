@@ -9,3 +9,6 @@ Thumbs.db
 .codex-*.log
 tools/region-data/source/*.zip
 tools/region-data/source/extracted/
+# 字型原始檔（數 MB）不進 repo，只 commit subset 後的產物。
+# 重新取得方式見 tools/fonts/README.md。
+tools/fonts/source/

@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { AlertTriangle, PackageCheck } from "@lucide/vue";
+import { PackageCheck } from "@lucide/vue";
+import Icon from "../icons/Icon.vue";
 import { useId } from "vue";
 import type { ProductSnapshotFormValue } from "../../features/setup/productSnapshot";
 
@@ -115,7 +116,7 @@ const groupNames = {
       class="identity-warning"
       role="status"
     >
-      <AlertTriangle :size="21" aria-hidden="true" />
+      <Icon name="state-warning" :size="24" />
       <div>
         <strong>目前無法建立防曬乳補擦時間</strong>
         <p>
@@ -314,7 +315,7 @@ const groupNames = {
   bottom: -1.5rem;
   width: 8rem;
   height: 8rem;
-  color: var(--color-tracking);
+  color: var(--color-primary);
   opacity: 0.05;
   pointer-events: none;
 }
@@ -341,7 +342,6 @@ const groupNames = {
 
 .session-product h2 {
   font-size: 1.15rem;
-  font-weight: 500;
 }
 
 .session-product p:not(.session-product__eyebrow) {

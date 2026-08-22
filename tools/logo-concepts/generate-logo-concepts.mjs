@@ -10,6 +10,24 @@ const COLORS = Object.freeze({
   warmInk: "#33291F",
 });
 
+/**
+ * 這支腳本產生的是**六款概念的探索紀錄與比較板**，不是正式 Logo。
+ *
+ * 正式橫式標誌在 `docs/design/logo/`，真實來源是 Illustrator（`.ai`），
+ * 字標已轉外框。**不要用這支腳本的輸出取代它**——腳本做不到 outline，
+ * 它的 <text> 依賴字體安裝。規則見 `docs/design/logo/README.md`。
+ *
+ * 字標字體：源泉圓體（GenSenRounded）TW 月版。2026-08-22 從 Noto Serif TC
+ * 改過來，因為明體的尖角收筆與圖標的「實心圓點＋膠囊線條、端點全圓、
+ * 不使用尖角」（DESIGN.md 第八節）互相打架。備援鏈在字體未安裝時退回
+ * Noto Sans TC（結構相同，只少了圓角），不會掉到完全不同的字。
+ */
+const WORDMARK_CJK_FONT =
+  "'GenSenRounded TW', 'GenSenRoundedTW-M', 'Noto Sans TC', 'Microsoft JhengHei', sans-serif";
+
+/** 比較板的說明文字（概念名稱、定位句）維持襯線體——那是文件排版，不是品牌資產。 */
+const BOARD_LABEL_FONT = "'Noto Serif TC', serif";
+
 const geometry = {
   morningLine: () => `
     <g fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="4">
@@ -92,7 +110,7 @@ export function renderLockupSvg(concept) {
   <title>${escapeXml(titleFor(concept, "橫式標誌"))}</title>
   <desc>${escapeXml(concept.tagline)}，包含獨立圖標、中文品牌名稱與英文副標。</desc>
   <g transform="translate(24 24)">${renderMarkGeometry(concept)}</g>
-  <text x="113" y="51" fill="${COLORS.espresso}" font-family="'Noto Serif TC', serif" font-size="30" font-weight="500" letter-spacing="0.5" lang="zh-Hant-TW">防曬晴報員</text>
+  <text x="113" y="51" fill="${COLORS.espresso}" font-family="${WORDMARK_CJK_FONT}" font-size="30" font-weight="500" letter-spacing="0.5" lang="zh-Hant-TW">防曬晴報員</text>
   <text x="113" y="79" fill="${COLORS.terracotta}" font-family="Inter, sans-serif" font-size="15" font-weight="500" letter-spacing="2.2">UVAlert</text>
 </svg>
 `;
@@ -109,11 +127,11 @@ export function renderBoardSvg(concepts = CONCEPTS) {
   <g data-concept="${concept.fileStem}" transform="translate(${x} ${y})">
     <g transform="translate(24 40) scale(2)">${renderMarkGeometry(concept)}</g>
     <g transform="translate(190 44)">${renderMarkGeometry(concept)}</g>
-    <text x="279" y="72" fill="${COLORS.espresso}" font-family="'Noto Serif TC', serif" font-size="26" font-weight="500" letter-spacing="0.5" lang="zh-Hant-TW">防曬晴報員</text>
+    <text x="279" y="72" fill="${COLORS.espresso}" font-family="${WORDMARK_CJK_FONT}" font-size="26" font-weight="500" letter-spacing="0.5" lang="zh-Hant-TW">防曬晴報員</text>
     <text x="279" y="98" fill="${COLORS.terracotta}" font-family="Inter, sans-serif" font-size="14" font-weight="500" letter-spacing="2">UVAlert</text>
     <g data-preview-size="32" transform="translate(32 218) scale(.5)">${renderMarkGeometry(concept, { monochrome: true })}</g>
-    <text x="88" y="240" fill="${COLORS.espresso}" font-family="'Noto Serif TC', serif" font-size="23" font-weight="500" lang="zh-Hant-TW">${escapeXml(concept.chineseName)}</text>
-    <text x="32" y="286" fill="${COLORS.espresso}" font-family="'Noto Serif TC', serif" font-size="17" font-weight="500" lang="zh-Hant-TW">${escapeXml(concept.tagline)}</text>
+    <text x="88" y="240" fill="${COLORS.espresso}" font-family="${BOARD_LABEL_FONT}" font-size="23" font-weight="500" lang="zh-Hant-TW">${escapeXml(concept.chineseName)}</text>
+    <text x="32" y="286" fill="${COLORS.espresso}" font-family="${BOARD_LABEL_FONT}" font-size="17" font-weight="500" lang="zh-Hant-TW">${escapeXml(concept.tagline)}</text>
     <path d="M32 328H448" stroke="${COLORS.espresso}" stroke-width="2" opacity=".24"/>
   </g>`;
   }).join("");

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { AlertTriangle } from "@lucide/vue";
+import Icon from "../icons/Icon.vue";
 import { useId } from "vue";
 import type { ProductClaimAnswer } from "../../features/setup/productSnapshot";
 
@@ -58,7 +58,7 @@ const groupName = `sunscreen-claim-${useId()}`;
       class="claim-consequence"
       role="status"
     >
-      <AlertTriangle :size="21" aria-hidden="true" />
+      <Icon name="state-warning" :size="24" />
       <div>
         <strong>這次先不建立補擦倒數</strong>
         <p>

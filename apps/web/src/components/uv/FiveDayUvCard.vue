@@ -3,7 +3,8 @@ import type {
   FiveDayUvForecast,
   UvRiskLevel
 } from "@sunshield/contracts";
-import { CloudSun, RefreshCw } from "@lucide/vue";
+import { CloudSun } from "@lucide/vue";
+import Icon from "../icons/Icon.vue";
 import type {
   UvForecastError,
   UvForecastPhase
@@ -116,7 +117,7 @@ function getUnavailableMessage(error: UvForecastError): string {
         type="button"
         @click="emit('refresh')"
       >
-        <RefreshCw :size="17" aria-hidden="true" />
+        <Icon name="tool-refresh" :size="20" />
         再試一次
       </button>
     </div>
@@ -188,7 +189,6 @@ function getUnavailableMessage(error: UvForecastError): string {
 .uv-forecast__title {
   margin: 0;
   font-size: var(--font-size-section-title);
-  font-weight: 600;
 }
 
 .uv-forecast__state {

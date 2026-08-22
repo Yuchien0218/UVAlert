@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import type { FiveDayUvForecast } from "@sunshield/contracts";
-import { ArrowDown, MoonStar, X } from "@lucide/vue";
+import { MoonStar } from "@lucide/vue";
+import Icon from "../icons/Icon.vue";
 import { computed } from "vue";
 import {
   getHighestForecastDay,
@@ -52,7 +53,7 @@ const highestDay = computed(() =>
         @click="emit('view')"
       >
         查看五日 UV
-        <ArrowDown :size="17" aria-hidden="true" />
+        <Icon name="tool-arrow-down" :size="20" />
       </button>
     </div>
     <button
@@ -61,7 +62,7 @@ const highestDay = computed(() =>
       aria-label="今晚不再顯示五日 UV 預報"
       @click="emit('dismiss')"
     >
-      <X :size="19" aria-hidden="true" />
+      <Icon name="tool-close" :size="20" />
     </button>
   </aside>
 </template>
@@ -104,7 +105,6 @@ const highestDay = computed(() =>
 
 .evening-prompt__title {
   font-size: 1.15rem;
-  font-weight: 600;
   color: var(--text-primary);
 }
 

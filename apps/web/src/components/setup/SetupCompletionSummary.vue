@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { TriangleAlert } from "@lucide/vue";
+import Icon from "../icons/Icon.vue";
 import type {
   ProductLabelSnapshotV1,
   SetupDraftV1,
@@ -155,7 +155,7 @@ function formatTime(iso: string | null): string {
       class="summary-warning"
       role="alert"
     >
-      <TriangleAlert :size="18" aria-hidden="true" />
+      <Icon name="state-warning" :size="20" />
       <div>
         <strong>{{ eligibilityWarning.title }}</strong>
         <p>{{ eligibilityWarning.body }}</p>
@@ -212,7 +212,6 @@ function formatTime(iso: string | null): string {
 h2 {
   margin: 0;
   font-size: 1.125rem;
-  font-weight: 700;
 }
 
 .summary-help {
@@ -258,7 +257,6 @@ h2 {
 .summary-item h3 {
   margin: 0;
   font-size: 0.875rem;
-  font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.1em;
   color: var(--text-secondary);

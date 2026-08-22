@@ -66,7 +66,6 @@ p {
 
 h2 {
   font-size: var(--font-size-section-title);
-  font-weight: 600;
 }
 
 p {

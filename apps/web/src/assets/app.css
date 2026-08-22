@@ -76,7 +76,6 @@
   max-width: 14ch;
   margin: 0;
   font-size: var(--font-size-page-title);
-  font-weight: 500;
   line-height: 0.98;
   letter-spacing: -0.055em;
 }
@@ -230,10 +229,23 @@
   filter: brightness(0.92);
 }
 
+/* 行動色是 --color-primary，不是 --color-tracking（那是「追蹤中」狀態色）。 */
 .button--primary {
-  background: var(--color-tracking);
-  color: #ffffff;
-  border-color: var(--color-tracking);
+  background: var(--color-primary);
+  color: var(--color-on-primary);
+  border-color: var(--color-primary);
+}
+
+.button--primary:active {
+  background: var(--color-primary-active);
+  border-color: var(--color-primary-active);
+}
+
+.button--primary:disabled,
+.button--primary[aria-disabled="true"] {
+  background: var(--color-primary-disabled);
+  border-color: var(--color-primary-disabled);
+  color: var(--color-body-strong);
 }
 
 .button--quiet {
@@ -250,7 +262,7 @@
   display: inline-flex;
   align-items: center;
   gap: var(--space-2);
-  color: var(--color-tracking);
+  color: var(--color-primary);
   font-weight: 500;
   text-underline-offset: 0.25rem;
 }

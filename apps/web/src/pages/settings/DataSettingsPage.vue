@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Download } from "@lucide/vue";
+import Icon from "../../components/icons/Icon.vue";
 import { computed, onMounted, shallowRef } from "vue";
 import { useWebAppServices } from "../../app/injection";
 
@@ -112,7 +112,7 @@ async function runClear(scope: ClearScope): Promise<void> {
           :disabled="busy"
           @click="localData.exportData"
         >
-          <Download :size="18" aria-hidden="true" />
+          <Icon name="tool-download" :size="20" />
           {{ busy ? "處理中…" : "匯出本機資料" }}
         </button>
 

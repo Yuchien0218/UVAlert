@@ -1,13 +1,7 @@
 <script setup lang="ts">
-import {
-  ChevronDown,
-  Dumbbell,
-  House,
-  Waves,
-  Wind
-} from "@lucide/vue";
 import type { SessionContext } from "@sunshield/contracts";
 import { shallowRef, watch } from "vue";
+import Icon from "../icons/Icon.vue";
 
 const selectedContext = defineModel<SessionContext | null>({
   required: true
@@ -18,13 +12,13 @@ const outdoorOptions = [
     value: "outdoor_general",
     label: "一般戶外",
     description: "通勤、散步或一般外出。",
-    icon: Wind
+    icon: "context-outdoor"
   },
   {
     value: "outdoor_exercise",
     label: "戶外運動",
     description: "跑步、騎車或其他較大量活動。",
-    icon: Dumbbell
+    icon: "context-exercise"
   }
 ] as const;
 
@@ -90,12 +84,7 @@ watch(
         name="setup-context"
         :value="option.value"
       >
-      <component
-        :is="option.icon"
-        :size="23"
-        :stroke-width="1.6"
-        aria-hidden="true"
-      />
+      <Icon :name="option.icon" :size="24" />
       <span>
         <strong>{{ option.label }}</strong>
         <small>{{ option.description }}</small>
@@ -110,16 +99,16 @@ watch(
         aria-controls="indoor-context-options"
         @click="indoorExpanded = !indoorExpanded"
       >
-        <House :size="23" :stroke-width="1.6" aria-hidden="true" />
+        <Icon name="context-indoor" :size="24" />
         <div>
           <strong>室內活動</strong>
           <small>近直射窗邊／遠離直射光</small>
         </div>
-        <ChevronDown
+        <Icon
+          name="tool-chevron-down"
           class="context-group__chevron"
           :class="{ 'context-group__chevron--expanded': indoorExpanded }"
           :size="20"
-          aria-hidden="true"
         />
       </button>
 
@@ -159,16 +148,16 @@ watch(
         aria-controls="water-context-options"
         @click="waterExpanded = !waterExpanded"
       >
-        <Waves :size="23" :stroke-width="1.6" aria-hidden="true" />
+        <Icon name="context-water" :size="24" />
         <div>
           <strong>水上活動</strong>
           <small>準備下水／已在水中</small>
         </div>
-        <ChevronDown
+        <Icon
+          name="tool-chevron-down"
           class="context-group__chevron"
           :class="{ 'context-group__chevron--expanded': waterExpanded }"
           :size="20"
-          aria-hidden="true"
         />
       </button>
 

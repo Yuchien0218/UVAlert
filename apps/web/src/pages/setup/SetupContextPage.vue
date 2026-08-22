@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ArrowRight, RotateCcw } from "@lucide/vue";
+import Icon from "../../components/icons/Icon.vue";
 import type { SessionContext, SetupDraftStep } from "@sunshield/contracts";
 import { onMounted, shallowRef, watch } from "vue";
 import { useRouter } from "vue-router";
@@ -89,14 +89,14 @@ function routeForStep(
           @click="continueDraft"
         >
           繼續設定
-          <ArrowRight :size="18" aria-hidden="true" />
+          <Icon name="tool-arrow-right" :size="20" />
         </button>
         <button
           class="button button--quiet"
           type="button"
           @click="restartDraft"
         >
-          <RotateCcw :size="17" aria-hidden="true" />
+          <Icon name="tool-reset" :size="20" />
           重新開始
         </button>
       </div>
@@ -127,7 +127,7 @@ function routeForStep(
         @click="next"
       >
         下一步
-        <ArrowRight :size="18" aria-hidden="true" />
+        <Icon name="tool-arrow-right" :size="20" />
       </button>
     </template>
   </SetupStepShell>
@@ -155,7 +155,6 @@ function routeForStep(
 
 .recovery-card h2 {
   font-size: clamp(1.5rem, 7vw, 2.35rem);
-  font-weight: 500;
   letter-spacing: -0.035em;
 }
 

@@ -1,14 +1,6 @@
 <script setup lang="ts">
-import {
-  CircleHelp,
-  Cloud,
-  Database,
-  BookOpen,
-  MessageSquare,
-  Smartphone,
-  TriangleAlert
-} from "@lucide/vue";
 import { computed } from "vue";
+import Icon from "../components/icons/Icon.vue";
 import {
   isSpecialSituationPublishable,
   listPublishableTopics
@@ -25,43 +17,43 @@ import {
 const allEntries = [
   {
     to: "/education",
-    icon: BookOpen,
+    icon: "more-education",
     label: "防曬衛教",
     description: "用白話讀懂 UV、防曬乳、補擦與曬後照護。"
   },
   {
     to: "/help",
-    icon: CircleHelp,
+    icon: "more-about",
     label: "常見問題",
     description: "防曬乳、提醒時間與使用限制的說明。"
   },
   {
     to: "/special-situation",
-    icon: TriangleAlert,
+    icon: "state-warning",
     label: "特殊狀況",
     description: "醫療邊界與功能限制。"
   },
   {
     to: "/install",
-    icon: Smartphone,
+    icon: "more-install",
     label: "安裝到手機桌面",
     description: "安裝後資料較不易遺失；不安裝也可正常使用。"
   },
   {
     to: "/settings/data",
-    icon: Database,
+    icon: "more-data",
     label: "本機資料管理",
     description: "查看、匯出與清除這台裝置上的資料。"
   },
   {
     to: "/settings/sync",
-    icon: Cloud,
+    icon: "state-online",
     label: "跨裝置同步",
     description: "選擇性登入；同步前會先讓你確認內容。"
   },
   {
     to: "/feedback",
-    icon: MessageSquare,
+    icon: "more-feedback",
     label: "問題回報與意見回饋",
     description: "不用登入也可以回報錯誤或提供建議。"
   }
@@ -102,7 +94,7 @@ const entries = computed(() =>
         class="entry app-card"
         :to="entry.to"
       >
-        <component :is="entry.icon" :size="20" aria-hidden="true" />
+        <Icon :name="entry.icon" :size="20" />
         <span>
           <strong>{{ entry.label }}</strong>
           <small>{{ entry.description }}</small>

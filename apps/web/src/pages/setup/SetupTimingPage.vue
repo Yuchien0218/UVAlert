@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { ArrowRight, LoaderCircle } from "@lucide/vue";
+import { LoaderCircle } from "@lucide/vue";
+import Icon from "../../components/icons/Icon.vue";
 import { computed, onMounted, shallowRef } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import ApplicationTimePicker from "../../components/setup/ApplicationTimePicker.vue";
@@ -262,7 +263,7 @@ onMounted(async () => {
         @click="goToProducts"
       >
         改為填寫完整的防曬乳包裝標示
-        <ArrowRight :size="17" aria-hidden="true" />
+        <Icon name="tool-arrow-right" :size="20" />
       </button>
     </template>
 
