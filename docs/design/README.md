@@ -11,6 +11,14 @@
 5. `packages/ui/src/styles.css`：目前實際使用的顏色、字級、間距、圓角、陰影與動畫 token。
 6. `apps/web/src/assets/app.css`：目前實際使用的共用版面與元件樣式。
 
+補充設計規格與資產：
+
+- [`2026-08-17-home-wireframe-variants-design.md`](2026-08-17-home-wireframe-variants-design.md)：進行中提醒主頁六款低擬真手機版 wireframe 的欄位與版型契約。
+- [`icon-system/README.md`](icon-system/README.md)：圖示幾何、命名、匯出與驗證規則。
+- [`logo-concepts/README.md`](logo-concepts/README.md)：第一輪 Logo 概念、正式採用的 06 播報印記與目前資產狀態。
+
+詳細設計規格的集中索引見 [`docs/superpowers/specs/README.md`](../superpowers/specs/README.md)；執行計畫見 [`docs/superpowers/plans/README.md`](../superpowers/plans/README.md)。
+
 程式碼是「目前畫面長什麼樣」的真實來源；設計文件是「接下來應該往哪裡走」的共同語言。兩者不一致時，先不要自行猜測或覆蓋，應先確認是否要把新方向正式實作。
 
 ## 目前視覺方向
