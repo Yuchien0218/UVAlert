@@ -199,7 +199,6 @@ const toneModifier = computed<string | null>(() => {
 .home-summary__title {
   margin: 0;
   font-size: clamp(1.3rem, 5vw, 1.8rem);
-  font-weight: 500;
   line-height: 1.2;
   letter-spacing: -0.03em;
 }

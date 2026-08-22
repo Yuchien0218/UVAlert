@@ -155,7 +155,6 @@ function routeForStep(
 
 .recovery-card h2 {
   font-size: clamp(1.5rem, 7vw, 2.35rem);
-  font-weight: 500;
   letter-spacing: -0.035em;
 }
 

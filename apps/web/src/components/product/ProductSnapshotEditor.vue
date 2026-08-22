@@ -342,7 +342,6 @@ const groupNames = {
 
 .session-product h2 {
   font-size: 1.15rem;
-  font-weight: 500;
 }
 
 .session-product p:not(.session-product__eyebrow) {

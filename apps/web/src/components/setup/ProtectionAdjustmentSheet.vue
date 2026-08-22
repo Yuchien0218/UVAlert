@@ -187,7 +187,6 @@ onBeforeUnmount(releasePageLock);
 
 .sheet__header h2 {
   font-size: 1.35rem;
-  font-weight: 500;
 }
 
 .sheet__close {

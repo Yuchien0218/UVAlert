@@ -161,7 +161,6 @@ function getTimingTone(
 .zone-list__title {
   margin: 0;
   font-size: var(--font-size-section-title);
-  font-weight: 600;
 }
 
 .zone-list__groups {

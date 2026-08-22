@@ -126,14 +126,12 @@ const relatedArticles = computed(() =>
 .education-article-body :deep(h2) {
   margin: var(--space-8) 0 var(--space-3);
   font-size: 1.25rem;
-  font-weight: 500;
   line-height: 1.35;
 }
 
 .education-article-body :deep(h3) {
   margin: var(--space-6) 0 var(--space-2);
   font-size: 1.05rem;
-  font-weight: 600;
   line-height: 1.45;
 }
 
@@ -211,7 +209,6 @@ const relatedArticles = computed(() =>
 .education-related h2 {
   margin: 0 0 var(--space-3);
   font-size: var(--font-size-section-title);
-  font-weight: 500;
 }
 
 .education-related-list {

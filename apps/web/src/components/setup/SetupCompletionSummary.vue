@@ -212,7 +212,6 @@ function formatTime(iso: string | null): string {
 h2 {
   margin: 0;
   font-size: 1.125rem;
-  font-weight: 700;
 }
 
 .summary-help {
@@ -258,7 +257,6 @@ h2 {
 .summary-item h3 {
   margin: 0;
   font-size: 0.875rem;
-  font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.1em;
   color: var(--text-secondary);

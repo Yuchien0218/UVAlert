@@ -105,7 +105,6 @@ const highestDay = computed(() =>
 
 .evening-prompt__title {
   font-size: 1.15rem;
-  font-weight: 600;
   color: var(--text-primary);
 }
 

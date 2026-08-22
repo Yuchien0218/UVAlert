@@ -189,7 +189,6 @@ function getUnavailableMessage(error: UvForecastError): string {
 .uv-forecast__title {
   margin: 0;
   font-size: var(--font-size-section-title);
-  font-weight: 600;
 }
 
 .uv-forecast__state {

@@ -199,7 +199,6 @@ function getEyebrowText(): string {
 .reminder-panel__title {
   margin: 0;
   font-size: clamp(1.65rem, 7vw, 2.8rem);
-  font-weight: 500;
   line-height: 1.1;
   letter-spacing: -0.04em;
 }

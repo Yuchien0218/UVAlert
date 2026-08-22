@@ -2,7 +2,7 @@
 <html lang="zh-Hant">
   <head>
     <meta charset="UTF-8">
-    <meta name="color-scheme" content="light dark">
+    <meta name="color-scheme" content="light">
     <meta
       name="viewport"
       content="width=device-width, initial-scale=1, viewport-fit=cover"
@@ -28,29 +28,10 @@
     <link rel="apple-touch-icon" href="/apple-touch-icon.png">
 
     <!--
-      manifest 只能有一個 theme_color；瀏覽器工具列的實際配色靠這兩條。
+      本系統只有一套暖色亮色主題（DESIGN.md 第十節「深色模式：不做」）。
       值取自 packages/ui/src/styles.css 的 --page-background。
     -->
-    <meta
-      name="theme-color"
-      media="(prefers-color-scheme: light)"
-      content="#f9f9f9"
-    >
-    <meta
-      name="theme-color"
-      media="(prefers-color-scheme: dark)"
-      content="#0f0e0c"
-    >
-    <script>
-      try {
-        const appearance = localStorage.getItem("sunshield.appearance");
-        if (appearance === "light" || appearance === "dark") {
-          document.documentElement.dataset.theme = appearance;
-        }
-      } catch {
-        // The Vue appearance controller applies the session preference.
-      }
-    </script>
+    <meta name="theme-color" content="#faf5ec">
   </head>
   <body>
     <div id="app"></div>

@@ -79,7 +79,6 @@ withDefaults(defineProps<Props>(), {
 .context-card__title {
   margin: 0;
   font-size: var(--font-size-section-title);
-  font-weight: 600;
 }
 
 .context-card__row {

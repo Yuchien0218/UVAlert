@@ -139,7 +139,6 @@ function getErrorMessage(error: SessionEndError): string {
 .session-end__title {
   margin: 0;
   font-size: 1.25rem;
-  font-weight: 500;
 }
 
 .session-end__body {
@@ -171,6 +170,10 @@ function getErrorMessage(error: SessionEndError): string {
   box-shadow: none;
 }
 
+/*
+ * 這是 <p> 而不是標題元素（對話框標題靠 aria-labelledby 關聯），
+ * 所以不吃 h1/h2/h3 的襯線體規則，字重要自己留著。
+ */
 .session-end__confirm-title {
   margin: 0;
   color: var(--text-primary);

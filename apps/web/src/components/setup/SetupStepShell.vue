@@ -244,7 +244,6 @@ button.setup-shell__quiet-action {
   max-width: 16ch;
   margin: 0;
   font-size: var(--font-size-page-title);
-  font-weight: 500;
   letter-spacing: -0.05em;
   line-height: 1;
 }

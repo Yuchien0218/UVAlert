@@ -798,16 +798,13 @@ Cormorant Garamond 不可用時，**EB Garamond** 字重 500 加 -0.02em 字距�
 
 ## 十、與程式碼的落差
 
-`README.md` 訂有「文件與程式碼衝突時以程式碼為準」的規則。本文件的**字體**仍是目標方向，尚未套用到程式碼；**色彩已於 2026-08-22 套用完畢**。目前剩下的落差：
+`README.md` 訂有「文件與程式碼衝突時以程式碼為準」的規則。**色彩已於 2026-08-22、字體已於 2026-08-23 套用完畢。** 目前剩下一項刻意的偏離：
 
-| 項目 | 本文件（目標） | `packages/ui/src/styles.css`（現況） |
-|---|---|---|
-| 標題字體 | Cormorant Garamond ＋ Noto Serif TC | 無 serif token |
-| 內文字體 | Inter ＋ Noto Sans TC | `--font-sans` 首位是 Helvetica Neue |
+| 項目 | 本文件（目標） | 實作 | 為什麼 |
+|---|---|---|---|
+| 中文內文字體 | Noto Sans TC | 系統黑體（PingFang TC／微軟正黑） | 內文會渲染使用者輸入的裝備名稱與備註。subset 會缺字，完整 CJK 字型是好幾 MB。詳見 `tools/fonts/README.md` |
 
-字體之所以還沒動，是因為需要先解決 web font 載入與 CJK 備援測試（本節末的套用順序建議）。另外要注意：Google Fonts 不提供 `Noto Sans Mono CJK TC`，讀數字體的 CJK 備援需要另外確認。
-
-**已對齊的部分**：品牌與表面色票、行動色、文字色、圓角（含 4px xs）、UV 五級風險色、倒數五狀態語意色、內容最大寬度 752px、點擊目標 44px、間距基礎單位 4px、單一亮色主題、自訂圖示系統為唯一來源。
+**已對齊的部分**：品牌與表面色票、行動色、文字色、標題襯線體、拉丁內文字體、圓角（含 4px xs）、UV 五級風險色、倒數五狀態語意色、內容最大寬度 752px、點擊目標 44px、間距基礎單位 4px、單一亮色主題、自訂圖示系統為唯一來源。
 
 > **2026-08-22 色彩套用**：`packages/ui/src/styles.css` 已改為本文件第二節的完整色票——品牌（primary／active／disabled ＋ 四個 accent）、表面（canvas 到三階深色）、文字與分隔線。語意別名一併重新指向：`--page-background` → canvas、`--text-primary` → ink、`--text-secondary` → muted、`--surface-primary` → surface-card、`--border-subtle` → hairline、`--focus-ring` → primary。`manifest.webmanifest` 的 `theme_color`／`background_color` 也換成 `#faf5ec`。
 >
@@ -819,13 +816,19 @@ Cormorant Garamond 不可用時，**EB Garamond** 字重 500 加 -0.02em 字距�
 >
 > 教訓：`.button` 已經帶 `min-height: var(--tap-target)`，**元件的 scoped CSS 不要再自己寫 `min-height`**——scoped 樣式的 attribute selector 特異性高於共用類別，一定會蓋過去。要調整尺寸請改 padding 或 token，不要覆寫 min-height。
 
+> **2026-08-23 字體套用**：新增 `--font-serif`，並在 `packages/ui/src/styles.css` 加全域規則讓 `h1`／`h2`／`h3` 走襯線體、字重 400。字型自行托管於 `apps/web/public/fonts/`，由 `node tools/fonts/build-fonts.mjs` 從完整字型 subset 產生（合計 748 KB，取代 26 MB 的原檔）。不使用 Google Fonts CDN——理由與其他取捨見 `tools/fonts/README.md`。
+>
+> **一併移除 31 個檔案裡的 36 條標題字重覆寫。** Noto Serif TC subset 只有 400 字重，元件若寫 `font-weight: 600` 會觸發瀏覽器合成假粗（faux bold），把筆畫無差別加厚，中文字會糊。這就是第十一節「不要把襯線標題加粗」的技術理由，不只是風格偏好。
+>
+> **webfont 是必要條件不是加分項**：Windows 系統沒有 Noto Serif CJK，中文襯線體只會落到新細明體——那是為 12px 點陣設計的字，放到 28–64px 標題品質很差。只加 token 不載入字型會讓標題比原本更難看。
+
 ### 深色模式：不做（已從程式碼移除）
 
 **本系統只有一套暖色亮色主題。** 理由是暖象牙 ＋ 濃縮咖啡的對比本身就是這個系統的層級機制——倒數面板之所以突出，是因為它是整頁唯一的深色表面。深色模式會讓這個對比失效，等於要重新設計一套層級語言。
 
 2026-08-19 已移除舊 demo 版的深色模式實作，包含 `:root[data-theme]` 與 `prefers-color-scheme` token 組、`/settings/display` 路由與頁面、`AppearanceSettings` 元件、`useAppearance` composable、`createAppearanceController`、`toggleThemeWithReveal` helper，以及 `UserPreferencesV1Schema` 的 `appearance` 欄位（含 Supabase 同步驗證）。schema 版本維持 `user-preferences-v1`——Zod 預設 strip 未知欄位，舊資料含 `appearance` 也能正常解析，不需要遷移。
 
-**套用順序建議**：色彩 token 先行（影響最大、風險最低），字體其次（需先解決 web font 載入與 CJK 備援測試），元件層 token 最後。
+**套用進度**：色彩 token（2026-08-22）與字體（2026-08-23）皆已完成。剩下元件層 token——`DESIGN.md` 第五節的元件規範目前仍靠 `apps/web/src/assets/app.css` 的共用類別實現，尚未抽成 token。
 
 ## 十一、Do's and Don'ts
 
@@ -885,9 +888,9 @@ Cormorant Garamond 不可用時，**EB Garamond** 字重 500 加 -0.02em 字距�
 2. **焦點環未系統化。** 只有 `text-input-focused` 有定義。程式碼有 `--focus-ring` token，但按鈕、連結、卡片的鍵盤焦點樣式未在此文件規範。可及性要求焦點環，這是缺口。
 3. **停用狀態只定義了主按鈕。** 次要按鈕、輸入框、清單項目的停用樣式未定義。
 4. **錯誤與驗證狀態未展開。** 表單驗證錯誤的視覺（欄位邊框、訊息位置、圖示）需要一個實際的表單流程才能確認。
-5. **地平線太陽字標未形式化為 token。** 它目前是 inline SVG 資產，尚未納入系統 token。
+5. **橫式標誌缺深色底版本。** 正式資產在 `docs/design/logo/`（2026-08-22 定案），但墨咖字標在濃縮咖啡深色面板上幾乎看不見，需要另做反白版。圖標本身已有 `06-broadcast-mark-dark-surface.svg`。
 6. **衛教七部位示意尚未設計。** 規格 4.6 有提到，圖示系統中列為待補。
-7. **工具型圖示尚未設計**：返回、關閉、展開收合、新增、編輯、刪除、分享、搜尋、收藏、重新整理。這批是替換 Lucide 的前置條件。
+7. **功能型圖示尚未設計**（10 個）：載入中、快速摘要、調整設定、流程橫幅、產品確認、地區、定位、UV 預報、夜間、傍晚。工具型那批已完成。這 10 個綁在可能被 wireframe 重新設計的元件上，刻意延後——清單見 `docs/design/icon-system/README.md` 第八節。
 8. **分享圖版面未定義。** 裝備分享圖的內容規則已確認（見第九節），但版面、尺寸與品牌標示位置未定。
 9. **`/reminder/reapply` 的最終顯示形式未定**，Sitemap 文件標註仍需在 wireframe 階段確認。
 10. **`packages/ui/src/index.ts` 的 `SUNSHIELD_THEME = "studio-mono"` 是死碼**，沒有任何地方引用，且名稱屬於已淘汰的視覺方向。導入新色盤時一併清掉或改成新的主題識別。

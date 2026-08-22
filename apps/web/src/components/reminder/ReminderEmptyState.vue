@@ -82,7 +82,6 @@ import Icon from "../icons/Icon.vue";
 .empty-state__title {
   margin: 0;
   font-size: clamp(1.75rem, 7vw, 2.75rem);
-  font-weight: 500;
   line-height: 1.12;
   letter-spacing: -0.04em;
 }

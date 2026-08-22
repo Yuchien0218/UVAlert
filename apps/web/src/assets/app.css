@@ -76,7 +76,6 @@
   max-width: 14ch;
   margin: 0;
   font-size: var(--font-size-page-title);
-  font-weight: 500;
   line-height: 0.98;
   letter-spacing: -0.055em;
 }

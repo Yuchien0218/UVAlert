@@ -39,7 +39,6 @@ withDefaults(defineProps<Props>(), { requiredReview: null });
 .under-review h2 {
   margin: 0;
   font-size: 1.15rem;
-  font-weight: 500;
 }
 
 .under-review p {

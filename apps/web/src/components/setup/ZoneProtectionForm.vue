@@ -293,7 +293,6 @@ function makeDraftZone(
 .preset-card__title {
   margin: 0;
   font-size: 1.5rem;
-  font-weight: 500;
 }
 
 .preset-card__body,
@@ -329,7 +328,6 @@ button.text-link {
 .zone-groups__heading h2 {
   margin: 0;
   font-size: 1.15rem;
-  font-weight: 500;
 }
 
 .zone-groups__heading p {

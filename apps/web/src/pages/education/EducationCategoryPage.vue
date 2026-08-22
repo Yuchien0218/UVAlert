@@ -94,7 +94,6 @@ const robots = computed(() => (publishableCount.value > 0 ? "index,follow" : "no
 .education-section-heading h2 {
   margin: 0;
   font-size: var(--font-size-section-title);
-  font-weight: 500;
 }
 
 .education-section-heading span,

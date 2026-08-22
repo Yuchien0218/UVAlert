@@ -45,7 +45,8 @@ pnpm --filter @sunshield/web typecheck
 | `pnpm education:generate` | 由 `docs/education/articles/*.md` 產生 Vue 使用的衛教資料 |
 | `pnpm region-data:build` | 由官方 NLSC SHP 產生行政區界線與索引 |
 | `pnpm region-data:verify` | 驗證上面的產出可重現 |
-| `node tools/icon-system/generate-icons.mjs` | 正規化圖示 SVG 並重組預覽板（冪等，不碰幾何） |
+| `node tools/icon-system/generate-icons.mjs` | 正規化圖示 SVG、重組預覽板、產生 Vue 用的圖示註冊表（冪等，不碰幾何） |
+| `node tools/fonts/build-fonts.mjs` | 由完整字型 subset 出自行托管的 woff2（原始字型不進 repo，見 `tools/fonts/README.md`） |
 
 Supabase 本機開發：`pnpm supabase:start`、`pnpm supabase:reset`、`pnpm supabase:functions:serve`。
 

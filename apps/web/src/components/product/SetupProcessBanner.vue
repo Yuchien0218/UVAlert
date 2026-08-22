@@ -66,7 +66,6 @@ defineEmits<{
 .process-banner h2 {
   margin-top: var(--space-2);
   font-size: 1.15rem;
-  font-weight: 500;
 }
 
 .process-banner__content > p:last-child {

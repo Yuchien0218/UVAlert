@@ -121,7 +121,6 @@ async function install(): Promise<void> {
 .limits h2 {
   margin: 0;
   font-size: 1.15rem;
-  font-weight: 500;
 }
 
 .install-card p,
