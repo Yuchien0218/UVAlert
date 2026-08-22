@@ -119,13 +119,6 @@ export function createAppRouter(
         meta: { title: "特殊狀況" }
       },
       {
-        path: "/settings/display",
-        name: "settings-display",
-        component: () =>
-          import("../pages/settings/DisplaySettingsPage.vue"),
-        meta: { title: "顯示設定" }
-      },
-      {
         path: "/settings/data",
         name: "settings-data",
         component: () => import("../pages/settings/DataSettingsPage.vue"),

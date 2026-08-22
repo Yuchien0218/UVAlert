@@ -41,7 +41,6 @@ describe("route name 完整性", () => {
     "product-new",
     "product-edit",
     "settings-data",
-    "settings-display",
     "install",
     "region",
     "help",

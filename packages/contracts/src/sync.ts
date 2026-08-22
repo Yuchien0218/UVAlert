@@ -28,7 +28,6 @@ export type SyncRecordKind = z.infer<typeof SyncRecordKindSchema>;
 
 export const UserPreferencesV1Schema = z.object({
   schemaVersion: z.literal(USER_PREFERENCES_SCHEMA_VERSION),
-  appearance: z.enum(["light", "dark", "system"]).default("system"),
   reminderFrequencyMinutes: z
     .number()
     .int()

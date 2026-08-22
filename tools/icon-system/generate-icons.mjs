@@ -1,285 +1,107 @@
-import { mkdirSync, writeFileSync } from "node:fs";
+import { existsSync, readFileSync, readdirSync, writeFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
-// Icon geometry echoes the 06 broadcast logo mark: solid dots plus
-// capsule strokes (round caps/joins), no thin hairlines, no sharp corners.
-// Grid is 24x24 with a ~2px optical margin so icons sit evenly beside text.
-const GRID = 24;
-const STROKE = 2.5;
+/**
+ * 圖示管線：Illustrator 為幾何的真實來源，這支腳本負責正規化與組版。
+ *
+ * 為什麼是這個方向：圖示本來就該用視覺工具畫。之前這支腳本用 JS 函式
+ * 產生路徑，結果是「跑一次就把手繪成果整批蓋掉」——2026-08-19 差點發生。
+ * 現在幾何歸 Illustrator，這支腳本只做三件機器該做的事：
+ *
+ *   1. 正規化：把 Illustrator 匯出的格式改成可以直接 inline 進 Vue 的樣子
+ *   2. 補 metadata：<title>、data-icon、data-tone、role
+ *   3. 組預覽板：從 icons/ 讀檔重組，不再自己畫
+ *
+ * 正規化是必要的，不是潔癖。Illustrator 匯出有三個會在 App 裡出事的地方：
+ *
+ *   - `stroke: #000` 寫死墨色。設計系統要求 currentColor，否則狀態圖示
+ *     無法繼承語意色，放在深色倒數面板上會變成看不見的黑塊。
+ *   - CSS class（.cls-1、.cls-2）放在 <defs> 裡。同一頁 inline 兩個圖示
+ *     時 class 會互相覆蓋，這是最難查的那種 bug。所以樣式一律內聯到元素上。
+ *   - 沒有 <title>，螢幕閱讀器讀不出圖示語意。
+ */
 
+const GRID = 24;
 const ACCENT = "#C1832E";
 const INK = "currentColor";
 
-// Two-color icons carry the logo's amber accent; status icons stay single-color
-// so they can inherit the semantic status colors already in packages/ui.
-const PALETTE_TWO_TONE = Object.freeze({ ink: INK, accent: ACCENT });
-const PALETTE_MONO = Object.freeze({ ink: INK, accent: INK });
+/** Illustrator 會匯出這些墨色，全部視為「應該是 currentColor」。 */
+const INK_LITERALS = ["#000", "#000000", "#33291f", "#33291F", "#2e2925", "#2E2925"];
 
-const line = (d, color) =>
-  `<path d="${d}" fill="none" stroke="${color}" stroke-width="${STROKE}" stroke-linecap="round" stroke-linejoin="round"/>`;
-const dot = (cx, cy, r, color) => `<circle cx="${cx}" cy="${cy}" r="${r}" fill="${color}"/>`;
-const ring = (cx, cy, r, color) =>
-  `<circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="${color}" stroke-width="${STROKE}"/>`;
-const wedge = (d, color) => `<path d="${d}" fill="${color}"/>`;
-
-// Remaining-time gauge, read like a battery or fuel gauge: full means there is
-// still protection time, empty means it is due. Segment count carries the
-// meaning, so the four states stay distinct in greyscale and at 16px.
-// Dashes are deliberately absent from this system. Round caps close small gaps
-// (rendering the stroke solid), larger gaps break the line into unrelated specks,
-// and on a closed curve the dash phase lands asymmetrically and skews the shape.
-// "Inactive" is carried by the diagonal slash instead, which also matches how
-// the notification icons read.
-// One definition for every "disabled" slash: 45 degrees, centred on 12,12,
-// same length and weight wherever it appears. Icons previously carried two
-// different slashes (53 degrees here, 45 degrees and much longer on the cloud).
-const slash = (color) =>
-  `<path d="M5.6 18.4L18.4 5.6" fill="none" stroke="${color}" stroke-width="${STROKE}" stroke-linecap="round"/>`;
-
-// A bell is the plainest notification symbol there is. The logo spec bans bells,
-// but that list constrains the brand mark only ("禁止方向" for the logo), not UI
-// status icons. Dome + rim + clapper keeps it in the capsule/solid family.
-// `splitRim` leaves an explicit, symmetric gap in the bell's rim for the
-// "not finished yet" state. The gap is authored as two separate strokes rather
-// than a dash pattern, so its position is controlled and cannot skew the shape.
-const bell = (color, { splitRim = false } = {}) => {
-  const dome = `<path d="M6.6 15.8V10.2A5.4 5.4 0 0 1 17.4 10.2V15.8Z" fill="none" stroke="${color}" stroke-width="${STROKE}" stroke-linecap="round" stroke-linejoin="round"/>`;
-  // The gap is a notch, not a wide break: at 6.2 units it ate a third of the rim
-  // and made this bell look narrower than the others even though both measure
-  // the same width.
-  const rim = splitRim
-    ? `<path d="M4.8 15.8H10.4M13.6 15.8H19.2" fill="none" stroke="${color}" stroke-width="${STROKE}" stroke-linecap="round"/>`
-    : `<path d="M4.8 15.8H19.2" fill="none" stroke="${color}" stroke-width="${STROKE}" stroke-linecap="round"/>`;
-  return dome + rim;
-};
-
-// Segment sizing leaves an even 1.6 gutter between segments and the shell's
-// inner edge on all four sides, so the row does not look crammed.
-const GAUGE_SLOTS = [5.6, 10.4, 15.2];
-const gauge = (filledSegments, color) => {
-  const outline = `<rect x="2.75" y="8.2" width="18.5" height="7.6" rx="3.2" fill="none" stroke="${color}" stroke-width="${STROKE}"/>`;
-  const segments = GAUGE_SLOTS.slice(0, filledSegments)
-    .map((x) => `<rect x="${x}" y="10.6" width="3.2" height="2.8" rx="1.1" fill="${color}"/>`)
-    .join("");
-  return outline + segments;
-};
-const box = (x, y, w, h, r, color) =>
-  `<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="${r}" fill="none" stroke="${color}" stroke-width="${STROKE}"/>`;
-const solidBox = (x, y, w, h, r, color) =>
-  `<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="${r}" fill="${color}"/>`;
-
+/**
+ * 圖示登記表——只有 metadata，沒有幾何。
+ *
+ * `file: false` 代表已經規劃但還沒畫，腳本會列出來而不是報錯。
+ */
 export const ICONS = Object.freeze([
   // ---- 下排導覽（雙色）----
-  {
-    id: "nav-reminder",
-    group: "nav",
-    label: "提醒",
-    twoTone: true,
-    // Sand sits in the upper chamber: every other amber accent in the set lives
-    // in the top half, and "time still left" suits a nav icon better than
-    // "time run out".
-    body: (c) =>
-      wedge("M7.9 5.1H16.1L12 11.7Z", c.accent) +
-      line("M6.4 3.9H17.6L12 12L17.6 20.1H6.4L12 12Z", c.ink),
-  },
-  {
-    id: "nav-gear",
-    group: "nav",
-    label: "裝備",
-    twoTone: true,
-    nudgeY: -0.3,
-    body: (c) => solidBox(9.25, 2.75, 5.5, 3.75, 1.5, c.accent) + box(6.75, 7.5, 10.5, 13.25, 3.25, c.ink),
-  },
-  // A horizontal three-dot row measured 17.5x4.5 next to two ~13x19 shapes, so
-  // it never read as part of the set. A 2x2 grid carries comparable mass and
-  // also matches what the page actually is: a card grid.
-  {
-    id: "nav-more",
-    group: "nav",
-    label: "更多",
-    twoTone: true,
-    body: (c) =>
-      dot(6.8, 6.8, 3.05, c.ink) +
-      dot(17.2, 6.8, 3.05, c.accent) +
-      dot(6.8, 17.2, 3.05, c.ink) +
-      dot(17.2, 17.2, 3.05, c.ink),
-  },
+  { id: "nav-reminder", group: "nav", label: "提醒", twoTone: true },
+  { id: "nav-gear", group: "nav", label: "裝備", twoTone: true },
+  { id: "nav-more", group: "nav", label: "更多", twoTone: true },
 
-  // ---- 倒數與部位狀態（單色，繼承語意色）----
-  // Fill amount encodes elapsed progress, so the four states stay distinct
-  // in greyscale and for color-blind users.
-  // Chosen over a filled ring, an hourglass and a depleting arc: the gauge kept
-  // the four states furthest apart at 16px, and "full = time left, empty = act
-  // now" needs no learning.
-  {
-    id: "state-tracking",
-    group: "state",
-    label: "追蹤中",
-    body: (c) => gauge(3, c.ink),
-  },
-  {
-    id: "state-soon",
-    group: "state",
-    label: "即將到期",
-    body: (c) => gauge(1, c.ink),
-  },
-  {
-    id: "state-due",
-    group: "state",
-    label: "已到期",
-    body: (c) => gauge(0, c.ink),
-  },
-  {
-    id: "state-untimed",
-    group: "state",
-    label: "未計時",
-    body: (c) => gauge(0, c.ink) + slash(c.ink),
-  },
+  // ---- 狀態（單色，繼承語意色）----
+  { id: "state-tracking", group: "state", label: "追蹤中" },
+  { id: "state-soon", group: "state", label: "即將到期" },
+  { id: "state-due", group: "state", label: "已到期" },
+  { id: "state-untimed", group: "state", label: "未計時" },
+  { id: "state-notification-off", group: "state", label: "通知未開啟" },
+  { id: "state-notification-pending", group: "state", label: "背景通知尚未完成" },
+  { id: "state-offline", group: "state", label: "目前離線" },
+  { id: "state-online", group: "state", label: "背景通知已恢復" },
+  { id: "state-success", group: "state", label: "已儲存" },
+  { id: "state-warning", group: "state", label: "警告" },
+  { id: "state-unverified", group: "state", label: "標示尚未確認" },
 
-  // ---- 通知與連線（單色）----
-  // Radiating arcs read as a wifi signal, a corner badge looked lopsided, and a
-  // card with an unread dot was too abstract to read as "notification" at all.
-  {
-    id: "state-notification-off",
-    group: "state",
-    label: "通知未開啟",
-    nudgeY: -0.2,
-    body: (c) => bell(c.ink) + dot(12, 19, 1.8, c.ink) + slash(c.ink),
-  },
-  {
-    id: "state-notification-pending",
-    group: "state",
-    label: "背景通知尚未完成",
-    // Broken rim: the bell is there but not yet whole. A hollow clapper was
-    // tried first (at stroke 2.5 a ring that small just reads as a bigger solid
-    // dot), then dropping the clapper entirely — but that left this too close
-    // to the plain bell used for the settings card.
-    nudgeY: -0.2,
-    body: (c) => bell(c.ink, { splitRim: true }) + dot(12, 19, 1.8, c.ink),
-  },
-  {
-    id: "state-offline",
-    group: "state",
-    label: "目前離線",
-    nudgeY: -0.45,
-    body: (c) =>
-      // The cloud mass is not symmetric around 12,12 (it sits low and slightly
-      // right), so the shared centred slash stuck out further on the top-right
-      // than the bottom-left. This variant is pushed 1.4 further southwest so
-      // both ends clear the cloud's edge by the same amount.
-      line("M7.5 18A4.5 4.5 0 0 1 7.5 9A6 6 0 0 1 18.5 11A3.6 3.6 0 0 1 18 18Z", c.ink) +
-      `<path d="M4.6 19.4L18.4 5.6" fill="none" stroke="${c.ink}" stroke-width="${STROKE}" stroke-linecap="round"/>`,
-  },
-  {
-    id: "state-online",
-    group: "state",
-    label: "背景通知已恢復",
-    // Paired with state-offline: the same cloud, with and without the slash.
-    // An interior dot was tried first but read as an arbitrary blob, because
-    // the cloud's own mass sits right of centre and the dot fought it.
-    body: (c) => line("M7.5 18A4.5 4.5 0 0 1 7.5 9A6 6 0 0 1 18.5 11A3.6 3.6 0 0 1 18 18Z", c.ink),
-  },
+  // ---- 更多頁卡片（雙色）----
+  { id: "more-notifications", group: "more", label: "通知設定", twoTone: true },
+  { id: "more-education", group: "more", label: "防曬衛教", twoTone: true },
+  { id: "more-data", group: "more", label: "本機資料與隱私", twoTone: true },
+  { id: "more-feedback", group: "more", label: "問題回報", twoTone: true },
+  { id: "more-install", group: "more", label: "安裝到主畫面", twoTone: true },
+  { id: "more-about", group: "more", label: "說明與關於", twoTone: true },
 
-  // ---- 表單與資料狀態（單色）----
-  {
-    id: "state-success",
-    group: "state",
-    label: "已儲存",
-    body: (c) => ring(12, 12, 8.5, c.ink) + line("M8 12.3L11 15.2L16 9.5", c.ink),
-  },
-  {
-    id: "state-warning",
-    group: "state",
-    label: "警告",
-    nudgeY: -0.65,
-    // Explicitly arc-rounded corners rather than a sharp triangle: cutting the
-    // apex back widens the usable interior, which is what actually fixes the
-    // exclamation mark crowding the edges (about 1.5 clearance versus 0.6 on a
-    // sharp triangle). It also matches the round caps and joins used everywhere
-    // else in the set — the sharp triangle was the odd one out.
-    body: (c) =>
-      line("M10.3 5.1A2 2 0 0 1 13.7 5.1L20.9 18.6A2 2 0 0 1 19.2 21.5H4.8A2 2 0 0 1 3.1 18.6Z", c.ink) +
-      line("M12 11V13.8", c.ink) +
-      dot(12, 17.1, 1.15, c.ink),
-  },
-  {
-    id: "state-unverified",
-    group: "state",
-    label: "標示尚未確認",
-    // The bowl is a true 270-degree arc centred on x=12, so the hook sits
-    // directly above the stem and the dot. The earlier version started the
-    // bowl off-axis, which tilted the whole glyph inside the ring.
-    body: (c) =>
-      ring(12, 12, 8.5, c.ink) +
-      line("M9.6 9.8A2.4 2.4 0 1 1 12 12.2V13.5", c.ink) +
-      dot(12, 16.4, 1.25, c.ink),
-  },
+  // ---- 設定情境（雙色）----
+  { id: "context-outdoor", group: "context", label: "一般戶外", twoTone: true },
+  { id: "context-exercise", group: "context", label: "戶外運動", twoTone: true },
+  { id: "context-indoor", group: "context", label: "室內", twoTone: true },
+  { id: "context-water", group: "context", label: "水中", twoTone: true },
 
-  // ---- 更多頁六張卡片（雙色）----
-  {
-    id: "more-notifications",
-    group: "more",
-    label: "通知設定",
-    twoTone: true,
-    nudgeY: -0.2,
-    body: (c) => bell(c.ink) + dot(12, 19, 1.8, c.accent),
-  },
-  {
-    id: "more-education",
-    group: "more",
-    label: "防曬衛教",
-    twoTone: true,
-    nudgeY: -0.45,
-    // Amber is painted first so the ink structure sits on top of it: the spine
-    // tucks under the book's edges instead of capping them.
-    body: (c) =>
-      line("M12 7.6V18.6", c.accent) +
-      line("M12 7.6C10.2 6.6 7.8 6.2 4.8 6.2V17.2C7.8 17.2 10.2 17.6 12 18.6C13.8 17.6 16.2 17.2 19.2 17.2V6.2C16.2 6.2 13.8 6.6 12 7.6Z", c.ink),
-  },
-  {
-    id: "more-data",
-    group: "more",
-    label: "本機資料與隱私",
-    twoTone: true,
-    // Amber is an accent laid over an ink structure, matching more-education's
-    // ink book with an amber spine. Making amber the structure itself (the top
-    // ellipse) broke that rule and read heavier than the rest of the set.
-    body: (c) =>
-      line("M5.25 12A6.75 2.9 0 0 0 18.75 12", c.accent) +
-      `<ellipse cx="12" cy="7.25" rx="6.75" ry="2.9" fill="none" stroke="${c.ink}" stroke-width="${STROKE}"/>` +
-      line("M5.25 7.25V16.75A6.75 2.9 0 0 0 18.75 16.75V7.25", c.ink),
-  },
-  {
-    id: "more-feedback",
-    group: "more",
-    label: "問題回報",
-    twoTone: true,
-    nudgeY: -0.45,
-    body: (c) =>
-      line("M6 4.5H18A2.5 2.5 0 0 1 20.5 7V14.5A2.5 2.5 0 0 1 18 17H12.5L8 20.5V17H6A2.5 2.5 0 0 1 3.5 14.5V7A2.5 2.5 0 0 1 6 4.5Z", c.ink) +
-      dot(12, 10.75, 2, c.accent),
-  },
-  {
-    id: "more-install",
-    group: "more",
-    label: "安裝到主畫面",
-    twoTone: true,
-    nudgeY: -0.65,
-    // The arrow used to run 10.5 units against a 6-unit tray, so it read as an
-    // arrow with a tray attached. Shorter arrow, wider tray, closer to square.
-    body: (c) =>
-      line("M4.4 13.4V18.4A2.2 2.2 0 0 0 6.6 20.6H17.4A2.2 2.2 0 0 0 19.6 18.4V13.4", c.ink) +
-      line("M12 4.8V11.9", c.accent) +
-      line("M8.3 9.4L12 13.1L15.7 9.4", c.accent),
-  },
-  {
-    id: "more-about",
-    group: "more",
-    label: "說明與關於",
-    twoTone: true,
-    body: (c) => ring(12, 12, 8.5, c.ink) + dot(12, 8, 1.5, c.accent) + line("M12 11.75V16.25", c.ink),
-  },
+  // ---- 事件回報（雙色）----
+  { id: "event-heavy-sweat", group: "event", label: "大量流汗", twoTone: true },
+  { id: "event-towel", group: "event", label: "擦拭", twoTone: true },
+  { id: "event-friction", group: "event", label: "摩擦", twoTone: true },
+  { id: "event-hand-wash", group: "event", label: "洗手", twoTone: true },
+
+  // ---- 裝備品類（雙色）----
+  { id: "gear-sunscreen", group: "gear", label: "防曬乳", twoTone: true },
+  { id: "gear-clothing", group: "gear", label: "防曬衣物", twoTone: true },
+  { id: "gear-sunglasses", group: "gear", label: "太陽眼鏡", twoTone: true },
+  { id: "gear-hat", group: "gear", label: "帽子", twoTone: true },
+  { id: "gear-umbrella", group: "gear", label: "陽傘", twoTone: true },
+  { id: "gear-other", group: "gear", label: "其他裝備", twoTone: true },
+
+  // ---- 衛教分類（雙色）----
+  { id: "education-uv-basics", group: "education", label: "了解今天的 UV", twoTone: true },
+  { id: "education-before-going-out", group: "education", label: "出門前準備", twoTone: true },
+  { id: "education-reapply", group: "education", label: "外出中的補擦", twoTone: true },
+  { id: "education-sweat-and-water", group: "education", label: "流汗或碰水後", twoTone: true },
+  { id: "education-after-sun-care", group: "education", label: "回家後與皮膚照顧", twoTone: true },
+  { id: "education-special-situations", group: "education", label: "特殊情況", twoTone: true },
+
+  // ---- 工具型（單色，尚未繪製）----
+  // 這批取代 @lucide/vue 的通用圖示。單色是刻意的：它們會出現在各種
+  // 語意情境裡（按鈕、連結、狀態列），必須繼承外層顏色。
+  { id: "tool-arrow-right", group: "tool", label: "前往" },
+  { id: "tool-arrow-left", group: "tool", label: "返回" },
+  { id: "tool-arrow-down", group: "tool", label: "向下" },
+  { id: "tool-chevron-down", group: "tool", label: "展開" },
+  { id: "tool-chevron-right", group: "tool", label: "進入" },
+  { id: "tool-close", group: "tool", label: "關閉" },
+  { id: "tool-plus", group: "tool", label: "新增" },
+  { id: "tool-download", group: "tool", label: "匯出" },
+  { id: "tool-refresh", group: "tool", label: "重新整理" },
+  { id: "tool-reset", group: "tool", label: "重置" }
 ]);
 
 function escapeXml(value) {
@@ -291,88 +113,259 @@ function escapeXml(value) {
     .replaceAll("'", "&apos;");
 }
 
-// Shapes whose rounded joins push their painted bounds off the geometric
-// centre (a triangle's apex spreads more than its base) carry a nudgeY so the
-// rendered ink lands on 12,12. Values come from measuring the rasterised icons.
-export function renderIconBody(icon, palette) {
-  const body = icon.body(palette);
-  return icon.nudgeY ? `<g transform="translate(0 ${icon.nudgeY})">${body}</g>` : body;
+/**
+ * 解析 Illustrator 的 <defs><style> 區塊。
+ *
+ * 格式是可預期的，不需要完整 CSS parser：規則以 } 分段，選擇器可以是
+ * 逗號分隔的多個 class，同一個 class 可能出現在多條規則裡（後面的覆蓋前面的）。
+ */
+function parseStyleBlock(css) {
+  const classProperties = new Map();
+
+  for (const rule of css.split("}")) {
+    const separator = rule.indexOf("{");
+    if (separator === -1) continue;
+
+    const selectors = rule.slice(0, separator).trim();
+    const declarations = rule.slice(separator + 1).trim();
+    if (!selectors || !declarations) continue;
+
+    const properties = [];
+    for (const declaration of declarations.split(";")) {
+      const colon = declaration.indexOf(":");
+      if (colon === -1) continue;
+      const name = declaration.slice(0, colon).trim();
+      const value = declaration.slice(colon + 1).trim();
+      if (name && value) properties.push([name, value]);
+    }
+    if (properties.length === 0) continue;
+
+    for (const selector of selectors.split(",")) {
+      const className = selector.trim().replace(/^\./, "");
+      if (!className) continue;
+      const existing = classProperties.get(className) ?? new Map();
+      for (const [name, value] of properties) existing.set(name, value);
+      classProperties.set(className, existing);
+    }
+  }
+
+  return classProperties;
 }
 
-export function renderIconSvg(icon) {
-  const palette = icon.twoTone ? PALETTE_TWO_TONE : PALETTE_MONO;
-  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${GRID} ${GRID}" role="img" data-icon="${icon.id}" data-tone="${icon.twoTone ? "two" : "mono"}">
+/** SVG presentation attribute 不吃 px 單位；順手統一強調色大小寫。 */
+function normalizePropertyValue(name, value) {
+  let next = value.trim();
+  if (/^[\d.]+px$/.test(next)) next = next.slice(0, -2);
+  if (INK_LITERALS.includes(next)) return INK;
+  if (next.toLowerCase() === ACCENT.toLowerCase()) return ACCENT;
+  return next;
+}
+
+/**
+ * 把 class 樣式內聯到元素上，然後移除 <defs> 與 class 屬性。
+ *
+ * 內聯是為了讓同一頁可以安全地 inline 多個圖示——Illustrator 每個檔案都從
+ * .cls-1 開始編號，不內聯的話兩個圖示放在一起就會互相搶樣式。
+ */
+function inlineClassStyles(markup, classProperties) {
+  return markup.replace(/class="([^"]+)"/g, (_match, classList) => {
+    const merged = new Map();
+    for (const className of classList.trim().split(/\s+/)) {
+      const properties = classProperties.get(className);
+      if (!properties) continue;
+      for (const [name, value] of properties) merged.set(name, value);
+    }
+    if (merged.size === 0) return "";
+
+    return [...merged]
+      .map(([name, value]) => `${name}="${normalizePropertyValue(name, value)}"`)
+      .join(" ");
+  });
+}
+
+/** 把散落在屬性上的寫死墨色換成 currentColor。 */
+function normalizeInlineColors(markup) {
+  let next = markup;
+  for (const literal of INK_LITERALS) {
+    next = next.replaceAll(`"${literal}"`, `"${INK}"`);
+  }
+  return next.replace(new RegExp(ACCENT, "gi"), ACCENT);
+}
+
+/**
+ * 把一份 Illustrator（或既有）SVG 正規化成可以直接 inline 的樣子。
+ */
+export function normalizeIconSvg(source, icon) {
+  let body = source;
+
+  // 取出 <svg> 內容，順便丟掉 XML 宣告與 Illustrator 的圖層 id
+  const openTag = body.match(/<svg\b[^>]*>/i);
+  if (!openTag) throw new Error(`${icon.id}: 找不到 <svg> 標籤`);
+  body = body.slice(openTag.index + openTag[0].length);
+  const closeTag = body.lastIndexOf("</svg>");
+  if (closeTag === -1) throw new Error(`${icon.id}: 找不到 </svg> 標籤`);
+  body = body.slice(0, closeTag);
+
+  // 舊的 <title> 由 metadata 重新注入，避免兩份不同步
+  body = body.replace(/<title>[\s\S]*?<\/title>/gi, "");
+
+  // <defs><style> 的 class 內聯掉，然後整個 defs 移除
+  const styleBlock = body.match(/<style[^>]*>([\s\S]*?)<\/style>/i);
+  if (styleBlock) {
+    const classProperties = parseStyleBlock(styleBlock[1]);
+    body = body.replace(/<defs>[\s\S]*?<\/defs>/gi, "");
+    body = inlineClassStyles(body, classProperties);
+  }
+
+  body = normalizeInlineColors(body);
+
+  // 收掉內聯後留下的多餘空白
+  body = body
+    .replace(/\s+>/g, ">")
+    .replace(/\s{2,}/g, " ")
+    .split("\n")
+    .map((line) => line.trim())
+    .filter(Boolean)
+    .join("\n  ");
+
+  const tone = icon.twoTone ? "two" : "mono";
+  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${GRID} ${GRID}" role="img" data-icon="${icon.id}" data-tone="${tone}">
   <title>${escapeXml(icon.label)}</title>
-  ${renderIconBody(icon, palette)}
+  ${body}
 </svg>
 `;
 }
 
-export function renderPreviewBoardSvg(icons = ICONS) {
-  const groups = [
-    { key: "nav", title: "下排導覽（雙色）" },
-    { key: "state", title: "狀態（單色，繼承語意色）" },
-    { key: "more", title: "更多頁卡片（雙色）" },
-  ];
+const GROUP_TITLES = Object.freeze({
+  nav: "下排導覽（雙色）",
+  state: "狀態（單色，繼承語意色）",
+  more: "更多頁卡片（雙色）",
+  context: "設定情境（雙色）",
+  event: "事件回報（雙色）",
+  gear: "裝備品類（雙色）",
+  education: "衛教分類（雙色）",
+  tool: "工具型（單色）"
+});
 
-  const columns = 6;
-  const cellW = 168;
-  const cellH = 150;
-  let y = 96;
+export const CONFIRMED_GROUPS = Object.freeze(["nav", "state", "more"]);
+export const PENDING_GROUPS = Object.freeze(["context", "event", "gear", "education", "tool"]);
+
+/** 從正規化後的 SVG 取出可以塞進預覽板的內容，並把 currentColor 換成實色。 */
+function extractBoardBody(normalizedSvg, inkColor) {
+  const inner = normalizedSvg
+    .replace(/^[\s\S]*?<svg\b[^>]*>/i, "")
+    .replace(/<\/svg>\s*$/i, "")
+    .replace(/<title>[\s\S]*?<\/title>/gi, "")
+    .trim();
+  return inner.replaceAll(INK, inkColor);
+}
+
+export function renderPreviewBoardSvg(groupKeys, boardTitle, iconBodies) {
+  const columns = 4;
+  const cellW = 250;
+  const cellH = 210;
+  const boardWidth = 1120;
+  let y = 108;
   let markup = "";
 
-  for (const group of groups) {
-    const members = icons.filter((icon) => icon.group === group.key);
+  for (const key of groupKeys) {
+    const members = ICONS.filter(
+      (icon) => icon.group === key && iconBodies.has(icon.id)
+    );
+    if (members.length === 0) continue;
+
     markup += `
-  <text x="64" y="${y}" fill="#2E2925" font-family="'Noto Sans TC', sans-serif" font-size="24" font-weight="500" lang="zh-Hant-TW">${escapeXml(group.title)}</text>`;
-    y += 40;
+  <text x="64" y="${y}" fill="#2E2925" font-family="'Noto Sans TC', sans-serif" font-size="25" font-weight="500" lang="zh-Hant-TW">${escapeXml(GROUP_TITLES[key])}</text>`;
+    y += 46;
 
     members.forEach((icon, index) => {
       const col = index % columns;
       const row = Math.floor(index / columns);
       const x = 64 + col * cellW;
       const top = y + row * cellH;
-      const palette = icon.twoTone ? { ink: "#33291F", accent: ACCENT } : { ink: "#33291F", accent: "#33291F" };
+      const body = iconBodies.get(icon.id);
 
       markup += `
   <g data-icon-cell="${icon.id}" transform="translate(${x} ${top})">
-    <g transform="scale(2)">${renderIconBody(icon, palette)}</g>
-    <g transform="translate(0 60) scale(0.667)">${renderIconBody(icon, palette)}</g>
-    <text x="30" y="72" fill="#6F5A54" font-family="'Noto Sans TC', sans-serif" font-size="13" lang="zh-Hant-TW">16px</text>
-    <text x="0" y="100" fill="#2E2925" font-family="'Noto Sans TC', sans-serif" font-size="16" lang="zh-Hant-TW">${escapeXml(icon.label)}</text>
+    <g transform="scale(4)">${body}</g>
+    <g transform="translate(104 62) scale(1.5)">${body}</g>
+    <g transform="translate(150 74) scale(0.75)">${body}</g>
+    <text x="104" y="118" fill="#6F5A54" font-family="'Noto Sans TC', sans-serif" font-size="13" lang="zh-Hant-TW">36px / 18px</text>
+    <text x="0" y="130" fill="#2E2925" font-family="'Noto Sans TC', sans-serif" font-size="17" lang="zh-Hant-TW">${escapeXml(icon.label)}</text>
   </g>`;
     });
 
-    y += Math.ceil(members.length / columns) * cellH + 24;
+    y += Math.ceil(members.length / columns) * cellH + 28;
   }
 
-  const height = y + 32;
-  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1120 ${height}" role="img">
-  <title>防曬晴報員 圖示系統核心組預覽</title>
-  <desc>依導覽、狀態與更多頁卡片分組，每個圖示同時呈現 48px 與 16px。</desc>
-  <rect width="1120" height="${height}" fill="#FAF5EC"/>
-  <text x="64" y="56" fill="#2E2925" font-family="'Noto Serif TC', serif" font-size="30" font-weight="500" letter-spacing="0.5" lang="zh-Hant-TW">圖示系統核心組</text>${markup}
+  const height = y + 36;
+  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${boardWidth} ${height}" role="img">
+  <title>防曬晴報員 ${escapeXml(boardTitle)}</title>
+  <desc>每個圖示同時呈現 96px、36px 與 18px 三種尺寸。</desc>
+  <rect width="${boardWidth}" height="${height}" fill="#FAF5EC"/>
+  <text x="64" y="62" fill="#2E2925" font-family="'Noto Serif TC', serif" font-size="32" font-weight="500" letter-spacing="0.5" lang="zh-Hant-TW">${escapeXml(boardTitle)}</text>${markup}
 </svg>
 `;
 }
 
-export function generateIcons(outputRoot = resolve("docs/design/icon-system")) {
+export function buildIcons(outputRoot = resolve("docs/design/icon-system")) {
   const root = resolve(outputRoot);
   const iconDirectory = resolve(root, "icons");
-  mkdirSync(iconDirectory, { recursive: true });
+
+  const normalized = [];
+  const missing = [];
+  const iconBodies = new Map();
 
   for (const icon of ICONS) {
-    writeFileSync(resolve(iconDirectory, `${icon.id}.svg`), renderIconSvg(icon), "utf8");
+    const file = resolve(iconDirectory, `${icon.id}.svg`);
+    if (!existsSync(file)) {
+      missing.push(icon.id);
+      continue;
+    }
+
+    const output = normalizeIconSvg(readFileSync(file, "utf8"), icon);
+    writeFileSync(file, output, "utf8");
+    normalized.push(icon.id);
+    iconBodies.set(icon.id, extractBoardBody(output, "#33291F"));
   }
 
-  writeFileSync(resolve(root, "icon-system-preview.svg"), renderPreviewBoardSvg(ICONS), "utf8");
+  // 檔案存在但沒登記在 ICONS 裡——通常是改名或忘了刪的殘留
+  const registered = new Set(ICONS.map((icon) => icon.id));
+  const unregistered = readdirSync(iconDirectory)
+    .filter((name) => name.endsWith(".svg"))
+    .map((name) => name.replace(/\.svg$/, ""))
+    .filter((id) => !registered.has(id));
 
-  return { outputRoot: root, icons: ICONS.length };
+  writeFileSync(
+    resolve(root, "preview-confirmed.svg"),
+    renderPreviewBoardSvg(CONFIRMED_GROUPS, "圖示系統 — 已確認", iconBodies),
+    "utf8"
+  );
+  writeFileSync(
+    resolve(root, "preview-pending-review.svg"),
+    renderPreviewBoardSvg(PENDING_GROUPS, "圖示系統 — 待確認", iconBodies),
+    "utf8"
+  );
+
+  return { outputRoot: root, normalized, missing, unregistered };
 }
 
 const isDirectRun = process.argv[1] && fileURLToPath(import.meta.url) === resolve(process.argv[1]);
 
 if (isDirectRun) {
-  const result = generateIcons(process.argv[2]);
-  console.log(`Generated ${result.icons} icons in ${result.outputRoot}`);
+  const result = buildIcons(process.argv[2]);
+  console.log(`已正規化 ${result.normalized.length} 個圖示 → ${result.outputRoot}`);
+
+  if (result.missing.length > 0) {
+    console.log(`\n尚未繪製（${result.missing.length}）：`);
+    for (const id of result.missing) {
+      const icon = ICONS.find((entry) => entry.id === id);
+      console.log(`  ${id.padEnd(30)} ${icon.label}`);
+    }
+  }
+
+  if (result.unregistered.length > 0) {
+    console.log(`\n有檔案但未登記在 ICONS（${result.unregistered.length}）：`);
+    for (const id of result.unregistered) console.log(`  ${id}`);
+  }
 }

@@ -5,7 +5,6 @@ import {
   Database,
   BookOpen,
   MessageSquare,
-  Palette,
   Smartphone,
   TriangleAlert
 } from "@lucide/vue";
@@ -47,12 +46,6 @@ const allEntries = [
     icon: Smartphone,
     label: "安裝到手機桌面",
     description: "安裝後資料較不易遺失；不安裝也可正常使用。"
-  },
-  {
-    to: "/settings/display",
-    icon: Palette,
-    label: "顯示設定",
-    description: "亮色、暗色與跟隨系統。"
   },
   {
     to: "/settings/data",

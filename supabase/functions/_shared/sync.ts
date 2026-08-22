@@ -383,9 +383,6 @@ function validatePayload(key: SyncRecordKey, payload: Record<string, unknown>): 
       if (payload.schemaVersion !== "user-preferences-v1") {
         throw new SyncValidationError("user preferences schema 不正確", "payload.schemaVersion");
       }
-      if (!isOneOf(payload.appearance, ["light", "dark", "system"])) {
-        throw new SyncValidationError("appearance 不正確", "payload.appearance");
-      }
       if (
         payload.reminderFrequencyMinutes !== null &&
         !isPositiveIntegerWithin(payload.reminderFrequencyMinutes, 120)

@@ -25,10 +25,6 @@ import {
   type AppBootController
 } from "./createAppBootController";
 import {
-  createAppearanceController,
-  type AppearanceController
-} from "./createAppearanceController";
-import {
   createSetupController,
   type SetupController
 } from "../features/setup/createSetupController";
@@ -87,7 +83,6 @@ import type { CloudSyncPort } from "@sunshield/platform";
 
 export interface WebAppServices {
   readonly boot: AppBootController;
-  readonly appearance: AppearanceController;
   readonly setup: SetupController;
   readonly productSettings: ProductSettingsController;
   readonly sessionControl: SessionControlController;
@@ -154,7 +149,6 @@ export function createWebAppServices(
     lifecycle,
     crossContext: notifier
   });
-  const appearance = createAppearanceController();
   const productRepository =
     new LocalProductSettingsRepository(database);
   const productCatalog = new LocalProductCatalogRepository(database);
@@ -255,7 +249,6 @@ export function createWebAppServices(
 
   return {
     boot,
-    appearance,
     setup,
     productSettings,
     sessionControl,
@@ -284,7 +277,6 @@ export function createWebAppServices(
       sessionControl.dispose();
       setup.dispose();
       productSettings.dispose();
-      appearance.dispose();
       boot.dispose();
       notifier.close();
       database.close();

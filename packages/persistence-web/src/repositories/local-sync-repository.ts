@@ -27,7 +27,6 @@ export const USER_PREFERENCES_METADATA_KEY = "userPreferencesV1";
 
 const DEFAULT_USER_PREFERENCES: UserPreferencesV1 = {
   schemaVersion: "user-preferences-v1",
-  appearance: "system",
   reminderFrequencyMinutes: null,
   soundEnabled: false,
   vibrationEnabled: false
