@@ -26,7 +26,7 @@ UVAlert 的品牌感受是「懂防曬知識、用生活化方式播報的氣象
 ## 三、色彩原則
 
 - 基底採暖白、米色、柔和中性色，建立成熟且有陽光感的氛圍。
-- 品牌主色與 Logo 配色暫不預設，待重新設計後再建立正式規範。
+- **更新（2026-08-18）**：Logo 配色已定案，選定 06 播報印記，配色為暖琥珀金 `#C1832E`、暖黑咖啡 `#33291F`、暖象牙 `#FAF5EC`（見 [`docs/design/logo-concepts/README.md`](logo-concepts/README.md)）。App icon／favicon 已套用此配色，但 `packages/ui/src/styles.css` 的品牌色 token 與 `apps/web/public/manifest.webmanifest` 目前仍是舊的中性灰階（`#f9f9f9`／`#121212`），尚未把這組新配色套進前端正式規範與程式碼，仍待後續作業。
 - UV 強度採局部色階，讓色彩代表資料意義，而不是裝飾。
 - 狀態必須同時有色彩、圖示與文字；不能要求使用者只靠顏色判斷。
 - 不使用綠色暗示「安全」或「防護有效」。

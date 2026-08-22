@@ -62,7 +62,7 @@
 
 所有輸出皆已確認為完全不透明（alpha 全通道 255），符合 maskable／apple-touch-icon 不可透明的規範。16px favicon 縮到最小仍可辨認「圓點＋放射線」輪廓，但細節必然比 32px 版簡化，屬預期內的正常取捨。
 
-**這批檔案只是預覽／審查用途，尚未寫入 `apps/web/public/manifest.webmanifest` 或取代現有的 `apps/web/public/icon-*.png`、`favicon.ico`、`apple-touch-icon.png`。要正式換上新圖示，需要另外確認並更新 apps/web。**
+**更新（2026-08-18）：這批 06 播報印記的點陣圖已正式取代 `apps/web/public/icon-*.png`、`favicon.ico`、`apple-touch-icon.png`（見 commit `8355d11`）。`apps/web/public/manifest.webmanifest` 的 `background_color`／`theme_color` 仍是舊的中性灰階 `#f9f9f9`，尚未換成本節列出的暖琥珀金／暖象牙配色，也還沒套進 `packages/ui/src/styles.css` 的品牌色 token——新 icon 已上線，但新配色尚未進到程式碼的色彩系統。**
 
 第二輪已全部完成，含 SVG 向量到點陣圖的完整輸出。
 

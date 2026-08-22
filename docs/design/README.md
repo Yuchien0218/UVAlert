@@ -25,7 +25,7 @@ UVAlert 採用「防曬氣象管家 × 防曬生活編輯部」的混合方向�
 
 ## Logo 概念探索
 
-`docs/design/logo-concepts/` 收錄第一輪 Logo 概念比較板與六款獨立圖標／橫式標誌，屬於方向探索產出，**尚未決定正式 Logo**，也未更動任何 PWA icon、favicon 或設計 token。詳見 [`logo-concepts/README.md`](logo-concepts/README.md)。
+`docs/design/logo-concepts/` 收錄第一輪 Logo 概念比較板與六款獨立圖標／橫式標誌。**更新（2026-08-18）**：已定案選用 06 播報印記，PWA icon／favicon／apple-touch-icon 已正式換上（commit `8355d11`）。但其暖琥珀金／暖黑咖啡／暖象牙配色尚未套進 `packages/ui/src/styles.css` 的設計 token 或 `manifest.webmanifest` 的 `theme_color`——那邊目前仍是舊的中性灰階，配色套用是待辦事項。詳見 [`logo-concepts/README.md`](logo-concepts/README.md)。
 
 ## 舊資料
 
