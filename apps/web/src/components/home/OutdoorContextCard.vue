@@ -110,8 +110,11 @@ withDefaults(defineProps<Props>(), {
 }
 
 .context-card__cta {
+  /* app.css 在 max-width: 31rem 讓 .button 滿版；在這個 flex row 裡會吃光整列，
+     把 .context-card__content 壓成 0 寬（文字一字一行）。只覆寫本區塊的 CTA，
+     不動全站共用的 .button。 */
+  width: auto;
   flex-shrink: 0;
-  min-height: 2.5rem;
   padding: var(--space-2) var(--space-4);
   white-space: nowrap;
 }

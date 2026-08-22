@@ -114,11 +114,12 @@ const highestDay = computed(() =>
   line-height: 1.6;
 }
 
+/* 不要在這裡寫 min-height：.button 已經帶 min-height: var(--tap-target)，
+   區域覆寫只會把點擊目標壓到 44px 以下（先前是 2.5rem = 40px）。 */
 .evening-prompt__view {
   display: inline-flex;
   align-items: center;
   gap: var(--space-2);
-  min-height: 2.5rem;
   padding: var(--space-2) var(--space-3);
   font-weight: 500;
   margin-top: var(--space-1);

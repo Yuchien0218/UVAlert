@@ -217,8 +217,9 @@ function getUnavailableMessage(error: UvForecastError): string {
   color: var(--color-due);
 }
 
+/* 不要在這裡寫 min-height：.button 已經帶 min-height: var(--tap-target)，
+   區域覆寫只會把點擊目標壓到 44px 以下（先前是 2.5rem = 40px）。 */
 .uv-forecast__retry {
-  min-height: 2.5rem;
   padding: var(--space-3) var(--space-4);
   font-size: var(--font-size-body);
   font-weight: 500;
