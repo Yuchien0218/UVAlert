@@ -51,8 +51,31 @@
   `GearForm`／`GearFormSheet`、`SetupTimingPage` 步驟 2、
   `ProductDetailPage`）：已跟使用者確認 Claude Design canvas 裡**沒有
   新畫面**，這輪不動，維持現狀。
-- **優先序 6**（`/reminder/report`、`/reminder/event/:id/correct`、
-  `/region` 三個完全沒做的頁面）：已跟使用者確認**這輪不做**。
+- **優先序 6**（原以為是 `/reminder/report`、`/reminder/event/:id/correct`、
+  `/region` 三個「完全沒做」的頁面）：使用者當時確認「這輪不做」，但
+  這個前提本身是錯的——三個頁面其實都已經做完，見下方更正。
+
+### 更正：三個「完全沒做」的頁面其實都做完了
+
+2026-08-23 稍晚核對程式碼時發現，`交接文件` 與本文件原本說
+`/reminder/report`、`/reminder/event/:id/correct`、`/region`
+「完全沒做」是**舊資訊，且三個都錯**。用 `Grep apps/web/src/router/
+index.ts` 核對後，三條路由全部存在且指向功能完整的頁面：
+
+| 路由 | 元件 | 功能狀態 |
+| --- | --- | --- |
+| `/reminder/report` | `ReportContextEventPage.vue` | 完整：選擇狀況（大量流汗／擦毛巾／明顯摩擦／洗手／游泳下水）→ 影響部位 →（水上活動另問入水時間確信度）→ 實際時間 → 確認，`createContextEventController.ts` 已接好 |
+| `/reminder/event/:id/correct` | `EventCorrectionPage.vue` | 完整：S-10 更正最近事件，原事件不改寫、送出 replace／void 後繼事件，`createEventCorrectionController.ts` 已接好 |
+| `/region` | `RegionPage.vue` | 完整：定位／手動選地區／略過，`RegionLocationPanel`、`RegionManualSelector`、`RegionPreferenceSummary` 都已接好 |
+
+`ReportContextEventPage.vue` 已重新核對並補上視覺對齊（桌面寬度限制、
+成功卡片色條、取消按鈕，比照 `ReapplyPage.vue` 的既有樣式），
+commit `638c34c`。另外兩個尚未逐一核對視覺是否需要對齊，但**功能都
+不缺，不是要從零設計的新頁面**。
+
+**教訓**：這個「完全沒做」的清單被至少兩份文件（交接文件、本文件第一版）
+原樣沿用，沒人在動手前用 `Grep` 核對路由表。下一輪如果看到任何文件說
+某個頁面「沒做」，先查路由表和對應元件檔案是否存在，不要直接信文件。
 
 ## 五、已知遺留問題（非本輪範圍，已開背景任務）
 
