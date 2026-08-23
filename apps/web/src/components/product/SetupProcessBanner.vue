@@ -32,19 +32,29 @@ defineEmits<{
 </template>
 
 <style scoped>
+/*
+ * 2026-08-23 修正：原本用 --color-soon／--color-soon-soft（即將到期的
+ * 琥珀色），但這個橫幅講的是「提醒設定還沒完成，要不要繼續」，跟部位
+ * 即將到期是完全不同的語意——同一個顏色會讓使用者把「該去完成設定」
+ * 跟「該去補擦」搞混。改用 --color-surface-cream-strong ＋
+ * --color-primary，跟 context-option-selected 同一組配色：「需要你
+ * 採取行動」而不是「警示」。圖示本身仍是 @lucide/vue 的 ClipboardList，
+ * 屬於 DESIGN.md 第十三節列的 10 個刻意延後圖示之一（流程橫幅），要等
+ * Illustrator 來源畫好才能換成自訂圖示，這次先不動。
+ */
 .process-banner {
   display: grid;
   grid-template-columns: auto minmax(0, 1fr);
   gap: var(--space-3) var(--space-4);
   padding: var(--space-5);
-  border: 1px solid var(--color-soon);
+  border: 1px solid var(--color-primary);
   border-radius: var(--radius-lg);
-  background: var(--color-soon-soft);
+  background: var(--color-surface-cream-strong);
 }
 
 .process-banner__icon {
   margin-top: var(--space-1);
-  color: var(--color-soon);
+  color: var(--color-primary);
 }
 
 .process-banner__content {
