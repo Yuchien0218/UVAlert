@@ -52,6 +52,8 @@
 
 開始提醒設定採同一流程內完成，不因產品標示、部位調整或通知設定跳離到平行頁面；必要的調整以同頁區塊或 sheet 呈現。
 
+> **2026-08-23 修正紀錄**：`SetupTimingPage` 的「改為填寫完整的防曬乳包裝標示」原本會 `router.push` 到 `/products/new`，整頁跳離設定流程，違反這條規則——是既有問題，發現時已存在，不是這輪改版造成的。修正方式是把 `GearFormPage.vue` 的表單邏輯抽成 `components/product/GearForm.vue`，新增 `components/setup/GearFormSheet.vue`（沿用 `ProtectionAdjustmentSheet.vue` 的開合／焦點鎖定／Escape 機制）在 `/setup/timing` 內開合，不再導頁。`/products/new`、`/products/:id/edit` 兩條獨立路由行為不變，三個入口都經瀏覽器實測確認。
+
 ### 2.3 裝備
 
 - `/products`：防曬裝備清單。
