@@ -64,8 +64,8 @@ function addGear(): void {
   void router.push({ name: "product-new" });
 }
 
-function editGear(productId: string): void {
-  void router.push({ name: "product-edit", params: { id: productId } });
+function openGear(productId: string): void {
+  void router.push({ name: "product-detail", params: { id: productId } });
 }
 </script>
 
@@ -110,8 +110,14 @@ function editGear(productId: string): void {
           新增防曬裝備
         </button>
 
+        <!--
+          實測發現：current.length === 0 時（使用中整個是空的，裝備全部
+          收納），這段話原本仍會顯示，且清單插值變成空字串，讀起來像
+          「清單裡的　都不會產生倒數」，中間留一個沒有意義的空白。這段
+          只該在「使用中裡有東西、但沒有能倒數的防曬乳」時出現。
+        -->
         <p
-          v-if="!hasUsableSunscreen"
+          v-if="current.length > 0 && !hasUsableSunscreen"
           class="no-sunscreen-note"
           role="status"
         >
@@ -126,7 +132,9 @@ function editGear(productId: string): void {
         </p>
 
         <section aria-labelledby="gear-current-title">
-          <h2 id="gear-current-title">目前使用</h2>
+          <div class="gear-section-heading">
+            <h2 id="gear-current-title">使用中</h2>
+          </div>
           <p v-if="current.length === 0" class="section-empty">
             目前沒有使用中的裝備。
           </p>
@@ -134,22 +142,30 @@ function editGear(productId: string): void {
             <li v-for="product in current" :key="product.productId">
               <GearListItem
                 :product="product"
-                @open="editGear(product.productId)"
+                @open="openGear(product.productId)"
               />
             </li>
           </ul>
         </section>
 
+        <!--
+          「收納中」取代原本的「過去紀錄」（2026-08-23 裁決）。「過去紀錄」
+          語氣像是被淘汰，容易讓人以為裝備被刪除了；「收納中」中性得多，
+          也符合這些裝備仍可從編輯頁恢復使用的事實。
+        -->
         <section v-if="past.length > 0" aria-labelledby="gear-past-title">
-          <h2 id="gear-past-title">過去紀錄</h2>
+          <div class="gear-section-heading">
+            <h2 id="gear-past-title">收納中</h2>
+            <span class="gear-section-count">{{ past.length }} 件</span>
+          </div>
           <p class="section-empty">
-            這些裝備不會用於新的提醒；需要時可以在編輯頁恢復。
+            這些裝備不會用於新的提醒；需要時可以在裝備詳情頁恢復。
           </p>
           <ul class="gear-list">
             <li v-for="product in past" :key="product.productId">
               <GearListItem
                 :product="product"
-                @open="editGear(product.productId)"
+                @open="openGear(product.productId)"
               />
             </li>
           </ul>
@@ -198,6 +214,21 @@ p {
 section {
   display: grid;
   gap: var(--space-3);
+}
+
+.gear-section-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+}
+
+.gear-section-heading h2 {
+  margin: 0;
+}
+
+.gear-section-count {
+  color: var(--text-secondary);
+  font-size: var(--font-size-caption);
 }
 
 .section-empty {

@@ -20,7 +20,7 @@ import {
  * S-12 新增防曬裝備 ／ S-13 編輯防曬裝備。
  *
  * 兩個畫面共用同一份表單：差別只在有沒有既有紀錄，以及編輯才有的
- * 移至過去紀錄／恢復／刪除。
+ * 移至收納／恢復／刪除。
  */
 const { productSettings } = useWebAppServices();
 const route = useRoute();
@@ -314,7 +314,7 @@ function cancel(): void {
         type="button"
         @click="archive"
       >
-        移至過去紀錄
+        移至收納
       </button>
 
       <template v-if="!confirmingDelete">

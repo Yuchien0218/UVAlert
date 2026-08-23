@@ -55,6 +55,12 @@ export function createAppRouter(
         meta: { title: "編輯防曬裝備", hideNavigation: true }
       },
       {
+        path: "/products/:id",
+        name: "product-detail",
+        component: () => import("../pages/ProductDetailPage.vue"),
+        meta: { title: "防曬裝備詳情", hideNavigation: true }
+      },
+      {
         path: "/products",
         name: "products",
         component: () => import("../pages/ProductsPage.vue"),
