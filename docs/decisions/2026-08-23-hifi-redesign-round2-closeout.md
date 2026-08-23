@@ -68,10 +68,13 @@ index.ts` 核對後，三條路由全部存在且指向功能完整的頁面：
 | `/reminder/event/:id/correct` | `EventCorrectionPage.vue` | 完整：S-10 更正最近事件，原事件不改寫、送出 replace／void 後繼事件，`createEventCorrectionController.ts` 已接好 |
 | `/region` | `RegionPage.vue` | 完整：定位／手動選地區／略過，`RegionLocationPanel`、`RegionManualSelector`、`RegionPreferenceSummary` 都已接好 |
 
-`ReportContextEventPage.vue` 已重新核對並補上視覺對齊（桌面寬度限制、
-成功卡片色條、取消按鈕，比照 `ReapplyPage.vue` 的既有樣式），
-commit `638c34c`。另外兩個尚未逐一核對視覺是否需要對齊，但**功能都
-不缺，不是要從零設計的新頁面**。
+`ReportContextEventPage.vue`（commit `638c34c`）與 `EventCorrectionPage.vue`
+（commit `e85a914`）都已補上視覺對齊：桌面限制最大寬度並置中、成功
+卡片加上色條、送出動作旁補上「取消」，比照 `ReapplyPage.vue` 的既有
+樣式。`RegionPage.vue` 核對後不需要改——已用標準 `page-heading` 樣式，
+定位／地區圖示仍是 Lucide 是 DESIGN.md 第十三節記載的刻意延後項目。
+三個頁面**功能都不缺，不是要從零設計的新頁面**，這輪視覺對齊也已
+全部完成。
 
 **教訓**：這個「完全沒做」的清單被至少兩份文件（交接文件、本文件第一版）
 原樣沿用，沒人在動手前用 `Grep` 核對路由表。下一輪如果看到任何文件說
