@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed } from "vue";
 import Icon from "../icons/Icon.vue";
-import type { ProductCatalogRecordV1 } from "@sunshield/contracts";
+import type { GearCategory, ProductCatalogRecordV1 } from "@sunshield/contracts";
 import {
   affectsCountdown,
   formatPurchaseMonth,
@@ -9,16 +9,50 @@ import {
   GEAR_CATEGORY_REMINDER_EFFECT,
   gearSafetyState
 } from "../../features/product/gearPresentation";
+import type { IconName } from "../../generated/icons.generated";
 
 const props = defineProps<{ product: ProductCatalogRecordV1 }>();
 defineEmits<{ open: [] }>();
 
+/** 每個品類對應的圖示色塊圖示（依 Claude Design 元件庫，2026-08-23 同步）。 */
+const GEAR_CATEGORY_ICONS: Record<GearCategory, IconName> = {
+  sunscreen: "gear-sunscreen",
+  clothing: "gear-clothing",
+  eyewear: "gear-sunglasses",
+  other_gear: "gear-other"
+};
+
 const safety = computed(() => gearSafetyState(props.product));
 const purchase = computed(() => formatPurchaseMonth(props.product.purchaseMonth));
+
+/**
+ * 一行摘要。防曬乳用真實規格（SPF／PA／補擦間隔），沒資料就不編造，
+ * 落回品類的一般提醒效果說明；其他品類本來就只有效果說明可用。
+ */
+const summary = computed((): string => {
+  if (safety.value.kind !== "usable") {
+    return `${safety.value.label}・${safety.value.detail}`;
+  }
+  if (props.product.gearCategory === "sunscreen") {
+    const snapshot = props.product.currentSnapshot;
+    const parts: string[] = [];
+    if (snapshot.spf !== null) parts.push(`SPF ${snapshot.spf}`);
+    if (snapshot.paGrade !== null) parts.push(`PA${snapshot.paGrade}`);
+    if (snapshot.reapplicationIntervalMinutes !== null) {
+      parts.push(`補擦間隔 ${snapshot.reapplicationIntervalMinutes} 分鐘`);
+    }
+    if (parts.length > 0) return parts.join("・");
+  }
+  return GEAR_CATEGORY_REMINDER_EFFECT[props.product.gearCategory];
+});
 </script>
 
 <template>
   <button class="gear-item" type="button" @click="$emit('open')">
+    <span class="gear-item__icon" aria-hidden="true">
+      <Icon :name="GEAR_CATEGORY_ICONS[product.gearCategory]" :size="24" />
+    </span>
+
     <div class="gear-item__body">
       <p class="gear-item__category">
         {{ GEAR_CATEGORY_LABELS[product.gearCategory] }}
@@ -28,16 +62,11 @@ const purchase = computed(() => formatPurchaseMonth(props.product.purchaseMonth)
         >不會建立倒數</span>
       </p>
       <strong class="gear-item__name">{{ product.displayName }}</strong>
-
       <p
-        v-if="safety.kind !== 'usable'"
-        class="gear-item__status"
-        :class="`gear-item__status--${safety.kind}`"
+        class="gear-item__summary"
+        :class="{ [`gear-item__summary--${safety.kind}`]: safety.kind !== 'usable' }"
       >
-        {{ safety.label }}・{{ safety.detail }}
-      </p>
-      <p v-else class="gear-item__effect">
-        {{ GEAR_CATEGORY_REMINDER_EFFECT[product.gearCategory] }}
+        {{ summary }}
       </p>
 
       <p v-if="purchase || product.expiryDate" class="gear-item__meta">
@@ -67,10 +96,18 @@ const purchase = computed(() => formatPurchaseMonth(props.product.purchaseMonth)
   min-height: var(--tap-target);
 }
 
+.gear-item__icon {
+  display: grid;
+  flex: 0 0 auto;
+  place-items: center;
+  color: var(--text-secondary);
+}
+
 .gear-item__body {
   display: grid;
   gap: var(--space-1);
   flex: 1;
+  min-width: 0;
 }
 
 p {
@@ -95,22 +132,18 @@ p {
   font-size: 1.0625rem;
 }
 
-.gear-item__effect,
+.gear-item__summary,
 .gear-item__meta,
 .gear-item__note {
   color: var(--text-secondary);
   line-height: 1.6;
 }
 
-.gear-item__status {
-  line-height: 1.6;
-}
-
-.gear-item__status--blocked {
+.gear-item__summary--blocked {
   color: var(--color-due);
 }
 
-.gear-item__status--no_countdown {
+.gear-item__summary--no_countdown {
   color: var(--color-untimed, var(--text-secondary));
 }
 </style>
