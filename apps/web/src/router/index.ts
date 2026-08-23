@@ -147,6 +147,13 @@ export function createAppRouter(
         meta: { title: "登入與雲端資料" }
       },
       {
+        path: "/settings/notifications",
+        name: "settings-notifications",
+        component: () =>
+          import("../pages/settings/NotificationSettingsPage.vue"),
+        meta: { title: "通知設定" }
+      },
+      {
         path: "/install",
         name: "install",
         component: () => import("../pages/InstallPage.vue"),
