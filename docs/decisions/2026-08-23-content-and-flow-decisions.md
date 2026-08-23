@@ -1,0 +1,111 @@
+# 內容治理與流程裁決
+
+**日期**：2026-08-23（Asia/Taipei）
+**狀態**：現行裁決。
+**用途**：裁決 `2026-08-22-mvp-flow-review.md` 提出的待決項目，並記錄 `/help` 發布決定。
+**關係**：本文件裁決 `2026-08-22-mvp-flow-review.md` 的建議；該檢討文件自此轉為**已處理**，不再是待裁決狀態。
+
+## 一、`/help` 與 `/special-situation`：保留
+
+**裁決**：**不砍。** 路由、頁面與「更多」頁入口全部保留。
+
+`mvp-flow-review.md` §2.1 建議砍掉 `/help` 系列與 `/special-situation`，理由是「三個並行的衛教入口」「同一內容兩個門」。
+
+**該理由與實際程式碼不符。** 實測結果：
+
+| 入口 | 實際狀態 |
+| --- | --- |
+| `/education` | 40 篇文章，**唯一有真實內容的** |
+| `/help` | 兩則主題皆未核准，顯示空狀態「目前沒有可查看的內容」 |
+| `/special-situation` | 文案為 `BLOCKED`，顯示「此功能尚未開放」 |
+
+不是「同一內容三個門」，而是**一個有內容的門 ＋ 兩扇鎖住的門**。內容重複問題目前不存在。
+
+另有一項功能相依：`/help/how-it-works` 同時是 `view_conservative_reminder`（時鐘不可信且離線）的降級落點，見 `apps/web/src/router/index.ts:106`——本來就不能砍。
+
+**回寫需求**：現行基準 `2026-08-15-redesign-sitemap-userflow-current.md` 第 18 行寫「`/help` App 內 Q&A……均已被 `/education` 取代」，第 176 行列有「確認舊 `/help`／`/learn` 路徑不再並行」的待辦。**兩處都需依本裁決改寫**，否則下一個 session 讀基準會再次動手砍。
+
+## 二、逾期文案：維持現狀
+
+**裁決**：**不改。** 到期後維持「該補擦了」，不顯示絕對時間、不做逾期計數器。
+
+對應 `mvp-flow-review.md` §1.1 的選項 A。該文件評估為「可接受——不管逾期多久，使用者要做的事都一樣」。
+
+選項 B（顯示「12:30 就該補擦了」）與選項 C（逾期計數器）均不採用。選項 C 另有獨立否決理由，見 `mvp-flow-review.md` §5.1（違反「不製造焦慮」語調、超出「不做曝曬量計算」定位、資訊不改變行動）。
+
+**此項不需再提案。**
+
+## 三、`/help` 兩則主題：放行發布
+
+**裁決**：`FAQ_BEACH_SUN_V1`（`/help/beach`）與運作說明（`/help/how-it-works`）通過審查，正常顯示。
+
+**審查日期**：
+
+| 欄位 | 值 |
+| --- | --- |
+| `reviewedAt` | `2026-08-23` |
+| `nextReviewAt` | `2027-08-23` |
+
+閘門是資料驅動的（`apps/web/src/features/help/helpTopics.ts:8-9`）：填入日期並將 `reviewStatus` 改為 `APPROVED` 後主題自動出現，不需改程式。
+
+### 3.1 但內容尚未接進 App
+
+`apps/web/src/pages/help/HelpTopicPage.vue:32-37` **只有 `v-if="!publishable"` 一個分支，沒有 `v-else`**。翻旗標後畫面會是「標題 ＋ 空白 ＋ 返回連結」。
+
+內容全文位於 `docs/archive/2026-08-pre-redesign/p0-specifications/防曬晴報員PRD.md`：
+
+- §13.4 海邊防曬 Q&A：Q1–Q8
+- §13.5 產品與 PWA Q&A：Q1–Q3
+
+**真正的工作量是把內容接進 App，不是翻旗標。**
+
+### 3.2 兩則的處置不同
+
+| 主題 | 處置 |
+| --- | --- |
+| `/help/beach` | **可照原文發布。** 證據型內容（椰子油 SPF 研究、耐水 40／80 分鐘標示、珊瑚友善宣稱），不宣稱 App 行為 |
+| `/help/how-it-works` | **需改寫後才能發布。** 原文描述不存在的通知能力，見 `2026-08-23-notification-decision.md` §4.2 |
+
+### 3.3 已知的治理不一致
+
+放行後，`/help` 兩則會成為全站唯一「已發布」的內容，而 `/education` 40 篇（含孕期、嬰兒、藥物光敏感等醫療相關題材）仍標示「專業審閱中」。
+
+兩者目前的畫面行為也不同：
+
+| | 內容狀態 | 畫面行為 |
+| --- | --- | --- |
+| `/education` | `status: draft`、`needs-professional-review` | **正常顯示**，加審閱中提示 |
+| `/help` | 未核准 | **完全隱藏**，顯示空狀態 |
+
+同一個治理問題兩套答案。本次不處理，但記錄備查。
+
+## 四、`/special-situation`：內容不存在，待撰寫
+
+`P0_COPY_DECK.md` §15 的兩則關鍵文案**字面上就是佔位符**：
+
+```
+CP-SPECIAL-004  title | BLOCKED：待核准的皮膚狀況標題
+CP-SPECIAL-005  body  | BLOCKED：待台灣醫療與法務共同核准的急症分流文字
+CP-SPECIAL-005  primary_cta | BLOCKED：待核准的台灣 119／緊急就醫主要行動
+```
+
+不是「已核准但沒接上」，是**從未撰寫**。
+
+**處置**：由 Claude 起草，但**必須以 `MEDICAL_REVIEW` 狀態進 repo，不得同時翻為 `APPROVED`**。
+
+理由：閘門存在的唯一目的就是讓核准來自有資格的人。若內容與旗標都由同一方決定，「已審查」即失去意義；而這是全站唯一一頁，寫錯的後果是使用者該就醫時沒去、或不需要時掛急診。
+
+**起草時的約束**：
+
+- 每條紅旗掛上台灣官方或國際權威來源，寫進 Copy Deck 讓審查者逐條查證
+- 不撰寫無來源支撐的判斷閾值（水泡尺寸、體表面積百分比等），那是臨床判斷不是文案
+- 沿用既有三條發布限制：不得要求疾病名稱／病史／症狀自由文字或照片；急症行動永遠優先於「開始提醒」；一般免責只能置於緊急行動之後
+
+## 回寫落點
+
+| 裁決 | 落點 |
+| --- | --- |
+| 一、`/help` 保留 | `2026-08-15-redesign-sitemap-userflow-current.md` 第 18、176 行 |
+| 二、逾期文案維持 | 無需改動；`mvp-flow-review.md` §1.1 標為已裁決 |
+| 三、審查日期與內容接線 | `apps/web/src/features/help/helpTopics.ts`、`HelpTopicPage.vue` |
+| 四、特殊狀況草稿 | `apps/web/src/features/help/`；審查狀態維持 `MEDICAL_REVIEW` |
