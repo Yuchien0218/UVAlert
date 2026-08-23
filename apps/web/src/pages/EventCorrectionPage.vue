@@ -321,11 +321,6 @@ async function runVoid(): Promise<void> {
 </template>
 
 <style scoped>
-.correction-page {
-  max-width: 46rem;
-  margin-inline: auto;
-}
-
 .app-card {
   display: grid;
   gap: var(--space-4);

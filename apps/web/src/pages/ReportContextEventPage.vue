@@ -312,11 +312,6 @@ function zoneNames(zoneIds: string[]): string {
 </template>
 
 <style scoped>
-.report-page {
-  max-width: 46rem;
-  margin-inline: auto;
-}
-
 .app-card {
   display: grid;
   gap: var(--space-4);
