@@ -6,7 +6,7 @@
 
 | 檔案 | 用途 | 狀態 |
 | --- | --- | --- |
-| `2026-08-15-redesign-sitemap-userflow-current.md` | 最新 Sitemap、User Flow、產品結構與已確認的重新設計決策 | 現行基準——**部分條文待更新**，見下方回寫落點 |
+| `2026-08-15-redesign-sitemap-userflow-current.md` | 最新 Sitemap、User Flow、產品結構與已確認的重新設計決策 | 現行基準（2026-08-23 已回寫） |
 | `2026-08-17-copy-audit.md` | 全站台灣繁體中文詞彙、語氣與文字整理盤點 | 現行文案依據 |
 | `2026-08-23-notification-decision.md` | 通知功能落差盤點與「做 service worker ＋ 本機通知」裁決 | 現行裁決 |
 | `2026-08-23-content-and-flow-decisions.md` | `/help` 保留、逾期文案維持、`/help` 發布審查日期、特殊狀況文案處置 | 現行裁決 |
@@ -19,16 +19,16 @@
 
 | 裁決 | 落點 | 狀態 |
 | --- | --- | --- |
-| `/help` 與 `/special-situation` 保留，不砍 | `2026-08-15-redesign-sitemap-userflow-current.md` 第 18、176 行 | **待回寫** |
+| `/help` 與 `/special-situation` 保留，不砍 | `2026-08-15-redesign-sitemap-userflow-current.md` §一、§五 | 已回寫（2026-08-23） |
 | 逾期文案維持「該補擦了」 | 無需改動 | 已完成 |
 | `/help` 兩則放行（`reviewedAt` 2026-08-23／`nextReviewAt` 2027-08-23） | `apps/web/src/features/help/helpTopics.ts` | 待實作 |
 | `/help` 內容接進 App | `apps/web/src/pages/help/HelpTopicPage.vue`（目前缺 `v-else` 分支） | 待實作 |
 | `/help/how-it-works` 改寫成誠實版（移除不存在的通知承諾） | `apps/web/src/features/help/` | 待實作 |
 | 特殊狀況文案起草，維持 `MEDICAL_REVIEW` | `apps/web/src/features/help/` | 待實作 |
 | 做 service worker ＋ 本機通知 | `apps/web/`、`vite.config.ts` | 待實作 |
-| 通知行為補進現行 Sitemap | `2026-08-15-redesign-sitemap-userflow-current.md` §4 | **待回寫** |
-| 夜間／收工行為補進現行 Sitemap | `2026-08-15-redesign-sitemap-userflow-current.md` §4.2 | **待回寫** |
-| 「不做暫停」的取捨寫進規格 | `2026-08-15-redesign-sitemap-userflow-current.md` §4 | **待回寫** |
+| 通知行為補進現行 Sitemap | `2026-08-15-redesign-sitemap-userflow-current.md` §4.3（全面改寫）、§4.1 第 6 點 | 已回寫（2026-08-23） |
+| 夜間／收工行為補進現行 Sitemap | `2026-08-15-redesign-sitemap-userflow-current.md` §4.2 | 已回寫（2026-08-23） |
+| 「不做暫停」的取捨寫進規格 | `2026-08-15-redesign-sitemap-userflow-current.md` §4.2 | 已回寫（2026-08-23） |
 | wireframe 文字修正 | wireframe 原始檔 | 待套用 |
 
 視覺設計另見：
