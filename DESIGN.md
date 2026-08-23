@@ -44,25 +44,25 @@ colors:
 
 typography:
   display-xl:
-    fontFamily: "Cormorant Garamond, Noto Serif TC, Noto Serif CJK TC, ui-serif, serif"
+    fontFamily: "LXGW WenKai TC, Noto Serif TC, ui-serif, serif"
     fontSize: 64px
     fontWeight: 400
     lineHeight: 1.05
     letterSpacing: -1.5px
   display-lg:
-    fontFamily: "Cormorant Garamond, Noto Serif TC, Noto Serif CJK TC, ui-serif, serif"
+    fontFamily: "LXGW WenKai TC, Noto Serif TC, ui-serif, serif"
     fontSize: 48px
     fontWeight: 400
     lineHeight: 1.1
     letterSpacing: -1px
   display-md:
-    fontFamily: "Cormorant Garamond, Noto Serif TC, Noto Serif CJK TC, ui-serif, serif"
+    fontFamily: "LXGW WenKai TC, Noto Serif TC, ui-serif, serif"
     fontSize: 36px
     fontWeight: 400
     lineHeight: 1.15
     letterSpacing: -0.5px
   display-sm:
-    fontFamily: "Cormorant Garamond, Noto Serif TC, Noto Serif CJK TC, ui-serif, serif"
+    fontFamily: "LXGW WenKai TC, Noto Serif TC, ui-serif, serif"
     fontSize: 28px
     fontWeight: 400
     lineHeight: 1.2
@@ -502,15 +502,19 @@ components:
 
 ### 字體家族
 
-系統以 **Cormorant Garamond**（或 **EB Garamond** 作為替代）為拉丁襯線標題字，搭配 **Noto Serif TC** 作為繁體中文標題字。**Inter** 為拉丁人文無襯線內文字，搭配 **Noto Sans TC** 處理繁體中文內文、導覽與 UI 標籤。**Noto Sans Mono CJK TC** 加系統等寬堆疊處理倒數數值與資料讀數。
+> **2026-08-23 標題字體變更**：標題字體由 Cormorant Garamond ＋ Noto Serif TC 改為 **霞鶩文楷 TC（LXGW WenKai TC）**。這項改動先在 Claude Design 的下游元件庫做出，本節依此回寫；程式碼尚未跟上，見第十節缺口表。變更理由：文楷（Kai）的手寫溫度與圓體字標（GenSenRounded TW）的語感一致，Cormorant ＋ Noto Serif TC 兩種西式／中式襯線體並置時調性不統一，且與圓潤的品牌標誌互相牴觸。
 
-備援堆疊：標題走 `Cormorant Garamond, Noto Serif TC, Noto Serif CJK TC, ui-serif, serif`，內文走 `Inter, Noto Sans TC, Noto Sans CJK TC, ui-sans-serif, sans-serif`。
+系統以 **霞鶩文楷 TC（LXGW WenKai TC）** 為中英通用的標題顯示字，字重僅 400（無 bold，不得合成假粗）。**Inter** 為拉丁人文無襯線內文字，搭配 **Noto Sans TC** 處理繁體中文內文、導覽與 UI 標籤。等寬字體改用 **Noto Sans Mono** 加系統等寬堆疊處理倒數數值與資料讀數——讀數只渲染純數字（見下方讀數字體備註），不需要 CJK 等寬覆蓋。
+
+**文楷不是襯線體**，是中文字體分類裡的楷書／手寫傾向字，功能上取代標題襯線體的角色（安靜、有編輯感、負字距），但視覺質地不同，不要拿 Noto Serif TC 或其他明體／宋體字混用替代。
+
+備援堆疊：標題走 `LXGW WenKai TC, Noto Serif TC, ui-serif, serif`，內文走 `Inter, Noto Sans TC, Noto Sans CJK TC, ui-sans-serif, sans-serif`。
 
 標題／內文的分工是編輯式的：
 
-- Cormorant Garamond ＋ Noto Serif TC（字重 400，負字距）→ h1、h2、h3、頁面主標
+- 霞鶩文楷 TC（字重 400，負字距）→ h1、h2、h3、頁面主標
 - Inter ＋ Noto Sans TC（字重 400–500）→ 內文、導覽、按鈕、說明、標籤
-- Noto Sans Mono CJK TC ＋ 系統等寬 → 倒數數值、UV 指數、時間戳記
+- Noto Sans Mono ＋ 系統等寬 → 倒數數值、UV 指數、時間戳記
 
 > **字標是例外（2026-08-22）**：Logo 的「防曬晴報員」五個字用**源泉圓體（GenSenRounded）TW 月版** Medium，不是襯線體。理由是字標緊鄰圖標，而圖標的造型語言是「實心圓點＋膠囊線條、端點全圓、**不使用尖角**」（第八節），明體的尖角收筆與它直接衝突。圓體保留黑體結構、只磨圓端點，呼應膠囊語言又不越過「不可愛化」那條線。
 >
@@ -524,7 +528,7 @@ components:
 
 | Token | 尺寸 | 字重 | 行高 | 字距 | 用途 |
 |---|---|---|---|---|---|
-| `{typography.display-xl}` | 64px | 400 | 1.05 | -1.5px | 衛教首頁主標 — Cormorant Garamond |
+| `{typography.display-xl}` | 64px | 400 | 1.05 | -1.5px | 衛教首頁主標 — 霞鶩文楷 TC |
 | `{typography.display-lg}` | 48px | 400 | 1.1 | -1px | 衛教分類頁主標 |
 | `{typography.display-md}` | 36px | 400 | 1.15 | -0.5px | 頁面標題（`page-heading__title`） |
 | `{typography.display-sm}` | 28px | 400 | 1.2 | -0.3px | 衛教首頁大卡片標題、區塊標題 |
@@ -541,15 +545,17 @@ components:
 
 ### 繁體中文字體建議
 
+**2026-08-23 更新**：霞鶩文楷 TC 本身涵蓋中英文字符，標題不再需要「拉丁字體 ＋ Noto Serif TC」兩件式配對——這點與先前版本不同，先前版本才需要下表的搭配邏輯。
+
 | 角色 | 建議字體 | 為什麼合適 | 授權 |
 |---|---|---|---|
-| 中文標題／衛教標題 | **Noto Serif TC** | 編輯感、安靜，與襯線主導的視覺聲音相容 | Google Fonts；SIL OFL |
+| 中英文標題（唯一） | **霞鶩文楷 TC（LXGW WenKai TC）** | 手寫傾向的楷書字，與圓潤字標調性一致；中英文皆涵蓋，不需另搭西式襯線體 | GitHub；SIL OFL |
 | 中文內文／介面 | **Noto Sans TC** | 小尺寸清晰、字符涵蓋廣，適合標籤與長閱讀 | Google Fonts；SIL OFL |
 | 替代介面聲音 | **IBM Plex Sans TC** | 略偏技術與結構化；適合工具感更強的版本 | IBM Plex；SIL OFL |
-| 衛教限定點綴 | **LXGW WenKai TC** | 更溫暖personal；只用於引言或反思型提示，不用於倒數或導覽 | GitHub；SIL OFL |
-| CJK 等寬／倒數備援 | **Noto Sans Mono CJK TC** | 讓中文字在資料與等寬表面中保持對齊 | Noto；SIL OFL |
+| 標題備援 | **Noto Serif TC** | 文楷不可用時的備援，見下方備援堆疊 | Google Fonts；SIL OFL |
+| CJK 等寬／倒數備援 | **Noto Sans Mono** | 讓中文字在資料與等寬表面中保持對齊 | Noto；SIL OFL |
 
-預設配對是 **Noto Serif TC ＋ Noto Sans TC**。IBM Plex Sans TC 是替代方向，不要與 Inter 同時載入。LXGW WenKai TC 只用於小段編輯時刻，個性太強不適合主要產品介面。
+預設標題字是 **霞鶩文楷 TC**，內文預設配對是 **Inter ＋ Noto Sans TC**。IBM Plex Sans TC 是替代介面方向，不要與 Inter 同時載入。
 
 ### 中文間距覆寫
 
@@ -593,7 +599,7 @@ components:
 
 ### 替代字體註記
 
-Cormorant Garamond 不可用時，**EB Garamond** 字重 500 加 -0.02em 字距是最接近的開源近似。繁體中文標題使用 **Noto Serif TC**。無襯線首選 **Inter ＋ Noto Sans TC**；**IBM Plex Sans TC** 是工具感更強的替代方向。任何替代字體都要維持相同的人文比例。
+霞鶩文楷 TC 不可用時，標題落到備援堆疊的 **Noto Serif TC**——這是唯一的標題備援，不是風格對等的替代，是「文楷載入失敗時不要讓標題落到系統預設明體」的保底。無襯線首選 **Inter ＋ Noto Sans TC**；**IBM Plex Sans TC** 是工具感更強的替代方向。
 
 ## 四、間距尺規（Spacing Scale）
 
@@ -798,13 +804,14 @@ Cormorant Garamond 不可用時，**EB Garamond** 字重 500 加 -0.02em 字距�
 
 ## 十、與程式碼的落差
 
-`README.md` 訂有「文件與程式碼衝突時以程式碼為準」的規則。**色彩已於 2026-08-22、字體已於 2026-08-23 套用完畢。** 目前剩下一項刻意的偏離：
+`README.md` 訂有「文件與程式碼衝突時以程式碼為準」的規則。**色彩已於 2026-08-22 套用完畢。字體有兩層：Cormorant Garamond 版本已於 2026-08-23 套用，但同日稍晚字體目標又改為霞鶩文楷 TC（見上方 2026-08-23 標題字體變更），程式碼尚未跟上新目標。** 目前有兩項刻意或暫時的偏離：
 
 | 項目 | 本文件（目標） | 實作 | 為什麼 |
 |---|---|---|---|
+| 標題顯示字體 | 霞鶩文楷 TC（LXGW WenKai TC） | Cormorant Garamond ＋ Noto Serif TC，自托管（`apps/web/public/fonts/`，commit `63e15c3`） | 2026-08-23 稍晚才裁決換字體，此前的 Cormorant 版本已經上線。換字體時**沿用既有自托管政策**（見 `tools/fonts/README.md`「一、自行托管，不用 Google Fonts CDN」），不要改成 Claude Design 下游 bundle 目前用的 jsDelivr CDN 載入方式——那個取捨的隱私理由沒有變 |
 | 中文內文字體 | Noto Sans TC | 系統黑體（PingFang TC／微軟正黑） | 內文會渲染使用者輸入的裝備名稱與備註。subset 會缺字，完整 CJK 字型是好幾 MB。詳見 `tools/fonts/README.md` |
 
-**已對齊的部分**：品牌與表面色票、行動色、文字色、標題襯線體、拉丁內文字體、圓角（含 4px xs）、UV 五級風險色、倒數五狀態語意色、內容最大寬度 752px、點擊目標 44px、間距基礎單位 4px、單一亮色主題、自訂圖示系統為唯一來源。
+**已對齊的部分**：品牌與表面色票、行動色、文字色、拉丁內文字體、圓角（含 4px xs）、UV 五級風險色、倒數五狀態語意色、內容最大寬度 752px、點擊目標 44px、間距基礎單位 4px、單一亮色主題、自訂圖示系統為唯一來源。**標題顯示字體不再列在這裡**——2026-08-23 稍晚改了目標，程式碼還是舊版 Cormorant，見上表。
 
 > **2026-08-22 色彩套用**：`packages/ui/src/styles.css` 已改為本文件第二節的完整色票——品牌（primary／active／disabled ＋ 四個 accent）、表面（canvas 到三階深色）、文字與分隔線。語意別名一併重新指向：`--page-background` → canvas、`--text-primary` → ink、`--text-secondary` → muted、`--surface-primary` → surface-card、`--border-subtle` → hairline、`--focus-ring` → primary。`manifest.webmanifest` 的 `theme_color`／`background_color` 也換成 `#faf5ec`。
 >
@@ -816,7 +823,9 @@ Cormorant Garamond 不可用時，**EB Garamond** 字重 500 加 -0.02em 字距�
 >
 > 教訓：`.button` 已經帶 `min-height: var(--tap-target)`，**元件的 scoped CSS 不要再自己寫 `min-height`**——scoped 樣式的 attribute selector 特異性高於共用類別，一定會蓋過去。要調整尺寸請改 padding 或 token，不要覆寫 min-height。
 
-> **2026-08-23 字體套用**：新增 `--font-serif`，並在 `packages/ui/src/styles.css` 加全域規則讓 `h1`／`h2`／`h3` 走襯線體、字重 400。字型自行托管於 `apps/web/public/fonts/`，由 `node tools/fonts/build-fonts.mjs` 從完整字型 subset 產生（合計 748 KB，取代 26 MB 的原檔）。不使用 Google Fonts CDN——理由與其他取捨見 `tools/fonts/README.md`。
+> **2026-08-23 字體套用（歷史記錄，已被同日稍晚的決定取代）**：新增 `--font-serif`，並在 `packages/ui/src/styles.css` 加全域規則讓 `h1`／`h2`／`h3` 走 Cormorant Garamond ＋ Noto Serif TC、字重 400。字型自行托管於 `apps/web/public/fonts/`，由 `node tools/fonts/build-fonts.mjs` 從完整字型 subset 產生（合計 748 KB，取代 26 MB 的原檔）。不使用 Google Fonts CDN——理由與其他取捨見 `tools/fonts/README.md`。
+>
+> **這個實作仍在 main 上線中，尚未替換。** 同一天稍晚，標題字體目標改為霞鶩文楷 TC（見本節最上方「2026-08-23 標題字體變更」與第三節），但程式碼還沒跟上。重新實作時：自托管政策不變，只是字型來源換成 LXGW WenKai TC（OFL-1.1，[github.com/lxgw/LxgwWenkaiTC](https://github.com/lxgw/LxgwWenkaiTC)），仍要跑過 `tools/fonts/build-fonts.mjs` 的 subset 流程再自行托管，不要直接用 Claude Design 下游 bundle 目前的 jsDelivr CDN 引用方式。
 >
 > **一併移除 31 個檔案裡的 36 條標題字重覆寫。** Noto Serif TC subset 只有 400 字重，元件若寫 `font-weight: 600` 會觸發瀏覽器合成假粗（faux bold），把筆畫無差別加厚，中文字會糊。這就是第十一節「不要把襯線標題加粗」的技術理由，不只是風格偏好。
 >
@@ -835,7 +844,7 @@ Cormorant Garamond 不可用時，**EB Garamond** 字重 500 加 -0.02em 字距�
 ### Do
 
 - 每一頁都錨定在暖象牙底色上。純白讀起來像通用工具軟體，暖色調是這個系統的差異點。
-- 所有標題使用襯線字。負字距不可省略。
+- 所有標題使用霞鶩文楷 TC（不是襯線體，是楷書字；2026-08-23 由 Cormorant Garamond ＋ Noto Serif TC 換過來）。負字距不可省略。
 - 把 `{colors.primary}` 留給主 CTA。每個決策情境只有一個。
 - 倒數面板用濃縮咖啡深色表面。它的視覺重量就是「這是最重要的東西」的訊號。
 - 狀態同時用色彩、圖示與文字表達。
@@ -846,10 +855,10 @@ Cormorant Garamond 不可用時，**EB Garamond** 字重 500 加 -0.02em 字距�
 ### Don't
 
 - 不要用冷灰或純白當底色。
-- 不要把襯線標題加粗。字重 400 是規則。
+- 不要把標題字加粗。霞鶩文楷 TC 只有字重 400，沒有 bold，瀏覽器合成假粗會把筆畫無差別加厚。
 - 不要用鮮黃或飽和紅當品牌主色。深杏桃是行動色，高強度顏色留給風險狀態。
 - 不要把深杏桃到處塗。
-- 不要用無襯線字當標題。
+- 不要用無襯線字當標題，也不要拿 Noto Serif TC 或其他明體／宋體取代標題的霞鶩文楷 TC——備援堆疊才會落到 Noto Serif TC，正常情況不用。
 - 不要單靠顏色傳達狀態。
 - 不要用綠色暗示安全或防護完成。
 - 不要在提醒頁以外的頁面顯示迷你倒數或 Session 狀態——那會產生第二個提醒頁。
