@@ -3,8 +3,7 @@ import Icon from "../icons/Icon.vue";
 import type { SetupSaveStatus } from "../../features/setup/createSetupController";
 
 interface Props {
-  step: 1 | 2 | 3;
-  maxStep?: 2 | 3;
+  step: 1 | 2;
   title: string;
   description: string;
   backTo?: string | null;
@@ -14,23 +13,22 @@ interface Props {
 
 const props = withDefaults(defineProps<Props>(), {
   backTo: null,
-  busy: false,
-  maxStep: 3
+  busy: false
 });
 
 defineEmits<{
   cancel: [];
 }>();
 
+/**
+ * 設定流程只有兩步（`/setup/review` 已併入步驟 2，2026-08-15 裁決）。
+ * 高保真圖用線性進度條＋「步驟 X/2」文字取代原本的圓形數字節點，
+ * 2026-08-23 使用者確認換用此版本。
+ */
 const steps = [
   { label: "情境", to: "/setup/context" },
-  { label: "塗抹時間與開始防曬提醒", to: "/setup/timing" },
-  { label: "確認設定", to: "/setup/review" }
+  { label: "塗抹時間與開始防曬提醒", to: "/setup/timing" }
 ] as const;
-
-const visibleSteps = props.maxStep === 2
-  ? steps.slice(0, 2)
-  : steps;
 </script>
 
 <template>
@@ -73,32 +71,32 @@ const visibleSteps = props.maxStep === 2
       </button>
     </div>
 
-    <ol class="setup-shell__progress" aria-label="設定進度">
-      <li
-        v-for="(progressStep, index) in visibleSteps"
-        :key="progressStep.label"
-        class="setup-shell__progress-item"
-        :class="{
-          'setup-shell__progress-item--complete': index + 1 < step,
-          'setup-shell__progress-item--current': index + 1 === step
-        }"
-        :aria-current="index + 1 === step ? 'step' : undefined"
+    <div class="setup-shell__progress">
+      <p class="setup-shell__progress-label">
+        步驟 {{ step }}／{{ steps.length }}・{{ steps[step - 1]!.label }}
+      </p>
+      <div
+        class="setup-shell__progress-track"
+        role="progressbar"
+        :aria-valuenow="step"
+        aria-valuemin="1"
+        :aria-valuemax="steps.length"
+        aria-label="設定進度"
       >
-        <RouterLink
-          v-if="index + 1 < step"
-          class="setup-shell__progress-link"
-          :to="progressStep.to"
-          :aria-label="`返回步驟 ${index + 1}：${progressStep.label}`"
-        >
-          <span class="stat-figure">{{ index + 1 }}</span>
-          <small>{{ progressStep.label }}</small>
-        </RouterLink>
-        <template v-else>
-          <span class="stat-figure">{{ index + 1 }}</span>
-          <small>{{ progressStep.label }}</small>
-        </template>
-      </li>
-    </ol>
+        <div
+          class="setup-shell__progress-fill"
+          :style="{ width: `${(step / steps.length) * 100}%` }"
+        />
+      </div>
+      <RouterLink
+        v-if="step > 1"
+        class="setup-shell__progress-back text-link"
+        :to="steps[0].to"
+        :aria-label="`返回步驟 1：${steps[0].label}`"
+      >
+        返回步驟 1：{{ steps[0].label }}
+      </RouterLink>
+    </div>
 
     <header class="setup-shell__heading">
       <h1 class="setup-shell__title">{{ title }}</h1>
@@ -166,73 +164,37 @@ button.setup-shell__quiet-action {
 
 .setup-shell__progress {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  gap: var(--space-2);
+}
+
+.setup-shell__progress-label {
   margin: 0;
-  padding: 0;
-  list-style: none;
-}
-
-.setup-shell__progress-item {
-  position: relative;
-  display: grid;
-  justify-items: center;
-  gap: var(--space-2);
   color: var(--text-secondary);
-  text-align: center;
-  font-size: 0.9rem;
+  font-size: var(--font-size-label);
+  font-weight: 500;
 }
 
-.setup-shell__progress-item::before {
-  position: absolute;
-  z-index: 0;
-  top: 1.125rem;
-  right: 50%;
-  left: -50%;
-  height: 1.5px;
-  background: var(--border-subtle);
-  content: "";
+.setup-shell__progress-track {
+  height: 8px;
+  border-radius: 4px;
+  background: var(--color-surface-card);
+  overflow: hidden;
 }
 
-.setup-shell__progress-item:first-child::before {
-  display: none;
+.setup-shell__progress-fill {
+  height: 100%;
+  background: var(--color-primary);
+  transition: width var(--motion-base, 240ms) cubic-bezier(0.22, 1, 0.36, 1);
 }
 
-.setup-shell__progress-item > span,
-.setup-shell__progress-link > span {
-  z-index: 1;
-  display: grid;
-  width: 2.25rem;
-  height: 2.25rem;
-  place-content: center;
-  border: 1.5px solid var(--border-subtle);
-  border-radius: 50%;
-  background: var(--page-background);
-  font-size: 0.875rem;
-  font-weight: 600;
+@media (prefers-reduced-motion: reduce) {
+  .setup-shell__progress-fill {
+    transition: none;
+  }
 }
 
-.setup-shell__progress-link {
-  display: grid;
-  justify-items: center;
-  gap: var(--space-2);
-  color: inherit;
-  text-decoration: none;
-}
-
-.setup-shell__progress-link:hover small {
-  text-decoration: underline;
-  text-underline-offset: 0.2rem;
-}
-
-.setup-shell__progress-item--complete .setup-shell__progress-link > span,
-.setup-shell__progress-item--current > span {
-  border-color: var(--text-primary);
-  background: var(--surface-inverse);
-  color: var(--text-inverse);
-}
-
-.setup-shell__progress-item--current {
-  color: var(--text-primary);
+.setup-shell__progress-back {
+  justify-self: start;
 }
 
 .setup-shell__heading {
@@ -274,17 +236,6 @@ button.setup-shell__quiet-action {
 
   .setup-shell__save-status {
     display: none;
-  }
-
-  .setup-shell__progress-item {
-    font-size: 0.8rem;
-  }
-
-  .setup-shell__progress-item > span,
-  .setup-shell__progress-link > span {
-    width: 2rem;
-    height: 2rem;
-    font-size: 0.8rem;
   }
 
   .setup-shell__actions {
