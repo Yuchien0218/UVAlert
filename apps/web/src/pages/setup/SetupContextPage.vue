@@ -66,7 +66,7 @@ function routeForStep(
   <SetupStepShell
     :step="1"
     :max-step="2"
-    eyebrow="開始提醒／情境"
+    eyebrow="開始防曬提醒／情境"
     title="你現在主要在哪種情境？"
     description="選擇最符合這次活動的情境；這只會決定接下來要確認哪些資料。"
     :save-status="setup.saveStatus.value"
@@ -113,6 +113,16 @@ function routeForStep(
         role="status"
       >
         設定內容目前無法儲存；畫面內容仍會保留，你可以再試一次。
+      </p>
+
+      <!--
+        2026-08-23 補上。高保真樣板（templates/app-screens）的步驟 1 有這句，
+        現有實作沒有——選情境很容易被誤解成「選了就會算出安全曝曬時間」，
+        這頁偏偏是整個流程唯一沒有安全提示的一頁，步驟 2 靠
+        SetupCompletionSummary 已經有對應文字。
+      -->
+      <p class="safety-note">
+        情境只影響提醒間隔，不代表安全曝曬時間。
       </p>
     </template>
 

@@ -195,7 +195,7 @@ export function createAppRouter(
         name: "setup-timing",
         component: () => import("../pages/setup/SetupTimingPage.vue"),
         meta: {
-          title: "塗抹時間與開始提醒",
+          title: "塗抹時間與開始防曬提醒",
           hideNavigation: true,
           requiresNoActiveSession: true,
           setupStep: "timing"

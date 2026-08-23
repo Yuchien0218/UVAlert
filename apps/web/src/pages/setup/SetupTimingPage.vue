@@ -181,7 +181,7 @@ onMounted(async () => {
   <SetupStepShell
     :step="2"
     :max-step="2"
-    title="塗抹時間與開始提醒"
+    title="塗抹時間與開始防曬提醒"
     description="確認實際塗抹時間；摘要中若有誤，可返回步驟 1 重新選擇。"
     back-to="/setup/context"
     :save-status="setup.saveStatus.value"
@@ -285,7 +285,7 @@ onMounted(async () => {
         @click="submit"
       >
         <LoaderCircle v-if="setup.phase.value === 'submitting'" :size="18" class="spinner" />
-        {{ setup.phase.value === 'submitting' ? '開始提醒中…' : '開始提醒' }}
+        {{ setup.phase.value === 'submitting' ? '開始防曬提醒中…' : '開始防曬提醒' }}
       </button>
     </template>
 

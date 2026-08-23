@@ -24,7 +24,7 @@ defineEmits<{
 
 const steps = [
   { label: "情境", to: "/setup/context" },
-  { label: "塗抹時間與開始提醒", to: "/setup/timing" },
+  { label: "塗抹時間與開始防曬提醒", to: "/setup/timing" },
   { label: "確認設定", to: "/setup/review" }
 ] as const;
 
