@@ -6,7 +6,7 @@ import subsetFont from "subset-font";
 /**
  * 字型管線：把完整字型裁成這個專案實際會渲染的字元。
  *
- * 為什麼要 subset：Noto Serif TC 完整檔 24MB，而全站（含 48 篇衛教文章）
+ * 為什麼要 subset：霞鶩文楷 TC 完整檔 15MB，而全站（含 48 篇衛教文章）
  * 只用到 1,200 多個不重複漢字。不裁的話標題字體會是幾 MB 的下載，對一個
  * 本機優先的 PWA 來說不可接受。
  *
@@ -16,8 +16,11 @@ import subsetFont from "subset-font";
  *
  * 字元來源分兩類，對應兩種字體角色：
  *
- *   - 襯線體（標題）只渲染固定字串——UI 標籤、衛教文章標題。使用者輸入
- *     （裝備名稱、備註）只出現在內文，不會進標題。所以 subset 是安全的。
+ *   - 標題字（霞鶩文楷 TC）只渲染固定字串——UI 標籤、衛教文章標題。
+ *     使用者輸入（裝備名稱、備註）只出現在內文，不會進標題。所以 subset
+ *     是安全的。同一支字型涵蓋中英文字符，不需要像西式襯線體那樣另外
+ *     搭配一支拉丁字體。Noto Serif TC 保留為第二支標題 webfont，只在
+ *     霞鶩文楷 TC 載入失敗時作為自托管備援，不依賴系統是否裝有此字型。
  *   - 無襯線體（內文）會渲染使用者輸入，任何 subset 都可能缺字。因此
  *     這裡只裁拉丁字元，中文內文交給系統黑體（PingFang TC／微軟正黑），
  *     兩者在台灣裝置上品質都不錯，且完全不需下載。
@@ -122,16 +125,16 @@ const isCjk = (character) => {
 
 const FONTS = [
   {
-    // 標題中文。字元集是全站掃描結果——標題不渲染使用者輸入，subset 安全。
-    source: "NotoSerifTC-Regular.otf",
-    output: "noto-serif-tc-subset.woff2",
+    // 標題主字體。單一字型涵蓋中英文，不需要另外搭配拉丁字體。
+    source: "LXGWWenKaiTC-Regular.ttf",
+    output: "lxgw-wenkai-tc-subset.woff2",
     scope: "all"
   },
   {
-    // 標題拉丁。CJK 字元交給上面那支，這裡只留拉丁與符號。
-    source: "CormorantGaramond-Regular.ttf",
-    output: "cormorant-garamond-subset.woff2",
-    scope: "latin"
+    // 標題備援。霞鶩文楷 TC 載入失敗時的自托管備援，不依賴系統字型。
+    source: "NotoSerifTC-Regular.otf",
+    output: "noto-serif-tc-subset.woff2",
+    scope: "all"
   },
   {
     // 內文拉丁。中文內文會有使用者輸入，交給系統黑體，不在這裡 subset。

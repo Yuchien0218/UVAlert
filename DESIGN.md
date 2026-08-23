@@ -808,10 +808,9 @@ components:
 
 | 項目 | 本文件（目標） | 實作 | 為什麼 |
 |---|---|---|---|
-| 標題顯示字體 | 霞鶩文楷 TC（LXGW WenKai TC） | Cormorant Garamond ＋ Noto Serif TC，自托管（`apps/web/public/fonts/`，commit `63e15c3`） | 2026-08-23 稍晚才裁決換字體，此前的 Cormorant 版本已經上線。換字體時**沿用既有自托管政策**（見 `tools/fonts/README.md`「一、自行托管，不用 Google Fonts CDN」），不要改成 Claude Design 下游 bundle 目前用的 jsDelivr CDN 載入方式——那個取捨的隱私理由沒有變 |
 | 中文內文字體 | Noto Sans TC | 系統黑體（PingFang TC／微軟正黑） | 內文會渲染使用者輸入的裝備名稱與備註。subset 會缺字，完整 CJK 字型是好幾 MB。詳見 `tools/fonts/README.md` |
 
-**已對齊的部分**：品牌與表面色票、行動色、文字色、拉丁內文字體、圓角（含 4px xs）、UV 五級風險色、倒數五狀態語意色、內容最大寬度 752px、點擊目標 44px、間距基礎單位 4px、單一亮色主題、自訂圖示系統為唯一來源。**標題顯示字體不再列在這裡**——2026-08-23 稍晚改了目標，程式碼還是舊版 Cormorant，見上表。
+**已對齊的部分**：品牌與表面色票、行動色、文字色、拉丁內文字體、**標題顯示字體**、圓角（含 4px xs）、UV 五級風險色、倒數五狀態語意色、內容最大寬度 752px、點擊目標 44px、間距基礎單位 4px、單一亮色主題、自訂圖示系統為唯一來源。
 
 > **2026-08-22 色彩套用**：`packages/ui/src/styles.css` 已改為本文件第二節的完整色票——品牌（primary／active／disabled ＋ 四個 accent）、表面（canvas 到三階深色）、文字與分隔線。語意別名一併重新指向：`--page-background` → canvas、`--text-primary` → ink、`--text-secondary` → muted、`--surface-primary` → surface-card、`--border-subtle` → hairline、`--focus-ring` → primary。`manifest.webmanifest` 的 `theme_color`／`background_color` 也換成 `#faf5ec`。
 >
@@ -823,9 +822,9 @@ components:
 >
 > 教訓：`.button` 已經帶 `min-height: var(--tap-target)`，**元件的 scoped CSS 不要再自己寫 `min-height`**——scoped 樣式的 attribute selector 特異性高於共用類別，一定會蓋過去。要調整尺寸請改 padding 或 token，不要覆寫 min-height。
 
-> **2026-08-23 字體套用（歷史記錄，已被同日稍晚的決定取代）**：新增 `--font-serif`，並在 `packages/ui/src/styles.css` 加全域規則讓 `h1`／`h2`／`h3` 走 Cormorant Garamond ＋ Noto Serif TC、字重 400。字型自行托管於 `apps/web/public/fonts/`，由 `node tools/fonts/build-fonts.mjs` 從完整字型 subset 產生（合計 748 KB，取代 26 MB 的原檔）。不使用 Google Fonts CDN——理由與其他取捨見 `tools/fonts/README.md`。
+> **2026-08-23 字體套用（初版，已被同日稍晚的霞鶩文楷 TC 版本取代）**：新增 `--font-serif`，並在 `packages/ui/src/styles.css` 加全域規則讓 `h1`／`h2`／`h3` 走 Cormorant Garamond ＋ Noto Serif TC、字重 400。字型自行托管於 `apps/web/public/fonts/`，由 `node tools/fonts/build-fonts.mjs` 從完整字型 subset 產生（合計 748 KB，取代 26 MB 的原檔）。不使用 Google Fonts CDN——理由與其他取捨見 `tools/fonts/README.md`。
 >
-> **這個實作仍在 main 上線中，尚未替換。** 同一天稍晚，標題字體目標改為霞鶩文楷 TC（見本節最上方「2026-08-23 標題字體變更」與第三節），但程式碼還沒跟上。重新實作時：自托管政策不變，只是字型來源換成 LXGW WenKai TC（OFL-1.1，[github.com/lxgw/LxgwWenkaiTC](https://github.com/lxgw/LxgwWenkaiTC)），仍要跑過 `tools/fonts/build-fonts.mjs` 的 subset 流程再自行托管，不要直接用 Claude Design 下游 bundle 目前的 jsDelivr CDN 引用方式。
+> **2026-08-23 同日稍晚換成霞鶩文楷 TC。** 標題字體目標改為 LXGW WenKai TC（見本節最上方「2026-08-23 標題字體變更」與第三節），已重新實作並上線：來源字型下載自 [github.com/lxgw/LxgwWenkaiTC](https://github.com/lxgw/LxgwWenkaiTC) release v1.522（OFL-1.1），只取 Regular 字重，跑過 `tools/fonts/build-fonts.mjs` 的 subset 流程後自托管（沿用既有政策，不用 Claude Design 下游 bundle 的 jsDelivr CDN）。單一字型涵蓋中英文，不再需要「拉丁字體 ＋ Noto Serif TC」兩件式配對；Noto Serif TC subset 保留為載入失敗時的自托管備援。合計 1,033 KB，比 Cormorant 版本重 285 KB——取捨說明見 `tools/fonts/README.md`。
 >
 > **一併移除 31 個檔案裡的 36 條標題字重覆寫。** Noto Serif TC subset 只有 400 字重，元件若寫 `font-weight: 600` 會觸發瀏覽器合成假粗（faux bold），把筆畫無差別加厚，中文字會糊。這就是第十一節「不要把襯線標題加粗」的技術理由，不只是風格偏好。
 >
