@@ -80,7 +80,11 @@ import {
   createFeedbackController,
   type FeedbackController
 } from "../features/feedback/createFeedbackController";
-import type { CloudSyncPort, NotificationPort } from "@sunshield/platform";
+import type { CloudSyncPort } from "@sunshield/platform";
+import {
+  createNotificationController,
+  type NotificationController
+} from "../features/notification/createNotificationController";
 
 export interface WebAppServices {
   readonly boot: AppBootController;
@@ -98,7 +102,7 @@ export interface WebAppServices {
   readonly sync: SyncController;
   readonly cloudSync: CloudSyncPort;
   readonly feedback: FeedbackController;
-  readonly notifications: NotificationPort;
+  readonly notifications: NotificationController;
   dispose(): void;
 }
 
@@ -117,7 +121,7 @@ export function createWebAppServices(
   const notifier = new BroadcastChannelNotifier();
   const connectivity = new BrowserConnectivity();
   const lifecycle = new BrowserLifecycle();
-  const notifications = new BrowserNotifications();
+  const notificationPort = new BrowserNotifications();
   const repository = new LocalSessionRepository({
     database,
     sourceContextId: contextId,
@@ -250,6 +254,11 @@ export function createWebAppServices(
     refreshUv: uvForecast.refresh
   });
 
+  const notifications = createNotificationController({
+    notifications: notificationPort,
+    currentSession: boot.currentSession
+  });
+
   return {
     boot,
     setup,
@@ -268,7 +277,7 @@ export function createWebAppServices(
     feedback,
     notifications,
     dispose(): void {
-      void notifications.cancelAll();
+      notifications.dispose();
       sync.dispose();
       feedback.dispose();
       auth.dispose();
