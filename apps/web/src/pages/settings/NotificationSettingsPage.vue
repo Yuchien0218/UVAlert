@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed } from "vue";
+import { computed, shallowRef } from "vue";
 import { useRouter } from "vue-router";
 import Icon from "../../components/icons/Icon.vue";
 import { useWebAppServices } from "../../app/injection";
@@ -28,12 +28,19 @@ const canDeliverInBackground = computed(
 const isGranted = computed(() => permission.value === "granted");
 const isDenied = computed(() => permission.value === "denied");
 
+/** 依高保真的確切措辭對齊四種狀態（2026-08-23 交接紀錄）。 */
 const statusLabel = computed(() => {
-  if (!isSupported.value) return "此裝置不支援";
-  if (isGranted.value) return "已開啟";
-  if (isDenied.value) return "已被封鎖";
-  return "未開啟";
+  if (!isSupported.value) return "這個瀏覽器不支援通知";
+  if (isGranted.value) return "通知已開啟";
+  if (isDenied.value) return "通知已被拒絕";
+  return "還沒開啟通知";
 });
+
+/**
+ * 「如何開啟」只展開步驟說明，不嘗試直接開啟瀏覽器設定——網頁做不到
+ * 這件事（2026-08-23 使用者確認的裁決）。
+ */
+const showDeniedSteps = shallowRef(false);
 
 async function requestPermission(): Promise<void> {
   await notifications.requestPermission();
@@ -62,10 +69,9 @@ function goBack(): void {
 
     <!-- 裝置支援與權限狀態卡片 -->
     <section class="app-card" aria-labelledby="permission-heading">
-      <h2 id="permission-heading">補擦提醒狀態</h2>
-      <p class="status-summary">
+      <h2 id="permission-heading" class="status-summary">
         目前狀態：<strong>{{ statusLabel }}</strong>
-      </p>
+      </h2>
 
       <div v-if="!isSupported" class="note-box" role="status">
         <p>目前使用的瀏覽器或環境不支援本機通知功能。</p>
@@ -75,6 +81,20 @@ function goBack(): void {
         <p>
           通知權限已被瀏覽器封鎖。若想接收補擦提醒，請至瀏覽器或系統設定中解除封鎖。
         </p>
+        <button
+          class="button button--quiet"
+          type="button"
+          :aria-expanded="showDeniedSteps"
+          aria-controls="denied-steps"
+          @click="showDeniedSteps = !showDeniedSteps"
+        >
+          如何開啟
+        </button>
+        <div v-if="showDeniedSteps" id="denied-steps" class="note-box">
+          <p>
+            開啟位置依瀏覽器而異，通常在網址列左側的鎖頭或資訊圖示裡找到「網站設定」或「權限」，把通知改為允許；也可以到瀏覽器的「設定 → 隱私權與安全性 → 網站設定 → 通知」找到本網站調整。若系統整體關閉了通知，還需要到作業系統的通知設定裡一併打開。
+          </p>
+        </div>
       </div>
 
       <div v-else-if="!isGranted" class="action-box">
@@ -98,22 +118,26 @@ function goBack(): void {
       瀏覽器或分頁被系統回收就收不到，這是 web 平台的限制，不是「可能」
       發生的邊緣狀況。省略這句或講得含糊，會讓產品退回「規格承諾、實作
       交付不了」的老問題。
+      2026-08-23：改成有邊框的強調區塊（粗體標題＋說明），對齊高保真的
+      視覺層級，不是純段落文字。
     -->
     <section class="app-card" aria-labelledby="delivery-heading">
       <h2 id="delivery-heading">通知傳送說明</h2>
-      <ul class="info-list">
-        <li>
-          <strong>單一提醒原則</strong>：系統每次只會排定下一個最近的補擦到期提醒，避免過多通知干擾。
-        </li>
-        <li v-if="canDeliverInBackground">
-          <strong>送達範圍</strong>：支援關閉分頁後送達。
-        </li>
-        <li v-else>
-          <strong>送達範圍</strong>：只在分頁還活著時送達——切到其他分頁或
-          App 仍會收到，但關掉瀏覽器或分頁被系統回收後就不會送達。你仍需
-          自己回來查看目前的補擦狀態。
-        </li>
-      </ul>
+      <p class="delivery-note">
+        <strong>單一提醒原則</strong>：系統每次只會排定下一個最近的補擦到期提醒，避免過多通知干擾。
+      </p>
+
+      <div v-if="canDeliverInBackground" class="delivery-emphasis">
+        <p class="delivery-emphasis__title">送達範圍</p>
+        <p>支援關閉分頁後送達。</p>
+      </div>
+      <div v-else class="delivery-emphasis delivery-emphasis--limited">
+        <p class="delivery-emphasis__title">送達範圍有限制</p>
+        <p>
+          只在分頁還活著時送達——切到其他分頁或 App 仍會收到，但關掉瀏覽器
+          或分頁被系統回收後就不會送達。你仍需自己回來查看目前的補擦狀態。
+        </p>
+      </div>
     </section>
   </div>
 </template>
@@ -144,7 +168,7 @@ function goBack(): void {
 
 .status-summary {
   margin: 0;
-  font-size: var(--font-size-body);
+  font-size: var(--font-size-section-title);
 }
 
 .note-box {
@@ -166,13 +190,33 @@ function goBack(): void {
   gap: var(--space-3);
 }
 
-.info-list {
-  display: grid;
-  gap: var(--space-2);
+.delivery-note {
   margin: 0;
-  padding-left: var(--space-4);
   color: var(--text-secondary);
   font-size: var(--font-size-caption);
+  line-height: 1.6;
+}
+
+.delivery-emphasis {
+  display: grid;
+  gap: var(--space-2);
+  padding: var(--space-4);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-sm);
+}
+
+.delivery-emphasis--limited {
+  border-color: var(--color-due);
+}
+
+.delivery-emphasis__title {
+  margin: 0;
+  font-weight: 600;
+}
+
+.delivery-emphasis p:not(.delivery-emphasis__title) {
+  margin: 0;
+  color: var(--text-secondary);
   line-height: 1.6;
 }
 </style>

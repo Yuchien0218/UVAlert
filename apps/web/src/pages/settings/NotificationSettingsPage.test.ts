@@ -66,7 +66,7 @@ describe("NotificationSettingsPage", () => {
       }
     });
 
-    expect(wrapper.text()).toContain("目前狀態：未開啟");
+    expect(wrapper.text()).toContain("目前狀態：還沒開啟通知");
     const button = wrapper.find("button.button--primary");
     expect(button.exists()).toBe(true);
 
@@ -87,7 +87,7 @@ describe("NotificationSettingsPage", () => {
       }
     });
 
-    expect(wrapper.text()).toContain("目前狀態：已開啟");
+    expect(wrapper.text()).toContain("目前狀態：通知已開啟");
   });
 
   it("被封鎖時顯示已被封鎖警示", () => {
@@ -103,8 +103,27 @@ describe("NotificationSettingsPage", () => {
       }
     });
 
-    expect(wrapper.text()).toContain("目前狀態：已被封鎖");
+    expect(wrapper.text()).toContain("目前狀態：通知已被拒絕");
     expect(wrapper.text()).toContain("通知權限已被瀏覽器封鎖");
+  });
+
+  it("被封鎖時可以展開「如何開啟」的步驟說明", async () => {
+    const services = makeServices({ permission: "denied" });
+    vi.mocked(useWebAppServices).mockReturnValue(
+      services as unknown as WebAppServices
+    );
+
+    const wrapper = mount(NotificationSettingsPage, {
+      global: {
+        plugins: [router],
+        stubs: { Icon: true }
+      }
+    });
+
+    expect(wrapper.find("#denied-steps").exists()).toBe(false);
+    await wrapper.get("button.button--quiet").trigger("click");
+    expect(wrapper.find("#denied-steps").exists()).toBe(true);
+    expect(wrapper.text()).toContain("網站設定");
   });
 
   it("裝置不支援時顯示不支援提示", () => {
@@ -120,7 +139,7 @@ describe("NotificationSettingsPage", () => {
       }
     });
 
-    expect(wrapper.text()).toContain("目前狀態：此裝置不支援");
+    expect(wrapper.text()).toContain("目前狀態：這個瀏覽器不支援通知");
   });
 
   /**
