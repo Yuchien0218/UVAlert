@@ -44,25 +44,25 @@ colors:
 
 typography:
   display-xl:
-    fontFamily: "LXGW WenKai TC, Noto Serif TC, ui-serif, serif"
+    fontFamily: "Noto Serif TC, Noto Serif CJK TC, ui-serif, serif"
     fontSize: 64px
     fontWeight: 400
     lineHeight: 1.05
     letterSpacing: -1.5px
   display-lg:
-    fontFamily: "LXGW WenKai TC, Noto Serif TC, ui-serif, serif"
+    fontFamily: "Noto Serif TC, Noto Serif CJK TC, ui-serif, serif"
     fontSize: 48px
     fontWeight: 400
     lineHeight: 1.1
     letterSpacing: -1px
   display-md:
-    fontFamily: "LXGW WenKai TC, Noto Serif TC, ui-serif, serif"
+    fontFamily: "Noto Serif TC, Noto Serif CJK TC, ui-serif, serif"
     fontSize: 36px
     fontWeight: 400
     lineHeight: 1.15
     letterSpacing: -0.5px
   display-sm:
-    fontFamily: "LXGW WenKai TC, Noto Serif TC, ui-serif, serif"
+    fontFamily: "Noto Serif TC, Noto Serif CJK TC, ui-serif, serif"
     fontSize: 28px
     fontWeight: 400
     lineHeight: 1.2
@@ -502,17 +502,25 @@ components:
 
 ### 字體家族
 
-> **2026-08-23 標題字體變更**：標題字體由 Cormorant Garamond ＋ Noto Serif TC 改為 **霞鶩文楷 TC（LXGW WenKai TC）**。這項改動先在 Claude Design 的下游元件庫做出，本節依此回寫；程式碼尚未跟上，見第十節缺口表。變更理由：文楷（Kai）的手寫溫度與圓體字標（GenSenRounded TW）的語感一致，Cormorant ＋ Noto Serif TC 兩種西式／中式襯線體並置時調性不統一，且與圓潤的品牌標誌互相牴觸。
+> **2026-08-23 標題字體定案（歷經兩次修正）**：標題字最終定為 **Noto Serif TC 單獨使用**，不搭配任何西文顯示字體。
+>
+> 過程記錄，避免同樣的提案再來一次：
+>
+> 1. 原本是 **Cormorant Garamond ＋ Noto Serif TC** 的中西配對。Claude Design 的下游元件庫指出這個配對「兩種襯線調性不統一」，並自行改成 **霞鶩文楷 TC**，還在自己的 CSS 註解裡標成「DESIGN.md §3」——但本文件從未有過那條規定，原文其實把霞鶩文楷 TC 限定在「引言或反思型提示」。
+> 2. 短暫套用霞鶩文楷 TC 後判定**不採用**：它是楷書／手寫傾向字，破壞了第一節指派給標題的任務。第一節原文：「暖象牙底色與**襯線標題**負責『成熟』，杏桃與陽光細節負責『親切』……全暖色會變成生活風格部落格」。標題改成手寫體後，全站沒有任何元素在承擔「成熟」，正好掉進那個失敗模式。第三節原本也已寫過霞鶩文楷 TC「個性太強不適合主要產品介面」。
+> 3. 但 Claude Design 對配對的**診斷是對的**：Cormorant 是細緻高對比的西文襯線體，與紮實低對比的 Noto Serif TC 並置時明顯細一截。
+>
+> 最終解法是**把西文顯示字整支移除**，而不是換一支。依據是實測資料：54 個衛教文章標題中只有 11 個含拉丁字母，且**全部**是嵌在中文句子裡的縮寫（UV、UVA、UVB、SPF、PA、UPF、UV400），**沒有任何一個是連續拉丁文字**——這個產品根本沒有「拉丁標題排版」這個工作。Noto Serif TC 自帶的拉丁字形本來就是為搭配它的中文而設計，縮寫與中文的視覺重量一致。
 
-系統以 **霞鶩文楷 TC（LXGW WenKai TC）** 為中英通用的標題顯示字，字重僅 400（無 bold，不得合成假粗）。**Inter** 為拉丁人文無襯線內文字，搭配 **Noto Sans TC** 處理繁體中文內文、導覽與 UI 標籤。等寬字體改用 **Noto Sans Mono** 加系統等寬堆疊處理倒數數值與資料讀數——讀數只渲染純數字（見下方讀數字體備註），不需要 CJK 等寬覆蓋。
+系統以 **Noto Serif TC** 為標題顯示字，中英文由同一支字型負責，字重僅 400。**Inter** 為拉丁人文無襯線內文字，搭配 **Noto Sans TC** 處理繁體中文內文、導覽與 UI 標籤。**Noto Sans Mono** 加系統等寬堆疊處理倒數數值與資料讀數——讀數只渲染純數字（見下方讀數字體備註），不需要 CJK 等寬覆蓋。
 
-**文楷不是襯線體**，是中文字體分類裡的楷書／手寫傾向字，功能上取代標題襯線體的角色（安靜、有編輯感、負字距），但視覺質地不同，不要拿 Noto Serif TC 或其他明體／宋體字混用替代。
+**標題不再搭配任何西文顯示字體。** 要加西文襯線體之前，先回頭看上面那段實測資料：沒有連續拉丁標題，就沒有它的工作。
 
-備援堆疊：標題走 `LXGW WenKai TC, Noto Serif TC, ui-serif, serif`，內文走 `Inter, Noto Sans TC, Noto Sans CJK TC, ui-sans-serif, sans-serif`。
+備援堆疊：標題走 `Noto Serif TC, Noto Serif CJK TC, ui-serif, serif`，內文走 `Inter, Noto Sans TC, Noto Sans CJK TC, ui-sans-serif, sans-serif`。
 
 標題／內文的分工是編輯式的：
 
-- 霞鶩文楷 TC（字重 400，負字距）→ h1、h2、h3、頁面主標
+- Noto Serif TC（字重 400，負字距）→ h1、h2、h3、頁面主標
 - Inter ＋ Noto Sans TC（字重 400–500）→ 內文、導覽、按鈕、說明、標籤
 - Noto Sans Mono ＋ 系統等寬 → 倒數數值、UV 指數、時間戳記
 
@@ -528,7 +536,7 @@ components:
 
 | Token | 尺寸 | 字重 | 行高 | 字距 | 用途 |
 |---|---|---|---|---|---|
-| `{typography.display-xl}` | 64px | 400 | 1.05 | -1.5px | 衛教首頁主標 — 霞鶩文楷 TC |
+| `{typography.display-xl}` | 64px | 400 | 1.05 | -1.5px | 衛教首頁主標 — Noto Serif TC |
 | `{typography.display-lg}` | 48px | 400 | 1.1 | -1px | 衛教分類頁主標 |
 | `{typography.display-md}` | 36px | 400 | 1.15 | -0.5px | 頁面標題（`page-heading__title`） |
 | `{typography.display-sm}` | 28px | 400 | 1.2 | -0.3px | 衛教首頁大卡片標題、區塊標題 |
@@ -545,17 +553,19 @@ components:
 
 ### 繁體中文字體建議
 
-**2026-08-23 更新**：霞鶩文楷 TC 本身涵蓋中英文字符，標題不再需要「拉丁字體 ＋ Noto Serif TC」兩件式配對——這點與先前版本不同，先前版本才需要下表的搭配邏輯。
+**2026-08-23 更新**：標題改為單一字型負責中英文，不再需要「拉丁字體 ＋ 中文字體」兩件式配對——理由見上方標題字體定案。
 
 | 角色 | 建議字體 | 為什麼合適 | 授權 |
 |---|---|---|---|
-| 中英文標題（唯一） | **霞鶩文楷 TC（LXGW WenKai TC）** | 手寫傾向的楷書字，與圓潤字標調性一致；中英文皆涵蓋，不需另搭西式襯線體 | GitHub；SIL OFL |
+| 中英文標題（唯一） | **Noto Serif TC** | 編輯感、安靜；自帶的拉丁字形即為搭配其中文而設計，縮寫與中文重量一致 | Google Fonts；SIL OFL |
 | 中文內文／介面 | **Noto Sans TC** | 小尺寸清晰、字符涵蓋廣，適合標籤與長閱讀 | Google Fonts；SIL OFL |
 | 替代介面聲音 | **IBM Plex Sans TC** | 略偏技術與結構化；適合工具感更強的版本 | IBM Plex；SIL OFL |
-| 標題備援 | **Noto Serif TC** | 文楷不可用時的備援，見下方備援堆疊 | Google Fonts；SIL OFL |
+| 若要更強的文氣（未採用） | **源流明體 GenRyuMin TW** | 思源宋體的 OFL 衍生版，比例偏傳統書籍排版；仍是明體，不帶手寫感 | GitHub；SIL OFL |
 | CJK 等寬／倒數備援 | **Noto Sans Mono** | 讓中文字在資料與等寬表面中保持對齊 | Noto；SIL OFL |
 
-預設標題字是 **霞鶩文楷 TC**，內文預設配對是 **Inter ＋ Noto Sans TC**。IBM Plex Sans TC 是替代介面方向，不要與 Inter 同時載入。
+預設標題字是 **Noto Serif TC**，內文預設配對是 **Inter ＋ Noto Sans TC**。IBM Plex Sans TC 是替代介面方向，不要與 Inter 同時載入。
+
+**不要把霞鶩文楷 TC 用在標題。** 它是楷書／手寫傾向字，會讓標題失去第一節指派的「成熟」任務——這點 2026-08-23 已實際套用後驗證並退回，不需要再試一次。
 
 ### 中文間距覆寫
 
@@ -599,7 +609,7 @@ components:
 
 ### 替代字體註記
 
-霞鶩文楷 TC 不可用時，標題落到備援堆疊的 **Noto Serif TC**——這是唯一的標題備援，不是風格對等的替代，是「文楷載入失敗時不要讓標題落到系統預設明體」的保底。無襯線首選 **Inter ＋ Noto Sans TC**；**IBM Plex Sans TC** 是工具感更強的替代方向。
+Noto Serif TC 是標題的唯一字型，沒有第二層自托管備援——載入失敗會落到系統襯線體（Windows 上是新細明體，品質差，見第十節）。若要更強的文氣，**源流明體 GenRyuMin TW** 是同為 OFL 的思源宋體衍生版，可作為風格對等的替換候選；但**不要換成楷體或圓體**。無襯線首選 **Inter ＋ Noto Sans TC**；**IBM Plex Sans TC** 是工具感更強的替代方向。
 
 ## 四、間距尺規（Spacing Scale）
 
@@ -824,7 +834,9 @@ components:
 
 > **2026-08-23 字體套用（初版，已被同日稍晚的霞鶩文楷 TC 版本取代）**：新增 `--font-serif`，並在 `packages/ui/src/styles.css` 加全域規則讓 `h1`／`h2`／`h3` 走 Cormorant Garamond ＋ Noto Serif TC、字重 400。字型自行托管於 `apps/web/public/fonts/`，由 `node tools/fonts/build-fonts.mjs` 從完整字型 subset 產生（合計 748 KB，取代 26 MB 的原檔）。不使用 Google Fonts CDN——理由與其他取捨見 `tools/fonts/README.md`。
 >
-> **2026-08-23 同日稍晚換成霞鶩文楷 TC。** 標題字體目標改為 LXGW WenKai TC（見本節最上方「2026-08-23 標題字體變更」與第三節），已重新實作並上線：來源字型下載自 [github.com/lxgw/LxgwWenkaiTC](https://github.com/lxgw/LxgwWenkaiTC) release v1.522（OFL-1.1），只取 Regular 字重，跑過 `tools/fonts/build-fonts.mjs` 的 subset 流程後自托管（沿用既有政策，不用 Claude Design 下游 bundle 的 jsDelivr CDN）。單一字型涵蓋中英文，不再需要「拉丁字體 ＋ Noto Serif TC」兩件式配對；Noto Serif TC subset 保留為載入失敗時的自托管備援。合計 1,033 KB，比 Cormorant 版本重 285 KB——取捨說明見 `tools/fonts/README.md`。
+> **2026-08-23 同日稍晚兩次修正，最終定案為 Noto Serif TC 單獨使用。** 中間曾短暫換成霞鶩文楷 TC（LXGW WenKai TC）並實際上線，隨後因手寫感破壞「襯線標題負責成熟」的角色分工而退回，完整過程見第三節「標題字體定案」。
+>
+> 最終實作：移除 Cormorant Garamond 與霞鶩文楷 TC，標題只留 Noto Serif TC subset，由它同時負責中英文。自托管政策不變。合計 **722 KB**（Cormorant 版本 748 KB、霞鶩文楷版本 1,033 KB），是三個版本裡最小的——因為不再需要第二支標題字型。
 >
 > **一併移除 31 個檔案裡的 36 條標題字重覆寫。** Noto Serif TC subset 只有 400 字重，元件若寫 `font-weight: 600` 會觸發瀏覽器合成假粗（faux bold），把筆畫無差別加厚，中文字會糊。這就是第十一節「不要把襯線標題加粗」的技術理由，不只是風格偏好。
 >
@@ -843,7 +855,7 @@ components:
 ### Do
 
 - 每一頁都錨定在暖象牙底色上。純白讀起來像通用工具軟體，暖色調是這個系統的差異點。
-- 所有標題使用霞鶩文楷 TC（不是襯線體，是楷書字；2026-08-23 由 Cormorant Garamond ＋ Noto Serif TC 換過來）。負字距不可省略。
+- 所有標題使用襯線體（Noto Serif TC，單一字型負責中英文）。負字距不可省略。
 - 把 `{colors.primary}` 留給主 CTA。每個決策情境只有一個。
 - 倒數面板用濃縮咖啡深色表面。它的視覺重量就是「這是最重要的東西」的訊號。
 - 狀態同時用色彩、圖示與文字表達。
@@ -854,10 +866,10 @@ components:
 ### Don't
 
 - 不要用冷灰或純白當底色。
-- 不要把標題字加粗。霞鶩文楷 TC 只有字重 400，沒有 bold，瀏覽器合成假粗會把筆畫無差別加厚。
+- 不要把襯線標題加粗。subset 只有字重 400，瀏覽器合成假粗會把筆畫無差別加厚。
 - 不要用鮮黃或飽和紅當品牌主色。深杏桃是行動色，高強度顏色留給風險狀態。
 - 不要把深杏桃到處塗。
-- 不要用無襯線字當標題，也不要拿 Noto Serif TC 或其他明體／宋體取代標題的霞鶩文楷 TC——備援堆疊才會落到 Noto Serif TC，正常情況不用。
+- 不要用無襯線字當標題，也不要用楷體或圓體（霞鶩文楷 TC 已於 2026-08-23 試過並退回，理由見第三節）。
 - 不要單靠顏色傳達狀態。
 - 不要用綠色暗示安全或防護完成。
 - 不要在提醒頁以外的頁面顯示迷你倒數或 Session 狀態——那會產生第二個提醒頁。

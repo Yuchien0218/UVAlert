@@ -1,6 +1,6 @@
 # 字型管線
 
-**日期**：2026-08-23（Asia/Taipei，**同日稍晚更新**：標題字體由 Cormorant Garamond ＋ Noto Serif TC 換成霞鶩文楷 TC）
+**日期**：2026-08-23（Asia/Taipei，同日經兩次修正後定案：標題只用 Noto Serif TC，移除 Cormorant Garamond；中間曾短暫試用霞鶩文楷 TC 並退回）
 **用途**：把完整字型裁成專案實際會渲染的字元，自行托管
 **權威性**：字型角色的設計規範在根目錄 `DESIGN.md` 第三節；這份文件記錄實作與取捨
 **產物**：`apps/web/public/fonts/*.woff2`（會 commit）
@@ -11,11 +11,10 @@
 node tools/fonts/build-fonts.mjs
 ```
 
-原始字型檔**不進 repo**（`.gitignore` 排除 `tools/fonts/source/`），因為完整 Noto Serif TC 就有 24MB、霞鶩文楷 TC 有 15MB。要重新產生得先下載到 `tools/fonts/source/`：
+原始字型檔**不進 repo**（`.gitignore` 排除 `tools/fonts/source/`），因為完整 Noto Serif TC 就有 24MB。要重新產生得先下載到 `tools/fonts/source/`：
 
 | 檔名 | 來源 | 授權 |
 |---|---|---|
-| `LXGWWenKaiTC-Regular.ttf` | [lxgw/LxgwWenkaiTC](https://github.com/lxgw/LxgwWenkaiTC) release → `LXGWWenKaiTC-Regular.ttf`（只取 Regular，Light／Medium 不需要——DESIGN.md 規定字重僅 400） | SIL OFL 1.1 |
 | `NotoSerifTC-Regular.otf` | [notofonts/noto-cjk](https://github.com/notofonts/noto-cjk) → `Serif/OTF/TraditionalChinese/NotoSerifCJKtc-Regular.otf` | SIL OFL 1.1 |
 | `Inter.ttf` | [google/fonts](https://github.com/google/fonts) → `ofl/inter/Inter[opsz,wght].ttf` | SIL OFL 1.1 |
 
@@ -23,12 +22,27 @@ node tools/fonts/build-fonts.mjs
 
 | 檔案 | 大小 | 原檔 | 比例 |
 |---|---|---|---|
-| `lxgw-wenkai-tc-subset.woff2` | 311 KB | 15 MB | 2.1% |
 | `noto-serif-tc-subset.woff2` | 649 KB | 24 MB | 2.7% |
 | `inter-subset.woff2` | 73 KB | 856 KB | 8.5% |
-| **合計** | **1,033 KB** | | |
+| **合計** | **722 KB** | | |
 
-**體積比 Cormorant 版本（748 KB）多了 285 KB，這是刻意的取捨，不是疏漏。** 霞鶩文楷 TC 單一字型就涵蓋中英文，本身已經不再需要「拉丁字體 ＋ 中文字體」兩件式配對；但 Noto Serif TC 現在保留純粹是**備援**角色——霞鶩文楷 TC 載入失敗時的自托管 CJK 備援，見下方「為什麼 webfont 是必要條件」。兩支字型都需要覆蓋同一組 948 個漢字，所以合計比單純的「主字體 ＋ 拉丁備援」組合重。如果之後想省這 649 KB，可以評估拿掉 Noto Serif TC、讓備援鏈直接落到系統襯線體——但要接受 Windows 上會退回新細明體的畫質風險。
+只有兩支字型：標題的 Noto Serif TC（中英文都由它負責）與內文拉丁的 Inter。中文內文交給系統黑體，理由見下方第三點。
+
+## 為什麼標題不配西文顯示字體
+
+2026-08-23 移除了原本搭配的 Cormorant Garamond。判斷依據是實測資料，不是風格偏好：
+
+| 項目 | 數字 |
+|---|---|
+| 衛教文章標題總數 | 54 |
+| 含拉丁字母 | 11（20%）|
+| **連續拉丁文字** | **0** |
+
+那 11 個全部是嵌在中文句子裡的縮寫——`UV`、`UVA`、`UVB`、`SPF`、`PA`、`UPF`、`UV400`。**沒有「拉丁標題排版」這個工作**，所以不需要專門的西文顯示體。
+
+而且配著反而有害：Cormorant Garamond 是細緻高對比的老式襯線體，Noto Serif TC 是紮實低對比的明體，「UVA、UVB、SPF、PA 到底差在哪裡？」這種句子裡，Cormorant 的縮寫會明顯比周圍中文細一截。Noto Serif TC 自帶的拉丁字形本來就是為搭配它的中文而設計的，重量一致。
+
+驗證這點的方式：改 `FONTS` 陣列前先跑一次上面的統計，確認標題的拉丁使用型態沒有改變。
 
 ## 三個取捨，都是刻意的
 

@@ -11,20 +11,6 @@
  * 對一個「打開就要看到倒數」的 App，可見性優先於字體正確性。
  */
 @font-face {
-  font-family: "LXGW WenKai TC Subset";
-  src: url("/fonts/lxgw-wenkai-tc-subset.woff2") format("woff2");
-  font-weight: 400;
-  font-style: normal;
-  font-display: swap;
-}
-
-/*
- * 標題備援。霞鶩文楷 TC 只有單一來源，載入失敗（網路中斷、格式不支援）
- * 時需要一支同樣自托管的 CJK 備援，不能只靠系統字型——Windows 沒有
- * Noto Serif CJK，會落到專為 12px 點陣設計的新細明體，放大到標題尺寸
- * 品質很差。
- */
-@font-face {
   font-family: "Noto Serif TC Subset";
   src: url("/fonts/noto-serif-tc-subset.woff2") format("woff2");
   font-weight: 400;
@@ -114,21 +100,22 @@
   --focus-ring: var(--color-primary);
 
   /*
-   * 標題字（DESIGN.md 第三節，2026-08-23 由 Cormorant Garamond ＋
-   * Noto Serif TC 換成霞鶩文楷 TC）。單一字型涵蓋中英文，不再需要
-   * 「拉丁字體 ＋ 中文字體」兩件式配對。
+   * 標題襯線體（DESIGN.md 第三節）。Noto Serif TC 單一字型同時涵蓋
+   * 中英文，不另外搭配拉丁顯示字體。
    *
-   * 注意：霞鶩文楷 TC 是楷書字，不是襯線體——功能上取代標題襯線體的
-   * 角色（安靜、有編輯感、負字距），但視覺質地不同，不要拿 Noto Serif
-   * TC 當作風格對等的替代，它只是載入失敗時的自托管備援。
+   * 為什麼不配一支西文襯線體：實測 54 個文章標題只有 11 個含拉丁字母，
+   * 且全是嵌在中文句子裡的縮寫（UV、SPF、PA、UPF），沒有連續拉丁文字。
+   * Noto Serif TC 自帶的拉丁字形本來就是為搭配它的中文而設計，額外掛
+   * 一支西文襯線體只會造成粗細與對比不搭（2026-08-23 移除 Cormorant
+   * Garamond 的理由）。
    *
    * 備援鏈的最後是系統襯線體，但那在 Windows 上會落到新細明體，
    * 那是為 12px 點陣設計的字，放大到標題尺寸品質很差。所以 webfont
    * 不是加分項而是必要條件，不要為了省流量把它拿掉。
    */
   --font-serif:
-    "LXGW WenKai TC Subset", "Noto Serif TC Subset", "Noto Serif TC",
-    "Noto Serif CJK TC", ui-serif, serif;
+    "Noto Serif TC Subset", "Noto Serif TC", "Noto Serif CJK TC",
+    ui-serif, serif;
 
   /*
    * 內文：拉丁走 Inter subset，中文交給系統黑體。
@@ -202,11 +189,11 @@ body {
 }
 
 /*
- * 所有標題走霞鶩文楷 TC，字重 400（DESIGN.md 第三節與第十一節）。
+ * 所有標題走襯線體，字重 400（DESIGN.md 第三節與第十一節）。
  *
- * 「不要把標題加粗」不只是風格偏好：霞鶩文楷 TC 只有 400 字重，
- * 元件若寫 font-weight: 600，瀏覽器會合成假粗（faux bold）——把筆畫
- * 無差別加厚，中文字會糊掉。需要強調時放大字級，不要加粗。
+ * 「不要把襯線標題加粗」不只是風格偏好：Noto Serif TC subset 只有 400
+ * 字重，元件若寫 font-weight: 600，瀏覽器會合成假粗（faux bold）——把
+ * 筆畫無差別加厚，中文字會糊掉。需要強調時放大字級，不要加粗。
  */
 h1,
 h2,
