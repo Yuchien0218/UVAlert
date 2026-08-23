@@ -70,6 +70,17 @@ function navigationLabel(to: string, label: string): string {
   background: var(--page-background);
 }
 
+/*
+ * 2026-08-23 修正（第二版）：第一版改成「未選取 muted、選取態 primary」
+ * 換色，是照 DESIGN.md 文字版規格做的；但 Claude Design 的下游元件庫
+ * （components/navigation/BottomNav.jsx／.prompt.md）明確寫「用形狀
+ * 承載狀態，不換色——選取態是圖示後面的奶油色藥丸底加粗體標籤，圖示與
+ * 文字顏色在任何狀態下都一樣」。兩份文件互相矛盾，使用者確認要藥丸版，
+ * 這裡照做，DESIGN.md 的文字規格也一併回寫，不再有兩套說法並存。
+ *
+ * nav-* 圖示是雙色系統，墨咖結構走 currentColor、琥珀金重點寫死在
+ * SVG 裡，兩種狀態都不變色，本來就不需要外層換色。
+ */
 .bottom-nav__item {
   position: relative;
   display: grid;
@@ -78,26 +89,29 @@ function navigationLabel(to: string, label: string): string {
   justify-items: center;
   gap: var(--space-1);
   border-radius: var(--radius-sm);
-  color: var(--text-primary);
-  opacity: 0.45;
+  color: var(--color-body-strong);
   font-size: 0.75rem;
+  font-weight: 400;
   text-decoration: none;
-  transition: opacity var(--duration-fast) var(--ease-out);
-}
-
-.bottom-nav__item:hover {
-  opacity: 0.8;
 }
 
 .bottom-nav__item.router-link-exact-active {
-  opacity: 1;
+  font-weight: 700;
 }
 
 .bottom-nav__icon-wrapper {
   position: relative;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
+  display: grid;
+  place-items: center;
+  width: 3.5rem;
+  height: 2rem;
+  border-radius: var(--radius-pill);
+  background: transparent;
+  transition: background-color var(--duration-fast) var(--ease-out);
+}
+
+.bottom-nav__item.router-link-exact-active .bottom-nav__icon-wrapper {
+  background: var(--color-surface-card);
 }
 
 .bottom-nav__badge {

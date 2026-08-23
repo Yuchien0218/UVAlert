@@ -189,8 +189,8 @@ components:
     typography: "{typography.title-md}"
   bottom-nav:
     backgroundColor: "{colors.canvas}"
-    textColor: "{colors.muted}"
-    activeTextColor: "{colors.primary}"
+    textColor: "{colors.body-strong}"
+    activePillColor: "{colors.surface-card}"
     typography: "{typography.nav-label}"
     height: 64px
   global-status-banner:
@@ -627,9 +627,15 @@ Noto Serif TC 是標題的唯一字型，沒有第二層自托管備援——載
 
 ### 外殼
 
-**`brand-header`** — 頁面頂部的品牌列，承載地平線太陽字標與「防曬晴報員」。背景 `{colors.canvas}`。不是導覽列——導覽在底部。
+**`brand-header`** — 頁面頂部的品牌列，承載正式橫式標誌（`docs/design/logo/uvalert-lockup-horizontal.svg`，播報印記圖標＋「防曬晴報員」字標）與另外排版的英文副標「UVAlert」。背景 `{colors.canvas}`。不是導覽列——導覽在底部。
 
-**`bottom-nav`** — 固定在底部的三項導覽：**提醒**、**裝備**、**更多**。高度 64px，背景 `{colors.canvas}`，未選取文字 `{colors.muted}`，選取態 `{colors.primary}`。標籤使用 `{typography.nav-label}`（12px / 500），圖示在上、文字在下。三項是固定的——不新增衛教專用入口，也不保留獨立「首頁」入口。
+> **2026-08-23 修正**：原文寫「地平線太陽字標」，是舊版 Logo 概念的敘述；實際採用的是 2026-08-22 定案的 06 播報印記（實心圓點＋膠囊線條），程式碼先前也還在用一個臨時畫的太陽圖示佔位。已換成內嵌正式 SVG，顏色是圖示／Logo 專用的墨咖 `#33291F` ＋ 琥珀金 `#C1832E`，不是介面的深杏桃 primary——兩套配色範圍不同，見第八節。
+
+**`bottom-nav`** — 固定在底部的三項導覽：**提醒**、**裝備**、**更多**。高度 64px，背景 `{colors.canvas}`。
+
+> **2026-08-23 修正**：選取態原本規定「未選取文字 `{colors.muted}`、選取態 `{colors.primary}`」——是換色。但 Claude Design 的下游元件庫（`components/navigation/BottomNav.jsx`／`.prompt.md`）實際做的是**用形狀承載狀態，不換色**：選取態是圖示後面的奶油色藥丸底（`{colors.surface-card}`）加粗體（700）標籤，圖示與文字顏色（`{colors.body-strong}`）在任何狀態下都一樣，沒有頂部指示條。兩份文件曾經互相矛盾，使用者確認採用藥丸版，本節文字回寫為準。這也更符合本文件其他地方的一貫哲學——用形狀而非純色承載狀態（例如部位狀態用格數計量表，不單靠顏色）。
+
+圖示在上、文字在下，標籤使用 `{typography.nav-label}`（12px，未選取 400／選取 700）。三項是固定的——不新增衛教專用入口，也不保留獨立「首頁」入口。
 
 **`global-status-banner`** — 承載跨頁的系統狀態：「通知未開啟」「背景通知尚未完成」「目前離線」「背景通知已恢復」。背景 `{colors.surface-soft}`，圓角 `{rounded.md}`。這類狀態**永不阻擋**本機倒數與手動操作，因此樣式是提示而非警示——不使用 `{colors.error}` 底色。
 
