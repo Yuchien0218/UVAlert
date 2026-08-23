@@ -349,6 +349,13 @@ export interface ScheduledNotification {
 export interface NotificationPort {
   /** 平台是否具備 Notification 與 Service Worker。 */
   isSupported(): boolean;
+  /**
+   * 預先註冊 service worker。
+   *
+   * 不需要通知權限，也不排任何東西——只是讓 worker 在真正要顯示通知之前
+   * 就已就緒。等到期當下才註冊會多一次網路往返，失敗時通知會靜默遺失。
+   */
+  ensureReady(): Promise<void>;
   getPermission(): NotificationPermissionState;
   /** 已是 `granted`／`denied`／`unsupported` 時直接回傳現值，不重複詢問。 */
   requestPermission(): Promise<NotificationPermissionState>;

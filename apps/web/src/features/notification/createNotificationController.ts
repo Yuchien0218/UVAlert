@@ -82,6 +82,9 @@ export function createNotificationController(
     });
   }
 
+  // service worker 先就緒，避免到期當下才註冊而讓通知遺失。
+  void notifications.ensureReady();
+
   const stopWatching = watch(
     () => dependencies.currentSession.value?.sessionNextDueAt ?? null,
     () => {

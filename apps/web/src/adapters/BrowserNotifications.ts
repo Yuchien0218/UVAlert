@@ -82,6 +82,11 @@ export class BrowserNotifications implements NotificationPort {
     return this.#deps.isSupported();
   }
 
+  /** 預先註冊，讓到期當下不必等註冊完成。失敗時靜默略過。 */
+  async ensureReady(): Promise<void> {
+    await this.#deps.getRegistration();
+  }
+
   getPermission(): NotificationPermissionState {
     return this.#deps.getPermission();
   }
@@ -159,16 +164,27 @@ export class BrowserNotifications implements NotificationPort {
   }
 
   async #show(notification: ScheduledNotification): Promise<void> {
+    // 排程當下是 granted，但使用者可能在到期前於瀏覽器設定撤銷權限。
+    // 這裡必須重新確認，否則 showNotification 會丟例外。
+    if (this.getPermission() !== "granted") {
+      return;
+    }
+
     const registration = await this.#deps.getRegistration();
     if (registration === null) {
       return;
     }
 
-    await registration.showNotification(notification.title, {
-      body: notification.body,
-      // 同一個 id 的通知互相取代，避免補擦提醒在通知中心堆疊。
-      tag: notification.id,
-      data: { path: "/reminder" }
-    });
+    try {
+      await registration.showNotification(notification.title, {
+        body: notification.body,
+        // 同一個 id 的通知互相取代，避免補擦提醒在通知中心堆疊。
+        tag: notification.id,
+        data: { path: "/reminder" }
+      });
+    } catch {
+      // 通知是輔助功能。顯示失敗不該冒泡成 unhandled rejection，
+      // 更不該影響本機倒數——倒數才是使用者的最終真值。
+    }
   }
 }

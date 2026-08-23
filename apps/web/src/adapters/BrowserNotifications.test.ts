@@ -147,6 +147,43 @@ describe("BrowserNotifications", () => {
       expect(showNotification).not.toHaveBeenCalled();
     });
 
+    it("排程後權限被撤銷，到期時不顯示也不爆掉", async () => {
+      // 使用者可以在計時器等待期間到瀏覽器設定關掉通知。
+      // 沒有這道防線的話，showNotification 會丟例外並變成 unhandled rejection。
+      let permission: NotificationPermissionState = "granted";
+      const { adapter, showNotification } = createHarness({
+        getPermission: () => permission
+      });
+
+      await adapter.schedule({
+        id: "zone-forehead",
+        dueAt: minutesFromNow(10),
+        title: "該補擦了",
+        body: "額頭"
+      });
+
+      permission = "denied";
+      await vi.advanceTimersByTimeAsync(11 * 60_000);
+
+      expect(showNotification).not.toHaveBeenCalled();
+    });
+
+    it("showNotification 丟例外時不冒泡", async () => {
+      const { adapter, showNotification } = createHarness();
+      showNotification.mockRejectedValue(new Error("permission revoked"));
+
+      await expect(
+        adapter.schedule({
+          id: "zone-forehead",
+          dueAt: minutesFromNow(-1),
+          title: "該補擦了",
+          body: "額頭"
+        })
+      ).resolves.toBeUndefined();
+
+      expect(showNotification).toHaveBeenCalledOnce();
+    });
+
     it("registration 取不到時不顯示也不爆掉", async () => {
       const { adapter, showNotification } = createHarness({
         getRegistration: () => Promise.resolve(null)

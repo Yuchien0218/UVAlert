@@ -16,6 +16,7 @@ function createNotificationsStub(
 } {
   return {
     isSupported: () => true,
+    ensureReady: vi.fn().mockResolvedValue(undefined),
     getPermission: () => permission,
     requestPermission: vi.fn().mockResolvedValue("granted"),
     schedule: vi.fn().mockResolvedValue(undefined),
