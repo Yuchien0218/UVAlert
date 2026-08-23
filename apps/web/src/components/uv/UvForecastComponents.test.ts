@@ -3,7 +3,6 @@
 import { makeFiveDayUvForecast } from "@sunshield/test-fixtures";
 import { mount } from "@vue/test-utils";
 import { describe, expect, it } from "vitest";
-import EveningUvPrompt from "./EveningUvPrompt.vue";
 import FiveDayUvCard from "./FiveDayUvCard.vue";
 
 describe("FiveDayUvCard", () => {
@@ -45,25 +44,5 @@ describe("FiveDayUvCard", () => {
     expect(wrapper.text()).toContain("設定地區");
     expect(wrapper.text()).toContain("才能查看五日 UV 預報");
     expect(wrapper.findAll(".uv-day")).toHaveLength(0);
-  });
-});
-
-describe("EveningUvPrompt", () => {
-  it("摘要最高預報並提供查看與本晚關閉操作", async () => {
-    const wrapper = mount(EveningUvPrompt, {
-      props: {
-        forecast: makeFiveDayUvForecast()
-      }
-    });
-
-    expect(wrapper.text()).toContain("晚上先看接下來 5 天 UV");
-    expect(wrapper.text()).toContain("UVI 11（危險級）");
-
-    const buttons = wrapper.findAll("button");
-    await buttons[0]!.trigger("click");
-    await buttons[1]!.trigger("click");
-
-    expect(wrapper.emitted("view")).toHaveLength(1);
-    expect(wrapper.emitted("dismiss")).toHaveLength(1);
   });
 });

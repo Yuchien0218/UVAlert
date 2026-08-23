@@ -211,15 +211,17 @@ components:
     borderColor: "{colors.hairline}"
     rounded: "{rounded.lg}"
     padding: 20px
-  countdown-panel:
-    backgroundColor: "{colors.surface-dark}"
-    textColor: "{colors.on-dark}"
+  countdown-block:
+    backgroundColor: "{colors.canvas}"
+    textColor: "{colors.ink}"
     typography: "{typography-cjk.countdown}"
-    rounded: "{rounded.lg}"
-    padding: 24px
-  countdown-ring:
-    strokeColor: "{colors.accent-apricot}"
-    trackColor: "{colors.surface-dark-elevated}"
+  countdown-bar:
+    trackColor: "{colors.surface-card}"
+    fillColorTracking: "{colors.status-tracking}"
+    fillColorSoon: "{colors.status-soon}"
+    fillColorDue: "{colors.status-due}"
+    height: 8px
+    rounded: "{rounded.xs}"
   stat-figure:
     textColor: "{colors.ink}"
     typography: "{typography.readout}"
@@ -419,7 +421,7 @@ components:
 
 1. **暖象牙底色**（`{colors.canvas}`）— 預設頁面地板
 2. **杏桃奶油卡片**（`{colors.surface-card}`）— 裝備清單、衛教模組、更多頁入口卡
-3. **濃縮咖啡深色表面**（`{colors.surface-dark}`）— 倒數面板、資料區塊
+3. **濃縮咖啡深色表面**（`{colors.surface-dark}`）— 設定流程的步驟外框、產品標示編輯、五日預報的強調欄
 
 深色表面是產品露出「儀器感」的地方——倒數數值、狀態讀數。象牙與濃縮咖啡的對比就是頁面的節奏。
 
@@ -443,7 +445,7 @@ components:
 | `{colors.surface-soft}` | `#F7EDE1` | `hsl(33, 58%, 93%)` | 區塊分隔、衛教引言底、來源區塊 |
 | `{colors.surface-card}` | `#F0E2D1` | `hsl(33, 51%, 88%)` | 裝備卡、更多頁入口卡、衛教分類卡 |
 | `{colors.surface-cream-strong}` | `#EFD0BC` | `hsl(24, 61%, 84%)` | 最強暖光變體：已選取的情境選項、衛教首頁大卡片 |
-| `{colors.surface-dark}` | `#2E2925` | `hsl(27, 11%, 16%)` | 倒數面板。主要深色表面 |
+| `{colors.surface-dark}` | `#2E2925` | `hsl(27, 11%, 16%)` | 主要深色表面。2026-08-23 起不再用於首頁倒數，改用於設定流程外框與資料強調 |
 | `{colors.surface-dark-elevated}` | `#493732` | `hsl(13, 19%, 24%)` | 深色區塊內的控制項與進度環軌道 |
 | `{colors.surface-dark-soft}` | `#241F1D` | `hsl(17, 11%, 13%)` | 深色卡片內的資料區塊 |
 | `{colors.hairline}` | `#E7D8CF` | `hsl(22, 33%, 86%)` | 暖色表面上的 1px 邊框。邊框像一階高度差，不是墨線 |
@@ -494,7 +496,7 @@ components:
 
 - **60% 暖象牙**：`{colors.canvas}` 與 `{colors.surface-soft}`，頁面地板與閱讀區。
 - **20% 暖光表面**：`{colors.surface-card}` 與 `{colors.surface-cream-strong}`，裝備與衛教卡片。
-- **12% 濃縮咖啡**：`{colors.surface-dark}` 與其變體，倒數面板與資料區塊。
+- **12% 濃縮咖啡**：`{colors.surface-dark}` 與其變體，設定流程外框與資料強調區塊。
 - **6% 深杏桃行動色**：`{colors.primary}`，每個決策情境只有一個主要行動。
 - **2% 細節與狀態**：陽光杏桃、香檳金、腮紅、藕紫與風險色，只在語意明確處出現。
 
@@ -616,7 +618,7 @@ Noto Serif TC 是標題的唯一字型，沒有第二層自托管備援——載
 - **基礎單位**：4px。
 - **Token**：`{spacing.xxs}` 4px · `{spacing.xs}` 8px · `{spacing.sm}` 12px · `{spacing.md}` 16px · `{spacing.lg}` 20px · `{spacing.xl}` 24px · `{spacing.xxl}` 32px · `{spacing.section}` 40px。
 - **區塊間距**：`{spacing.xl}`（24px）是頁面內主要區塊的預設間隔；`{spacing.section}`（40px）用於語意上分開的大段落。
-- **卡片內距**：`{spacing.lg}`（20px）為預設；深色倒數面板與 bottom sheet 用 `{spacing.xl}`（24px）；狀態卡與清單項目用 `{spacing.md}`（16px）。
+- **卡片內距**：`{spacing.lg}`（20px）為預設；深色表面與 bottom sheet 用 `{spacing.xl}`（24px）；狀態卡與清單項目用 `{spacing.md}`（16px）。
 - **頁面左右留白**：行動端 16px、桌面 24px。
 
 這是行動優先的產品，間距尺規刻意比行銷網站緊湊——沒有 96px 的區塊節奏，因為單一畫面要在不捲動的情況下顯示倒數、狀態與下一步。
@@ -641,9 +643,13 @@ Noto Serif TC 是標題的唯一字型，沒有第二層自托管備援——載
 
 ### 提醒（核心）
 
-**`countdown-panel`** — 產品的核心。濃縮咖啡深色卡片（`{colors.surface-dark}`）承載倒數數值，數字使用 `{typography-cjk.countdown}`（64px / 600 / tabular-nums），文字 `{colors.on-dark}`。圓角 `{rounded.lg}`，內距 24px。這是整個 App 唯一的大型深色表面——它的視覺重量就是「這是最重要的東西」的訊號。
+**`countdown-block`** — 產品的核心。倒數數值直接放在暖象牙畫布上（`{colors.canvas}`），數字使用 `{typography-cjk.countdown}`（tabular-nums），文字 `{colors.ink}`。**不是卡片，沒有底色與邊框。**
 
-**`countdown-ring`** — 倒數進度環。進度筆觸 `{colors.accent-apricot}`，軌道 `{colors.surface-dark-elevated}`。即將到期時筆觸轉為 `{colors.status-soon}`，已到期轉為 `{colors.status-due}`——但顏色永遠搭配明確的文字標示（「即將到期」「該補擦了」），不單獨承擔資訊。
+> **2026-08-23 變更**：原本規定為濃縮咖啡深色卡片（`countdown-panel`）加進度環。wireframe 改為畫布上的平面版本，使用者裁決採用 wireframe。層級改由**字級**承擔——倒數數字是全頁最大的字，它的尺寸就是「這是最重要的東西」的訊號，不再依賴深色表面的對比。連帶影響見第七節與第十一節。
+
+**`countdown-bar`** — 倒數進度條。水平線性，高 8px，圓角 `{rounded.xs}`，軌道 `{colors.surface-card}`。填色隨狀態變化：追蹤中 `{colors.status-tracking}`、即將到期 `{colors.status-soon}`、已到期 `{colors.status-due}`——但顏色永遠搭配明確的文字標示（剩餘分鐘、部位名稱、預計時間），不單獨承擔資訊。
+
+沒有可信期限時**不畫進度條**，而不是畫 0%——空的進度條會被讀成「時間已經用完」。
 
 **`stat-figure`** — 資料讀數樣式。等寬字、`tabular-nums`、字重 600、負字距。用於倒數分鐘、UV 指數、時間戳記。`--display` 變體放大到 `clamp(3rem, 18vw, 4.75rem)` 供主倒數使用。
 
@@ -746,7 +752,7 @@ Noto Serif TC 是標題的唯一字型，沒有第二層自托管備援——載
 | 平面 | 無陰影、無邊框 | 頁面區塊、品牌列 |
 | 細邊框 | 1px `{colors.hairline}` | 輸入框、`app-card`、五日預報卡 |
 | 暖色卡片 | `{colors.surface-card}` 底、無陰影 | 裝備卡、更多頁入口卡、衛教分類卡 |
-| 深色表面 | `{colors.surface-dark}` 底、無陰影 | 倒數面板 |
+| 深色表面 | `{colors.surface-dark}` 底、無陰影 | （2026-08-23 起首頁倒數不再使用；保留給未來需要深色資料表面的場合） |
 | 浮層 | 極淡陰影 | bottom sheet 與浮動元素（`0 1px 3px rgba(20,20,19,0.08)`，罕用）|
 
 高度哲學是**色塊優先、陰影罕用**。深度主要來自象牙與濃縮咖啡的表面對比。
@@ -844,7 +850,9 @@ Noto Serif TC 是標題的唯一字型，沒有第二層自托管備援——載
 
 ### 深色模式：不做（已從程式碼移除）
 
-**本系統只有一套暖色亮色主題。** 理由是暖象牙 ＋ 濃縮咖啡的對比本身就是這個系統的層級機制——倒數面板之所以突出，是因為它是整頁唯一的深色表面。深色模式會讓這個對比失效，等於要重新設計一套層級語言。
+**本系統只有一套暖色亮色主題。** 整套色票——暖象牙地板、杏桃奶油卡片、濃縮咖啡強調面——是為單一亮色情境調出來的，深色模式等於要重新設計一套層級語言，而不是把顏色反轉。
+
+> **2026-08-23 註**：這條理由原本寫的是「倒數面板之所以突出，是因為它是整頁唯一的深色表面」。首頁倒數改為平面版本後（見第五節），那個例子不再成立，但結論不變——理由改以整體色票的單一情境設計為依據。
 
 2026-08-19 已移除舊 demo 版的深色模式實作，包含 `:root[data-theme]` 與 `prefers-color-scheme` token 組、`/settings/display` 路由與頁面、`AppearanceSettings` 元件、`useAppearance` composable、`createAppearanceController`、`toggleThemeWithReveal` helper，以及 `UserPreferencesV1Schema` 的 `appearance` 欄位（含 Supabase 同步驗證）。schema 版本維持 `user-preferences-v1`——Zod 預設 strip 未知欄位，舊資料含 `appearance` 也能正常解析，不需要遷移。
 
@@ -857,7 +865,7 @@ Noto Serif TC 是標題的唯一字型，沒有第二層自托管備援——載
 - 每一頁都錨定在暖象牙底色上。純白讀起來像通用工具軟體，暖色調是這個系統的差異點。
 - 所有標題使用襯線體（Noto Serif TC，單一字型負責中英文）。負字距不可省略。
 - 把 `{colors.primary}` 留給主 CTA。每個決策情境只有一個。
-- 倒數面板用濃縮咖啡深色表面。它的視覺重量就是「這是最重要的東西」的訊號。
+- 倒數數值用全頁最大的字級。它的尺寸就是「這是最重要的東西」的訊號（2026-08-23 起改由字級承擔，不再依賴深色面板）。
 - 狀態同時用色彩、圖示與文字表達。
 - 風險與狀態色搭配數值與中文標示一起出現。
 - 藕紫只用於已完成、安心的狀態。
@@ -917,7 +925,7 @@ Noto Serif TC 是標題的唯一字型，沒有第二層自托管備援——載
 
 ## 十四、迭代指引
 
-1. 一次專注一個元件。引用它的 YAML key（`{component.countdown-panel}`、`{component.status-card-due}`）。
+1. 一次專注一個元件。引用它的 YAML key（`{component.countdown-block}`、`{component.status-card-due}`）。
 2. 元件變體（`-active`、`-disabled`、`-selected`、`-focused`）在 `components:` 中各佔一個獨立條目。
 3. 到處使用 `{token.refs}`，不寫死 hex。
 4. 不記錄 hover。只定義預設與 Active／Pressed／Selected 狀態。

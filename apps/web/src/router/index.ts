@@ -153,6 +153,13 @@ export function createAppRouter(
         meta: { title: "地區設定" }
       },
       {
+        // 2026-08-23：首頁改版後五日預報從內嵌卡片改成連結，這裡是它的落點。
+        path: "/forecast",
+        name: "forecast",
+        component: () => import("../pages/ForecastPage.vue"),
+        meta: { title: "五日 UV 預報" }
+      },
+      {
         path: "/setup",
         redirect: { name: "setup-context" }
       },

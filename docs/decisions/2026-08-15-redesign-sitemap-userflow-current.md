@@ -158,8 +158,8 @@ PWA 內的文章保留下排導覽與收藏操作；一般瀏覽器、搜尋或�
 
 | 狀態 | 主要行動 | 實作 |
 | --- | --- | --- |
-| 夜間 ＋ 有 Session 進行中 | **結束提醒**（收工），不讓倒數跨夜 | `NightWindDownPrompt.vue`（含測試） |
-| 夜間 ＋ 沒有 Session | **無主要 CTA**，改以說明告知現在不需要防曬 | 次日預報提示 `EveningUvPrompt.vue` |
+| 夜間 ＋ 有 Session 進行中 | **結束提醒**（收工），不讓倒數跨夜 | 首頁 `HomeNightSession.vue` ＋ `SessionEndControl`；`/reminder` 另有 `NightWindDownPrompt.vue` |
+| 夜間 ＋ 沒有 Session | **無主要 CTA**，改以說明告知現在不需要防曬 | `HomePage.vue` 的夜間分支 ＋ `HomeNightNotice.vue` |
 
 第二種狀態刻意不提供開始倒數的主要按鈕——夜間 UV 為 0，不需要防曬。但必須：
 
