@@ -121,6 +121,21 @@ function getEyebrowText(): string {
       </div>
     </div>
 
+    <div
+      v-if="presentation.progressPercent !== null"
+      class="reminder-panel__track"
+      role="progressbar"
+      :aria-valuenow="presentation.progressPercent"
+      aria-valuemin="0"
+      aria-valuemax="100"
+      :aria-label="presentation.ariaLabel"
+    >
+      <div
+        class="reminder-panel__fill"
+        :style="{ width: `${presentation.progressPercent}%` }"
+      />
+    </div>
+
     <button
       class="button button--primary reminder-panel__action"
       type="button"
@@ -222,6 +237,25 @@ function getEyebrowText(): string {
 
 .reminder-panel--untimed .reminder-panel__body {
   margin: 0;
+}
+
+.reminder-panel__track {
+  height: 8px;
+  border-radius: 4px;
+  background: var(--color-surface-card);
+  overflow: hidden;
+}
+
+.reminder-panel__fill {
+  height: 100%;
+  background: var(--reminder-tone);
+  transition: width var(--motion-base, 240ms) cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .reminder-panel__fill {
+    transition: none;
+  }
 }
 
 .reminder-panel__action {
