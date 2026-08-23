@@ -44,25 +44,25 @@ colors:
 
 typography:
   display-xl:
-    fontFamily: "Cormorant Garamond, Noto Serif TC, Noto Serif CJK TC, ui-serif, serif"
+    fontFamily: "Noto Serif TC, Noto Serif CJK TC, ui-serif, serif"
     fontSize: 64px
     fontWeight: 400
     lineHeight: 1.05
     letterSpacing: -1.5px
   display-lg:
-    fontFamily: "Cormorant Garamond, Noto Serif TC, Noto Serif CJK TC, ui-serif, serif"
+    fontFamily: "Noto Serif TC, Noto Serif CJK TC, ui-serif, serif"
     fontSize: 48px
     fontWeight: 400
     lineHeight: 1.1
     letterSpacing: -1px
   display-md:
-    fontFamily: "Cormorant Garamond, Noto Serif TC, Noto Serif CJK TC, ui-serif, serif"
+    fontFamily: "Noto Serif TC, Noto Serif CJK TC, ui-serif, serif"
     fontSize: 36px
     fontWeight: 400
     lineHeight: 1.15
     letterSpacing: -0.5px
   display-sm:
-    fontFamily: "Cormorant Garamond, Noto Serif TC, Noto Serif CJK TC, ui-serif, serif"
+    fontFamily: "Noto Serif TC, Noto Serif CJK TC, ui-serif, serif"
     fontSize: 28px
     fontWeight: 400
     lineHeight: 1.2
@@ -189,8 +189,8 @@ components:
     typography: "{typography.title-md}"
   bottom-nav:
     backgroundColor: "{colors.canvas}"
-    textColor: "{colors.muted}"
-    activeTextColor: "{colors.primary}"
+    textColor: "{colors.body-strong}"
+    activePillColor: "{colors.surface-card}"
     typography: "{typography.nav-label}"
     height: 64px
   global-status-banner:
@@ -211,15 +211,17 @@ components:
     borderColor: "{colors.hairline}"
     rounded: "{rounded.lg}"
     padding: 20px
-  countdown-panel:
-    backgroundColor: "{colors.surface-dark}"
-    textColor: "{colors.on-dark}"
+  countdown-block:
+    backgroundColor: "{colors.canvas}"
+    textColor: "{colors.ink}"
     typography: "{typography-cjk.countdown}"
-    rounded: "{rounded.lg}"
-    padding: 24px
-  countdown-ring:
-    strokeColor: "{colors.accent-apricot}"
-    trackColor: "{colors.surface-dark-elevated}"
+  countdown-bar:
+    trackColor: "{colors.surface-card}"
+    fillColorTracking: "{colors.status-tracking}"
+    fillColorSoon: "{colors.status-soon}"
+    fillColorDue: "{colors.status-due}"
+    height: 8px
+    rounded: "{rounded.xs}"
   stat-figure:
     textColor: "{colors.ink}"
     typography: "{typography.readout}"
@@ -419,7 +421,7 @@ components:
 
 1. **暖象牙底色**（`{colors.canvas}`）— 預設頁面地板
 2. **杏桃奶油卡片**（`{colors.surface-card}`）— 裝備清單、衛教模組、更多頁入口卡
-3. **濃縮咖啡深色表面**（`{colors.surface-dark}`）— 倒數面板、資料區塊
+3. **濃縮咖啡深色表面**（`{colors.surface-dark}`）— 設定流程的步驟外框、產品標示編輯、五日預報的強調欄
 
 深色表面是產品露出「儀器感」的地方——倒數數值、狀態讀數。象牙與濃縮咖啡的對比就是頁面的節奏。
 
@@ -443,7 +445,7 @@ components:
 | `{colors.surface-soft}` | `#F7EDE1` | `hsl(33, 58%, 93%)` | 區塊分隔、衛教引言底、來源區塊 |
 | `{colors.surface-card}` | `#F0E2D1` | `hsl(33, 51%, 88%)` | 裝備卡、更多頁入口卡、衛教分類卡 |
 | `{colors.surface-cream-strong}` | `#EFD0BC` | `hsl(24, 61%, 84%)` | 最強暖光變體：已選取的情境選項、衛教首頁大卡片 |
-| `{colors.surface-dark}` | `#2E2925` | `hsl(27, 11%, 16%)` | 倒數面板。主要深色表面 |
+| `{colors.surface-dark}` | `#2E2925` | `hsl(27, 11%, 16%)` | 主要深色表面。2026-08-23 起不再用於首頁倒數，改用於設定流程外框與資料強調 |
 | `{colors.surface-dark-elevated}` | `#493732` | `hsl(13, 19%, 24%)` | 深色區塊內的控制項與進度環軌道 |
 | `{colors.surface-dark-soft}` | `#241F1D` | `hsl(17, 11%, 13%)` | 深色卡片內的資料區塊 |
 | `{colors.hairline}` | `#E7D8CF` | `hsl(22, 33%, 86%)` | 暖色表面上的 1px 邊框。邊框像一階高度差，不是墨線 |
@@ -494,7 +496,7 @@ components:
 
 - **60% 暖象牙**：`{colors.canvas}` 與 `{colors.surface-soft}`，頁面地板與閱讀區。
 - **20% 暖光表面**：`{colors.surface-card}` 與 `{colors.surface-cream-strong}`，裝備與衛教卡片。
-- **12% 濃縮咖啡**：`{colors.surface-dark}` 與其變體，倒數面板與資料區塊。
+- **12% 濃縮咖啡**：`{colors.surface-dark}` 與其變體，設定流程外框與資料強調區塊。
 - **6% 深杏桃行動色**：`{colors.primary}`，每個決策情境只有一個主要行動。
 - **2% 細節與狀態**：陽光杏桃、香檳金、腮紅、藕紫與風險色，只在語意明確處出現。
 
@@ -502,15 +504,27 @@ components:
 
 ### 字體家族
 
-系統以 **Cormorant Garamond**（或 **EB Garamond** 作為替代）為拉丁襯線標題字，搭配 **Noto Serif TC** 作為繁體中文標題字。**Inter** 為拉丁人文無襯線內文字，搭配 **Noto Sans TC** 處理繁體中文內文、導覽與 UI 標籤。**Noto Sans Mono CJK TC** 加系統等寬堆疊處理倒數數值與資料讀數。
+> **2026-08-23 標題字體定案（歷經兩次修正）**：標題字最終定為 **Noto Serif TC 單獨使用**，不搭配任何西文顯示字體。
+>
+> 過程記錄，避免同樣的提案再來一次：
+>
+> 1. 原本是 **Cormorant Garamond ＋ Noto Serif TC** 的中西配對。Claude Design 的下游元件庫指出這個配對「兩種襯線調性不統一」，並自行改成 **霞鶩文楷 TC**，還在自己的 CSS 註解裡標成「DESIGN.md §3」——但本文件從未有過那條規定，原文其實把霞鶩文楷 TC 限定在「引言或反思型提示」。
+> 2. 短暫套用霞鶩文楷 TC 後判定**不採用**：它是楷書／手寫傾向字，破壞了第一節指派給標題的任務。第一節原文：「暖象牙底色與**襯線標題**負責『成熟』，杏桃與陽光細節負責『親切』……全暖色會變成生活風格部落格」。標題改成手寫體後，全站沒有任何元素在承擔「成熟」，正好掉進那個失敗模式。第三節原本也已寫過霞鶩文楷 TC「個性太強不適合主要產品介面」。
+> 3. 但 Claude Design 對配對的**診斷是對的**：Cormorant 是細緻高對比的西文襯線體，與紮實低對比的 Noto Serif TC 並置時明顯細一截。
+>
+> 最終解法是**把西文顯示字整支移除**，而不是換一支。依據是實測資料：54 個衛教文章標題中只有 11 個含拉丁字母，且**全部**是嵌在中文句子裡的縮寫（UV、UVA、UVB、SPF、PA、UPF、UV400），**沒有任何一個是連續拉丁文字**——這個產品根本沒有「拉丁標題排版」這個工作。Noto Serif TC 自帶的拉丁字形本來就是為搭配它的中文而設計，縮寫與中文的視覺重量一致。
 
-備援堆疊：標題走 `Cormorant Garamond, Noto Serif TC, Noto Serif CJK TC, ui-serif, serif`，內文走 `Inter, Noto Sans TC, Noto Sans CJK TC, ui-sans-serif, sans-serif`。
+系統以 **Noto Serif TC** 為標題顯示字，中英文由同一支字型負責，字重僅 400。**Inter** 為拉丁人文無襯線內文字，搭配 **Noto Sans TC** 處理繁體中文內文、導覽與 UI 標籤。**Noto Sans Mono** 加系統等寬堆疊處理倒數數值與資料讀數——讀數只渲染純數字（見下方讀數字體備註），不需要 CJK 等寬覆蓋。
+
+**標題不再搭配任何西文顯示字體。** 要加西文襯線體之前，先回頭看上面那段實測資料：沒有連續拉丁標題，就沒有它的工作。
+
+備援堆疊：標題走 `Noto Serif TC, Noto Serif CJK TC, ui-serif, serif`，內文走 `Inter, Noto Sans TC, Noto Sans CJK TC, ui-sans-serif, sans-serif`。
 
 標題／內文的分工是編輯式的：
 
-- Cormorant Garamond ＋ Noto Serif TC（字重 400，負字距）→ h1、h2、h3、頁面主標
+- Noto Serif TC（字重 400，負字距）→ h1、h2、h3、頁面主標
 - Inter ＋ Noto Sans TC（字重 400–500）→ 內文、導覽、按鈕、說明、標籤
-- Noto Sans Mono CJK TC ＋ 系統等寬 → 倒數數值、UV 指數、時間戳記
+- Noto Sans Mono ＋ 系統等寬 → 倒數數值、UV 指數、時間戳記
 
 > **字標是例外（2026-08-22）**：Logo 的「防曬晴報員」五個字用**源泉圓體（GenSenRounded）TW 月版** Medium，不是襯線體。理由是字標緊鄰圖標，而圖標的造型語言是「實心圓點＋膠囊線條、端點全圓、**不使用尖角**」（第八節），明體的尖角收筆與它直接衝突。圓體保留黑體結構、只磨圓端點，呼應膠囊語言又不越過「不可愛化」那條線。
 >
@@ -524,7 +538,7 @@ components:
 
 | Token | 尺寸 | 字重 | 行高 | 字距 | 用途 |
 |---|---|---|---|---|---|
-| `{typography.display-xl}` | 64px | 400 | 1.05 | -1.5px | 衛教首頁主標 — Cormorant Garamond |
+| `{typography.display-xl}` | 64px | 400 | 1.05 | -1.5px | 衛教首頁主標 — Noto Serif TC |
 | `{typography.display-lg}` | 48px | 400 | 1.1 | -1px | 衛教分類頁主標 |
 | `{typography.display-md}` | 36px | 400 | 1.15 | -0.5px | 頁面標題（`page-heading__title`） |
 | `{typography.display-sm}` | 28px | 400 | 1.2 | -0.3px | 衛教首頁大卡片標題、區塊標題 |
@@ -541,15 +555,19 @@ components:
 
 ### 繁體中文字體建議
 
+**2026-08-23 更新**：標題改為單一字型負責中英文，不再需要「拉丁字體 ＋ 中文字體」兩件式配對——理由見上方標題字體定案。
+
 | 角色 | 建議字體 | 為什麼合適 | 授權 |
 |---|---|---|---|
-| 中文標題／衛教標題 | **Noto Serif TC** | 編輯感、安靜，與襯線主導的視覺聲音相容 | Google Fonts；SIL OFL |
+| 中英文標題（唯一） | **Noto Serif TC** | 編輯感、安靜；自帶的拉丁字形即為搭配其中文而設計，縮寫與中文重量一致 | Google Fonts；SIL OFL |
 | 中文內文／介面 | **Noto Sans TC** | 小尺寸清晰、字符涵蓋廣，適合標籤與長閱讀 | Google Fonts；SIL OFL |
 | 替代介面聲音 | **IBM Plex Sans TC** | 略偏技術與結構化；適合工具感更強的版本 | IBM Plex；SIL OFL |
-| 衛教限定點綴 | **LXGW WenKai TC** | 更溫暖personal；只用於引言或反思型提示，不用於倒數或導覽 | GitHub；SIL OFL |
-| CJK 等寬／倒數備援 | **Noto Sans Mono CJK TC** | 讓中文字在資料與等寬表面中保持對齊 | Noto；SIL OFL |
+| 若要更強的文氣（未採用） | **源流明體 GenRyuMin TW** | 思源宋體的 OFL 衍生版，比例偏傳統書籍排版；仍是明體，不帶手寫感 | GitHub；SIL OFL |
+| CJK 等寬／倒數備援 | **Noto Sans Mono** | 讓中文字在資料與等寬表面中保持對齊 | Noto；SIL OFL |
 
-預設配對是 **Noto Serif TC ＋ Noto Sans TC**。IBM Plex Sans TC 是替代方向，不要與 Inter 同時載入。LXGW WenKai TC 只用於小段編輯時刻，個性太強不適合主要產品介面。
+預設標題字是 **Noto Serif TC**，內文預設配對是 **Inter ＋ Noto Sans TC**。IBM Plex Sans TC 是替代介面方向，不要與 Inter 同時載入。
+
+**不要把霞鶩文楷 TC 用在標題。** 它是楷書／手寫傾向字，會讓標題失去第一節指派的「成熟」任務——這點 2026-08-23 已實際套用後驗證並退回，不需要再試一次。
 
 ### 中文間距覆寫
 
@@ -593,14 +611,14 @@ components:
 
 ### 替代字體註記
 
-Cormorant Garamond 不可用時，**EB Garamond** 字重 500 加 -0.02em 字距是最接近的開源近似。繁體中文標題使用 **Noto Serif TC**。無襯線首選 **Inter ＋ Noto Sans TC**；**IBM Plex Sans TC** 是工具感更強的替代方向。任何替代字體都要維持相同的人文比例。
+Noto Serif TC 是標題的唯一字型，沒有第二層自托管備援——載入失敗會落到系統襯線體（Windows 上是新細明體，品質差，見第十節）。若要更強的文氣，**源流明體 GenRyuMin TW** 是同為 OFL 的思源宋體衍生版，可作為風格對等的替換候選；但**不要換成楷體或圓體**。無襯線首選 **Inter ＋ Noto Sans TC**；**IBM Plex Sans TC** 是工具感更強的替代方向。
 
 ## 四、間距尺規（Spacing Scale）
 
 - **基礎單位**：4px。
 - **Token**：`{spacing.xxs}` 4px · `{spacing.xs}` 8px · `{spacing.sm}` 12px · `{spacing.md}` 16px · `{spacing.lg}` 20px · `{spacing.xl}` 24px · `{spacing.xxl}` 32px · `{spacing.section}` 40px。
 - **區塊間距**：`{spacing.xl}`（24px）是頁面內主要區塊的預設間隔；`{spacing.section}`（40px）用於語意上分開的大段落。
-- **卡片內距**：`{spacing.lg}`（20px）為預設；深色倒數面板與 bottom sheet 用 `{spacing.xl}`（24px）；狀態卡與清單項目用 `{spacing.md}`（16px）。
+- **卡片內距**：`{spacing.lg}`（20px）為預設；深色表面與 bottom sheet 用 `{spacing.xl}`（24px）；狀態卡與清單項目用 `{spacing.md}`（16px）。
 - **頁面左右留白**：行動端 16px、桌面 24px。
 
 這是行動優先的產品，間距尺規刻意比行銷網站緊湊——沒有 96px 的區塊節奏，因為單一畫面要在不捲動的情況下顯示倒數、狀態與下一步。
@@ -609,9 +627,17 @@ Cormorant Garamond 不可用時，**EB Garamond** 字重 500 加 -0.02em 字距�
 
 ### 外殼
 
-**`brand-header`** — 頁面頂部的品牌列，承載地平線太陽字標與「防曬晴報員」。背景 `{colors.canvas}`。不是導覽列——導覽在底部。
+**`brand-header`** — 頁面頂部的品牌列，承載正式橫式標誌（`docs/design/logo/uvalert-lockup-horizontal.svg`，播報印記圖標＋「防曬晴報員」字標）。背景 `{colors.canvas}`。不是導覽列——導覽在底部。
 
-**`bottom-nav`** — 固定在底部的三項導覽：**提醒**、**裝備**、**更多**。高度 64px，背景 `{colors.canvas}`，未選取文字 `{colors.muted}`，選取態 `{colors.primary}`。標籤使用 `{typography.nav-label}`（12px / 500），圖示在上、文字在下。三項是固定的——不新增衛教專用入口，也不保留獨立「首頁」入口。
+> **2026-08-23 使用者確認**：Logo 放大（原 1.75rem 高，改 2.5rem），並拿掉另外排版的英文副標「UVAlert」，只留正式橫式標誌本身。
+
+> **2026-08-23 修正**：原文寫「地平線太陽字標」，是舊版 Logo 概念的敘述；實際採用的是 2026-08-22 定案的 06 播報印記（實心圓點＋膠囊線條），程式碼先前也還在用一個臨時畫的太陽圖示佔位。已換成內嵌正式 SVG，顏色是圖示／Logo 專用的墨咖 `#33291F` ＋ 琥珀金 `#C1832E`，不是介面的深杏桃 primary——兩套配色範圍不同，見第八節。
+
+**`bottom-nav`** — 固定在底部的三項導覽：**提醒**、**裝備**、**更多**。高度 64px，背景 `{colors.canvas}`。
+
+> **2026-08-23 修正**：選取態原本規定「未選取文字 `{colors.muted}`、選取態 `{colors.primary}`」——是換色。但 Claude Design 的下游元件庫（`components/navigation/BottomNav.jsx`／`.prompt.md`）實際做的是**用形狀承載狀態，不換色**：選取態是圖示後面的奶油色藥丸底（`{colors.surface-card}`）加粗體（700）標籤，圖示與文字顏色（`{colors.body-strong}`）在任何狀態下都一樣，沒有頂部指示條。兩份文件曾經互相矛盾，使用者確認採用藥丸版，本節文字回寫為準。這也更符合本文件其他地方的一貫哲學——用形狀而非純色承載狀態（例如部位狀態用格數計量表，不單靠顏色）。
+
+圖示在上、文字在下，標籤使用 `{typography.nav-label}`（12px，未選取 400／選取 700）。三項是固定的——不新增衛教專用入口，也不保留獨立「首頁」入口。
 
 **`global-status-banner`** — 承載跨頁的系統狀態：「通知未開啟」「背景通知尚未完成」「目前離線」「背景通知已恢復」。背景 `{colors.surface-soft}`，圓角 `{rounded.md}`。這類狀態**永不阻擋**本機倒數與手動操作，因此樣式是提示而非警示——不使用 `{colors.error}` 底色。
 
@@ -625,9 +651,13 @@ Cormorant Garamond 不可用時，**EB Garamond** 字重 500 加 -0.02em 字距�
 
 ### 提醒（核心）
 
-**`countdown-panel`** — 產品的核心。濃縮咖啡深色卡片（`{colors.surface-dark}`）承載倒數數值，數字使用 `{typography-cjk.countdown}`（64px / 600 / tabular-nums），文字 `{colors.on-dark}`。圓角 `{rounded.lg}`，內距 24px。這是整個 App 唯一的大型深色表面——它的視覺重量就是「這是最重要的東西」的訊號。
+**`countdown-block`** — 產品的核心。倒數數值直接放在暖象牙畫布上（`{colors.canvas}`），數字使用 `{typography-cjk.countdown}`（tabular-nums），文字 `{colors.ink}`。**不是卡片，沒有底色與邊框。**
 
-**`countdown-ring`** — 倒數進度環。進度筆觸 `{colors.accent-apricot}`，軌道 `{colors.surface-dark-elevated}`。即將到期時筆觸轉為 `{colors.status-soon}`，已到期轉為 `{colors.status-due}`——但顏色永遠搭配明確的文字標示（「即將到期」「該補擦了」），不單獨承擔資訊。
+> **2026-08-23 變更**：原本規定為濃縮咖啡深色卡片（`countdown-panel`）加進度環。wireframe 改為畫布上的平面版本，使用者裁決採用 wireframe。層級改由**字級**承擔——倒數數字是全頁最大的字，它的尺寸就是「這是最重要的東西」的訊號，不再依賴深色表面的對比。連帶影響見第七節與第十一節。
+
+**`countdown-bar`** — 倒數進度條。水平線性，高 8px，圓角 `{rounded.xs}`，軌道 `{colors.surface-card}`。填色隨狀態變化：追蹤中 `{colors.status-tracking}`、即將到期 `{colors.status-soon}`、已到期 `{colors.status-due}`——但顏色永遠搭配明確的文字標示（剩餘分鐘、部位名稱、預計時間），不單獨承擔資訊。
+
+沒有可信期限時**不畫進度條**，而不是畫 0%——空的進度條會被讀成「時間已經用完」。
 
 **`stat-figure`** — 資料讀數樣式。等寬字、`tabular-nums`、字重 600、負字距。用於倒數分鐘、UV 指數、時間戳記。`--display` 變體放大到 `clamp(3rem, 18vw, 4.75rem)` 供主倒數使用。
 
@@ -730,7 +760,7 @@ Cormorant Garamond 不可用時，**EB Garamond** 字重 500 加 -0.02em 字距�
 | 平面 | 無陰影、無邊框 | 頁面區塊、品牌列 |
 | 細邊框 | 1px `{colors.hairline}` | 輸入框、`app-card`、五日預報卡 |
 | 暖色卡片 | `{colors.surface-card}` 底、無陰影 | 裝備卡、更多頁入口卡、衛教分類卡 |
-| 深色表面 | `{colors.surface-dark}` 底、無陰影 | 倒數面板 |
+| 深色表面 | `{colors.surface-dark}` 底、無陰影 | （2026-08-23 起首頁倒數不再使用；保留給未來需要深色資料表面的場合） |
 | 浮層 | 極淡陰影 | bottom sheet 與浮動元素（`0 1px 3px rgba(20,20,19,0.08)`，罕用）|
 
 高度哲學是**色塊優先、陰影罕用**。深度主要來自象牙與濃縮咖啡的表面對比。
@@ -798,13 +828,13 @@ Cormorant Garamond 不可用時，**EB Garamond** 字重 500 加 -0.02em 字距�
 
 ## 十、與程式碼的落差
 
-`README.md` 訂有「文件與程式碼衝突時以程式碼為準」的規則。**色彩已於 2026-08-22、字體已於 2026-08-23 套用完畢。** 目前剩下一項刻意的偏離：
+`README.md` 訂有「文件與程式碼衝突時以程式碼為準」的規則。**色彩已於 2026-08-22 套用完畢。字體有兩層：Cormorant Garamond 版本已於 2026-08-23 套用，但同日稍晚字體目標又改為霞鶩文楷 TC（見上方 2026-08-23 標題字體變更），程式碼尚未跟上新目標。** 目前有兩項刻意或暫時的偏離：
 
 | 項目 | 本文件（目標） | 實作 | 為什麼 |
 |---|---|---|---|
 | 中文內文字體 | Noto Sans TC | 系統黑體（PingFang TC／微軟正黑） | 內文會渲染使用者輸入的裝備名稱與備註。subset 會缺字，完整 CJK 字型是好幾 MB。詳見 `tools/fonts/README.md` |
 
-**已對齊的部分**：品牌與表面色票、行動色、文字色、標題襯線體、拉丁內文字體、圓角（含 4px xs）、UV 五級風險色、倒數五狀態語意色、內容最大寬度 752px、點擊目標 44px、間距基礎單位 4px、單一亮色主題、自訂圖示系統為唯一來源。
+**已對齊的部分**：品牌與表面色票、行動色、文字色、拉丁內文字體、**標題顯示字體**、圓角（含 4px xs）、UV 五級風險色、倒數五狀態語意色、內容最大寬度 752px、點擊目標 44px、間距基礎單位 4px、單一亮色主題、自訂圖示系統為唯一來源。
 
 > **2026-08-22 色彩套用**：`packages/ui/src/styles.css` 已改為本文件第二節的完整色票——品牌（primary／active／disabled ＋ 四個 accent）、表面（canvas 到三階深色）、文字與分隔線。語意別名一併重新指向：`--page-background` → canvas、`--text-primary` → ink、`--text-secondary` → muted、`--surface-primary` → surface-card、`--border-subtle` → hairline、`--focus-ring` → primary。`manifest.webmanifest` 的 `theme_color`／`background_color` 也換成 `#faf5ec`。
 >
@@ -816,7 +846,11 @@ Cormorant Garamond 不可用時，**EB Garamond** 字重 500 加 -0.02em 字距�
 >
 > 教訓：`.button` 已經帶 `min-height: var(--tap-target)`，**元件的 scoped CSS 不要再自己寫 `min-height`**——scoped 樣式的 attribute selector 特異性高於共用類別，一定會蓋過去。要調整尺寸請改 padding 或 token，不要覆寫 min-height。
 
-> **2026-08-23 字體套用**：新增 `--font-serif`，並在 `packages/ui/src/styles.css` 加全域規則讓 `h1`／`h2`／`h3` 走襯線體、字重 400。字型自行托管於 `apps/web/public/fonts/`，由 `node tools/fonts/build-fonts.mjs` 從完整字型 subset 產生（合計 748 KB，取代 26 MB 的原檔）。不使用 Google Fonts CDN——理由與其他取捨見 `tools/fonts/README.md`。
+> **2026-08-23 字體套用（初版，已被同日稍晚的霞鶩文楷 TC 版本取代）**：新增 `--font-serif`，並在 `packages/ui/src/styles.css` 加全域規則讓 `h1`／`h2`／`h3` 走 Cormorant Garamond ＋ Noto Serif TC、字重 400。字型自行托管於 `apps/web/public/fonts/`，由 `node tools/fonts/build-fonts.mjs` 從完整字型 subset 產生（合計 748 KB，取代 26 MB 的原檔）。不使用 Google Fonts CDN——理由與其他取捨見 `tools/fonts/README.md`。
+>
+> **2026-08-23 同日稍晚兩次修正，最終定案為 Noto Serif TC 單獨使用。** 中間曾短暫換成霞鶩文楷 TC（LXGW WenKai TC）並實際上線，隨後因手寫感破壞「襯線標題負責成熟」的角色分工而退回，完整過程見第三節「標題字體定案」。
+>
+> 最終實作：移除 Cormorant Garamond 與霞鶩文楷 TC，標題只留 Noto Serif TC subset，由它同時負責中英文。自托管政策不變。合計 **722 KB**（Cormorant 版本 748 KB、霞鶩文楷版本 1,033 KB），是三個版本裡最小的——因為不再需要第二支標題字型。
 >
 > **一併移除 31 個檔案裡的 36 條標題字重覆寫。** Noto Serif TC subset 只有 400 字重，元件若寫 `font-weight: 600` 會觸發瀏覽器合成假粗（faux bold），把筆畫無差別加厚，中文字會糊。這就是第十一節「不要把襯線標題加粗」的技術理由，不只是風格偏好。
 >
@@ -824,7 +858,9 @@ Cormorant Garamond 不可用時，**EB Garamond** 字重 500 加 -0.02em 字距�
 
 ### 深色模式：不做（已從程式碼移除）
 
-**本系統只有一套暖色亮色主題。** 理由是暖象牙 ＋ 濃縮咖啡的對比本身就是這個系統的層級機制——倒數面板之所以突出，是因為它是整頁唯一的深色表面。深色模式會讓這個對比失效，等於要重新設計一套層級語言。
+**本系統只有一套暖色亮色主題。** 整套色票——暖象牙地板、杏桃奶油卡片、濃縮咖啡強調面——是為單一亮色情境調出來的，深色模式等於要重新設計一套層級語言，而不是把顏色反轉。
+
+> **2026-08-23 註**：這條理由原本寫的是「倒數面板之所以突出，是因為它是整頁唯一的深色表面」。首頁倒數改為平面版本後（見第五節），那個例子不再成立，但結論不變——理由改以整體色票的單一情境設計為依據。
 
 2026-08-19 已移除舊 demo 版的深色模式實作，包含 `:root[data-theme]` 與 `prefers-color-scheme` token 組、`/settings/display` 路由與頁面、`AppearanceSettings` 元件、`useAppearance` composable、`createAppearanceController`、`toggleThemeWithReveal` helper，以及 `UserPreferencesV1Schema` 的 `appearance` 欄位（含 Supabase 同步驗證）。schema 版本維持 `user-preferences-v1`——Zod 預設 strip 未知欄位，舊資料含 `appearance` 也能正常解析，不需要遷移。
 
@@ -835,9 +871,9 @@ Cormorant Garamond 不可用時，**EB Garamond** 字重 500 加 -0.02em 字距�
 ### Do
 
 - 每一頁都錨定在暖象牙底色上。純白讀起來像通用工具軟體，暖色調是這個系統的差異點。
-- 所有標題使用襯線字。負字距不可省略。
+- 所有標題使用襯線體（Noto Serif TC，單一字型負責中英文）。負字距不可省略。
 - 把 `{colors.primary}` 留給主 CTA。每個決策情境只有一個。
-- 倒數面板用濃縮咖啡深色表面。它的視覺重量就是「這是最重要的東西」的訊號。
+- 倒數數值用全頁最大的字級。它的尺寸就是「這是最重要的東西」的訊號（2026-08-23 起改由字級承擔，不再依賴深色面板）。
 - 狀態同時用色彩、圖示與文字表達。
 - 風險與狀態色搭配數值與中文標示一起出現。
 - 藕紫只用於已完成、安心的狀態。
@@ -846,10 +882,10 @@ Cormorant Garamond 不可用時，**EB Garamond** 字重 500 加 -0.02em 字距�
 ### Don't
 
 - 不要用冷灰或純白當底色。
-- 不要把襯線標題加粗。字重 400 是規則。
+- 不要把襯線標題加粗。subset 只有字重 400，瀏覽器合成假粗會把筆畫無差別加厚。
 - 不要用鮮黃或飽和紅當品牌主色。深杏桃是行動色，高強度顏色留給風險狀態。
 - 不要把深杏桃到處塗。
-- 不要用無襯線字當標題。
+- 不要用無襯線字當標題，也不要用楷體或圓體（霞鶩文楷 TC 已於 2026-08-23 試過並退回，理由見第三節）。
 - 不要單靠顏色傳達狀態。
 - 不要用綠色暗示安全或防護完成。
 - 不要在提醒頁以外的頁面顯示迷你倒數或 Session 狀態——那會產生第二個提醒頁。
@@ -897,7 +933,7 @@ Cormorant Garamond 不可用時，**EB Garamond** 字重 500 加 -0.02em 字距�
 
 ## 十四、迭代指引
 
-1. 一次專注一個元件。引用它的 YAML key（`{component.countdown-panel}`、`{component.status-card-due}`）。
+1. 一次專注一個元件。引用它的 YAML key（`{component.countdown-block}`、`{component.status-card-due}`）。
 2. 元件變體（`-active`、`-disabled`、`-selected`、`-focused`）在 `components:` 中各佔一個獨立條目。
 3. 到處使用 `{token.refs}`，不寫死 hex。
 4. 不記錄 hover。只定義預設與 Active／Pressed／Selected 狀態。

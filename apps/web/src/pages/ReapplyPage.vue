@@ -83,7 +83,6 @@ function zoneNames(zoneIds: string[]): string {
 </template>
 
 <style scoped>
-.reapply-page { max-width: 46rem; margin-inline: auto; }
 .flow-heading { display: grid; gap: var(--space-5); }
 .flow-heading .button { justify-self: start; }
 .flow-heading h1, .flow-heading p { margin: 0; }

@@ -16,6 +16,16 @@ import {
 
 const allEntries = [
   {
+    to: "/settings/notifications",
+    icon: "more-notifications",
+    label: "通知設定",
+    /*
+     * 不寫「背景通知」——目前沒有背景通知，用這個詞會讓使用者以為
+     * 關掉瀏覽器仍收得到（Sitemap §4.3，2026-08-23 裁決）。
+     */
+    description: "開啟或管理補擦提醒通知。"
+  },
+  {
     to: "/education",
     icon: "more-education",
     label: "防曬衛教",

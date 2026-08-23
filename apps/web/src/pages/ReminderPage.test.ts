@@ -98,6 +98,18 @@ function mockServices(currentSession: SessionProjection | null): void {
       saveProduct: vi.fn(async () => true),
       stopProduct: vi.fn(async () => true),
       dispose: vi.fn()
+    },
+    uvForecast: {
+      phase: shallowReadonly(shallowRef("no_region")),
+      error: shallowReadonly(shallowRef(null)),
+      region: shallowReadonly(shallowRef(null)),
+      forecast: shallowReadonly(shallowRef(null)),
+      isEvening: shallowReadonly(shallowRef(false)),
+      showEveningPrompt: shallowReadonly(shallowRef(false)),
+      ensureLoaded: vi.fn(async () => undefined),
+      refresh: vi.fn(async () => undefined),
+      dismissEveningPrompt: vi.fn(),
+      dispose: vi.fn()
     }
   } as unknown as WebAppServices);
 }

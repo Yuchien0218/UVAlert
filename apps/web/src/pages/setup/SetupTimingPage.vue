@@ -4,6 +4,7 @@ import Icon from "../../components/icons/Icon.vue";
 import { computed, onMounted, shallowRef } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import ApplicationTimePicker from "../../components/setup/ApplicationTimePicker.vue";
+import GearFormSheet from "../../components/setup/GearFormSheet.vue";
 import ProtectionAdjustmentSheet from "../../components/setup/ProtectionAdjustmentSheet.vue";
 import QuickProtectionSummary from "../../components/setup/QuickProtectionSummary.vue";
 import SetupStepShell from "../../components/setup/SetupStepShell.vue";
@@ -37,6 +38,7 @@ const waterStart = shallowRef<WaterStartFormValue | null>(
 const localError = shallowRef<string | null>(null);
 const protectionNotice = shallowRef<string | null>(null);
 const showProtectionAdjustment = shallowRef(false);
+const showGearForm = shallowRef(false);
 const sunscreenClaim = shallowRef<ProductClaimAnswer | null>(null);
 
 /** 已經在裝備頁確認過標示的人不必再被問一次。 */
@@ -128,23 +130,22 @@ async function openProtectionAdjustment(): Promise<void> {
   protectionNotice.value = null;
 }
 
-async function goToProducts(): Promise<void> {
-  if (applicationTime.value !== null) {
-    const saved = await setup.savePendingTiming({
-      appliedAt: applicationTime.value,
-      waterStart: needsWaterStart.value ? waterStart.value : null
-    });
-    if (!saved) {
-      localError.value = "時間尚未儲存，請確認後再試一次。";
-      return;
-    }
-  }
+/**
+ * 開啟完整標示表單 sheet。
+ *
+ * 2026-08-23 修正：原本這裡會 `router.push` 到 `/products/new`，整頁
+ * 跳離設定流程，違反 Sitemap §2.2「不因產品標示……跳離到平行頁面；
+ * 必要的調整以同頁區塊或 sheet 呈現」。改成同頁開合 sheet，不再導頁，
+ * 因此也不需要先 `savePendingTiming` 保留塗抹時間——使用者從頭到尾
+ * 沒有離開這一頁。
+ */
+function openGearForm(): void {
+  showGearForm.value = true;
+}
 
-  // 裝備頁改為清單後，這條次要入口要直接落在新增表單上。
-  await router.push({
-    name: "product-new",
-    query: { returnTo: "/setup/timing" }
-  });
+function handleGearFormSaved(): void {
+  showGearForm.value = false;
+  sunscreenClaim.value = null;
 }
 
 function validateForm(): string | null {
@@ -181,7 +182,7 @@ onMounted(async () => {
   <SetupStepShell
     :step="2"
     :max-step="2"
-    title="塗抹時間與開始提醒"
+    title="塗抹時間與開始防曬提醒"
     description="確認實際塗抹時間；摘要中若有誤，可返回步驟 1 重新選擇。"
     back-to="/setup/context"
     :save-status="setup.saveStatus.value"
@@ -260,12 +261,18 @@ onMounted(async () => {
         v-if="needsSunscreenClaim"
         class="text-link"
         type="button"
-        @click="goToProducts"
+        @click="openGearForm"
       >
         改為填寫完整的防曬乳包裝標示
         <Icon name="tool-arrow-right" :size="20" />
       </button>
     </template>
+
+    <GearFormSheet
+      :open="showGearForm"
+      @close="showGearForm = false"
+      @saved="handleGearFormSaved"
+    />
 
     <!-- 摘要區塊（確認前必看，AC-34 Scenario B）-->
     <SetupCompletionSummary
@@ -285,7 +292,7 @@ onMounted(async () => {
         @click="submit"
       >
         <LoaderCircle v-if="setup.phase.value === 'submitting'" :size="18" class="spinner" />
-        {{ setup.phase.value === 'submitting' ? '開始提醒中…' : '開始提醒' }}
+        {{ setup.phase.value === 'submitting' ? '開始防曬提醒中…' : '開始防曬提醒' }}
       </button>
     </template>
 

@@ -284,16 +284,26 @@ function zoneNames(zoneIds: string[]): string {
         }}
       </p>
 
-      <button
-        class="button button--primary"
-        type="button"
-        :disabled="contextEvent.phase.value === 'submitting'"
-        @click="contextEvent.submit"
-      >
-        {{
-          contextEvent.phase.value === "submitting" ? "記錄中…" : "確認記錄"
-        }}
-      </button>
+      <div class="submit-actions">
+        <button
+          class="button button--primary"
+          type="button"
+          :disabled="contextEvent.phase.value === 'submitting'"
+          @click="contextEvent.submit"
+        >
+          {{
+            contextEvent.phase.value === "submitting" ? "記錄中…" : "確認記錄"
+          }}
+        </button>
+        <button
+          class="button button--quiet"
+          type="button"
+          :disabled="contextEvent.phase.value === 'submitting'"
+          @click="cancel"
+        >
+          取消
+        </button>
+      </div>
       <p class="safety-note">
         記錄只會更新受影響部位的提醒時間，不代表防護效果或你可以在陽光下停留的時間。
       </p>
@@ -306,6 +316,10 @@ function zoneNames(zoneIds: string[]): string {
   display: grid;
   gap: var(--space-4);
   padding: var(--space-5);
+}
+
+.success-panel {
+  border-top: 0.35rem solid var(--color-success);
 }
 
 h2,
@@ -392,5 +406,20 @@ p {
 .correction-note {
   color: var(--text-secondary);
   line-height: 1.7;
+}
+
+.submit-actions {
+  display: grid;
+  gap: var(--space-3);
+}
+
+.submit-actions .button {
+  width: 100%;
+}
+
+@media (min-width: 36rem) {
+  .submit-actions {
+    grid-template-columns: 1fr auto;
+  }
 }
 </style>

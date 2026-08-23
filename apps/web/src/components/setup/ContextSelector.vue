@@ -219,8 +219,14 @@ watch(
   cursor: pointer;
 }
 
+/*
+ * 2026-08-23 修正：原本只變邊框顏色（且用墨色 --text-primary，不是
+ * 行動色），跟 DESIGN.md 第五節牴觸——「已選取：surface-cream-strong 底、
+ * primary 邊框。選取態同時有底色與邊框變化，不只靠顏色」。
+ */
 .context-choice--selected {
-  border: 2px solid var(--text-primary);
+  border-color: var(--color-primary);
+  background: var(--color-surface-cream-strong);
 }
 
 .context-choice__input {
@@ -303,8 +309,8 @@ watch(
 }
 
 .context-group__option--selected {
-  border-color: var(--text-primary);
-  background: var(--page-background);
+  border-color: var(--color-primary);
+  background: var(--color-surface-cream-strong);
 }
 
 .context-group__option input {

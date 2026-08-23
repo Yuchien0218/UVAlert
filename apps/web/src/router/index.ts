@@ -55,6 +55,12 @@ export function createAppRouter(
         meta: { title: "編輯防曬裝備", hideNavigation: true }
       },
       {
+        path: "/products/:id",
+        name: "product-detail",
+        component: () => import("../pages/ProductDetailPage.vue"),
+        meta: { title: "防曬裝備詳情", hideNavigation: true }
+      },
+      {
         path: "/products",
         name: "products",
         component: () => import("../pages/ProductsPage.vue"),
@@ -141,6 +147,13 @@ export function createAppRouter(
         meta: { title: "登入與雲端資料" }
       },
       {
+        path: "/settings/notifications",
+        name: "settings-notifications",
+        component: () =>
+          import("../pages/settings/NotificationSettingsPage.vue"),
+        meta: { title: "通知設定" }
+      },
+      {
         path: "/install",
         name: "install",
         component: () => import("../pages/InstallPage.vue"),
@@ -151,6 +164,13 @@ export function createAppRouter(
         name: "region",
         component: () => import("../pages/RegionPage.vue"),
         meta: { title: "地區設定" }
+      },
+      {
+        // 2026-08-23：首頁改版後五日預報從內嵌卡片改成連結，這裡是它的落點。
+        path: "/forecast",
+        name: "forecast",
+        component: () => import("../pages/ForecastPage.vue"),
+        meta: { title: "五日 UV 預報" }
       },
       {
         path: "/setup",
@@ -175,7 +195,7 @@ export function createAppRouter(
         name: "setup-timing",
         component: () => import("../pages/setup/SetupTimingPage.vue"),
         meta: {
-          title: "塗抹時間與開始提醒",
+          title: "塗抹時間與開始防曬提醒",
           hideNavigation: true,
           requiresNoActiveSession: true,
           setupStep: "timing"

@@ -5,6 +5,7 @@ import type {
   ZoneProjection
 } from "@sunshield/contracts";
 import type { ConnectivityStatus } from "@sunshield/platform";
+import { calculateRemainingProgress } from "./homeReminderClockPresentation";
 
 export type ReminderTone = "timed" | "soon" | "due" | "untimed";
 
@@ -35,6 +36,8 @@ export interface ReminderPresentation {
   body: string;
   timeLabel: string;
   remainingMinutes: number | null;
+  /** 只有計時中的 tone 會有值；沒有可信起訖時間（例如標示等待）時為 null，此時不畫進度條而不是畫 0%。 */
+  progressPercent: number | null;
   actionLabel: string;
   actionKind: ActionKind;
   ariaLabel: string;
@@ -135,6 +138,17 @@ export function buildReminderPresentation(options: {
       primaryAction.actionAt,
       now
     );
+    const dueMs = primaryAction.actionAt === null
+      ? null
+      : Date.parse(primaryAction.actionAt);
+    const progressPercent =
+      dueMs !== null && Number.isFinite(dueMs)
+        ? calculateProgressPercent(
+            affectedZones[0]?.zoneTimerStartedAt ?? null,
+            dueMs,
+            now.getTime()
+          )
+        : null;
     if (isReminderActionDue(primaryAction, now)) {
       return buildReminderPresentation({
         primaryAction: {
@@ -157,6 +171,7 @@ export function buildReminderPresentation(options: {
         body: `晴報員提醒：可以準備補擦了。預計時間 ${absoluteTime}。`,
         timeLabel: absoluteTime,
         remainingMinutes,
+        progressPercent,
         actionLabel,
         actionKind: primaryAction.actionKind,
         ariaLabel: `${zoneLabel}快到補擦時間，預計 ${absoluteTime}。`,
@@ -175,6 +190,7 @@ export function buildReminderPresentation(options: {
       body: "請依產品標示使用，並搭配遮蔭、衣物、帽子或太陽眼鏡。",
       timeLabel: absoluteTime,
       remainingMinutes,
+      progressPercent,
       actionLabel,
       actionKind: primaryAction.actionKind,
       ariaLabel: `${zoneLabel}提醒進行中，約在${relativeTime}需要檢查，預計 ${absoluteTime}。`,
@@ -190,6 +206,7 @@ export function buildReminderPresentation(options: {
       body: "已到建議補擦時間。請依實際情況與產品標示，確認是否需要補擦。",
       timeLabel: "現在",
       remainingMinutes: 0,
+      progressPercent: 0,
       actionLabel,
       actionKind: primaryAction.actionKind,
       ariaLabel: `${zoneLabel}已到建議補擦時間。`,
@@ -224,6 +241,7 @@ function buildUntimedPresentation(options: {
   const base = {
     tone: "untimed" as const,
     remainingMinutes: null,
+    progressPercent: null,
     actionLabel,
     actionKind: primaryAction.actionKind,
     secondaryActions: [] as SecondaryAction[]
@@ -427,6 +445,15 @@ function formatRelativeTime(
   return remainder === 0
     ? `${hours} 小時後`
     : `${hours} 小時 ${remainder} 分鐘後`;
+}
+
+function calculateProgressPercent(
+  startedAt: string | null,
+  dueMs: number,
+  nowMs: number
+): number | null {
+  const progress = calculateRemainingProgress(startedAt, dueMs, nowMs);
+  return progress === null ? null : Math.round(progress * 100);
 }
 
 function calculateRemainingMinutes(

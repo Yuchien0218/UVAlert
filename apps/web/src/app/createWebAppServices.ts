@@ -11,6 +11,7 @@ import {
   SunshieldDatabase
 } from "@sunshield/persistence-web";
 import { BrowserConnectivity } from "../adapters/BrowserConnectivity";
+import { BrowserNotifications } from "../adapters/BrowserNotifications";
 import { BrowserLifecycle } from "../adapters/BrowserLifecycle";
 import { IndexedDbLocalIdentity } from "../adapters/IndexedDbLocalIdentity";
 import { BrowserUvForecastClient } from "../adapters/BrowserUvForecastClient";
@@ -80,6 +81,10 @@ import {
   type FeedbackController
 } from "../features/feedback/createFeedbackController";
 import type { CloudSyncPort } from "@sunshield/platform";
+import {
+  createNotificationController,
+  type NotificationController
+} from "../features/notification/createNotificationController";
 
 export interface WebAppServices {
   readonly boot: AppBootController;
@@ -97,6 +102,7 @@ export interface WebAppServices {
   readonly sync: SyncController;
   readonly cloudSync: CloudSyncPort;
   readonly feedback: FeedbackController;
+  readonly notifications: NotificationController;
   dispose(): void;
 }
 
@@ -115,6 +121,7 @@ export function createWebAppServices(
   const notifier = new BroadcastChannelNotifier();
   const connectivity = new BrowserConnectivity();
   const lifecycle = new BrowserLifecycle();
+  const notificationPort = new BrowserNotifications();
   const repository = new LocalSessionRepository({
     database,
     sourceContextId: contextId,
@@ -247,6 +254,11 @@ export function createWebAppServices(
     refreshUv: uvForecast.refresh
   });
 
+  const notifications = createNotificationController({
+    notifications: notificationPort,
+    currentSession: boot.currentSession
+  });
+
   return {
     boot,
     setup,
@@ -263,7 +275,9 @@ export function createWebAppServices(
     sync,
     cloudSync,
     feedback,
+    notifications,
     dispose(): void {
+      notifications.dispose();
       sync.dispose();
       feedback.dispose();
       auth.dispose();

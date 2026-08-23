@@ -308,3 +308,66 @@ export interface CrossContextPort {
     listener: (message: InvalidationMessage) => void
   ): () => void;
 }
+
+/**
+ * 通知權限狀態。
+ *
+ * `unsupported` 與 `denied` 不同：前者是平台沒有 Notification／Service Worker
+ * （例如非安全來源、或不支援的瀏覽器），使用者無從授權；後者是使用者拒絕過，
+ * 多數瀏覽器不允許程式再次詢問。兩者的畫面文案不一樣，所以不能合併。
+ */
+export type NotificationPermissionState =
+  | "granted"
+  | "denied"
+  | "default"
+  | "unsupported";
+
+export interface ScheduledNotification {
+  /**
+   * 排程識別碼。用同一個 id 重複排程會取代既有的那筆，
+   * 因此部位到期時間被重算時不需要先取消再排。
+   */
+  id: string;
+  /** 觸發的絕對時間（ISO 8601），與 `zoneDueAt` 同語意。 */
+  dueAt: string;
+  title: string;
+  body: string;
+}
+
+/**
+ * 本機通知端口。
+ *
+ * **這個端口只能在分頁存活時送達。** web 平台沒有可靠的背景排程機制——
+ * Notification Triggers（`TimestampTrigger`）已被 Chrome 放棄且從未進 stable，
+ * Safari 只支援 push 不支援本機通知。瀏覽器關閉或分頁被回收後，
+ * 排程一律不會觸發。完整的落差分析與取捨見
+ * `docs/decisions/2026-08-23-notification-decision.md`。
+ *
+ * 因此 `canDeliverInBackground()` 存在的目的，是讓畫面能誠實告訴使用者
+ * 「你仍然需要自己回來查看」，而不是讓它假裝提醒一定會到。
+ */
+export interface NotificationPort {
+  /** 平台是否具備 Notification 與 Service Worker。 */
+  isSupported(): boolean;
+  /**
+   * 預先註冊 service worker。
+   *
+   * 不需要通知權限，也不排任何東西——只是讓 worker 在真正要顯示通知之前
+   * 就已就緒。等到期當下才註冊會多一次網路往返，失敗時通知會靜默遺失。
+   */
+  ensureReady(): Promise<void>;
+  getPermission(): NotificationPermissionState;
+  /** 已是 `granted`／`denied`／`unsupported` 時直接回傳現值，不重複詢問。 */
+  requestPermission(): Promise<NotificationPermissionState>;
+  /** `dueAt` 已過期則立即觸發；權限不足時靜默略過，不丟例外。 */
+  schedule(notification: ScheduledNotification): Promise<void>;
+  cancel(id: string): Promise<void>;
+  cancelAll(): Promise<void>;
+  /**
+   * 排程能否在分頁關閉後送達。
+   *
+   * 目前所有 web 平台都是 `false`。保留這個方法是為了在未來接上
+   * Web Push 之後，畫面文案能自動跟著改，而不必回頭改判斷邏輯。
+   */
+  canDeliverInBackground(): boolean;
+}

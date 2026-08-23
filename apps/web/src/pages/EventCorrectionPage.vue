@@ -257,18 +257,28 @@ async function runVoid(): Promise<void> {
           }}
         </p>
 
-        <button
-          class="button button--primary"
-          type="button"
-          :disabled="eventCorrection.phase.value === 'submitting'"
-          @click="eventCorrection.submitReplace"
-        >
-          {{
-            eventCorrection.phase.value === "submitting"
-              ? "更正中…"
-              : "儲存更正"
-          }}
-        </button>
+        <div class="submit-actions">
+          <button
+            class="button button--primary"
+            type="button"
+            :disabled="eventCorrection.phase.value === 'submitting'"
+            @click="eventCorrection.submitReplace"
+          >
+            {{
+              eventCorrection.phase.value === "submitting"
+                ? "更正中…"
+                : "儲存更正"
+            }}
+          </button>
+          <button
+            class="button button--quiet"
+            type="button"
+            :disabled="eventCorrection.phase.value === 'submitting'"
+            @click="back"
+          >
+            取消
+          </button>
+        </div>
 
         <section class="app-card danger-zone">
           <h2>作廢這筆紀錄</h2>
@@ -315,6 +325,10 @@ async function runVoid(): Promise<void> {
   display: grid;
   gap: var(--space-4);
   padding: var(--space-5);
+}
+
+.success-panel {
+  border-top: 0.35rem solid var(--color-success);
 }
 
 h1,
@@ -380,5 +394,20 @@ p {
 .form-error {
   color: var(--color-due);
   line-height: 1.7;
+}
+
+.submit-actions {
+  display: grid;
+  gap: var(--space-3);
+}
+
+.submit-actions .button {
+  width: 100%;
+}
+
+@media (min-width: 36rem) {
+  .submit-actions {
+    grid-template-columns: 1fr auto;
+  }
 }
 </style>

@@ -16,8 +16,16 @@ import subsetFont from "subset-font";
  *
  * 字元來源分兩類，對應兩種字體角色：
  *
- *   - 襯線體（標題）只渲染固定字串——UI 標籤、衛教文章標題。使用者輸入
- *     （裝備名稱、備註）只出現在內文，不會進標題。所以 subset 是安全的。
+ *   - 標題字（Noto Serif TC）只渲染固定字串——UI 標籤、衛教文章標題。
+ *     使用者輸入（裝備名稱、備註）只出現在內文，不會進標題。所以 subset
+ *     是安全的。
+ *
+ *     標題不另外搭配拉丁顯示字體（2026-08-23 裁決）。實測 54 個文章標題
+ *     中只有 11 個含拉丁字母，且**全部**是嵌在中文句子裡的縮寫（UV、UVA、
+ *     SPF、PA、UPF），沒有任何一個是連續拉丁文字——也就是沒有「拉丁標題
+ *     排版」這個工作。Noto Serif TC 自帶的拉丁字形本來就是為了搭配它的
+ *     中文而設計，縮寫與中文的視覺重量一致；額外掛一支西文襯線體只會
+ *     造成粗細與對比不搭。
  *   - 無襯線體（內文）會渲染使用者輸入，任何 subset 都可能缺字。因此
  *     這裡只裁拉丁字元，中文內文交給系統黑體（PingFang TC／微軟正黑），
  *     兩者在台灣裝置上品質都不錯，且完全不需下載。
@@ -122,16 +130,10 @@ const isCjk = (character) => {
 
 const FONTS = [
   {
-    // 標題中文。字元集是全站掃描結果——標題不渲染使用者輸入，subset 安全。
+    // 標題。單一字型同時涵蓋中英文，不另外搭配拉丁顯示字體（理由見上）。
     source: "NotoSerifTC-Regular.otf",
     output: "noto-serif-tc-subset.woff2",
     scope: "all"
-  },
-  {
-    // 標題拉丁。CJK 字元交給上面那支，這裡只留拉丁與符號。
-    source: "CormorantGaramond-Regular.ttf",
-    output: "cormorant-garamond-subset.woff2",
-    scope: "latin"
   },
   {
     // 內文拉丁。中文內文會有使用者輸入，交給系統黑體，不在這裡 subset。

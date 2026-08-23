@@ -11,13 +11,14 @@ import ReminderEmptyState from "../components/reminder/ReminderEmptyState.vue";
 import ZoneStatusList from "../components/reminder/ZoneStatusList.vue";
 import SessionEndControl from "../components/session/SessionEndControl.vue";
 import NightWindDownPrompt from "../components/reminder/NightWindDownPrompt.vue";
+import FiveDayUvCard from "../components/uv/FiveDayUvCard.vue";
 import { useCurrentTime } from "../composables/useCurrentTime";
 import { getEveningCycleKey } from "../features/uv/uvForecastRules";
 
 /** 夜間收工提示的每晚一次記憶，比照 EVENING_UV_DISMISSAL_STORAGE_KEY。 */
 const NIGHT_PROMPT_DISMISSAL_KEY = "sunshield.night-wind-down-dismissed-cycle";
 
-const { boot, sessionControl, sessionEvents, productSettings } =
+const { boot, sessionControl, sessionEvents, productSettings, uvForecast } =
   useWebAppServices();
 const router = useRouter();
 
@@ -32,6 +33,7 @@ onMounted(() => {
     void sessionEvents.ensureLoaded();
     void productSettings.ensureLoaded();
   }
+  void uvForecast.ensureLoaded();
 });
 
 // Session 換人或剛建立時重讀事件流，否則清單會停留在上一個 Session。
@@ -269,6 +271,12 @@ function dismissNightPrompt(): void {
       <ZoneStatusList
         :primary-action="boot.currentSession.value.primaryAction"
         :zones="boot.currentSession.value.zones"
+      />
+      <FiveDayUvCard
+        :phase="uvForecast.phase.value"
+        :error="uvForecast.error.value"
+        :forecast="uvForecast.forecast.value"
+        @refresh="uvForecast.refresh"
       />
       <RecentEventsList
         ref="recentEventsRef"
