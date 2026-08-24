@@ -101,7 +101,7 @@ async function deleteCloudData(): Promise<void> {
 
     <p v-if="notice" class="notice notice--ok" role="status">{{ notice }}</p>
     <p v-if="error" class="notice notice--error" role="alert">{{ error }}</p>
-    <RouterLink class="text-link" to="/more">返回更多</RouterLink>
+    <RouterLink class="text-link text-link--muted" to="/more">返回更多</RouterLink>
   </div>
 </template>
 
@@ -115,5 +115,4 @@ async function deleteCloudData(): Promise<void> {
 .notice { margin: 0; line-height: 1.7; }
 .notice--ok { color: var(--text-secondary); }
 .notice--error { color: var(--color-due); }
-.text-link { color: var(--text-secondary); }
 </style>

@@ -77,7 +77,7 @@ async function runTest(): Promise<void> {
 <template>
   <div class="page-stack notification-settings-page">
     <header class="detail-header">
-      <button class="back-link" type="button" @click="goBack">
+      <button class="text-link" type="button" @click="goBack">
         <Icon name="tool-arrow-left" :size="20" />
         返回更多
       </button>
@@ -232,18 +232,6 @@ async function runTest(): Promise<void> {
 .notification-settings-page {
   display: grid;
   gap: var(--space-4);
-}
-
-.back-link {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--space-2);
-  padding: 0;
-  border: none;
-  background: transparent;
-  color: var(--color-primary);
-  font-size: var(--font-size-caption);
-  cursor: pointer;
 }
 
 .app-card {
