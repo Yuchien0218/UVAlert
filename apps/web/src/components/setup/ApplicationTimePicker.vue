@@ -54,7 +54,7 @@ function selectQuick(minutesAgo: number): void {
       <button
         v-for="option in quickOptions"
         :key="option.minutesAgo"
-        class="time-option app-card"
+        class="time-option option-surface"
         :class="{
           'option-selected': selectedQuick === option.minutesAgo
         }"

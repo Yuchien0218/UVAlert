@@ -125,7 +125,7 @@ function zoneNames(zoneIds: string[]): string {
           <button
             v-for="choice in contextEvent.availableChoices.value"
             :key="choice.kind"
-            class="kind-option app-card"
+            class="kind-option option-surface"
             :class="{
               'option-selected': contextEvent.selectedKind.value === choice.kind
             }"

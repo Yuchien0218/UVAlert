@@ -72,7 +72,7 @@ watch(
     <label
       v-for="option in outdoorOptions"
       :key="option.value"
-      class="context-choice app-card"
+      class="context-choice option-surface"
       :class="{ 'option-selected': selectedContext === option.value }"
     >
       <input
@@ -118,7 +118,7 @@ watch(
         <label
           v-for="option in indoorOptions"
           :key="option.value"
-          class="context-group__option app-card"
+          class="context-group__option option-surface"
           :class="{ 'option-selected': selectedContext === option.value }"
         >
           <input
@@ -164,7 +164,7 @@ watch(
         <label
           v-for="option in waterOptions"
           :key="option.value"
-          class="context-group__option app-card"
+          class="context-group__option option-surface"
           :class="{ 'option-selected': selectedContext === option.value }"
         >
           <input

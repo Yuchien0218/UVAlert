@@ -355,6 +355,29 @@ button.text-link {
  * 沒有樣式。各元件的版面（padding、border-radius、layout）保留在
  * 各自的 scoped style，這裡只統一「選中長怎樣」。
  */
+/*
+ * 可點選選項的**靜態**外觀（2026-08-24 使用者指定）：實心底、看不見邊框。
+ *
+ * 邊框顏色刻意跟底色一樣——看起來沒有邊框，但仍佔 1px，所以選取時把
+ * border-color 換成 primary 不會造成 1px 的版面位移（`.time-option`
+ * 原本選取改 2px 就有這個問題）。
+ *
+ * 底色用 hairline 這個線條色當填色是刻意的：它就是使用者指定的那個灰，
+ * 而且比卡片底 surface-soft 深一階，選項因此讀起來是「卡片裡可以按的
+ * 區塊」，不是又一張卡片。
+ */
+.option-surface,
+.choice-grid label {
+  border: 1px solid var(--color-hairline);
+  background: var(--color-hairline);
+}
+
+/* hover 要跟靜態有差別，否則按下去前沒有任何回饋。 */
+.option-surface:hover,
+.choice-grid label:hover {
+  background: color-mix(in srgb, var(--color-hairline) 88%, var(--color-ink));
+}
+
 .option-selected,
 .choice-grid label:has(input:checked) {
   border-color: var(--color-primary);
@@ -419,6 +442,7 @@ button.text-link {
   grid-template-columns: minmax(0, 1fr);
 }
 
+/* 版面只留在這裡；底色與邊框由上方的 .option-surface 那組負責。 */
 .choice-grid label {
   display: grid;
   min-height: var(--tap-target);
@@ -426,16 +450,11 @@ button.text-link {
   align-items: center;
   gap: var(--space-3);
   padding: var(--space-3);
-  border: 1px solid var(--border-subtle);
   border-radius: var(--radius-sm);
   cursor: pointer;
   transition: background-color var(--duration-fast) var(--ease-out),
               color var(--duration-fast) var(--ease-out),
               border-color var(--duration-fast) var(--ease-out);
-}
-
-.choice-grid label:hover {
-  background-color: var(--border-subtle);
 }
 
 .choice-grid label:active {
