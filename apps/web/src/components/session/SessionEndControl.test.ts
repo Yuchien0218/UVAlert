@@ -14,14 +14,19 @@ describe("SessionEndControl", () => {
       }
     });
 
-    const trigger = getButton(wrapper, "停止本次提醒");
-    expect(trigger.classes()).toContain("text-link");
-    expect(wrapper.find('[role="region"]').exists()).toBe(false);
+    /*
+     * 2026-08-24：觸發器從「停止本次提醒」文字連結改成右上角的小叉叉
+     * （減輕畫面份量），確認從內嵌區塊改成彈窗，role 因此由 region
+     * 改成 dialog。確認文案本身沒變。
+     */
+    const trigger = wrapper.get(".icon-button");
+    expect(trigger.attributes("aria-label")).toBe("結束這次提醒");
+    expect(wrapper.find('[role="dialog"]').exists()).toBe(false);
 
     await trigger.trigger("click");
 
-    const confirmation = wrapper.get('[role="region"]');
-    expect(confirmation.classes()).not.toContain("app-card");
+    const confirmation = wrapper.get('[role="dialog"]');
+    expect(confirmation.attributes("aria-modal")).toBe("true");
     expect(
       confirmation.get("p.session-end__confirm-title").text()
     ).toBe("要結束這次提醒嗎？");
@@ -35,7 +40,7 @@ describe("SessionEndControl", () => {
 
     await getButton(wrapper, "取消").trigger("click");
 
-    expect(wrapper.find('[role="region"]').exists()).toBe(false);
+    expect(wrapper.find('[role="dialog"]').exists()).toBe(false);
     expect(wrapper.emitted("confirm")).toBeUndefined();
     wrapper.unmount();
   });
@@ -48,7 +53,7 @@ describe("SessionEndControl", () => {
       }
     });
 
-    await getButton(wrapper, "停止本次提醒").trigger("click");
+    await wrapper.get(".icon-button").trigger("click");
     await getButton(wrapper, "結束本次提醒").trigger("click");
 
     expect(wrapper.emitted("confirm")).toEqual([[]]);
@@ -61,7 +66,7 @@ describe("SessionEndControl", () => {
         error: null
       }
     });
-    await getButton(wrapper, "停止本次提醒").trigger("click");
+    await wrapper.get(".icon-button").trigger("click");
     await wrapper.setProps({
       phase: "ending",
       error: null

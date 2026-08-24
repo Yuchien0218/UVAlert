@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { nextTick, shallowRef, useTemplateRef } from "vue";
+import Icon from "../icons/Icon.vue";
 import type {
   SessionEndError,
   SessionEndPhase
@@ -59,29 +60,31 @@ function getErrorMessage(error: SessionEndError): string {
 </script>
 
 <template>
-  <section class="session-end" aria-labelledby="session-end-title">
-    <h2 id="session-end-title" class="session-end__title">
-      提醒控制
-    </h2>
-
-    <div v-if="!isConfirming" class="session-end__body">
-      <p class="session-end__summary">
-        不再需要這次倒數時，可以手動停止；既有裝備與紀錄仍會保留。
-      </p>
-      <button
-        ref="stopButton"
-        class="text-link session-end__trigger"
-        type="button"
-        @click="openConfirmation"
-      >
-        停止本次提醒
-      </button>
-    </div>
+  <!--
+    2026-08-24 使用者裁決：原本是「提醒控制」整個區塊（標題＋說明＋
+    「停止本次提醒」連結），佔掉不少版面。改成右上角一顆小叉叉以減輕
+    畫面份量，確認改用彈窗呈現。
+  -->
+  <div class="session-end">
+    <button
+      ref="stopButton"
+      class="icon-button"
+      type="button"
+      aria-label="結束這次提醒"
+      @click="openConfirmation"
+    >
+      <Icon name="tool-close" :size="24" />
+    </button>
 
     <div
-      v-else
+      v-if="isConfirming"
+      class="session-end__backdrop"
+      @click.self="cancelConfirmation"
+    >
+    <div
       class="session-end__confirmation"
-      role="region"
+      role="dialog"
+      aria-modal="true"
       aria-labelledby="session-end-confirm-title"
       aria-describedby="session-end-confirm-body"
       @keydown.esc="cancelConfirmation"
@@ -125,49 +128,45 @@ function getErrorMessage(error: SessionEndError): string {
         </button>
       </div>
     </div>
-  </section>
+    </div>
+  </div>
 </template>
 
 <style scoped>
+/* 只剩右上角那顆叉叉，靠 justify-self 貼齊 page-stack 的右緣。 */
 .session-end {
-  display: grid;
-  gap: var(--space-3);
-  padding-top: var(--space-5);
-  border-top: 1px solid var(--border-subtle);
+  justify-self: end;
 }
 
-.session-end__title {
-  margin: 0;
-  font-size: var(--font-size-title);
-}
-
-.session-end__body {
-  display: grid;
-  gap: var(--space-3);
-}
-
-.session-end__summary,
 .session-end__confirm-body {
   margin: 0;
   color: var(--text-secondary);
   line-height: 1.7;
 }
 
-.session-end__trigger {
-  width: fit-content;
-  padding: var(--space-3) var(--space-4);
-  border-color: var(--border-subtle);
-  background: var(--surface-primary);
-  color: var(--text-primary);
-  font-weight: 500;
+/*
+ * 確認彈窗。沿用兩個 sheet 的遮罩做法（rgb(0 0 0 / 42%)），面板用
+ * --surface-overlay——那是**不透明**的表面，浮在內容上必須遮得住背後
+ * （半透明的 --surface-primary 會讓底下文字透出來，2026-08-24 踩過）。
+ */
+.session-end__backdrop {
+  position: fixed;
+  z-index: 100;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: var(--space-5);
+  background: rgb(0 0 0 / 42%);
 }
 
 .session-end__confirmation {
   display: grid;
   gap: var(--space-3);
-  padding-top: var(--space-3);
-  border: 0;
-  box-shadow: none;
+  width: min(100%, 24rem);
+  padding: var(--space-5);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  background: var(--surface-overlay);
 }
 
 /*

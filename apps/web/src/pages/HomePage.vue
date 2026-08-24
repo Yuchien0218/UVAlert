@@ -279,14 +279,14 @@ function handleEndSession(): void {
 
     <!-- 夜間＋提醒進行中：主要行動是結束提醒，不是補擦。 -->
     <template v-else-if="hasSession && isNight">
-      <HomeNightSession :session="session!" />
-
       <SessionEndControl
         :phase="sessionControl.endPhase.value"
         :error="sessionControl.endError.value"
         @confirm="handleEndSession"
         @reset-error="sessionControl.clearEndError"
       />
+
+      <HomeNightSession :session="session!" />
 
       <!-- 夜間也看得到最近紀錄；原本是連到 /reminder，該頁已併入本頁。 -->
       <RecentEventsList
@@ -301,6 +301,17 @@ function handleEndSession(): void {
 
     <!-- 白天＋提醒進行中。 -->
     <template v-else-if="hasSession">
+      <!--
+        2026-08-24：白天也要能結束提醒。`/reminder` 併入本頁時漏掉了——
+        那頁本來一直有結束控制，白天分支沒補上等於白天沒辦法結束。
+      -->
+      <SessionEndControl
+        :phase="sessionControl.endPhase.value"
+        :error="sessionControl.endError.value"
+        @confirm="handleEndSession"
+        @reset-error="sessionControl.clearEndError"
+      />
+
       <HomeCountdown
         v-if="clockPresentation !== null"
         :presentation="clockPresentation"

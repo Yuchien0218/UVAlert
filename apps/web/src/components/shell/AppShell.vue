@@ -13,35 +13,6 @@ const navigationVisible = computed(
   () => route.meta.hideNavigation !== true
 );
 
-type HeaderTone = "tracking" | "soon" | "due" | null;
-
-// 掃過目前 session 所有部位的狀態，取「最高急迫度」給頁首用。
-// due > soon > tracking，跟 ZoneStatusList.vue 的 tone 對應邏輯一致，
-// 兩處如果之後要調整優先順序，記得一起改。
-const highestUrgencyTone = computed<HeaderTone>(() => {
-  const session = boot.currentSession.value;
-  if (session === null) return null;
-
-  let hasSoon = false;
-  let hasTracking = false;
-
-  for (const zone of session.zones) {
-    if (zone.timingStatus === "reapply_due") {
-      return "due";
-    }
-    if (zone.timingStatus === "reapply_soon") {
-      hasSoon = true;
-    }
-    if (zone.timingStatus === "tracking") {
-      hasTracking = true;
-    }
-  }
-
-  if (hasSoon) return "soon";
-  if (hasTracking) return "tracking";
-  return null;
-});
-
 /**
  * 頁首右上角的 UV 指數（2026-08-24 使用者裁決，取代原本的「本機提醒」）。
  *
@@ -71,7 +42,6 @@ watch(
     :class="{ 'app-shell--with-navigation': navigationVisible }"
   >
     <BrandHeader
-      :tone="highestUrgencyTone"
       :region-name="uvForecast.region.value?.displayName ?? null"
       :uv-risk-level="headerUvDay?.riskLevel ?? null"
     />

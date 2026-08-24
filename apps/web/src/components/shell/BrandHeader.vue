@@ -5,15 +5,6 @@ import type { UvRiskLevel } from "@sunshield/contracts";
 import { getUvRiskLevelLabel } from "../../features/uv/uvForecastRules";
 
 interface Props {
-  /**
-   * 反映目前所有提醒裡「最高急迫度」的狀態，由父層（通常是讀取所有
-   * session/zone 狀態的地方）算出來傳進來。null／未傳 = 沒有進行中的
-   * Logo 維持中性色；提醒狀態由文字與狀態點表達。
-   *
-   * 2026-08-24 起這只是**沒有地區時的退路**——有地區與預報時，右上角改
-   * 顯示 UV 指數（見下）。
-   */
-  tone?: "tracking" | "soon" | "due" | null;
   /** 目前地區名稱。與 riskLevel 同時有值時，右上角才顯示 UV。 */
   regionName?: string | null;
   /** 要顯示的 UV 風險等級（白天今日、夜間明日，由父層決定）。 */
@@ -21,7 +12,6 @@ interface Props {
 }
 
 const props = withDefaults(defineProps<Props>(), {
-  tone: null,
   regionName: null,
   uvRiskLevel: null
 });
@@ -30,8 +20,13 @@ const props = withDefaults(defineProps<Props>(), {
  * 2026-08-24 使用者裁決：右上角從「本機提醒」改成顯示紫外線指數，
  * 例如「臺中市 低量級」，文字顏色跟著風險等級走，點下去到 /forecast。
  *
- * 沒有設定地區（或預報還沒讀到）就沒有 UV 可顯示，這時退回原本的提醒
- * 狀態文字——那是本來就有的資訊，不會變成空白。
+ * 沒有 UV 可顯示時（沒設定地區，或預報讀不到）改顯示「前往地區設定」，
+ * 連到 /region——那是唯一能讓使用者自己解決的動作，比留一句沒有出口的
+ * 狀態文字有用。
+ *
+ * 2026-08-24 一併移除原本的 tone／狀態點（提醒進行中／快到補擦時間／
+ * 建議現在補擦）。那組資訊現在整份都在首頁看得到（倒數、部位狀態清單），
+ * 頁首再放一次只是重複，還會跟 UV 搶同一個位置。
  */
 const showUv = computed(
   () => props.regionName !== null && props.uvRiskLevel !== null
@@ -42,23 +37,6 @@ const uvLabel = computed(() =>
     ? null
     : `${props.regionName} ${getUvRiskLevelLabel(props.uvRiskLevel)}`
 );
-
-// 狀態點的顏色不能是唯一的狀態載體，否則對色覺障礙或在強光下看不出
-// 色差的使用者等於沒有這個資訊。文字跟著 tone 走，色彩只是強化；Logo
-// 不再跟隨提醒狀態變色，保留中性外觀供後續品牌重新設計。
-// 這裡的字串刻意與 ZoneStatusList.vue 的狀態標籤一致，不另創說法。
-const contextLabel = computed(() => {
-  switch (props.tone) {
-    case "tracking":
-      return "提醒進行中";
-    case "soon":
-      return "快到補擦時間";
-    case "due":
-      return "建議現在補擦";
-    case null:
-      return "本機提醒";
-  }
-});
 </script>
 
 <template>
@@ -125,14 +103,9 @@ const contextLabel = computed(() => {
       {{ uvLabel }}
     </RouterLink>
 
-    <div
-      v-else
-      class="brand-header__context"
-      :class="tone ? `brand-header__context--${tone}` : undefined"
-    >
-      <span class="brand-header__status-dot" aria-hidden="true" />
-      {{ contextLabel }}
-    </div>
+    <RouterLink v-else class="brand-header__set-region" to="/region">
+      前往地區設定
+    </RouterLink>
   </header>
 </template>
 
@@ -162,13 +135,15 @@ const contextLabel = computed(() => {
   flex: 0 0 auto;
 }
 
-.brand-header__context {
+/* 沒有 UV 可顯示時的出口，樣式跟 UV 一致，只是不帶風險色。 */
+.brand-header__set-region {
   display: inline-flex;
   align-items: center;
-  gap: var(--space-2);
+  padding: var(--space-3) 0;
   color: var(--text-secondary);
   font-size: var(--font-size-caption);
   font-weight: 500;
+  text-decoration: none;
 }
 
 /*
@@ -209,23 +184,4 @@ const contextLabel = computed(() => {
   color: var(--color-uvi-extreme);
 }
 
-.brand-header__status-dot {
-  width: 0.45rem;
-  height: 0.45rem;
-  border-radius: 50%;
-  background: var(--text-secondary);
-  transition: background-color 0.2s ease;
-}
-
-.brand-header__context--tracking .brand-header__status-dot {
-  background: var(--color-tracking);
-}
-
-.brand-header__context--soon .brand-header__status-dot {
-  background: var(--color-soon);
-}
-
-.brand-header__context--due .brand-header__status-dot {
-  background: var(--color-due);
-}
 </style>
