@@ -1,12 +1,19 @@
 <script setup lang="ts">
-import { computed, shallowRef } from "vue";
+import { computed } from "vue";
+
+/**
+ * 塗抹時間只提供四個相對時間快選。
+ *
+ * 2026-08-24 使用者裁決：移除自訂時間（datetime-local）與每個選項下方的
+ * 絕對時刻。這頁的第一考量是「當計時器用」，選項愈少、文字愈少愈好。
+ *
+ * **已知取捨**：超過一小時前塗抹的情況現在無法在設定時記錄，只能選「1
+ * 小時前」。若之後回報這是問題，再考慮加回自訂時間或延長快選範圍。
+ */
 
 const value = defineModel<string | null>({ required: true });
 
 const referenceNow = new Date();
-const customValue = shallowRef(
-  value.value === null ? "" : toLocalInputValue(new Date(value.value))
-);
 
 const quickOptions = [
   { label: "剛剛", figure: null, suffix: null, minutesAgo: 0 },
@@ -30,38 +37,9 @@ const selectedQuick = computed(() => {
 });
 
 function selectQuick(minutesAgo: number): void {
-  const selected = new Date(
+  value.value = new Date(
     referenceNow.getTime() - minutesAgo * 60_000
-  );
-  value.value = selected.toISOString();
-  customValue.value = toLocalInputValue(selected);
-}
-
-function selectCustom(): void {
-  if (customValue.value === "") {
-    value.value = null;
-    return;
-  }
-  const selected = new Date(customValue.value);
-  value.value = Number.isNaN(selected.getTime())
-    ? null
-    : selected.toISOString();
-}
-
-function formatAbsolute(minutesAgo: number): string {
-  return new Intl.DateTimeFormat("zh-TW", {
-    hour: "2-digit",
-    minute: "2-digit"
-  }).format(
-    new Date(referenceNow.getTime() - minutesAgo * 60_000)
-  );
-}
-
-function toLocalInputValue(date: Date): string {
-  const offsetMs = date.getTimezoneOffset() * 60_000;
-  return new Date(date.getTime() - offsetMs)
-    .toISOString()
-    .slice(0, 16);
+  ).toISOString();
 }
 </script>
 
@@ -90,22 +68,8 @@ function toLocalInputValue(date: Date): string {
             {{ option.suffix }}
           </template>
         </span>
-        <span class="time-option__time stat-figure stat-figure--inline">
-          {{ formatAbsolute(option.minutesAgo) }}
-        </span>
       </button>
     </div>
-
-    <label class="time-picker__custom">
-      <span>自訂時間</span>
-      <input
-        v-model="customValue"
-        class="stat-figure"
-        type="datetime-local"
-        :max="toLocalInputValue(new Date())"
-        @change="selectCustom"
-      >
-    </label>
   </fieldset>
 </template>
 
@@ -120,9 +84,8 @@ function toLocalInputValue(date: Date): string {
  */
 /*
  * 2026-08-24：手機版原本是一欄四列（桌面才兩欄），四個快選項目就佔掉
- * 一大段高度，是這頁太長的主因之一。改成一律兩欄兩列，並把時刻放到
- * 標籤下方而不是右側——原本桌面版就是這個排法，現在變成共用的基準，
- * 媒體查詢因此可以整個拿掉。
+ * 一大段高度，是這頁太長的主因之一。改成一律兩欄兩列，媒體查詢因此
+ * 可以整個拿掉。
  */
 .time-picker__quick {
   display: grid;
@@ -157,32 +120,4 @@ function toLocalInputValue(date: Date): string {
   font-weight: 500;
 }
 
-.time-option__time {
-  color: var(--text-secondary);
-  font-size: var(--font-size-caption);
-  white-space: nowrap;
-}
-
-.time-picker__custom {
-  display: grid;
-  gap: var(--space-2);
-  margin-top: var(--space-2);
-}
-
-.time-picker__custom span {
-  color: var(--text-secondary);
-  font-size: var(--font-size-label);
-  font-weight: 500;
-}
-
-.time-picker__custom input {
-  min-height: var(--tap-target);
-  padding: var(--space-3) var(--space-4);
-  border: 1px solid var(--border-subtle);
-  border-radius: var(--radius-sm);
-  background: var(--page-background);
-  color: var(--text-primary);
-  color-scheme: light dark;
-  font-size: 1rem;
-}
 </style>

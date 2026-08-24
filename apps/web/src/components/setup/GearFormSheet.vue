@@ -157,7 +157,8 @@ onBeforeUnmount(releasePageLock);
   border: 1px solid var(--border-subtle);
   border-bottom: 0;
   border-radius: 1.5rem 1.5rem 0 0;
-  background: var(--surface-primary);
+  /* 浮在內容上，必須不透明才遮得住背後的文字（見 --surface-overlay）。 */
+  background: var(--surface-overlay);
 }
 
 .sheet:focus {

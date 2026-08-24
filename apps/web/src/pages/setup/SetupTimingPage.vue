@@ -8,7 +8,7 @@ import GearFormSheet from "../../components/setup/GearFormSheet.vue";
 import ProtectionAdjustmentSheet from "../../components/setup/ProtectionAdjustmentSheet.vue";
 import QuickProtectionSummary from "../../components/setup/QuickProtectionSummary.vue";
 import SetupStepShell from "../../components/setup/SetupStepShell.vue";
-import SetupCompletionSummary from "../../components/setup/SetupCompletionSummary.vue";
+import ProductEligibilityNotice from "../../components/setup/ProductEligibilityNotice.vue";
 import SunscreenClaimQuickQuestion from "../../components/setup/SunscreenClaimQuickQuestion.vue";
 import WaterStartPicker from "../../components/setup/WaterStartPicker.vue";
 import { useSetup } from "../../composables/useSetup";
@@ -274,13 +274,17 @@ onMounted(async () => {
       @saved="handleGearFormSaved"
     />
 
-    <!-- 摘要區塊（確認前必看，AC-34 Scenario B）-->
-    <SetupCompletionSummary
-      v-if="hasConfirmedProtection && setup.draft.value"
-      :draft="setup.draft.value"
-      :application-time="applicationTime"
+    <!--
+      2026-08-24：原本這裡是「確認這次提醒」完整摘要（AC-34 Scenario B）。
+      使用者確認 AC-34 已不適用，且摘要重述的情境／部位／時間在提醒開始後
+      都看得到——這頁要優先當計時器用，文字與按鈕愈少愈好，因此移除。
+
+      只保留產品資格警示：它講的是「按下去之後不會有倒數」或「請停止使用」，
+      屬於送出前必須知道的後果，不是重述。
+    -->
+    <ProductEligibilityNotice
+      v-if="hasConfirmedProtection"
       :product-snapshot="productSettings.snapshot.value"
-      :water-start="needsWaterStart ? waterStart : null"
     />
 
     <template #actions>

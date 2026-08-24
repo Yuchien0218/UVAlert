@@ -88,8 +88,9 @@ const specLine = computed(() => {
   const parts: string[] = [];
   if (spf !== null) parts.push(`SPF ${spf}`);
   // paGrade 存使用者照包裝抄的完整標示（「PA++++」），不加前綴——
-  // 這裡原本寫 `PA${paGrade}`，跟 SetupCompletionSummary 的直接顯示
-  // 互相矛盾。先前沒爆是因為當時沒有任何寫入路徑，兩邊都碰不到真值。
+  // 這裡原本寫 `PA${paGrade}`，跟設定流程摘要的直接顯示互相矛盾。
+  // 先前沒爆是因為當時沒有任何寫入路徑，兩邊都碰不到真值。
+  // （那張摘要已於 2026-08-24 移除，這裡的規則不變。）
   if (paGrade !== null) parts.push(paGrade);
   return parts.length === 0 ? null : parts.join("・");
 });

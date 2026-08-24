@@ -105,6 +105,14 @@
    * （surface-dark）或圖片背景上不要用這個 token。
    */
   --surface-primary: rgba(255, 255, 255, 0.4);
+  /*
+   * 浮在內容之上的面板（bottom sheet、對話框）專用的**不透明**表面。
+   * --surface-primary 是半透明的，貼在頁面底色上當卡片沒問題，但蓋在
+   * 內容上面時後面的文字會透出來（2026-08-24 實際發生在兩個 sheet 上）。
+   * 這個值就是 rgba(255,255,255,0.4) 疊在 canvas #faf5ec 上算出來的
+   * 結果，所以 sheet 與卡片看起來是同一個表面，只是它會確實遮住背後。
+   */
+  --surface-overlay: #fcf9f4;
   --surface-soft: var(--color-surface-soft);
   --surface-inverse: var(--color-surface-dark);
   --text-primary: var(--color-ink);

@@ -4,26 +4,9 @@ import Icon from "../icons/Icon.vue";
 
 <template>
   <section
-    class="empty-state empty-state--tracking"
+    class="empty-state app-card"
     data-testid="reminder-empty"
   >
-    <!-- 絕對定位的大太陽背景裝飾 -->
-    <svg
-      class="empty-state__sun-decor"
-      viewBox="0 0 48 48"
-      aria-hidden="true"
-    >
-      <circle cx="24" cy="24" r="11" />
-      <line
-        v-for="rayIndex in 8"
-        :key="rayIndex"
-        x1="24"
-        y1="2"
-        x2="24"
-        y2="7"
-        :transform="`rotate(${(rayIndex - 1) * 45} 24 24)`"
-      />
-    </svg>
     <div>
       <h2 class="empty-state__title empty-state__title--single-line">
         還沒有開始防曬提醒
@@ -43,40 +26,22 @@ import Icon from "../icons/Icon.vue";
 </template>
 
 <style scoped>
+/*
+ * 2026-08-24：移除兩項舊實作。
+ *
+ * 1. 手刻的 inline SVG 大太陽背景裝飾——Icon.vue 明文規定「不要手刻
+ *    inline SVG」，圖示一律走圖示系統；而且它只是裝飾，沒有承載資訊。
+ * 2. background: --color-tracking-soft（「追蹤中」狀態色）。狀態色不得
+ *    當裝飾用（DESIGN.md 第二節），這裡語意還剛好相反——這是**還沒有**
+ *    任何追蹤的空狀態，卻套用了「追蹤中」的顏色。
+ *
+ * 改用共用的 .app-card，跟其他頁面的卡片一致。
+ */
 .empty-state {
-  position: relative;
   display: grid;
   justify-items: start;
   gap: var(--space-5);
   padding: clamp(1.5rem, 7vw, 2.5rem) clamp(1.25rem, 5vw, 2rem);
-  border-radius: var(--radius-lg);
-  overflow: hidden;
-}
-
-/* 太陽背景裝飾樣式：垂直置中略偏下，確保完整圓心露出，
-   不會像原本 bottom: -2rem 那樣把圓心推到卡片邊界外只剩零散光芒 */
-.empty-state__sun-decor {
-  position: absolute;
-  right: -1.5rem;
-  top: 58%;
-  transform: translateY(-50%);
-  width: 12rem;
-  height: 12rem;
-  color: var(--color-tracking);
-  opacity: 0.08;
-  pointer-events: none;
-}
-
-.empty-state__sun-decor circle,
-.empty-state__sun-decor line {
-  fill: none;
-  stroke: currentColor;
-  stroke-width: 1.5;
-  stroke-linecap: round;
-}
-
-.empty-state--tracking {
-  background: var(--color-tracking-soft);
 }
 
 .empty-state__title {

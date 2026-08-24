@@ -16,8 +16,18 @@ describe("ReminderEmptyState", () => {
     });
 
     const card = wrapper.get('[data-testid="reminder-empty"]');
-    expect(card.classes()).toContain("empty-state--tracking");
-    expect(card.classes()).not.toContain("app-card");
+    /*
+     * 2026-08-24 反轉：原本斷言 empty-state--tracking 且**不可**是
+     * app-card，那是 9f7eebe（2026-08-05）把它從 app-card 改成藍色 tint
+     * 時定下的。該決定早於 2026-08-22 的配色套用與 DESIGN.md 第二節
+     * 「狀態色不得與裝飾用法混淆」；--color-tracking 是「追蹤中」的狀態
+     * 色，用在**還沒有**任何追蹤的空狀態語意剛好相反。改回 app-card。
+     */
+    expect(card.classes()).toContain("app-card");
+    expect(card.classes()).not.toContain("empty-state--tracking");
+    // 手刻的 inline SVG 太陽裝飾一併移除（Icon.vue 規定不得手刻 SVG）。
+    // 注意不能斷言「完全沒有 svg」——按鈕上的箭頭圖示本身也是 svg。
+    expect(wrapper.find(".empty-state__sun-decor").exists()).toBe(false);
     expect(wrapper.get(".empty-state__action").classes()).toContain(
       "empty-state__action--compact"
     );
