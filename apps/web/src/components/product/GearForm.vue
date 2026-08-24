@@ -55,6 +55,13 @@ const displayName = ref("");
 const purchaseMonth = ref("");
 const expiryDate = ref("");
 const note = ref("");
+/**
+ * SPF／PA 只用來辨識「這罐是哪一罐」，**不影響倒數**——
+ * `packages/domain` 對這兩個欄位零引用，倒數長度由包裝標示裡的
+ * 補擦間隔決定。以字串保存輸入，儲存時才轉型與驗證。
+ */
+const spfInput = ref("");
+const paGradeInput = ref("");
 const snapshotForm = ref<ProductSnapshotFormValue>({
   claimAnswer: "yes",
   waitAnswer: "none",
@@ -111,6 +118,11 @@ onMounted(async () => {
   expiryDate.value = record.expiryDate ?? "";
   note.value = record.note ?? "";
   snapshotForm.value = productSnapshotToFormValue(record.currentSnapshot);
+  spfInput.value =
+    record.currentSnapshot.spf === null
+      ? ""
+      : String(record.currentSnapshot.spf);
+  paGradeInput.value = record.currentSnapshot.paGrade ?? "";
 });
 
 function validate(): string | null {
@@ -126,6 +138,17 @@ function validate(): string | null {
   if (expiryDate.value !== "" && !/^\d{4}-\d{2}-\d{2}$/.test(expiryDate.value)) {
     return "到期日格式須為 YYYY-MM-DD。";
   }
+  // schema 要求 spf 為正數、paGrade 長度 1–20；先擋住再 parse，
+  // 否則 Zod 會丟例外而不是回到表單上的錯誤訊息。
+  if (spfInput.value.trim() !== "") {
+    const parsed = Number(spfInput.value);
+    if (!Number.isFinite(parsed) || parsed <= 0) {
+      return "SPF 請填寫大於 0 的數字，例如 50。";
+    }
+  }
+  if (paGradeInput.value.trim().length > 20) {
+    return "PA 標示請控制在 20 個字以內。";
+  }
   return null;
 }
 
@@ -135,8 +158,15 @@ async function save(): Promise<void> {
 
   // 非 sunscreen 品類不保留只對 sunscreen 有意義的標示答案，
   // 避免存下一組看起來會影響倒數、實際不會的資料。
+  // SPF／PA 跟其他標示欄位一樣只對 sunscreen 有意義，
+  // 非防曬乳品類不保留，避免存下看起來有意義、實際不會被用到的資料。
+  const spf =
+    spfInput.value.trim() === "" ? null : Number(spfInput.value);
+  const paGrade =
+    paGradeInput.value.trim() === "" ? null : paGradeInput.value.trim();
+
   const formValue: ProductSnapshotFormValue = showSunscreenFields.value
-    ? snapshotForm.value
+    ? { ...snapshotForm.value, spf, paGrade }
     : {
         claimAnswer: needsLabelFields.value
           ? snapshotForm.value.claimAnswer
@@ -145,7 +175,9 @@ async function save(): Promise<void> {
         waitMinutes: null,
         intervalAnswer: "unknown",
         intervalMinutes: null,
-        waterResistance: "unknown"
+        waterResistance: "unknown",
+        spf: null,
+        paGrade: null
       };
 
   const saved = await productSettings.saveProduct({
@@ -237,6 +269,39 @@ async function remove(): Promise<void> {
       <p class="field-helper">
         只用於這台裝置上的選擇，重複的暱稱不會被當成同一件裝備。
       </p>
+
+      <div v-if="showSunscreenFields" class="field-pair">
+        <div>
+          <label for="gear-spf">SPF（選填）</label>
+          <!--
+            刻意不用 type="number"：Vue 的 v-model 對 number input 會
+            自動轉型成 number，spfInput 就不再是字串，後面的 .trim()
+            會直接丟 TypeError 讓儲存靜默失敗（2026-08-24 實測抓到）。
+            text + inputmode 同樣會跳數字鍵盤，也避開滾輪誤改值。
+          -->
+          <input
+            id="gear-spf"
+            v-model="spfInput"
+            type="text"
+            inputmode="numeric"
+            maxlength="4"
+            placeholder="50"
+          >
+        </div>
+        <div>
+          <label for="gear-pa">PA（選填）</label>
+          <input
+            id="gear-pa"
+            v-model="paGradeInput"
+            type="text"
+            maxlength="20"
+            placeholder="PA++++"
+          >
+        </div>
+      </div>
+      <p v-if="showSunscreenFields" class="field-helper">
+        只用來認出這罐是哪一罐，<strong>不影響補擦倒數</strong>；倒數長度由下方的包裝標示決定。
+      </p>
     </section>
 
     <ProductSnapshotEditor
@@ -244,6 +309,7 @@ async function remove(): Promise<void> {
       v-model="snapshotForm"
       :water-context="showSunscreenFields"
       :sunscreen-fields="showSunscreenFields"
+      collapsible
       eyebrow="包裝標示"
       title="確認這瓶防曬乳"
       :description="
@@ -261,16 +327,21 @@ async function remove(): Promise<void> {
     </section>
 
     <section class="app-card">
-      <label for="gear-purchase">購買月份（選填）</label>
-      <input id="gear-purchase" v-model="purchaseMonth" type="month">
-
-      <label for="gear-expiry">
-        到期日（選填）
-        <span v-if="affectsCountdown(gearCategory)" class="affects-badge">
-          會影響倒數
-        </span>
-      </label>
-      <input id="gear-expiry" v-model="expiryDate" type="date">
+      <div class="field-pair">
+        <div>
+          <label for="gear-purchase">購買月份（選填）</label>
+          <input id="gear-purchase" v-model="purchaseMonth" type="month">
+        </div>
+        <div>
+          <label for="gear-expiry">
+            到期日（選填）
+            <span v-if="affectsCountdown(gearCategory)" class="affects-badge">
+              會影響倒數
+            </span>
+          </label>
+          <input id="gear-expiry" v-model="expiryDate" type="date">
+        </div>
+      </div>
       <p v-if="affectsCountdown(gearCategory)" class="field-helper">
         到期日一過就不會再建立補擦倒數。
       </p>
@@ -373,9 +444,15 @@ p {
   font-size: var(--font-size-caption);
 }
 
+/*
+ * 2×2，不是 3 欄。域模型的 GearCategory 只有 4 個值，放進 3 欄會讓
+ * 第二排只剩一個孤兒、右邊空 2/3（2026-08-24 使用者截圖指出）。
+ * 高保真稿用 3 欄是因為它的品類陣列有 6 個（多了帽子與陽傘），
+ * 抄版面時要一併核對項目數量。
+ */
 .category-grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(2, 1fr);
   gap: var(--space-2);
 }
 
@@ -412,10 +489,16 @@ p {
   clip: rect(0, 0, 0, 0);
 }
 
+/*
+ * 原本用 var(--surface-raised, transparent)，但 --surface-raised 從未
+ * 在 packages/ui/src/styles.css 定義過 → 落到 transparent，於是這段
+ * 白白比上面的 legend 與格子多縮 12px，卻看不出為什麼要縮。改用實際
+ * 存在的 surface-soft，讓內距有對應的底色支撐。
+ */
 .category-effect {
   padding: var(--space-3);
   border-radius: var(--radius-sm);
-  background: var(--surface-raised, transparent);
+  background: var(--color-surface-soft);
   color: var(--text-secondary);
   line-height: 1.7;
 }
@@ -436,6 +519,24 @@ p {
   border-radius: var(--radius-pill, 999px);
   font-size: var(--font-size-caption);
   color: var(--text-secondary);
+}
+
+.field-pair {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-3);
+}
+
+.field-pair > div {
+  display: grid;
+  gap: var(--space-2);
+  min-width: 0;
+}
+
+/* 欄位在格線裡要撐滿自己那一欄，否則 date/month 這類原生控制項
+   會用瀏覽器預設寬度，兩欄看起來一長一短。 */
+.field-pair input {
+  width: 100%;
 }
 
 input,

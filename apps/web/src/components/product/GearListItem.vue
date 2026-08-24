@@ -37,7 +37,9 @@ const summary = computed((): string => {
     const snapshot = props.product.currentSnapshot;
     const parts: string[] = [];
     if (snapshot.spf !== null) parts.push(`SPF ${snapshot.spf}`);
-    if (snapshot.paGrade !== null) parts.push(`PA${snapshot.paGrade}`);
+    // paGrade 存的是使用者輸入的完整標示（欄位 placeholder 就是
+    // 「PA++++」），不要再自己加 PA 前綴——會變成「PAPA++++」。
+    if (snapshot.paGrade !== null) parts.push(snapshot.paGrade);
     if (snapshot.reapplicationIntervalMinutes !== null) {
       parts.push(`補擦間隔 ${snapshot.reapplicationIntervalMinutes} 分鐘`);
     }

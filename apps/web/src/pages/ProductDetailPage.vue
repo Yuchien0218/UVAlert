@@ -86,8 +86,11 @@ const specLine = computed(() => {
   if (product.value === null || !isSunscreen.value) return null;
   const { spf, paGrade } = product.value.currentSnapshot;
   const parts: string[] = [];
-  if (spf !== null) parts.push(`SPF${spf}`);
-  if (paGrade !== null) parts.push(`PA${paGrade}`);
+  if (spf !== null) parts.push(`SPF ${spf}`);
+  // paGrade 存使用者照包裝抄的完整標示（「PA++++」），不加前綴——
+  // 這裡原本寫 `PA${paGrade}`，跟 SetupCompletionSummary 的直接顯示
+  // 互相矛盾。先前沒爆是因為當時沒有任何寫入路徑，兩邊都碰不到真值。
+  if (paGrade !== null) parts.push(paGrade);
   return parts.length === 0 ? null : parts.join("・");
 });
 

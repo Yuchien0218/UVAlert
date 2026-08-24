@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { PackageCheck } from "@lucide/vue";
 import Icon from "../icons/Icon.vue";
-import { useId } from "vue";
+import { computed, shallowRef, useId } from "vue";
 import type { ProductSnapshotFormValue } from "../../features/setup/productSnapshot";
 
 interface Props {
@@ -12,14 +12,24 @@ interface Props {
    * 記錄衣物時必須收起，否則會讓人以為填了就會影響倒數。
    */
   sunscreenFields?: boolean;
+  /**
+   * 預設收合成摘要，展開才顯示四個問答（2026-08-24）。
+   *
+   * 這四題**全部可以跳過**——預設值就是保守值（有防曬標示／沒有等待
+   * 說明／沒有明確間隔→120 分鐘／耐水不確定），所以收合不會讓使用者
+   * 漏填任何必要資料。攤開時它們佔掉 1690px（整頁的 55%），收合後
+   * 約 210px。`/setup` 流程的即時記錄不套用，維持攤開。
+   */
+  collapsible?: boolean;
   eyebrow?: string;
   title?: string;
   description?: string;
 }
 
-withDefaults(defineProps<Props>(), {
+const props = withDefaults(defineProps<Props>(), {
   otherTopicalOnly: false,
   sunscreenFields: true,
+  collapsible: false,
   eyebrow: "本次使用",
   title: "只用在這次提醒",
   description:
@@ -37,6 +47,43 @@ const groupNames = {
   interval: `${groupPrefix}-interval`,
   waterResistance: `${groupPrefix}-water-resistance`
 };
+
+const expanded = shallowRef(false);
+const showQuestions = computed(
+  () => !props.collapsible || expanded.value
+);
+
+/**
+ * 收合時的摘要，只講真正會進倒數的兩件事：間隔與耐水。
+ * 不寫 SPF／PA——那兩個不影響倒數，寫在這裡會誤導。
+ */
+const summary = computed(() => {
+  const parts: string[] = [];
+
+  if (
+    value.value.intervalAnswer === "explicit" &&
+    value.value.intervalMinutes !== null
+  ) {
+    parts.push(`包裝間隔 ${value.value.intervalMinutes} 分鐘`);
+  } else {
+    parts.push("一般間隔 120 分鐘");
+  }
+
+  if (props.sunscreenFields) {
+    const water = value.value.waterResistance;
+    parts.push(
+      water === "40" || water === "80"
+        ? `耐水 ${water} 分鐘`
+        : water === "not_water_resistant"
+          ? "標示不耐水"
+          : water === "no_claim"
+            ? "沒有耐水標示"
+            : "耐水未確認"
+    );
+  }
+
+  return parts.join("・");
+});
 </script>
 
 <template>
@@ -66,10 +113,26 @@ const groupNames = {
         <p>
           {{ description }}
         </p>
+
+        <template v-if="collapsible">
+          <p class="session-product__summary">{{ summary }}</p>
+          <button
+            class="button button--quiet session-product__toggle"
+            type="button"
+            :aria-expanded="expanded"
+            @click="expanded = !expanded"
+          >
+            <Icon
+              :name="expanded ? 'tool-chevron-down' : 'tool-chevron-right'"
+              :size="20"
+            />
+            {{ expanded ? "收合包裝標示" : "填寫包裝標示（選填）" }}
+          </button>
+        </template>
       </div>
     </section>
 
-    <fieldset class="question-card app-card">
+    <fieldset v-if="showQuestions" class="question-card app-card">
       <legend>
         {{
           otherTopicalOnly
@@ -116,6 +179,10 @@ const groupNames = {
       class="identity-warning"
       role="status"
     >
+      <!--
+        這則警示不受收合影響：使用者選了「沒有／不確定」防曬標示時，
+        該部位不會建立倒數，這個後果必須一直看得到，不能藏進收合裡。
+      -->
       <Icon name="state-warning" :size="24" />
       <div>
         <strong>目前無法建立防曬乳補擦時間</strong>
@@ -125,7 +192,9 @@ const groupNames = {
       </div>
     </aside>
 
-    <template v-if="sunscreenFields && value.claimAnswer === 'yes'">
+    <template
+      v-if="showQuestions && sunscreenFields && value.claimAnswer === 'yes'"
+    >
       <fieldset class="question-card app-card">
         <legend>包裝怎麼寫擦上後的等待時間？</legend>
         <p class="question-card__helper">
@@ -348,6 +417,21 @@ const groupNames = {
   margin-top: var(--space-2);
   color: var(--text-secondary);
   line-height: 1.7;
+}
+
+/* 特異性要壓過上面的 `.session-product p:not(.session-product__eyebrow)`，
+   否則摘要會被套成次要文字色。 */
+.session-product p.session-product__summary {
+  margin-top: var(--space-3);
+  color: var(--text-primary);
+  font-weight: 500;
+}
+
+.session-product__toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin-top: var(--space-3);
 }
 
 .question-card {
