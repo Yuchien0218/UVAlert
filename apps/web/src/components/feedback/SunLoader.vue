@@ -45,9 +45,12 @@ withDefaults(defineProps<Props>(), {
   display: inline-flex;
 }
 
+/* 3.25rem 是這顆 loading 圖示專屬的裝飾尺寸，不在 DESIGN.md 的
+   16/20/24 圖示級距裡，不需要 token——原本套的 --icon-size-lg 從未
+   定義過，只是靠 fallback 撐著。 */
 .sun-loader__icon {
-  width: var(--icon-size-lg, 3.25rem);
-  height: var(--icon-size-lg, 3.25rem);
+  width: 3.25rem;
+  height: 3.25rem;
 }
 
 .sun-loader__center {

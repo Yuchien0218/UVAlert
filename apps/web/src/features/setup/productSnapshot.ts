@@ -19,6 +19,16 @@ export interface ProductSnapshotFormValue {
     | "not_water_resistant"
     | "no_claim"
     | "unknown";
+  /**
+   * SPF 與 PA 只用來辨識「這罐是哪一罐」，**不進入倒數計算**——
+   * `packages/domain` 對這兩個欄位零引用。倒數長度由
+   * `intervalAnswer` 決定，不要因為填了 SPF 就以為間隔會變。
+   *
+   * 選填，省略時視為 null；既有呼叫點（`createSetupController`）
+   * 不記錄這兩個欄位，因此不強制傳入。
+   */
+  spf?: number | null;
+  paGrade?: string | null;
 }
 
 export function makeSessionOnlyProductSnapshot(
@@ -74,8 +84,8 @@ export function makeSessionOnlyProductSnapshot(
         : value.waterResistance === "80"
           ? 80
           : null,
-    spf: null,
-    paGrade: null,
+    spf: value.spf ?? null,
+    paGrade: value.paGrade ?? null,
     capturedAt
   });
 }
@@ -105,6 +115,8 @@ export function productSnapshotToFormValue(
           ? "unknown"
           : "none",
     intervalMinutes: snapshot.reapplicationIntervalMinutes,
-    waterResistance: snapshot.waterResistanceStatus
+    waterResistance: snapshot.waterResistanceStatus,
+    spf: snapshot.spf,
+    paGrade: snapshot.paGrade
   };
 }

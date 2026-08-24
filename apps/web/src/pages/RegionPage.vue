@@ -95,7 +95,7 @@ function returnToCaller(): Promise<unknown> {
 .page-heading__eyebrow {
   color: var(--text-secondary);
   font-family: var(--font-mono);
-  font-size: 0.75rem;
+  font-size: var(--font-size-caption);
   letter-spacing: 0.12em;
 }
 
@@ -108,7 +108,7 @@ function returnToCaller(): Promise<unknown> {
 }
 
 .region-skip h2 {
-  font-size: 1.1rem;
+  font-size: var(--font-size-title-sm);
 }
 
 .region-skip p {

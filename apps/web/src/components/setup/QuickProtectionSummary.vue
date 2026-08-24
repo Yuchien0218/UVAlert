@@ -148,7 +148,7 @@ const zoneLabels = computed(() =>
 
 .quick-protection__header-content h2 {
   margin-top: var(--space-2);
-  font-size: 1.35rem;
+  font-size: var(--font-size-title-md);
 }
 
 .quick-protection__toggle {
@@ -165,7 +165,7 @@ const zoneLabels = computed(() =>
   display: grid;
   gap: var(--space-4);
   padding: 0 var(--space-5) var(--space-5);
-  animation: slideDown var(--duration-normal) var(--ease-out);
+  animation: slideDown var(--duration-base) var(--ease-out);
 }
 
 .quick-protection__summary {

@@ -91,13 +91,13 @@ const toneClass = computed(
 
 .countdown__detail {
   margin: 0;
-  font-size: 0.9375rem;
+  font-size: var(--font-size-body);
 }
 
 .countdown__track {
   height: 8px;
   margin-top: var(--space-2);
-  border-radius: 4px;
+  border-radius: var(--radius-xs);
   background: var(--color-surface-card);
   overflow: hidden;
 }

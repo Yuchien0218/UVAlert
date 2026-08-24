@@ -88,7 +88,8 @@ describe("BrowserNotifications", () => {
         id: "zone-forehead",
         dueAt: minutesFromNow(-5),
         title: "該補擦了",
-        body: "額頭"
+        body: "額頭",
+        repeatMinutes: null
       });
 
       expect(showNotification).toHaveBeenCalledOnce();
@@ -106,7 +107,8 @@ describe("BrowserNotifications", () => {
         id: "zone-forehead",
         dueAt: minutesFromNow(42),
         title: "該補擦了",
-        body: "額頭"
+        body: "額頭",
+        repeatMinutes: null
       });
 
       await vi.advanceTimersByTimeAsync(41 * 60_000);
@@ -126,7 +128,8 @@ describe("BrowserNotifications", () => {
           id: "zone-forehead",
           dueAt: minutesFromNow(-1),
           title: "該補擦了",
-          body: "額頭"
+          body: "額頭",
+          repeatMinutes: null
         })
       ).resolves.toBeUndefined();
 
@@ -140,7 +143,8 @@ describe("BrowserNotifications", () => {
         id: "zone-forehead",
         dueAt: "not-a-timestamp",
         title: "該補擦了",
-        body: "額頭"
+        body: "額頭",
+        repeatMinutes: null
       });
 
       await vi.advanceTimersByTimeAsync(10 * 60_000);
@@ -159,7 +163,8 @@ describe("BrowserNotifications", () => {
         id: "zone-forehead",
         dueAt: minutesFromNow(10),
         title: "該補擦了",
-        body: "額頭"
+        body: "額頭",
+        repeatMinutes: null
       });
 
       permission = "denied";
@@ -177,7 +182,8 @@ describe("BrowserNotifications", () => {
           id: "zone-forehead",
           dueAt: minutesFromNow(-1),
           title: "該補擦了",
-          body: "額頭"
+          body: "額頭",
+          repeatMinutes: null
         })
       ).resolves.toBeUndefined();
 
@@ -193,7 +199,8 @@ describe("BrowserNotifications", () => {
         id: "zone-forehead",
         dueAt: minutesFromNow(-1),
         title: "該補擦了",
-        body: "額頭"
+        body: "額頭",
+        repeatMinutes: null
       });
 
       expect(showNotification).not.toHaveBeenCalled();
@@ -208,13 +215,15 @@ describe("BrowserNotifications", () => {
         id: "zone-forehead",
         dueAt: minutesFromNow(10),
         title: "舊的",
-        body: "額頭"
+        body: "額頭",
+        repeatMinutes: null
       });
       await adapter.schedule({
         id: "zone-forehead",
         dueAt: minutesFromNow(30),
         title: "新的",
-        body: "額頭"
+        body: "額頭",
+        repeatMinutes: null
       });
 
       // 舊排程的時間點過去時不該觸發。
@@ -236,7 +245,8 @@ describe("BrowserNotifications", () => {
         id: "zone-forehead",
         dueAt: minutesFromNow(10),
         title: "該補擦了",
-        body: "額頭"
+        body: "額頭",
+        repeatMinutes: null
       });
       await adapter.cancel("zone-forehead");
 
@@ -251,13 +261,15 @@ describe("BrowserNotifications", () => {
         id: "zone-a",
         dueAt: minutesFromNow(5),
         title: "A",
-        body: "a"
+        body: "a",
+        repeatMinutes: null
       });
       await adapter.schedule({
         id: "zone-b",
         dueAt: minutesFromNow(10),
         title: "B",
-        body: "b"
+        body: "b",
+        repeatMinutes: null
       });
       await adapter.cancelAll();
 
@@ -280,7 +292,8 @@ describe("BrowserNotifications", () => {
         id: "zone-forehead",
         dueAt: minutesFromNow(beyondLimitMinutes),
         title: "該補擦了",
-        body: "額頭"
+        body: "額頭",
+        repeatMinutes: null
       });
 
       await vi.advanceTimersByTimeAsync(2_147_483_647);
@@ -291,6 +304,99 @@ describe("BrowserNotifications", () => {
         beyondLimitMinutes * 60_000 - 2_147_483_647
       );
       expect(showNotification).toHaveBeenCalledOnce();
+    });
+  });
+
+  describe("再次提醒頻率", () => {
+    it("repeatMinutes 為 null 時只顯示一次", async () => {
+      const { adapter, showNotification } = createHarness();
+
+      await adapter.schedule({
+        id: "session-next-due",
+        dueAt: minutesFromNow(-1),
+        title: "該補擦了",
+        body: "打開查看",
+        repeatMinutes: null
+      });
+
+      await vi.advanceTimersByTimeAsync(60 * 60_000);
+      expect(showNotification).toHaveBeenCalledOnce();
+    });
+
+    it("顯示後依 repeatMinutes 再次觸發", async () => {
+      const { adapter, showNotification } = createHarness();
+
+      await adapter.schedule({
+        id: "session-next-due",
+        dueAt: minutesFromNow(-1),
+        title: "該補擦了",
+        body: "打開查看",
+        repeatMinutes: 5
+      });
+
+      expect(showNotification).toHaveBeenCalledOnce();
+
+      await vi.advanceTimersByTimeAsync(5 * 60_000);
+      expect(showNotification).toHaveBeenCalledTimes(2);
+
+      await vi.advanceTimersByTimeAsync(5 * 60_000);
+      expect(showNotification).toHaveBeenCalledTimes(3);
+    });
+
+    it("重排（同 id）會砍掉整條重複鏈", async () => {
+      const { adapter, showNotification } = createHarness();
+
+      await adapter.schedule({
+        id: "session-next-due",
+        dueAt: minutesFromNow(-1),
+        title: "該補擦了",
+        body: "打開查看",
+        repeatMinutes: 5
+      });
+      expect(showNotification).toHaveBeenCalledOnce();
+
+      // 使用者補擦了，之後不會再收到重複提醒。
+      await adapter.cancel("session-next-due");
+
+      await vi.advanceTimersByTimeAsync(30 * 60_000);
+      expect(showNotification).toHaveBeenCalledOnce();
+    });
+  });
+
+  describe("裝置測試", () => {
+    it("有權限時立即顯示測試通知並回傳 true", async () => {
+      const { adapter, showNotification } = createHarness();
+
+      await expect(adapter.sendTest()).resolves.toBe(true);
+      expect(showNotification).toHaveBeenCalledWith(
+        "測試通知",
+        expect.objectContaining({ tag: "notification-test" })
+      );
+    });
+
+    it("沒有權限時回傳 false，不呼叫 showNotification", async () => {
+      const { adapter, showNotification } = createHarness({
+        getPermission: () => "denied"
+      });
+
+      await expect(adapter.sendTest()).resolves.toBe(false);
+      expect(showNotification).not.toHaveBeenCalled();
+    });
+
+    it("registration 取不到時回傳 false", async () => {
+      const { adapter, showNotification } = createHarness({
+        getRegistration: () => Promise.resolve(null)
+      });
+
+      await expect(adapter.sendTest()).resolves.toBe(false);
+      expect(showNotification).not.toHaveBeenCalled();
+    });
+
+    it("showNotification 丟例外時回傳 false，不冒泡", async () => {
+      const { adapter, showNotification } = createHarness();
+      showNotification.mockRejectedValue(new Error("boom"));
+
+      await expect(adapter.sendTest()).resolves.toBe(false);
     });
   });
 

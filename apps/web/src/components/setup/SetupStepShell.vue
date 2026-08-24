@@ -83,9 +83,13 @@ const steps = [
         :aria-valuemax="steps.length"
         aria-label="設定進度"
       >
-        <div
-          class="setup-shell__progress-fill"
-          :style="{ width: `${(step / steps.length) * 100}%` }"
+        <span
+          v-for="(progressStep, index) in steps"
+          :key="progressStep.label"
+          class="setup-shell__progress-segment"
+          :class="{
+            'setup-shell__progress-segment--filled': index < step
+          }"
         />
       </div>
       <RouterLink
@@ -154,7 +158,7 @@ button.setup-shell__quiet-action {
   align-items: center;
   gap: var(--space-2);
   color: var(--color-success);
-  font-size: 0.75rem;
+  font-size: var(--font-size-caption);
   white-space: nowrap;
 }
 
@@ -174,21 +178,31 @@ button.setup-shell__quiet-action {
   font-weight: 500;
 }
 
+/*
+ * 分段線條，不是連續進度條——每一步各自一段，完成與否由該段是否填滿
+ * 表示，不用圓點編號或勾勾（2026-08-24 使用者提供的高保真稿裁決，
+ * 見 templates/app-screens 畫面 10：「指示器只用線段與文字……在灰階下
+ * 仍可辨識」）。流程固定兩步；若之後加入第三步，段數等分即可。
+ */
 .setup-shell__progress-track {
-  height: 8px;
-  border-radius: 4px;
-  background: var(--color-surface-card);
-  overflow: hidden;
+  display: flex;
+  gap: var(--space-1);
 }
 
-.setup-shell__progress-fill {
-  height: 100%;
+.setup-shell__progress-segment {
+  flex: 1;
+  height: 3px;
+  border-radius: var(--radius-pill);
+  background: var(--border-subtle);
+  transition: background var(--motion-base, 240ms) cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.setup-shell__progress-segment--filled {
   background: var(--color-primary);
-  transition: width var(--motion-base, 240ms) cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .setup-shell__progress-fill {
+  .setup-shell__progress-segment {
     transition: none;
   }
 }

@@ -102,14 +102,14 @@ function toLocalInputValue(date: Date): string {
 
 .water-start legend {
   padding: 0;
-  font-size: 1.08rem;
+  font-size: var(--font-size-title-sm);
   font-weight: 500;
 }
 
 .water-start > p {
   margin: 0;
   color: var(--text-secondary);
-  font-size: 0.875rem;
+  font-size: var(--font-size-body);
   line-height: 1.7;
 }
 
@@ -123,7 +123,7 @@ function toLocalInputValue(date: Date): string {
   min-height: var(--tap-target);
   padding: 0 var(--space-4);
   border: 1px solid var(--border-subtle);
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   background: transparent;
   color: var(--text-primary);
   cursor: pointer;
@@ -142,7 +142,7 @@ function toLocalInputValue(date: Date): string {
 
 .water-start label span {
   color: var(--text-secondary);
-  font-size: 0.875rem;
+  font-size: var(--font-size-body);
 }
 
 .water-start input {

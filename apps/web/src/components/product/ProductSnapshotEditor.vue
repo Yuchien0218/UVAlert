@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { PackageCheck } from "@lucide/vue";
 import Icon from "../icons/Icon.vue";
-import { useId } from "vue";
+import { computed, shallowRef, useId } from "vue";
 import type { ProductSnapshotFormValue } from "../../features/setup/productSnapshot";
 
 interface Props {
@@ -12,14 +12,24 @@ interface Props {
    * 記錄衣物時必須收起，否則會讓人以為填了就會影響倒數。
    */
   sunscreenFields?: boolean;
+  /**
+   * 預設收合成摘要，展開才顯示四個問答（2026-08-24）。
+   *
+   * 這四題**全部可以跳過**——預設值就是保守值（有防曬標示／沒有等待
+   * 說明／沒有明確間隔→120 分鐘／耐水不確定），所以收合不會讓使用者
+   * 漏填任何必要資料。攤開時它們佔掉 1690px（整頁的 55%），收合後
+   * 約 210px。`/setup` 流程的即時記錄不套用，維持攤開。
+   */
+  collapsible?: boolean;
   eyebrow?: string;
   title?: string;
   description?: string;
 }
 
-withDefaults(defineProps<Props>(), {
+const props = withDefaults(defineProps<Props>(), {
   otherTopicalOnly: false,
   sunscreenFields: true,
+  collapsible: false,
   eyebrow: "本次使用",
   title: "只用在這次提醒",
   description:
@@ -37,28 +47,48 @@ const groupNames = {
   interval: `${groupPrefix}-interval`,
   waterResistance: `${groupPrefix}-water-resistance`
 };
+
+const expanded = shallowRef(false);
+const showQuestions = computed(
+  () => !props.collapsible || expanded.value
+);
+
+/**
+ * 收合時的摘要，只講真正會進倒數的兩件事：間隔與耐水。
+ * 不寫 SPF／PA——那兩個不影響倒數，寫在這裡會誤導。
+ */
+const summary = computed(() => {
+  const parts: string[] = [];
+
+  if (
+    value.value.intervalAnswer === "explicit" &&
+    value.value.intervalMinutes !== null
+  ) {
+    parts.push(`包裝間隔 ${value.value.intervalMinutes} 分鐘`);
+  } else {
+    parts.push("一般間隔 120 分鐘");
+  }
+
+  if (props.sunscreenFields) {
+    const water = value.value.waterResistance;
+    parts.push(
+      water === "40" || water === "80"
+        ? `耐水 ${water} 分鐘`
+        : water === "not_water_resistant"
+          ? "標示不耐水"
+          : water === "no_claim"
+            ? "沒有耐水標示"
+            : "耐水未確認"
+    );
+  }
+
+  return parts.join("・");
+});
 </script>
 
 <template>
   <div class="product-editor">
     <section class="session-product app-card">
-      <!-- 絕對定位的大太陽背景裝飾 -->
-      <svg
-        class="session-product__sun-decor"
-        viewBox="0 0 48 48"
-        aria-hidden="true"
-      >
-        <circle cx="24" cy="24" r="11" />
-        <line
-          v-for="rayIndex in 8"
-          :key="rayIndex"
-          x1="24"
-          y1="2"
-          x2="24"
-          y2="7"
-          :transform="`rotate(${(rayIndex - 1) * 45} 24 24)`"
-        />
-      </svg>
       <PackageCheck :size="25" :stroke-width="1.6" aria-hidden="true" />
       <div>
         <p class="session-product__eyebrow">{{ eyebrow }}</p>
@@ -66,10 +96,26 @@ const groupNames = {
         <p>
           {{ description }}
         </p>
+
+        <template v-if="collapsible">
+          <p class="session-product__summary">{{ summary }}</p>
+          <button
+            class="button button--quiet session-product__toggle"
+            type="button"
+            :aria-expanded="expanded"
+            @click="expanded = !expanded"
+          >
+            <Icon
+              :name="expanded ? 'tool-chevron-down' : 'tool-chevron-right'"
+              :size="20"
+            />
+            {{ expanded ? "收合包裝標示" : "填寫包裝標示（選填）" }}
+          </button>
+        </template>
       </div>
     </section>
 
-    <fieldset class="question-card app-card">
+    <fieldset v-if="showQuestions" class="question-card app-card">
       <legend>
         {{
           otherTopicalOnly
@@ -116,6 +162,10 @@ const groupNames = {
       class="identity-warning"
       role="status"
     >
+      <!--
+        這則警示不受收合影響：使用者選了「沒有／不確定」防曬標示時，
+        該部位不會建立倒數，這個後果必須一直看得到，不能藏進收合裡。
+      -->
       <Icon name="state-warning" :size="24" />
       <div>
         <strong>目前無法建立防曬乳補擦時間</strong>
@@ -125,7 +175,9 @@ const groupNames = {
       </div>
     </aside>
 
-    <template v-if="sunscreenFields && value.claimAnswer === 'yes'">
+    <template
+      v-if="showQuestions && sunscreenFields && value.claimAnswer === 'yes'"
+    >
       <fieldset class="question-card app-card">
         <legend>包裝怎麼寫擦上後的等待時間？</legend>
         <p class="question-card__helper">
@@ -301,37 +353,16 @@ const groupNames = {
 }
 
 .session-product {
-  position: relative;
   display: grid;
   grid-template-columns: auto minmax(0, 1fr);
   gap: var(--space-4);
   padding: var(--space-5);
-  overflow: hidden;
-}
-
-.session-product__sun-decor {
-  position: absolute;
-  right: -1.5rem;
-  bottom: -1.5rem;
-  width: 8rem;
-  height: 8rem;
-  color: var(--color-primary);
-  opacity: 0.05;
-  pointer-events: none;
-}
-
-.session-product__sun-decor circle,
-.session-product__sun-decor line {
-  fill: none;
-  stroke: currentColor;
-  stroke-width: 1.5;
-  stroke-linecap: round;
 }
 
 .session-product__eyebrow {
   margin: 0 0 var(--space-2);
   color: var(--text-secondary);
-  font-size: 0.8rem;
+  font-size: var(--font-size-label);
   font-weight: 500;
 }
 
@@ -341,7 +372,7 @@ const groupNames = {
 }
 
 .session-product h2 {
-  font-size: 1.15rem;
+  font-size: var(--font-size-section-title);
 }
 
 .session-product p:not(.session-product__eyebrow) {
@@ -350,93 +381,26 @@ const groupNames = {
   line-height: 1.7;
 }
 
-.question-card {
-  display: grid;
-  gap: var(--space-4);
-  min-width: 0;
-  margin: 0;
-  padding: var(--space-5);
-  border: 1px solid var(--border-subtle);
-}
-
-.question-card legend {
-  float: left;
-  width: 100%;
-  max-width: 100%;
-  margin: 0;
-  padding: 0;
-  font-size: 1.08rem;
+/* 特異性要壓過上面的 `.session-product p:not(.session-product__eyebrow)`，
+   否則摘要會被套成次要文字色。 */
+.session-product p.session-product__summary {
+  margin-top: var(--space-3);
+  color: var(--text-primary);
   font-weight: 500;
-  overflow-wrap: anywhere;
 }
 
-.question-card legend + * {
-  clear: both;
-}
-
-.question-card__helper {
-  margin: 0;
-  color: var(--text-secondary);
-  font-size: 0.875rem;
-  line-height: 1.7;
-}
-
-.choice-grid {
-  display: grid;
-  gap: var(--space-2);
-}
-
-.choice-grid--row,
-.choice-grid--compact {
-  grid-template-columns: minmax(0, 1fr);
-}
-
-.choice-grid label {
-  display: grid;
-  min-height: var(--tap-target);
-  grid-template-columns: auto minmax(0, 1fr);
+.session-product__toggle {
+  display: inline-flex;
   align-items: center;
-  gap: var(--space-3);
-  padding: var(--space-3);
-  border: 1px solid var(--border-subtle);
-  border-radius: var(--radius-sm);
-  cursor: pointer;
-  transition: background-color var(--duration-fast) var(--ease-out),
-              color var(--duration-fast) var(--ease-out),
-              border-color var(--duration-fast) var(--ease-out);
+  gap: var(--space-2);
+  margin-top: var(--space-3);
 }
 
-.choice-grid label:hover {
-  background-color: var(--border-subtle);
-}
-
-.choice-grid label:active {
-  filter: brightness(0.85);
-}
-
-.choice-grid label:has(input:checked) {
-  border-color: var(--surface-inverse);
-  background: var(--surface-inverse);
-  color: var(--text-inverse);
-}
-
-.choice-grid input {
-  accent-color: var(--text-primary);
-}
-
-.choice-grid label:has(input:checked) input {
-  accent-color: var(--text-inverse);
-}
-
-@media (min-width: 42rem) {
-  .choice-grid--row {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-  }
-
-  .choice-grid--compact {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-}
+/*
+ * .question-card／.question-card__helper／.choice-grid 已抽到
+ * app.css（2026-08-24），跟 GearForm.vue、
+ * SunscreenClaimQuickQuestion.vue 共用，這裡不再重複定義。
+ */
 
 .number-field {
   display: grid;
@@ -445,7 +409,7 @@ const groupNames = {
 
 .number-field span {
   color: var(--text-secondary);
-  font-size: 0.875rem;
+  font-size: var(--font-size-body);
 }
 
 .number-field input {
@@ -472,7 +436,7 @@ const groupNames = {
 .identity-warning p {
   margin: var(--space-1) 0 0;
   color: var(--text-secondary);
-  font-size: 0.875rem;
+  font-size: var(--font-size-body);
   line-height: 1.7;
 }
 </style>

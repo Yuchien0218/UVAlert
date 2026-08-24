@@ -135,8 +135,8 @@ water_preparing | water_active
    或高保真參考都還沒有。
 2. `/reminder/event/:id/correct`（更正最近事件）——同上，沒有參考。
 3. `/region`（地區與定位設定）——同上，沒有參考。
-4. 通知：再次提醒頻率＋裝置測試（見裁決 4，依賴 `NotificationController`
-   排程邏輯重構，下一輪）。
+4. ~~通知：再次提醒頻率＋裝置測試~~ **已完成（2026-08-24）**，見
+   `2026-08-23-hifi-redesign-round2-closeout.md`。
 5. 分享圖片（依賴照片儲存機制，`docs/decisions/
    2026-08-23-wireframe-copy-fixes.md` §四點五已記錄，未排期）。
 6. 開瓶日期欄位（依賴新資料欄位與 migration，同上，未排期）。

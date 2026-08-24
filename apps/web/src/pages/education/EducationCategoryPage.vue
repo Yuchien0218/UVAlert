@@ -117,7 +117,7 @@ const robots = computed(() => (publishableCount.value > 0 ? "index,follow" : "no
 }
 
 .education-article-card strong {
-  font-size: 1.05rem;
+  font-size: var(--font-size-title-sm);
   font-weight: 500;
 }
 

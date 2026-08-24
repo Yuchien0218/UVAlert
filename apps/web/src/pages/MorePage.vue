@@ -101,7 +101,7 @@ const entries = computed(() =>
       <RouterLink
         v-for="entry in entries"
         :key="entry.to"
-        class="entry app-card"
+        class="entry"
         :to="entry.to"
       >
         <Icon :name="entry.icon" :size="20" />
@@ -126,9 +126,18 @@ const entries = computed(() =>
   grid-template-columns: auto minmax(0, 1fr);
   align-items: center;
   gap: var(--space-4);
-  padding: var(--space-5);
+  padding: var(--space-4);
+  border: none;
+  border-radius: var(--radius-lg);
+  background: var(--surface-primary);
   color: inherit;
   text-decoration: none;
+}
+
+@media (min-width: 48rem) {
+  .entry-list {
+    grid-template-columns: 1fr 1fr;
+  }
 }
 
 .entry strong,

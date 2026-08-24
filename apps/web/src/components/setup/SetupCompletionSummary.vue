@@ -205,20 +205,20 @@ function formatTime(iso: string | null): string {
   display: grid;
   gap: var(--space-4);
   padding: var(--space-5);
-  background: var(--surface-secondary);
+  background: var(--surface-soft);
   border-radius: var(--radius-sm);
 }
 
 h2 {
   margin: 0;
-  font-size: 1.125rem;
+  font-size: var(--font-size-title-sm);
 }
 
 .summary-help {
   margin: 0;
   color: var(--text-secondary);
   line-height: 1.7;
-  font-size: 0.875rem;
+  font-size: var(--font-size-body);
 }
 
 .summary-warning {
@@ -228,7 +228,7 @@ h2 {
   padding: var(--space-4);
   border-radius: var(--radius-sm);
   border-left: 0.25rem solid var(--color-due);
-  background: var(--color-due-soft, var(--surface-secondary));
+  background: var(--color-due-soft, var(--surface-soft));
   color: var(--text-primary);
 }
 
@@ -241,7 +241,7 @@ h2 {
   margin: var(--space-2) 0 0;
   color: var(--text-secondary);
   line-height: 1.6;
-  font-size: 0.875rem;
+  font-size: var(--font-size-body);
 }
 
 .summary-grid {
@@ -256,7 +256,7 @@ h2 {
 
 .summary-item h3 {
   margin: 0;
-  font-size: 0.875rem;
+  font-size: var(--font-size-body);
   text-transform: uppercase;
   letter-spacing: 0.1em;
   color: var(--text-secondary);
@@ -270,7 +270,7 @@ h2 {
 
 .summary-sub {
   color: var(--text-secondary);
-  font-size: 0.875rem;
+  font-size: var(--font-size-body);
 }
 
 .summary-item ul {
@@ -295,6 +295,6 @@ h2 {
   border-top: 1px solid var(--border-subtle);
   color: var(--text-secondary);
   line-height: 1.7;
-  font-size: 0.875rem;
+  font-size: var(--font-size-body);
 }
 </style>

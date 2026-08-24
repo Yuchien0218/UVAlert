@@ -350,7 +350,7 @@ dd {
 }
 
 .notice--ok {
-  background: var(--color-success-soft, var(--surface-raised));
+  background: var(--color-success-soft, var(--surface-soft));
   color: var(--text-secondary);
 }
 

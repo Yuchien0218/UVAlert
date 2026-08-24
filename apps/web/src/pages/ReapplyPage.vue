@@ -2,6 +2,7 @@
 import { nextTick, onMounted, watch } from "vue";
 import { useRouter } from "vue-router";
 import { useWebAppServices } from "../app/injection";
+import Icon from "../components/icons/Icon.vue";
 import ReapplicationZoneSelector from "../components/reapplication/ReapplicationZoneSelector.vue";
 import ReapplicationProductAssignments from "../components/reapplication/ReapplicationProductAssignments.vue";
 import ApplicationTimeSelector from "../components/reapplication/ApplicationTimeSelector.vue";
@@ -28,8 +29,10 @@ function zoneNames(zoneIds: string[]): string {
 <template>
   <div class="page-stack reapply-page">
     <header class="flow-heading">
-      <button class="button button--quiet" type="button" @click="cancel">返回提醒</button>
       <div><p class="eyebrow">補擦紀錄</p><h1>記錄補擦</h1><p>請確認要記錄的部位、防曬乳與時間；儲存前不會更新提醒。</p></div>
+      <button class="icon-button" type="button" aria-label="返回提醒" @click="cancel">
+        <Icon name="tool-close" :size="24" />
+      </button>
     </header>
 
     <p v-if="reapplication.phase.value === 'loading'" role="status">正在讀取目前部位與防曬乳…</p>
@@ -83,8 +86,7 @@ function zoneNames(zoneIds: string[]): string {
 </template>
 
 <style scoped>
-.flow-heading { display: grid; gap: var(--space-5); }
-.flow-heading .button { justify-self: start; }
+.flow-heading { display: flex; align-items: start; justify-content: space-between; gap: var(--space-4); }
 .flow-heading h1, .flow-heading p { margin: 0; }
 .flow-heading h1 { font-size: var(--font-size-page-title); }
 .flow-heading div { display: grid; gap: var(--space-3); }

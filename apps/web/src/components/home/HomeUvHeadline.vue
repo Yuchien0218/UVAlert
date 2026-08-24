@@ -110,7 +110,7 @@ const locationLine = computed(() => {
   justify-content: space-between;
   align-items: baseline;
   gap: var(--space-3);
-  font-size: var(--font-size-body-sm, 0.875rem);
+  font-size: var(--font-size-body);
 }
 
 .uv-headline__note {

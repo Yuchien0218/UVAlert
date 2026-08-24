@@ -234,7 +234,7 @@ function getUnavailableMessage(error: UvForecastError): string {
   border: 1px solid var(--border-subtle);
   border-radius: var(--radius-pill);
   color: var(--text-secondary);
-  font-size: 0.75rem;
+  font-size: var(--font-size-caption);
   white-space: nowrap;
 }
 
@@ -344,7 +344,7 @@ function getUnavailableMessage(error: UvForecastError): string {
 .uv-forecast__note {
   margin: 0;
   color: var(--text-secondary);
-  font-size: 0.8rem;
+  font-size: var(--font-size-label);
   line-height: 1.7;
 }
 

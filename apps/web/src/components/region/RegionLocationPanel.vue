@@ -141,13 +141,13 @@ const errorMessage = computed(() => {
 .eyebrow {
   color: var(--text-secondary);
   font-family: var(--font-mono);
-  font-size: 0.75rem;
+  font-size: var(--font-size-caption);
   letter-spacing: 0.12em;
 }
 
 .location-panel__title {
   margin-top: var(--space-1);
-  font-size: 1.3rem;
+  font-size: var(--font-size-title-md);
 }
 
 .location-panel__body,
@@ -169,7 +169,7 @@ const errorMessage = computed(() => {
 }
 
 .location-panel__candidate h3 {
-  font-size: 1.1rem;
+  font-size: var(--font-size-title-sm);
 }
 
 .location-panel__relocate {

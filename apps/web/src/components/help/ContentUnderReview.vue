@@ -38,7 +38,7 @@ withDefaults(defineProps<Props>(), { requiredReview: null });
 
 .under-review h2 {
   margin: 0;
-  font-size: 1.15rem;
+  font-size: var(--font-size-section-title);
 }
 
 .under-review p {
@@ -48,10 +48,10 @@ withDefaults(defineProps<Props>(), { requiredReview: null });
 }
 
 .under-review__meta {
-  font-size: 0.875rem;
+  font-size: var(--font-size-body);
 }
 
 .under-review__note {
-  font-size: 0.875rem;
+  font-size: var(--font-size-body);
 }
 </style>

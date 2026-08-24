@@ -44,7 +44,8 @@ function makeProduct(
     purchaseMonth: "2026-05",
     expiryDate: "2028-05-01",
     note: "清爽好推",
-    currentSnapshot: { ...snapshot, spf: 50, paGrade: "++++" },
+    // paGrade 存照包裝抄的完整標示，顯示端不再自己加 PA 前綴。
+    currentSnapshot: { ...snapshot, spf: 50, paGrade: "PA++++" },
     snapshotFingerprint: fingerprintProductLabelSnapshot(snapshot),
     createdAt: "2026-08-01T08:00:00.000Z",
     updatedAt: "2026-08-01T08:00:00.000Z",
@@ -112,8 +113,10 @@ describe("ProductDetailPage", () => {
 
     expect(wrapper.text()).toContain("日常保濕防曬乳");
     expect(wrapper.text()).toContain("防曬乳");
-    expect(wrapper.text()).toContain("SPF50");
+    expect(wrapper.text()).toContain("SPF 50");
     expect(wrapper.text()).toContain("PA++++");
+    // 前綴重複的回歸守門：曾經寫成 `PA${paGrade}`，實測顯示成 PAPA++++。
+    expect(wrapper.text()).not.toContain("PAPA");
     expect(wrapper.text()).toContain("2028-05-01");
     expect(wrapper.text()).toContain("清爽好推");
   });

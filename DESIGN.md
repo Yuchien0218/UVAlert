@@ -353,6 +353,12 @@ components:
     rounded: "{rounded.md}"
     padding: 12px 20px
     minHeight: 44px
+  icon-button:
+    backgroundColor: transparent
+    textColor: "{colors.ink}"
+    borderColor: "{colors.hairline}"
+    rounded: "{rounded.pill}"
+    size: 44px
   text-link:
     backgroundColor: transparent
     textColor: "{colors.primary}"
@@ -720,6 +726,10 @@ Noto Serif TC 是標題的唯一字型，沒有第二層自托管備援——載
 **`button-quiet`** — 弱化描邊按鈕。透明底、`{colors.hairline}` 邊框。用於「再試一次」這類次要動作。
 
 **`button-on-dark`** — 深色表面上的按鈕。背景 `{colors.surface-dark-elevated}`，文字 `{colors.on-dark}`。**系統永不在深色表面上反轉出淺色次要按鈕**。
+
+**`icon-button`** — 44×44 圓形圖示鈕，透明底、`{colors.hairline}` 邊框，圓角 `{rounded.pill}`。用於次要流程頁（`/reminder/reapply`、記錄狀況、更正紀錄、新增／編輯裝備）與 sheet 的關閉／取消控制項。
+
+> **2026-08-24 收斂**：這個樣式原本在 7 個地方各自實作（`.sheet__close`、`.back-link`、`.form-heading__close` 等），其中兩組還是「同名但分別 scoped」的重複定義。統一成 `apps/web/src/assets/app.css` 的 `.icon-button`。刻意不疊在 `button-primary`／`button-quiet` 之上——`.button` 在窄螢幕（<31rem）會 `width: 100%`，次要動作套上去會變成跟主要動作同等重量的滿版按鈕。
 
 **`text-link`** — 內文連結，`{colors.primary}`。按下時加底線。
 

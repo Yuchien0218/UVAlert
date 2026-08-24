@@ -332,6 +332,14 @@ export interface ScheduledNotification {
   dueAt: string;
   title: string;
   body: string;
+  /**
+   * 顯示後多久再提醒一次，`null` 表示只提醒一次。
+   *
+   * 重複跟單次提醒受同一個平台限制：只在分頁存活時有效，見
+   * `canDeliverInBackground()`。同一個 id 的下一次 `schedule()`
+   * （例如到期時間被重算）會取代整個重複鏈，不會兩者並存。
+   */
+  repeatMinutes: number | null;
 }
 
 /**
@@ -370,4 +378,20 @@ export interface NotificationPort {
    * Web Push 之後，畫面文案能自動跟著改，而不必回頭改判斷邏輯。
    */
   canDeliverInBackground(): boolean;
+  /**
+   * 立即顯示一則測試通知，讓使用者確認這台裝置目前收得到。
+   * 權限不足或顯示失敗回傳 `false`，不丟例外。
+   */
+  sendTest(): Promise<boolean>;
+}
+
+/**
+ * 使用者的通知偏好（目前只有再次提醒頻率）。
+ *
+ * 本機優先：不需要雲端同步也能讀寫，跟 `LocalSyncPort` 共用同一份
+ * `UserPreferencesV1` 儲存位置，避免出現兩份互相漂移的偏好資料。
+ */
+export interface UserPreferencesPort {
+  getReminderFrequencyMinutes(): Promise<number | null>;
+  setReminderFrequencyMinutes(minutes: number | null): Promise<void>;
 }

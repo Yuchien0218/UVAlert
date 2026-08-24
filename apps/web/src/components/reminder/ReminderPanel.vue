@@ -225,7 +225,7 @@ function getEyebrowText(): string {
 .reminder-panel__label {
   margin: calc(var(--space-3) * -1) 0 0;
   color: var(--text-secondary);
-  font-size: 0.875rem;
+  font-size: var(--font-size-body);
 }
 
 .reminder-panel__body {
@@ -241,7 +241,7 @@ function getEyebrowText(): string {
 
 .reminder-panel__track {
   height: 8px;
-  border-radius: 4px;
+  border-radius: var(--radius-xs);
   background: var(--color-surface-card);
   overflow: hidden;
 }

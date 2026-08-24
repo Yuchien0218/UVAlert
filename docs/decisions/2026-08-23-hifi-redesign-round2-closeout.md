@@ -80,12 +80,74 @@ index.ts` 核對後，三條路由全部存在且指向功能完整的頁面：
 原樣沿用，沒人在動手前用 `Grep` 核對路由表。下一輪如果看到任何文件說
 某個頁面「沒做」，先查路由表和對應元件檔案是否存在，不要直接信文件。
 
+## 七、第四輪：`防曬補擦流程設計/` 新稿子對齊（2026-08-24）
+
+使用者提供第三份 Claude Design 匯出（`防曬補擦流程設計/UVAlert
+Screens.dc.html`，10 個畫面），涵蓋原本沒有稿子的
+`ForecastPage`／`ReapplyPage`／`MorePage`／`GearForm`／
+`SetupTimingPage` 步驟 2／`ProductDetailPage`，也重新畫了已完成的
+`/reminder`、通知設定、裝備卡片、設定步驟指示器供核對。**這批稿子的
+字型是霞鶩文楷 TC，已被 DESIGN.md 的最終裁決推翻（改回 Noto Serif TC
+單獨使用），實作時忽略字型設定，只採版面與元件結構。**
+
+發現並處理的落差：
+
+- **設定流程步驟指示器要重做**：稿子畫的是分段線條（每步一段，完成
+  與否由該段填滿與否表示），不是上一輪做的連續進度條。已改成分段版
+  （commit `11908d8`）。
+- **`ProductDetailPage` 稿子編造資料**：畫了「依情境的補擦間隔：
+  120／80／60 分」，但一瓶防曬乳在資料模型裡只有一個
+  `reapplicationIntervalMinutes`，不會依情境變出三個數字。不採用這
+  部分。
+- **`ForecastPage` 稿子編造資料**：畫了逐時 UV 長條圖與「今日最高
+  UVI」卡片，但 `FiveDayUvForecast` 沒有逐時欄位。不採用；既有頁面
+  結構本來就與稿子其餘部分一致，未改動。
+- **`MorePage`、`GearForm` 視覺對齊**：入口卡改成 DESIGN.md 的
+  `more-entry-card`（杏桃奶油底、無邊框）；`GearForm` 品類選擇器改
+  3 欄圖示格子，順手修掉一個既有 bug（`choice-grid` 樣式只定義在
+  `ProductSnapshotEditor.vue` 的 scoped style 裡，品類選項原本完全
+  沒套到樣式）。已完成，commit `a68f077`。
+- **`/reminder` 稿子與現行裁決衝突**：稿子的按鈕文字是「我剛補擦了」，
+  跟已稽核的 `copy-audit.md`「記錄補擦」矛盾；稿子上的深色圓環
+  `CountdownPanel` 用法經使用者截圖核對後，實際渲染跟現行平面版本
+  一致，不是我原本以為的深色面板差異。**裁決：維持「記錄補擦」不改，
+  `/reminder` 不需要照這批稿子調整**。
+- **`ReapplyPage`、`SetupTimingPage` 步驟 2**：稿子本身標註為「提案」
+  （上游未定義），現有實作已有更完整的流程（部位×裝備配對、水上
+  活動確信度等），這輪未逐項比對是否需要改動。
+
+過程中額外發現 `--border-strong` 這個 CSS 變數從未在
+`packages/ui/src/styles.css` 定義過，多處元件（`GearListItem.vue`、
+`GearForm.vue`、`ReportContextEventPage.vue`、`EventCorrectionPage.vue`）
+都在用，落回瀏覽器預設 `currentColor`。已開背景任務修正。
+
 ## 五、已知遺留問題（非本輪範圍，已開背景任務）
 
 `FiveDayUvCard.vue` 在沒設定地區時顯示的「設定地區」連結是無效的
 `#outdoor-context` 頁內錨點，不是導向 `/region` 的連結。這是既有問題，
 這輪把卡片嵌入 `/reminder` 後同一個壞連結出現在兩處，更容易被注意到。
 已透過背景任務追蹤（非 session 內完成）。
+
+## 六、第三輪：通知「再次提醒頻率」＋「裝置測試」（2026-08-24）
+
+交接文件第三節列的下一輪項目，依賴 `NotificationController` 排程邏輯
+重構——這輪已完成，commit `3f969bc`：
+
+- `ScheduledNotification` 新增 `repeatMinutes`；`BrowserNotifications`
+  顯示後若有設定會依頻率重新武裝，同一 id 的下一次 `schedule()`（到期
+  時間被重算）自然砍掉整條重複鏈。
+- 新增 `UserPreferencesPort`／`LocalUserPreferencesRepository`，接上
+  `UserPreferencesV1.reminderFrequencyMinutes`——這個欄位早就在
+  `packages/contracts` 裡定義好了，只是從沒有任何程式碼讀寫過。跟
+  `LocalSyncRepository` 共用同一個 `AppMetadata` key，本機優先，不需要
+  雲端同步也能用。
+- `NotificationSettingsPage` 已授權狀態新增「再次提醒頻率」（只提醒
+  一次／每 5／15 分鐘再提醒一次）與「裝置測試」兩區塊，文案明講重複
+  提醒受同一個「只在分頁存活時有效」的平台限制，不是新的送達保證。
+
+`pnpm check` 全綠（typecheck + 481 個測試）。因為 headless 測試環境無法
+把通知權限切成 granted，已授權狀態的畫面靠單元測試涵蓋（radio 互動、
+測試按鈕點擊），沒有額外做瀏覽器目視驗證。
 
 ---
 

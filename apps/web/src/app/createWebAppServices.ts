@@ -7,6 +7,7 @@ import {
   LocalSetupDraftRepository,
   LocalSessionRepository,
   LocalSyncRepository,
+  LocalUserPreferencesRepository,
   LocalWeatherForecastRepository,
   SunshieldDatabase
 } from "@sunshield/persistence-web";
@@ -256,7 +257,8 @@ export function createWebAppServices(
 
   const notifications = createNotificationController({
     notifications: notificationPort,
-    currentSession: boot.currentSession
+    currentSession: boot.currentSession,
+    userPreferences: new LocalUserPreferencesRepository(database)
   });
 
   return {

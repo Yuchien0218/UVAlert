@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed } from "vue";
 import { useRoute, useRouter } from "vue-router";
+import Icon from "../components/icons/Icon.vue";
 import GearForm from "../components/product/GearForm.vue";
 
 /**
@@ -39,16 +40,21 @@ function handleCancel(): void {
 
 <template>
   <div class="page-stack gear-form-page">
-    <header class="flow-heading">
-      <button class="button button--quiet" type="button" @click="handleCancel">
-        取消
-      </button>
+    <header class="form-heading">
       <div>
         <h1>{{ isEdit ? "編輯防曬裝備" : "新增防曬裝備" }}</h1>
         <p>
           資料會先儲存在這台裝置；若已開啟同步，之後也可以同步到雲端。非必要欄位可以稍後再補。
         </p>
       </div>
+      <button
+        class="icon-button"
+        type="button"
+        aria-label="取消"
+        @click="handleCancel"
+      >
+        <Icon name="tool-close" :size="24" />
+      </button>
     </header>
 
     <GearForm :product-id="productId" @saved="handleSaved" />
@@ -61,8 +67,18 @@ p {
   margin: 0;
 }
 
-.flow-heading p {
+/* 關閉控制項用 app.css 的共用 .icon-button，不在這裡另寫一份。 */
+.form-heading {
+  display: flex;
+  align-items: start;
+  justify-content: space-between;
+  gap: var(--space-4);
+}
+
+.form-heading p {
+  margin-top: var(--space-3);
   color: var(--text-secondary);
   line-height: 1.7;
 }
+
 </style>
