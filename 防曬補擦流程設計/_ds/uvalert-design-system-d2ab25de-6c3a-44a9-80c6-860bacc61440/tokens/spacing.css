@@ -1,0 +1,31 @@
+/* Spacing, radii and layout — DESIGN.md §4 and §6. 4px base unit.
+   Deliberately tighter than a marketing site: countdown, status and next step
+   must fit one mobile screen without scrolling. */
+:root {
+  --space-xxs: 4px;
+  --space-xs: 8px;
+  --space-sm: 12px;
+  --space-md: 16px;
+  --space-lg: 20px;
+  --space-xl: 24px;
+  --space-xxl: 32px;
+  --space-section: 40px;
+
+  /* Type stack rhythm — the gap BETWEEN a heading, its body, and its note.
+     Smaller than the block gap so a heading + its text read as one unit. */
+  --space-stack-title-body: 8px;   /* 標題 → 內文 */
+  --space-stack-body-note: 4px;    /* 內文 → 次要說明 */
+  --space-stack-block: 24px;       /* 一組文字 → 下一組 */
+
+  --radius-xs: 4px;
+  --radius-sm: 8px;
+  --radius-md: 14px;
+  --radius-lg: 20px;
+  --radius-pill: 999px;
+
+  --content-max: 752px;
+  --tap-target: 44px;
+  --page-gutter-mobile: 16px;
+  --page-gutter-desktop: 24px;
+  --bottom-nav-height: 64px;
+}

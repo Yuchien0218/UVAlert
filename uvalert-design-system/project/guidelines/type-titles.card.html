@@ -1,0 +1,27 @@
+<!-- @dsCard group="Type" viewport="700x420" name="Titles & body (sans)" subtitle="Inter + Noto Sans TC, 400–500" -->
+<!doctype html>
+<html lang="zh-Hant"><head><meta charset="utf-8"><link rel="stylesheet" href="../styles.css">
+<style>body{margin:0;padding:16px;background:var(--color-canvas);color:var(--color-ink)}.two{display:grid;grid-template-columns:1fr 1fr;gap:var(--space-xl)}.lb{font-size:11px;font-family:var(--font-mono);color:var(--color-muted);margin:0 0 var(--space-xs)}.rule{border-top:1px solid var(--color-hairline);margin:var(--space-lg) 0}</style>
+</head><body>
+<div class="type-stack">
+  <p class="title-lg">文章章節標題 22/500・行高 1.45</p>
+  <p class="body-md">預設內文 16px，中文行高 1.75。中文沒有可依靠的升降部節奏，行高要明確設定；長段落用這一級。</p>
+  <p class="body-sm">次要說明 14px，行高 1.65 — 比內文緊，才會讀成同一塊而不是散開。</p>
+  <p class="caption">細則與免責 13px，行高 1.6。</p>
+  <p class="title-md">卡片標題 18/500</p>
+  <p class="body-md">上一組與這個標題之間是 24px（--space-stack-block）；標題到內文只有 8px。</p>
+</div>
+<div class="rule"></div>
+<div class="two">
+  <div><p class="lb">stack 內距</p><div class="type-stack">
+    <p class="title-sm">標題 → 內文　8px</p>
+    <p class="body-md">內文行高 1.75。</p>
+    <p class="body-sm">內文 → 次要說明　4px。</p>
+  </div></div>
+  <div><p class="lb">不要這樣</p><div style="display:grid;gap:var(--space-md)">
+    <p class="title-sm" style="margin:0">標題與內文等距 16px</p>
+    <p class="body-md">看起來像兩段各自獨立的文字，標題不再屬於下面這段。</p>
+    <p class="body-sm" style="margin:0">說明也一樣浮開。</p>
+  </div></div>
+</div>
+</body></html>

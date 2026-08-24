@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<!-- @template name="UVAlert Hi-fi Screens" description="三張成品級手機畫面：提醒主頁（進行中）、裝備清單、設定流程 step 1" -->
+<helmet><script src="./ds-base.js"></script><style>body{margin:0;background:#e9ddcf}</style></helmet>
+<div style="padding:40px;display:flex;flex-wrap:wrap;gap:48px;align-items:flex-start;font-family:var(--font-body)">
+
+<div style="display:flex;flex-direction:column;gap:10px" data-screen-label="01 提醒主頁 進行中">
+<div style="font-size:12px;letter-spacing:.08em;color:var(--color-body)">01　提醒主頁－進行中</div>
+<div style="width:375px;height:780px;background:var(--color-canvas);border:1px solid var(--color-hairline);border-radius:22px;overflow:hidden;display:flex;flex-direction:column">
+<x-import component-from-global-scope="UVAlertDesignSystem_d2ab25.BrandHeader" logo-base="../../assets/logo" hint-size="100%,68px"></x-import>
+<div style="flex:1;min-height:0;overflow:hidden;display:flex;flex-direction:column;gap:16px;padding:4px 20px 20px">
+<x-import component-from-global-scope="UVAlertDesignSystem_d2ab25.CountdownPanel" tone="tracking" label="追蹤中" minutes="82" unit="分鐘" progress="{{ progress }}" caption="預計 20:15 需要補擦" hint-size="100%,180px"></x-import>
+<x-import component-from-global-scope="UVAlertDesignSystem_d2ab25.Button" variant="primary" full-width="{{ yes }}" hint-size="100%,48px">我剛補擦了</x-import>
+<div style="display:grid">
+<x-import component-from-global-scope="UVAlertDesignSystem_d2ab25.ZoneStatusRow" zone="臉部" tone="tracking" state-label="追蹤中" remaining="82 分" icon-base="../../assets/icons" hint-size="100%,48px"></x-import>
+<x-import component-from-global-scope="UVAlertDesignSystem_d2ab25.ZoneStatusRow" zone="頸部" tone="soon" state-label="即將到期" remaining="18 分" icon-base="../../assets/icons" hint-size="100%,48px"></x-import>
+<x-import component-from-global-scope="UVAlertDesignSystem_d2ab25.ZoneStatusRow" zone="手背" tone="due" state-label="該補擦了" remaining="0 分" icon-base="../../assets/icons" hint-size="100%,48px"></x-import>
+</div>
+<x-import component-from-global-scope="UVAlertDesignSystem_d2ab25.FiveDayUvCard" days="{{ days }}" source="中央氣象署・F-D0047-091" updated-at="14:00" hint-size="100%,150px"></x-import>
+<div style="flex:1"></div>
+<x-import component-from-global-scope="UVAlertDesignSystem_d2ab25.SafetyNote" hint-size="100%,40px">這是協助你記得補擦的提醒，不是安全曝曬時間或防護效果保證。</x-import>
+</div>
+<x-import component-from-global-scope="UVAlertDesignSystem_d2ab25.BottomNav" active="reminder" icon-base="../../assets/icons" hint-size="100%,64px"></x-import>
+</div>
+</div>
+
+<div style="display:flex;flex-direction:column;gap:10px" data-screen-label="02 裝備清單">
+<div style="font-size:12px;letter-spacing:.08em;color:var(--color-body)">02　裝備清單</div>
+<div style="width:375px;height:780px;background:var(--color-canvas);border:1px solid var(--color-hairline);border-radius:22px;overflow:hidden;display:flex;flex-direction:column">
+<x-import component-from-global-scope="UVAlertDesignSystem_d2ab25.BrandHeader" logo-base="../../assets/logo" hint-size="100%,68px"></x-import>
+<div style="flex:1;min-height:0;overflow:hidden;display:flex;flex-direction:column;gap:16px;padding:4px 20px 20px">
+<x-import component-from-global-scope="UVAlertDesignSystem_d2ab25.PageHeading" eyebrow="裝備" title="你的防曬裝備" body="補擦間隔會依你選的這件裝備計算。" hint-size="100%,100px"></x-import>
+<div style="display:grid;gap:12px">
+<x-import component-from-global-scope="UVAlertDesignSystem_d2ab25.GearListItem" category="gear-sunscreen" name="安耐曬 金鑽高效防曬露" summary="SPF 50+ · 一般補擦 120 分鐘" icon-base="../../assets/icons" hint-size="100%,84px"></x-import>
+<x-import component-from-global-scope="UVAlertDesignSystem_d2ab25.GearListItem" category="gear-hat" name="寬緣漁夫帽" summary="臉部、頸部遮蔽" icon-base="../../assets/icons" hint-size="100%,84px"></x-import>
+<x-import component-from-global-scope="UVAlertDesignSystem_d2ab25.GearListItem" category="gear-clothing" name="長袖防曬外套" summary="標示尚未確認" icon-base="../../assets/icons" hint-size="100%,84px"></x-import>
+</div>
+<x-import component-from-global-scope="UVAlertDesignSystem_d2ab25.Button" variant="quiet" full-width="{{ yes }}" hint-size="100%,48px">新增裝備</x-import>
+<div style="flex:1"></div>
+<x-import component-from-global-scope="UVAlertDesignSystem_d2ab25.SafetyNote" hint-size="100%,40px">補擦間隔依產品標示與活動情境估算，不代表防護效果保證。</x-import>
+</div>
+<x-import component-from-global-scope="UVAlertDesignSystem_d2ab25.BottomNav" active="gear" icon-base="../../assets/icons" hint-size="100%,64px"></x-import>
+</div>
+</div>
+
+<div style="display:flex;flex-direction:column;gap:10px" data-screen-label="03 設定流程 step 1">
+<div style="font-size:12px;letter-spacing:.08em;color:var(--color-body)">03　開始提醒－步驟 1 情境</div>
+<div style="width:375px;height:780px;background:var(--color-canvas);border:1px solid var(--color-hairline);border-radius:22px;overflow:hidden;display:flex;flex-direction:column">
+<x-import component-from-global-scope="UVAlertDesignSystem_d2ab25.BrandHeader" logo-base="../../assets/logo" hint-size="100%,68px"></x-import>
+<div style="flex:1;min-height:0;overflow:hidden;display:flex;flex-direction:column;padding:4px 20px 24px">
+<x-import component-from-global-scope="UVAlertDesignSystem_d2ab25.SetupStepShell" step="{{ one }}" title="你現在主要在哪種情境？" description="選擇最符合這次活動的情境，補擦間隔會跟著調整。" hint-size="100%,520px">
+<x-import component-from-global-scope="UVAlertDesignSystem_d2ab25.ContextOption" icon="context-outdoor" label="戶外一般活動" description="通勤、散步、逛街。" icon-base="../../assets/icons" hint-size="100%,72px"></x-import>
+<x-import component-from-global-scope="UVAlertDesignSystem_d2ab25.ContextOption" icon="context-exercise" label="戶外運動" description="會流汗，補擦間隔較短。" selected="{{ yes }}" icon-base="../../assets/icons" hint-size="100%,72px"></x-import>
+<x-import component-from-global-scope="UVAlertDesignSystem_d2ab25.ContextOption" icon="context-water" label="水上活動" description="準備下水或已在水中。" icon-base="../../assets/icons" hint-size="100%,72px"></x-import>
+<x-import component-from-global-scope="UVAlertDesignSystem_d2ab25.ContextOption" icon="context-indoor" label="室內靠窗" description="仍有紫外線，間隔最長。" icon-base="../../assets/icons" hint-size="100%,72px"></x-import>
+</x-import>
+<div style="flex:1"></div>
+<div style="display:grid;gap:12px;padding-top:20px">
+<x-import component-from-global-scope="UVAlertDesignSystem_d2ab25.Button" variant="primary" full-width="{{ yes }}" hint-size="100%,48px">下一步</x-import>
+<x-import component-from-global-scope="UVAlertDesignSystem_d2ab25.SafetyNote" hint-size="100%,40px">情境只影響提醒間隔，不代表安全曝曬時間。</x-import>
+</div>
+</div>
+<x-import component-from-global-scope="UVAlertDesignSystem_d2ab25.BottomNav" active="reminder" icon-base="../../assets/icons" hint-size="100%,64px"></x-import>
+</div>
+</div>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  renderVals() {
+    return {
+      yes: true,
+      one: 1,
+      progress: 0.55,
+      days: [
+        { date: "8/23", uvi: 6, level: "high" },
+        { date: "8/24", uvi: 8, level: "very-high" },
+        { date: "8/25", uvi: 5, level: "moderate" },
+        { date: "8/26", uvi: 3, level: "moderate" },
+        { date: "8/27", uvi: 2, level: "low" }
+      ]
+    };
+  }
+}
+</script>
+</body>
+</html>

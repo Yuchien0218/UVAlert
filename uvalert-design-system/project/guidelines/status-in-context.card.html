@@ -1,0 +1,39 @@
+<!-- @dsCard group="Colors" viewport="700x1010" name="Status in context" subtitle="Judge status colour on real components, never on swatches" -->
+<!doctype html>
+<html lang="zh-Hant"><head><meta charset="utf-8"><link rel="stylesheet" href="../styles.css">
+<style>body{margin:0;padding:16px;background:var(--color-canvas);color:var(--color-ink)}#root{display:grid;gap:var(--space-md)}.lb{font-size:11px;font-family:var(--font-mono);color:var(--color-muted);margin:0}.col{display:grid;gap:var(--space-xs)}.two{display:grid;grid-template-columns:1fr 1fr;gap:var(--space-md);align-items:start}</style>
+</head><body><div id="root"></div>
+<script>window.UVALERT_ICON_BASE="../assets/icons"</script>
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+<script src="../_ds_bundle.js"></script>
+<script type="text/babel">
+const NS = window.UVAlertDesignSystem_d2ab25;
+const { CountdownPanel, StatusCard, ZoneStatusRow } = NS;
+const IB = "../assets/icons";
+function Card(){return (<>
+<div className="two">
+  <div className="col"><p className="lb">countdown · tracking</p>
+    <CountdownPanel tone="tracking" label="追蹤中" minutes="82" progress={0.62} caption="預計 20:15 需要補擦" /></div>
+  <div className="col"><p className="lb">countdown · due</p>
+    <CountdownPanel tone="due" label="該補擦了" minutes="0" progress={0} caption="上次補擦 12:40" /></div>
+</div>
+<div className="col"><p className="lb">zone rows · 四種狀態並排比較</p>
+  <div>
+    <ZoneStatusRow zone="臉部" tone="tracking" stateLabel="追蹤中" remaining="82 分" iconBase={IB} />
+    <ZoneStatusRow zone="頸部" tone="soon" stateLabel="即將到期" remaining="18 分" iconBase={IB} />
+    <ZoneStatusRow zone="手背" tone="due" stateLabel="該補擦了" remaining="0 分" iconBase={IB} />
+    <ZoneStatusRow zone="耳朵" tone="untimed" stateLabel="未計時" remaining="—" iconBase={IB} />
+  </div></div>
+<div className="col"><p className="lb">status cards · 五種同等視覺重量</p>
+  <div style={{display:"grid",gap:"var(--space-xs)"}}>
+    <StatusCard tone="tracking" label="追蹤中" iconBase={IB}>下一次補擦在 20:15。</StatusCard>
+    <StatusCard tone="soon" label="即將到期" iconBase={IB}>頸部再 18 分鐘需要補擦。</StatusCard>
+    <StatusCard tone="due" label="該補擦了" iconBase={IB}>手背已超過建議間隔。</StatusCard>
+    <StatusCard tone="untimed" label="未計時" iconBase={IB}>這個部位這次沒有加入提醒。</StatusCard>
+    <StatusCard tone="saved" label="已儲存" iconBase={IB}>裝備設定已更新。</StatusCard>
+  </div></div>
+</>);}
+ReactDOM.createRoot(document.getElementById("root")).render(<Card />);
+</script></body></html>

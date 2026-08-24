@@ -1,0 +1,71 @@
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+html {
+  min-width: 20rem;
+  background: var(--color-canvas);
+  font-family: var(--font-sans);
+  font-size: var(--font-size-body-md);
+  color: var(--color-ink);
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+}
+body {
+  min-width: 20rem;
+  min-height: 100svh;
+  margin: 0;
+  background: var(--color-canvas);
+  color: var(--color-body);
+  line-height: var(--line-height-body);
+  letter-spacing: 0.01em;
+  text-wrap: pretty;
+  line-break: strict;
+  word-break: normal;
+}
+h1, h2, h3 {
+  font-family: var(--font-display);
+  font-weight: 400;
+  color: var(--color-ink);
+  line-height: var(--line-height-display);
+}
+button,
+a,
+input,
+select,
+textarea {
+  font: inherit;
+}
+button,
+a {
+  -webkit-tap-highlight-color: transparent;
+}
+a {
+  color: var(--color-primary);
+  text-underline-offset: 0.2em;
+}
+a:hover {
+  color: var(--color-primary-active);
+}
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+button {
+  color: inherit;
+}
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+  }
+}

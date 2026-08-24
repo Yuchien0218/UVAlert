@@ -1,0 +1,4 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" role="img" data-icon="state-unverified" data-tone="mono">
+  <title>標示尚未確認</title>
+  <circle cx="12" cy="12" r="8.5" fill="none" stroke="currentColor" stroke-width="2.5"></circle><path d="M9.6 9.8A2.4 2.4 0 1 1 12 12.2V13.5" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"></path><circle cx="12" cy="16.4" r="1.25" fill="currentColor"></circle>
+</svg>

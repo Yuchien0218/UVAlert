@@ -1,0 +1,66 @@
+/* Type tokens — DESIGN.md §3. Display face is 霞鶩文楷 TC (LXGW WenKai TC, OFL-1.1,
+   github.com/lxgw/LxgwWenkaiTC) — a kai/handwritten-leaning face whose warmth
+   matches the rounded wordmark and the app's "someone reminding you" voice; the
+   old Cormorant + Noto Serif TC pairing mixed two unrelated serif tempers and
+   fought the rounded logo. Body and all UI stay Inter + Noto Sans TC.
+   The repo ships sources only, so the webfont build is loaded from jsDelivr.
+   Display weight is 400 — WenKai has no bold; never synthesise one.
+   Readout note (DESIGN.md §3, 2026-08-22): mono is only ever applied to bare
+   numerals (countdown minutes, 20:15, UV index) — Chinese units sit in adjacent
+   elements in the body font — so no CJK mono coverage is needed.
+   Wordmark exception: the 防曬晴報員 lettering uses GenSenRounded TW Medium and
+   ships as outlined paths inside assets/logo/lockup-horizontal.svg — never set
+   headings or body in a rounded face. */
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Noto+Sans+TC:wght@400;500;600&family=Noto+Sans+Mono:wght@500;600&display=swap");
+
+@font-face {
+  font-family: "LXGW WenKai TC";
+  src: url("../assets/fonts/LXGWWenKaiTC-Regular.ttf") format("truetype");
+  font-weight: 400;
+  font-display: swap;
+}
+
+:root {
+  --font-display: "LXGW WenKai TC", "Noto Serif TC", ui-serif, serif;
+  /* Legacy alias — same face; prefer --font-display in new code. */
+  --font-serif: var(--font-display);
+  --font-sans: Inter, "Noto Sans TC", "Noto Sans CJK TC", ui-sans-serif, sans-serif;
+  --font-mono: "Noto Sans Mono", ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+
+  /* Display steps are 霞鶩文楷 TC, weight 400 only — never bolded, never rounded.
+     WenKai's strokes are light, so display sizes start larger than a sans would. */
+  --font-size-display-xl: 64px;
+  --font-size-display-lg: 48px;
+  --font-size-display-md: 36px;
+  --font-size-display-sm: 28px;
+  --font-size-title-lg: 22px;
+  --font-size-title-md: 18px;
+  --font-size-title-sm: 16px;
+  --font-size-body-md: 16px;
+  --font-size-body-sm: 14px;
+  --font-size-caption: 13px;
+  --font-size-caption-uppercase: 12px;
+  --font-size-readout: 14px;
+  --font-size-button: 14px;
+  --font-size-nav-label: 12px;
+  --font-size-countdown: 64px;
+
+  --letter-spacing-display-xl: -1.5px;
+  --letter-spacing-display-lg: -1px;
+  --letter-spacing-display-md: -0.5px;
+  --letter-spacing-display-sm: -0.3px;
+  --letter-spacing-caption-uppercase: 1.5px;
+  --letter-spacing-readout: -0.02em;
+
+  /* CJK overrides: same sizes, more vertical breathing room. Chinese has no
+     ascender/descender rhythm to lean on, so每 step gets an explicit value and
+     the ladder TIGHTENS as type gets smaller — a 14px note at 1.75 floats apart
+     and stops reading as one block. */
+  --line-height-display: 1.22;
+  --line-height-title: 1.45;
+  --line-height-body: 1.75;      /* 16px 內文，長段落 */
+  --line-height-body-sm: 1.65;   /* 14px 次要說明 */
+  --line-height-caption: 1.6;    /* 13px 細則、免責 */
+  --line-height-label: 1.5;      /* 單行標籤，不換行 */
+  --line-height-countdown: 0.95;
+}
