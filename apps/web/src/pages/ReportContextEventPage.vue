@@ -125,7 +125,7 @@ function zoneNames(zoneIds: string[]): string {
           <button
             v-for="choice in contextEvent.availableChoices.value"
             :key="choice.kind"
-            class="kind-option"
+            class="kind-option app-card"
             :class="{
               'option-selected': contextEvent.selectedKind.value === choice.kind
             }"
@@ -354,13 +354,19 @@ p {
   gap: var(--space-3);
 }
 
+/*
+ * 2026-08-24：這裡原本自己寫了 border 與 background: transparent，
+ * scoped 的特異性（.kind-option[data-v-xxx]）高過共用的 .option-selected，
+ * 把選取態整組蓋掉——選了以後底色與邊框都沒變，看起來像沒選到。
+ * 同一個陷阱今天已經在 ContextSelector 與 ApplicationTimePicker 修過，
+ * DESIGN.md 第十節也記過一次（min-height 那次）。
+ * 邊框與底色改由共用的 .app-card 提供，這裡只留版面。
+ */
 .kind-option {
   display: grid;
   gap: var(--space-1);
   padding: var(--space-4);
-  border: 1px solid var(--border-strong);
   border-radius: var(--radius-sm);
-  background: transparent;
   color: var(--text-primary);
   text-align: start;
   cursor: pointer;
