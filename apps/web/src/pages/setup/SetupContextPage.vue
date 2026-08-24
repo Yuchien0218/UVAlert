@@ -49,7 +49,10 @@ async function next(): Promise<void> {
 
 async function cancel(): Promise<void> {
   await setup.cancel();
-  await router.replace({ name: "reminder" });
+  // 2026-08-24：取消一律回首頁（底部導覽「提醒」的去處）。原本回
+  // /reminder，那是「查看完整狀態」的詳細頁，跟導覽列的提醒不同頁，
+  // 取消後會落在使用者沒預期的畫面。
+  await router.replace({ name: "home" });
 }
 
 /** 兩步流程後只剩 context 與 timing；舊草稿的 review 一律回 timing。 */

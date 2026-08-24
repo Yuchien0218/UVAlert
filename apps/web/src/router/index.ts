@@ -239,7 +239,11 @@ export function createAppRouter(
     }
 
     if (to.meta.requiresActiveSession === true && boot.currentSession.value === null) {
-      return { name: "reminder" };
+      // 2026-08-24：沒有進行中的提醒時導回首頁。首頁就是底部導覽「提醒」
+      // 的去處，也負責顯示「還沒有開始防曬提醒」的空狀態與開始 CTA；
+      // 原本導到 /reminder（「查看完整狀態」詳細頁）會落在使用者沒預期
+      // 的畫面。/reminder 本身保留給首頁的「查看完整狀態／最近紀錄」。
+      return { name: "home" };
     }
 
     if (typeof to.meta.setupStep === "string" && setup !== undefined) {

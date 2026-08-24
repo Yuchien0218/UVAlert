@@ -87,10 +87,10 @@ async function submit(): Promise<void> {
 
   const result = await setup.submit();
   if (result.ok) {
-    await router.replace({
-      name: "reminder",
-      query: { started: "1" }
-    });
+    // 2026-08-24：開始提醒後回首頁——首頁就是倒數與主 CTA 的所在，
+    // 也是底部導覽「提醒」的去處。原本回 /reminder（完整狀態詳細頁）。
+    // 順帶移除 query `started=1`：全專案沒有任何地方讀取它。
+    await router.replace({ name: "home" });
   }
 }
 
@@ -163,7 +163,8 @@ function validateForm(): string | null {
 
 async function cancel(): Promise<void> {
   await setup.cancel();
-  await router.replace({ name: "reminder" });
+  // 取消一律回首頁，理由同 SetupContextPage。
+  await router.replace({ name: "home" });
 }
 
 onMounted(async () => {

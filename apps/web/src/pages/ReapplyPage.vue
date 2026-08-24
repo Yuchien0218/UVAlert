@@ -13,11 +13,13 @@ const { reapplication } = useWebAppServices();
 const router = useRouter();
 
 onMounted(() => { void reapplication.load(); });
-watch(() => reapplication.error.value, (value) => { if (value === "not_found") void router.replace({ name: "reminder" }); });
+// 2026-08-24：這頁是從首頁主 CTA 進來的，取消／完成／找不到都回首頁。
+// 原本回 /reminder（「查看完整狀態」詳細頁），跟進來的地方不一致。
+watch(() => reapplication.error.value, (value) => { if (value === "not_found") void router.replace({ name: "home" }); });
 watch(() => reapplication.phase.value, async (value) => { if (value === "success") { await nextTick(); document.querySelector<HTMLElement>("#reapply-success-title")?.focus(); } });
 
-function cancel(): void { void router.push({ name: "reminder" }); }
-function finish(): void { void router.push({ name: "reminder" }); }
+function cancel(): void { void router.push({ name: "home" }); }
+function finish(): void { void router.push({ name: "home" }); }
 function zoneNames(zoneIds: string[]): string {
   return zoneIds.map((zoneId) => {
     const zone = reapplication.session.value?.zones.find((item) => item.zoneInstanceId === zoneId);

@@ -15,7 +15,8 @@ onMounted(() => {
 watch(
   () => contextEvent.error.value,
   (value) => {
-    if (value === "not_found") void router.replace({ name: "reminder" });
+    // 2026-08-24：這頁從首頁主 CTA 進來，取消／完成／找不到都回首頁。
+    if (value === "not_found") void router.replace({ name: "home" });
   }
 );
 
@@ -32,7 +33,7 @@ watch(
 );
 
 function cancel(): void {
-  void router.push({ name: "reminder" });
+  void router.push({ name: "home" });
 }
 
 function localValue(iso: string): string {

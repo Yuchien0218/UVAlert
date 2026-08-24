@@ -166,7 +166,10 @@ describe("createAppRouter", () => {
     }
   });
 
-  it("S-08 沒有 active Session 時回到提醒頁", async () => {
+  // 2026-08-24：落點從 /reminder 改成首頁。首頁是底部導覽「提醒」的
+  // 去處，也負責顯示「還沒有開始防曬提醒」的空狀態與開始 CTA；
+  // /reminder 是首頁連過去的「查看完整狀態」詳細頁，不適合當守衛落點。
+  it("S-08 沒有 active Session 時回到首頁", async () => {
     const boot = {
       phase: shallowReadonly(shallowRef("ready")), errorCode: shallowReadonly(shallowRef(null)), connectivity: shallowReadonly(shallowRef("online")), currentSession: shallowReadonly(shallowRef(null)),
       ensureBooted: vi.fn(async () => undefined), refresh: vi.fn(async () => undefined), dispose: vi.fn()
@@ -174,6 +177,6 @@ describe("createAppRouter", () => {
     const router = createAppRouter(boot, createMemoryHistory());
     await router.push("/reminder/reapply");
     await router.isReady();
-    expect(router.currentRoute.value.name).toBe("reminder");
+    expect(router.currentRoute.value.name).toBe("home");
   });
 });
