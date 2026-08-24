@@ -77,7 +77,7 @@
   margin: 0;
   font-size: var(--font-size-page-title);
   line-height: 0.98;
-  letter-spacing: -0.055em;
+  letter-spacing: var(--letter-spacing-page-title);
 }
 
 .page-heading__body {

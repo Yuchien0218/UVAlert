@@ -175,13 +175,24 @@
    * readout 則是 DESIGN.md 第三節已經記載的值，.stat-figure 原本就是
    * -0.02em，這裡只是給它一個名字，不是新決定。
    *
-   * 五個只出現一次的負字距標題（-0.03em 到 -0.055em）刻意不收斂進來，
-   * 那是「這些大標題的字距該不該統一」的設計決定，不是重複實作問題。
+   * 2026-08-24 使用者確認統一：原本 5 個只出現一次的負字距大標題
+   * （-0.03em 到 -0.055em）依角色併進既有分組，不再各自為政：
+   * - page-title：.page-heading__title 跟 SetupStepShell 的
+   *   .setup-shell__title 都用 --font-size-page-title，同樣是「頁面主標」
+   *   角色，原本 -0.055em／-0.05em 只差 0.005em，取用得較廣的
+   *   page-heading__title 數值。
+   * - headline：SetupContextPage 的 .recovery-card h2（clamp 1.5–2.35rem）
+   *   跟既有的 ReminderPanel／ReminderEmptyState 大標題尺寸級距重疊，
+   *   角色也同樣是「單一句子的大標題」，併入 headline。
+   * - readout：CountdownSunTime 的 .countdown-time__number 是即時跳動的
+   *   數字（雖然沒套 mono 字體），角色跟 .stat-figure 一樣是「讀數」，
+   *   併入 readout。
    */
   --letter-spacing-eyebrow: 0.16em;
   --letter-spacing-mono-label: 0.12em;
   --letter-spacing-headline: -0.04em;
   --letter-spacing-readout: -0.02em;
+  --letter-spacing-page-title: -0.055em;
 
   --space-1: 0.25rem;
   --space-2: 0.5rem;

@@ -165,7 +165,7 @@ function routeForStep(
 
 .recovery-card h2 {
   font-size: clamp(1.5rem, 7vw, 2.35rem);
-  letter-spacing: -0.035em;
+  letter-spacing: var(--letter-spacing-headline);
 }
 
 .recovery-card > p:last-of-type {
