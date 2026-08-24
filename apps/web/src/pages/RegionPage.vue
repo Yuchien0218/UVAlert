@@ -37,7 +37,7 @@ function returnToCaller(): Promise<unknown> {
 <template>
   <div class="page-stack region-page">
     <header class="page-heading">
-      <p class="page-heading__eyebrow">地區／本機資料</p>
+      <p class="page-heading__eyebrow eyebrow--mono">地區／本機資料</p>
       <h1 class="page-heading__title">地區設定</h1>
       <p class="page-heading__body">
         地區設定只用來顯示 UV 資訊；不會延長或縮短你的本機補擦提醒。
@@ -90,13 +90,6 @@ function returnToCaller(): Promise<unknown> {
 .region-skip h2,
 .region-skip p {
   margin: 0;
-}
-
-.page-heading__eyebrow {
-  color: var(--text-secondary);
-  font-family: var(--font-mono);
-  font-size: var(--font-size-caption);
-  letter-spacing: 0.12em;
 }
 
 .region-skip {

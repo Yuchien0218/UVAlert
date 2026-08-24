@@ -162,6 +162,27 @@
   --font-size-title: 1.25rem;
   --font-size-title-md: 1.35rem;
 
+  /*
+   * 2026-08-24 補：字距（letter-spacing）原本 8 個檔案各寫各的魔術數字，
+   * 互相對不上。這裡只收斂「真的重複」的三組，不強改只出現一次的數值
+   * （那些各自獨立，不是重複問題，改了是視覺決定，不是收斂）：
+   * - eyebrow：flow-heading 版型的小標籤，ReapplyPage／EventCorrectionPage／
+   *   ReportContextEventPage 三份逐字相同的 `.eyebrow { letter-spacing: .16em }`。
+   * - mono-label：RegionPage 與 RegionLocationPanel 的等寬座標／定位標籤，
+   *   四個屬性完全相同的區塊。
+   * - headline：ReminderPanel／ReminderEmptyState 的倒數大標題，
+   *   字級用 clamp() 各自不同，但字距都是 -0.04em。
+   * readout 則是 DESIGN.md 第三節已經記載的值，.stat-figure 原本就是
+   * -0.02em，這裡只是給它一個名字，不是新決定。
+   *
+   * 五個只出現一次的負字距標題（-0.03em 到 -0.055em）刻意不收斂進來，
+   * 那是「這些大標題的字距該不該統一」的設計決定，不是重複實作問題。
+   */
+  --letter-spacing-eyebrow: 0.16em;
+  --letter-spacing-mono-label: 0.12em;
+  --letter-spacing-headline: -0.04em;
+  --letter-spacing-readout: -0.02em;
+
   --space-1: 0.25rem;
   --space-2: 0.5rem;
   --space-3: 0.75rem;

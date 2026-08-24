@@ -88,6 +88,28 @@
 }
 
 /*
+ * 2026-08-24：flow-heading 版型（ReapplyPage／EventCorrectionPage／
+ * ReportContextEventPage）逐字重複的 `.eyebrow { letter-spacing: .16em }`
+ * 收斂到這裡。
+ */
+.eyebrow {
+  letter-spacing: var(--letter-spacing-eyebrow);
+}
+
+/*
+ * 2026-08-24：等寬座標／定位標籤，RegionPage 的 .page-heading__eyebrow
+ * 覆寫版與 RegionLocationPanel 的 .eyebrow 四個屬性逐字相同，收斂成
+ * modifier class，套用時疊加在既有 class 上（不取代）。
+ */
+.eyebrow--mono {
+  margin: 0;
+  color: var(--text-secondary);
+  font-family: var(--font-mono);
+  font-size: var(--font-size-caption);
+  letter-spacing: var(--letter-spacing-mono-label);
+}
+
+/*
  * Instrument numerals — repurposes --font-mono as a "readout" face for
  * actual data (countdown minutes, UVI value, timestamps), not as a
  * decorative uppercase label. This gives the mono font a job that means
@@ -98,7 +120,7 @@
   font-variant-numeric: tabular-nums;
   font-weight: 600;
   line-height: 0.95;
-  letter-spacing: -0.02em;
+  letter-spacing: var(--letter-spacing-readout);
   color: var(--text-primary);
 }
 

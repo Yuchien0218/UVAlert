@@ -48,7 +48,7 @@ const errorMessage = computed(() => {
   <section class="location-panel app-card" aria-labelledby="location-title">
     <div class="location-panel__heading">
       <div>
-        <p class="eyebrow">裝置定位</p>
+        <p class="eyebrow--mono">裝置定位</p>
         <h2 id="location-title" class="location-panel__title">
           使用目前位置
         </h2>
@@ -129,20 +129,12 @@ const errorMessage = computed(() => {
   gap: var(--space-4);
 }
 
-.eyebrow,
 .location-panel__title,
 .location-panel__body,
 .location-panel__candidate h3,
 .location-panel__candidate p,
 .location-panel__error {
   margin: 0;
-}
-
-.eyebrow {
-  color: var(--text-secondary);
-  font-family: var(--font-mono);
-  font-size: var(--font-size-caption);
-  letter-spacing: 0.12em;
 }
 
 .location-panel__title {
