@@ -6,7 +6,6 @@ import RecentEventsList from "../components/reminder/RecentEventsList.vue";
 import ZoneStatusList from "../components/reminder/ZoneStatusList.vue";
 import type { SecondaryActionKind } from "../features/reminder/reminderPresentation";
 import HomeCountdown from "../components/home/HomeCountdown.vue";
-import HomeLinkRow from "../components/home/HomeLinkRow.vue";
 import HomeLocationPrompt from "../components/home/HomeLocationPrompt.vue";
 import HomeNightNotice from "../components/home/HomeNightNotice.vue";
 import HomeNightSession from "../components/home/HomeNightSession.vue";
@@ -160,16 +159,6 @@ const reminderPresentation = computed(() => {
     now: currentTime.value
   });
 });
-
-const trackedZoneCount = computed(
-  () =>
-    session.value?.zones.filter((zone) => zone.zoneTimerStartedAt !== null)
-      .length ?? 0
-);
-
-const trackedZoneDetail = computed(
-  () => trackedZoneCount.value + " 個追蹤部位"
-);
 
 /**
  * S-07 的動作分派。
@@ -399,9 +388,10 @@ function handleEndSession(): void {
         :note="headlineNote"
       />
 
-      <nav class="home__links" aria-label="UV 入口">
-        <HomeLinkRow label="五日 UV 預報" to="/forecast" />
-      </nav>
+      <!--
+        2026-08-24：「五日 UV 預報」入口移到頁首右上角的 UV 指數
+        （點下去就是 /forecast），這裡不再重複一個入口。
+      -->
 
       <!--
         2026-08-24：完整狀態併入首頁下半部（原 /reminder，已移除）。
@@ -449,19 +439,13 @@ function handleEndSession(): void {
         開始防曬提醒
       </button>
 
-      <nav class="home__links" aria-label="次要入口">
-        <HomeLinkRow label="五日 UV 預報" to="/forecast" />
-        <!--
-          「查看最近紀錄」刻意不顯示筆數（2026-08-23 裁決）。事件流只查得
-          到目前 session，沒有提醒進行中時算不出今天有幾筆——寧可不顯示，
-          也不顯示假數字。夜間那張 wireframe 沒有這一列，所以也不放。
-        -->
-        <!--
-          2026-08-24：原本這裡有「查看最近紀錄」連到 /reminder。沒有進行
-          中的提醒時事件流查不到東西（事件流只查得到目前 session），該頁
-          又已併入本頁，所以這一列直接移除。
-        -->
-      </nav>
+      <!--
+        2026-08-24：這裡原本有兩個次要入口，現在都沒了，連 <nav> 空殼一起
+        移除。
+        - 「查看最近紀錄」連到 /reminder：該頁已併入本頁，且沒有提醒進行中
+          時事件流本來就查不到東西（事件流只查得到目前 session）。
+        - 「五日 UV 預報」：入口移到頁首右上角的 UV 指數，點它就是 /forecast。
+      -->
     </template>
 
     <div class="home__spacer" />
@@ -484,10 +468,6 @@ function handleEndSession(): void {
 
 .home__cta {
   width: 100%;
-}
-
-.home__links {
-  display: grid;
 }
 
 .home__spacer {

@@ -6,7 +6,7 @@ import BottomNavigation from "./BottomNavigation.vue";
 import BrandHeader from "./BrandHeader.vue";
 import GlobalStatusBanner from "./GlobalStatusBanner.vue";
 
-const { boot } = useWebAppServices();
+const { boot, uvForecast } = useWebAppServices();
 const route = useRoute();
 const mainElement = useTemplateRef<HTMLElement>("mainElement");
 const navigationVisible = computed(
@@ -42,6 +42,20 @@ const highestUrgencyTone = computed<HeaderTone>(() => {
   return null;
 });
 
+/**
+ * 頁首右上角的 UV 指數（2026-08-24 使用者裁決，取代原本的「本機提醒」）。
+ *
+ * 白天顯示今日、夜間顯示明日——跟首頁 HomeUvHeadline 同一條規則：夜間看
+ * 「今天的 UV」沒有行動價值，今天已經過完了。
+ */
+const isNight = computed(() => uvForecast.isEvening.value);
+
+const headerUvDay = computed(() => {
+  const days = uvForecast.forecast.value?.days ?? [];
+  if (days.length === 0) return null;
+  return isNight.value ? days[1] ?? null : days[0] ?? null;
+});
+
 watch(
   () => route.fullPath,
   async () => {
@@ -56,7 +70,11 @@ watch(
     class="app-shell"
     :class="{ 'app-shell--with-navigation': navigationVisible }"
   >
-    <BrandHeader :tone="highestUrgencyTone" />
+    <BrandHeader
+      :tone="highestUrgencyTone"
+      :region-name="uvForecast.region.value?.displayName ?? null"
+      :uv-risk-level="headerUvDay?.riskLevel ?? null"
+    />
     <GlobalStatusBanner
       :phase="boot.phase.value"
       :error-code="boot.errorCode.value"

@@ -1,18 +1,47 @@
 <script setup lang="ts">
 import { computed } from "vue";
 
+import type { UvRiskLevel } from "@sunshield/contracts";
+import { getUvRiskLevelLabel } from "../../features/uv/uvForecastRules";
+
 interface Props {
   /**
    * 反映目前所有提醒裡「最高急迫度」的狀態，由父層（通常是讀取所有
    * session/zone 狀態的地方）算出來傳進來。null／未傳 = 沒有進行中的
    * Logo 維持中性色；提醒狀態由文字與狀態點表達。
+   *
+   * 2026-08-24 起這只是**沒有地區時的退路**——有地區與預報時，右上角改
+   * 顯示 UV 指數（見下）。
    */
   tone?: "tracking" | "soon" | "due" | null;
+  /** 目前地區名稱。與 riskLevel 同時有值時，右上角才顯示 UV。 */
+  regionName?: string | null;
+  /** 要顯示的 UV 風險等級（白天今日、夜間明日，由父層決定）。 */
+  uvRiskLevel?: UvRiskLevel | null;
 }
 
 const props = withDefaults(defineProps<Props>(), {
-  tone: null
+  tone: null,
+  regionName: null,
+  uvRiskLevel: null
 });
+
+/**
+ * 2026-08-24 使用者裁決：右上角從「本機提醒」改成顯示紫外線指數，
+ * 例如「臺中市 低量級」，文字顏色跟著風險等級走，點下去到 /forecast。
+ *
+ * 沒有設定地區（或預報還沒讀到）就沒有 UV 可顯示，這時退回原本的提醒
+ * 狀態文字——那是本來就有的資訊，不會變成空白。
+ */
+const showUv = computed(
+  () => props.regionName !== null && props.uvRiskLevel !== null
+);
+
+const uvLabel = computed(() =>
+  props.uvRiskLevel === null
+    ? null
+    : `${props.regionName} ${getUvRiskLevelLabel(props.uvRiskLevel)}`
+);
 
 // 狀態點的顏色不能是唯一的狀態載體，否則對色覺障礙或在強光下看不出
 // 色差的使用者等於沒有這個資訊。文字跟著 tone 走，色彩只是強化；Logo
@@ -87,7 +116,17 @@ const contextLabel = computed(() => {
         </g>
       </svg>
     </RouterLink>
+    <RouterLink
+      v-if="showUv"
+      class="brand-header__uv"
+      :class="`brand-header__uv--${uvRiskLevel}`"
+      to="/forecast"
+    >
+      {{ uvLabel }}
+    </RouterLink>
+
     <div
+      v-else
       class="brand-header__context"
       :class="tone ? `brand-header__context--${tone}` : undefined"
     >
@@ -130,6 +169,44 @@ const contextLabel = computed(() => {
   color: var(--text-secondary);
   font-size: var(--font-size-caption);
   font-weight: 500;
+}
+
+/*
+ * UV 指數入口。顏色用 DESIGN.md 第二節的 UV 五級風險色。
+ *
+ * 顏色不是唯一的載體——等級名稱（低量級／中量級…）本身就是文字，
+ * 灰階或色覺差異下仍讀得出來，符合本檔案上方對狀態點的同一條規則。
+ * 觸控目標靠 padding 撐到 44px，不寫 min-height（見 DESIGN.md 第十節
+ * 2026-08-22 更正：元件覆寫尺寸會蓋掉共用 token）。
+ */
+.brand-header__uv {
+  display: inline-flex;
+  align-items: center;
+  padding: var(--space-3) 0;
+  color: var(--text-secondary);
+  font-size: var(--font-size-caption);
+  font-weight: 500;
+  text-decoration: none;
+}
+
+.brand-header__uv--low {
+  color: var(--color-uvi-low);
+}
+
+.brand-header__uv--moderate {
+  color: var(--color-uvi-moderate);
+}
+
+.brand-header__uv--high {
+  color: var(--color-uvi-high);
+}
+
+.brand-header__uv--very_high {
+  color: var(--color-uvi-very-high);
+}
+
+.brand-header__uv--extreme {
+  color: var(--color-uvi-extreme);
 }
 
 .brand-header__status-dot {
