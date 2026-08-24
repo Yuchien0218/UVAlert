@@ -651,7 +651,7 @@ Noto Serif TC 是標題的唯一字型，沒有第二層自托管備援——載
 
 **`page-heading`** — 由三段組成：`eyebrow`（`{typography.caption}`，`{colors.muted}`）、`title`（`{typography.display-md}`，襯線）、`body`（`{typography.body-md}`，`{colors.body}`，`max-width: 38rem`）。eyebrow 與 body 都是選用的。
 
-**`app-card`** — 通用內容卡。背景 `{colors.canvas}`，1px `{colors.hairline}` 邊框，圓角 `{rounded.lg}`，內距 20px。無陰影。
+**`app-card`** — 通用內容卡。背景半透明白 `rgba(255,255,255,0.6)` 疊在 `{colors.canvas}` 上（2026-08-24：純 canvas 版本套用後卡片跟頁面幾乎融在一起，改用半透明白疊加維持一點層次），1px `{colors.hairline}` 邊框，圓角 `{rounded.lg}`，內距 20px。無陰影。這個疊加效果假設卡片背後是 canvas 底色，不要用在深色面板或圖片背景上。
 
 **`page-footer-meta`** — 頁尾的版本、隱私政策、使用條款與資料說明。純文字連結列，`{colors.muted-soft}`，`{typography.body-sm}`。**刻意不做成功能卡片**，避免與「更多」頁的入口卡競爭。
 

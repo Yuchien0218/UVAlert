@@ -96,16 +96,15 @@
 
   --page-background: var(--color-canvas);
   /*
-   * 2026-08-24：改回 var(--color-canvas)，取代 2026-08-22 一度指向的
-   * --color-surface-card。這其實是回頭對齊 DESIGN.md 第五節 app-card
-   * 元件規範本來就寫的「背景 canvas、1px hairline 邊框」，是 2026-08-22
-   * 那次色彩套用順手把它改錯了方向；Claude Design 的下游元件庫一直是
-   * canvas＋hairline 版本，這次一併核對後跟進。全站卡片、輸入框、
-   * bottom sheet 都會變成跟頁面同色、只靠 hairline 分隔（不影響
-   * HomeCountdown／ReminderPanel／BottomNavigation，那三處直接引用
-   * --color-surface-card，不經過這個別名）。
+   * 2026-08-24：先改回 var(--color-canvas)（取代 2026-08-22 一度指向的
+   * --color-surface-card，理由見 DESIGN.md 第十節同日記錄），套用後
+   * 使用者反映卡片跟頁面幾乎融在一起、分不出界線；改用半透明白
+   * rgba(255,255,255,0.6) 疊在 canvas 上——比純 canvas 亮，卡片會有
+   * 一點「浮起來」的層次，但保留同一套暖色調，不像純白 #FFFFFF 那樣
+   * 突兀。疊加效果依賴卡片背後真的是 canvas 底色；深色面板
+   * （surface-dark）或圖片背景上不要用這個 token。
    */
-  --surface-primary: var(--color-canvas);
+  --surface-primary: rgba(255, 255, 255, 0.6);
   --surface-soft: var(--color-surface-soft);
   --surface-inverse: var(--color-surface-dark);
   --text-primary: var(--color-ink);
