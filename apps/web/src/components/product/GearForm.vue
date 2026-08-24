@@ -2,6 +2,7 @@
 import { computed, onMounted, ref, shallowRef } from "vue";
 import type { GearCategory } from "@sunshield/contracts";
 import { useWebAppServices } from "../../app/injection";
+import Icon from "../icons/Icon.vue";
 import ProductSnapshotEditor from "./ProductSnapshotEditor.vue";
 import {
   makeSessionOnlyProductSnapshot,
@@ -14,6 +15,15 @@ import {
   GEAR_CATEGORY_REMINDER_EFFECT,
   gearSafetyState
 } from "../../features/product/gearPresentation";
+import type { IconName } from "../../generated/icons.generated";
+
+/** 跟 GearListItem.vue 用同一組品類圖示對應。 */
+const GEAR_CATEGORY_ICONS: Record<GearCategory, IconName> = {
+  sunscreen: "gear-sunscreen",
+  clothing: "gear-clothing",
+  eyewear: "gear-sunglasses",
+  other_gear: "gear-other"
+};
 
 /**
  * S-12 新增防曬裝備／S-13 編輯防曬裝備的表單本體。
@@ -189,10 +199,15 @@ async function remove(): Promise<void> {
       <p v-if="categoryLocked" class="question-card__helper">
         已使用過的防曬乳不可改為只做紀錄的裝備，否則已建立的倒數會失去依據。需要改類別請另建一筆新紀錄。
       </p>
-      <div class="choice-grid">
+      <div class="category-grid">
         <label
           v-for="(label, category) in GEAR_CATEGORY_LABELS"
           :key="category"
+          class="category-option"
+          :class="{
+            'category-option--disabled':
+              categoryLocked && category !== 'sunscreen'
+          }"
         >
           <input
             v-model="gearCategory"
@@ -201,6 +216,7 @@ async function remove(): Promise<void> {
             :value="category"
             :disabled="categoryLocked && category !== 'sunscreen'"
           >
+          <Icon :name="GEAR_CATEGORY_ICONS[category]" :size="24" />
           <span>{{ label }}</span>
         </label>
       </div>
@@ -355,6 +371,45 @@ p {
   color: var(--text-secondary);
   line-height: 1.6;
   font-size: var(--font-size-caption);
+}
+
+.category-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--space-2);
+}
+
+.category-option {
+  position: relative;
+  display: grid;
+  justify-items: center;
+  gap: var(--space-2);
+  min-height: 4.75rem;
+  padding: var(--space-3) var(--space-1);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-sm);
+  color: var(--text-primary);
+  text-align: center;
+  font-size: var(--font-size-caption);
+  cursor: pointer;
+}
+
+.category-option:has(input:checked) {
+  border-color: var(--color-primary);
+  background: var(--color-surface-cream-strong);
+}
+
+.category-option--disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+.category-option input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
 }
 
 .category-effect {
