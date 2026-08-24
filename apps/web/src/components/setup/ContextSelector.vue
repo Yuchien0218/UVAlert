@@ -72,7 +72,7 @@ watch(
     <label
       v-for="option in outdoorOptions"
       :key="option.value"
-      class="context-choice"
+      class="context-choice app-card"
       :class="{ 'option-selected': selectedContext === option.value }"
     >
       <input
@@ -89,7 +89,7 @@ watch(
       </span>
     </label>
 
-    <div class="context-group">
+    <div class="context-group app-card">
       <button
         class="context-group__toggle"
         type="button"
@@ -118,7 +118,7 @@ watch(
         <label
           v-for="option in indoorOptions"
           :key="option.value"
-          class="context-group__option"
+          class="context-group__option app-card"
           :class="{ 'option-selected': selectedContext === option.value }"
         >
           <input
@@ -135,7 +135,7 @@ watch(
       </div>
     </div>
 
-    <div class="context-group">
+    <div class="context-group app-card">
       <button
         class="context-group__toggle"
         type="button"
@@ -164,7 +164,7 @@ watch(
         <label
           v-for="option in waterOptions"
           :key="option.value"
-          class="context-group__option"
+          class="context-group__option app-card"
           :class="{ 'option-selected': selectedContext === option.value }"
         >
           <input
@@ -193,13 +193,17 @@ watch(
   border: 0;
 }
 
-.context-choice,
-.context-group {
-  border: 1px solid var(--border-subtle);
-  border-radius: var(--radius-lg);
-  background: var(--surface-primary);
-}
-
+/*
+ * 2026-08-24：這裡原本自己寫了一份跟 .app-card 逐字相同的
+ * border／border-radius／background，改用共用類別。
+ *
+ * 這不只是去重複——它同時是「一般戶外／戶外運動 選取後不會變深」的
+ * 成因：scoped 樣式會編譯成 .context-choice[data-v-xxx]，特異性高於
+ * 共用的 .option-selected（單一 class），所以選中的 cream 底色被
+ * 本地的 background 蓋掉。室內／水上的子選項沒有這個問題，是因為
+ * .context-group__option 剛好沒寫 background，沒東西跟共用類別打架。
+ * 同一個陷阱 DESIGN.md 第十節已經記過一次（min-height 那次）。
+ */
 .context-choice {
   position: relative;
   display: grid;
@@ -279,13 +283,17 @@ watch(
   padding: 0 var(--space-5) var(--space-5);
 }
 
+/*
+ * 同上：本地的 border 會蓋掉 .option-selected 的 primary 邊框，導致子
+ * 選項選中時只有底色變深、邊框沒跟著變（跟上層卡片不一致）。改用
+ * app-card 提供邊框與底色，這裡只留版面與比較小的圓角。
+ */
 .context-group__option {
   display: grid;
   grid-template-columns: auto minmax(0, 1fr);
   align-items: center;
   gap: var(--space-3);
   padding: var(--space-4);
-  border: 1px solid var(--border-subtle);
   border-radius: var(--radius-md);
   cursor: pointer;
 }
