@@ -102,13 +102,25 @@ watch(
 /**
  * 選了情境就立刻存檔並揭露後半段——單頁沒有「下一步」按鈕可以觸發儲存。
  * 只有真的改變時才寫入，避免把 draft 載入時的同步值當成使用者操作。
+ *
+ * 這裡一定要先 await ensureLoaded()：草稿是由 controller 的載入流程建立的，
+ * 沒有草稿時 saveContext 會直接丟 SetupValidationError（requireDraft）。
+ * 使用者在載入完成前就點情境，或載入本身失敗過（例如本機儲存讀取失敗），
+ * 都會走到這條路徑——2026-08-24 實際發生過：例外沒被接住變成 unhandled
+ * rejection，畫面既不揭露後半段也不顯示任何錯誤，看起來就像點了沒反應。
  */
 watch(selectedContext, async (value, previous) => {
   if (value === null || value === previous) return;
   if (value === context.value) return;
   localError.value = null;
-  if (await setup.saveContext(value)) {
-    await setup.ensureRecommendedProtection();
+  try {
+    await setup.ensureLoaded();
+    if (await setup.saveContext(value)) {
+      await setup.ensureRecommendedProtection();
+    }
+  } catch {
+    localError.value =
+      "設定內容目前無法儲存，請重新整理後再試一次。";
   }
 });
 
@@ -216,6 +228,15 @@ async function cancel(): Promise<void> {
   await router.replace({ name: "home" });
 }
 
+/**
+ * 草稿載入失敗後的復原手段。controller 的 `loaded` 旗標在失敗時仍是
+ * false，但重跑 ensureLoaded 需要整個 app 的 boot 也重新來過，整頁重載
+ * 是最可靠的方式（也跟提醒頁的「重新讀取」一致）。
+ */
+function reload(): void {
+  globalThis.location.reload();
+}
+
 onMounted(async () => {
   await Promise.all([
     setup.ensureLoaded(),
@@ -238,8 +259,31 @@ onMounted(async () => {
     :busy="setup.phase.value === 'loading'"
     @cancel="cancel"
   >
+    <!--
+      載入草稿失敗時要明講。原本這裡直接顯示情境選擇器，但草稿沒載進來
+      的話怎麼選都不會有反應（2026-08-24 實際發生過的靜默失敗）。
+    -->
     <section
-      v-if="setup.recoveryPending.value"
+      v-if="setup.phase.value === 'error'"
+      class="load-error app-card"
+      role="alert"
+    >
+      <h2>目前無法開始設定</h2>
+      <p>
+        讀取這台裝置上的設定草稿時發生問題。已經記錄的提醒與裝備不會受影響；請重新整理後再試一次。
+      </p>
+      <button
+        class="button button--primary"
+        type="button"
+        @click="reload"
+      >
+        <Icon name="tool-refresh" :size="20" />
+        重新整理
+      </button>
+    </section>
+
+    <section
+      v-else-if="setup.recoveryPending.value"
       class="recovery-card app-card"
     >
       <p class="recovery-card__eyebrow">尚未建立提醒</p>
@@ -409,11 +453,22 @@ onMounted(async () => {
 </template>
 
 <style scoped>
-.recovery-card {
+.recovery-card,
+.load-error {
   display: grid;
   justify-items: start;
   gap: var(--space-4);
   padding: clamp(1.25rem, 6vw, 2rem);
+}
+
+.load-error h2,
+.load-error p {
+  margin: 0;
+}
+
+.load-error p {
+  color: var(--text-secondary);
+  line-height: 1.7;
 }
 
 .recovery-card__eyebrow {
