@@ -106,7 +106,7 @@ onBeforeUnmount(releasePageLock);
               </h2>
             </div>
             <button
-              class="sheet__close"
+              class="icon-button"
               type="button"
               aria-label="關閉調整"
               @click="close"
@@ -187,20 +187,6 @@ onBeforeUnmount(releasePageLock);
 
 .sheet__header h2 {
   font-size: 1.35rem;
-}
-
-.sheet__close {
-  display: grid;
-  width: var(--tap-target);
-  height: var(--tap-target);
-  flex: 0 0 auto;
-  place-items: center;
-  padding: 0;
-  border: 1px solid var(--border-subtle);
-  border-radius: 50%;
-  background: transparent;
-  color: var(--text-primary);
-  cursor: pointer;
 }
 
 .sheet__body {

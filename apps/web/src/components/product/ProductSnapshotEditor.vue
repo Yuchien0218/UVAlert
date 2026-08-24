@@ -89,23 +89,6 @@ const summary = computed(() => {
 <template>
   <div class="product-editor">
     <section class="session-product app-card">
-      <!-- 絕對定位的大太陽背景裝飾 -->
-      <svg
-        class="session-product__sun-decor"
-        viewBox="0 0 48 48"
-        aria-hidden="true"
-      >
-        <circle cx="24" cy="24" r="11" />
-        <line
-          v-for="rayIndex in 8"
-          :key="rayIndex"
-          x1="24"
-          y1="2"
-          x2="24"
-          y2="7"
-          :transform="`rotate(${(rayIndex - 1) * 45} 24 24)`"
-        />
-      </svg>
       <PackageCheck :size="25" :stroke-width="1.6" aria-hidden="true" />
       <div>
         <p class="session-product__eyebrow">{{ eyebrow }}</p>
@@ -370,37 +353,16 @@ const summary = computed(() => {
 }
 
 .session-product {
-  position: relative;
   display: grid;
   grid-template-columns: auto minmax(0, 1fr);
   gap: var(--space-4);
   padding: var(--space-5);
-  overflow: hidden;
-}
-
-.session-product__sun-decor {
-  position: absolute;
-  right: -1.5rem;
-  bottom: -1.5rem;
-  width: 8rem;
-  height: 8rem;
-  color: var(--color-primary);
-  opacity: 0.05;
-  pointer-events: none;
-}
-
-.session-product__sun-decor circle,
-.session-product__sun-decor line {
-  fill: none;
-  stroke: currentColor;
-  stroke-width: 1.5;
-  stroke-linecap: round;
 }
 
 .session-product__eyebrow {
   margin: 0 0 var(--space-2);
   color: var(--text-secondary);
-  font-size: 0.8rem;
+  font-size: var(--font-size-label);
   font-weight: 500;
 }
 
@@ -410,7 +372,7 @@ const summary = computed(() => {
 }
 
 .session-product h2 {
-  font-size: 1.15rem;
+  font-size: var(--font-size-section-title);
 }
 
 .session-product p:not(.session-product__eyebrow) {
@@ -461,7 +423,7 @@ const summary = computed(() => {
 .question-card__helper {
   margin: 0;
   color: var(--text-secondary);
-  font-size: 0.875rem;
+  font-size: var(--font-size-body);
   line-height: 1.7;
 }
 
@@ -529,7 +491,7 @@ const summary = computed(() => {
 
 .number-field span {
   color: var(--text-secondary);
-  font-size: 0.875rem;
+  font-size: var(--font-size-body);
 }
 
 .number-field input {
@@ -556,7 +518,7 @@ const summary = computed(() => {
 .identity-warning p {
   margin: var(--space-1) 0 0;
   color: var(--text-secondary);
-  font-size: 0.875rem;
+  font-size: var(--font-size-body);
   line-height: 1.7;
 }
 </style>

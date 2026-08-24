@@ -2,6 +2,7 @@
 import { computed, nextTick, onMounted, shallowRef, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { useWebAppServices } from "../app/injection";
+import Icon from "../components/icons/Icon.vue";
 import { getZoneLabel } from "../features/reminder/reminderPresentation";
 
 /**
@@ -89,9 +90,6 @@ async function runVoid(): Promise<void> {
 <template>
   <div class="page-stack correction-page">
     <header class="flow-heading">
-      <button class="button button--quiet" type="button" @click="back">
-        返回提醒
-      </button>
       <div>
         <p class="eyebrow">更正紀錄</p>
         <h1>更正這筆紀錄</h1>
@@ -99,6 +97,9 @@ async function runVoid(): Promise<void> {
           原本的紀錄會保留下來，你會在後面新增一筆更正。送出前不會改變目前提醒。
         </p>
       </div>
+      <button class="icon-button" type="button" aria-label="返回提醒" @click="back">
+        <Icon name="tool-close" :size="24" />
+      </button>
     </header>
 
     <p v-if="eventCorrection.phase.value === 'loading'" role="status">
@@ -337,10 +338,20 @@ p {
   margin: 0;
 }
 
-.flow-heading p {
+/*
+ * 跟 ReportContextEventPage 一直沿用 .flow-heading／.eyebrow 這兩個
+ * class 名稱，但只定義過 `.flow-heading p` 的顏色，沒有版面（橫向排列、
+ * 內距 div 的直向堆疊）——標題列其實是瀏覽器預設的直向堆疊。跟關閉鈕
+ * 收斂順手補上，對齊 ReapplyPage.vue 已有的版本。
+ */
+.flow-heading { display: flex; align-items: start; justify-content: space-between; gap: var(--space-4); }
+.flow-heading h1 { font-size: var(--font-size-page-title); }
+.flow-heading div { display: grid; gap: var(--space-3); }
+.flow-heading div > p:last-child {
   color: var(--text-secondary);
   line-height: 1.7;
 }
+.eyebrow { letter-spacing: .16em; }
 
 .section-helper {
   color: var(--text-secondary);

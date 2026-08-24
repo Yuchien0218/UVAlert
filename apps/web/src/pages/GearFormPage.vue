@@ -48,7 +48,7 @@ function handleCancel(): void {
         </p>
       </div>
       <button
-        class="form-heading__close"
+        class="icon-button"
         type="button"
         aria-label="取消"
         @click="handleCancel"
@@ -67,15 +67,7 @@ p {
   margin: 0;
 }
 
-/*
- * 關閉控制項比照 GearFormSheet 的 .sheet__close：同一份 GearForm 的
- * 兩個外殼（獨立頁與流程內 sheet），關閉方式要一致。
- *
- * 原本是 `.button.button--quiet` 的「取消」，但 app.css 在 31rem 以下
- * 讓所有 .button 撐滿寬度，於是次要動作在手機上變成一條與主要動作
- * 同等重量的滿版按鈕（2026-08-24 使用者截圖指出）。改用不帶 .button
- * 的圖示鈕就不受那條規則影響。
- */
+/* 關閉控制項用 app.css 的共用 .icon-button，不在這裡另寫一份。 */
 .form-heading {
   display: flex;
   align-items: start;
@@ -89,17 +81,4 @@ p {
   line-height: 1.7;
 }
 
-.form-heading__close {
-  display: grid;
-  width: var(--tap-target);
-  height: var(--tap-target);
-  flex: 0 0 auto;
-  place-items: center;
-  padding: 0;
-  border: 1px solid var(--border-subtle);
-  border-radius: 50%;
-  background: transparent;
-  color: var(--text-primary);
-  cursor: pointer;
-}
 </style>

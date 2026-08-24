@@ -2,6 +2,7 @@
 import { nextTick, onMounted, watch } from "vue";
 import { useRouter } from "vue-router";
 import { useWebAppServices } from "../app/injection";
+import Icon from "../components/icons/Icon.vue";
 import { getZoneLabel } from "../features/reminder/reminderPresentation";
 
 const { contextEvent } = useWebAppServices();
@@ -66,9 +67,6 @@ function zoneNames(zoneIds: string[]): string {
 <template>
   <div class="page-stack report-page">
     <header class="flow-heading">
-      <button class="button button--quiet" type="button" @click="cancel">
-        返回提醒
-      </button>
       <div>
         <p class="eyebrow">記錄狀況</p>
         <h1>記錄這次狀況</h1>
@@ -76,6 +74,9 @@ function zoneNames(zoneIds: string[]): string {
           記下這次狀況後，相關部位的提醒會更新；確認前不會改變提醒。
         </p>
       </div>
+      <button class="icon-button" type="button" aria-label="返回提醒" @click="cancel">
+        <Icon name="tool-close" :size="24" />
+      </button>
     </header>
 
     <p v-if="contextEvent.phase.value === 'loading'" role="status">
@@ -312,6 +313,19 @@ function zoneNames(zoneIds: string[]): string {
 </template>
 
 <style scoped>
+/*
+ * 這頁跟 EventCorrectionPage 一直沿用 .flow-heading／.eyebrow 這兩個
+ * class 名稱，但從未實際定義過任何樣式——標題列其實是瀏覽器預設的
+ * 直向堆疊，不是設計稿那種橫向排版。跟關閉鈕收斂順手補上，對齊
+ * ReapplyPage.vue 已有的版本。
+ */
+.flow-heading { display: flex; align-items: start; justify-content: space-between; gap: var(--space-4); }
+.flow-heading h1, .flow-heading p { margin: 0; }
+.flow-heading h1 { font-size: var(--font-size-page-title); }
+.flow-heading div { display: grid; gap: var(--space-3); }
+.flow-heading div > p:last-child { color: var(--text-secondary); line-height: 1.7; }
+.eyebrow { letter-spacing: .16em; }
+
 .app-card {
   display: grid;
   gap: var(--space-4);
