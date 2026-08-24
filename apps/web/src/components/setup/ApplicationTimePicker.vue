@@ -118,18 +118,22 @@ function toLocalInputValue(date: Date): string {
  * 同一頁兩張同構的卡片標題大小與間距不同，就是「排版像舊實作」的來源。
  * 改用共用的 .question-card，這裡只留這張卡特有的東西。
  */
+/*
+ * 2026-08-24：手機版原本是一欄四列（桌面才兩欄），四個快選項目就佔掉
+ * 一大段高度，是這頁太長的主因之一。改成一律兩欄兩列，並把時刻放到
+ * 標籤下方而不是右側——原本桌面版就是這個排法，現在變成共用的基準，
+ * 媒體查詢因此可以整個拿掉。
+ */
 .time-picker__quick {
   display: grid;
-  grid-template-columns: 1fr;
-  gap: var(--space-3);
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-2);
 }
 
 .time-option {
   display: grid;
-  grid-template-columns: 1fr auto;
-  align-items: center;
-  gap: var(--space-4);
-  padding: var(--space-3) var(--space-4);
+  gap: var(--space-1);
+  padding: var(--space-3);
   border-radius: var(--radius-sm);
   color: var(--text-primary);
   cursor: pointer;
@@ -155,7 +159,7 @@ function toLocalInputValue(date: Date): string {
 
 .time-option__time {
   color: var(--text-secondary);
-  font-size: var(--font-size-body);
+  font-size: var(--font-size-caption);
   white-space: nowrap;
 }
 
@@ -180,22 +184,5 @@ function toLocalInputValue(date: Date): string {
   color: var(--text-primary);
   color-scheme: light dark;
   font-size: 1rem;
-}
-
-@media (min-width: 36rem) {
-  .time-picker__quick {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: var(--space-2);
-  }
-
-  .time-option {
-    grid-template-columns: 1fr;
-    gap: var(--space-1);
-    padding: var(--space-3);
-  }
-
-  .time-option__time {
-    font-size: var(--font-size-caption);
-  }
 }
 </style>

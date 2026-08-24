@@ -256,9 +256,31 @@ h2 {
   gap: var(--space-3);
 }
 
+/*
+ * 2026-08-24：四個項目原本都是「標籤在上、內容在下」直向堆疊，等於八行，
+ * 是這頁太長的主因之一。改成標籤與內容並排，行數減半。標籤欄固定寬度
+ * 讓四個項目的內容對齊；最長的標籤是「防曬乳包裝標示」七個字。
+ */
 .summary-item {
   display: grid;
-  gap: var(--space-2);
+  grid-template-columns: 7em minmax(0, 1fr);
+  gap: var(--space-1) var(--space-3);
+  align-items: baseline;
+}
+
+.summary-item > :not(h3) {
+  grid-column: 2;
+}
+
+/* 極窄螢幕放不下並排，退回堆疊。 */
+@media (max-width: 22rem) {
+  .summary-item {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .summary-item > :not(h3) {
+    grid-column: 1;
+  }
 }
 
 /*
@@ -284,15 +306,27 @@ h2 {
   font-size: var(--font-size-body);
 }
 
+/*
+ * 2026-08-24：部位與包裝標示原本每項一列帶項目符號，五個部位就是五行。
+ * 改成同一行內以「、」相連（仍保留 ul／li 的語意給輔助科技），
+ * 跟快速提醒區「這次會套用到：…」的寫法一致。
+ */
 .summary-item ul {
+  display: flex;
+  flex-wrap: wrap;
   margin: 0;
-  padding-inline-start: 1.3rem;
-  list-style: disc;
+  padding: 0;
+  list-style: none;
 }
 
 .summary-item li {
   color: var(--text-primary);
   line-height: 1.6;
+}
+
+.summary-item li:not(:last-child)::after {
+  content: "、";
+  color: var(--text-secondary);
 }
 
 .empty-state {

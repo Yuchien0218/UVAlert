@@ -5,7 +5,7 @@ import type {
   SessionContext,
   SetupDraftZoneV1
 } from "@sunshield/contracts";
-import { computed, shallowRef } from "vue";
+import { computed, shallowRef, watch } from "vue";
 import {
   BODY_ZONE_LABELS,
   recommendedPresetFor
@@ -25,7 +25,19 @@ defineEmits<{
   adjust: [];
 }>();
 
-const expanded = shallowRef(true);
+/**
+ * 尚未確認時攤開（使用者沒挑過部位，推薦內容必須看得到）；一旦確認就
+ * 收合成單行——這時它的任務已經完成，下面還要填塗抹時間、看確認摘要，
+ * 讓它繼續佔掉整段版面只是把頁面拉長。使用者仍可點標題列重新展開。
+ */
+const expanded = shallowRef(props.pending);
+
+watch(
+  () => props.pending,
+  (pending) => {
+    expanded.value = pending;
+  }
+);
 
 const preset = computed(() => recommendedPresetFor(props.context));
 const zoneLabels = computed(() =>
