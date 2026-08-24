@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import Icon from "../icons/Icon.vue";
+
 /**
  * 首頁的分隔連結列——「五日 UV 預報」「查看最近紀錄」「查看完整狀態」。
  *
@@ -20,7 +22,7 @@ defineProps<{
     <span class="link-row__label">{{ label }}</span>
     <span class="link-row__detail">
       <span v-if="detail">{{ detail }}</span>
-      <span class="link-row__chevron" aria-hidden="true">›</span>
+      <Icon name="tool-chevron-right" :size="20" />
     </span>
   </RouterLink>
 </template>
@@ -29,7 +31,7 @@ defineProps<{
 .link-row {
   display: flex;
   justify-content: space-between;
-  align-items: baseline;
+  align-items: center;
   gap: var(--space-3);
   /*
    * 不寫 min-height——.button 那組的教訓（DESIGN.md 第十節 2026-08-22
@@ -46,15 +48,18 @@ defineProps<{
   font-size: var(--font-size-body);
 }
 
+/*
+ * 2026-08-24：右側箭號原本是文字字元「›」，用內文字體渲染，粗細與幾何
+ * 都跟自訂圖示系統對不上。圖示庫本來就有 tool-chevron-right，改用它
+ * （Icon.vue：圖示一律經過圖示系統，不要手刻也不要拿字元充當）。
+ * 連帶移除箭號的 font-size: 1rem 魔術數字，以及為了對齊文字基線而設的
+ * align-items: baseline——圖示要用 center 對齊才不會偏。
+ */
 .link-row__detail {
   display: inline-flex;
-  align-items: baseline;
+  align-items: center;
   gap: var(--space-2);
   color: var(--text-secondary);
   font-size: var(--font-size-caption);
-}
-
-.link-row__chevron {
-  font-size: 1rem;
 }
 </style>
