@@ -87,6 +87,27 @@ index.ts` 核對後，三條路由全部存在且指向功能完整的頁面：
 這輪把卡片嵌入 `/reminder` 後同一個壞連結出現在兩處，更容易被注意到。
 已透過背景任務追蹤（非 session 內完成）。
 
+## 六、第三輪：通知「再次提醒頻率」＋「裝置測試」（2026-08-24）
+
+交接文件第三節列的下一輪項目，依賴 `NotificationController` 排程邏輯
+重構——這輪已完成，commit `3f969bc`：
+
+- `ScheduledNotification` 新增 `repeatMinutes`；`BrowserNotifications`
+  顯示後若有設定會依頻率重新武裝，同一 id 的下一次 `schedule()`（到期
+  時間被重算）自然砍掉整條重複鏈。
+- 新增 `UserPreferencesPort`／`LocalUserPreferencesRepository`，接上
+  `UserPreferencesV1.reminderFrequencyMinutes`——這個欄位早就在
+  `packages/contracts` 裡定義好了，只是從沒有任何程式碼讀寫過。跟
+  `LocalSyncRepository` 共用同一個 `AppMetadata` key，本機優先，不需要
+  雲端同步也能用。
+- `NotificationSettingsPage` 已授權狀態新增「再次提醒頻率」（只提醒
+  一次／每 5／15 分鐘再提醒一次）與「裝置測試」兩區塊，文案明講重複
+  提醒受同一個「只在分頁存活時有效」的平台限制，不是新的送達保證。
+
+`pnpm check` 全綠（typecheck + 481 個測試）。因為 headless 測試環境無法
+把通知權限切成 granted，已授權狀態的畫面靠單元測試涵蓋（radio 互動、
+測試按鈕點擊），沒有額外做瀏覽器目視驗證。
+
 ---
 
 **這輪高保真重新設計到此告一段落。** 下一輪如果使用者帶新的高保真圖

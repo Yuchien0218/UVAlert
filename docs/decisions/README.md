@@ -39,6 +39,7 @@
 | 通知設定頁重排＋「如何開啟」展開步驟說明 | `NotificationSettingsPage.vue` | 已完成（2026-08-23，commit `1241f7e`） |
 | 優先序 5（其餘頁面）暫緩 | `2026-08-23-hifi-redesign-round2-closeout.md` §四 | 已裁決（2026-08-23）——使用者確認暫不處理 |
 | 優先序 6「三個完全沒做的頁面」是錯的認知，三個路由都已有完整功能的頁面 | `2026-08-23-hifi-redesign-round2-closeout.md` §四更正 | 已完成（2026-08-23）——`/reminder/report`（`638c34c`）與更正事件（`e85a914`）已補視覺對齊；`/region` 核對後不需要改 |
+| 通知「再次提醒頻率」＋「裝置測試」 | `2026-08-23-hifi-redesign-round2-closeout.md` §六 | 已完成（2026-08-24，commit `3f969bc`） |
 
 視覺設計另見：
 
