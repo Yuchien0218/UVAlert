@@ -54,7 +54,7 @@ function selectQuick(minutesAgo: number): void {
       <button
         v-for="option in quickOptions"
         :key="option.minutesAgo"
-        class="time-option option-surface"
+        class="time-option app-card"
         :class="{
           'option-selected': selectedQuick === option.minutesAgo
         }"
@@ -105,8 +105,9 @@ function selectQuick(minutesAgo: number): void {
               border-color var(--duration-fast) var(--ease-out);
 }
 
+/* 理由同 app.css 的 .choice-grid label:hover——避免 hover 跟已選取同色。 */
 .time-option:hover {
-  background-color: var(--border-subtle);
+  background-color: var(--color-hairline-soft);
 }
 
 .time-option:active {

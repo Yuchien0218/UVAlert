@@ -343,8 +343,15 @@ button.text-link {
 }
 
 /*
- * 選項卡片的「已選取」外觀——cream-strong 底 + primary 邊框
- * （DESIGN.md 第五節 context-option-selected）。
+ * 選項卡片的「已選取」外觀——實心暖灰底 ＋ 低彩度的 muted 邊框。
+ *
+ * 2026-08-24 使用者指定，分三次調整到現在這組：底色從 cream-strong 改成
+ * hairline 這個暖灰（DESIGN.md 第五節 context-option-selected 的舊值是
+ * cream-strong）；補上邊框；邊框再從 primary(#9f5e42) 換成彩度低很多的
+ * muted(#6f5a54)——primary 在這個灰底上太搶眼。**未選取維持原樣**。
+ *
+ * 用線條色 hairline 當填色是刻意的——它比卡片底 surface-soft 深一階，
+ * 選取的項目因此讀起來是「被按下去的區塊」，再靠深色邊框確認。
  *
  * 2026-08-24 收斂：這組顏色邏輯原本在 5 個地方各自實作
  * （ContextSelector、GearForm、ReportContextEventPage、
@@ -355,33 +362,10 @@ button.text-link {
  * 沒有樣式。各元件的版面（padding、border-radius、layout）保留在
  * 各自的 scoped style，這裡只統一「選中長怎樣」。
  */
-/*
- * 可點選選項的**靜態**外觀（2026-08-24 使用者指定）：實心底、看不見邊框。
- *
- * 邊框顏色刻意跟底色一樣——看起來沒有邊框，但仍佔 1px，所以選取時把
- * border-color 換成 primary 不會造成 1px 的版面位移（`.time-option`
- * 原本選取改 2px 就有這個問題）。
- *
- * 底色用 hairline 這個線條色當填色是刻意的：它就是使用者指定的那個灰，
- * 而且比卡片底 surface-soft 深一階，選項因此讀起來是「卡片裡可以按的
- * 區塊」，不是又一張卡片。
- */
-.option-surface,
-.choice-grid label {
-  border: 1px solid var(--color-hairline);
-  background: var(--color-hairline);
-}
-
-/* hover 要跟靜態有差別，否則按下去前沒有任何回饋。 */
-.option-surface:hover,
-.choice-grid label:hover {
-  background: color-mix(in srgb, var(--color-hairline) 88%, var(--color-ink));
-}
-
 .option-selected,
 .choice-grid label:has(input:checked) {
-  border-color: var(--color-primary);
-  background: var(--color-surface-cream-strong);
+  border-color: var(--color-muted);
+  background: var(--color-hairline);
 }
 
 /*
@@ -442,7 +426,6 @@ button.text-link {
   grid-template-columns: minmax(0, 1fr);
 }
 
-/* 版面只留在這裡；底色與邊框由上方的 .option-surface 那組負責。 */
 .choice-grid label {
   display: grid;
   min-height: var(--tap-target);
@@ -450,11 +433,21 @@ button.text-link {
   align-items: center;
   gap: var(--space-3);
   padding: var(--space-3);
+  border: 1px solid var(--border-subtle);
   border-radius: var(--radius-sm);
   cursor: pointer;
   transition: background-color var(--duration-fast) var(--ease-out),
               color var(--duration-fast) var(--ease-out),
               border-color var(--duration-fast) var(--ease-out);
+}
+
+/*
+ * 2026-08-24：hover 原本是 --border-subtle，跟改版後的「已選取」底色
+ * 剛好同一個值——滑過未選項目會長得像已選取。改用更淺的 hairline-soft
+ * 拉開差別。
+ */
+.choice-grid label:hover {
+  background-color: var(--color-hairline-soft);
 }
 
 .choice-grid label:active {
