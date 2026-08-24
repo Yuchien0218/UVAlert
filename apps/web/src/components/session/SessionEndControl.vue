@@ -138,7 +138,7 @@ function getErrorMessage(error: SessionEndError): string {
 
 .session-end__title {
   margin: 0;
-  font-size: 1.25rem;
+  font-size: var(--font-size-title);
 }
 
 .session-end__body {

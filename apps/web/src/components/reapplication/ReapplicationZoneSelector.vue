@@ -26,7 +26,7 @@ const emit = defineEmits<{ suggested: []; all: []; toggle: [zoneId: string] }>()
 <style scoped>
 .reapply-section { padding: var(--space-5); }
 fieldset { margin: 0; min-width: 0; }
-legend { padding: 0; font-size: 1.25rem; font-weight: 700; }
+legend { padding: 0; font-size: var(--font-size-title); font-weight: 700; }
 .section-help { color: var(--text-secondary); line-height: 1.7; }
 .mode-actions { display: flex; flex-wrap: wrap; gap: var(--space-2); margin-block: var(--space-4); }
 .zone-choice { display: grid; grid-template-columns: auto 1fr auto; align-items: center; min-height: var(--tap-target); gap: var(--space-3); border-top: 1px solid var(--border-subtle); }

@@ -151,6 +151,15 @@
    * 的 1.35rem）。
    */
   --font-size-title-sm: 1.15rem;
+  /*
+   * 2026-08-24 補：介於 title-sm（1.15）跟 title-md（1.35）之間，
+   * 收斂區塊／對話框標題角色（SessionEndControl 對話框標題、
+   * HomePage 狀態標題、ReapplicationZoneSelector legend）——這三處
+   * 數值巧合都是 1.25rem 且角色相同；UV 等級標籤與衛教文章 H2 數值
+   * 雖然也是 1.25rem，但角色不同，不併進來（前者不是標題，後者是
+   * 獨立的內文排版）。
+   */
+  --font-size-title: 1.25rem;
   --font-size-title-md: 1.35rem;
 
   --space-1: 0.25rem;

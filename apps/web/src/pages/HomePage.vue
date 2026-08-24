@@ -322,6 +322,6 @@ function handleEndSession(): void {
 
 .home-state h2 {
   color: var(--text-primary);
-  font-size: 1.25rem;
+  font-size: var(--font-size-title);
 }
 </style>
