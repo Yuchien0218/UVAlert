@@ -273,14 +273,20 @@ function makeDraftZone(
   padding: clamp(1.25rem, 5vw, 2rem);
 }
 
+/*
+ * 2026-08-24：原本用 --color-soon-soft／--color-soon（「即將到期」狀態色）。
+ * 這張卡講的是「這是推薦的部位組合」，跟部位快到期完全無關；狀態色不得
+ * 當裝飾用（DESIGN.md 第二節）。這是 QuickProtectionSummary 同款「快速
+ * 提醒（推薦）」卡的兄弟，那邊已改，這邊當時漏掉。
+ */
 .preset-card__mark {
   display: grid;
   width: 3.25rem;
   height: 3.25rem;
   place-content: center;
   border-radius: 50%;
-  background: var(--color-soon-soft);
-  color: var(--color-soon);
+  background: var(--surface-soft);
+  color: var(--color-primary);
 }
 
 .preset-card__eyebrow {

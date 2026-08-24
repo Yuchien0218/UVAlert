@@ -50,7 +50,13 @@ defineEmits<{ end: []; keep: [] }>();
   gap: var(--space-3);
   padding: var(--space-4);
   border-radius: var(--radius-sm);
-  background: var(--color-untimed-soft, var(--surface-soft));
+  /*
+   * 2026-08-24：原本用 --color-untimed-soft（「未計時」狀態色）。這是
+   * role="status" 的夜間中性說明，不是任何一種提醒狀態，改用中性的
+   * surface-soft，跟 SetupTimingPage 的 .night-notice 一致。
+   * （原本的 var(..., --surface-soft) 備援永遠不會生效，一併拿掉。）
+   */
+  background: var(--surface-soft);
 }
 
 .night-prompt__heading {

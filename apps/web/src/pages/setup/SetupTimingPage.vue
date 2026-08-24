@@ -329,11 +329,18 @@ onMounted(async () => {
   line-height: 1.7;
 }
 
+/*
+ * 2026-08-24：原本用 --color-untimed-soft（「未計時」狀態色）。這則是
+ * role="status" 的中性說明，文案本身就寫明「仍然可以建立提醒」，不是
+ * 警告也不是任何一種提醒狀態——不該套狀態色，改用中性的 surface-soft。
+ * （原本還帶 var(..., --surface-soft) 的備援，但 untimed-soft 一直有定義，
+ * 那個備援永遠不會生效，一併拿掉。）
+ */
 .night-notice {
   margin: 0;
   padding: var(--space-4);
   border-radius: var(--radius-sm);
-  background: var(--color-untimed-soft, var(--surface-soft));
+  background: var(--surface-soft);
   color: var(--text-secondary);
   line-height: 1.7;
 }

@@ -226,9 +226,14 @@ function getZoneNames(zoneIds: string[], zones: ZoneProjection[]): string {
   color: var(--text-secondary);
 }
 
+/*
+ * 2026-08-24：原本用 --color-untimed-soft（「未計時」狀態色）。這是
+ * role="alert" 的真警告（時間可能不準），改用系統的警告色 soon，
+ * 跟 .identity-warning 一致。
+ */
 .clock-warning {
   padding: var(--space-3) var(--space-4);
-  background: var(--color-untimed-soft);
+  background: var(--color-soon-soft);
   border-radius: var(--radius-sm);
 }
 

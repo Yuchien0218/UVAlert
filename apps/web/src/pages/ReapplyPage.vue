@@ -102,7 +102,14 @@ function zoneNames(zoneIds: string[]): string {
 .success-panel h2, .success-panel p { margin: 0; }
 .correction-note { color: var(--text-secondary); line-height: 1.7; }
 .success-groups { margin: 0; padding-inline-start: 1.3rem; line-height: 1.7; }
-.refresh-warning { display: grid; justify-items: start; gap: var(--space-3); padding: var(--space-4); background: var(--color-untimed-soft); }
+/*
+ * 2026-08-24：原本用 --color-untimed-soft（「未計時」狀態色）。這是
+ * role="alert" 的真警告（紀錄已存但提醒沒重讀），跟「未計時」無關；
+ * 改用 --color-soon-soft，跟 ProductSnapshotEditor 的 .identity-warning
+ * 一致——soon 是這套系統裡的警告色。untimed 今天剛從紫色改成中性灰，
+ * 留著只會更像未套樣式。
+ */
+.refresh-warning { display: grid; justify-items: start; gap: var(--space-3); padding: var(--space-4); border-radius: var(--radius-sm); background: var(--color-soon-soft); }
 .refresh-warning p { margin: 0; line-height: 1.7; }
 @media (min-width: 36rem) { .submit-actions { grid-template-columns: 1fr auto; } }
 </style>
