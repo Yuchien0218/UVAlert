@@ -127,7 +127,7 @@ const entries = computed(() =>
   align-items: center;
   gap: var(--space-4);
   padding: var(--space-4);
-  border: none;
+  border: 1px solid var(--border-subtle);
   border-radius: var(--radius-lg);
   background: var(--surface-primary);
   color: inherit;
