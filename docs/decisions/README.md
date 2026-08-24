@@ -41,6 +41,12 @@
 | 優先序 6「三個完全沒做的頁面」是錯的認知，三個路由都已有完整功能的頁面 | `2026-08-23-hifi-redesign-round2-closeout.md` §四更正 | 已完成（2026-08-23）——`/reminder/report`（`638c34c`）與更正事件（`e85a914`）已補視覺對齊；`/region` 核對後不需要改 |
 | 通知「再次提醒頻率」＋「裝置測試」 | `2026-08-23-hifi-redesign-round2-closeout.md` §六 | 已完成（2026-08-24，commit `3f969bc`） |
 | 第四輪：新稿子（`防曬補擦流程設計/`）核對——步驟指示器改分段線條、MorePage／GearForm 視覺對齊、ForecastPage／ProductDetailPage 兩處編造資料不採用 | `2026-08-23-hifi-redesign-round2-closeout.md` §七 | 已完成（2026-08-24，commit `11908d8`／`a68f077`／`7ad3a98`） |
+| 設定流程兩步合併為單頁 `/setup`（減少跳轉疲倦感） | `SetupPage.vue`、`router/index.ts`、`SetupStepShell.vue` | 已完成（2026-08-24，commit `ce23062`；靜默失敗修正 `1acb6fe`） |
+| 移除設定流程的「確認這次提醒」摘要；產品資格警示保留為獨立元件 | `ProductEligibilityNotice.vue`、`SetupPage.vue` | 已完成（2026-08-24，commit `4dfc0d4`）——AC-34「不得摺疊」僅存於 `docs/archive/`，使用者確認已不適用 |
+| `/reminder` 移除，完整狀態併入首頁下半部 | `HomePage.vue`、`router/index.ts`、`resolveActionRoute.ts` | 已完成（2026-08-24，commit `51026aa`）——移除理由是資訊架構：該頁不屬於任何下排 tab、進去沒有返回路徑 |
+| 頁首右上角改顯示 UV 指數（取代「本機提醒」），點擊進入 `/forecast` | `BrandHeader.vue`、`AppShell.vue`、`HomePage.vue` | 已完成（2026-08-24，commit `91327d7`）——提醒頁不再另放五日 UV 預報入口 |
+| 設定取消／流程完成的落點統一回首頁 | `SetupPage.vue`、`ReapplyPage.vue`、`ReportContextEventPage.vue`、`router/index.ts` | 已完成（2026-08-24，commit `f8fdb74`） |
+| Sitemap 文件回寫（六處落差：單頁設定、`/reminder` 移除、頁首 UV、摘要移除、「更多」八張卡、`/forecast` 補記） | `2026-08-15-redesign-sitemap-userflow-current.md` | 已回寫（2026-08-24） |
 
 視覺設計另見：
 
