@@ -74,6 +74,6 @@ onMounted(() => {
 
 .forecast-region__label {
   margin: 0;
-  font-size: 0.9375rem;
+  font-size: var(--font-size-body);
 }
 </style>

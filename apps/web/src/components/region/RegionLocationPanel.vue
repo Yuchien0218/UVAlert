@@ -147,7 +147,7 @@ const errorMessage = computed(() => {
 
 .location-panel__title {
   margin-top: var(--space-1);
-  font-size: 1.3rem;
+  font-size: var(--font-size-title-md);
 }
 
 .location-panel__body,

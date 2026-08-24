@@ -43,7 +43,7 @@ defineProps<{
 }
 
 .link-row__label {
-  font-size: 0.9375rem;
+  font-size: var(--font-size-body);
 }
 
 .link-row__detail {

@@ -91,7 +91,7 @@ const toneClass = computed(
 
 .countdown__detail {
   margin: 0;
-  font-size: 0.9375rem;
+  font-size: var(--font-size-body);
 }
 
 .countdown__track {
