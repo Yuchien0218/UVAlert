@@ -142,18 +142,19 @@ async function handleDelete(): Promise<void> {
 
 <template>
   <div class="page-stack product-detail-page">
+    <!--
+      2026-08-24：返回從左側的文字連結改成右上角只有圖示的叉叉，跟記錄
+      補擦／記錄狀況／更正紀錄／設定流程一致。「編輯」原本佔著右上角，
+      移到下方的行動區——右上角保留給單一的離開動作。
+    -->
     <header class="detail-header">
-      <button class="text-link" type="button" @click="goBack">
-        <Icon name="tool-arrow-left" :size="20" />
-        返回裝備清單
-      </button>
       <button
-        v-if="product !== null"
-        class="text-link"
+        class="icon-button"
         type="button"
-        @click="goEdit"
+        aria-label="返回裝備清單"
+        @click="goBack"
       >
-        編輯
+        <Icon name="tool-close" :size="24" />
       </button>
     </header>
 
@@ -223,6 +224,10 @@ async function handleDelete(): Promise<void> {
       </p>
 
       <div class="detail-actions">
+        <!-- 從右上角移下來（2026-08-24），右上角只留返回。 -->
+        <button class="button button--quiet" type="button" @click="goEdit">
+          編輯
+        </button>
         <button
           v-if="canRestore"
           class="button button--primary"
@@ -285,8 +290,7 @@ async function handleDelete(): Promise<void> {
 <style scoped>
 .detail-header {
   display: flex;
-  justify-content: space-between;
-  align-items: center;
+  justify-content: flex-end;
 }
 
 .page-heading {

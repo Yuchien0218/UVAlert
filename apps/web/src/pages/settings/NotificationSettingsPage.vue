@@ -76,10 +76,15 @@ async function runTest(): Promise<void> {
 
 <template>
   <div class="page-stack notification-settings-page">
+    <!-- 2026-08-24：返回改成右上角只有圖示的叉叉，跟其他頁一致。 -->
     <header class="detail-header">
-      <button class="text-link" type="button" @click="goBack">
-        <Icon name="tool-arrow-left" :size="20" />
-        返回更多
+      <button
+        class="icon-button"
+        type="button"
+        aria-label="返回更多"
+        @click="goBack"
+      >
+        <Icon name="tool-close" :size="24" />
       </button>
     </header>
 
@@ -232,6 +237,12 @@ async function runTest(): Promise<void> {
 .notification-settings-page {
   display: grid;
   gap: var(--space-4);
+}
+
+/* 右上角的返回鈕靠右。 */
+.detail-header {
+  display: flex;
+  justify-content: flex-end;
 }
 
 .app-card {

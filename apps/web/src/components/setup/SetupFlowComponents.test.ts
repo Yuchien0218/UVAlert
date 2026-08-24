@@ -88,7 +88,13 @@ describe("SetupStepShell", () => {
 
     expect(wrapper.text()).toContain("開始防曬提醒");
     expect(wrapper.text()).toContain("測試說明");
-    expect(wrapper.text()).toContain("取消");
+    /*
+     * 2026-08-24：取消鈕改成只有圖示的叉叉（跟其他頁的右上角一致），
+     * 「取消」兩個字移到 aria-label，所以不再出現在 text() 裡。
+     */
+    expect(wrapper.get(".icon-button").attributes("aria-label")).toBe(
+      "取消設定"
+    );
 
     expect(wrapper.text()).not.toContain("步驟");
     expect(wrapper.find('[role="progressbar"]').exists()).toBe(false);

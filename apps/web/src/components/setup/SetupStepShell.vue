@@ -47,14 +47,19 @@ defineEmits<{
         草稿未儲存
       </span>
 
+      <!--
+        2026-08-24：改成只有圖示的圓形叉叉，跟記錄補擦／記錄狀況／更正
+        紀錄三頁的右上角一致（那三頁本來就是 .icon-button）。文字標籤移到
+        aria-label，螢幕閱讀器仍讀得到「取消設定」。
+      -->
       <button
-        class="setup-shell__quiet-action"
+        class="icon-button"
         type="button"
+        aria-label="取消設定"
         :disabled="busy"
         @click="$emit('cancel')"
       >
-        <Icon name="tool-close" :size="20" />
-        取消
+        <Icon name="tool-close" :size="24" />
       </button>
     </div>
 
@@ -87,24 +92,12 @@ defineEmits<{
   gap: var(--space-3);
 }
 
-.setup-shell__quiet-action {
-  display: inline-flex;
-  min-height: var(--tap-target);
-  align-items: center;
-  gap: var(--space-2);
-  padding: 0;
-  border: 0;
-  background: transparent;
-  color: var(--text-secondary);
-  cursor: pointer;
-  text-decoration: none;
-}
-
-button.setup-shell__quiet-action {
+/* 取消鈕改用共用的 .icon-button，這裡只負責把它推到最右並處理停用態。 */
+.setup-shell__toolbar .icon-button {
   justify-self: end;
 }
 
-.setup-shell__quiet-action:disabled {
+.setup-shell__toolbar .icon-button:disabled {
   cursor: wait;
   opacity: 0.55;
 }
