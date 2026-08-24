@@ -173,32 +173,18 @@ export function createAppRouter(
         meta: { title: "五日 UV 預報" }
       },
       {
+        // 2026-08-24：設定改成單一頁面。原本的 `/setup/context` 與
+        // `/setup/timing` 兩步已移除，依 2026-08-08 的前例不留轉址——
+        // P0 尚未上線、沒有外部連結要相容，留著只會讓路由表更難讀。
+        // （更早移除的還有 `/setup/protection` 與 `/setup/review`。）
+        // 部位 sheet 仍可用 `/setup?adjustProtection=1` 直接開啟。
         path: "/setup",
-        redirect: { name: "setup-context" }
-      },
-      {
-        path: "/setup/context",
-        name: "setup-context",
-        component: () => import("../pages/setup/SetupContextPage.vue"),
+        name: "setup",
+        component: () => import("../pages/setup/SetupPage.vue"),
         meta: {
-          title: "選擇情境",
+          title: "開始防曬提醒",
           hideNavigation: true,
-          requiresNoActiveSession: true,
-          setupStep: "context"
-        }
-      },
-      {
-        // 2026-08-08：`/setup/protection` 與 `/setup/review` 兩條轉址已移除。
-        // 都是兩步流程改版後的遺跡，P0 尚未上線、沒有外部連結要相容。
-        // 部位 sheet 仍可用 `/setup/timing?adjustProtection=1` 直接開啟。
-        path: "/setup/timing",
-        name: "setup-timing",
-        component: () => import("../pages/setup/SetupTimingPage.vue"),
-        meta: {
-          title: "塗抹時間與開始防曬提醒",
-          hideNavigation: true,
-          requiresNoActiveSession: true,
-          setupStep: "timing"
+          requiresNoActiveSession: true
         }
       },
       {
@@ -246,23 +232,12 @@ export function createAppRouter(
       return { name: "home" };
     }
 
-    if (typeof to.meta.setupStep === "string" && setup !== undefined) {
-      await setup.ensureLoaded();
-      const draft = setup.draft.value;
-
-      if (
-        setup.recoveryPending.value &&
-        to.name !== "setup-context"
-      ) {
-        return { name: "setup-context" };
-      }
-      if (
-        to.meta.setupStep !== "context" &&
-        draft?.initialContext === null
-      ) {
-        return { name: "setup-context" };
-      }
-    }
+    /*
+     * 2026-08-24：原本這裡有一段 setupStep 守衛，負責把「還沒選情境」或
+     * 「有未完成草稿」的人導回步驟 1。設定合併成單一頁面後兩者都不再需要
+     * ——同一頁就能選情境，未完成草稿由頁面自己顯示「繼續／重新開始」。
+     * `SetupDraftV1.currentStep` 仍保留在契約裡（持久化欄位，供續作用）。
+     */
 
     return true;
   });

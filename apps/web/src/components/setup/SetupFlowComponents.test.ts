@@ -71,33 +71,40 @@ describe("S-03 ContextSelector", () => {
 });
 
 describe("SetupStepShell", () => {
-  it("顯示情境、塗抹時間、確認設定三步，並讓已完成步驟返回", () => {
+  /*
+   * 2026-08-24：設定合併成單一頁面（/setup）後，這個外框不再有步驟指示器
+   * 與「返回上一步」。原本的斷言檢查的是「步驟 X/2」與跨步驟連結，那些
+   * 已隨兩步流程一起移除；改為確認外框本身該有的東西：標題、說明、取消，
+   * 以及**不再出現**任何步驟字樣或設定流程內部連結。
+   */
+  it("顯示標題、說明與取消，且不再有步驟指示器或跨步驟連結", () => {
     const wrapper = mount(SetupStepShell, {
       props: {
-        step: 2,
-        eyebrow: "Setup / Protection",
-        title: "這次要追蹤哪些部位？",
+        title: "開始防曬提醒",
         description: "測試說明",
         saveStatus: "idle"
-      },
-      global: {
-        stubs: {
-          RouterLink: {
-            props: ["to"],
-            template:
-              '<a :href="to"><slot /></a>'
-          }
-        }
       }
     });
 
-    // 2026-08-24：進度條下方的「返回步驟 1：情境」連結已移除——工具列的
-    // 「返回」（backTo）已經是同一個去處，同頁面出現兩個回上一步的入口
-    // 只是增加高度與雜訊。這裡改為確認它確實不再出現。
-    expect(wrapper.find('a[href="/setup/context"]').exists()).toBe(false);
-    expect(wrapper.find('a[href="/setup/timing"]').exists()).toBe(false);
-    expect(wrapper.text()).not.toContain("防護");
-    expect(wrapper.text()).toContain("塗抹時間");
+    expect(wrapper.text()).toContain("開始防曬提醒");
+    expect(wrapper.text()).toContain("測試說明");
+    expect(wrapper.text()).toContain("取消");
+
+    expect(wrapper.text()).not.toContain("步驟");
+    expect(wrapper.find('[role="progressbar"]').exists()).toBe(false);
+    expect(wrapper.find("a").exists()).toBe(false);
+  });
+
+  it("儲存狀態為 error 時提示草稿未儲存", () => {
+    const wrapper = mount(SetupStepShell, {
+      props: {
+        title: "開始防曬提醒",
+        description: "測試說明",
+        saveStatus: "error"
+      }
+    });
+
+    expect(wrapper.text()).toContain("草稿未儲存");
   });
 });
 

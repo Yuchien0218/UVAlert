@@ -133,7 +133,7 @@ function handleAction(kind: ActionKind): void {
 }
 
 function handleStartSetup(): void {
-  void router.push("/setup/context");
+  void router.push("/setup");
 }
 
 function handleEndSession(): void {

@@ -52,8 +52,7 @@ describe("route name 完整性", () => {
     "education-category",
     "education-article",
     "home",
-    "setup-context",
-    "setup-timing",
+    "setup",
     "not-found"
   ];
 
@@ -67,7 +66,10 @@ describe("route name 完整性", () => {
     for (const name of [
       "reminder-action",
       "setup-protection",
-      "setup-review"
+      "setup-review",
+      // 2026-08-24：兩步流程合併成 /setup 單頁後移除，同樣不留轉址。
+      "setup-context",
+      "setup-timing"
     ]) {
       expect(router.hasRoute(name)).toBe(false);
     }
@@ -158,6 +160,8 @@ describe("createAppRouter", () => {
     for (const path of [
       "/setup/review",
       "/setup/protection",
+      "/setup/context",
+      "/setup/timing",
       "/reminder/action/record_reapplication"
     ]) {
       await router.push(path);

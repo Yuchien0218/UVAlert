@@ -2,47 +2,34 @@
 import Icon from "../icons/Icon.vue";
 import type { SetupSaveStatus } from "../../features/setup/createSetupController";
 
+/**
+ * 設定流程的外框：工具列（儲存狀態＋取消）、標題、內容、底部行動區。
+ *
+ * 2026-08-24：設定改成單一頁面（`/setup`）後，這裡移除了步驟指示器
+ * （線性進度條＋「步驟 X/2」）與「返回上一步」——只有一頁就沒有步驟，
+ * 也沒有上一步可回。`step`／`backTo` 兩個 prop 一併移除。
+ */
+
 interface Props {
-  step: 1 | 2;
   title: string;
   description: string;
-  backTo?: string | null;
   saveStatus: SetupSaveStatus;
   busy?: boolean;
 }
 
-const props = withDefaults(defineProps<Props>(), {
-  backTo: null,
+withDefaults(defineProps<Props>(), {
   busy: false
 });
 
 defineEmits<{
   cancel: [];
 }>();
-
-/**
- * 設定流程只有兩步（`/setup/review` 已併入步驟 2，2026-08-15 裁決）。
- * 高保真圖用線性進度條＋「步驟 X/2」文字取代原本的圓形數字節點，
- * 2026-08-23 使用者確認換用此版本。
- */
-const steps = [
-  { label: "情境", to: "/setup/context" },
-  { label: "塗抹時間與開始防曬提醒", to: "/setup/timing" }
-] as const;
 </script>
 
 <template>
   <section class="setup-shell" :aria-busy="busy">
     <div class="setup-shell__toolbar">
-      <RouterLink
-        v-if="backTo"
-        class="setup-shell__quiet-action"
-        :to="backTo"
-      >
-        <Icon name="tool-arrow-left" :size="20" />
-        返回
-      </RouterLink>
-      <span v-else />
+      <span />
 
       <span
         v-if="saveStatus === 'saved'"
@@ -69,29 +56,6 @@ const steps = [
         <Icon name="tool-close" :size="20" />
         取消
       </button>
-    </div>
-
-    <div class="setup-shell__progress">
-      <p class="setup-shell__progress-label">
-        步驟 {{ step }}／{{ steps.length }}・{{ steps[step - 1]!.label }}
-      </p>
-      <div
-        class="setup-shell__progress-track"
-        role="progressbar"
-        :aria-valuenow="step"
-        aria-valuemin="1"
-        :aria-valuemax="steps.length"
-        aria-label="設定進度"
-      >
-        <span
-          v-for="(progressStep, index) in steps"
-          :key="progressStep.label"
-          class="setup-shell__progress-segment"
-          :class="{
-            'setup-shell__progress-segment--filled': index < step
-          }"
-        />
-      </div>
     </div>
 
     <header class="setup-shell__heading">
@@ -156,47 +120,6 @@ button.setup-shell__quiet-action {
 
 .setup-shell__save-status--error {
   color: var(--color-due);
-}
-
-.setup-shell__progress {
-  display: grid;
-  gap: var(--space-2);
-}
-
-.setup-shell__progress-label {
-  margin: 0;
-  color: var(--text-secondary);
-  font-size: var(--font-size-label);
-  font-weight: 500;
-}
-
-/*
- * 分段線條，不是連續進度條——每一步各自一段，完成與否由該段是否填滿
- * 表示，不用圓點編號或勾勾（2026-08-24 使用者提供的高保真稿裁決，
- * 見 templates/app-screens 畫面 10：「指示器只用線段與文字……在灰階下
- * 仍可辨識」）。流程固定兩步；若之後加入第三步，段數等分即可。
- */
-.setup-shell__progress-track {
-  display: flex;
-  gap: var(--space-1);
-}
-
-.setup-shell__progress-segment {
-  flex: 1;
-  height: 3px;
-  border-radius: var(--radius-pill);
-  background: var(--border-subtle);
-  transition: background var(--motion-base, 240ms) cubic-bezier(0.22, 1, 0.36, 1);
-}
-
-.setup-shell__progress-segment--filled {
-  background: var(--color-primary);
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .setup-shell__progress-segment {
-    transition: none;
-  }
 }
 
 .setup-shell__heading {
