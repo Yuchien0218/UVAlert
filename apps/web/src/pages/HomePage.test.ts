@@ -14,7 +14,6 @@ import { useWebAppServices } from "../app/injection";
 import HomeCountdown from "../components/home/HomeCountdown.vue";
 import HomeLocationPrompt from "../components/home/HomeLocationPrompt.vue";
 import HomeNightNotice from "../components/home/HomeNightNotice.vue";
-import HomeNightSession from "../components/home/HomeNightSession.vue";
 import HomeUvHeadline from "../components/home/HomeUvHeadline.vue";
 import ZoneStatusList from "../components/reminder/ZoneStatusList.vue";
 import SessionEndControl from "../components/session/SessionEndControl.vue";
@@ -176,7 +175,13 @@ describe("HomePage", () => {
       expect(wrapper.find('[to="/reminder"]').exists()).toBe(false);
     });
 
-    it("夜間改成收工版面，主要行動是結束提醒", async () => {
+    /**
+     * 2026-08-24 反轉：原本斷言夜間換成「收工版面」且**不顯示**補擦倒數
+     * （2026-08-23 裁決，理由是夜間 UV 為 0）。使用者反映夜間看不到倒數
+     * 與進度條，確認推翻該裁決——現在日夜共用同一個版面，夜間只多一句
+     * 說明現在不需要防曬。
+     */
+    it("夜間與白天共用版面，一樣顯示倒數，只多一句夜間說明", async () => {
       mockServices({
         session,
         isEvening: true,
@@ -185,10 +190,20 @@ describe("HomePage", () => {
 
       const wrapper = await mountHome();
 
-      expect(wrapper.findComponent(HomeNightSession).exists()).toBe(true);
+      expect(wrapper.findComponent(HomeCountdown).exists()).toBe(true);
+      expect(wrapper.findComponent(ZoneStatusList).exists()).toBe(true);
       expect(wrapper.findComponent(SessionEndControl).exists()).toBe(true);
-      // 夜間不顯示補擦倒數——UV 是 0，繼續倒數沒有行動價值。
-      expect(wrapper.findComponent(HomeCountdown).exists()).toBe(false);
+      expect(wrapper.get(".home__night-note").text()).toContain(
+        "現在不需要防曬"
+      );
+    });
+
+    it("白天不顯示夜間說明", async () => {
+      mockServices({ session, region: { displayName: "臺北市 大安區" } });
+
+      const wrapper = await mountHome();
+
+      expect(wrapper.find(".home__night-note").exists()).toBe(false);
     });
   });
 
