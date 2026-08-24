@@ -370,11 +370,15 @@ button.text-link {
  */
 .question-card {
   display: grid;
-  gap: var(--space-4);
+  gap: 0;
   min-width: 0;
   margin: 0;
   padding: var(--space-5);
   border: 1px solid var(--border-subtle);
+}
+
+.question-card > * + * {
+  margin-top: var(--space-4);
 }
 
 .question-card legend {
@@ -388,8 +392,14 @@ button.text-link {
   overflow-wrap: anywhere;
 }
 
+/*
+ * 2026-08-24：legend→下一個元素（helper 說明或選項格）原本跟其他區塊
+ * 一樣是 16px，等距會讓標題讀起來像獨立於下面內容——套用 stack 系統的
+ * 標題→內文間距，收緊成 8px。
+ */
 .question-card legend + * {
   clear: both;
+  margin-top: var(--space-stack-title-body);
 }
 
 .question-card__helper {

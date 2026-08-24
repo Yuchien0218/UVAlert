@@ -69,18 +69,23 @@
   --color-white: #ffffff;
 
   /*
-   * 提醒狀態色與 UV 色階獨立於品牌色，DESIGN.md 第十節列為「已對齊」，
-   * 不要改。--color-tracking 是「追蹤中」這個狀態，不是行動色；
-   * 行動色請用 --color-primary。
+   * 提醒狀態色與 UV 色階獨立於品牌色。--color-tracking 是「追蹤中」這個
+   * 狀態，不是行動色；行動色請用 --color-primary。
+   *
+   * 2026-08-24 使用者確認跟進 Claude Design 的微調：tracking／soon／due
+   * 三色加深一階，untimed 從紫色（#5b3cc4）改成中性灰（#9d9591）——
+   * 跟其他四色「各自專屬色相」的邏輯不同，untimed 本來就是「沒有時間
+   * 資訊」，中性灰更貼切。untimed-soft 改用 color-mix 算，不再手寫
+   * 固定的淡紫色（原本的淡紫已經不搭新的灰色主色）。
    */
-  --color-tracking: #2f6fbb;
+  --color-tracking: #3f76a5;
   --color-tracking-soft: #eaf3fc;
-  --color-soon: #a86100;
+  --color-soon: #bb6820;
   --color-soon-soft: #fff3d6;
-  --color-due: #cc3333;
+  --color-due: #c1442f;
   --color-due-soft: #fdecea;
-  --color-untimed: #5b3cc4;
-  --color-untimed-soft: #f1edff;
+  --color-untimed: #9d9591;
+  --color-untimed-soft: color-mix(in srgb, #9d9591 12%, #faf5ec);
   --color-success: #147d64;
   --color-success-soft: #e9f7f1;
   --color-uvi-low: #507aa8;
@@ -90,7 +95,17 @@
   --color-uvi-extreme: #7d4bb3;
 
   --page-background: var(--color-canvas);
-  --surface-primary: var(--color-surface-card);
+  /*
+   * 2026-08-24：改回 var(--color-canvas)，取代 2026-08-22 一度指向的
+   * --color-surface-card。這其實是回頭對齊 DESIGN.md 第五節 app-card
+   * 元件規範本來就寫的「背景 canvas、1px hairline 邊框」，是 2026-08-22
+   * 那次色彩套用順手把它改錯了方向；Claude Design 的下游元件庫一直是
+   * canvas＋hairline 版本，這次一併核對後跟進。全站卡片、輸入框、
+   * bottom sheet 都會變成跟頁面同色、只靠 hairline 分隔（不影響
+   * HomeCountdown／ReminderPanel／BottomNavigation，那三處直接引用
+   * --color-surface-card，不經過這個別名）。
+   */
+  --surface-primary: var(--color-canvas);
   --surface-soft: var(--color-surface-soft);
   --surface-inverse: var(--color-surface-dark);
   --text-primary: var(--color-ink);
@@ -203,6 +218,19 @@
   --space-8: 2rem;
   --space-10: 2.5rem;
   --space-12: 3rem;
+
+  /*
+   * 2026-08-24 使用者確認引進：Claude Design 的 stack 間距系統
+   * （標題→內文、內文→次要說明、一組文字→下一組），數值跟既有的
+   * --space-2／--space-1／--space-6 完全相同，這裡只是給它們語意
+   * 名稱，不是新數值。.page-heading／.flow-heading 這類「標題＋內文」
+   * 區塊本來就用 --space-3（12px）＋單一 gap，跟這組「更細的標題→內文
+   * 收緊」語意不同，不套用；已套用在 .question-card（見 app.css），
+   * 把 legend→helper 的間距從跟其他區塊同值的 16px 收緊成 8px。
+   */
+  --space-stack-title-body: var(--space-2);
+  --space-stack-body-note: var(--space-1);
+  --space-stack-block: var(--space-6);
 
   --radius-xs: 0.25rem;
   --radius-sm: 0.5rem;
