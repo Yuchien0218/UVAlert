@@ -89,7 +89,7 @@ async function runTest(): Promise<void> {
     </header>
 
     <header class="page-heading">
-      <h1>通知設定</h1>
+      <h1 class="page-heading__title">通知設定</h1>
       <p>
         在防曬即將失效或該補擦時接收提醒。提醒由這台裝置本機發出，不經由外部伺服器。
       </p>

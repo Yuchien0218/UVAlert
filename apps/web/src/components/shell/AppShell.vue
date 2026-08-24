@@ -74,18 +74,9 @@ watch(
   background: var(--page-background);
 }
 
-/*
- * 2026-08-24：上緣留白的下限從 1.5rem 拉到 2rem。手機寬度時 6vw 算出來
- * 比下限小，等於一律吃到 24px——頁首（72px 高）與 32px 的大標題之間只有
- * 24px，標題會讀成貼在頁首上、像是頁首的一部分。
- *
- * 依 DESIGN.md 第四節，24px 是「頁面內主要區塊」的間距；App 外框與頁面
- * 內容之間是語意上更大的分界，用 32px 讓標題自己站住。左右留白與下緣
- * 不變。
- */
 .app-shell__main {
   width: 100%;
-  padding: clamp(2rem, 6vw, 3.5rem)
+  padding: clamp(1.5rem, 6vw, 3.5rem)
     clamp(1rem, 5vw, 2.75rem)
     var(--space-12);
 }

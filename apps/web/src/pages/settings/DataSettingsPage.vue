@@ -40,7 +40,7 @@ async function runClear(scope: ClearScope): Promise<void> {
 <template>
   <div class="page-stack data-page">
     <header class="page-heading">
-      <h1>本機資料管理</h1>
+      <h1 class="page-heading__title">本機資料管理</h1>
       <p>
          不用登入也能使用；未同步的資料只儲存在這台裝置上。匯出的檔案由你的裝置直接產生，不會上傳、不經後端、不進分析。
       </p>

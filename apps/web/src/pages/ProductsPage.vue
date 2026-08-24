@@ -72,7 +72,7 @@ function openGear(productId: string): void {
 <template>
   <div class="page-stack gear-page">
     <header class="page-heading">
-      <h1>我的防曬裝備</h1>
+      <h1 class="page-heading__title">我的防曬裝備</h1>
       <p>
         這份清單會先儲存在這台裝置。只有防曬乳會建立補擦倒數；其他裝備只做紀錄。
       </p>

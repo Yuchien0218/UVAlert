@@ -294,6 +294,14 @@ h3 {
   font-family: var(--font-serif);
   font-weight: 400;
   letter-spacing: -0.01em;
+  /*
+   * 2026-08-24：清掉瀏覽器預設的 margin（h1 是 0.67em，32px 標題就是
+   * 上下各 21.44px）。版面一律用容器的 gap 排，留著預設 margin 會讓
+   * 「有沒有記得加 .page-heading__title」變成間距差 40px 的分水嶺——
+   * 通知設定頁就是這樣跟其他頁對不齊的。多數元件本來就各自寫了
+   * margin: 0 來擋這件事，統一在這裡處理。
+   */
+  margin: 0;
 }
 
 button,
