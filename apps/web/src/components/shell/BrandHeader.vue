@@ -128,7 +128,7 @@ const contextLabel = computed(() => {
   align-items: center;
   gap: var(--space-2);
   color: var(--text-secondary);
-  font-size: 0.75rem;
+  font-size: var(--font-size-caption);
   font-weight: 500;
 }
 

@@ -154,7 +154,7 @@ function routeForStep(
 .recovery-card__eyebrow {
   margin: 0;
   color: var(--text-secondary);
-  font-size: 0.8rem;
+  font-size: var(--font-size-label);
   font-weight: 500;
 }
 

@@ -158,7 +158,7 @@ button.setup-shell__quiet-action {
   align-items: center;
   gap: var(--space-2);
   color: var(--color-success);
-  font-size: 0.75rem;
+  font-size: var(--font-size-caption);
   white-space: nowrap;
 }
 

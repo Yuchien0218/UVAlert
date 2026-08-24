@@ -48,7 +48,7 @@ defineProps<Props>();
 }
 
 .region-summary__title {
-  font-size: 0.875rem;
+  font-size: var(--font-size-body);
   color: var(--text-secondary);
 }
 

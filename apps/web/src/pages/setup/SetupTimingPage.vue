@@ -328,7 +328,7 @@ onMounted(async () => {
   margin: 0;
   padding: var(--space-4);
   border-radius: var(--radius-sm);
-  background: var(--color-untimed-soft, var(--surface-raised));
+  background: var(--color-untimed-soft, var(--surface-soft));
   color: var(--text-secondary);
   line-height: 1.7;
 }

@@ -220,7 +220,7 @@ function getZoneNames(zoneIds: string[], zones: ZoneProjection[]): string {
 
 #events-title {
   margin: 0;
-  font-size: 0.875rem;
+  font-size: var(--font-size-body);
   letter-spacing: 0.16em;
   text-transform: uppercase;
   color: var(--text-secondary);
@@ -234,7 +234,7 @@ function getZoneNames(zoneIds: string[], zones: ZoneProjection[]): string {
 
 .clock-warning p {
   margin: 0;
-  font-size: 0.875rem;
+  font-size: var(--font-size-body);
   line-height: 1.6;
   color: var(--text-secondary);
 }
@@ -256,7 +256,7 @@ function getZoneNames(zoneIds: string[], zones: ZoneProjection[]): string {
   background: transparent;
   color: var(--text-primary);
   font: inherit;
-  font-size: 0.875rem;
+  font-size: var(--font-size-body);
   line-height: 1.6;
   text-align: left;
 }

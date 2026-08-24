@@ -286,7 +286,7 @@ function makeDraftZone(
 .preset-card__eyebrow {
   margin: 0 0 var(--space-2);
   color: var(--text-secondary);
-  font-size: 0.8rem;
+  font-size: var(--font-size-label);
   font-weight: 500;
 }
 
@@ -303,7 +303,7 @@ function makeDraftZone(
 }
 
 .preset-card__note {
-  font-size: 0.875rem;
+  font-size: var(--font-size-body);
 }
 
 .preset-card__actions,
@@ -327,14 +327,14 @@ button.text-link {
 
 .zone-groups__heading h2 {
   margin: 0;
-  font-size: 1.15rem;
+  font-size: var(--font-size-section-title);
 }
 
 .zone-groups__heading p {
   margin: var(--space-2) 0 0;
   color: var(--text-secondary);
   line-height: 1.7;
-  font-size: 0.875rem;
+  font-size: var(--font-size-body);
 }
 
 .zone-groups__list {
@@ -369,7 +369,7 @@ button.text-link {
 .zone-group-choice small {
   margin-top: var(--space-1);
   color: var(--text-secondary);
-  font-size: 0.75rem;
+  font-size: var(--font-size-caption);
 }
 
 .field {
@@ -380,7 +380,7 @@ button.text-link {
 
 .field span {
   color: var(--text-secondary);
-  font-size: 0.875rem;
+  font-size: var(--font-size-body);
 }
 
 .field input {

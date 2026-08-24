@@ -40,7 +40,7 @@ defineEmits<{ start: [] }>();
 .night-notice__body {
   margin: 0;
   color: var(--color-body-strong, var(--text-primary));
-  font-size: 0.875rem;
+  font-size: var(--font-size-body);
   line-height: 1.7;
 }
 

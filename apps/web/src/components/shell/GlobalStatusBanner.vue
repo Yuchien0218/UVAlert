@@ -66,7 +66,7 @@ const status = computed(() => {
   padding: var(--space-3) var(--space-4);
   border-bottom: 1px solid var(--border-subtle);
   background: var(--color-tracking-soft);
-  font-size: 0.875rem;
+  font-size: var(--font-size-body);
   text-align: center;
 }
 

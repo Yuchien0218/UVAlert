@@ -120,7 +120,7 @@ async function install(): Promise<void> {
 .install-card h2,
 .limits h2 {
   margin: 0;
-  font-size: 1.15rem;
+  font-size: var(--font-size-section-title);
 }
 
 .install-card p,
@@ -139,14 +139,14 @@ async function install(): Promise<void> {
 }
 
 .install-card__note {
-  font-size: 0.875rem;
+  font-size: var(--font-size-body);
 }
 
 .install-result {
   margin: 0;
   padding: var(--space-4);
   border-radius: var(--radius-sm);
-  background: var(--surface-secondary);
+  background: var(--surface-soft);
   color: var(--text-secondary);
   line-height: 1.7;
 }

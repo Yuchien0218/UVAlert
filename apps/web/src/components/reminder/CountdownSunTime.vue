@@ -157,13 +157,13 @@ const estimateValue = computed(() =>
 
 .countdown-time__unit {
   color: var(--text-secondary);
-  font-size: 0.875rem;
+  font-size: var(--font-size-body);
   font-weight: 500;
 }
 
 .countdown-time__estimate {
   color: var(--text-secondary);
-  font-size: 0.8rem;
+  font-size: var(--font-size-label);
   line-height: 1.4;
   text-align: left;
 }

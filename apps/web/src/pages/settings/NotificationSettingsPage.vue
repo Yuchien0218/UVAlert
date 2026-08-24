@@ -260,7 +260,7 @@ async function runTest(): Promise<void> {
 .note-box {
   padding: var(--space-3);
   border-radius: var(--radius-sm);
-  background: var(--surface-raised);
+  background: var(--surface-soft);
   color: var(--text-secondary);
   font-size: var(--font-size-caption);
   line-height: 1.6;

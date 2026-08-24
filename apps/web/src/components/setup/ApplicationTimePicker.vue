@@ -130,7 +130,7 @@ function toLocalInputValue(date: Date): string {
 .time-picker > p {
   margin: 0;
   color: var(--text-secondary);
-  font-size: 0.8rem;
+  font-size: var(--font-size-label);
   line-height: 1.6;
 }
 
@@ -195,7 +195,7 @@ function toLocalInputValue(date: Date): string {
 
 .time-picker__custom span {
   color: var(--text-secondary);
-  font-size: 0.8rem;
+  font-size: var(--font-size-label);
   font-weight: 500;
 }
 
@@ -223,7 +223,7 @@ function toLocalInputValue(date: Date): string {
   }
 
   .time-option__time {
-    font-size: 0.75rem;
+    font-size: var(--font-size-caption);
   }
 }
 </style>

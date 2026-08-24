@@ -104,14 +104,14 @@ const startedLabel = computed<string | null>(() => {
 .night-session__meta {
   margin: 0;
   color: var(--text-secondary);
-  font-size: 0.875rem;
+  font-size: var(--font-size-body);
 }
 
 .night-session__body {
   margin-top: var(--space-3);
   margin-bottom: 0;
   color: var(--color-body-strong, var(--text-primary));
-  font-size: 0.875rem;
+  font-size: var(--font-size-body);
   line-height: 1.7;
 }
 </style>

@@ -175,7 +175,7 @@ async function save(): Promise<void> {
 .manual-region .manual-region__error {
   margin: 0;
   color: var(--color-due);
-  font-size: 0.875rem;
+  font-size: var(--font-size-body);
 }
 
 .manual-region h2 {
