@@ -36,14 +36,8 @@ const publishable = computed(() =>
       :required-review="topic?.requiredReview ?? null"
     />
 
-    <RouterLink class="text-link" :to="{ name: 'help' }">
+    <RouterLink class="text-link text-link--muted" :to="{ name: 'help' }">
       返回常見問題
     </RouterLink>
   </div>
 </template>
-
-<style scoped>
-.text-link {
-  color: var(--text-secondary);
-}
-</style>

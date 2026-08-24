@@ -327,7 +327,6 @@ function zoneNames(zoneIds: string[]): string {
 .flow-heading h1 { font-size: var(--font-size-page-title); }
 .flow-heading div { display: grid; gap: var(--space-3); }
 .flow-heading div > p:last-child { color: var(--text-secondary); line-height: 1.7; }
-.eyebrow { letter-spacing: .16em; }
 
 .app-card {
   display: grid;

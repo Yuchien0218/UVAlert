@@ -122,7 +122,7 @@ function writeSyncDisabled(value: boolean): void {
     </section>
 
     <RouterLink class="text-link" to="/settings/account-data">管理登入與雲端資料</RouterLink>
-    <RouterLink class="text-link" to="/more">返回更多</RouterLink>
+    <RouterLink class="text-link text-link--muted" to="/more">返回更多</RouterLink>
   </div>
 </template>
 
@@ -143,5 +143,4 @@ function writeSyncDisabled(value: boolean): void {
 .notice { margin: 0; line-height: 1.7; }
 .notice--error { color: var(--color-due); }
 .notice--ok { color: var(--text-secondary); }
-.text-link { color: var(--text-secondary); }
 </style>

@@ -57,7 +57,7 @@ async function submit(): Promise<void> {
       </p>
     </form>
 
-    <RouterLink class="text-link" to="/more">返回更多</RouterLink>
+    <RouterLink class="text-link text-link--muted" to="/more">返回更多</RouterLink>
   </div>
 </template>
 
@@ -70,5 +70,4 @@ textarea { resize: vertical; }
 .notice { margin: 0; line-height: 1.7; }
 .notice--ok { color: var(--text-secondary); }
 .notice--error { color: var(--color-due); }
-.text-link { color: var(--text-secondary); }
 </style>

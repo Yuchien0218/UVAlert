@@ -29,10 +29,10 @@ colors:
   accent-blush: "#D79A92"
   accent-mauve: "#8C6F7A"
   accent-amber: "#D9A35F"
-  status-tracking: "#2F6FBB"
-  status-soon: "#A86100"
-  status-due: "#CC3333"
-  status-untimed: "#5B3CC4"
+  status-tracking: "#3F76A5"
+  status-soon: "#BB6820"
+  status-due: "#C1442F"
+  status-untimed: "#9D9591"
   status-saved: "#8C6F7A"
   warning: "#C78336"
   error: "#B84D4C"
@@ -476,10 +476,10 @@ components:
 
 | Token | Hex | HSL | 語意 |
 |---|---|---|---|
-| `{colors.status-tracking}` | `#2F6FBB` | `hsl(211, 59%, 46%)` | 追蹤中 |
-| `{colors.status-soon}` | `#A86100` | `hsl(35, 100%, 33%)` | 即將到期 |
-| `{colors.status-due}` | `#CC3333` | `hsl(0, 60%, 50%)` | 已到期 |
-| `{colors.status-untimed}` | `#5B3CC4` | `hsl(255, 53%, 50%)` | 未計時 |
+| `{colors.status-tracking}` | `#3F76A5` | `hsl(208, 45%, 45%)` | 追蹤中（2026-08-24 加深一階，見上方色彩修正記錄） |
+| `{colors.status-soon}` | `#BB6820` | `hsl(28, 71%, 43%)` | 即將到期（2026-08-24 加深一階） |
+| `{colors.status-due}` | `#C1442F` | `hsl(9, 61%, 47%)` | 已到期（2026-08-24 加深一階） |
+| `{colors.status-untimed}` | `#9D9591` | `hsl(19, 6%, 59%)` | 未計時（2026-08-24 從專屬紫色改中性灰——沒有時間資訊，中性灰比紫色貼切） |
 | `{colors.status-saved}` | `#8C6F7A` | `hsl(337, 12%, 49%)` | 已儲存（藕紫，與 accent-mauve 同值） |
 
 **「已儲存」刻意用藕紫而非綠色。** 專案規則明訂不使用綠色暗示「安全」或「防護有效」——防曬沒有「完成」狀態，只有「這次記錄成功」。藕紫傳達安心但不傳達安全。
@@ -651,7 +651,7 @@ Noto Serif TC 是標題的唯一字型，沒有第二層自托管備援——載
 
 **`page-heading`** — 由三段組成：`eyebrow`（`{typography.caption}`，`{colors.muted}`）、`title`（`{typography.display-md}`，襯線）、`body`（`{typography.body-md}`，`{colors.body}`，`max-width: 38rem`）。eyebrow 與 body 都是選用的。
 
-**`app-card`** — 通用內容卡。背景 `{colors.canvas}`，1px `{colors.hairline}` 邊框，圓角 `{rounded.lg}`，內距 20px。無陰影。
+**`app-card`** — 通用內容卡。背景半透明白 `rgba(255,255,255,0.6)` 疊在 `{colors.canvas}` 上（2026-08-24：純 canvas 版本套用後卡片跟頁面幾乎融在一起，改用半透明白疊加維持一點層次），1px `{colors.hairline}` 邊框，圓角 `{rounded.lg}`，內距 20px。無陰影。這個疊加效果假設卡片背後是 canvas 底色，不要用在深色面板或圖片背景上。
 
 **`page-footer-meta`** — 頁尾的版本、隱私政策、使用條款與資料說明。純文字連結列，`{colors.muted-soft}`，`{typography.body-sm}`。**刻意不做成功能卡片**，避免與「更多」頁的入口卡競爭。
 
@@ -851,6 +851,12 @@ Noto Serif TC 是標題的唯一字型，沒有第二層自托管備援——載
 > **關鍵修正**：`.button--primary` 原本借用 `--color-tracking`（藍色，那其實是「追蹤中」的狀態色），已改用 `--color-primary`，並補上 active／disabled 狀態。`--color-tracking` 現在只剩狀態色用途。四個元件的「選取／連結／裝飾」用途也一併從 tracking 改為 primary。
 >
 > 對比度實測（暖象牙底）：主要按鈕 4.80:1、文字連結 4.66:1、焦點環 4.66:1、次要文字 5.92:1、標題 12.8–13.2:1，全數通過 WCAG AA。
+
+> **2026-08-24 色彩與卡片背景修正**：核對 Claude Design 下游元件庫時發現兩處落差，使用者確認後套用：
+> 1. **`--surface-primary` 改回 `{colors.canvas}`**，取代 2026-08-22 一度指向的 `{colors.surface-card}`。本節第五節的 `app-card` 規範本來就寫「背景 canvas、1px hairline 邊框」（見上方 654 行），2026-08-22 那次色彩套用其實是改錯方向；Claude Design 的下游元件庫一直維持 canvas＋hairline 版本。這次改動會讓 `app-card`、輸入框、bottom sheet 等所有引用 `--surface-primary` 的元件變成跟頁面同色，只靠 hairline 分隔——`HomeCountdown`／`ReminderPanel`／`BottomNavigation` 三處直接引用 `{colors.surface-card}`，不受影響。
+> 2. **`{colors.status-tracking}`／`{colors.status-soon}`／`{colors.status-due}` 加深一階**（`#2F6FBB`→`#3F76A5`、`#A86100`→`#BB6820`、`#CC3333`→`#C1442F`），**`{colors.status-untimed}` 從紫色 `#5B3CC4` 改成中性灰 `#9D9591`**——untimed 語意是「沒有時間資訊」，中性灰比專屬紫色貼切，也是 Claude Design 已經套用的方向。
+>
+> 同時引進 Claude Design 定義的 stack 間距 token（`--space-stack-title-body` 8px／`--space-stack-body-note` 4px／`--space-stack-block` 24px，數值分別等於既有的 `--space-2`／`--space-1`／`--space-6`，純語意別名）。已套用在 `question-card` 的 legend→內文間距（見 `apps/web/src/assets/app.css`）；`.page-heading`／`.flow-heading` 維持原本的 `--space-3`（12px）單一 gap，語意不同，不套用。
 
 > **2026-08-22 更正**：「點擊目標 44px」先前寫成已對齊，但實際有三個元件用區域 CSS 覆寫把共用 `.button` 的 `min-height: var(--tap-target)` 壓成 `2.5rem`（40px）——`OutdoorContextCard`、`EveningUvPrompt`、`FiveDayUvCard`。三處皆已改為刪除該行、回歸共用 token（不是改寫成 44px，避免再寫死數值）。
 >

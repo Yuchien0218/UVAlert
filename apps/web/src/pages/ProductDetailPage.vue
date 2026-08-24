@@ -142,7 +142,7 @@ async function handleDelete(): Promise<void> {
 <template>
   <div class="page-stack product-detail-page">
     <header class="detail-header">
-      <button class="text-link back-link" type="button" @click="goBack">
+      <button class="text-link" type="button" @click="goBack">
         <Icon name="tool-arrow-left" :size="20" />
         返回裝備清單
       </button>
@@ -286,12 +286,6 @@ async function handleDelete(): Promise<void> {
   display: flex;
   justify-content: space-between;
   align-items: center;
-}
-
-.back-link {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--space-2);
 }
 
 .page-heading {

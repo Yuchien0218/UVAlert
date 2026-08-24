@@ -151,7 +151,7 @@ const estimateValue = computed(() =>
   color: var(--text-primary);
   font-size: 1em;
   font-weight: 600;
-  letter-spacing: -0.03em;
+  letter-spacing: var(--letter-spacing-readout);
   line-height: 1;
 }
 

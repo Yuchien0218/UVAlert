@@ -69,18 +69,23 @@
   --color-white: #ffffff;
 
   /*
-   * 提醒狀態色與 UV 色階獨立於品牌色，DESIGN.md 第十節列為「已對齊」，
-   * 不要改。--color-tracking 是「追蹤中」這個狀態，不是行動色；
-   * 行動色請用 --color-primary。
+   * 提醒狀態色與 UV 色階獨立於品牌色。--color-tracking 是「追蹤中」這個
+   * 狀態，不是行動色；行動色請用 --color-primary。
+   *
+   * 2026-08-24 使用者確認跟進 Claude Design 的微調：tracking／soon／due
+   * 三色加深一階，untimed 從紫色（#5b3cc4）改成中性灰（#9d9591）——
+   * 跟其他四色「各自專屬色相」的邏輯不同，untimed 本來就是「沒有時間
+   * 資訊」，中性灰更貼切。untimed-soft 改用 color-mix 算，不再手寫
+   * 固定的淡紫色（原本的淡紫已經不搭新的灰色主色）。
    */
-  --color-tracking: #2f6fbb;
+  --color-tracking: #3f76a5;
   --color-tracking-soft: #eaf3fc;
-  --color-soon: #a86100;
+  --color-soon: #bb6820;
   --color-soon-soft: #fff3d6;
-  --color-due: #cc3333;
+  --color-due: #c1442f;
   --color-due-soft: #fdecea;
-  --color-untimed: #5b3cc4;
-  --color-untimed-soft: #f1edff;
+  --color-untimed: #9d9591;
+  --color-untimed-soft: color-mix(in srgb, #9d9591 12%, #faf5ec);
   --color-success: #147d64;
   --color-success-soft: #e9f7f1;
   --color-uvi-low: #507aa8;
@@ -90,7 +95,16 @@
   --color-uvi-extreme: #7d4bb3;
 
   --page-background: var(--color-canvas);
-  --surface-primary: var(--color-surface-card);
+  /*
+   * 2026-08-24：先改回 var(--color-canvas)（取代 2026-08-22 一度指向的
+   * --color-surface-card，理由見 DESIGN.md 第十節同日記錄），套用後
+   * 使用者反映卡片跟頁面幾乎融在一起、分不出界線；改用半透明白疊在
+   * canvas 上——比純 canvas 亮，卡片會有一點「浮起來」的層次，但保留
+   * 同一套暖色調，不像純白 #FFFFFF 那樣突兀。0.6 使用者覺得還是太重，
+   * 調整為 0.4。疊加效果依賴卡片背後真的是 canvas 底色；深色面板
+   * （surface-dark）或圖片背景上不要用這個 token。
+   */
+  --surface-primary: rgba(255, 255, 255, 0.4);
   --surface-soft: var(--color-surface-soft);
   --surface-inverse: var(--color-surface-dark);
   --text-primary: var(--color-ink);
@@ -162,6 +176,38 @@
   --font-size-title: 1.25rem;
   --font-size-title-md: 1.35rem;
 
+  /*
+   * 2026-08-24 補：字距（letter-spacing）原本 8 個檔案各寫各的魔術數字，
+   * 互相對不上。這裡只收斂「真的重複」的三組，不強改只出現一次的數值
+   * （那些各自獨立，不是重複問題，改了是視覺決定，不是收斂）：
+   * - eyebrow：flow-heading 版型的小標籤，ReapplyPage／EventCorrectionPage／
+   *   ReportContextEventPage 三份逐字相同的 `.eyebrow { letter-spacing: .16em }`。
+   * - mono-label：RegionPage 與 RegionLocationPanel 的等寬座標／定位標籤，
+   *   四個屬性完全相同的區塊。
+   * - headline：ReminderPanel／ReminderEmptyState 的倒數大標題，
+   *   字級用 clamp() 各自不同，但字距都是 -0.04em。
+   * readout 則是 DESIGN.md 第三節已經記載的值，.stat-figure 原本就是
+   * -0.02em，這裡只是給它一個名字，不是新決定。
+   *
+   * 2026-08-24 使用者確認統一：原本 5 個只出現一次的負字距大標題
+   * （-0.03em 到 -0.055em）依角色併進既有分組，不再各自為政：
+   * - page-title：.page-heading__title 跟 SetupStepShell 的
+   *   .setup-shell__title 都用 --font-size-page-title，同樣是「頁面主標」
+   *   角色，原本 -0.055em／-0.05em 只差 0.005em，取用得較廣的
+   *   page-heading__title 數值。
+   * - headline：SetupContextPage 的 .recovery-card h2（clamp 1.5–2.35rem）
+   *   跟既有的 ReminderPanel／ReminderEmptyState 大標題尺寸級距重疊，
+   *   角色也同樣是「單一句子的大標題」，併入 headline。
+   * - readout：CountdownSunTime 的 .countdown-time__number 是即時跳動的
+   *   數字（雖然沒套 mono 字體），角色跟 .stat-figure 一樣是「讀數」，
+   *   併入 readout。
+   */
+  --letter-spacing-eyebrow: 0.16em;
+  --letter-spacing-mono-label: 0.12em;
+  --letter-spacing-headline: -0.04em;
+  --letter-spacing-readout: -0.02em;
+  --letter-spacing-page-title: -0.055em;
+
   --space-1: 0.25rem;
   --space-2: 0.5rem;
   --space-3: 0.75rem;
@@ -171,6 +217,19 @@
   --space-8: 2rem;
   --space-10: 2.5rem;
   --space-12: 3rem;
+
+  /*
+   * 2026-08-24 使用者確認引進：Claude Design 的 stack 間距系統
+   * （標題→內文、內文→次要說明、一組文字→下一組），數值跟既有的
+   * --space-2／--space-1／--space-6 完全相同，這裡只是給它們語意
+   * 名稱，不是新數值。.page-heading／.flow-heading 這類「標題＋內文」
+   * 區塊本來就用 --space-3（12px）＋單一 gap，跟這組「更細的標題→內文
+   * 收緊」語意不同，不套用；已套用在 .question-card（見 app.css），
+   * 把 legend→helper 的間距從跟其他區塊同值的 16px 收緊成 8px。
+   */
+  --space-stack-title-body: var(--space-2);
+  --space-stack-body-note: var(--space-1);
+  --space-stack-block: var(--space-6);
 
   --radius-xs: 0.25rem;
   --radius-sm: 0.5rem;

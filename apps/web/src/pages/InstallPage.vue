@@ -104,7 +104,7 @@ async function install(): Promise<void> {
       </ul>
     </section>
 
-    <RouterLink class="text-link" to="/more">返回更多</RouterLink>
+    <RouterLink class="text-link text-link--muted" to="/more">返回更多</RouterLink>
   </div>
 </template>
 
@@ -151,7 +151,4 @@ async function install(): Promise<void> {
   line-height: 1.7;
 }
 
-.text-link {
-  color: var(--text-secondary);
-}
 </style>

@@ -351,7 +351,6 @@ p {
   color: var(--text-secondary);
   line-height: 1.7;
 }
-.eyebrow { letter-spacing: .16em; }
 
 .section-helper {
   color: var(--text-secondary);

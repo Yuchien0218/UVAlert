@@ -39,7 +39,7 @@ const topics = computed(() => listPublishableTopics());
       <p>內容正在審查中，完成前暫不提供。這不影響提醒功能。</p>
     </section>
 
-    <RouterLink class="text-link" to="/more">返回更多</RouterLink>
+    <RouterLink class="text-link text-link--muted" to="/more">返回更多</RouterLink>
   </div>
 </template>
 
@@ -85,7 +85,4 @@ const topics = computed(() => listPublishableTopics());
   line-height: 1.7;
 }
 
-.text-link {
-  color: var(--text-secondary);
-}
 </style>
