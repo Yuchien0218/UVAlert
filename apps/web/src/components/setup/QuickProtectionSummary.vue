@@ -37,7 +37,7 @@ const zoneLabels = computed(() =>
 </script>
 
 <template>
-  <section class="quick-protection">
+  <section class="quick-protection app-card">
     <button
       class="quick-protection__header"
       type="button"
@@ -93,11 +93,18 @@ const zoneLabels = computed(() =>
 </template>
 
 <style scoped>
+/*
+ * 2026-08-24：原本整區用 --color-soon-soft 當底、圓形圖示用 --color-soon。
+ * 但 --color-soon 的語意是「即將到期」，這區講的是「這是推薦的部位組合」，
+ * 完全不同的事——DESIGN.md 第二節明訂狀態色不得與裝飾用法混淆。
+ *
+ * SetupProcessBanner 2026-08-23 已經因為同一個理由把 --color-soon 換掉
+ * （「同一個顏色會讓使用者把該去完成設定跟該去補擦搞混」），這一處是當時
+ * 漏掉的。改用共用的 .app-card，跟同頁其他區塊一致。
+ */
 .quick-protection {
   display: grid;
   gap: var(--space-4);
-  border-radius: var(--radius-lg);
-  background: var(--color-soon-soft);
 }
 
 .quick-protection__header {
@@ -123,8 +130,8 @@ const zoneLabels = computed(() =>
   height: 3rem;
   place-content: center;
   border-radius: 50%;
-  background: var(--color-soon);
-  color: var(--text-inverse);
+  background: var(--surface-soft);
+  color: var(--color-primary);
   flex-shrink: 0;
 }
 
@@ -165,7 +172,7 @@ const zoneLabels = computed(() =>
   display: grid;
   gap: var(--space-4);
   padding: 0 var(--space-5) var(--space-5);
-  animation: slideDown var(--duration-base) var(--ease-out);
+  animation: quickProtectionFadeIn var(--duration-base) var(--ease-out);
 }
 
 .quick-protection__summary {
@@ -193,14 +200,16 @@ const zoneLabels = computed(() =>
   margin-top: var(--space-2);
 }
 
-@keyframes slideDown {
+/*
+ * 2026-08-24：原本叫 slideDown、帶 translateY(-0.5rem)，但 DESIGN.md
+ * 第十二節明訂動畫「只用 opacity，不用位移或縮放」。改成純淡入。
+ */
+@keyframes quickProtectionFadeIn {
   from {
     opacity: 0;
-    transform: translateY(-0.5rem);
   }
   to {
     opacity: 1;
-    transform: translateY(0);
   }
 }
 

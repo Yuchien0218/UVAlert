@@ -141,7 +141,7 @@ function formatTime(iso: string | null): string {
 <template>
   <section
     v-if="draft"
-    class="completion-summary"
+    class="completion-summary app-card"
     aria-labelledby="summary-title"
   >
     <h2 id="summary-title">確認這次提醒</h2>
@@ -201,12 +201,15 @@ function formatTime(iso: string | null): string {
 </template>
 
 <style scoped>
+/*
+ * 2026-08-24：原本自己用 --surface-soft ＋ --radius-sm，跟同頁其他卡片的
+ * app-card（--radius-lg）長得不一樣——這是「排版像舊實作」的來源之一。
+ * 改用共用的 app-card。
+ */
 .completion-summary {
   display: grid;
   gap: var(--space-4);
   padding: var(--space-5);
-  background: var(--surface-soft);
-  border-radius: var(--radius-sm);
 }
 
 h2 {
@@ -221,14 +224,18 @@ h2 {
   font-size: var(--font-size-body);
 }
 
+/*
+ * 2026-08-24：原本有 border-left: 0.25rem solid --color-due，但 DESIGN.md
+ * 第五節 status-card 明訂「純色塊填滿、無左側色條、無陰影」。底色也改用
+ * 該節規定的 color-mix(狀態色 12%, canvas) 公式，跟其他狀態卡視覺重量一致。
+ */
 .summary-warning {
   display: grid;
   grid-template-columns: auto minmax(0, 1fr);
   gap: var(--space-3);
   padding: var(--space-4);
-  border-radius: var(--radius-sm);
-  border-left: 0.25rem solid var(--color-due);
-  background: var(--color-due-soft, var(--surface-soft));
+  border-radius: var(--radius-lg);
+  background: color-mix(in srgb, var(--color-due) 12%, var(--color-canvas));
   color: var(--text-primary);
 }
 
@@ -254,11 +261,15 @@ h2 {
   gap: var(--space-2);
 }
 
+/*
+ * 2026-08-24：原本有 text-transform: uppercase ＋ letter-spacing: 0.1em。
+ * 這些標籤全是中文，中文沒有大小寫，uppercase 完全不生效；那組字距是套用
+ * 在拉丁小標上的慣例，放在中文只會把字拉散。兩者都移除。
+ */
 .summary-item h3 {
   margin: 0;
   font-size: var(--font-size-body);
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
+  font-weight: 500;
   color: var(--text-secondary);
 }
 

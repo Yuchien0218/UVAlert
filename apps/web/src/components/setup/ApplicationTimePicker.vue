@@ -66,9 +66,9 @@ function toLocalInputValue(date: Date): string {
 </script>
 
 <template>
-  <fieldset class="time-picker app-card">
+  <fieldset class="time-picker question-card app-card">
     <legend>塗抹時間</legend>
-    <p>
+    <p class="question-card__helper">
       請選擇實際塗抹時間。系統會以此重新計算提醒狀態。
     </p>
 
@@ -76,10 +76,9 @@ function toLocalInputValue(date: Date): string {
       <button
         v-for="option in quickOptions"
         :key="option.minutesAgo"
-        class="time-option"
+        class="time-option app-card"
         :class="{
-          'time-option--selected':
-            selectedQuick === option.minutesAgo
+          'option-selected': selectedQuick === option.minutesAgo
         }"
         type="button"
         @click="selectQuick(option.minutesAgo)"
@@ -111,29 +110,14 @@ function toLocalInputValue(date: Date): string {
 </template>
 
 <style scoped>
-.time-picker {
-  display: grid;
-  gap: var(--space-5);
-  min-width: 0;
-  margin: 0;
-  padding: var(--space-5);
-  border: 1px solid var(--border-subtle);
-}
-
-.time-picker legend {
-  padding: 0;
-  font-size: clamp(0.95rem, 4vw, 1.05rem);
-  font-weight: 500;
-  margin-bottom: calc(var(--space-3) * -1);
-}
-
-.time-picker > p {
-  margin: 0;
-  color: var(--text-secondary);
-  font-size: var(--font-size-label);
-  line-height: 1.6;
-}
-
+/*
+ * 2026-08-24：這張卡原本自己刻了一整套 fieldset＋legend＋說明的版面
+ * （legend 用 clamp(0.95rem, 4vw, 1.05rem) 魔術數字、靠負的 margin-bottom
+ * 補間距、又重寫一次 app-card 已經提供的 border），跟正下方結構完全相同的
+ * SunscreenClaimQuickQuestion 長得不一樣——那張用的是共用的 .question-card。
+ * 同一頁兩張同構的卡片標題大小與間距不同，就是「排版像舊實作」的來源。
+ * 改用共用的 .question-card，這裡只留這張卡特有的東西。
+ */
 .time-picker__quick {
   display: grid;
   grid-template-columns: 1fr;
@@ -146,9 +130,7 @@ function toLocalInputValue(date: Date): string {
   align-items: center;
   gap: var(--space-4);
   padding: var(--space-3) var(--space-4);
-  border: 1px solid var(--border-subtle);
   border-radius: var(--radius-sm);
-  background: transparent;
   color: var(--text-primary);
   cursor: pointer;
   text-align: left;
@@ -164,12 +146,6 @@ function toLocalInputValue(date: Date): string {
   filter: brightness(0.92);
 }
 
-.time-option--selected {
-  border: 2px solid var(--color-primary);
-  background: var(--color-surface-cream-strong);
-  color: var(--text-primary);
-}
-
 .time-option__label {
   display: flex;
   align-items: baseline;
@@ -179,12 +155,8 @@ function toLocalInputValue(date: Date): string {
 
 .time-option__time {
   color: var(--text-secondary);
-  font-size: 0.85rem;
+  font-size: var(--font-size-body);
   white-space: nowrap;
-}
-
-.time-option--selected .time-option__time {
-  color: var(--text-secondary);
 }
 
 .time-picker__custom {
