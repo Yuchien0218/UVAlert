@@ -91,11 +91,10 @@ describe("SetupStepShell", () => {
       }
     });
 
-    expect(
-      wrapper
-        .get('a[aria-label="返回步驟 1：情境"]')
-        .attributes("href")
-    ).toBe("/setup/context");
+    // 2026-08-24：進度條下方的「返回步驟 1：情境」連結已移除——工具列的
+    // 「返回」（backTo）已經是同一個去處，同頁面出現兩個回上一步的入口
+    // 只是增加高度與雜訊。這裡改為確認它確實不再出現。
+    expect(wrapper.find('a[href="/setup/context"]').exists()).toBe(false);
     expect(wrapper.find('a[href="/setup/timing"]').exists()).toBe(false);
     expect(wrapper.text()).not.toContain("防護");
     expect(wrapper.text()).toContain("塗抹時間");

@@ -92,14 +92,6 @@ const steps = [
           }"
         />
       </div>
-      <RouterLink
-        v-if="step > 1"
-        class="setup-shell__progress-back text-link"
-        :to="steps[0].to"
-        :aria-label="`返回步驟 1：${steps[0].label}`"
-      >
-        返回步驟 1：{{ steps[0].label }}
-      </RouterLink>
     </div>
 
     <header class="setup-shell__heading">
@@ -205,10 +197,6 @@ button.setup-shell__quiet-action {
   .setup-shell__progress-segment {
     transition: none;
   }
-}
-
-.setup-shell__progress-back {
-  justify-self: start;
 }
 
 .setup-shell__heading {
