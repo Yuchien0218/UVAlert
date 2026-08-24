@@ -80,6 +80,47 @@ index.ts` 核對後，三條路由全部存在且指向功能完整的頁面：
 原樣沿用，沒人在動手前用 `Grep` 核對路由表。下一輪如果看到任何文件說
 某個頁面「沒做」，先查路由表和對應元件檔案是否存在，不要直接信文件。
 
+## 七、第四輪：`防曬補擦流程設計/` 新稿子對齊（2026-08-24）
+
+使用者提供第三份 Claude Design 匯出（`防曬補擦流程設計/UVAlert
+Screens.dc.html`，10 個畫面），涵蓋原本沒有稿子的
+`ForecastPage`／`ReapplyPage`／`MorePage`／`GearForm`／
+`SetupTimingPage` 步驟 2／`ProductDetailPage`，也重新畫了已完成的
+`/reminder`、通知設定、裝備卡片、設定步驟指示器供核對。**這批稿子的
+字型是霞鶩文楷 TC，已被 DESIGN.md 的最終裁決推翻（改回 Noto Serif TC
+單獨使用），實作時忽略字型設定，只採版面與元件結構。**
+
+發現並處理的落差：
+
+- **設定流程步驟指示器要重做**：稿子畫的是分段線條（每步一段，完成
+  與否由該段填滿與否表示），不是上一輪做的連續進度條。已改成分段版
+  （commit `11908d8`）。
+- **`ProductDetailPage` 稿子編造資料**：畫了「依情境的補擦間隔：
+  120／80／60 分」，但一瓶防曬乳在資料模型裡只有一個
+  `reapplicationIntervalMinutes`，不會依情境變出三個數字。不採用這
+  部分。
+- **`ForecastPage` 稿子編造資料**：畫了逐時 UV 長條圖與「今日最高
+  UVI」卡片，但 `FiveDayUvForecast` 沒有逐時欄位。不採用；既有頁面
+  結構本來就與稿子其餘部分一致，未改動。
+- **`MorePage`、`GearForm` 視覺對齊**：入口卡改成 DESIGN.md 的
+  `more-entry-card`（杏桃奶油底、無邊框）；`GearForm` 品類選擇器改
+  3 欄圖示格子，順手修掉一個既有 bug（`choice-grid` 樣式只定義在
+  `ProductSnapshotEditor.vue` 的 scoped style 裡，品類選項原本完全
+  沒套到樣式）。已完成，commit `a68f077`。
+- **`/reminder` 稿子與現行裁決衝突**：稿子的按鈕文字是「我剛補擦了」，
+  跟已稽核的 `copy-audit.md`「記錄補擦」矛盾；稿子上的深色圓環
+  `CountdownPanel` 用法經使用者截圖核對後，實際渲染跟現行平面版本
+  一致，不是我原本以為的深色面板差異。**裁決：維持「記錄補擦」不改，
+  `/reminder` 不需要照這批稿子調整**。
+- **`ReapplyPage`、`SetupTimingPage` 步驟 2**：稿子本身標註為「提案」
+  （上游未定義），現有實作已有更完整的流程（部位×裝備配對、水上
+  活動確信度等），這輪未逐項比對是否需要改動。
+
+過程中額外發現 `--border-strong` 這個 CSS 變數從未在
+`packages/ui/src/styles.css` 定義過，多處元件（`GearListItem.vue`、
+`GearForm.vue`、`ReportContextEventPage.vue`、`EventCorrectionPage.vue`）
+都在用，落回瀏覽器預設 `currentColor`。已開背景任務修正。
+
 ## 五、已知遺留問題（非本輪範圍，已開背景任務）
 
 `FiveDayUvCard.vue` 在沒設定地區時顯示的「設定地區」連結是無效的

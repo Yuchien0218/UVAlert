@@ -97,6 +97,13 @@
   --text-secondary: var(--color-muted);
   --text-inverse: var(--color-on-dark);
   --border-subtle: var(--color-hairline);
+  /*
+   * DESIGN.md 沒有獨立的「強邊框」token——text-input、app-card、
+   * context-option 等所有 1px 邊框元件都用同一個 hairline
+   * （第二節 451 行）。這裡只是別名，避免 --border-strong 落回
+   * currentColor（未定義時的瀏覽器預設）。
+   */
+  --border-strong: var(--color-hairline);
   --focus-ring: var(--color-primary);
 
   /*
