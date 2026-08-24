@@ -96,23 +96,23 @@
 
   --page-background: var(--color-canvas);
   /*
-   * 2026-08-24：先改回 var(--color-canvas)（取代 2026-08-22 一度指向的
-   * --color-surface-card，理由見 DESIGN.md 第十節同日記錄），套用後
-   * 使用者反映卡片跟頁面幾乎融在一起、分不出界線；改用半透明白疊在
-   * canvas 上——比純 canvas 亮，卡片會有一點「浮起來」的層次，但保留
-   * 同一套暖色調，不像純白 #FFFFFF 那樣突兀。0.6 使用者覺得還是太重，
-   * 調整為 0.4。疊加效果依賴卡片背後真的是 canvas 底色；深色面板
-   * （surface-dark）或圖片背景上不要用這個 token。
+   * 卡片表面。2026-08-24 定案為暖奶油 --color-surface-soft（#f7ede1）。
+   *
+   * 這天試過三個版本：先改回 canvas（跟頁面完全同色，使用者反映分不出
+   * 界線）→ 半透明白 rgba(255,255,255,0.4) 疊在 canvas 上 → 最後使用者
+   * 指定改用 HomeLocationPrompt 那張卡的暖奶油色。半透明版本的問題不只
+   * 是色感：它必須依賴「卡片背後真的是 canvas」，一旦蓋在別的東西上就
+   * 破功（兩個 bottom sheet 就這樣透出背後的文字）。改成不透明色之後
+   * 這類問題整類消失。
    */
-  --surface-primary: rgba(255, 255, 255, 0.4);
+  --surface-primary: var(--color-surface-soft);
   /*
-   * 浮在內容之上的面板（bottom sheet、對話框）專用的**不透明**表面。
-   * --surface-primary 是半透明的，貼在頁面底色上當卡片沒問題，但蓋在
-   * 內容上面時後面的文字會透出來（2026-08-24 實際發生在兩個 sheet 上）。
-   * 這個值就是 rgba(255,255,255,0.4) 疊在 canvas #faf5ec 上算出來的
-   * 結果，所以 sheet 與卡片看起來是同一個表面，只是它會確實遮住背後。
+   * 浮在內容之上的面板（bottom sheet、對話框）專用的表面，**必須不透明**
+   * ——半透明會讓背後的文字透出來（2026-08-24 實際發生過）。目前與
+   * --surface-primary 同值；刻意綁定具體色而不是別名，這樣即使之後
+   * --surface-primary 又改成半透明，浮層仍然保證遮得住背後。
    */
-  --surface-overlay: #fcf9f4;
+  --surface-overlay: var(--color-surface-soft);
   --surface-soft: var(--color-surface-soft);
   --surface-inverse: var(--color-surface-dark);
   --text-primary: var(--color-ink);
