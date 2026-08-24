@@ -76,7 +76,7 @@ const groupName = `sunscreen-claim-${useId()}`;
   margin-top: var(--space-4);
   padding: var(--space-4);
   border-radius: var(--radius-sm);
-  background: var(--color-untimed-soft, var(--color-surface-raised));
+  background: var(--color-untimed-soft, var(--surface-soft));
   color: var(--text-secondary);
 }
 
