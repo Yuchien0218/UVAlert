@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed } from "vue";
 import { useRoute, useRouter } from "vue-router";
+import Icon from "../components/icons/Icon.vue";
 import GearForm from "../components/product/GearForm.vue";
 
 /**
@@ -39,16 +40,21 @@ function handleCancel(): void {
 
 <template>
   <div class="page-stack gear-form-page">
-    <header class="flow-heading">
-      <button class="button button--quiet" type="button" @click="handleCancel">
-        取消
-      </button>
+    <header class="form-heading">
       <div>
         <h1>{{ isEdit ? "編輯防曬裝備" : "新增防曬裝備" }}</h1>
         <p>
           資料會先儲存在這台裝置；若已開啟同步，之後也可以同步到雲端。非必要欄位可以稍後再補。
         </p>
       </div>
+      <button
+        class="form-heading__close"
+        type="button"
+        aria-label="取消"
+        @click="handleCancel"
+      >
+        <Icon name="tool-close" :size="24" />
+      </button>
     </header>
 
     <GearForm :product-id="productId" @saved="handleSaved" />
@@ -61,8 +67,39 @@ p {
   margin: 0;
 }
 
-.flow-heading p {
+/*
+ * 關閉控制項比照 GearFormSheet 的 .sheet__close：同一份 GearForm 的
+ * 兩個外殼（獨立頁與流程內 sheet），關閉方式要一致。
+ *
+ * 原本是 `.button.button--quiet` 的「取消」，但 app.css 在 31rem 以下
+ * 讓所有 .button 撐滿寬度，於是次要動作在手機上變成一條與主要動作
+ * 同等重量的滿版按鈕（2026-08-24 使用者截圖指出）。改用不帶 .button
+ * 的圖示鈕就不受那條規則影響。
+ */
+.form-heading {
+  display: flex;
+  align-items: start;
+  justify-content: space-between;
+  gap: var(--space-4);
+}
+
+.form-heading p {
+  margin-top: var(--space-3);
   color: var(--text-secondary);
   line-height: 1.7;
+}
+
+.form-heading__close {
+  display: grid;
+  width: var(--tap-target);
+  height: var(--tap-target);
+  flex: 0 0 auto;
+  place-items: center;
+  padding: 0;
+  border: 1px solid var(--border-subtle);
+  border-radius: 50%;
+  background: transparent;
+  color: var(--text-primary);
+  cursor: pointer;
 }
 </style>

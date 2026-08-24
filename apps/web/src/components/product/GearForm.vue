@@ -512,13 +512,26 @@ p {
   color: var(--text-primary);
 }
 
+/*
+ * inline-block + nowrap 缺一不可：欄位改成兩欄並排後寬度減半，
+ * 原本的 inline span 一換行邊框就從中間斷開（「會」留在框內、
+ * 「影響倒數」跑到框外）。改成整塊不可分割，放不下就整顆換行。
+ */
 .affects-badge {
-  margin-inline-start: var(--space-2);
+  display: inline-block;
   padding: 0 var(--space-2);
   border: 1px solid var(--border-strong);
   border-radius: var(--radius-pill, 999px);
   font-size: var(--font-size-caption);
   color: var(--text-secondary);
+  white-space: nowrap;
+}
+
+.field-pair label {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
 }
 
 .field-pair {
@@ -528,9 +541,19 @@ p {
 }
 
 .field-pair > div {
-  display: grid;
+  display: flex;
+  flex-direction: column;
   gap: var(--space-2);
   min-width: 0;
+}
+
+/*
+ * 兩欄的 label 行數不一定相同（到期日多一顆「會影響倒數」徽章，
+ * 窄欄時會掉成兩行）。把輸入框推到欄底，兩個框才會對齊——否則
+ * 修好徽章反而換來輸入框高低不齊。
+ */
+.field-pair > div > input {
+  margin-top: auto;
 }
 
 /* 欄位在格線裡要撐滿自己那一欄，否則 date/month 這類原生控制項
