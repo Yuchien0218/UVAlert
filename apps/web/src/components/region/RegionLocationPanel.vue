@@ -169,7 +169,7 @@ const errorMessage = computed(() => {
 }
 
 .location-panel__candidate h3 {
-  font-size: 1.1rem;
+  font-size: var(--font-size-title-sm);
 }
 
 .location-panel__relocate {

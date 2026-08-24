@@ -396,93 +396,11 @@ const summary = computed(() => {
   margin-top: var(--space-3);
 }
 
-.question-card {
-  display: grid;
-  gap: var(--space-4);
-  min-width: 0;
-  margin: 0;
-  padding: var(--space-5);
-  border: 1px solid var(--border-subtle);
-}
-
-.question-card legend {
-  float: left;
-  width: 100%;
-  max-width: 100%;
-  margin: 0;
-  padding: 0;
-  font-size: 1.08rem;
-  font-weight: 500;
-  overflow-wrap: anywhere;
-}
-
-.question-card legend + * {
-  clear: both;
-}
-
-.question-card__helper {
-  margin: 0;
-  color: var(--text-secondary);
-  font-size: var(--font-size-body);
-  line-height: 1.7;
-}
-
-.choice-grid {
-  display: grid;
-  gap: var(--space-2);
-}
-
-.choice-grid--row,
-.choice-grid--compact {
-  grid-template-columns: minmax(0, 1fr);
-}
-
-.choice-grid label {
-  display: grid;
-  min-height: var(--tap-target);
-  grid-template-columns: auto minmax(0, 1fr);
-  align-items: center;
-  gap: var(--space-3);
-  padding: var(--space-3);
-  border: 1px solid var(--border-subtle);
-  border-radius: var(--radius-sm);
-  cursor: pointer;
-  transition: background-color var(--duration-fast) var(--ease-out),
-              color var(--duration-fast) var(--ease-out),
-              border-color var(--duration-fast) var(--ease-out);
-}
-
-.choice-grid label:hover {
-  background-color: var(--border-subtle);
-}
-
-.choice-grid label:active {
-  filter: brightness(0.85);
-}
-
-.choice-grid label:has(input:checked) {
-  border-color: var(--surface-inverse);
-  background: var(--surface-inverse);
-  color: var(--text-inverse);
-}
-
-.choice-grid input {
-  accent-color: var(--text-primary);
-}
-
-.choice-grid label:has(input:checked) input {
-  accent-color: var(--text-inverse);
-}
-
-@media (min-width: 42rem) {
-  .choice-grid--row {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-  }
-
-  .choice-grid--compact {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-}
+/*
+ * .question-card／.question-card__helper／.choice-grid 已抽到
+ * app.css（2026-08-24），跟 GearForm.vue、
+ * SunscreenClaimQuickQuestion.vue 共用，這裡不再重複定義。
+ */
 
 .number-field {
   display: grid;

@@ -148,7 +148,7 @@ const zoneLabels = computed(() =>
 
 .quick-protection__header-content h2 {
   margin-top: var(--space-2);
-  font-size: 1.35rem;
+  font-size: var(--font-size-title-md);
 }
 
 .quick-protection__toggle {

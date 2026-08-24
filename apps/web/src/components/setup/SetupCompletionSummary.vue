@@ -211,7 +211,7 @@ function formatTime(iso: string | null): string {
 
 h2 {
   margin: 0;
-  font-size: 1.125rem;
+  font-size: var(--font-size-title-sm);
 }
 
 .summary-help {

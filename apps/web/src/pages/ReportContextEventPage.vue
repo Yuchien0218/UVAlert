@@ -125,6 +125,9 @@ function zoneNames(zoneIds: string[]): string {
             v-for="choice in contextEvent.availableChoices.value"
             :key="choice.kind"
             class="kind-option"
+            :class="{
+              'option-selected': contextEvent.selectedKind.value === choice.kind
+            }"
             type="button"
             :aria-pressed="contextEvent.selectedKind.value === choice.kind"
             @click="contextEvent.selectKind(choice.kind)"
@@ -362,11 +365,6 @@ p {
   text-align: start;
   cursor: pointer;
   min-height: var(--tap-target);
-}
-
-.kind-option[aria-pressed="true"] {
-  border-color: var(--color-primary);
-  background: var(--color-surface-cream-strong);
 }
 
 .kind-option span {

@@ -102,7 +102,7 @@ function toLocalInputValue(date: Date): string {
 
 .water-start legend {
   padding: 0;
-  font-size: 1.08rem;
+  font-size: var(--font-size-title-sm);
   font-weight: 500;
 }
 

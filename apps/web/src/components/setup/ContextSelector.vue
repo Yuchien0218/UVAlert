@@ -73,9 +73,7 @@ watch(
       v-for="option in outdoorOptions"
       :key="option.value"
       class="context-choice"
-      :class="{
-        'context-choice--selected': selectedContext === option.value
-      }"
+      :class="{ 'option-selected': selectedContext === option.value }"
     >
       <input
         v-model="selectedContext"
@@ -121,10 +119,7 @@ watch(
           v-for="option in indoorOptions"
           :key="option.value"
           class="context-group__option"
-          :class="{
-            'context-group__option--selected':
-              selectedContext === option.value
-          }"
+          :class="{ 'option-selected': selectedContext === option.value }"
         >
           <input
             v-model="selectedContext"
@@ -170,10 +165,7 @@ watch(
           v-for="option in waterOptions"
           :key="option.value"
           class="context-group__option"
-          :class="{
-            'context-group__option--selected':
-              selectedContext === option.value
-          }"
+          :class="{ 'option-selected': selectedContext === option.value }"
         >
           <input
             v-model="selectedContext"
@@ -217,16 +209,6 @@ watch(
   gap: var(--space-4);
   padding: var(--space-5);
   cursor: pointer;
-}
-
-/*
- * 2026-08-23 修正：原本只變邊框顏色（且用墨色 --text-primary，不是
- * 行動色），跟 DESIGN.md 第五節牴觸——「已選取：surface-cream-strong 底、
- * primary 邊框。選取態同時有底色與邊框變化，不只靠顏色」。
- */
-.context-choice--selected {
-  border-color: var(--color-primary);
-  background: var(--color-surface-cream-strong);
 }
 
 .context-choice__input {
@@ -306,11 +288,6 @@ watch(
   border: 1px solid var(--border-subtle);
   border-radius: var(--radius-md);
   cursor: pointer;
-}
-
-.context-group__option--selected {
-  border-color: var(--color-primary);
-  background: var(--color-surface-cream-strong);
 }
 
 .context-group__option input {

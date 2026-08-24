@@ -108,7 +108,7 @@ function returnToCaller(): Promise<unknown> {
 }
 
 .region-skip h2 {
-  font-size: 1.1rem;
+  font-size: var(--font-size-title-sm);
 }
 
 .region-skip p {

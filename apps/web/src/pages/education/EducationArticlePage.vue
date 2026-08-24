@@ -131,7 +131,7 @@ const relatedArticles = computed(() =>
 
 .education-article-body :deep(h3) {
   margin: var(--space-6) 0 var(--space-2);
-  font-size: 1.05rem;
+  font-size: var(--font-size-title-sm);
   line-height: 1.45;
 }
 

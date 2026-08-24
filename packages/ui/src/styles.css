@@ -142,6 +142,16 @@
   --font-size-label: 0.8rem;
   --font-size-body: 0.875rem;
   --font-size-caption: 0.75rem;
+  /*
+   * 2026-08-24 補上：DESIGN.md 原本只有 5 級，實測發現 body（0.875rem）
+   * 跟 section-title（1.15rem）之間有大量卡片／fieldset 標題各自寫死
+   * 接近的數值（1.05–1.2rem 那批，13 種散在 30+ 檔案）。title-sm 先
+   * 收斂最密集的區間，跟 section-title 同值但語意是「卡片內的小標題」，
+   * 不是頁面區塊標題。title-md 收斂 sheet 標題那組（3 個檔案完全一致
+   * 的 1.35rem）。
+   */
+  --font-size-title-sm: 1.15rem;
+  --font-size-title-md: 1.35rem;
 
   --space-1: 0.25rem;
   --space-2: 0.5rem;
