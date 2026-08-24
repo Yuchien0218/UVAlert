@@ -3,7 +3,8 @@ import { nextTick, shallowRef, type Ref } from "vue";
 import type { SessionProjection } from "@sunshield/contracts";
 import type {
   NotificationPermissionState,
-  NotificationPort
+  NotificationPort,
+  UserPreferencesPort
 } from "@sunshield/platform";
 import { createNotificationController } from "./createNotificationController";
 
@@ -13,6 +14,7 @@ function createNotificationsStub(
   schedule: ReturnType<typeof vi.fn>;
   cancelAll: ReturnType<typeof vi.fn>;
   requestPermission: ReturnType<typeof vi.fn>;
+  sendTest: ReturnType<typeof vi.fn>;
 } {
   return {
     isSupported: () => true,
@@ -22,7 +24,21 @@ function createNotificationsStub(
     schedule: vi.fn().mockResolvedValue(undefined),
     cancel: vi.fn().mockResolvedValue(undefined),
     cancelAll: vi.fn().mockResolvedValue(undefined),
-    canDeliverInBackground: () => false
+    canDeliverInBackground: () => false,
+    sendTest: vi.fn().mockResolvedValue(true)
+  } as never;
+}
+
+function createUserPreferencesStub(
+  reminderFrequencyMinutes: number | null = null
+): UserPreferencesPort & {
+  setReminderFrequencyMinutes: ReturnType<typeof vi.fn>;
+} {
+  return {
+    getReminderFrequencyMinutes: vi
+      .fn()
+      .mockResolvedValue(reminderFrequencyMinutes),
+    setReminderFrequencyMinutes: vi.fn().mockResolvedValue(undefined)
   } as never;
 }
 
@@ -55,7 +71,11 @@ describe("createNotificationController", () => {
       sessionWith()
     );
 
-    createNotificationController({ notifications, currentSession });
+    createNotificationController({
+      notifications,
+      currentSession,
+      userPreferences: createUserPreferencesStub()
+    });
     await flush();
 
     expect(notifications.schedule).toHaveBeenCalledOnce();
@@ -63,7 +83,8 @@ describe("createNotificationController", () => {
       id: "session-next-due",
       dueAt: "2026-08-23T12:00:00.000Z",
       title: "該補擦了",
-      body: "打開查看要補哪些部位"
+      body: "打開查看要補哪些部位",
+      repeatMinutes: null
     });
   });
 
@@ -75,7 +96,11 @@ describe("createNotificationController", () => {
       })
     );
 
-    createNotificationController({ notifications, currentSession });
+    createNotificationController({
+      notifications,
+      currentSession,
+      userPreferences: createUserPreferencesStub()
+    });
     await flush();
 
     expect(notifications.schedule).toHaveBeenCalledOnce();
@@ -97,7 +122,11 @@ describe("createNotificationController", () => {
       session as SessionProjection | null
     );
 
-    createNotificationController({ notifications, currentSession });
+    createNotificationController({
+      notifications,
+      currentSession,
+      userPreferences: createUserPreferencesStub()
+    });
     await flush();
 
     expect(notifications.cancelAll).toHaveBeenCalled();
@@ -110,7 +139,11 @@ describe("createNotificationController", () => {
       sessionWith()
     );
 
-    createNotificationController({ notifications, currentSession });
+    createNotificationController({
+      notifications,
+      currentSession,
+      userPreferences: createUserPreferencesStub()
+    });
     await flush();
 
     currentSession.value = sessionWith({
@@ -130,7 +163,11 @@ describe("createNotificationController", () => {
       sessionWith()
     );
 
-    createNotificationController({ notifications, currentSession });
+    createNotificationController({
+      notifications,
+      currentSession,
+      userPreferences: createUserPreferencesStub()
+    });
     await flush();
 
     currentSession.value = sessionWith({
@@ -151,7 +188,8 @@ describe("createNotificationController", () => {
 
       const controller = createNotificationController({
         notifications,
-        currentSession
+        currentSession,
+        userPreferences: createUserPreferencesStub()
       });
       await flush();
 
@@ -173,7 +211,8 @@ describe("createNotificationController", () => {
 
       const controller = createNotificationController({
         notifications,
-        currentSession
+        currentSession,
+        userPreferences: createUserPreferencesStub()
       });
       await flush();
       notifications.schedule.mockClear();
@@ -193,7 +232,8 @@ describe("createNotificationController", () => {
 
     const controller = createNotificationController({
       notifications,
-      currentSession
+      currentSession,
+      userPreferences: createUserPreferencesStub()
     });
     await flush();
     controller.dispose();
@@ -207,6 +247,69 @@ describe("createNotificationController", () => {
     expect(notifications.schedule).not.toHaveBeenCalled();
   });
 
+  describe("再次提醒頻率", () => {
+    it("初始化時從 userPreferences 載入既有偏好，並套用到排程", async () => {
+      const notifications = createNotificationsStub();
+      const userPreferences = createUserPreferencesStub(5);
+      const currentSession = shallowRef<SessionProjection | null>(
+        sessionWith()
+      );
+
+      const controller = createNotificationController({
+        notifications,
+        currentSession,
+        userPreferences
+      });
+      await flush();
+
+      expect(controller.reminderFrequencyMinutes.value).toBe(5);
+      expect(notifications.schedule).toHaveBeenLastCalledWith(
+        expect.objectContaining({ repeatMinutes: 5 })
+      );
+    });
+
+    it("setReminderFrequencyMinutes 會存偏好並立刻重排", async () => {
+      const notifications = createNotificationsStub();
+      const userPreferences = createUserPreferencesStub(null);
+      const currentSession = shallowRef<SessionProjection | null>(
+        sessionWith()
+      );
+
+      const controller = createNotificationController({
+        notifications,
+        currentSession,
+        userPreferences
+      });
+      await flush();
+
+      await controller.setReminderFrequencyMinutes(15);
+
+      expect(userPreferences.setReminderFrequencyMinutes).toHaveBeenCalledWith(
+        15
+      );
+      expect(controller.reminderFrequencyMinutes.value).toBe(15);
+      expect(notifications.schedule).toHaveBeenLastCalledWith(
+        expect.objectContaining({ repeatMinutes: 15 })
+      );
+    });
+  });
+
+  describe("裝置測試", () => {
+    it("sendTestNotification 直接委派給 NotificationPort", async () => {
+      const notifications = createNotificationsStub();
+      const currentSession = shallowRef<SessionProjection | null>(null);
+
+      const controller = createNotificationController({
+        notifications,
+        currentSession,
+        userPreferences: createUserPreferencesStub()
+      });
+
+      await expect(controller.sendTestNotification()).resolves.toBe(true);
+      expect(notifications.sendTest).toHaveBeenCalledOnce();
+    });
+  });
+
   /**
    * 這個斷言是刻意的：畫面必須據此告訴使用者「仍需自己回來查看」。
    * 若哪天接上 Web Push 讓它變 true，文案也必須跟著改。
@@ -217,7 +320,8 @@ describe("createNotificationController", () => {
 
     const controller = createNotificationController({
       notifications,
-      currentSession
+      currentSession,
+      userPreferences: createUserPreferencesStub()
     });
 
     expect(controller.canDeliverInBackground).toBe(false);

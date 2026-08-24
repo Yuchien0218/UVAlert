@@ -1,7 +1,7 @@
 // @vitest-environment happy-dom
 
 import { mount, shallowMount } from "@vue/test-utils";
-import { shallowReadonly, shallowRef } from "vue";
+import { nextTick, shallowReadonly, shallowRef } from "vue";
 import { createMemoryHistory, createRouter } from "vue-router";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { WebAppServices } from "../../app/createWebAppServices";
@@ -14,19 +14,32 @@ function makeServices(options: {
   permission?: "default" | "granted" | "denied";
   isSupported?: boolean;
   canDeliverInBackground?: boolean;
+  reminderFrequencyMinutes?: number | null;
 } = {}) {
   const permissionState = shallowRef(options.permission ?? "default");
   const requestPermission = vi.fn(async () => {
     permissionState.value = "granted";
     return "granted" as const;
   });
+  const reminderFrequencyMinutesState = shallowRef(
+    options.reminderFrequencyMinutes ?? null
+  );
+  const setReminderFrequencyMinutes = vi.fn(async (minutes: number | null) => {
+    reminderFrequencyMinutesState.value = minutes;
+  });
+  const sendTestNotification = vi.fn(async () => true);
 
   return {
     notifications: {
       permission: shallowReadonly(permissionState),
       isSupported: options.isSupported ?? true,
       canDeliverInBackground: options.canDeliverInBackground ?? false,
+      reminderFrequencyMinutes: shallowReadonly(
+        reminderFrequencyMinutesState
+      ),
       requestPermission,
+      setReminderFrequencyMinutes,
+      sendTestNotification,
       dispose: vi.fn()
     }
   };
@@ -88,6 +101,58 @@ describe("NotificationSettingsPage", () => {
     });
 
     expect(wrapper.text()).toContain("目前狀態：通知已開啟");
+  });
+
+  it("已授權時顯示再次提醒頻率與裝置測試", async () => {
+    const services = makeServices({
+      permission: "granted",
+      reminderFrequencyMinutes: 5
+    });
+    vi.mocked(useWebAppServices).mockReturnValue(
+      services as unknown as WebAppServices
+    );
+
+    const wrapper = mount(NotificationSettingsPage, {
+      global: {
+        plugins: [router],
+        stubs: { Icon: true }
+      }
+    });
+
+    expect(wrapper.text()).toContain("再次提醒頻率");
+    const options = wrapper.findAll('input[name="reminder-frequency"]');
+    expect(options).toHaveLength(3);
+    expect(
+      (options[1]!.element as HTMLInputElement).checked
+    ).toBe(true);
+
+    await options[2]!.setValue(true);
+    expect(
+      services.notifications.setReminderFrequencyMinutes
+    ).toHaveBeenCalledWith(15);
+
+    expect(wrapper.text()).toContain("裝置測試");
+    await wrapper.get("button.button--quiet").trigger("click");
+    expect(services.notifications.sendTestNotification).toHaveBeenCalledOnce();
+    await nextTick();
+    expect(wrapper.text()).toContain("已送出");
+  });
+
+  it("未授權時不顯示再次提醒頻率與裝置測試", () => {
+    const services = makeServices({ permission: "default" });
+    vi.mocked(useWebAppServices).mockReturnValue(
+      services as unknown as WebAppServices
+    );
+
+    const wrapper = mount(NotificationSettingsPage, {
+      global: {
+        plugins: [router],
+        stubs: { Icon: true }
+      }
+    });
+
+    expect(wrapper.text()).not.toContain("再次提醒頻率");
+    expect(wrapper.text()).not.toContain("裝置測試");
   });
 
   it("被封鎖時顯示已被封鎖警示", () => {

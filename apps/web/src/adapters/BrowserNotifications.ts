@@ -147,6 +147,28 @@ export class BrowserNotifications implements NotificationPort {
     return false;
   }
 
+  /** 立即顯示一則測試通知，不受任何排程狀態影響。 */
+  async sendTest(): Promise<boolean> {
+    if (this.getPermission() !== "granted") {
+      return false;
+    }
+
+    const registration = await this.#deps.getRegistration();
+    if (registration === null) {
+      return false;
+    }
+
+    try {
+      await registration.showNotification("測試通知", {
+        body: "如果你看到這則通知，代表這台裝置目前收得到補擦提醒。",
+        tag: "notification-test"
+      });
+      return true;
+    } catch {
+      return false;
+    }
+  }
+
   /** 分段續接，避免超過 `setTimeout` 上限時立刻觸發。 */
   #arm(notification: ScheduledNotification, delay: number): void {
     const slice = Math.min(delay, MAX_TIMEOUT_MS);
@@ -166,25 +188,28 @@ export class BrowserNotifications implements NotificationPort {
   async #show(notification: ScheduledNotification): Promise<void> {
     // 排程當下是 granted，但使用者可能在到期前於瀏覽器設定撤銷權限。
     // 這裡必須重新確認，否則 showNotification 會丟例外。
-    if (this.getPermission() !== "granted") {
-      return;
+    if (this.getPermission() === "granted") {
+      const registration = await this.#deps.getRegistration();
+      if (registration !== null) {
+        try {
+          await registration.showNotification(notification.title, {
+            body: notification.body,
+            // 同一個 id 的通知互相取代，避免補擦提醒在通知中心堆疊。
+            tag: notification.id,
+            data: { path: "/reminder" }
+          });
+        } catch {
+          // 通知是輔助功能。顯示失敗不該冒泡成 unhandled rejection，
+          // 更不該影響本機倒數——倒數才是使用者的最終真值。
+        }
+      }
     }
 
-    const registration = await this.#deps.getRegistration();
-    if (registration === null) {
-      return;
-    }
-
-    try {
-      await registration.showNotification(notification.title, {
-        body: notification.body,
-        // 同一個 id 的通知互相取代，避免補擦提醒在通知中心堆疊。
-        tag: notification.id,
-        data: { path: "/reminder" }
-      });
-    } catch {
-      // 通知是輔助功能。顯示失敗不該冒泡成 unhandled rejection，
-      // 更不該影響本機倒數——倒數才是使用者的最終真值。
+    // 重複提醒：顯示後才重新武裝下一次，而不是一次排好整條鏈——
+    // 這樣同一個 id 的下一次 schedule()（到期時間被重算）自然會
+    // 透過 cancel() 砍掉整條重複鏈，不需要另外追蹤。
+    if (notification.repeatMinutes !== null) {
+      this.#arm(notification, notification.repeatMinutes * 60_000);
     }
   }
 }

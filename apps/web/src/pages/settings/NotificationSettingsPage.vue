@@ -49,6 +49,29 @@ async function requestPermission(): Promise<void> {
 function goBack(): void {
   void router.push({ name: "more" });
 }
+
+/**
+ * 再次提醒頻率與裝置測試（2026-08-23 下一輪：交接文件第三節列的兩個
+ * 待補項目，依賴 NotificationController 的重複排程與 sendTest，這輪
+ * 已補上）。兩者都只在分頁還活著時有效，跟單次提醒同一個平台限制，
+ * 不是新的送達承諾。
+ */
+const reminderFrequencyMinutes = computed(
+  () => notifications.reminderFrequencyMinutes.value
+);
+
+async function setFrequency(minutes: number | null): Promise<void> {
+  await notifications.setReminderFrequencyMinutes(minutes);
+}
+
+type TestResult = "idle" | "sending" | "sent" | "failed";
+const testResult = shallowRef<TestResult>("idle");
+
+async function runTest(): Promise<void> {
+  testResult.value = "sending";
+  const sent = await notifications.sendTestNotification();
+  testResult.value = sent ? "sent" : "failed";
+}
 </script>
 
 <template>
@@ -139,6 +162,69 @@ function goBack(): void {
         </p>
       </div>
     </section>
+
+    <section
+      v-if="isGranted"
+      class="app-card"
+      aria-labelledby="repeat-heading"
+    >
+      <h2 id="repeat-heading">再次提醒頻率</h2>
+      <div class="repeat-options" role="radiogroup" aria-labelledby="repeat-heading">
+        <label class="repeat-option">
+          <input
+            type="radio"
+            name="reminder-frequency"
+            :checked="reminderFrequencyMinutes === null"
+            @change="setFrequency(null)"
+          >
+          只提醒一次
+        </label>
+        <label class="repeat-option">
+          <input
+            type="radio"
+            name="reminder-frequency"
+            :checked="reminderFrequencyMinutes === 5"
+            @change="setFrequency(5)"
+          >
+          每 5 分鐘再提醒一次
+        </label>
+        <label class="repeat-option">
+          <input
+            type="radio"
+            name="reminder-frequency"
+            :checked="reminderFrequencyMinutes === 15"
+            @change="setFrequency(15)"
+          >
+          每 15 分鐘再提醒一次
+        </label>
+      </div>
+      <p class="delivery-note">
+        重複提醒跟單次提醒受同一個限制：只在分頁還活著時有效，不是新的送達保證。
+      </p>
+    </section>
+
+    <section
+      v-if="isGranted"
+      class="app-card"
+      aria-labelledby="test-heading"
+    >
+      <h2 id="test-heading">裝置測試</h2>
+      <p class="delivery-note">送一則測試通知，確認這台裝置目前收得到。</p>
+      <button
+        class="button button--quiet"
+        type="button"
+        :disabled="testResult === 'sending'"
+        @click="runTest"
+      >
+        {{ testResult === "sending" ? "傳送中…" : "送出測試通知" }}
+      </button>
+      <p v-if="testResult === 'sent'" class="delivery-note" role="status">
+        已送出，請查看系統通知。
+      </p>
+      <p v-if="testResult === 'failed'" class="form-error" role="alert">
+        測試通知傳送失敗，請確認瀏覽器通知權限。
+      </p>
+    </section>
   </div>
 </template>
 
@@ -217,6 +303,24 @@ function goBack(): void {
 .delivery-emphasis p:not(.delivery-emphasis__title) {
   margin: 0;
   color: var(--text-secondary);
+  line-height: 1.6;
+}
+
+.repeat-options {
+  display: grid;
+  gap: var(--space-2);
+}
+
+.repeat-option {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: var(--tap-target);
+}
+
+.form-error {
+  margin: 0;
+  color: var(--color-due);
   line-height: 1.6;
 }
 </style>
