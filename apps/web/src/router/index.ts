@@ -24,12 +24,10 @@ export function createAppRouter(
         component: () => import("../pages/HomePage.vue"),
         meta: { title: "提醒" }
       },
-      {
-        path: "/reminder",
-        name: "reminder",
-        component: () => import("../pages/ReminderPage.vue"),
-        meta: { title: "目前提醒" }
-      },
+      // 2026-08-24：`/reminder` 已移除，內容併入首頁下半部（摘要在上、
+      // 完整狀態在下）。它原本是首頁連過去的「查看完整狀態」詳細頁，但
+      // 沒有任何導覽歸屬——三個下排 tab 都不對應它，進去之後也沒有明確
+      // 的返回，等於一個懸空的頁面。依 2026-08-08 的前例不留轉址。
       {
         path: "/reminder/reapply",
         name: "reminder-reapply",

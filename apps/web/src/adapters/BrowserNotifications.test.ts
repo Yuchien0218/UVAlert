@@ -96,7 +96,7 @@ describe("BrowserNotifications", () => {
       expect(showNotification).toHaveBeenCalledWith("該補擦了", {
         body: "額頭",
         tag: "zone-forehead",
-        data: { path: "/reminder" }
+        data: { path: "/" }
       });
     });
 

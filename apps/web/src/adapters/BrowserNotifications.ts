@@ -196,7 +196,9 @@ export class BrowserNotifications implements NotificationPort {
             body: notification.body,
             // 同一個 id 的通知互相取代，避免補擦提醒在通知中心堆疊。
             tag: notification.id,
-            data: { path: "/reminder" }
+            // 2026-08-24：`/reminder` 已移除、內容併入首頁；通知點開落在
+            // 首頁，那裡就有倒數與完整狀態。
+            data: { path: "/" }
           });
         } catch {
           // 通知是輔助功能。顯示失敗不該冒泡成 unhandled rejection，

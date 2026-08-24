@@ -33,7 +33,7 @@ onMounted(() => {
 watch(
   () => eventCorrection.error.value,
   (value) => {
-    if (value === "not_found") void router.replace({ name: "reminder" });
+    if (value === "not_found") void router.replace({ name: "home" });
   }
 );
 
@@ -50,7 +50,7 @@ watch(
 );
 
 function back(): void {
-  void router.push({ name: "reminder" });
+  void router.push({ name: "home", hash: "#recent-events" });
 }
 
 function localValue(iso: string): string {

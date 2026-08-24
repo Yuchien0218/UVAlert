@@ -1,7 +1,10 @@
 <script setup lang="ts">
 import type { ActionKind } from "@sunshield/contracts";
-import { computed, onMounted } from "vue";
+import { computed, nextTick, onMounted, shallowRef, watch } from "vue";
 import { useRouter } from "vue-router";
+import RecentEventsList from "../components/reminder/RecentEventsList.vue";
+import ZoneStatusList from "../components/reminder/ZoneStatusList.vue";
+import type { SecondaryActionKind } from "../features/reminder/reminderPresentation";
 import HomeCountdown from "../components/home/HomeCountdown.vue";
 import HomeLinkRow from "../components/home/HomeLinkRow.vue";
 import HomeLocationPrompt from "../components/home/HomeLocationPrompt.vue";
@@ -14,7 +17,10 @@ import { useCurrentTime } from "../composables/useCurrentTime";
 import { buildHomeReminderClockPresentation } from "../features/reminder/homeReminderClockPresentation";
 import { buildReminderPresentation } from "../features/reminder/reminderPresentation";
 import { useWebAppServices } from "../app/injection";
-import { resolveActionRoute } from "../helpers/resolveActionRoute";
+import {
+  resolveActionDestination,
+  resolveActionRoute
+} from "../helpers/resolveActionRoute";
 
 /**
  * 提醒主頁——App 的首屏，五個狀態共用同一個版面骨架。
@@ -36,13 +42,50 @@ import { resolveActionRoute } from "../helpers/resolveActionRoute";
  * | 無提醒＋無地區 | 設定地區 |
  */
 
-const { boot, sessionControl, uvForecast } = useWebAppServices();
+const {
+  boot,
+  sessionControl,
+  sessionEvents,
+  productSettings,
+  uvForecast
+} = useWebAppServices();
+
+/** `view_product_label` 的原地展開；規格語意是「正在等待，不要離開」。 */
+const productLabelExpanded = shallowRef(false);
+const clockNotice = shallowRef<string | null>(null);
+const recentEventsRef = shallowRef<{ expand?: () => void } | null>(null);
+
+/**
+ * 時鐘可信度來自 reducer 的 reason code，不是連線狀態——
+ * 離線不必然表示時鐘不可信，兩者是獨立訊號。
+ */
+const clockTrusted = computed(
+  () =>
+    !(
+      boot.currentSession.value?.primaryAction.reasonCodes ?? []
+    ).includes("CLOCK_UNTRUSTED")
+);
 const router = useRouter();
 const currentTime = useCurrentTime();
 
 onMounted(() => {
   void uvForecast.ensureLoaded();
+  // 完整狀態（部位、最近紀錄）併進本頁後，這兩份資料也要在這裡載入。
+  if (boot.currentSession.value !== null) {
+    void sessionEvents.ensureLoaded();
+    void productSettings.ensureLoaded();
+  }
 });
+
+// Session 換人或剛建立時重讀事件流，否則清單會停留在上一個 Session。
+watch(
+  () => boot.currentSession.value?.sessionId ?? null,
+  (sessionId, previous) => {
+    if (sessionId !== null && sessionId !== previous) {
+      void sessionEvents.refresh();
+    }
+  }
+);
 
 const session = computed(() => boot.currentSession.value);
 const hasSession = computed(() => session.value !== null);
@@ -128,8 +171,73 @@ const trackedZoneDetail = computed(
   () => trackedZoneCount.value + " 個追蹤部位"
 );
 
+/**
+ * S-07 的動作分派。
+ *
+ * 2026-08-24：`/reminder` 併入本頁後改用 resolveActionDestination——
+ * 原本只用 resolveActionRoute（一律導頁），但完整狀態現在就在同一頁下方，
+ * 「錨點到部位」「展開包裝標示」這類原地行為不該再跳頁。這是 2026-08-06
+ * 裁決「13 個 ActionKind 不新增畫面」的落點。
+ */
 function handleAction(kind: ActionKind): void {
-  void router.push(resolveActionRoute(kind));
+  const destination = resolveActionDestination(kind);
+  if (destination.kind === "route") {
+    void router.push(destination.to);
+    return;
+  }
+
+  switch (destination.behavior) {
+    case "anchor_zones":
+      void scrollToZones();
+      return;
+    case "expand_product_label":
+      productLabelExpanded.value = true;
+      return;
+    case "recalibrate_clock":
+      // 校準子系統尚未實作（platform 沒有對應 port）。
+      // 明講現況勝過靜默失敗或假裝已校準。
+      clockNotice.value =
+        "目前無法在這台裝置上校準時間。請確認系統時間後重新整理。";
+      return;
+    default:
+      return;
+  }
+}
+
+async function handleSecondaryAction(
+  kind: SecondaryActionKind
+): Promise<void> {
+  switch (kind) {
+    case "view_saved_records":
+      // 紀錄就在本頁下方；離開頁面反而失去脈絡，所以錨點並展開。
+      recentEventsRef.value?.expand?.();
+      await nextTick();
+      globalThis.document
+        .querySelector("#recent-events")
+        ?.scrollIntoView({ behavior: "smooth", block: "start" });
+      return;
+    case "view_handling_guidance":
+      // 不得預先帶入症狀、產品名稱或任何使用者輸入（S-07 裁決附註）。
+      void router.push({ name: "special-situation" });
+      return;
+    default:
+      void router.push(resolveActionRoute(kind as ActionKind));
+      return;
+  }
+}
+
+async function scrollToZones(): Promise<void> {
+  await nextTick();
+  globalThis.document
+    .querySelector("#zone-status")
+    ?.scrollIntoView({ behavior: "smooth", block: "start" });
+}
+
+function handleCorrectEvent(eventId: string): void {
+  void router.push({
+    name: "reminder-event-correct",
+    params: { id: eventId }
+  });
 }
 
 function handleStartSetup(): void {
@@ -191,9 +299,15 @@ function handleEndSession(): void {
         @reset-error="sessionControl.clearEndError"
       />
 
-      <nav class="home__links" aria-label="次要入口">
-        <HomeLinkRow label="查看最近紀錄" to="/reminder" />
-      </nav>
+      <!-- 夜間也看得到最近紀錄；原本是連到 /reminder，該頁已併入本頁。 -->
+      <RecentEventsList
+        id="recent-events"
+        ref="recentEventsRef"
+        :zones="session!.zones"
+        :events="sessionEvents.stream.value"
+        :clock-trusted="clockTrusted"
+        @correct="handleCorrectEvent"
+      />
     </template>
 
     <!-- 白天＋提醒進行中。 -->
@@ -212,13 +326,69 @@ function handleEndSession(): void {
         {{ reminderPresentation.actionLabel }}
       </button>
 
-      <nav class="home__links" aria-label="提醒入口">
-        <HomeLinkRow
-          label="查看完整狀態"
-          :detail="trackedZoneDetail"
-          to="/reminder"
-        />
-      </nav>
+      <!--
+        主行動之外的次要動作（查看已存紀錄、處理指引等）。原本只有
+        /reminder 的 ReminderPanel 顯示它們，首頁明明已經算出同一份
+        presentation 卻只取 actionLabel，等於少了一半的操作。
+      -->
+      <div
+        v-if="
+          reminderPresentation !== null &&
+          reminderPresentation.secondaryActions.length > 0
+        "
+        class="home__secondary-actions"
+      >
+        <button
+          v-for="secondary in reminderPresentation.secondaryActions"
+          :key="secondary.kind"
+          class="button button--quiet"
+          type="button"
+          @click="handleSecondaryAction(secondary.kind)"
+        >
+          {{ secondary.label }}
+        </button>
+      </div>
+
+      <p v-if="clockNotice" class="inline-notice" role="status">
+        {{ clockNotice }}
+      </p>
+
+      <!-- view_product_label：原地展開，語意是「正在等待，不要離開」 -->
+      <section
+        v-if="productLabelExpanded && productSettings.snapshot.value"
+        class="product-label app-card"
+        aria-labelledby="product-label-title"
+      >
+        <h2 id="product-label-title">目前防曬乳的包裝標示</h2>
+        <ul>
+          <li>
+            {{
+              productSettings.snapshot.value.preExposureWaitStatus ===
+                'explicit_minutes' &&
+              productSettings.snapshot.value.preExposureWaitMinutes !== null
+                ? `擦上後需等待 ${productSettings.snapshot.value.preExposureWaitMinutes} 分鐘`
+                : '包裝沒有寫擦上後要等多久'
+            }}
+          </li>
+          <li>
+            {{
+              productSettings.snapshot.value.reapplicationIntervalStatus ===
+                'explicit_minutes' &&
+              productSettings.snapshot.value.reapplicationIntervalMinutes !==
+                null
+                ? `包裝標示的補擦間隔為 ${productSettings.snapshot.value.reapplicationIntervalMinutes} 分鐘`
+                : '包裝沒有寫明補擦間隔'
+            }}
+          </li>
+        </ul>
+        <button
+          class="button button--quiet"
+          type="button"
+          @click="productLabelExpanded = false"
+        >
+          收合
+        </button>
+      </section>
 
       <HomeUvHeadline
         :eyebrow="headlineEyebrow"
@@ -232,6 +402,25 @@ function handleEndSession(): void {
       <nav class="home__links" aria-label="UV 入口">
         <HomeLinkRow label="五日 UV 預報" to="/forecast" />
       </nav>
+
+      <!--
+        2026-08-24：完整狀態併入首頁下半部（原 /reminder，已移除）。
+        首屏維持「倒數＋主 CTA＋UV」不捲動就看完；部位與最近紀錄放在
+        下面，需要細節的人往下捲即可，不必再跳到另一頁。
+      -->
+      <ZoneStatusList
+        id="zone-status"
+        :primary-action="session!.primaryAction"
+        :zones="session!.zones"
+      />
+      <RecentEventsList
+        id="recent-events"
+        ref="recentEventsRef"
+        :zones="session!.zones"
+        :events="sessionEvents.stream.value"
+        :clock-trusted="clockTrusted"
+        @correct="handleCorrectEvent"
+      />
     </template>
 
     <!-- 以下都是沒有提醒進行中的狀態。 -->
@@ -267,7 +456,11 @@ function handleEndSession(): void {
           到目前 session，沒有提醒進行中時算不出今天有幾筆——寧可不顯示，
           也不顯示假數字。夜間那張 wireframe 沒有這一列，所以也不放。
         -->
-        <HomeLinkRow v-if="!isNight" label="查看最近紀錄" to="/reminder" />
+        <!--
+          2026-08-24：原本這裡有「查看最近紀錄」連到 /reminder。沒有進行
+          中的提醒時事件流查不到東西（事件流只查得到目前 session），該頁
+          又已併入本頁，所以這一列直接移除。
+        -->
       </nav>
     </template>
 

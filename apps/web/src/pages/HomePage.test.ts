@@ -124,6 +124,19 @@ function mockServices(options: Options = {}): void {
       endCurrentSession: vi.fn(async () => true),
       clearEndError: vi.fn(),
       dispose: vi.fn()
+    },
+    // 2026-08-24：/reminder 併入首頁後，首頁也要讀事件流與產品 snapshot
+    // （最近紀錄清單與「展開包裝標示」原地行為）。
+    sessionEvents: {
+      stream: shallowReadonly(shallowRef([])),
+      ensureLoaded: vi.fn(async () => undefined),
+      refresh: vi.fn(async () => undefined),
+      dispose: vi.fn()
+    },
+    productSettings: {
+      snapshot: shallowReadonly(shallowRef(null)),
+      ensureLoaded: vi.fn(async () => undefined),
+      dispose: vi.fn()
     }
   } as unknown as WebAppServices);
 }
@@ -145,31 +158,22 @@ describe("HomePage", () => {
   });
 
   describe("有提醒進行中", () => {
-    it("白天顯示倒數與完整狀態入口，不內嵌部位清單", async () => {
+    /**
+     * 2026-08-24 反轉：原本斷言首頁**不內嵌**部位清單、只放「查看完整狀態」
+     * 入口（2026-08-08 裁決）。使用者裁決把 `/reminder` 併入首頁——那頁沒有
+     * 任何導覽歸屬，三個下排 tab 都不對應它，是懸空的頁面。現在首頁是
+     * 「摘要在上、完整狀態在下」的單頁，首屏仍維持倒數＋主 CTA 不捲動就
+     * 看得完，部位與最近紀錄在下方。
+     */
+    it("白天顯示倒數，並在下方內嵌部位清單與最近紀錄", async () => {
       mockServices({ session, region: { displayName: "臺北市 大安區" } });
 
       const wrapper = await mountHome();
 
       expect(wrapper.findComponent(HomeCountdown).exists()).toBe(true);
-      // 各部位狀態已移到提醒頁；首頁只留前往完整狀態的入口（2026-08-08 裁決）。
-      expect(wrapper.findComponent(ZoneStatusList).exists()).toBe(false);
-      expect(wrapper.find('[to="/reminder"]').exists()).toBe(true);
-    });
-
-    /**
-     * 結束控制屬於 `/reminder`，不屬於首頁。
-     *
-     * Sitemap §4.2：「`/reminder` 顯示完整部位狀態、補擦操作、最近事件與
-     * 結束控制」。首頁白天的主要行動只有一個——記錄補擦——把結束提醒也
-     * 放上來會變成兩個競爭的行動（DESIGN.md 第六節）。使用者仍可經由
-     * 「查看完整狀態」到達。
-     */
-    it("白天不在首頁放結束控制", async () => {
-      mockServices({ session, region: { displayName: "臺北市 大安區" } });
-
-      const wrapper = await mountHome();
-
-      expect(wrapper.findComponent(SessionEndControl).exists()).toBe(false);
+      expect(wrapper.findComponent(ZoneStatusList).exists()).toBe(true);
+      // /reminder 已移除，不該再有指向它的連結。
+      expect(wrapper.find('[to="/reminder"]').exists()).toBe(false);
     });
 
     it("夜間改成收工版面，主要行動是結束提醒", async () => {

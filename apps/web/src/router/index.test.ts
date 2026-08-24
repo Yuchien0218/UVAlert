@@ -32,9 +32,8 @@ describe("route name 完整性", () => {
     "reminder-reapply",
     "reminder-report",
     "products",
-    "reminder",
     "help-how-it-works",
-    // ReminderPage 次要 CTA 的落點
+    // 首頁次要 CTA 的落點（原 ReminderPage，2026-08-24 併入首頁）
     "special-situation",
     // 其他頁面 push 的目的地
     "reminder-event-correct",
@@ -100,7 +99,9 @@ describe("createAppRouter", () => {
     );
   });
 
-  it("提醒網址保留在提醒頁並保留部位錨點", async () => {
+  // 2026-08-24：/reminder 已移除、內容併入首頁。原本斷言該網址停在提醒頁；
+  // 現在它不存在，因此改為斷言 404，錨點行為改由首頁承接。
+  it("已移除的 /reminder 網址落到 not-found", async () => {
     const boot: AppBootController = {
       phase: shallowReadonly(shallowRef("ready")),
       errorCode: shallowReadonly(shallowRef(null)),
@@ -115,11 +116,14 @@ describe("createAppRouter", () => {
     await router.push("/reminder#zone-status");
     await router.isReady();
 
-    expect(router.currentRoute.value.name).toBe("reminder");
+    expect(router.currentRoute.value.name).toBe("not-found");
+
+    // 錨點行為改由首頁承接——部位清單現在在首頁下半部。
+    await router.push("/#zone-status");
+    await router.isReady();
+
+    expect(router.currentRoute.value.name).toBe("home");
     expect(router.currentRoute.value.hash).toBe("#zone-status");
-    expect(globalThis.document.title).toBe(
-      "目前提醒｜防曬晴報員"
-    );
   });
 
   it("地區設定有直接路由且不會在導航時要求定位", async () => {
