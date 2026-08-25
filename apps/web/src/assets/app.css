@@ -287,6 +287,19 @@
   border-color: var(--border-subtle);
 }
 
+/*
+ * 2026-08-25：.button--quiet 原本沒有任何 disabled 樣式——停用時看起來
+ * 跟平常一樣可以點，使用者點了沒反應也不知道為什麼（DESIGN.md 第十三節
+ * 規格盲點 3「次要按鈕停用樣式未定義」）。沿用 GearForm.vue
+ * `.category-option--disabled`／SetupStepShell.vue `.icon-button:disabled`
+ * 已經在用的 opacity 0.55 + not-allowed 慣例，不發明新數值。
+ */
+.button--quiet:disabled,
+.button--quiet[aria-disabled="true"] {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
 .button-group {
   display: flex;
   flex-wrap: wrap;
@@ -532,4 +545,39 @@ button.text-link {
 
 .notice--error {
   color: var(--color-due);
+}
+
+/*
+ * 衛教分類／文章卡片右上角的狀態徽章（「已發布」／「內容審閱中」）。
+ * EducationIndexPage.vue 與 EducationCategoryPage.vue 原本各自 scoped
+ * 定義同一組樣式，連「跟 kicker 共用 color/font-size」這個切法都逐字
+ * 相同——2026-08-25 收斂成共用類別。
+ */
+/*
+ * 送出／取消按鈕列——EventCorrectionPage、ReportContextEventPage、
+ * ReapplyPage 三個檔案逐字重複同一組樣式（含同一個 36rem 斷點），
+ * 2026-08-25 收斂成共用類別。
+ */
+.submit-actions {
+  display: grid;
+  gap: var(--space-3);
+}
+
+.submit-actions .button {
+  width: 100%;
+}
+
+@media (min-width: 36rem) {
+  .submit-actions {
+    grid-template-columns: 1fr auto;
+  }
+}
+
+.education-card-status {
+  justify-self: start;
+  padding: 0.15rem 0.5rem;
+  border-radius: var(--radius-pill);
+  background: var(--border-subtle);
+  color: var(--text-secondary);
+  font-size: var(--font-size-caption);
 }

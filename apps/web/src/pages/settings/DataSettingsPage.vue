@@ -4,6 +4,7 @@ import { computed, onMounted, shallowRef } from "vue";
 import { useWebAppServices } from "../../app/injection";
 import AppNotice from "../../components/common/AppNotice.vue";
 import ConfirmAction from "../../components/common/ConfirmAction.vue";
+import EmptyStateCard from "../../components/common/EmptyStateCard.vue";
 
 /**
  * S-19 本機資料管理。
@@ -58,16 +59,12 @@ async function runClear(scope: ClearScope): Promise<void> {
       正在讀取本機資料概況…
     </p>
 
-    <section
+    <EmptyStateCard
       v-else-if="localData.error.value === 'load_failed'"
-      class="app-card"
+      title="暫時讀不到本機資料"
+      body="目前無法讀取這台裝置上的資料。這不代表資料已經消失，請稍後再試；在讀取成功之前建議先不要執行清除。"
       role="alert"
-    >
-      <h2>暫時讀不到本機資料</h2>
-      <p>
-        目前無法讀取這台裝置上的資料。這不代表資料已經消失，請稍後再試；在讀取成功之前建議先不要執行清除。
-      </p>
-    </section>
+    />
 
     <template v-else-if="summary">
       <section class="app-card" aria-labelledby="data-summary-title">

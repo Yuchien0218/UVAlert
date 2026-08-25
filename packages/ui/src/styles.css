@@ -283,6 +283,7 @@
   --radius-sm: 0.5rem;
   --radius-md: 0.875rem;
   --radius-lg: 1.25rem;
+  --radius-sheet: 1.5rem;
   --radius-pill: 999px;
 
   --shadow-card: 0 1rem 3rem rgb(18 18 18 / 7%);
@@ -294,6 +295,14 @@
   --duration-fast: 160ms;
   --duration-base: 240ms;
   --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+
+  /*
+   * 2026-08-25：z-index 只有兩層——常駐的下排導覽列，跟蓋過它的全螢幕
+   * 浮層（bottom sheet／確認彈窗）。4 個檔案原本各自寫死 20／100，收斂
+   * 成 token 避免以後加新浮層時隨手撞值。
+   */
+  --z-nav: 20;
+  --z-overlay: 100;
 }
 
 *,

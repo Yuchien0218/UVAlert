@@ -319,18 +319,4 @@ p {
   line-height: 1.6;
 }
 
-.submit-actions {
-  display: grid;
-  gap: var(--space-3);
-}
-
-.submit-actions .button {
-  width: 100%;
-}
-
-@media (min-width: 36rem) {
-  .submit-actions {
-    grid-template-columns: 1fr auto;
-  }
-}
 </style>

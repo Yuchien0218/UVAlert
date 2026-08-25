@@ -106,8 +106,7 @@ const robots = computed(() => (publishableCount.value > 0 ? "index,follow" : "no
 }
 
 .education-section-heading span,
-.education-card-kicker,
-.education-card-status {
+.education-card-kicker {
   color: var(--text-secondary);
   font-size: var(--font-size-caption);
 }
@@ -136,10 +135,4 @@ const robots = computed(() => (publishableCount.value > 0 ? "index,follow" : "no
   line-height: 1.6;
 }
 
-.education-card-status {
-  justify-self: start;
-  padding: 0.15rem 0.5rem;
-  border-radius: var(--radius-pill);
-  background: var(--border-subtle);
-}
 </style>

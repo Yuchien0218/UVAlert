@@ -84,12 +84,12 @@ function openGear(productId: string): void {
 
     <SunLoader v-if="productSettings.phase.value === 'loading'" label="正在讀取裝備清單…" />
 
-    <section v-else-if="loadFailed" class="app-card" role="alert">
-      <h2>暫時讀不到裝備清單</h2>
-      <p>
-        本機資料目前無法讀取。這不代表清單是空的，請稍後再試，先不要重新建立同一筆裝備。
-      </p>
-    </section>
+    <EmptyStateCard
+      v-else-if="loadFailed"
+      title="暫時讀不到裝備清單"
+      body="本機資料目前無法讀取。這不代表清單是空的，請稍後再試，先不要重新建立同一筆裝備。"
+      role="alert"
+    />
 
     <template v-else>
       <!-- 完全沒有裝備 -->

@@ -90,7 +90,7 @@ const locationLine = computed(() => {
 }
 
 .uv-headline__level {
-  padding-bottom: 0.25rem;
+  padding-bottom: var(--space-1);
   font-size: var(--font-size-title);
   font-weight: 500;
 }

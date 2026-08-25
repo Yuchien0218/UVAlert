@@ -142,7 +142,7 @@ const relatedArticles = computed(() =>
 .education-article-body :deep(ul),
 .education-article-body :deep(ol) {
   margin: 0 0 var(--space-5);
-  padding-left: 1.5rem;
+  padding-left: var(--space-6);
 }
 
 .education-article-body :deep(li + li) {

@@ -523,7 +523,7 @@ p {
   display: inline-block;
   padding: 0 var(--space-2);
   border: 1px solid var(--border-strong);
-  border-radius: var(--radius-pill, 999px);
+  border-radius: var(--radius-pill);
   font-size: var(--font-size-caption);
   color: var(--text-secondary);
   white-space: nowrap;

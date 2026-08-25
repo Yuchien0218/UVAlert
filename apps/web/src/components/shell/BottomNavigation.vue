@@ -52,7 +52,7 @@ function navigationLabel(to: string, label: string): string {
 <style scoped>
 .bottom-nav {
   position: fixed;
-  z-index: 20;
+  z-index: var(--z-nav);
   right: 0;
   bottom: 0;
   left: 0;

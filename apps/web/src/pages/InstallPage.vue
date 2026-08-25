@@ -133,7 +133,7 @@ async function install(): Promise<void> {
 .install-card ol,
 .limits ul {
   margin: 0;
-  padding-inline-start: 1.3rem;
+  padding-inline-start: var(--space-5);
   color: var(--text-body);
   line-height: 1.6;
 }

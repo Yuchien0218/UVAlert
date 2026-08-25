@@ -65,7 +65,7 @@ describe("BottomNavigation", () => {
     expect(bottomNavigationSource).toContain(
       "env(safe-area-inset-bottom)"
     );
-    expect(bottomNavigationSource).toMatch(/z-index:\s*\d+/);
+    expect(bottomNavigationSource).toMatch(/z-index:\s*(\d+|var\(--[\w-]+\))/);
     expect(bottomNavigationSource).toContain(
       "background: var(--page-background);"
     );

@@ -47,7 +47,7 @@ const emit = defineEmits<{
   gap: var(--space-2);
   padding: var(--space-2) var(--space-3);
   border: 1px solid var(--border-strong);
-  border-radius: var(--radius-pill, 999px);
+  border-radius: var(--radius-pill);
   min-height: var(--tap-target);
 }
 

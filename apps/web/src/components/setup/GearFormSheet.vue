@@ -139,7 +139,7 @@ onBeforeUnmount(releasePageLock);
 <style scoped>
 .sheet-layer {
   position: fixed;
-  z-index: 100;
+  z-index: var(--z-overlay);
   inset: 0;
   display: grid;
   align-items: end;
@@ -156,7 +156,7 @@ onBeforeUnmount(releasePageLock);
   overflow: hidden;
   border: 1px solid var(--border-subtle);
   border-bottom: 0;
-  border-radius: 1.5rem 1.5rem 0 0;
+  border-radius: var(--radius-sheet) var(--radius-sheet) 0 0;
   /* 浮在內容上，必須不透明才遮得住背後的文字（見 --surface-overlay）。 */
   background: var(--surface-overlay);
 }
@@ -191,7 +191,7 @@ onBeforeUnmount(releasePageLock);
 
 .sheet-enter-active,
 .sheet-leave-active {
-  transition: opacity 180ms ease;
+  transition: opacity var(--duration-fast) var(--ease-out);
 }
 
 .sheet-enter-from,

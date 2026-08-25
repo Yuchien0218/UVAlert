@@ -12,4 +12,4 @@ defineProps<{ zones: ZoneProjection[]; selectedZoneIds: string[]; choices: Reapp
     <p>實際時間：{{ new Date(appliedAt).toLocaleString('zh-TW') }}</p>
   </section>
 </template>
-<style scoped>.review { display: grid; gap: var(--space-3); } h2,p,ul { margin: 0; } p,li { line-height: 1.6; } ul { padding-inline-start: 1.3rem; }</style>
+<style scoped>.review { display: grid; gap: var(--space-3); } h2,p,ul { margin: 0; } p,li { line-height: 1.6; } ul { padding-inline-start: var(--space-5); }</style>

@@ -101,8 +101,7 @@ const toneClass = computed(
 .countdown__fill {
   height: 100%;
   background: var(--tone-color, var(--color-tracking));
-  transition: width var(--motion-base, 240ms)
-    cubic-bezier(0.22, 1, 0.36, 1);
+  transition: width var(--duration-base) var(--ease-out);
 }
 
 .countdown--tracking {

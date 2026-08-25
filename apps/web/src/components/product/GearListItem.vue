@@ -127,7 +127,7 @@ p {
 .gear-item__badge {
   padding: 0 var(--space-2);
   border: 1px solid var(--border-strong);
-  border-radius: var(--radius-pill, 999px);
+  border-radius: var(--radius-pill);
 }
 
 .gear-item__name {

@@ -151,7 +151,7 @@ function getErrorMessage(error: SessionEndError): string {
  */
 .session-end__backdrop {
   position: fixed;
-  z-index: 100;
+  z-index: var(--z-overlay);
   inset: 0;
   display: grid;
   place-items: center;
