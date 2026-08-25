@@ -143,7 +143,7 @@ onBeforeUnmount(releasePageLock);
   inset: 0;
   display: grid;
   align-items: end;
-  background: rgb(0 0 0 / 42%);
+  background: var(--overlay-backdrop);
 }
 
 .sheet {

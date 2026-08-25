@@ -208,7 +208,7 @@ p {
 
 .assignment-section__helper {
   color: var(--text-secondary);
-  line-height: 1.7;
+  line-height: 1.6;
 }
 
 .assignment-row {

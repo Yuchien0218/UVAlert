@@ -60,6 +60,7 @@ const topics = computed(() => listPublishableTopics());
 
 .topic-item strong {
   font-weight: 500;
+  line-height: 1.4;
 }
 
 .topic-item small {
@@ -81,8 +82,8 @@ const topics = computed(() => listPublishableTopics());
 
 .empty-state p {
   margin: 0;
-  color: var(--text-secondary);
-  line-height: 1.7;
+  color: var(--text-body);
+  line-height: 1.6;
 }
 
 </style>

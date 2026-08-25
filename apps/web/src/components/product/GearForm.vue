@@ -500,16 +500,18 @@ p {
   border-radius: var(--radius-sm);
   background: var(--color-surface-soft);
   color: var(--text-secondary);
-  line-height: 1.7;
+  line-height: 1.6;
 }
 
 .no-effect-note {
   color: var(--text-secondary);
-  line-height: 1.7;
+  line-height: 1.6;
 }
 
 .no-effect-note strong {
+  display: block;
   color: var(--text-primary);
+  line-height: 1.4;
 }
 
 /*
@@ -583,6 +585,6 @@ textarea {
 
 .form-error {
   color: var(--color-due);
-  line-height: 1.7;
+  line-height: 1.6;
 }
 </style>

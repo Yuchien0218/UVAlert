@@ -14,6 +14,11 @@
 | `2026-08-23-hifi-redesign-handoff.md` | 高保真重新設計交接紀錄——結構性衝突裁決、待辦清單、未解問題 | 第一輪交接文件，第四節三問已在收尾紀錄裁決 |
 | `2026-08-23-hifi-redesign-round2-closeout.md` | 高保真重新設計第二輪收尾——交接文件第四節裁決、優先序 1–4 實作結果、優先序 5／6 處置 | **現行收尾文件**，session 換手時先讀這份 |
 | `2026-08-22-mvp-flow-review.md` | 重做 wireframe 前的流程斷點盤點與簡化建議 | **已裁決**（2026-08-23）——結論見 `2026-08-23-content-and-flow-decisions.md` |
+| `2026-08-25-typography-token-consolidation.md` | 字級魔術數字收斂＋`--font-size-body` 14px→16px 配合 DESIGN.md | 已完成（2026-08-25）——未經瀏覽器視覺驗證，見文件內建議 |
+| `2026-08-25-text-color-token-gap.md` | 文字顏色語意 token 補齊＋35 處 secondary→body 重新分類；發現 muted-soft 對比度 4.42:1 過不了 WCAG AA，text-tertiary 刻意未套用 | 已完成（2026-08-25）——第二輪有實際顏色變化，未經瀏覽器視覺驗證 |
+| `2026-08-25-hardcoded-style-final-sweep.md` | 字級／字距／顏色收尾盤點：字距乾淨、遮罩色 3 檔重複收斂成 `--overlay-backdrop`、Logo hex 確認為刻意設計 | 已完成（2026-08-25）——視覺零變化 |
+| `2026-08-25-line-height-consolidation.md` | body 行高 1.7→1.75→1.7→1.6（使用者連續三輪回饋收緊，最終值 1.6，DESIGN.md 已回寫） | 已完成（2026-08-25）——有實際可見變化，未經瀏覽器視覺驗證，1.6 可讀性尤其需要視覺確認 |
+| `2026-08-25-strong-line-height-fix.md` | body 行高調寬後，13 處單行 `<strong>` 標題（警示框、清單卡片）跟著繼承過多留白，改回 1.4／1.45 | 已完成（2026-08-25）——有實際可見變化，未經瀏覽器視覺驗證 |
 
 `2026-08-22-mvp-flow-review.md` 原為待裁決的分析文件，2026-08-23 已逐項裁決完畢，轉為歷史參考。它指出的問題有一部分與實際程式碼不符（例如「三個並行的衛教入口」），採用前請先核對程式碼。
 
@@ -47,6 +52,7 @@
 | 頁首右上角改顯示 UV 指數（取代「本機提醒」），點擊進入 `/forecast` | `BrandHeader.vue`、`AppShell.vue`、`HomePage.vue` | 已完成（2026-08-24，commit `91327d7`）——提醒頁不再另放五日 UV 預報入口 |
 | 設定取消／流程完成的落點統一回首頁 | `SetupPage.vue`、`ReapplyPage.vue`、`ReportContextEventPage.vue`、`router/index.ts` | 已完成（2026-08-24，commit `f8fdb74`） |
 | Sitemap 文件回寫（六處落差：單頁設定、`/reminder` 移除、頁首 UV、摘要移除、「更多」八張卡、`/forecast` 補記） | `2026-08-15-redesign-sitemap-userflow-current.md` | 已回寫（2026-08-24） |
+| `--font-size-body` 14px→16px 配合 DESIGN.md body-md；7 處字級魔術數字收斂進既有 token | `packages/ui/src/styles.css`、`apps/web/src/assets/app.css`、`HomeCountdown.vue`、`HomeUvHeadline.vue`、`GearListItem.vue`、`RegionPreferenceSummary.vue`、`ZoneProtectionForm.vue`、`EducationArticlePage.vue` | 已完成（2026-08-25）——`pnpm check` 全過，**尚未瀏覽器視覺驗證**，見 `2026-08-25-typography-token-consolidation.md` |
 
 視覺設計另見：
 

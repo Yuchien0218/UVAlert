@@ -96,9 +96,9 @@ const relatedArticles = computed(() =>
 
 .education-article-summary {
   margin: 0;
-  color: var(--text-secondary);
-  font-size: 1rem;
-  line-height: 1.8;
+  color: var(--text-body);
+  font-size: var(--font-size-body);
+  line-height: 1.6;
 }
 
 .education-article-meta,
@@ -115,7 +115,7 @@ const relatedArticles = computed(() =>
   border-radius: var(--radius-md);
   background: var(--surface-primary);
   color: var(--text-secondary);
-  line-height: 1.7;
+  line-height: 1.6;
 }
 
 .education-article-body {
@@ -125,7 +125,7 @@ const relatedArticles = computed(() =>
 
 .education-article-body :deep(h2) {
   margin: var(--space-8) 0 var(--space-3);
-  font-size: 1.25rem;
+  font-size: var(--font-size-title);
   line-height: 1.35;
 }
 

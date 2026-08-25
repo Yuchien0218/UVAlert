@@ -482,7 +482,7 @@ function handleEndSession(): void {
   border-radius: var(--radius-sm);
   background: var(--surface-soft);
   color: var(--text-secondary);
-  line-height: 1.7;
+  line-height: 1.6;
 }
 
 .home__spacer {

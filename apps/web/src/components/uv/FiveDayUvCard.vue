@@ -196,7 +196,7 @@ function getUnavailableMessage(error: UvForecastError): string {
   justify-items: start;
   gap: var(--space-3);
   color: var(--text-secondary);
-  line-height: 1.7;
+  line-height: 1.6;
 }
 
 .uv-forecast__state strong,
@@ -206,6 +206,7 @@ function getUnavailableMessage(error: UvForecastError): string {
   color: var(--text-primary);
   font-weight: 600;
   font-size: var(--font-size-body);
+  line-height: 1.4;
 }
 
 .uv-forecast__state span {
@@ -340,12 +341,16 @@ function getUnavailableMessage(error: UvForecastError): string {
   color: var(--text-inverse);
 }
 
+/*
+ * 2026-08-25：跟其他 body 級文字一起被批次改成 1.75，但這是 label 級
+ * （12.8px）文字，DESIGN.md「說明／標籤」對應的 CJK 行高是 1.5，改回來。
+ */
 .uv-forecast__source,
 .uv-forecast__note {
   margin: 0;
   color: var(--text-secondary);
   font-size: var(--font-size-label);
-  line-height: 1.7;
+  line-height: 1.5;
 }
 
 .uv-forecast__source span {

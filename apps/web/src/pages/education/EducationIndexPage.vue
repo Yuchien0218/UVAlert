@@ -89,7 +89,7 @@ const robots = computed(() => (publishableCount.value > 0 ? "index,follow" : "no
   border-radius: var(--radius-md);
   background: var(--surface-primary);
   color: var(--text-secondary);
-  line-height: 1.7;
+  line-height: 1.6;
 }
 
 .education-section-heading {
@@ -128,11 +128,12 @@ const robots = computed(() => (publishableCount.value > 0 ? "index,follow" : "no
 .education-category-card strong {
   font-size: var(--font-size-title-sm);
   font-weight: 500;
+  line-height: 1.45;
 }
 
 .education-category-card small {
   color: var(--text-secondary);
-  line-height: 1.7;
+  line-height: 1.6;
 }
 
 .education-card-status {

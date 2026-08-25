@@ -80,8 +80,8 @@ p {
 
 .form-heading p {
   margin-top: var(--space-3);
-  color: var(--text-secondary);
-  line-height: 1.7;
+  color: var(--text-body);
+  line-height: 1.6;
 }
 
 </style>

@@ -189,8 +189,8 @@ p {
 }
 
 .page-heading p {
-  color: var(--text-secondary);
-  line-height: 1.7;
+  color: var(--text-body);
+  line-height: 1.6;
 }
 
 .app-card {
@@ -208,7 +208,7 @@ p {
   border-radius: var(--radius-sm);
   background: var(--color-untimed-soft, var(--surface-soft));
   color: var(--text-secondary);
-  line-height: 1.7;
+  line-height: 1.6;
 }
 
 section {
@@ -233,7 +233,7 @@ section {
 
 .section-empty {
   color: var(--text-secondary);
-  line-height: 1.7;
+  line-height: 1.6;
 }
 
 .gear-list {

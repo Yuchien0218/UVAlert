@@ -140,12 +140,12 @@ function getErrorMessage(error: SessionEndError): string {
 
 .session-end__confirm-body {
   margin: 0;
-  color: var(--text-secondary);
-  line-height: 1.7;
+  color: var(--text-body);
+  line-height: 1.6;
 }
 
 /*
- * 確認彈窗。沿用兩個 sheet 的遮罩做法（rgb(0 0 0 / 42%)），面板用
+ * 確認彈窗。沿用兩個 sheet 的遮罩做法（--overlay-backdrop），面板用
  * --surface-overlay——那是**不透明**的表面，浮在內容上必須遮得住背後
  * （半透明的 --surface-primary 會讓底下文字透出來，2026-08-24 踩過）。
  */
@@ -156,7 +156,7 @@ function getErrorMessage(error: SessionEndError): string {
   display: grid;
   place-items: center;
   padding: var(--space-5);
-  background: rgb(0 0 0 / 42%);
+  background: var(--overlay-backdrop);
 }
 
 .session-end__confirmation {

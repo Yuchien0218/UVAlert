@@ -108,11 +108,12 @@ async function deleteCloudData(): Promise<void> {
 <style scoped>
 .account-card { display: grid; gap: var(--space-3); justify-items: start; padding: var(--space-5); }
 .account-card h2, .account-card p { margin: 0; }
-.account-card p { color: var(--text-secondary); line-height: 1.7; }
+.account-card p { color: var(--text-body); line-height: 1.6; }
 .account-card--danger h2 { color: var(--color-due); }
 .confirm-note { display: grid; gap: var(--space-3); width: 100%; padding: var(--space-3); border: 1px solid var(--color-due); border-radius: var(--radius-sm); }
+.confirm-note strong { line-height: 1.4; }
 .button-row { display: flex; flex-wrap: wrap; gap: var(--space-3); }
-.notice { margin: 0; line-height: 1.7; }
-.notice--ok { color: var(--text-secondary); }
+.notice { margin: 0; line-height: 1.6; }
+.notice--ok { color: var(--text-body); }
 .notice--error { color: var(--color-due); }
 </style>

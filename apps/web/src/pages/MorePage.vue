@@ -147,6 +147,7 @@ const entries = computed(() =>
 
 .entry strong {
   font-weight: 500;
+  line-height: 1.4;
 }
 
 .entry small {

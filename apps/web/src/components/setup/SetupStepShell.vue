@@ -131,8 +131,8 @@ defineEmits<{
 .setup-shell__description {
   max-width: 38rem;
   margin: 0;
-  color: var(--text-secondary);
-  line-height: 1.7;
+  color: var(--text-body);
+  line-height: 1.6;
 }
 
 .setup-shell__content {

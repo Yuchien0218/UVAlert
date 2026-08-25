@@ -377,8 +377,8 @@ const summary = computed(() => {
 
 .session-product p:not(.session-product__eyebrow) {
   margin-top: var(--space-2);
-  color: var(--text-secondary);
-  line-height: 1.7;
+  color: var(--text-body);
+  line-height: 1.6;
 }
 
 /* 特異性要壓過上面的 `.session-product p:not(.session-product__eyebrow)`，
@@ -433,10 +433,15 @@ const summary = computed(() => {
   color: var(--text-primary);
 }
 
+.identity-warning strong {
+  display: block;
+  line-height: 1.4;
+}
+
 .identity-warning p {
   margin: var(--space-1) 0 0;
-  color: var(--text-secondary);
+  color: var(--text-body);
   font-size: var(--font-size-body);
-  line-height: 1.7;
+  line-height: 1.6;
 }
 </style>

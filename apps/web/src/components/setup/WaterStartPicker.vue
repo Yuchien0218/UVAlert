@@ -110,7 +110,7 @@ function toLocalInputValue(date: Date): string {
   margin: 0;
   color: var(--text-secondary);
   font-size: var(--font-size-body);
-  line-height: 1.7;
+  line-height: 1.6;
 }
 
 .water-start__options {

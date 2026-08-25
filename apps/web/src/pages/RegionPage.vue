@@ -105,8 +105,8 @@ function returnToCaller(): Promise<unknown> {
 }
 
 .region-skip p {
-  color: var(--text-secondary);
-  line-height: 1.7;
+  color: var(--text-body);
+  line-height: 1.6;
 }
 
 .region-skip__action {

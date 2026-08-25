@@ -80,11 +80,17 @@
   letter-spacing: var(--letter-spacing-page-title);
 }
 
+/*
+ * 2026-08-25：改用 --text-body（見 styles.css 的 5 級文字色階補齊記錄）。
+ * 這是頁面標題下方的導言段落，跟 --text-secondary 定義的「副標、麵包屑、
+ * 次要文字」不是同一種角色——它是使用者進頁面第一個要讀的內容，DESIGN.md
+ * 把這個角色叫「預設內文」。
+ */
 .page-heading__body {
   max-width: 38rem;
   margin: 0;
-  color: var(--text-secondary);
-  line-height: 1.75;
+  color: var(--text-body);
+  line-height: 1.6;
 }
 
 /*
@@ -124,8 +130,15 @@
   color: var(--text-primary);
 }
 
+/*
+ * 2026-08-25：原本是 clamp(3rem, 18vw, 4.75rem)，但沒有任何元件在用這個
+ * modifier——HomeCountdown 與 HomeUvHeadline 各自在 scoped 樣式裡寫了
+ * 逐字相同的 clamp(3rem, 15vw, 3.75rem)，等於同一個角色（首頁大讀數）
+ * 重複定義兩次，外加這裡一份沒人用的死碼。改成兩處實際重複的值，兩個
+ * 元件改套用這個 class，不再各自覆寫 font-size。
+ */
 .stat-figure--display {
-  font-size: clamp(3rem, 18vw, 4.75rem);
+  font-size: clamp(3rem, 15vw, 3.75rem);
 }
 
 .stat-figure--inline {
@@ -413,7 +426,7 @@ button.text-link {
   margin: 0;
   color: var(--text-secondary);
   font-size: var(--font-size-body);
-  line-height: 1.7;
+  line-height: 1.6;
 }
 
 .choice-grid {

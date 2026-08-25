@@ -301,7 +301,7 @@ async function runTest(): Promise<void> {
 
 .delivery-emphasis p:not(.delivery-emphasis__title) {
   margin: 0;
-  color: var(--text-secondary);
+  color: var(--text-body);
   line-height: 1.6;
 }
 

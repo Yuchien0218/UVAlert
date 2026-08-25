@@ -135,12 +135,12 @@ function writeSyncDisabled(value: boolean): void {
 }
 .sync-card h2,
 .sync-card p { margin: 0; }
-.sync-card p { color: var(--text-secondary); line-height: 1.7; }
+.sync-card p { color: var(--text-body); line-height: 1.6; }
 .sync-list { display: grid; gap: var(--space-2); width: 100%; margin: 0; padding: 0; list-style: none; }
 .sync-list li { display: flex; justify-content: space-between; gap: var(--space-3); padding-block: var(--space-2); border-bottom: 1px solid var(--border-strong); }
 .sync-list span { color: var(--text-secondary); }
 .button-row { display: flex; flex-wrap: wrap; gap: var(--space-3); }
-.notice { margin: 0; line-height: 1.7; }
+.notice { margin: 0; line-height: 1.6; }
 .notice--error { color: var(--color-due); }
-.notice--ok { color: var(--text-secondary); }
+.notice--ok { color: var(--text-body); }
 </style>

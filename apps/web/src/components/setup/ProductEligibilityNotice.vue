@@ -79,14 +79,20 @@ const warning = computed(() => {
   color: var(--text-primary);
 }
 
+/*
+ * 2026-08-25：這是警示框裡單行的標題，不是流動的內文段落，繼承 body
+ * 的 1.75 行高會在文字上下留出明顯的空隙，改成跟其他標題級文字一致
+ * 的 1.4。
+ */
 .eligibility-notice strong {
   display: block;
   font-weight: 600;
+  line-height: 1.4;
 }
 
 .eligibility-notice p {
   margin: var(--space-2) 0 0;
-  color: var(--text-secondary);
+  color: var(--text-body);
   font-size: var(--font-size-body);
   line-height: 1.6;
 }

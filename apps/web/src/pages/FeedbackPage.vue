@@ -67,7 +67,7 @@ label { display: grid; gap: var(--space-2); }
 label span { font-weight: 500; }
 input, select, textarea { width: 100%; padding: var(--space-3); border: 1px solid var(--border-strong); border-radius: var(--radius-sm); background: var(--surface-primary); color: var(--text-primary); font: inherit; }
 textarea { resize: vertical; }
-.notice { margin: 0; line-height: 1.7; }
-.notice--ok { color: var(--text-secondary); }
+.notice { margin: 0; line-height: 1.6; }
+.notice--ok { color: var(--text-body); }
 .notice--error { color: var(--color-due); }
 </style>

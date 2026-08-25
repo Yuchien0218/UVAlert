@@ -467,8 +467,8 @@ onMounted(async () => {
 }
 
 .load-error p {
-  color: var(--text-secondary);
-  line-height: 1.7;
+  color: var(--text-body);
+  line-height: 1.6;
 }
 
 .recovery-card__eyebrow {
@@ -489,8 +489,8 @@ onMounted(async () => {
 }
 
 .recovery-card > p:last-of-type {
-  color: var(--text-secondary);
-  line-height: 1.7;
+  color: var(--text-body);
+  line-height: 1.6;
 }
 
 .update-notice {
@@ -499,7 +499,7 @@ onMounted(async () => {
   border-radius: var(--radius-sm);
   background: var(--color-success-soft);
   color: var(--text-secondary);
-  line-height: 1.7;
+  line-height: 1.6;
 }
 
 .night-notice {
@@ -508,13 +508,13 @@ onMounted(async () => {
   border-radius: var(--radius-sm);
   background: var(--surface-soft);
   color: var(--text-secondary);
-  line-height: 1.7;
+  line-height: 1.6;
 }
 
 .form-error {
   margin: 0;
   color: var(--color-due);
-  line-height: 1.7;
+  line-height: 1.6;
 }
 
 button:disabled {

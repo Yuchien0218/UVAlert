@@ -296,19 +296,35 @@ function makeDraftZone(
   font-weight: 500;
 }
 
+/*
+ * 2026-08-25：原本固定 1.5rem。這張卡是單一推薦（v-if，非 v-for 重複的
+ * 清單項目），跟 SetupPage .recovery-card h2 一樣是「單一句子的大標題」
+ * 角色，改用同一個 clamp／字距，不再各自寫死。
+ */
 .preset-card__title {
   margin: 0;
-  font-size: 1.5rem;
+  font-size: clamp(1.5rem, 7vw, 2.35rem);
+  letter-spacing: var(--letter-spacing-headline);
 }
 
 .preset-card__body,
 .preset-card__note {
   margin: var(--space-3) 0 0;
-  color: var(--text-secondary);
-  line-height: 1.7;
+  line-height: 1.6;
+}
+
+/*
+ * 2026-08-25：原本跟 __note 共用 --text-secondary。__body 是 h2 底下的
+ * 推薦說明，跟其他「標題下方導言」一樣改用 --text-body；__note 維持
+ * --text-secondary（不降級到 --text-tertiary，見 styles.css 的對比度
+ * 警告——muted-soft 對暖象牙底色量出來只有 4.42:1，過不了 WCAG AA）。
+ */
+.preset-card__body {
+  color: var(--text-body);
 }
 
 .preset-card__note {
+  color: var(--text-secondary);
   font-size: var(--font-size-body);
 }
 
@@ -339,7 +355,7 @@ button.text-link {
 .zone-groups__heading p {
   margin: var(--space-2) 0 0;
   color: var(--text-secondary);
-  line-height: 1.7;
+  line-height: 1.6;
   font-size: var(--font-size-body);
 }
 
@@ -370,6 +386,7 @@ button.text-link {
 
 .zone-group-choice strong {
   font-weight: 500;
+  line-height: 1.4;
 }
 
 .zone-group-choice small {
@@ -401,6 +418,6 @@ button.text-link {
 .form-error {
   margin: 0;
   color: var(--color-due);
-  line-height: 1.7;
+  line-height: 1.6;
 }
 </style>

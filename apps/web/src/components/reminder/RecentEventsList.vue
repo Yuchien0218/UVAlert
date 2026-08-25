@@ -241,7 +241,7 @@ function getZoneNames(zoneIds: string[], zones: ZoneProjection[]): string {
   margin: 0;
   font-size: var(--font-size-body);
   line-height: 1.6;
-  color: var(--text-secondary);
+  color: var(--text-body);
 }
 
 .events-list {

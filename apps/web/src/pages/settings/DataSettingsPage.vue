@@ -305,8 +305,8 @@ dd {
 }
 
 .page-heading p {
-  color: var(--text-secondary);
-  line-height: 1.7;
+  color: var(--text-body);
+  line-height: 1.6;
 }
 
 .app-card {
@@ -334,8 +334,8 @@ dd {
 }
 
 .caution {
-  color: var(--text-secondary);
-  line-height: 1.7;
+  color: var(--text-body);
+  line-height: 1.6;
 }
 
 .caution strong {
@@ -345,7 +345,7 @@ dd {
 .notice {
   padding: var(--space-3);
   border-radius: var(--radius-sm);
-  line-height: 1.7;
+  line-height: 1.6;
   width: 100%;
 }
 
@@ -367,9 +367,14 @@ dd {
   border-top: 1px solid var(--border-strong);
 }
 
+.clear-row div > strong {
+  display: block;
+  line-height: 1.4;
+}
+
 .clear-row p {
   color: var(--text-secondary);
-  line-height: 1.7;
+  line-height: 1.6;
 }
 
 .clear-row--danger strong {
@@ -382,7 +387,7 @@ dd {
   border-radius: var(--radius-sm);
   border: 1px solid var(--color-due);
   color: var(--text-secondary);
-  line-height: 1.7;
+  line-height: 1.6;
 }
 
 .confirm-note ul {

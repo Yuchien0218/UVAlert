@@ -113,10 +113,42 @@
    * --surface-primary 又改成半透明，浮層仍然保證遮得住背後。
    */
   --surface-overlay: var(--color-surface-soft);
+  /*
+   * 2026-08-25：三個 bottom sheet／確認彈窗（GearFormSheet、
+   * ProtectionAdjustmentSheet、SessionEndControl）逐字重複寫
+   * `background: rgb(0 0 0 / 42%)` 當遮罩色，沒有共用 token。收斂成這個
+   * 別名，跟 --surface-overlay（浮層本身的不透明底色）成對出現。
+   */
+  --overlay-backdrop: rgb(0 0 0 / 42%);
   --surface-soft: var(--color-surface-soft);
   --surface-inverse: var(--color-surface-dark);
   --text-primary: var(--color-ink);
   --text-secondary: var(--color-muted);
+  /*
+   * 2026-08-25 補上：DESIGN.md 第二節「文字」定義了 5 級文字色階
+   * （ink → body-strong → body → muted → muted-soft），但語意別名一直
+   * 只有 primary／secondary 兩級，中間三級只有原始色票、沒有語意名稱。
+   * 結果是該用 body-strong（強調段落與導言）或 body（預設內文）的地方
+   * 只能落在 primary 或 secondary 兩邊——跟字級 token 那次的落差是同一種
+   * 形狀（見 175 行附近的字級收斂記錄）。
+   *
+   * 已把 --text-body 套進 35 處「標題／卡片下方的導言段落、對話框說明、
+   * 通知與警示框內文」——這些原本套 --text-secondary，但内容其實是使用者
+   * 要讀的主要文字，不是「次要」。完整清單見
+   * docs/decisions/2026-08-25-text-color-token-gap.md。
+   *
+   * --text-tertiary **刻意沒有套用在任何元件上**：對應的 --color-muted-soft
+   * 對暖象牙底色（--color-canvas）量出來的對比度只有 4.42:1，過不了 WCAG AA
+   * 一般文字要求的 4.5:1（DESIGN.md 定義的候選用途「說明文字、頁尾細則」
+   * 全部是一般字級，沒有一處大到能套用 3:1 那個例外）。這代表 DESIGN.md
+   * 這個 token 的色值本身不能直接拿來用在真的文字上——要嘛之後把
+   * --color-muted-soft 調深到通過 4.5:1 再啟用，要嘛把它的用途限縮成
+   * 裝飾用途（非文字）。在那之前，任何「這段該更不明顯」的需求都留在
+   * --text-secondary（5.93:1，通過 AA），不要改用 --text-tertiary。
+   */
+  --text-emphasis: var(--color-body-strong);
+  --text-body: var(--color-body);
+  --text-tertiary: var(--color-muted-soft);
   --text-inverse: var(--color-on-dark);
   --border-subtle: var(--color-hairline);
   /*
@@ -162,7 +194,15 @@
   --font-size-page-title: clamp(1.75rem, 6vw, 2rem);
   --font-size-section-title: 1.15rem;
   --font-size-label: 0.8rem;
-  --font-size-body: 0.875rem;
+  /*
+   * 2026-08-25：0.875rem（14px）→ 1rem（16px），改配合 DESIGN.md 第三節
+   * body-md 的 16px 目標（使用者確認方向是「改程式碼配合文件」，不是反過來
+   * 把文件降到 14px）。原本這個 token 名稱是 body，實際套用的卻是文件定義
+   * 的 body-sm（14px，次要說明）那一級，全站主要內文因此比文件規格小一號。
+   * 這裡只調整這一個 token；title-sm／title／title-md 等其他 token 跟
+   * DESIGN.md 階層表的數值落差不在這次範圍內，見文件第十節。
+   */
+  --font-size-body: 1rem;
   --font-size-caption: 0.75rem;
   /*
    * 2026-08-24 補上：DESIGN.md 原本只有 5 級，實測發現 body（0.875rem）
@@ -271,13 +311,28 @@ html {
   -webkit-font-smoothing: antialiased;
 }
 
+/*
+ * 2026-08-25 行高調整史，避免下次又反覆橫跳：
+ * 1. 原本 1.7。--font-size-body 從 14px 調到 16px（對齊 DESIGN.md
+ *    body-md）後沒連帶調行高，字變大但行距沒跟著變寬，使用者反映
+ *    「行距怪怪的」。
+ * 2. 改成 1.75，對齊 DESIGN.md 第三節「中文間距覆寫」訂的 Body MD
+ *    （16px）配套值，全站 70+ 處逐字重複寫死的內文段落行高一起同步。
+ * 3. 使用者看過後回饋「p 的行距再縮小一點點」，改回 1.7。
+ * 4. 使用者再次要求「再改成 1.6」，改到目前的 **1.6**。
+ * 每一輪都用同一批約 38 個檔案（逐字重複覆寫這個值的內文段落）＋這裡
+ * 的全域預設一起同步改，避免只改一處造成「有的段落新值、有的段落舊值」
+ * 的落差。`DESIGN.md` 第三節 Body MD 那一列已跟著回寫到 1.6。
+ * label／caption 級文字（DESIGN.md 訂 1.5）跟 `.education-article-body`
+ * 長文正文容器（刻意維持 1.85，見該元件註解）不在這幾次調整範圍內。
+ */
 body {
   min-width: 20rem;
   min-height: 100vh;
   min-height: 100svh;
   margin: 0;
   background: var(--page-background);
-  line-height: 1.7;
+  line-height: 1.6;
   letter-spacing: normal;
 }
 

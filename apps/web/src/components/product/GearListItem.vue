@@ -131,7 +131,7 @@ p {
 }
 
 .gear-item__name {
-  font-size: 1.0625rem;
+  font-size: var(--font-size-title-sm);
 }
 
 .gear-item__summary,

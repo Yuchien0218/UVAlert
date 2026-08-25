@@ -44,7 +44,7 @@
 
 .location-prompt__message {
   margin: 0;
-  color: var(--color-body-strong, var(--text-primary));
+  color: var(--text-emphasis);
   font-size: var(--font-size-body);
 }
 

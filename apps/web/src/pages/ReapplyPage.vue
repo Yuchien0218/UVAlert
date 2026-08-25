@@ -92,7 +92,7 @@ function zoneNames(zoneIds: string[]): string {
 .flow-heading h1, .flow-heading p { margin: 0; }
 .flow-heading h1 { font-size: var(--font-size-page-title); }
 .flow-heading div { display: grid; gap: var(--space-3); }
-.flow-heading div > p:last-child { color: var(--text-secondary); line-height: 1.7; }
+.flow-heading div > p:last-child { color: var(--text-body); line-height: 1.6; }
 .submit-actions { display: grid; gap: var(--space-3); }
 .submit-actions .button { width: 100%; }
 .submit-error, .success-panel { padding: var(--space-5); }
@@ -100,8 +100,8 @@ function zoneNames(zoneIds: string[]): string {
 .submit-error p { margin: 0; }
 .success-panel { display: grid; gap: var(--space-4); border-top: .35rem solid var(--color-success); }
 .success-panel h2, .success-panel p { margin: 0; }
-.correction-note { color: var(--text-secondary); line-height: 1.7; }
-.success-groups { margin: 0; padding-inline-start: 1.3rem; line-height: 1.7; }
+.correction-note { color: var(--text-secondary); line-height: 1.6; }
+.success-groups { margin: 0; padding-inline-start: 1.3rem; line-height: 1.6; }
 /*
  * 2026-08-24：原本用 --color-untimed-soft（「未計時」狀態色）。這是
  * role="alert" 的真警告（紀錄已存但提醒沒重讀），跟「未計時」無關；
@@ -110,6 +110,6 @@ function zoneNames(zoneIds: string[]): string {
  * 留著只會更像未套樣式。
  */
 .refresh-warning { display: grid; justify-items: start; gap: var(--space-3); padding: var(--space-4); border-radius: var(--radius-sm); background: var(--color-soon-soft); }
-.refresh-warning p { margin: 0; line-height: 1.7; }
+.refresh-warning p { margin: 0; line-height: 1.6; }
 @media (min-width: 36rem) { .submit-actions { grid-template-columns: 1fr auto; } }
 </style>

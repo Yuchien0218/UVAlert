@@ -39,9 +39,9 @@ defineEmits<{ start: [] }>();
 
 .night-notice__body {
   margin: 0;
-  color: var(--color-body-strong, var(--text-primary));
+  color: var(--text-emphasis);
   font-size: var(--font-size-body);
-  line-height: 1.7;
+  line-height: 1.6;
 }
 
 .night-notice__escape {

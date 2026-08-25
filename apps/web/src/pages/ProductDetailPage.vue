@@ -371,7 +371,7 @@ async function handleDelete(): Promise<void> {
 }
 
 .spec-safety--no_countdown {
-  color: var(--text-secondary);
+  color: var(--text-body);
   background: var(--color-untimed-soft, var(--surface-soft));
 }
 

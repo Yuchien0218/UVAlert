@@ -126,16 +126,16 @@ async function install(): Promise<void> {
 .install-card p,
 .limits p {
   margin: 0;
-  color: var(--text-secondary);
-  line-height: 1.7;
+  color: var(--text-body);
+  line-height: 1.6;
 }
 
 .install-card ol,
 .limits ul {
   margin: 0;
   padding-inline-start: 1.3rem;
-  color: var(--text-secondary);
-  line-height: 1.8;
+  color: var(--text-body);
+  line-height: 1.6;
 }
 
 .install-card__note {
@@ -147,8 +147,8 @@ async function install(): Promise<void> {
   padding: var(--space-4);
   border-radius: var(--radius-sm);
   background: var(--surface-soft);
-  color: var(--text-secondary);
-  line-height: 1.7;
+  color: var(--text-body);
+  line-height: 1.6;
 }
 
 </style>

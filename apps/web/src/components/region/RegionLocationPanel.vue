@@ -142,10 +142,14 @@ const errorMessage = computed(() => {
   font-size: var(--font-size-title-md);
 }
 
-.location-panel__body,
+.location-panel__body {
+  color: var(--text-body);
+  line-height: 1.6;
+}
+
 .location-panel__candidate p {
   color: var(--text-secondary);
-  line-height: 1.7;
+  line-height: 1.6;
 }
 
 .location-panel__action,
@@ -179,6 +183,6 @@ const errorMessage = computed(() => {
   padding: var(--space-3);
   border-radius: var(--radius-sm);
   background: var(--color-due-soft);
-  line-height: 1.7;
+  line-height: 1.6;
 }
 </style>

@@ -34,7 +34,7 @@ const toneClass = computed(
     <p class="countdown__eyebrow">補擦倒數</p>
 
     <div class="countdown__value">
-      <span class="stat-figure countdown__figure">
+      <span class="stat-figure stat-figure--display countdown__figure">
         {{ presentation.remainingMinutes }}
       </span>
       <span class="countdown__unit">分鐘</span>
@@ -79,14 +79,10 @@ const toneClass = computed(
   gap: var(--space-2);
 }
 
-.countdown__figure {
-  font-size: clamp(3rem, 15vw, 3.75rem);
-}
-
 .countdown__unit {
   padding-bottom: 0.375rem;
   color: var(--text-secondary);
-  font-size: 1rem;
+  font-size: var(--font-size-body);
 }
 
 .countdown__detail {

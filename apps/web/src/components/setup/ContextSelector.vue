@@ -239,13 +239,14 @@ watch(
 .context-choice strong,
 .context-group strong {
   font-weight: 500;
+  line-height: 1.4;
 }
 
 .context-choice small,
 .context-group small {
   margin-top: var(--space-1);
   color: var(--text-secondary);
-  line-height: 1.7;
+  line-height: 1.6;
 }
 
 .context-group {
