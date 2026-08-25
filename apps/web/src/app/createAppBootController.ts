@@ -102,7 +102,8 @@ export function createAppBootController(
       currentSessionState.value =
         await dependencies.repository.getCurrentSession(localVisitorId);
       phaseState.value = "ready";
-    } catch {
+    } catch (error) {
+      console.error("[Boot Error]", error);
       errorCodeState.value = "storage_unavailable";
       phaseState.value = "error";
     }
