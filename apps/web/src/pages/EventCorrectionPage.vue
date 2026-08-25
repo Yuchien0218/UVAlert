@@ -3,6 +3,9 @@ import { computed, nextTick, onMounted, shallowRef, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { useWebAppServices } from "../app/injection";
 import Icon from "../components/icons/Icon.vue";
+import QuickTimePicker from "../components/common/QuickTimePicker.vue";
+import SunLoader from "../components/feedback/SunLoader.vue";
+import ZoneSelectorGrid from "../components/reminder/ZoneSelectorGrid.vue";
 import { getZoneLabel } from "../features/reminder/reminderPresentation";
 
 /**
@@ -53,24 +56,6 @@ function back(): void {
   void router.push({ name: "home", hash: "#recent-events" });
 }
 
-function localValue(iso: string): string {
-  const date = new Date(iso);
-  return new Date(date.getTime() - date.getTimezoneOffset() * 60_000)
-    .toISOString()
-    .slice(0, 16);
-}
-
-function isQuickSelected(minutes: number): boolean {
-  return (
-    Math.abs(
-      (Date.parse(eventCorrection.referenceNow.value) -
-        Date.parse(eventCorrection.occurredAt.value)) /
-        60_000 -
-        minutes
-    ) < 0.5
-  );
-}
-
 function zoneNames(zoneIds: string[]): string {
   return zoneIds
     .map((zoneId) => {
@@ -102,9 +87,7 @@ async function runVoid(): Promise<void> {
       </button>
     </header>
 
-    <p v-if="eventCorrection.phase.value === 'loading'" role="status">
-      正在讀取這筆紀錄…
-    </p>
+    <SunLoader v-if="eventCorrection.phase.value === 'loading'" label="正在讀取這筆紀錄…" />
 
     <section
       v-else-if="
@@ -160,25 +143,12 @@ async function runVoid(): Promise<void> {
           <p v-else class="section-helper">
             取消勾選的部位會從這筆紀錄移除，其他部位不受影響。
           </p>
-          <div class="zone-grid">
-            <label
-              v-for="zone in eventCorrection.selectableZones.value"
-              :key="zone.zoneInstanceId"
-              class="zone-chip"
-            >
-              <input
-                type="checkbox"
-                :checked="
-                  eventCorrection.selectedZoneIds.value.includes(
-                    zone.zoneInstanceId
-                  )
-                "
-                :disabled="eventCorrection.zoneSelectionLocked.value"
-                @change="eventCorrection.toggleZone(zone.zoneInstanceId)"
-              >
-              <span>{{ getZoneLabel(zone) }}</span>
-            </label>
-          </div>
+          <ZoneSelectorGrid
+            :zones="eventCorrection.selectableZones.value"
+            :selected-zone-ids="eventCorrection.selectedZoneIds.value"
+            :locked="eventCorrection.zoneSelectionLocked.value"
+            @toggle="eventCorrection.toggleZone"
+          />
           <p
             v-if="eventCorrection.fieldErrors.value.zones?.[0]"
             class="form-error"
@@ -191,53 +161,16 @@ async function runVoid(): Promise<void> {
           </p>
         </section>
 
-        <section class="app-card time-section" aria-labelledby="correction-time-title">
-          <h2 id="correction-time-title">
-            {{ isGroup ? "實際何時補擦？" : "實際什麼時候發生？" }}
-          </h2>
-          <div class="quick-times">
-            <button
-              v-for="item in [
-                { label: '剛剛', minutes: 0 },
-                { label: '15 分鐘前', minutes: 15 },
-                { label: '30 分鐘前', minutes: 30 },
-                { label: '60 分鐘前', minutes: 60 }
-              ]"
-              :key="item.minutes"
-              class="button button--quiet"
-              type="button"
-              :aria-pressed="isQuickSelected(item.minutes)"
-              @click="eventCorrection.setQuickTime(item.minutes)"
-            >
-              {{ item.label }}
-            </button>
-          </div>
-          <label for="correction-time">自訂日期與時間</label>
-          <input
-            id="correction-time"
-            type="datetime-local"
-            :value="localValue(eventCorrection.occurredAt.value)"
-            @change="
-              eventCorrection.setOccurredAt(
-                new Date(
-                  ($event.target as HTMLInputElement).value
-                ).toISOString()
-              )
-            "
-          >
-          <p class="time-summary">
-            更正後：{{
-              new Date(eventCorrection.occurredAt.value).toLocaleString("zh-TW")
-            }}
-          </p>
-          <p
-            v-if="eventCorrection.fieldErrors.value.occurredAt?.[0]"
-            class="form-error"
-            role="alert"
-          >
-            {{ eventCorrection.fieldErrors.value.occurredAt[0] }}
-          </p>
-        </section>
+        <QuickTimePicker
+          :heading="isGroup ? '實際何時補擦？' : '實際什麼時候發生？'"
+          id-prefix="correction-time"
+          summary-label="更正後："
+          :applied-at="eventCorrection.occurredAt.value"
+          :reference-now="eventCorrection.referenceNow.value"
+          :error="eventCorrection.fieldErrors.value.occurredAt?.[0]"
+          @change="eventCorrection.setOccurredAt"
+          @quick="eventCorrection.setQuickTime"
+        />
 
         <p
           v-if="
@@ -355,41 +288,6 @@ p {
 .section-helper {
   color: var(--text-secondary);
   line-height: 1.6;
-}
-
-.zone-grid {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-2);
-}
-
-.zone-chip {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--space-2);
-  padding: var(--space-2) var(--space-3);
-  border: 1px solid var(--border-strong);
-  border-radius: var(--radius-pill, 999px);
-  min-height: var(--tap-target);
-}
-
-.quick-times {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-2);
-}
-
-.time-section input {
-  min-height: var(--tap-target);
-  padding-inline: var(--space-3);
-  border: 1px solid var(--border-strong);
-  border-radius: var(--radius-sm);
-  color: var(--text-primary);
-  background: var(--surface-primary);
-}
-
-.time-summary {
-  color: var(--text-secondary);
 }
 
 .danger-zone {

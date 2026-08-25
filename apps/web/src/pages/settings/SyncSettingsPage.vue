@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed, onMounted, shallowRef } from "vue";
 import { useWebAppServices } from "../../app/injection";
+import AppNotice from "../../components/common/AppNotice.vue";
 
 const { auth, sync } = useWebAppServices();
 const syncDisabled = shallowRef(readSyncDisabled());
@@ -82,9 +83,9 @@ function writeSyncDisabled(value: boolean): void {
       <button class="button button--primary" type="button" @click="signIn">
         使用 Google 登入同步
       </button>
-      <p v-if="auth.state.value.status === 'error'" class="notice notice--error" role="alert">
+      <AppNotice v-if="auth.state.value.status === 'error'" kind="error">
         登入未完成，請稍後再試（{{ auth.state.value.errorCode }}）。本機資料沒有變動。
-      </p>
+      </AppNotice>
     </section>
 
     <section v-else-if="syncDisabled" class="app-card sync-card">
@@ -115,10 +116,10 @@ function writeSyncDisabled(value: boolean): void {
         </div>
       </template>
 
-      <p v-if="sync.state.value.status === 'synced'" class="notice notice--ok" role="status">同步完成。</p>
-      <p v-if="sync.state.value.error" class="notice notice--error" role="alert">
+      <AppNotice v-if="sync.state.value.status === 'synced'" kind="ok">同步完成。</AppNotice>
+      <AppNotice v-if="sync.state.value.error" kind="error">
         {{ sync.state.value.error.message }} 本機資料沒有因雲端錯誤被刪除。
-      </p>
+      </AppNotice>
     </section>
 
     <RouterLink class="text-link" to="/settings/account-data">管理登入與雲端資料</RouterLink>
@@ -140,7 +141,4 @@ function writeSyncDisabled(value: boolean): void {
 .sync-list li { display: flex; justify-content: space-between; gap: var(--space-3); padding-block: var(--space-2); border-bottom: 1px solid var(--border-strong); }
 .sync-list span { color: var(--text-secondary); }
 .button-row { display: flex; flex-wrap: wrap; gap: var(--space-3); }
-.notice { margin: 0; line-height: 1.6; }
-.notice--error { color: var(--color-due); }
-.notice--ok { color: var(--text-body); }
 </style>

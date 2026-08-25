@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed } from "vue";
+import EmptyStateCard from "../../components/common/EmptyStateCard.vue";
 import { listPublishableTopics } from "../../features/help/helpTopics";
 
 /**
@@ -34,10 +35,12 @@ const topics = computed(() => listPublishableTopics());
       </RouterLink>
     </nav>
 
-    <section v-else class="empty-state app-card" role="status">
-      <h2>目前沒有可查看的內容</h2>
-      <p>內容正在審查中，完成前暫不提供。這不影響提醒功能。</p>
-    </section>
+    <EmptyStateCard
+      v-else
+      title="目前沒有可查看的內容"
+      body="內容正在審查中，完成前暫不提供。這不影響提醒功能。"
+      role="status"
+    />
 
     <RouterLink class="text-link text-link--muted" to="/more">返回更多</RouterLink>
   </div>
@@ -65,24 +68,6 @@ const topics = computed(() => listPublishableTopics());
 
 .topic-item small {
   color: var(--text-secondary);
-  line-height: 1.6;
-}
-
-.empty-state {
-  display: grid;
-  justify-items: start;
-  gap: var(--space-3);
-  padding: clamp(1.25rem, 5vw, 2rem);
-}
-
-.empty-state h2 {
-  margin: 0;
-  font-size: var(--font-size-section-title);
-}
-
-.empty-state p {
-  margin: 0;
-  color: var(--text-body);
   line-height: 1.6;
 }
 

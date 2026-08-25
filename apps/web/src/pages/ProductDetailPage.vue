@@ -2,6 +2,8 @@
 import { computed, onMounted, ref } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import Icon from "../components/icons/Icon.vue";
+import SunLoader from "../components/feedback/SunLoader.vue";
+import EmptyStateCard from "../components/common/EmptyStateCard.vue";
 import { useWebAppServices } from "../app/injection";
 import {
   affectsCountdown,
@@ -158,17 +160,21 @@ async function handleDelete(): Promise<void> {
       </button>
     </header>
 
-    <p v-if="productSettings.phase.value === 'loading'" role="status">
-      正在讀取裝備資料…
-    </p>
+    <SunLoader v-if="productSettings.phase.value === 'loading'" label="正在讀取裝備資料…" />
 
-    <section v-else-if="product === null" class="app-card empty-state" role="alert">
-      <h1>找不到這件裝備</h1>
-      <p>這筆裝備紀錄可能已被刪除，或是網址有誤。</p>
-      <button class="button button--primary" type="button" @click="goBack">
-        返回我的防曬裝備
-      </button>
-    </section>
+    <EmptyStateCard
+      v-else-if="product === null"
+      title="找不到這件裝備"
+      body="這筆裝備紀錄可能已被刪除，或是網址有誤。"
+      title-tag="h1"
+      role="alert"
+    >
+      <template #actions>
+        <button class="button button--primary" type="button" @click="goBack">
+          返回我的防曬裝備
+        </button>
+      </template>
+    </EmptyStateCard>
 
     <template v-else>
       <header class="page-heading">
@@ -378,12 +384,5 @@ async function handleDelete(): Promise<void> {
 .detail-actions {
   display: grid;
   gap: var(--space-3);
-}
-
-.empty-state {
-  display: grid;
-  gap: var(--space-4);
-  padding: var(--space-5);
-  justify-items: start;
 }
 </style>

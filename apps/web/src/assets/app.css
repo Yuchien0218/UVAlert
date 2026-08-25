@@ -509,3 +509,27 @@ button.text-link {
     width: 100%;
   }
 }
+
+/*
+ * 操作結果提示框——FeedbackPage、SyncSettingsPage、DataSettingsPage、
+ * AccountDataPage 原本各自 scoped 定義 .notice/.notice--ok/.notice--error，
+ * 其中只有 DataSettingsPage.vue 是有底色的完整卡片，其餘 3 個只是純文字
+ * 變色，彼此已經漂移。2026-08-25 使用者決定統一採用 DataSettingsPage
+ * 的完整版本，收斂成共用類別，搭配 components/common/AppNotice.vue 使用。
+ */
+.notice {
+  margin: 0;
+  padding: var(--space-3);
+  border-radius: var(--radius-sm);
+  line-height: 1.6;
+  width: 100%;
+}
+
+.notice--ok {
+  background: var(--color-success-soft);
+  color: var(--text-secondary);
+}
+
+.notice--error {
+  color: var(--color-due);
+}

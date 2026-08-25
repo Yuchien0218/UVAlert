@@ -1,5 +1,7 @@
 <script setup lang="ts">
 import Icon from "../components/icons/Icon.vue";
+import SunLoader from "../components/feedback/SunLoader.vue";
+import EmptyStateCard from "../components/common/EmptyStateCard.vue";
 import { computed, onMounted } from "vue";
 import { useRouter } from "vue-router";
 import { useWebAppServices } from "../app/injection";
@@ -80,9 +82,7 @@ function openGear(productId: string): void {
 
     <SetupProcessBanner v-if="hasActiveSetupDraft" />
 
-    <p v-if="productSettings.phase.value === 'loading'" role="status">
-      正在讀取裝備清單…
-    </p>
+    <SunLoader v-if="productSettings.phase.value === 'loading'" label="正在讀取裝備清單…" />
 
     <section v-else-if="loadFailed" class="app-card" role="alert">
       <h2>暫時讀不到裝備清單</h2>
@@ -93,16 +93,18 @@ function openGear(productId: string): void {
 
     <template v-else>
       <!-- 完全沒有裝備 -->
-      <section v-if="!hasAnyGear" class="app-card empty-state">
-        <h2>還沒有任何裝備</h2>
-        <p>
-          把常用的防曬乳與裝備記在這裡，建立提醒時就不必重填包裝標示。也可以先不儲存防曬乳，直接建立提醒。
-        </p>
-        <button class="button button--primary" type="button" @click="addGear">
-          <Icon name="tool-plus" :size="20" />
-          新增防曬裝備
-        </button>
-      </section>
+      <EmptyStateCard
+        v-if="!hasAnyGear"
+        title="還沒有任何裝備"
+        body="把常用的防曬乳與裝備記在這裡，建立提醒時就不必重填包裝標示。也可以先不儲存防曬乳，直接建立提醒。"
+      >
+        <template #actions>
+          <button class="button button--primary" type="button" @click="addGear">
+            <Icon name="tool-plus" :size="20" />
+            新增防曬裝備
+          </button>
+        </template>
+      </EmptyStateCard>
 
       <template v-else>
         <button class="button button--primary" type="button" @click="addGear">
@@ -197,10 +199,6 @@ p {
   display: grid;
   gap: var(--space-4);
   padding: var(--space-5);
-}
-
-.empty-state {
-  justify-items: start;
 }
 
 .no-sunscreen-note {

@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import { computed, onMounted, shallowRef } from "vue";
 import { useWebAppServices } from "../../app/injection";
+import AppNotice from "../../components/common/AppNotice.vue";
+import ConfirmAction from "../../components/common/ConfirmAction.vue";
 
 const { auth, cloudSync } = useWebAppServices();
 const confirmingDelete = shallowRef(false);
@@ -88,19 +90,24 @@ async function deleteCloudData(): Promise<void> {
       <section class="app-card account-card account-card--danger">
         <h2>清除 UVAlert 雲端資料</h2>
         <p>會刪除 UVAlert 雲端同步資料與 UVAlert 登入；不會刪除 Google 帳號。本機提醒與本機資料不受影響。</p>
-        <div v-if="confirmingDelete" class="confirm-note" role="alert">
-          <strong>確定要清除雲端資料嗎？</strong>
-          <div class="button-row">
-            <button class="button button--primary" type="button" :disabled="busy" @click="deleteCloudData">清除雲端資料</button>
-            <button class="button button--quiet" type="button" :disabled="busy" @click="confirmingDelete = false">取消</button>
-          </div>
-        </div>
-        <button v-else class="button button--quiet" type="button" :disabled="busy" @click="deleteCloudData">清除雲端資料</button>
+        <ConfirmAction
+          :confirming="confirmingDelete"
+          :pending="busy"
+          trigger-label="清除雲端資料"
+          confirm-label="清除雲端資料"
+          @trigger="deleteCloudData"
+          @confirm="deleteCloudData"
+          @cancel="confirmingDelete = false"
+        >
+          <template #warning>
+            <strong>確定要清除雲端資料嗎？</strong>
+          </template>
+        </ConfirmAction>
       </section>
     </template>
 
-    <p v-if="notice" class="notice notice--ok" role="status">{{ notice }}</p>
-    <p v-if="error" class="notice notice--error" role="alert">{{ error }}</p>
+    <AppNotice v-if="notice" kind="ok">{{ notice }}</AppNotice>
+    <AppNotice v-if="error" kind="error">{{ error }}</AppNotice>
     <RouterLink class="text-link text-link--muted" to="/more">返回更多</RouterLink>
   </div>
 </template>
@@ -110,10 +117,4 @@ async function deleteCloudData(): Promise<void> {
 .account-card h2, .account-card p { margin: 0; }
 .account-card p { color: var(--text-body); line-height: 1.6; }
 .account-card--danger h2 { color: var(--color-due); }
-.confirm-note { display: grid; gap: var(--space-3); width: 100%; padding: var(--space-3); border: 1px solid var(--color-due); border-radius: var(--radius-sm); }
-.confirm-note strong { line-height: 1.4; }
-.button-row { display: flex; flex-wrap: wrap; gap: var(--space-3); }
-.notice { margin: 0; line-height: 1.6; }
-.notice--ok { color: var(--text-body); }
-.notice--error { color: var(--color-due); }
 </style>

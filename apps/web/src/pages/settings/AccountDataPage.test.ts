@@ -30,7 +30,7 @@ describe("AccountDataPage", () => {
   it("停止同步只改本機同步開關，保留雲端操作入口", async () => {
     const services = makeServices();
     vi.mocked(useWebAppServices).mockReturnValue(services as unknown as WebAppServices);
-    const wrapper = shallowMount(AccountDataPage);
+    const wrapper = shallowMount(AccountDataPage, { global: { stubs: { ConfirmAction: false } } });
     await wrapper.get("button").trigger("click");
     expect(wrapper.text()).toContain("重新開啟同步");
     expect(services.cloudSync.deleteAccount).not.toHaveBeenCalled();
@@ -39,7 +39,7 @@ describe("AccountDataPage", () => {
   it("清除雲端需要第二次確認，成功後才登出", async () => {
     const services = makeServices();
     vi.mocked(useWebAppServices).mockReturnValue(services as unknown as WebAppServices);
-    const wrapper = shallowMount(AccountDataPage);
+    const wrapper = shallowMount(AccountDataPage, { global: { stubs: { ConfirmAction: false } } });
     const buttons = wrapper.findAll("button");
     const deleteButton = buttons.find((button) => button.text() === "清除雲端資料");
     expect(deleteButton).toBeDefined();

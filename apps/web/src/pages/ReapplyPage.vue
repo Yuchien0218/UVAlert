@@ -5,7 +5,7 @@ import { useWebAppServices } from "../app/injection";
 import Icon from "../components/icons/Icon.vue";
 import ReapplicationZoneSelector from "../components/reapplication/ReapplicationZoneSelector.vue";
 import ReapplicationProductAssignments from "../components/reapplication/ReapplicationProductAssignments.vue";
-import ApplicationTimeSelector from "../components/reapplication/ApplicationTimeSelector.vue";
+import QuickTimePicker from "../components/common/QuickTimePicker.vue";
 import ReapplicationReview from "../components/reapplication/ReapplicationReview.vue";
 import { getZoneLabel } from "../features/reminder/reminderPresentation";
 
@@ -69,7 +69,7 @@ function zoneNames(zoneIds: string[]): string {
         :errors="reapplication.fieldErrors.value"
         @assign="reapplication.assignProduct"
       />
-      <ApplicationTimeSelector :applied-at="reapplication.appliedAt.value" :reference-now="reapplication.referenceNow.value" :error="reapplication.fieldErrors.value.appliedAt?.[0]" @change="reapplication.setAppliedAt" @quick="reapplication.setQuickTime" />
+      <QuickTimePicker :applied-at="reapplication.appliedAt.value" :reference-now="reapplication.referenceNow.value" :error="reapplication.fieldErrors.value.appliedAt?.[0]" @change="reapplication.setAppliedAt" @quick="reapplication.setQuickTime" />
       <ReapplicationReview :zones="reapplication.session.value.zones" :selected-zone-ids="reapplication.selectedZoneIds.value" :choices="reapplication.productChoices.value" :assignments="reapplication.assignments.value" :applied-at="reapplication.appliedAt.value" />
 
       <div v-if="reapplication.error.value && reapplication.error.value !== 'validation'" class="app-card submit-error" role="alert">

@@ -2,6 +2,7 @@
 import { computed, shallowRef } from "vue";
 import type { FeedbackType } from "@sunshield/contracts";
 import { useFeedbackController } from "../app/injection";
+import AppNotice from "../components/common/AppNotice.vue";
 
 const feedback = useFeedbackController();
 const feedbackType = shallowRef<FeedbackType>("bug");
@@ -49,12 +50,12 @@ async function submit(): Promise<void> {
       <button class="button button--primary" type="submit" :disabled="busy">
         {{ busy ? "送出中…" : "送出" }}
       </button>
-      <p v-if="feedback.state.value.status === 'submitted'" class="notice notice--ok" role="status">
-      已收到你的回報，謝謝！
-      </p>
-      <p v-if="feedback.state.value.error" class="notice notice--error" role="alert">
+      <AppNotice v-if="feedback.state.value.status === 'submitted'" kind="ok">
+        已收到你的回報，謝謝！
+      </AppNotice>
+      <AppNotice v-if="feedback.state.value.error" kind="error">
         {{ feedback.state.value.error.message }}
-      </p>
+      </AppNotice>
     </form>
 
     <RouterLink class="text-link text-link--muted" to="/more">返回更多</RouterLink>
@@ -67,7 +68,4 @@ label { display: grid; gap: var(--space-2); }
 label span { font-weight: 500; }
 input, select, textarea { width: 100%; padding: var(--space-3); border: 1px solid var(--border-strong); border-radius: var(--radius-sm); background: var(--surface-primary); color: var(--text-primary); font: inherit; }
 textarea { resize: vertical; }
-.notice { margin: 0; line-height: 1.6; }
-.notice--ok { color: var(--text-body); }
-.notice--error { color: var(--color-due); }
 </style>

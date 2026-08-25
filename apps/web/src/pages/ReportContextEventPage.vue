@@ -3,6 +3,9 @@ import { nextTick, onMounted, watch } from "vue";
 import { useRouter } from "vue-router";
 import { useWebAppServices } from "../app/injection";
 import Icon from "../components/icons/Icon.vue";
+import QuickTimePicker from "../components/common/QuickTimePicker.vue";
+import SunLoader from "../components/feedback/SunLoader.vue";
+import ZoneSelectorGrid from "../components/reminder/ZoneSelectorGrid.vue";
 import { getZoneLabel } from "../features/reminder/reminderPresentation";
 
 const { contextEvent } = useWebAppServices();
@@ -36,23 +39,6 @@ function cancel(): void {
   void router.push({ name: "home" });
 }
 
-function localValue(iso: string): string {
-  const date = new Date(iso);
-  const offset = date.getTimezoneOffset() * 60_000;
-  return new Date(date.getTime() - offset).toISOString().slice(0, 16);
-}
-
-function isQuickSelected(minutes: number): boolean {
-  return (
-    Math.abs(
-      (Date.parse(contextEvent.referenceNow.value) -
-        Date.parse(contextEvent.occurredAt.value)) /
-        60_000 -
-        minutes
-    ) < 0.5
-  );
-}
-
 function zoneNames(zoneIds: string[]): string {
   return zoneIds
     .map((zoneId) => {
@@ -80,9 +66,7 @@ function zoneNames(zoneIds: string[]): string {
       </button>
     </header>
 
-    <p v-if="contextEvent.phase.value === 'loading'" role="status">
-      正在讀取目前提醒狀態…
-    </p>
+    <SunLoader v-if="contextEvent.phase.value === 'loading'" label="正在讀取目前提醒狀態…" />
 
     <section
       v-else-if="
@@ -156,28 +140,12 @@ function zoneNames(zoneIds: string[]): string {
           <p v-else class="section-helper">
             只勾選這次實際受影響的部位；未勾選的部位狀態不會改變。
           </p>
-          <div class="zone-grid">
-            <label
-              v-for="zone in contextEvent.selectableZones.value"
-              :key="zone.zoneInstanceId"
-              class="zone-chip"
-              :class="{
-                'zone-chip--locked': contextEvent.zoneSelectionLocked.value
-              }"
-            >
-              <input
-                type="checkbox"
-                :checked="
-                  contextEvent.selectedZoneIds.value.includes(
-                    zone.zoneInstanceId
-                  )
-                "
-                :disabled="contextEvent.zoneSelectionLocked.value"
-                @change="contextEvent.toggleZone(zone.zoneInstanceId)"
-              >
-              <span>{{ getZoneLabel(zone) }}</span>
-            </label>
-          </div>
+          <ZoneSelectorGrid
+            :zones="contextEvent.selectableZones.value"
+            :selected-zone-ids="contextEvent.selectedZoneIds.value"
+            :locked="contextEvent.zoneSelectionLocked.value"
+            @toggle="contextEvent.toggleZone"
+          />
           <p
             v-if="contextEvent.fieldErrors.value.zones?.[0]"
             class="form-error"
@@ -225,51 +193,15 @@ function zoneNames(zoneIds: string[]): string {
           </div>
         </section>
 
-        <section class="app-card time-section" aria-labelledby="report-time-title">
-          <h2 id="report-time-title">實際什麼時候發生？</h2>
-          <div class="quick-times">
-            <button
-              v-for="item in [
-                { label: '剛剛', minutes: 0 },
-                { label: '15 分鐘前', minutes: 15 },
-                { label: '30 分鐘前', minutes: 30 },
-                { label: '60 分鐘前', minutes: 60 }
-              ]"
-              :key="item.minutes"
-              class="button button--quiet"
-              type="button"
-              :aria-pressed="isQuickSelected(item.minutes)"
-              @click="contextEvent.setQuickTime(item.minutes)"
-            >
-              {{ item.label }}
-            </button>
-          </div>
-          <label for="report-time">自訂日期與時間</label>
-          <input
-            id="report-time"
-            type="datetime-local"
-            :value="localValue(contextEvent.occurredAt.value)"
-            @change="
-              contextEvent.setOccurredAt(
-                new Date(
-                  ($event.target as HTMLInputElement).value
-                ).toISOString()
-              )
-            "
-          >
-          <p class="time-summary">
-            確認時間：{{
-              new Date(contextEvent.occurredAt.value).toLocaleString("zh-TW")
-            }}
-          </p>
-          <p
-            v-if="contextEvent.fieldErrors.value.occurredAt?.[0]"
-            class="form-error"
-            role="alert"
-          >
-            {{ contextEvent.fieldErrors.value.occurredAt[0] }}
-          </p>
-        </section>
+        <QuickTimePicker
+          heading="實際什麼時候發生？"
+          id-prefix="report-time"
+          :applied-at="contextEvent.occurredAt.value"
+          :reference-now="contextEvent.referenceNow.value"
+          :error="contextEvent.fieldErrors.value.occurredAt?.[0]"
+          @change="contextEvent.setOccurredAt"
+          @quick="contextEvent.setQuickTime"
+        />
       </template>
 
       <p
@@ -374,45 +306,6 @@ p {
 }
 
 .kind-option span {
-  color: var(--text-secondary);
-}
-
-.zone-grid {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-2);
-}
-
-.zone-chip {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--space-2);
-  padding: var(--space-2) var(--space-3);
-  border: 1px solid var(--border-strong);
-  border-radius: var(--radius-pill, 999px);
-  min-height: var(--tap-target);
-}
-
-.zone-chip--locked {
-  opacity: 0.75;
-}
-
-.quick-times {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-2);
-}
-
-.time-section input {
-  min-height: var(--tap-target);
-  padding-inline: var(--space-3);
-  border: 1px solid var(--border-strong);
-  border-radius: var(--radius-sm);
-  color: var(--text-primary);
-  background: var(--surface-primary);
-}
-
-.time-summary {
   color: var(--text-secondary);
 }
 

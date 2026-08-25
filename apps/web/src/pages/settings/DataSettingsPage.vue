@@ -2,6 +2,8 @@
 import Icon from "../../components/icons/Icon.vue";
 import { computed, onMounted, shallowRef } from "vue";
 import { useWebAppServices } from "../../app/injection";
+import AppNotice from "../../components/common/AppNotice.vue";
+import ConfirmAction from "../../components/common/ConfirmAction.vue";
 
 /**
  * S-19 本機資料管理。
@@ -116,20 +118,12 @@ async function runClear(scope: ClearScope): Promise<void> {
           {{ busy ? "處理中…" : "匯出本機資料" }}
         </button>
 
-        <p
-          v-if="localData.notice.value?.kind === 'exported'"
-          class="notice notice--ok"
-          role="status"
-        >
+        <AppNotice v-if="localData.notice.value?.kind === 'exported'" kind="ok">
           已產生 {{ localData.notice.value.fileName }}。請確認檔案已儲存到你要的位置。
-        </p>
-        <p
-          v-if="localData.error.value === 'export_failed'"
-          class="notice notice--error"
-          role="alert"
-        >
+        </AppNotice>
+        <AppNotice v-if="localData.error.value === 'export_failed'" kind="error">
           匯出沒有完成，檔案沒有產生。本機資料沒有任何變動，可以再試一次。
-        </p>
+        </AppNotice>
       </section>
 
       <section class="app-card" aria-labelledby="data-clear-title">
@@ -138,11 +132,7 @@ async function runClear(scope: ClearScope): Promise<void> {
           清除無法復原。如果想留下紀錄，<strong>請先在上方匯出</strong>。
         </p>
 
-        <p
-          v-if="localData.notice.value?.kind === 'cleared'"
-          class="notice notice--ok"
-          role="status"
-        >
+        <AppNotice v-if="localData.notice.value?.kind === 'cleared'" kind="ok">
           {{
             localData.notice.value.scope === "drafts"
               ? "設定草稿已清除。"
@@ -150,14 +140,10 @@ async function runClear(scope: ClearScope): Promise<void> {
                  ? "裝備與已結束的提醒歷史已清除。"
                 : "這台裝置上的資料已全部清除。"
           }}
-        </p>
-        <p
-          v-if="localData.error.value === 'clear_failed'"
-          class="notice notice--error"
-          role="alert"
-        >
+        </AppNotice>
+        <AppNotice v-if="localData.error.value === 'clear_failed'" kind="error">
           清除沒有完成，資料維持原狀。請稍後再試。
-        </p>
+        </AppNotice>
 
         <!-- 清除草稿 -->
         <div class="clear-row">
@@ -165,32 +151,16 @@ async function runClear(scope: ClearScope): Promise<void> {
             <strong>清除設定草稿</strong>
             <p>只刪除還沒建立提醒的設定進度。</p>
           </div>
-          <button
-            v-if="confirming !== 'drafts'"
-            class="button button--quiet"
-            type="button"
-            :disabled="busy || !summary.hasSetupDraft"
-            @click="confirming = 'drafts'"
-          >
-            清除草稿
-          </button>
-          <template v-else>
-            <button
-              class="button button--primary"
-              type="button"
-              :disabled="busy"
-              @click="runClear('drafts')"
-            >
-              清除設定草稿
-            </button>
-            <button
-              class="button button--quiet"
-              type="button"
-              @click="confirming = null"
-            >
-              取消
-            </button>
-          </template>
+          <ConfirmAction
+            :confirming="confirming === 'drafts'"
+            :pending="busy"
+            :trigger-disabled="!summary.hasSetupDraft"
+            trigger-label="清除草稿"
+            confirm-label="清除設定草稿"
+            @trigger="confirming = 'drafts'"
+            @confirm="runClear('drafts')"
+            @cancel="confirming = null"
+          />
         </div>
 
         <!-- 清除裝備與歷史 -->
@@ -204,35 +174,19 @@ async function runClear(scope: ClearScope): Promise<void> {
               </template>
             </p>
           </div>
-          <button
-            v-if="confirming !== 'history'"
-            class="button button--quiet"
-            type="button"
-            :disabled="busy"
-            @click="confirming = 'history'"
+          <ConfirmAction
+            :confirming="confirming === 'history'"
+            :pending="busy"
+            trigger-label="清除裝備與歷史"
+            confirm-label="清除裝備與歷史"
+            @trigger="confirming = 'history'"
+            @confirm="runClear('history')"
+            @cancel="confirming = null"
           >
-              清除裝備與歷史
-          </button>
-          <template v-else>
-            <p class="confirm-note" role="alert">
+            <template #warning>
               裝備清單與已結束的提醒都會消失，之後建立提醒需要重新填寫包裝標示。確定嗎？
-            </p>
-            <button
-              class="button button--primary"
-              type="button"
-              :disabled="busy"
-              @click="runClear('history')"
-            >
-              清除裝備與歷史
-            </button>
-            <button
-              class="button button--quiet"
-              type="button"
-              @click="confirming = null"
-            >
-              取消
-            </button>
-          </template>
+            </template>
+          </ConfirmAction>
         </div>
 
         <!-- 清除全部 -->
@@ -241,17 +195,16 @@ async function runClear(scope: ClearScope): Promise<void> {
             <strong>清除全部本機資料</strong>
             <p>把這台裝置恢復成剛安裝的狀態。</p>
           </div>
-          <button
-            v-if="confirming !== 'all'"
-            class="button button--quiet"
-            type="button"
-            :disabled="busy"
-            @click="confirming = 'all'"
+          <ConfirmAction
+            :confirming="confirming === 'all'"
+            :pending="busy"
+            trigger-label="清除全部"
+            confirm-label="清除全部本機資料"
+            @trigger="confirming = 'all'"
+            @confirm="runClear('all')"
+            @cancel="confirming = null"
           >
-            清除全部
-          </button>
-          <template v-else>
-            <div class="confirm-note" role="alert">
+            <template #warning>
               <p>將會刪除：</p>
               <ul>
                 <li>{{ summary.productCount }} 筆防曬裝備</li>
@@ -267,23 +220,8 @@ async function runClear(scope: ClearScope): Promise<void> {
                   你這次還沒有匯出，清除後無法復原。
                 </template>
               </p>
-            </div>
-            <button
-              class="button button--primary"
-              type="button"
-              :disabled="busy"
-              @click="runClear('all')"
-            >
-              清除全部本機資料
-            </button>
-            <button
-              class="button button--quiet"
-              type="button"
-              @click="confirming = null"
-            >
-              取消
-            </button>
-          </template>
+            </template>
+          </ConfirmAction>
         </div>
       </section>
     </template>
@@ -342,22 +280,6 @@ dd {
   color: var(--text-primary);
 }
 
-.notice {
-  padding: var(--space-3);
-  border-radius: var(--radius-sm);
-  line-height: 1.6;
-  width: 100%;
-}
-
-.notice--ok {
-  background: var(--color-success-soft, var(--surface-soft));
-  color: var(--text-secondary);
-}
-
-.notice--error {
-  color: var(--color-due);
-}
-
 .clear-row {
   display: grid;
   gap: var(--space-3);
@@ -379,19 +301,5 @@ dd {
 
 .clear-row--danger strong {
   color: var(--color-due);
-}
-
-.confirm-note {
-  width: 100%;
-  padding: var(--space-3);
-  border-radius: var(--radius-sm);
-  border: 1px solid var(--color-due);
-  color: var(--text-secondary);
-  line-height: 1.6;
-}
-
-.confirm-note ul {
-  margin: var(--space-2) 0;
-  padding-inline-start: var(--space-5);
 }
 </style>
