@@ -260,14 +260,14 @@
 
 ## 建議採用的 18 篇清單
 
-| 分類 | 新增文章 1 | 新增文章 2 | 新增文章 3 |
-|---|---|---|---|
-| 了解今天的 UV | SPF 30、50、50+ 差多少？ | 天天防曬會影響維生素 D 嗎？ | 潤色防曬、可見光與防斑 |
-| 出門前準備 | 物理性、化學性、混合型怎麼選？ | 保養、防曬、妝前與底妝順序 | 防曬乳、防曬棒、防曬噴霧比較 |
-| 外出中的補擦 | 防曬棒怎麼補才夠？ | 噴霧防曬怎麼補才夠？ | 防曬與防蚊液的順序 |
-| 流汗或碰水後 | reef-safe 有統一標準嗎？ | 去海邊如何兼顧防曬與海洋？ | 礦物性防曬一定對珊瑚友善嗎？ |
-| 回家後與皮膚照顧 | 曬後可以冰敷嗎？ | 曬傷可以擦蘆薈嗎？ | 曬黑代表健康嗎？曬後先做什麼？ |
-| 特殊情況 | 孕期／備孕／哺乳防曬 | 嬰兒幾個月可以擦防曬？ | 藥物光敏感與防曬 |
+| 分類             | 新增文章 1                     | 新增文章 2                  | 新增文章 3                     |
+| ---------------- | ------------------------------ | --------------------------- | ------------------------------ |
+| 了解今天的 UV    | SPF 30、50、50+ 差多少？       | 天天防曬會影響維生素 D 嗎？ | 潤色防曬、可見光與防斑         |
+| 出門前準備       | 物理性、化學性、混合型怎麼選？ | 保養、防曬、妝前與底妝順序  | 防曬乳、防曬棒、防曬噴霧比較   |
+| 外出中的補擦     | 防曬棒怎麼補才夠？             | 噴霧防曬怎麼補才夠？        | 防曬與防蚊液的順序             |
+| 流汗或碰水後     | reef-safe 有統一標準嗎？       | 去海邊如何兼顧防曬與海洋？  | 礦物性防曬一定對珊瑚友善嗎？   |
+| 回家後與皮膚照顧 | 曬後可以冰敷嗎？               | 曬傷可以擦蘆薈嗎？          | 曬黑代表健康嗎？曬後先做什麼？ |
+| 特殊情況         | 孕期／備孕／哺乳防曬           | 嬰兒幾個月可以擦防曬？      | 藥物光敏感與防曬               |
 
 ## 編寫時的重要限制
 
@@ -285,4 +285,3 @@
 - [NOAA — Skincare Chemicals and Marine Life](https://oceanservice.noaa.gov/news/sunscreen-corals-noaa-studies.html)（存取：2026-08-16）
 - [NOAA — Effects of UV Filters and Sunscreen on Corals and Aquatic Ecosystems](https://coralreef.noaa.gov/digital-corals/stories/documents/mar20/effects-ultraviolet-filters-sunscreen-corals)（存取：2026-08-16）
 - [US EPA — UV Filters in Sunscreens and Aquatic Environmental Health](https://www.epa.gov/water-research/uv-filters-sunscreens-and-aquatic-environmental-health)（2026；存取：2026-08-16）
-

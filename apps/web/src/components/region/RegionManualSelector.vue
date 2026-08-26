@@ -1,10 +1,5 @@
 <script setup lang="ts">
-import {
-  computed,
-  nextTick,
-  shallowRef,
-  useTemplateRef
-} from "vue";
+import { computed, nextTick, shallowRef, useTemplateRef } from "vue";
 import type { RegionPhase } from "../../features/region/createRegionController";
 import type { RegionDirectoryEntry } from "../../features/region/TaiwanRegionResolver";
 
@@ -123,11 +118,7 @@ async function save(): Promise<void> {
         @change="handleTownChange"
       >
         <option value="">
-          {{
-            selectedCountyCode === ""
-              ? "請先選擇縣市"
-              : "請選擇鄉鎮市區"
-          }}
+          {{ selectedCountyCode === "" ? "請先選擇縣市" : "請選擇鄉鎮市區" }}
         </option>
         <option
           v-for="town in towns"
@@ -184,8 +175,8 @@ async function save(): Promise<void> {
 
 .manual-region p {
   margin-top: var(--space-2);
-  color: var(--text-secondary);
-  line-height: 1.7;
+  color: var(--text-body);
+  line-height: 1.6;
 }
 
 .manual-region__field {
@@ -200,7 +191,7 @@ async function save(): Promise<void> {
 .manual-region__field select,
 .manual-region__field input {
   width: 100%;
-  min-height: 2.75rem;
+  min-height: var(--tap-target);
   padding: var(--space-3);
   border: 1px solid var(--border-subtle);
   border-radius: var(--radius-sm);
@@ -211,9 +202,5 @@ async function save(): Promise<void> {
 
 .manual-region__field select[aria-invalid="true"] {
   border: 2px solid var(--color-due);
-}
-
-.manual-region .button {
-  min-height: 2.75rem;
 }
 </style>

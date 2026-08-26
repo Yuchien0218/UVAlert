@@ -3,7 +3,11 @@ import { nextTick, onMounted, watch } from "vue";
 import { useRouter } from "vue-router";
 import { useWebAppServices } from "../app/injection";
 import Icon from "../components/icons/Icon.vue";
+import QuickTimePicker from "../components/common/QuickTimePicker.vue";
+import SunLoader from "../components/feedback/SunLoader.vue";
+import ZoneSelectorGrid from "../components/reminder/ZoneSelectorGrid.vue";
 import { getZoneLabel } from "../features/reminder/reminderPresentation";
+import { formatDateTime } from "../helpers/datetime";
 
 const { contextEvent } = useWebAppServices();
 const router = useRouter();
@@ -15,7 +19,8 @@ onMounted(() => {
 watch(
   () => contextEvent.error.value,
   (value) => {
-    if (value === "not_found") void router.replace({ name: "reminder" });
+    // 2026-08-24：這頁從首頁主 CTA 進來，取消／完成／找不到都回首頁。
+    if (value === "not_found") void router.replace({ name: "home" });
   }
 );
 
@@ -24,32 +29,13 @@ watch(
   async (value) => {
     if (value === "success") {
       await nextTick();
-      document
-        .querySelector<HTMLElement>("#report-success-title")
-        ?.focus();
+      document.querySelector<HTMLElement>("#report-success-title")?.focus();
     }
   }
 );
 
 function cancel(): void {
-  void router.push({ name: "reminder" });
-}
-
-function localValue(iso: string): string {
-  const date = new Date(iso);
-  const offset = date.getTimezoneOffset() * 60_000;
-  return new Date(date.getTime() - offset).toISOString().slice(0, 16);
-}
-
-function isQuickSelected(minutes: number): boolean {
-  return (
-    Math.abs(
-      (Date.parse(contextEvent.referenceNow.value) -
-        Date.parse(contextEvent.occurredAt.value)) /
-        60_000 -
-        minutes
-    ) < 0.5
-  );
+  void router.push({ name: "home" });
 }
 
 function zoneNames(zoneIds: string[]): string {
@@ -70,18 +56,22 @@ function zoneNames(zoneIds: string[]): string {
       <div>
         <p class="eyebrow">記錄狀況</p>
         <h1>記錄這次狀況</h1>
-        <p>
-          記下這次狀況後，相關部位的提醒會更新；確認前不會改變提醒。
-        </p>
+        <p>記下這次狀況後，相關部位的提醒會更新；確認前不會改變提醒。</p>
       </div>
-      <button class="icon-button" type="button" aria-label="返回提醒" @click="cancel">
+      <button
+        class="icon-button"
+        type="button"
+        aria-label="返回提醒"
+        @click="cancel"
+      >
         <Icon name="tool-close" :size="24" />
       </button>
     </header>
 
-    <p v-if="contextEvent.phase.value === 'loading'" role="status">
-      正在讀取目前提醒狀態…
-    </p>
+    <SunLoader
+      v-if="contextEvent.phase.value === 'loading'"
+      label="正在讀取目前提醒狀態…"
+    />
 
     <section
       v-else-if="
@@ -92,9 +82,7 @@ function zoneNames(zoneIds: string[]): string {
       <h2 id="report-success-title" tabindex="-1">已記錄這次狀況</h2>
       <p>
         {{ contextEvent.success.value.label }}，{{
-          new Date(contextEvent.success.value.occurredAt).toLocaleString(
-            "zh-TW"
-          )
+          formatDateTime(contextEvent.success.value.occurredAt)
         }}。
       </p>
       <p>影響部位：{{ zoneNames(contextEvent.success.value.zoneIds) }}</p>
@@ -124,7 +112,7 @@ function zoneNames(zoneIds: string[]): string {
           <button
             v-for="choice in contextEvent.availableChoices.value"
             :key="choice.kind"
-            class="kind-option"
+            class="kind-option app-card"
             :class="{
               'option-selected': contextEvent.selectedKind.value === choice.kind
             }"
@@ -149,34 +137,21 @@ function zoneNames(zoneIds: string[]): string {
       <template v-if="contextEvent.selectedKind.value">
         <section class="app-card" aria-labelledby="report-zones-title">
           <h2 id="report-zones-title">影響哪些部位？</h2>
-          <p v-if="contextEvent.zoneSelectionLocked.value" class="section-helper">
+          <p
+            v-if="contextEvent.zoneSelectionLocked.value"
+            class="section-helper"
+          >
             離水必須沿用入水時的部位集合，因此這裡不可調整。
           </p>
           <p v-else class="section-helper">
             只勾選這次實際受影響的部位；未勾選的部位狀態不會改變。
           </p>
-          <div class="zone-grid">
-            <label
-              v-for="zone in contextEvent.selectableZones.value"
-              :key="zone.zoneInstanceId"
-              class="zone-chip"
-              :class="{
-                'zone-chip--locked': contextEvent.zoneSelectionLocked.value
-              }"
-            >
-              <input
-                type="checkbox"
-                :checked="
-                  contextEvent.selectedZoneIds.value.includes(
-                    zone.zoneInstanceId
-                  )
-                "
-                :disabled="contextEvent.zoneSelectionLocked.value"
-                @change="contextEvent.toggleZone(zone.zoneInstanceId)"
-              >
-              <span>{{ getZoneLabel(zone) }}</span>
-            </label>
-          </div>
+          <ZoneSelectorGrid
+            :zones="contextEvent.selectableZones.value"
+            :selected-zone-ids="contextEvent.selectedZoneIds.value"
+            :locked="contextEvent.zoneSelectionLocked.value"
+            @toggle="contextEvent.toggleZone"
+          />
           <p
             v-if="contextEvent.fieldErrors.value.zones?.[0]"
             class="form-error"
@@ -206,7 +181,7 @@ function zoneNames(zoneIds: string[]): string {
                   contextEvent.waterStartConfidence.value === 'confirmed'
                 "
                 @change="contextEvent.setWaterStartConfidence('confirmed')"
-              >
+              />
               <span>知道，就是下面選的時間</span>
             </label>
             <label>
@@ -214,61 +189,23 @@ function zoneNames(zoneIds: string[]): string {
                 type="radio"
                 name="water-confidence"
                 value="unknown"
-                :checked="
-                  contextEvent.waterStartConfidence.value === 'unknown'
-                "
+                :checked="contextEvent.waterStartConfidence.value === 'unknown'"
                 @change="contextEvent.setWaterStartConfidence('unknown')"
-              >
+              />
               <span>不確定</span>
             </label>
           </div>
         </section>
 
-        <section class="app-card time-section" aria-labelledby="report-time-title">
-          <h2 id="report-time-title">實際什麼時候發生？</h2>
-          <div class="quick-times">
-            <button
-              v-for="item in [
-                { label: '剛剛', minutes: 0 },
-                { label: '15 分鐘前', minutes: 15 },
-                { label: '30 分鐘前', minutes: 30 },
-                { label: '60 分鐘前', minutes: 60 }
-              ]"
-              :key="item.minutes"
-              class="button button--quiet"
-              type="button"
-              :aria-pressed="isQuickSelected(item.minutes)"
-              @click="contextEvent.setQuickTime(item.minutes)"
-            >
-              {{ item.label }}
-            </button>
-          </div>
-          <label for="report-time">自訂日期與時間</label>
-          <input
-            id="report-time"
-            type="datetime-local"
-            :value="localValue(contextEvent.occurredAt.value)"
-            @change="
-              contextEvent.setOccurredAt(
-                new Date(
-                  ($event.target as HTMLInputElement).value
-                ).toISOString()
-              )
-            "
-          >
-          <p class="time-summary">
-            確認時間：{{
-              new Date(contextEvent.occurredAt.value).toLocaleString("zh-TW")
-            }}
-          </p>
-          <p
-            v-if="contextEvent.fieldErrors.value.occurredAt?.[0]"
-            class="form-error"
-            role="alert"
-          >
-            {{ contextEvent.fieldErrors.value.occurredAt[0] }}
-          </p>
-        </section>
+        <QuickTimePicker
+          heading="實際什麼時候發生？"
+          id-prefix="report-time"
+          :applied-at="contextEvent.occurredAt.value"
+          :reference-now="contextEvent.referenceNow.value"
+          :error="contextEvent.fieldErrors.value.occurredAt?.[0]"
+          @change="contextEvent.setOccurredAt"
+          @quick="contextEvent.setQuickTime"
+        />
       </template>
 
       <p
@@ -316,26 +253,10 @@ function zoneNames(zoneIds: string[]): string {
 </template>
 
 <style scoped>
-/*
- * 這頁跟 EventCorrectionPage 一直沿用 .flow-heading／.eyebrow 這兩個
- * class 名稱，但從未實際定義過任何樣式——標題列其實是瀏覽器預設的
- * 直向堆疊，不是設計稿那種橫向排版。跟關閉鈕收斂順手補上，對齊
- * ReapplyPage.vue 已有的版本。
- */
-.flow-heading { display: flex; align-items: start; justify-content: space-between; gap: var(--space-4); }
-.flow-heading h1, .flow-heading p { margin: 0; }
-.flow-heading h1 { font-size: var(--font-size-page-title); }
-.flow-heading div { display: grid; gap: var(--space-3); }
-.flow-heading div > p:last-child { color: var(--text-secondary); line-height: 1.7; }
-
 .app-card {
   display: grid;
   gap: var(--space-4);
   padding: var(--space-5);
-}
-
-.success-panel {
-  border-top: 0.35rem solid var(--color-success);
 }
 
 h2,
@@ -345,7 +266,7 @@ p {
 
 .section-helper {
   color: var(--text-secondary);
-  line-height: 1.7;
+  line-height: 1.6;
 }
 
 .kind-grid {
@@ -353,13 +274,19 @@ p {
   gap: var(--space-3);
 }
 
+/*
+ * 2026-08-24：這裡原本自己寫了 border 與 background: transparent，
+ * scoped 的特異性（.kind-option[data-v-xxx]）高過共用的 .option-selected，
+ * 把選取態整組蓋掉——選了以後底色與邊框都沒變，看起來像沒選到。
+ * 同一個陷阱今天已經在 ContextSelector 與 ApplicationTimePicker 修過，
+ * DESIGN.md 第十節也記過一次（min-height 那次）。
+ * 邊框與底色改由共用的 .app-card 提供，這裡只留版面。
+ */
 .kind-option {
   display: grid;
   gap: var(--space-1);
   padding: var(--space-4);
-  border: 1px solid var(--border-strong);
   border-radius: var(--radius-sm);
-  background: transparent;
   color: var(--text-primary);
   text-align: start;
   cursor: pointer;
@@ -370,67 +297,8 @@ p {
   color: var(--text-secondary);
 }
 
-.zone-grid {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-2);
-}
-
-.zone-chip {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--space-2);
-  padding: var(--space-2) var(--space-3);
-  border: 1px solid var(--border-strong);
-  border-radius: var(--radius-pill, 999px);
-  min-height: var(--tap-target);
-}
-
-.zone-chip--locked {
-  opacity: 0.75;
-}
-
-.quick-times {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-2);
-}
-
-.time-section input {
-  min-height: var(--tap-target);
-  padding-inline: var(--space-3);
-  border: 1px solid var(--border-strong);
-  border-radius: var(--radius-sm);
-  color: var(--text-primary);
-  background: var(--surface-primary);
-}
-
-.time-summary {
-  color: var(--text-secondary);
-}
-
-.form-error {
-  color: var(--color-due);
-  line-height: 1.7;
-}
-
 .correction-note {
   color: var(--text-secondary);
-  line-height: 1.7;
-}
-
-.submit-actions {
-  display: grid;
-  gap: var(--space-3);
-}
-
-.submit-actions .button {
-  width: 100%;
-}
-
-@media (min-width: 36rem) {
-  .submit-actions {
-    grid-template-columns: 1fr auto;
-  }
+  line-height: 1.6;
 }
 </style>

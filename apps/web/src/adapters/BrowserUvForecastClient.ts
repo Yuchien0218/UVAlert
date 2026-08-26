@@ -13,18 +13,17 @@ export class BrowserUvForecastClient implements UvForecastApiPort {
   readonly #fetch: FetchPort;
   readonly #endpoint: string;
 
-  constructor(options: {
-    fetch?: FetchPort;
-    endpoint?: string;
-  } = {}) {
-    this.#fetch =
-      options.fetch ?? globalThis.fetch.bind(globalThis);
+  constructor(
+    options: {
+      fetch?: FetchPort;
+      endpoint?: string;
+    } = {}
+  ) {
+    this.#fetch = options.fetch ?? globalThis.fetch.bind(globalThis);
     this.#endpoint = options.endpoint ?? "/v1/uv/forecast";
   }
 
-  async getFiveDayForecast(
-    regionCode: string
-  ): Promise<FiveDayUvForecast> {
+  async getFiveDayForecast(regionCode: string): Promise<FiveDayUvForecast> {
     const query = new URLSearchParams({ regionCode });
     const response = await this.#fetch(
       `${this.#endpoint}?${query.toString()}`,

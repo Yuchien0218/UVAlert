@@ -2,6 +2,8 @@
 import { computed, onMounted, ref } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import Icon from "../components/icons/Icon.vue";
+import SunLoader from "../components/feedback/SunLoader.vue";
+import EmptyStateCard from "../components/common/EmptyStateCard.vue";
 import { useWebAppServices } from "../app/injection";
 import {
   affectsCountdown,
@@ -52,9 +54,7 @@ const product = computed(
     ) ?? null
 );
 
-const isSunscreen = computed(
-  () => product.value?.gearCategory === "sunscreen"
-);
+const isSunscreen = computed(() => product.value?.gearCategory === "sunscreen");
 
 const safety = computed(() =>
   product.value === null ? null : gearSafetyState(product.value)
@@ -72,7 +72,9 @@ const canRestore = computed(
 );
 
 const purchase = computed(() =>
-  product.value === null ? null : formatPurchaseMonth(product.value.purchaseMonth)
+  product.value === null
+    ? null
+    : formatPurchaseMonth(product.value.purchaseMonth)
 );
 
 /**
@@ -88,15 +90,14 @@ const specLine = computed(() => {
   const parts: string[] = [];
   if (spf !== null) parts.push(`SPF ${spf}`);
   // paGrade 存使用者照包裝抄的完整標示（「PA++++」），不加前綴——
-  // 這裡原本寫 `PA${paGrade}`，跟 SetupCompletionSummary 的直接顯示
-  // 互相矛盾。先前沒爆是因為當時沒有任何寫入路徑，兩邊都碰不到真值。
+  // 這裡原本寫 `PA${paGrade}`，跟設定流程摘要的直接顯示互相矛盾。
+  // 先前沒爆是因為當時沒有任何寫入路徑，兩邊都碰不到真值。
+  // （那張摘要已於 2026-08-24 移除，這裡的規則不變。）
   if (paGrade !== null) parts.push(paGrade);
   return parts.length === 0 ? null : parts.join("・");
 });
 
-const isBusy = computed(
-  () => productSettings.phase.value === "saving"
-);
+const isBusy = computed(() => productSettings.phase.value === "saving");
 
 const actionError = ref<string | null>(null);
 
@@ -141,32 +142,40 @@ async function handleDelete(): Promise<void> {
 
 <template>
   <div class="page-stack product-detail-page">
+    <!--
+      2026-08-24：返回從左側的文字連結改成右上角只有圖示的叉叉，跟記錄
+      補擦／記錄狀況／更正紀錄／設定流程一致。「編輯」原本佔著右上角，
+      移到下方的行動區——右上角保留給單一的離開動作。
+    -->
     <header class="detail-header">
-      <button class="text-link" type="button" @click="goBack">
-        <Icon name="tool-arrow-left" :size="20" />
-        返回裝備清單
-      </button>
       <button
-        v-if="product !== null"
-        class="text-link"
+        class="icon-button"
         type="button"
-        @click="goEdit"
+        aria-label="返回裝備清單"
+        @click="goBack"
       >
-        編輯
+        <Icon name="tool-close" :size="24" />
       </button>
     </header>
 
-    <p v-if="productSettings.phase.value === 'loading'" role="status">
-      正在讀取裝備資料…
-    </p>
+    <SunLoader
+      v-if="productSettings.phase.value === 'loading'"
+      label="正在讀取裝備資料…"
+    />
 
-    <section v-else-if="product === null" class="app-card empty-state" role="alert">
-      <h1>找不到這件裝備</h1>
-      <p>這筆裝備紀錄可能已被刪除，或是網址有誤。</p>
-      <button class="button button--primary" type="button" @click="goBack">
-        返回我的防曬裝備
-      </button>
-    </section>
+    <EmptyStateCard
+      v-else-if="product === null"
+      title="找不到這件裝備"
+      body="這筆裝備紀錄可能已被刪除，或是網址有誤。"
+      title-tag="h1"
+      role="alert"
+    >
+      <template #actions>
+        <button class="button button--primary" type="button" @click="goBack">
+          返回我的防曬裝備
+        </button>
+      </template>
+    </EmptyStateCard>
 
     <template v-else>
       <header class="page-heading">
@@ -222,6 +231,10 @@ async function handleDelete(): Promise<void> {
       </p>
 
       <div class="detail-actions">
+        <!-- 從右上角移下來（2026-08-24），右上角只留返回。 -->
+        <button class="button button--quiet" type="button" @click="goEdit">
+          編輯
+        </button>
         <button
           v-if="canRestore"
           class="button button--primary"
@@ -257,7 +270,9 @@ async function handleDelete(): Promise<void> {
           </button>
         </template>
         <template v-else>
-          <p class="form-error" role="alert">確定要刪除這件裝備？這個動作無法復原。</p>
+          <p class="form-error" role="alert">
+            確定要刪除這件裝備？這個動作無法復原。
+          </p>
           <div class="button-group">
             <button
               class="button button--primary"
@@ -284,8 +299,7 @@ async function handleDelete(): Promise<void> {
 <style scoped>
 .detail-header {
   display: flex;
-  justify-content: space-between;
-  align-items: center;
+  justify-content: flex-end;
 }
 
 .page-heading {
@@ -366,19 +380,12 @@ async function handleDelete(): Promise<void> {
 }
 
 .spec-safety--no_countdown {
-  color: var(--text-secondary);
+  color: var(--text-body);
   background: var(--color-untimed-soft, var(--surface-soft));
 }
 
 .detail-actions {
   display: grid;
   gap: var(--space-3);
-}
-
-.empty-state {
-  display: grid;
-  gap: var(--space-4);
-  padding: var(--space-5);
-  justify-items: start;
 }
 </style>

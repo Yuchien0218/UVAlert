@@ -1,5 +1,7 @@
 <script setup lang="ts">
 import Icon from "../components/icons/Icon.vue";
+import SunLoader from "../components/feedback/SunLoader.vue";
+import EmptyStateCard from "../components/common/EmptyStateCard.vue";
 import { computed, onMounted } from "vue";
 import { useRouter } from "vue-router";
 import { useWebAppServices } from "../app/injection";
@@ -36,9 +38,7 @@ const past = computed(() =>
   )
 );
 
-const hasAnyGear = computed(
-  () => productSettings.products.value.length > 0
-);
+const hasAnyGear = computed(() => productSettings.products.value.length > 0);
 
 /** 「只有非 sunscreen 裝備」是規格明列的狀態，必須明示沒有可建立倒數的產品。 */
 const hasUsableSunscreen = computed(() =>
@@ -49,15 +49,10 @@ const hasUsableSunscreen = computed(() =>
   )
 );
 
-const loadFailed = computed(
-  () => productSettings.phase.value === "error"
-);
+const loadFailed = computed(() => productSettings.phase.value === "error");
 
 onMounted(() => {
-  void Promise.all([
-    productSettings.ensureLoaded(),
-    setup.ensureLoaded()
-  ]);
+  void Promise.all([productSettings.ensureLoaded(), setup.ensureLoaded()]);
 });
 
 function addGear(): void {
@@ -72,7 +67,7 @@ function openGear(productId: string): void {
 <template>
   <div class="page-stack gear-page">
     <header class="page-heading">
-      <h1>我的防曬裝備</h1>
+      <h1 class="page-heading__title">我的防曬裝備</h1>
       <p>
         這份清單會先儲存在這台裝置。只有防曬乳會建立補擦倒數；其他裝備只做紀錄。
       </p>
@@ -80,29 +75,32 @@ function openGear(productId: string): void {
 
     <SetupProcessBanner v-if="hasActiveSetupDraft" />
 
-    <p v-if="productSettings.phase.value === 'loading'" role="status">
-      正在讀取裝備清單…
-    </p>
+    <SunLoader
+      v-if="productSettings.phase.value === 'loading'"
+      label="正在讀取裝備清單…"
+    />
 
-    <section v-else-if="loadFailed" class="app-card" role="alert">
-      <h2>暫時讀不到裝備清單</h2>
-      <p>
-        本機資料目前無法讀取。這不代表清單是空的，請稍後再試，先不要重新建立同一筆裝備。
-      </p>
-    </section>
+    <EmptyStateCard
+      v-else-if="loadFailed"
+      title="暫時讀不到裝備清單"
+      body="本機資料目前無法讀取。這不代表清單是空的，請稍後再試，先不要重新建立同一筆裝備。"
+      role="alert"
+    />
 
     <template v-else>
       <!-- 完全沒有裝備 -->
-      <section v-if="!hasAnyGear" class="app-card empty-state">
-        <h2>還沒有任何裝備</h2>
-        <p>
-          把常用的防曬乳與裝備記在這裡，建立提醒時就不必重填包裝標示。也可以先不儲存防曬乳，直接建立提醒。
-        </p>
-        <button class="button button--primary" type="button" @click="addGear">
-          <Icon name="tool-plus" :size="20" />
-          新增防曬裝備
-        </button>
-      </section>
+      <EmptyStateCard
+        v-if="!hasAnyGear"
+        title="還沒有任何裝備"
+        body="把常用的防曬乳與裝備記在這裡，建立提醒時就不必重填包裝標示。也可以先不儲存防曬乳，直接建立提醒。"
+      >
+        <template #actions>
+          <button class="button button--primary" type="button" @click="addGear">
+            <Icon name="tool-plus" :size="20" />
+            新增防曬裝備
+          </button>
+        </template>
+      </EmptyStateCard>
 
       <template v-else>
         <button class="button button--primary" type="button" @click="addGear">
@@ -113,7 +111,7 @@ function openGear(productId: string): void {
         <!--
           實測發現：current.length === 0 時（使用中整個是空的，裝備全部
           收納），這段話原本仍會顯示，且清單插值變成空字串，讀起來像
-          「清單裡的　都不會產生倒數」，中間留一個沒有意義的空白。這段
+          「清單裡的 都不會產生倒數」，中間留一個沒有意義的空白。這段
           只該在「使用中裡有東西、但沒有能倒數的防曬乳」時出現。
         -->
         <p
@@ -189,8 +187,8 @@ p {
 }
 
 .page-heading p {
-  color: var(--text-secondary);
-  line-height: 1.7;
+  color: var(--text-body);
+  line-height: 1.6;
 }
 
 .app-card {
@@ -199,16 +197,12 @@ p {
   padding: var(--space-5);
 }
 
-.empty-state {
-  justify-items: start;
-}
-
 .no-sunscreen-note {
   padding: var(--space-4);
   border-radius: var(--radius-sm);
   background: var(--color-untimed-soft, var(--surface-soft));
   color: var(--text-secondary);
-  line-height: 1.7;
+  line-height: 1.6;
 }
 
 section {
@@ -233,7 +227,7 @@ section {
 
 .section-empty {
   color: var(--text-secondary);
-  line-height: 1.7;
+  line-height: 1.6;
 }
 
 .gear-list {

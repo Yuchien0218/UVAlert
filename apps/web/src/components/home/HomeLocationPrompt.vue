@@ -23,9 +23,7 @@
 
 <template>
   <div class="location-prompt">
-    <p class="location-prompt__message">
-      尚未設定地區，所以沒有 UV 資料。
-    </p>
+    <p class="location-prompt__message">尚未設定地區，所以沒有 UV 資料。</p>
     <RouterLink class="button button--quiet location-prompt__cta" to="/region">
       設定地區
     </RouterLink>
@@ -44,7 +42,7 @@
 
 .location-prompt__message {
   margin: 0;
-  color: var(--color-body-strong, var(--text-primary));
+  color: var(--text-emphasis);
   font-size: var(--font-size-body);
 }
 

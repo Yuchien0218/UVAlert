@@ -96,7 +96,7 @@ describe("BrowserNotifications", () => {
       expect(showNotification).toHaveBeenCalledWith("該補擦了", {
         body: "額頭",
         tag: "zone-forehead",
-        data: { path: "/reminder" }
+        data: { path: "/" }
       });
     });
 
@@ -232,10 +232,7 @@ describe("BrowserNotifications", () => {
 
       await vi.advanceTimersByTimeAsync(20 * 60_000);
       expect(showNotification).toHaveBeenCalledOnce();
-      expect(showNotification).toHaveBeenCalledWith(
-        "新的",
-        expect.anything()
-      );
+      expect(showNotification).toHaveBeenCalledWith("新的", expect.anything());
     });
 
     it("取消後不再觸發", async () => {

@@ -18,7 +18,11 @@ export async function handleCommit(request: Request): Promise<Response> {
   }
   if (request.method !== "POST") {
     return toResponse(
-      errorResponse({ status: 405, code: "VALIDATION_ERROR", message: "只接受 POST" })
+      errorResponse({
+        status: 405,
+        code: "VALIDATION_ERROR",
+        message: "只接受 POST"
+      })
     );
   }
   const auth = await requirePermanentUser(request);
@@ -29,7 +33,11 @@ export async function handleCommit(request: Request): Promise<Response> {
     body = await request.json();
   } catch {
     return toResponse(
-      errorResponse({ status: 422, code: "VALIDATION_ERROR", message: "JSON 格式不正確" })
+      errorResponse({
+        status: 422,
+        code: "VALIDATION_ERROR",
+        message: "JSON 格式不正確"
+      })
     );
   }
 
@@ -41,7 +49,10 @@ export async function handleCommit(request: Request): Promise<Response> {
       errorResponse({
         status: 422,
         code: "VALIDATION_ERROR",
-        message: error instanceof SyncValidationError ? error.message : "同步資料格式不正確"
+        message:
+          error instanceof SyncValidationError
+            ? error.message
+            : "同步資料格式不正確"
       })
     );
   }
@@ -56,11 +67,19 @@ export async function handleCommit(request: Request): Promise<Response> {
   if (error !== null) {
     if (isConflictError(error)) {
       return toResponse(
-        errorResponse({ status: 409, code: "SYNC_CONFLICT", message: "同步資料版本已在其他裝置更新" })
+        errorResponse({
+          status: 409,
+          code: "SYNC_CONFLICT",
+          message: "同步資料版本已在其他裝置更新"
+        })
       );
     }
     return toResponse(
-      errorResponse({ status: 500, code: "SERVER_ERROR", message: "同步尚未完成，本機資料維持原狀" })
+      errorResponse({
+        status: 500,
+        code: "SERVER_ERROR",
+        message: "同步尚未完成，本機資料維持原狀"
+      })
     );
   }
 
@@ -68,12 +87,20 @@ export async function handleCommit(request: Request): Promise<Response> {
     return jsonResponse(validateSyncCommitResult(data));
   } catch {
     return toResponse(
-      errorResponse({ status: 500, code: "SERVER_ERROR", message: "同步服務回應格式不正確" })
+      errorResponse({
+        status: 500,
+        code: "SERVER_ERROR",
+        message: "同步服務回應格式不正確"
+      })
     );
   }
 }
 
-function isConflictError(error: { code?: string; message?: string; details?: string }): boolean {
+function isConflictError(error: {
+  code?: string;
+  message?: string;
+  details?: string;
+}): boolean {
   return (
     error.code === "40001" ||
     error.message === "SYNC_CONFLICT" ||

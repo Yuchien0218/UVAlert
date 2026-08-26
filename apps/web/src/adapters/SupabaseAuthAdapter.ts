@@ -21,10 +21,7 @@ export class SupabaseAuthAdapter implements AuthPort {
   readonly #client: SupabaseAuthClient;
   readonly #redirectTo: string | undefined;
 
-  constructor(options: {
-    client: SupabaseAuthClient;
-    redirectTo?: string;
-  }) {
+  constructor(options: { client: SupabaseAuthClient; redirectTo?: string }) {
     this.#client = options.client;
     this.#redirectTo = options.redirectTo;
   }
@@ -95,10 +92,7 @@ export class DisabledAuthAdapter implements AuthPort {
   }
 
   async signInWithGoogle(): Promise<void> {
-    throw new SupabaseAuthError(
-      "AUTH_NOT_CONFIGURED",
-      "Google 登入尚未設定"
-    );
+    throw new SupabaseAuthError("AUTH_NOT_CONFIGURED", "Google 登入尚未設定");
   }
 
   async getAccessToken(): Promise<string | null> {
@@ -110,12 +104,14 @@ export class DisabledAuthAdapter implements AuthPort {
   }
 }
 
-export function createSupabaseAuthAdapter(options: {
-  url?: string;
-  publishableKey?: string;
-  redirectTo?: string;
-  client?: SupabaseAuthClient;
-} = {}): AuthPort {
+export function createSupabaseAuthAdapter(
+  options: {
+    url?: string;
+    publishableKey?: string;
+    redirectTo?: string;
+    client?: SupabaseAuthClient;
+  } = {}
+): AuthPort {
   if (options.client !== undefined) {
     return new SupabaseAuthAdapter({
       client: options.client,

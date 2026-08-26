@@ -21,12 +21,6 @@ describe("resolveActionRoute", () => {
     "confirm_protection_method",
     "view_protection_options"
   ];
-  const IN_PLACE_KINDS: ActionKind[] = [
-    "review_required_zones",
-    "view_product_label",
-    "recalibrate_clock",
-    "view_ended_state"
-  ];
 
   it.each(REAPPLY_KINDS)("%s 導向 S-08 補擦表單", (kind) => {
     expect(resolveActionRoute(kind)).toEqual({ name: "reminder-reapply" });
@@ -38,9 +32,10 @@ describe("resolveActionRoute", () => {
     expect(resolveActionRoute(kind)).toEqual({ name: "products" });
   });
 
-  it("review_required_zones 導向提醒頁的部位錨點", () => {
+  // 2026-08-24：/reminder 已併入首頁，錨點仍有效（部位清單在首頁下半部）。
+  it("review_required_zones 導向首頁的部位錨點", () => {
     expect(resolveActionRoute("review_required_zones")).toEqual({
-      name: "reminder",
+      name: "home",
       hash: "#zone-status"
     });
   });
@@ -84,7 +79,7 @@ describe("resolveActionRoute", () => {
         "reminder-reapply",
         "reminder-report",
         "products",
-        "reminder",
+        "home",
         "help-how-it-works"
       ]).toContain((route as { name: string }).name);
     }

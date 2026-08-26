@@ -1,5 +1,7 @@
 <script setup lang="ts">
-import { nextTick, shallowRef, useTemplateRef } from "vue";
+import { shallowRef, useTemplateRef } from "vue";
+import Icon from "../icons/Icon.vue";
+import { useOverlay } from "../../composables/useOverlay";
 import type {
   SessionEndError,
   SessionEndPhase
@@ -18,23 +20,18 @@ const emit = defineEmits<{
 }>();
 
 const isConfirming = shallowRef(false);
-const confirmationTitle =
-  useTemplateRef<HTMLElement>("confirmationTitle");
-const stopButton = useTemplateRef<HTMLButtonElement>("stopButton");
+const confirmation = useTemplateRef<HTMLElement>("confirmation");
+const cancelButton = useTemplateRef<HTMLButtonElement>("cancelButton");
 
-async function openConfirmation(): Promise<void> {
+function openConfirmation(): void {
   emit("resetError");
   isConfirming.value = true;
-  await nextTick();
-  confirmationTitle.value?.focus();
 }
 
-async function cancelConfirmation(): Promise<void> {
+function cancelConfirmation(): void {
   if (props.phase === "ending") return;
   isConfirming.value = false;
   emit("resetError");
-  await nextTick();
-  stopButton.value?.focus();
 }
 
 function confirmEnd(): void {
@@ -56,118 +53,120 @@ function getErrorMessage(error: SessionEndError): string {
       return "";
   }
 }
+
+const { closeFromBackdrop } = useOverlay({
+  open: isConfirming,
+  container: confirmation,
+  initialFocus: cancelButton,
+  onClose: cancelConfirmation
+});
 </script>
 
 <template>
-  <section class="session-end" aria-labelledby="session-end-title">
-    <h2 id="session-end-title" class="session-end__title">
-      提醒控制
-    </h2>
-
-    <div v-if="!isConfirming" class="session-end__body">
-      <p class="session-end__summary">
-        不再需要這次倒數時，可以手動停止；既有裝備與紀錄仍會保留。
-      </p>
-      <button
-        ref="stopButton"
-        class="text-link session-end__trigger"
-        type="button"
-        @click="openConfirmation"
-      >
-        停止本次提醒
-      </button>
-    </div>
-
-    <div
-      v-else
-      class="session-end__confirmation"
-      role="region"
-      aria-labelledby="session-end-confirm-title"
-      aria-describedby="session-end-confirm-body"
-      @keydown.esc="cancelConfirmation"
+  <!--
+    2026-08-24 使用者裁決：原本是「提醒控制」整個區塊（標題＋說明＋
+    「停止本次提醒」連結），佔掉不少版面。改成右上角一顆小叉叉以減輕
+    畫面份量，確認改用彈窗呈現。
+  -->
+  <div class="session-end">
+    <button
+      class="icon-button"
+      type="button"
+      aria-label="結束這次提醒"
+      @click="openConfirmation"
     >
-      <p
-        ref="confirmationTitle"
-        id="session-end-confirm-title"
-        class="session-end__confirm-title"
-        tabindex="-1"
-      >
-        要結束這次提醒嗎？
-      </p>
-      <p id="session-end-confirm-body" class="session-end__confirm-body">
-        結束後會停止所有待處理提示；裝備紀錄與既有資料不會受影響。
-      </p>
+      <Icon name="tool-close" :size="24" />
+    </button>
 
-      <p
-        v-if="error !== null"
-        class="session-end__error"
-        role="alert"
+    <Teleport to="body">
+      <div
+        v-if="isConfirming"
+        class="session-end__backdrop"
+        data-overlay-root
+        @click.self="closeFromBackdrop"
       >
-        {{ getErrorMessage(error) }}
-      </p>
+        <div
+          ref="confirmation"
+          class="session-end__confirmation"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="session-end-confirm-title"
+          aria-describedby="session-end-confirm-body"
+          tabindex="-1"
+        >
+          <p id="session-end-confirm-title" class="session-end__confirm-title">
+            要結束這次提醒嗎？
+          </p>
+          <p id="session-end-confirm-body" class="session-end__confirm-body">
+            結束後會停止所有待處理提示；裝備紀錄與既有資料不會受影響。
+          </p>
 
-      <div class="session-end__actions">
-        <button
-          class="button session-end__confirm-button"
-          type="button"
-          :disabled="phase === 'ending'"
-          @click="confirmEnd"
-        >
-          {{ phase === "ending" ? "正在結束…" : "結束本次提醒" }}
-        </button>
-        <button
-          class="button button--quiet"
-          type="button"
-          :disabled="phase === 'ending'"
-          @click="cancelConfirmation"
-        >
-          取消
-        </button>
+          <p v-if="error !== null" class="session-end__error" role="alert">
+            {{ getErrorMessage(error) }}
+          </p>
+
+          <div class="session-end__actions">
+            <button
+              class="button session-end__confirm-button"
+              type="button"
+              :disabled="phase === 'ending'"
+              @click="confirmEnd"
+            >
+              {{ phase === "ending" ? "正在結束…" : "結束本次提醒" }}
+            </button>
+            <button
+              ref="cancelButton"
+              class="button button--quiet"
+              type="button"
+              :disabled="phase === 'ending'"
+              @click="cancelConfirmation"
+            >
+              取消
+            </button>
+          </div>
+        </div>
       </div>
-    </div>
-  </section>
+    </Teleport>
+  </div>
 </template>
 
 <style scoped>
+/* 只剩右上角那顆叉叉，靠 justify-self 貼齊 page-stack 的右緣。 */
 .session-end {
-  display: grid;
-  gap: var(--space-3);
-  padding-top: var(--space-5);
-  border-top: 1px solid var(--border-subtle);
+  justify-self: end;
 }
 
-.session-end__title {
-  margin: 0;
-  font-size: var(--font-size-title);
-}
-
-.session-end__body {
-  display: grid;
-  gap: var(--space-3);
-}
-
-.session-end__summary,
 .session-end__confirm-body {
   margin: 0;
-  color: var(--text-secondary);
-  line-height: 1.7;
+  color: var(--text-body);
+  font-size: var(--font-size-body);
+  line-height: 1.6;
 }
 
-.session-end__trigger {
-  width: fit-content;
-  padding: var(--space-3) var(--space-4);
-  border-color: var(--border-subtle);
-  background: var(--surface-primary);
-  color: var(--text-primary);
-  font-weight: 500;
+/*
+ * 確認彈窗。沿用兩個 sheet 的遮罩做法（--overlay-backdrop），面板用
+ * --surface-overlay——那是**不透明**的表面，浮在內容上必須遮得住背後
+ * （半透明的 --surface-primary 會讓底下文字透出來，2026-08-24 踩過）。
+ */
+.session-end__backdrop {
+  position: fixed;
+  z-index: var(--z-overlay);
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: var(--space-5);
+  background: var(--overlay-backdrop);
 }
 
 .session-end__confirmation {
   display: grid;
   gap: var(--space-3);
-  padding-top: var(--space-3);
-  border: 0;
-  box-shadow: none;
+  width: min(100%, 24rem);
+  padding: var(--space-5);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  background: var(--surface-overlay);
+  overscroll-behavior: contain;
 }
 
 /*
@@ -179,14 +178,6 @@ function getErrorMessage(error: SessionEndError): string {
   color: var(--text-primary);
   font-size: var(--font-size-title-sm);
   font-weight: 600;
-}
-
-.session-end__confirm-title:focus {
-  outline: none;
-}
-
-.session-end__confirm-body {
-  font-size: var(--font-size-body);
 }
 
 .session-end__error {

@@ -1,7 +1,5 @@
-import type {
-  SessionProjection,
-  ZoneProjection
-} from "@sunshield/contracts";
+import type { SessionProjection, ZoneProjection } from "@sunshield/contracts";
+import { formatTime } from "../../helpers/datetime";
 import { getZoneLabel } from "./reminderPresentation";
 
 export type HomeReminderClockTone = "tracking" | "soon" | "due";
@@ -35,10 +33,7 @@ export function buildHomeReminderClockPresentation(
 
   const timedZones = session.zones
     .map((zone, sourceIndex): TimedZone | null => {
-      if (
-        zone.trackingStatus !== "active" ||
-        zone.zoneDueAt === null
-      ) {
+      if (zone.trackingStatus !== "active" || zone.zoneDueAt === null) {
         return null;
       }
       const dueMs = Date.parse(zone.zoneDueAt);
@@ -53,8 +48,7 @@ export function buildHomeReminderClockPresentation(
     .filter((entry): entry is TimedZone => entry !== null)
     .sort(
       (left, right) =>
-        left.dueMs - right.dueMs ||
-        left.sourceIndex - right.sourceIndex
+        left.dueMs - right.dueMs || left.sourceIndex - right.sourceIndex
     );
 
   const earliest = timedZones[0];
@@ -74,9 +68,7 @@ export function buildHomeReminderClockPresentation(
       : "priority";
   const firstZoneLabel = getZoneLabel(earliest.zone);
   const zoneLabel =
-    earliestZones.length > 1
-      ? `${firstZoneLabel}等部位`
-      : firstZoneLabel;
+    earliestZones.length > 1 ? `${firstZoneLabel}等部位` : firstZoneLabel;
   const remainingMs = Math.max(0, earliest.dueMs - now.getTime());
   const remainingMinutes = Math.ceil(remainingMs / 60_000);
   const progress = calculateRemainingProgress(
@@ -86,7 +78,7 @@ export function buildHomeReminderClockPresentation(
   );
   const tone = getTone(earliest.zone, remainingMs);
   const title = buildTitle(scope, zoneLabel, tone);
-  const absoluteTime = formatAbsoluteTime(earliest.dueAt);
+  const absoluteTime = formatTime(earliest.dueAt);
 
   return {
     tone,
@@ -95,8 +87,7 @@ export function buildHomeReminderClockPresentation(
     timeLabel: `預計 ${absoluteTime}`,
     remainingMinutes,
     progress,
-    progressPercent:
-      progress === null ? null : Math.round(progress * 100),
+    progressPercent: progress === null ? null : Math.round(progress * 100),
     ariaLabel: buildAriaLabel(
       scope,
       zoneLabel,
@@ -144,9 +135,7 @@ function buildAriaLabel(
   tone: HomeReminderClockTone
 ): string {
   const timingLabel =
-    remainingMinutes === 0
-      ? "已到建議補擦時間"
-      : `剩 ${remainingMinutes} 分鐘`;
+    remainingMinutes === 0 ? "已到建議補擦時間" : `剩 ${remainingMinutes} 分鐘`;
   return scope === "priority"
     ? `${PRIORITY_LEAD_BY_TONE[tone]}：${zoneLabel}，${timingLabel}，預計 ${absoluteTime}。`
     : `${ALL_ARIA_LEAD_BY_TONE[tone]}，${timingLabel}，預計 ${absoluteTime}。`;
@@ -179,12 +168,4 @@ function getTone(
   }
   if (zone.timingStatus === "reapply_soon") return "soon";
   return "tracking";
-}
-
-function formatAbsoluteTime(value: string): string {
-  return new Intl.DateTimeFormat("zh-TW", {
-    hour: "2-digit",
-    minute: "2-digit",
-    hour12: false
-  }).format(new Date(value));
 }

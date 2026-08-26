@@ -20,13 +20,9 @@ const props = defineProps<{
 }>();
 
 /** 沒有可信期限時 progressPercent 為 null，此時不畫進度條而不是畫 0%。 */
-const hasProgress = computed(
-  () => props.presentation.progressPercent !== null
-);
+const hasProgress = computed(() => props.presentation.progressPercent !== null);
 
-const toneClass = computed(
-  () => `countdown--${props.presentation.tone}`
-);
+const toneClass = computed(() => `countdown--${props.presentation.tone}`);
 </script>
 
 <template>
@@ -34,7 +30,7 @@ const toneClass = computed(
     <p class="countdown__eyebrow">補擦倒數</p>
 
     <div class="countdown__value">
-      <span class="stat-figure countdown__figure">
+      <span class="stat-figure stat-figure--display countdown__figure">
         {{ presentation.remainingMinutes }}
       </span>
       <span class="countdown__unit">分鐘</span>
@@ -79,14 +75,10 @@ const toneClass = computed(
   gap: var(--space-2);
 }
 
-.countdown__figure {
-  font-size: clamp(3rem, 15vw, 3.75rem);
-}
-
 .countdown__unit {
   padding-bottom: 0.375rem;
   color: var(--text-secondary);
-  font-size: 1rem;
+  font-size: var(--font-size-body);
 }
 
 .countdown__detail {
@@ -105,8 +97,7 @@ const toneClass = computed(
 .countdown__fill {
   height: 100%;
   background: var(--tone-color, var(--color-tracking));
-  transition: width var(--motion-base, 240ms)
-    cubic-bezier(0.22, 1, 0.36, 1);
+  transition: width var(--duration-base) var(--ease-out);
 }
 
 .countdown--tracking {

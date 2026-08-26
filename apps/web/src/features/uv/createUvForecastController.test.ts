@@ -61,9 +61,7 @@ function makeDependencies(options: {
   } satisfies UvForecastApiPort;
   const snapshots = {
     getLatestForecast: vi.fn(async () =>
-      options.cachedForecast === undefined
-        ? null
-        : options.cachedForecast
+      options.cachedForecast === undefined ? null : options.cachedForecast
     ),
     saveForecast: vi.fn(async () => undefined)
   } satisfies UvForecastSnapshotPort;
@@ -73,9 +71,7 @@ function makeDependencies(options: {
         return options.preference;
       }
       const region =
-        options.region === undefined
-          ? makeRegionSelection()
-          : options.region;
+        options.region === undefined ? makeRegionSelection() : options.region;
       return region === null
         ? null
         : {
@@ -191,9 +187,9 @@ describe("createUvForecastController", () => {
     controller.dismissEveningPrompt();
 
     expect(controller.showEveningPrompt.value).toBe(false);
-    expect(
-      storage.getItem(EVENING_UV_DISMISSAL_STORAGE_KEY)
-    ).toBe("2026-07-30");
+    expect(storage.getItem(EVENING_UV_DISMISSAL_STORAGE_KEY)).toBe(
+      "2026-07-30"
+    );
     controller.dispose();
   });
 
@@ -216,9 +212,7 @@ describe("createUvForecastController", () => {
 
     expect(controller.phase.value).toBe("cached");
     expect(controller.error.value).toBe("network_error");
-    expect(controller.forecast.value?.region.displayName).toBe(
-      "臺北市中正區"
-    );
+    expect(controller.forecast.value?.region.displayName).toBe("臺北市中正區");
     controller.dispose();
   });
 });

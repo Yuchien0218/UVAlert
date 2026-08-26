@@ -16,9 +16,10 @@ interface BeforeInstallPromptEvent extends Event {
 const deferredPrompt = shallowRef<BeforeInstallPromptEvent | null>(null);
 const promptResult = shallowRef<string | null>(null);
 
-const isStandalone = computed(() =>
-  globalThis.matchMedia?.("(display-mode: standalone)").matches === true ||
-  (globalThis.navigator as { standalone?: boolean }).standalone === true
+const isStandalone = computed(
+  () =>
+    globalThis.matchMedia?.("(display-mode: standalone)").matches === true ||
+    (globalThis.navigator as { standalone?: boolean }).standalone === true
 );
 
 const userAgent = globalThis.navigator.userAgent;
@@ -66,7 +67,9 @@ async function install(): Promise<void> {
 
     <section v-else-if="deferredPrompt" class="install-card app-card">
       <h2>可以安裝到這台裝置</h2>
-      <p>安裝後會在主畫面出現圖示，開啟速度較快；本機資料也較不容易因清除瀏覽器資料而遺失。</p>
+      <p>
+        安裝後會在主畫面出現圖示，開啟速度較快；本機資料也較不容易因清除瀏覽器資料而遺失。
+      </p>
       <button class="button button--primary" type="button" @click="install">
         安裝到手機
       </button>
@@ -104,7 +107,9 @@ async function install(): Promise<void> {
       </ul>
     </section>
 
-    <RouterLink class="text-link text-link--muted" to="/more">返回更多</RouterLink>
+    <RouterLink class="text-link text-link--muted" to="/more"
+      >返回更多</RouterLink
+    >
   </div>
 </template>
 
@@ -126,16 +131,16 @@ async function install(): Promise<void> {
 .install-card p,
 .limits p {
   margin: 0;
-  color: var(--text-secondary);
-  line-height: 1.7;
+  color: var(--text-body);
+  line-height: 1.6;
 }
 
 .install-card ol,
 .limits ul {
   margin: 0;
-  padding-inline-start: 1.3rem;
-  color: var(--text-secondary);
-  line-height: 1.8;
+  padding-inline-start: var(--space-5);
+  color: var(--text-body);
+  line-height: 1.6;
 }
 
 .install-card__note {
@@ -147,8 +152,7 @@ async function install(): Promise<void> {
   padding: var(--space-4);
   border-radius: var(--radius-sm);
   background: var(--surface-soft);
-  color: var(--text-secondary);
-  line-height: 1.7;
+  color: var(--text-body);
+  line-height: 1.6;
 }
-
 </style>

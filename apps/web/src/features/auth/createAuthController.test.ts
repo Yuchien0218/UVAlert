@@ -2,10 +2,12 @@ import { describe, expect, it } from "vitest";
 import type { AuthPort, AuthState } from "@sunshield/platform";
 import { createAuthController } from "./createAuthController";
 
-function makeAuth(options: {
-  initial?: AuthState;
-  signInError?: unknown;
-} = {}): AuthPort & { setState(next: AuthState): void } {
+function makeAuth(
+  options: {
+    initial?: AuthState;
+    signInError?: unknown;
+  } = {}
+): AuthPort & { setState(next: AuthState): void } {
   let state = options.initial ?? { kind: "signed_out" as const };
   return {
     async getState() {
@@ -53,7 +55,12 @@ describe("createAuthController", () => {
       local: {
         async collectSyncSnapshot() {
           localReadCount += 1;
-          return { collectedAt: "2026-08-17T09:00:00.000Z", records: [], tombstones: [], metadata: [] };
+          return {
+            collectedAt: "2026-08-17T09:00:00.000Z",
+            records: [],
+            tombstones: [],
+            metadata: []
+          };
         },
         async getActiveSession() {
           localReadCount += 1;

@@ -1,13 +1,8 @@
-import {
-  SetupDraftV1Schema,
-  type SetupDraftV1
-} from "@sunshield/contracts";
+import { SetupDraftV1Schema, type SetupDraftV1 } from "@sunshield/contracts";
 import type { SetupDraftRepositoryPort } from "@sunshield/platform";
 import { SunshieldDatabase } from "../db/database";
 
-export class LocalSetupDraftRepository
-  implements SetupDraftRepositoryPort
-{
+export class LocalSetupDraftRepository implements SetupDraftRepositoryPort {
   readonly #database: SunshieldDatabase;
 
   constructor(database: SunshieldDatabase) {

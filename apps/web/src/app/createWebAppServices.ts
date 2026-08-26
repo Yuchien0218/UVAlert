@@ -142,8 +142,7 @@ export function createWebAppServices(
   const sync = createSyncController({
     local: localSync,
     cloud: cloudSync,
-    createId,
-    now: () => new Date().toISOString()
+    createId
   });
   const feedback = createFeedbackController({
     feedback: new BrowserFeedbackClient(),
@@ -157,8 +156,7 @@ export function createWebAppServices(
     lifecycle,
     crossContext: notifier
   });
-  const productRepository =
-    new LocalProductSettingsRepository(database);
+  const productRepository = new LocalProductSettingsRepository(database);
   const productCatalog = new LocalProductCatalogRepository(database);
   const productSettings = createProductSettingsController({
     repository: productRepository,
@@ -222,23 +220,19 @@ export function createWebAppServices(
   const directoryByCode = new Map(
     directory.map((entry) => [entry.regionCode, entry])
   );
-  const regionPreference = new LocalRegionPreferenceRepository(
-    database,
-    {
-      legacyRegionLookup: {
-        resolve(regionCode) {
-          const entry = directoryByCode.get(regionCode);
-          return entry === undefined
-            ? null
-            : {
-                ...entry,
-                boundaryDataVersion:
-                  regionManifest.boundaryDataVersion
-              };
-        }
+  const regionPreference = new LocalRegionPreferenceRepository(database, {
+    legacyRegionLookup: {
+      resolve(regionCode) {
+        const entry = directoryByCode.get(regionCode);
+        return entry === undefined
+          ? null
+          : {
+              ...entry,
+              boundaryDataVersion: regionManifest.boundaryDataVersion
+            };
       }
     }
-  );
+  });
   const uvForecast = createUvForecastController({
     regionPreference,
     api: new BrowserUvForecastClient(),

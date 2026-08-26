@@ -47,10 +47,7 @@ describe("createSessionEventsController", () => {
       identity: makeIdentity()
     });
 
-    await Promise.all([
-      controller.ensureLoaded(),
-      controller.ensureLoaded()
-    ]);
+    await Promise.all([controller.ensureLoaded(), controller.ensureLoaded()]);
     await controller.ensureLoaded();
 
     expect(getCurrentSessionEventStream).toHaveBeenCalledTimes(1);

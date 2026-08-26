@@ -4,10 +4,7 @@ import {
   type CrossContextNotifier,
   type InvalidationMessage
 } from "@sunshield/persistence-web";
-import {
-  makeClock,
-  makeStartSessionCommand
-} from "@sunshield/test-fixtures";
+import { makeClock, makeStartSessionCommand } from "@sunshield/test-fixtures";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { createAppBootController } from "../../app/createAppBootController";
 import {
@@ -25,9 +22,7 @@ let idSequence: number;
 class SilentNotifier implements CrossContextNotifier {
   publish(_message: InvalidationMessage): void {}
 
-  subscribe(
-    _listener: (message: InvalidationMessage) => void
-  ): () => void {
+  subscribe(_listener: (message: InvalidationMessage) => void): () => void {
     return () => undefined;
   }
 }
@@ -99,15 +94,17 @@ describe("Session control to EndSession transaction", () => {
     expect(boot.currentSession.value).toBeNull();
     expect(await database.ActiveSessionLocks.count()).toBe(0);
     expect(await database.SessionEndedEvents.count()).toBe(1);
-    expect(await database.SessionEndedEvents.toCollection().first())
-      .toMatchObject({
-        endedReason: "user_ended"
-      });
-    expect(await database.ProtectionSessions.toCollection().first())
-      .toMatchObject({
-        overallStatus: "ended",
-        endedReason: "user_ended",
-        revision: 2
-      });
+    expect(
+      await database.SessionEndedEvents.toCollection().first()
+    ).toMatchObject({
+      endedReason: "user_ended"
+    });
+    expect(
+      await database.ProtectionSessions.toCollection().first()
+    ).toMatchObject({
+      overallStatus: "ended",
+      endedReason: "user_ended",
+      revision: 2
+    });
   });
 });

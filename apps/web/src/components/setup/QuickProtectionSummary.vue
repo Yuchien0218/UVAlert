@@ -1,11 +1,8 @@
 <script setup lang="ts">
 import { SlidersHorizontal, Sparkles } from "@lucide/vue";
 import Icon from "../icons/Icon.vue";
-import type {
-  SessionContext,
-  SetupDraftZoneV1
-} from "@sunshield/contracts";
-import { computed, shallowRef } from "vue";
+import type { SessionContext, SetupDraftZoneV1 } from "@sunshield/contracts";
+import { computed, shallowRef, watch } from "vue";
 import {
   BODY_ZONE_LABELS,
   recommendedPresetFor
@@ -25,19 +22,30 @@ defineEmits<{
   adjust: [];
 }>();
 
-const expanded = shallowRef(true);
+/**
+ * 尚未確認時攤開（使用者沒挑過部位，推薦內容必須看得到）；一旦確認就
+ * 收合成單行——這時它的任務已經完成，下面還要填塗抹時間、看確認摘要，
+ * 讓它繼續佔掉整段版面只是把頁面拉長。使用者仍可點標題列重新展開。
+ */
+const expanded = shallowRef(props.pending);
+
+watch(
+  () => props.pending,
+  (pending) => {
+    expanded.value = pending;
+  }
+);
 
 const preset = computed(() => recommendedPresetFor(props.context));
 const zoneLabels = computed(() =>
   props.zones.map(
-    (zone) =>
-      zone.customLabel ?? BODY_ZONE_LABELS[zone.bodyZoneCode]
+    (zone) => zone.customLabel ?? BODY_ZONE_LABELS[zone.bodyZoneCode]
   )
 );
 </script>
 
 <template>
-  <section class="quick-protection">
+  <section class="quick-protection app-card">
     <button
       class="quick-protection__header"
       type="button"
@@ -59,10 +67,7 @@ const zoneLabels = computed(() =>
       />
     </button>
 
-    <div
-      v-if="expanded"
-      class="quick-protection__details"
-    >
+    <div v-if="expanded" class="quick-protection__details">
       <p class="quick-protection__summary">{{ preset.summary }}</p>
       <p class="quick-protection__zones">
         這次會套用到：{{ zoneLabels.join("、") }}
@@ -93,11 +98,18 @@ const zoneLabels = computed(() =>
 </template>
 
 <style scoped>
+/*
+ * 2026-08-24：原本整區用 --color-soon-soft 當底、圓形圖示用 --color-soon。
+ * 但 --color-soon 的語意是「即將到期」，這區講的是「這是推薦的部位組合」，
+ * 完全不同的事——DESIGN.md 第二節明訂狀態色不得與裝飾用法混淆。
+ *
+ * SetupProcessBanner 2026-08-23 已經因為同一個理由把 --color-soon 換掉
+ * （「同一個顏色會讓使用者把該去完成設定跟該去補擦搞混」），這一處是當時
+ * 漏掉的。改用共用的 .app-card，跟同頁其他區塊一致。
+ */
 .quick-protection {
   display: grid;
   gap: var(--space-4);
-  border-radius: var(--radius-lg);
-  background: var(--color-soon-soft);
 }
 
 .quick-protection__header {
@@ -123,8 +135,8 @@ const zoneLabels = computed(() =>
   height: 3rem;
   place-content: center;
   border-radius: 50%;
-  background: var(--color-soon);
-  color: var(--text-inverse);
+  background: var(--surface-soft);
+  color: var(--color-primary);
   flex-shrink: 0;
 }
 
@@ -165,25 +177,29 @@ const zoneLabels = computed(() =>
   display: grid;
   gap: var(--space-4);
   padding: 0 var(--space-5) var(--space-5);
-  animation: slideDown var(--duration-base) var(--ease-out);
+  animation: quickProtectionFadeIn var(--duration-base) var(--ease-out);
 }
 
 .quick-protection__summary {
   color: var(--text-secondary);
   font-size: var(--font-size-body);
-  line-height: 1.7;
+  line-height: 1.6;
 }
 
 .quick-protection__zones {
   font-size: var(--font-size-body);
   color: var(--text-secondary);
-  line-height: 1.7;
+  line-height: 1.6;
 }
 
+/*
+ * 2026-08-25：跟其他 body 級文字一起被批次改成 1.75，但這是 label 級
+ * （12.8px）文字，DESIGN.md「說明／標籤」對應的 CJK 行高是 1.5，改回來。
+ */
 .quick-protection__note {
   color: var(--text-secondary);
   font-size: var(--font-size-label);
-  line-height: 1.7;
+  line-height: 1.5;
 }
 
 .quick-protection__actions {
@@ -193,14 +209,16 @@ const zoneLabels = computed(() =>
   margin-top: var(--space-2);
 }
 
-@keyframes slideDown {
+/*
+ * 2026-08-24：原本叫 slideDown、帶 translateY(-0.5rem)，但 DESIGN.md
+ * 第十二節明訂動畫「只用 opacity，不用位移或縮放」。改成純淡入。
+ */
+@keyframes quickProtectionFadeIn {
   from {
     opacity: 0;
-    transform: translateY(-0.5rem);
   }
   to {
     opacity: 1;
-    transform: translateY(0);
   }
 }
 

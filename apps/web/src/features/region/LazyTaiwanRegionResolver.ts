@@ -36,8 +36,7 @@ export class LazyTaiwanRegionResolver {
 }
 
 async function loadGeneratedBoundaries(): Promise<RegionBoundaryCollection> {
-  const module = await import(
-    "../../generated/region-boundaries.generated.json"
-  );
+  const module =
+    await import("../../generated/region-boundaries.generated.json");
   return module.default as unknown as RegionBoundaryCollection;
 }

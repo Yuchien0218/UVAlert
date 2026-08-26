@@ -14,9 +14,7 @@ const customValue = shallowRef(
 );
 
 function selectKnown(minutesAgo: number): void {
-  const selected = new Date(
-    referenceNow.getTime() - minutesAgo * 60_000
-  );
+  const selected = new Date(referenceNow.getTime() - minutesAgo * 60_000);
   value.value = {
     confidence: "confirmed",
     activityStartedAt: selected.toISOString()
@@ -48,18 +46,14 @@ function selectCustom(): void {
 
 function toLocalInputValue(date: Date): string {
   const offsetMs = date.getTimezoneOffset() * 60_000;
-  return new Date(date.getTime() - offsetMs)
-    .toISOString()
-    .slice(0, 16);
+  return new Date(date.getTime() - offsetMs).toISOString().slice(0, 16);
 }
 </script>
 
 <template>
   <fieldset class="water-start app-card">
     <legend>實際何時開始入水？</legend>
-    <p>
-      若無法確認，可以選擇不確定；系統會保守處理，不會猜測入水時間。
-    </p>
+    <p>若無法確認，可以選擇不確定；系統會保守處理，不會猜測入水時間。</p>
     <div class="water-start__options">
       <button type="button" @click="selectKnown(0)">剛剛入水</button>
       <button type="button" @click="selectKnown(15)">
@@ -85,7 +79,7 @@ function toLocalInputValue(date: Date): string {
         type="datetime-local"
         :max="toLocalInputValue(new Date())"
         @change="selectCustom"
-      >
+      />
     </label>
   </fieldset>
 </template>
@@ -110,7 +104,7 @@ function toLocalInputValue(date: Date): string {
   margin: 0;
   color: var(--text-secondary);
   font-size: var(--font-size-body);
-  line-height: 1.7;
+  line-height: 1.6;
 }
 
 .water-start__options {

@@ -21,13 +21,16 @@ export class BroadcastChannelNotifier implements CrossContextNotifier {
       typeof globalThis.BroadcastChannel === "function"
         ? new globalThis.BroadcastChannel(channelName)
         : null;
-    this.#channel?.addEventListener("message", (event: MessageEvent<unknown>) => {
-      if (isInvalidationMessage(event.data)) {
-        for (const listener of this.#listeners) {
-          listener(event.data);
+    this.#channel?.addEventListener(
+      "message",
+      (event: MessageEvent<unknown>) => {
+        if (isInvalidationMessage(event.data)) {
+          for (const listener of this.#listeners) {
+            listener(event.data);
+          }
         }
       }
-    });
+    );
   }
 
   publish(message: InvalidationMessage): void {
@@ -64,4 +67,3 @@ function isInvalidationMessage(value: unknown): value is InvalidationMessage {
     typeof candidate.sourceContextId === "string"
   );
 }
-

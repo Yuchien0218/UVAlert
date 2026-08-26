@@ -18,9 +18,7 @@ afterEach(async () => {
 
 describe("region preference privacy integration", () => {
   it("persists only administrative identity and refreshes UV by preference", async () => {
-    database = new SunshieldDatabase(
-      `region-privacy-${crypto.randomUUID()}`
-    );
+    database = new SunshieldDatabase(`region-privacy-${crypto.randomUUID()}`);
     await database.open();
     const repository = new LocalRegionPreferenceRepository(database);
     const refreshUv = vi.fn(async () => undefined);
@@ -62,9 +60,7 @@ describe("region preference privacy integration", () => {
     await controller.useCurrentPosition();
     await controller.confirmCandidate();
 
-    const stored = await database.AppMetadata.get(
-      "uvRegionPreferenceV1"
-    );
+    const stored = await database.AppMetadata.get("uvRegionPreferenceV1");
     expect(stored).toBeDefined();
     expect(stored?.value).toContain("63000020");
     expect(stored?.value).not.toMatch(

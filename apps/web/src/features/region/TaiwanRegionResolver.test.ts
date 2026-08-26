@@ -92,9 +92,7 @@ describe("TaiwanRegionResolver", () => {
   it("rejects non-finite coordinates", () => {
     const resolver = new TaiwanRegionResolver(boundaries);
 
-    expect(() => resolver.resolve(Number.NaN, 22.2)).toThrow(
-      /finite/
-    );
+    expect(() => resolver.resolve(Number.NaN, 22.2)).toThrow(/finite/);
   });
 });
 

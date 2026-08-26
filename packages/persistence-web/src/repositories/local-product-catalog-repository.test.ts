@@ -23,7 +23,9 @@ describe("LocalProductCatalogRepository", () => {
       snapshot: makeProductSnapshot(),
       now: "2026-08-01T08:00:00.000Z"
     });
-    const updatedSnapshot = makeProductSnapshot({ capturedAt: "2026-08-01T09:00:00.000Z" });
+    const updatedSnapshot = makeProductSnapshot({
+      capturedAt: "2026-08-01T09:00:00.000Z"
+    });
     const updated = await repository.saveProduct({
       productId: "product-a",
       displayName: "戶外防曬",
@@ -41,7 +43,9 @@ describe("LocalProductCatalogRepository", () => {
   });
 
   it("1.0.0 舊紀錄讀取時升級為新版並視為防曬產品", async () => {
-    const database = new SunshieldDatabase(`catalog-migrate-${crypto.randomUUID()}`);
+    const database = new SunshieldDatabase(
+      `catalog-migrate-${crypto.randomUUID()}`
+    );
     databases.push(database);
     // 直接塞一筆 1.0.0 的紀錄，模擬擴充前存下的資料。
     await database.SunscreenProducts.put({
@@ -74,7 +78,9 @@ describe("LocalProductCatalogRepository", () => {
   });
 
   it("到期日已過時推導出 expired，維持過期產品不建立期限", async () => {
-    const database = new SunshieldDatabase(`catalog-expiry-${crypto.randomUUID()}`);
+    const database = new SunshieldDatabase(
+      `catalog-expiry-${crypto.randomUUID()}`
+    );
     databases.push(database);
     const repository = new LocalProductCatalogRepository(database);
 
@@ -98,7 +104,9 @@ describe("LocalProductCatalogRepository", () => {
   });
 
   it("安全狀態被封鎖的產品不得直接恢復", async () => {
-    const database = new SunshieldDatabase(`catalog-restore-${crypto.randomUUID()}`);
+    const database = new SunshieldDatabase(
+      `catalog-restore-${crypto.randomUUID()}`
+    );
     databases.push(database);
     const repository = new LocalProductCatalogRepository(database);
     await repository.saveProduct({
@@ -111,9 +119,15 @@ describe("LocalProductCatalogRepository", () => {
       }),
       now: "2026-08-01T00:00:00.000Z"
     });
-    await repository.archiveProduct("product-blocked", "2026-08-02T00:00:00.000Z");
+    await repository.archiveProduct(
+      "product-blocked",
+      "2026-08-02T00:00:00.000Z"
+    );
 
-    await repository.restoreProduct("product-blocked", "2026-08-03T00:00:00.000Z");
+    await repository.restoreProduct(
+      "product-blocked",
+      "2026-08-03T00:00:00.000Z"
+    );
 
     expect(
       (await repository.getProduct("product-blocked"))?.archivedAt
@@ -121,7 +135,9 @@ describe("LocalProductCatalogRepository", () => {
   });
 
   it("一般封存的裝備可以恢復", async () => {
-    const database = new SunshieldDatabase(`catalog-restore-ok-${crypto.randomUUID()}`);
+    const database = new SunshieldDatabase(
+      `catalog-restore-ok-${crypto.randomUUID()}`
+    );
     databases.push(database);
     const repository = new LocalProductCatalogRepository(database);
     await repository.saveProduct({
@@ -138,11 +154,18 @@ describe("LocalProductCatalogRepository", () => {
   });
 
   it("以中性名稱匯入既有 current snapshot，不捏造品牌", async () => {
-    const database = new SunshieldDatabase(`catalog-legacy-${crypto.randomUUID()}`);
+    const database = new SunshieldDatabase(
+      `catalog-legacy-${crypto.randomUUID()}`
+    );
     databases.push(database);
     const snapshot = makeProductSnapshot();
-    await database.AppMetadata.put({ key: "currentProductLabelSnapshotV1", value: JSON.stringify(snapshot) });
-    const products = await new LocalProductCatalogRepository(database).listProducts();
+    await database.AppMetadata.put({
+      key: "currentProductLabelSnapshotV1",
+      value: JSON.stringify(snapshot)
+    });
+    const products = await new LocalProductCatalogRepository(
+      database
+    ).listProducts();
     expect(products).toHaveLength(1);
     expect(products[0]?.displayName).toBe("目前使用產品");
     expect(products[0]?.currentSnapshot).toEqual(snapshot);

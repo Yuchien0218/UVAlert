@@ -67,8 +67,16 @@ async function mountDetail(
   const router = createRouter({
     history: createMemoryHistory(),
     routes: [
-      { path: "/products/:id", name: "product-detail", component: ProductDetailPage },
-      { path: "/products", name: "products", component: { template: "<div />" } },
+      {
+        path: "/products/:id",
+        name: "product-detail",
+        component: ProductDetailPage
+      },
+      {
+        path: "/products",
+        name: "products",
+        component: { template: "<div />" }
+      },
       {
         path: "/products/:id/edit",
         name: "product-edit",
@@ -141,9 +149,9 @@ describe("ProductDetailPage", () => {
     it("使用中的防曬乳，主 CTA 是換新的一瓶，呼叫 archiveProduct", async () => {
       const { wrapper, archiveProduct } = await mountDetail(makeProduct());
 
-      const button = wrapper.findAll("button").find(
-        (b) => b.text() === "換新的一瓶"
-      );
+      const button = wrapper
+        .findAll("button")
+        .find((b) => b.text() === "換新的一瓶");
       expect(button).toBeDefined();
       expect(wrapper.text()).not.toContain("記錄使用中");
 
@@ -167,9 +175,9 @@ describe("ProductDetailPage", () => {
         makeProduct({ status: "stopped" })
       );
 
-      const button = wrapper.findAll("button").find(
-        (b) => b.text() === "記錄使用中"
-      );
+      const button = wrapper
+        .findAll("button")
+        .find((b) => b.text() === "記錄使用中");
       expect(button).toBeDefined();
       expect(wrapper.text()).not.toContain("換新的一瓶");
 

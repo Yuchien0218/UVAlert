@@ -14,9 +14,13 @@ import EducationSeoHead from "../../components/education/EducationSeoHead.vue";
     <header class="page-heading">
       <p class="page-heading__eyebrow">防曬衛教</p>
       <h1 class="page-heading__title">找不到這篇內容</h1>
-      <p class="page-heading__body">連結可能已更新，請回到衛教首頁重新選擇文章。</p>
+      <p class="page-heading__body">
+        連結可能已更新，請回到衛教首頁重新選擇文章。
+      </p>
     </header>
-    <RouterLink class="button button--primary" to="/education">回到防曬衛教</RouterLink>
+    <RouterLink class="button button--primary" to="/education"
+      >回到防曬衛教</RouterLink
+    >
   </div>
 </template>
 

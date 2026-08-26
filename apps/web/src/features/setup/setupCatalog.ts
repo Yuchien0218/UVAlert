@@ -28,10 +28,7 @@ export interface BodyZoneGroup {
 
 export interface SetupPreset {
   readonly id:
-    | "face_ears_neck"
-    | "commute_tracked"
-    | "broad_tracked"
-    | "beach_tracked";
+    "face_ears_neck" | "commute_tracked" | "broad_tracked" | "beach_tracked";
   readonly label: string;
   readonly summary: string;
   readonly groupIds: readonly BodyZoneGroupId[];
@@ -117,15 +114,7 @@ export const SETUP_PRESETS: readonly SetupPreset[] = [
     id: "broad_tracked",
     label: "臉頸＋手腳",
     summary: "通勤常見部位，加上腿部與外露腳部",
-    groupIds: [
-      "face",
-      "ears",
-      "neck",
-      "arms",
-      "hand_backs",
-      "legs",
-      "feet"
-    ]
+    groupIds: ["face", "ears", "neck", "arms", "hand_backs", "legs", "feet"]
   },
   {
     id: "beach_tracked",
@@ -172,9 +161,7 @@ export const BODY_ZONE_LABELS: Record<BodyZoneCode, string> = {
   custom: "其他部位"
 };
 
-export function recommendedPresetFor(
-  context: SessionContext
-): SetupPreset {
+export function recommendedPresetFor(context: SessionContext): SetupPreset {
   const presetId =
     context === "water_preparing" || context === "water_active"
       ? "beach_tracked"
@@ -220,9 +207,7 @@ export function makeQuickProtectionDraft(
   };
 }
 
-export function getBodyZoneGroup(
-  groupId: BodyZoneGroupId
-): BodyZoneGroup {
+export function getBodyZoneGroup(groupId: BodyZoneGroupId): BodyZoneGroup {
   return BODY_ZONE_GROUPS.find((group) => group.id === groupId)!;
 }
 
@@ -230,8 +215,7 @@ export function groupForBodyZone(
   bodyZoneCode: BodyZoneCode
 ): BodyZoneGroup | null {
   return (
-    BODY_ZONE_GROUPS.find((group) =>
-      group.zoneCodes.includes(bodyZoneCode)
-    ) ?? null
+    BODY_ZONE_GROUPS.find((group) => group.zoneCodes.includes(bodyZoneCode)) ??
+    null
   );
 }

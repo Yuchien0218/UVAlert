@@ -23,11 +23,13 @@
 ### Task 1: Generate variants A–C
 
 **Files:**
+
 - Create: `docs/design/wireframes/home-active/home-active-a-countdown-centered.png`
 - Create: `docs/design/wireframes/home-active/home-active-b-daily-briefing.png`
 - Create: `docs/design/wireframes/home-active/home-active-c-body-status.png`
 
 **Interfaces:**
+
 - Consumes: `docs/design/2026-08-17-home-wireframe-variants-design.md`
 - Produces: Three standalone PNG previews with labels A, B, and C.
 
@@ -54,11 +56,13 @@ Copy the accepted generated outputs into the three exact project paths listed ab
 ### Task 2: Generate variants D–F
 
 **Files:**
+
 - Create: `docs/design/wireframes/home-active/home-active-d-action-first.png`
 - Create: `docs/design/wireframes/home-active/home-active-e-timeline.png`
 - Create: `docs/design/wireframes/home-active/home-active-f-dashboard-summary.png`
 
 **Interfaces:**
+
 - Consumes: `docs/design/2026-08-17-home-wireframe-variants-design.md`
 - Produces: Three standalone PNG previews with labels D, E, and F.
 
@@ -85,9 +89,11 @@ Copy the accepted generated outputs into the three exact project paths listed ab
 ### Task 3: Validate and index the six assets
 
 **Files:**
+
 - Modify: `docs/design/README.md`
 
 **Interfaces:**
+
 - Consumes: All six accepted PNG files.
 - Produces: A project-local index entry linking the six wireframe assets and their approved design specification.
 

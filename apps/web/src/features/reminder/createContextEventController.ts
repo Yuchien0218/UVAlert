@@ -30,12 +30,7 @@ export type ContextEventKind =
   | "water_end";
 
 export type ContextEventPhase =
-  | "idle"
-  | "loading"
-  | "ready"
-  | "submitting"
-  | "success"
-  | "error";
+  "idle" | "loading" | "ready" | "submitting" | "success" | "error";
 
 export type ContextEventError =
   | "validation"
@@ -255,9 +250,7 @@ export function createContextEventController(
   function setQuickTime(minutesAgo: number): void {
     const now = dependencies.now();
     referenceNow.value = now.toISOString();
-    setOccurredAt(
-      new Date(now.getTime() - minutesAgo * 60_000).toISOString()
-    );
+    setOccurredAt(new Date(now.getTime() - minutesAgo * 60_000).toISOString());
   }
 
   async function submit(): Promise<boolean> {
@@ -378,8 +371,7 @@ export function createContextEventController(
         : kind === "water_end"
           ? {
               contextType: "water_end",
-              activityIntervalId:
-                openWaterInterval.value!.activityIntervalId,
+              activityIntervalId: openWaterInterval.value!.activityIntervalId,
               zoneInstanceIds: selectedZoneIds.value,
               endedAt: effectiveOccurredAt
             }

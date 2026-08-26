@@ -16,16 +16,18 @@ defineEmits<{ start: [] }>();
 
 <template>
   <div class="night-notice">
-    <p class="night-notice__body">
-      現在不需要防曬，明早出門前再開始提醒。
-    </p>
+    <p class="night-notice__body">現在不需要防曬，明早出門前再開始提醒。</p>
 
     <!--
       逃生出口不可省略：裝置時區或時鐘設錯、跨時區旅行、夜班戶外工作者
       都可能真的需要在夜間開始提醒。硬性阻斷會讓產品對他們完全不可用。
       做成 text link 而非按鈕，避免與「現在不需要防曬」互相矛盾。
     -->
-    <button class="text-link night-notice__escape" type="button" @click="$emit('start')">
+    <button
+      class="text-link night-notice__escape"
+      type="button"
+      @click="$emit('start')"
+    >
       還是要開始提醒
     </button>
   </div>
@@ -39,9 +41,9 @@ defineEmits<{ start: [] }>();
 
 .night-notice__body {
   margin: 0;
-  color: var(--color-body-strong, var(--text-primary));
+  color: var(--text-emphasis);
   font-size: var(--font-size-body);
-  line-height: 1.7;
+  line-height: 1.6;
 }
 
 .night-notice__escape {

@@ -22,12 +22,7 @@ import type { AppBootController } from "../../app/createAppBootController";
  * 事件時間與受影響部位——產品不在可更正範圍，replace 時原樣沿用。
  */
 export type EventCorrectionPhase =
-  | "idle"
-  | "loading"
-  | "ready"
-  | "submitting"
-  | "success"
-  | "error";
+  "idle" | "loading" | "ready" | "submitting" | "success" | "error";
 
 export type EventCorrectionError =
   | "validation"
@@ -185,7 +180,11 @@ export function createEventCorrectionController(
 
   function guard(action: "replace" | "void"): boolean {
     const value = context.value;
-    if (value === null || phase.value === "submitting" || success.value !== null) {
+    if (
+      value === null ||
+      phase.value === "submitting" ||
+      success.value !== null
+    ) {
       return false;
     }
     if (!value.isLeaf) {
@@ -218,7 +217,10 @@ export function createEventCorrectionController(
     if (code === "PERSISTENCE_ERROR") error.value = "persistence";
     else if (code === "CORRECTION_CONFLICT") error.value = "already_corrected";
     else if (code === "NOT_FOUND") error.value = "not_found";
-    else if (code === "REVISION_CONFLICT" || code === "CLIENT_SEQUENCE_CONFLICT") {
+    else if (
+      code === "REVISION_CONFLICT" ||
+      code === "CLIENT_SEQUENCE_CONFLICT"
+    ) {
       error.value = "state_changed";
     } else {
       // 領域層把非法水上區間也映射成 VALIDATION_ERROR，
@@ -255,9 +257,9 @@ export function createEventCorrectionController(
     };
     const effectiveOccurredAt =
       action === "void"
-        ? (value.kind === "context_event"
-            ? value.event.effectiveOccurredAt
-            : value.group.appliedAt)
+        ? value.kind === "context_event"
+          ? value.event.effectiveOccurredAt
+          : value.group.appliedAt
         : new Date(occurredAt.value).toISOString();
 
     let result;
@@ -272,7 +274,9 @@ export function createEventCorrectionController(
                 contextType: "water_start",
                 activityIntervalId: base.activityIntervalId,
                 zoneInstanceIds:
-                  action === "void" ? base.zoneInstanceIds : selectedZoneIds.value,
+                  action === "void"
+                    ? base.zoneInstanceIds
+                    : selectedZoneIds.value,
                 startConfidence: base.startConfidence,
                 activityStartedAt: base.activityStartedAt
               }
@@ -331,7 +335,9 @@ export function createEventCorrectionController(
                     application.productSnapshotFingerprint,
                   productLabelSnapshot: application.productLabelSnapshot
                 }))
-                .filter((application) => application.zoneInstanceIds.length > 0);
+                .filter(
+                  (application) => application.zoneInstanceIds.length > 0
+                );
 
         result = await dependencies.repository.correctApplicationGroup(
           CorrectApplicationGroupCommandV1Schema.parse({

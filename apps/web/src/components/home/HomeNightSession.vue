@@ -2,6 +2,7 @@
 import type { SessionProjection } from "@sunshield/contracts";
 import { computed } from "vue";
 import { useCurrentTime } from "../../composables/useCurrentTime";
+import { formatTime } from "../../helpers/datetime";
 
 /**
  * 夜間、且提醒仍在進行時的首屏（wireframe 09）。
@@ -9,10 +10,13 @@ import { useCurrentTime } from "../../composables/useCurrentTime";
  * 這個狀態的主要行動是**結束提醒**，不是補擦——夜間 UV 為 0，繼續倒數
  * 沒有意義，但系統不自動結束，決定權在使用者（Sitemap §4.2）。
  *
- * **刻意不顯示 UV 數值。** wireframe 原本寫「目前 UV 0 低量級」，但預報
- * 資料是日間值不是即時觀測，斷言一個「目前」數字會讓使用者以為有即時
- * 測站。既有的 `NightWindDownPrompt` 也是用「現在紫外線通常較低」這種
- * 不斷言數字的寫法，這裡沿用同一個做法。
+ * **刻意不顯示倒數與 UV 數值。** 顯示「已進行多久」（往上加），不是
+ * 「還有多久要補擦」——夜間補擦倒數沒有行動價值，而預報資料是日間值不是
+ * 即時觀測，斷言一個「目前 UV」數字會讓使用者以為有即時測站。
+ *
+ * 反覆紀錄：2026-08-24 曾一度改為日夜共用版面（顯示倒數與進度條），
+ * 2026-08-26 使用者確認改回這個收工版面，理由是「不讓倒數跨夜」。
+ * 見 docs/decisions/2026-08-26-night-session-layout-revert.md。
  */
 
 const props = defineProps<{ session: SessionProjection }>();
@@ -38,9 +42,8 @@ const startedAt = computed<number | null>(() => {
 
 const trackedZoneCount = computed(
   () =>
-    props.session.zones.filter(
-      (zone) => zone.zoneTimerStartedAt !== null
-    ).length
+    props.session.zones.filter((zone) => zone.zoneTimerStartedAt !== null)
+      .length
 );
 
 const elapsedLabel = computed<string | null>(() => {
@@ -58,11 +61,7 @@ const elapsedLabel = computed<string | null>(() => {
 
 const startedLabel = computed<string | null>(() => {
   if (startedAt.value === null) return null;
-  return new Date(startedAt.value).toLocaleTimeString("zh-TW", {
-    hour: "2-digit",
-    minute: "2-digit",
-    hour12: false
-  });
+  return formatTime(startedAt.value);
 });
 </script>
 
@@ -110,8 +109,8 @@ const startedLabel = computed<string | null>(() => {
 .night-session__body {
   margin-top: var(--space-3);
   margin-bottom: 0;
-  color: var(--color-body-strong, var(--text-primary));
+  color: var(--text-emphasis);
   font-size: var(--font-size-body);
-  line-height: 1.7;
+  line-height: 1.6;
 }
 </style>

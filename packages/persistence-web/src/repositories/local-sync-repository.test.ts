@@ -252,7 +252,9 @@ describe("LocalSyncRepository", () => {
     });
 
     await repository.applyTombstones([tombstone!]);
-    expect(await database.SunscreenProducts.get("product-delete")).toBeUndefined();
+    expect(
+      await database.SunscreenProducts.get("product-delete")
+    ).toBeUndefined();
     expect(
       await database.SyncMetadata.get(["product_catalog", "product-delete"])
     ).toMatchObject({ tombstone: true, cloudRevision: 2 });

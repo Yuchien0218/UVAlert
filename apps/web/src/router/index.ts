@@ -5,12 +5,10 @@ import {
   type RouterHistory
 } from "vue-router";
 import type { AppBootController } from "../app/createAppBootController";
-import type { SetupController } from "../features/setup/createSetupController";
 
 export function createAppRouter(
   boot: AppBootController,
-  history: RouterHistory = createWebHistory(),
-  setup?: SetupController
+  history: RouterHistory = createWebHistory()
 ): Router {
   const router = createRouter({
     history,
@@ -24,23 +22,29 @@ export function createAppRouter(
         component: () => import("../pages/HomePage.vue"),
         meta: { title: "提醒" }
       },
-      {
-        path: "/reminder",
-        name: "reminder",
-        component: () => import("../pages/ReminderPage.vue"),
-        meta: { title: "目前提醒" }
-      },
+      // 2026-08-24：`/reminder` 已移除，內容併入首頁下半部（摘要在上、
+      // 完整狀態在下）。它原本是首頁連過去的「查看完整狀態」詳細頁，但
+      // 沒有任何導覽歸屬——三個下排 tab 都不對應它，進去之後也沒有明確
+      // 的返回，等於一個懸空的頁面。依 2026-08-08 的前例不留轉址。
       {
         path: "/reminder/reapply",
         name: "reminder-reapply",
         component: () => import("../pages/ReapplyPage.vue"),
-        meta: { title: "記錄補擦", hideNavigation: true, requiresActiveSession: true }
+        meta: {
+          title: "記錄補擦",
+          hideNavigation: true,
+          requiresActiveSession: true
+        }
       },
       {
         path: "/reminder/report",
         name: "reminder-report",
         component: () => import("../pages/ReportContextEventPage.vue"),
-        meta: { title: "記錄狀況", hideNavigation: true, requiresActiveSession: true }
+        meta: {
+          title: "記錄狀況",
+          hideNavigation: true,
+          requiresActiveSession: true
+        }
       },
       {
         path: "/products/new",
@@ -173,32 +177,18 @@ export function createAppRouter(
         meta: { title: "五日 UV 預報" }
       },
       {
+        // 2026-08-24：設定改成單一頁面。原本的 `/setup/context` 與
+        // `/setup/timing` 兩步已移除，依 2026-08-08 的前例不留轉址——
+        // P0 尚未上線、沒有外部連結要相容，留著只會讓路由表更難讀。
+        // （更早移除的還有 `/setup/protection` 與 `/setup/review`。）
+        // 部位 sheet 仍可用 `/setup?adjustProtection=1` 直接開啟。
         path: "/setup",
-        redirect: { name: "setup-context" }
-      },
-      {
-        path: "/setup/context",
-        name: "setup-context",
-        component: () => import("../pages/setup/SetupContextPage.vue"),
+        name: "setup",
+        component: () => import("../pages/setup/SetupPage.vue"),
         meta: {
-          title: "選擇情境",
+          title: "開始防曬提醒",
           hideNavigation: true,
-          requiresNoActiveSession: true,
-          setupStep: "context"
-        }
-      },
-      {
-        // 2026-08-08：`/setup/protection` 與 `/setup/review` 兩條轉址已移除。
-        // 都是兩步流程改版後的遺跡，P0 尚未上線、沒有外部連結要相容。
-        // 部位 sheet 仍可用 `/setup/timing?adjustProtection=1` 直接開啟。
-        path: "/setup/timing",
-        name: "setup-timing",
-        component: () => import("../pages/setup/SetupTimingPage.vue"),
-        meta: {
-          title: "塗抹時間與開始防曬提醒",
-          hideNavigation: true,
-          requiresNoActiveSession: true,
-          setupStep: "timing"
+          requiresNoActiveSession: true
         }
       },
       {
@@ -238,27 +228,23 @@ export function createAppRouter(
       return { name: "home" };
     }
 
-    if (to.meta.requiresActiveSession === true && boot.currentSession.value === null) {
-      return { name: "reminder" };
+    if (
+      to.meta.requiresActiveSession === true &&
+      boot.currentSession.value === null
+    ) {
+      // 2026-08-24：沒有進行中的提醒時導回首頁。首頁就是底部導覽「提醒」
+      // 的去處，也負責顯示「還沒有開始防曬提醒」的空狀態與開始 CTA；
+      // 原本導到 /reminder（「查看完整狀態」詳細頁）會落在使用者沒預期
+      // 的畫面。/reminder 本身保留給首頁的「查看完整狀態／最近紀錄」。
+      return { name: "home" };
     }
 
-    if (typeof to.meta.setupStep === "string" && setup !== undefined) {
-      await setup.ensureLoaded();
-      const draft = setup.draft.value;
-
-      if (
-        setup.recoveryPending.value &&
-        to.name !== "setup-context"
-      ) {
-        return { name: "setup-context" };
-      }
-      if (
-        to.meta.setupStep !== "context" &&
-        draft?.initialContext === null
-      ) {
-        return { name: "setup-context" };
-      }
-    }
+    /*
+     * 2026-08-24：原本這裡有一段 setupStep 守衛，負責把「還沒選情境」或
+     * 「有未完成草稿」的人導回步驟 1。設定合併成單一頁面後兩者都不再需要
+     * ——同一頁就能選情境，未完成草稿由頁面自己顯示「繼續／重新開始」。
+     * `SetupDraftV1.currentStep` 仍保留在契約裡（持久化欄位，供續作用）。
+     */
 
     return true;
   });

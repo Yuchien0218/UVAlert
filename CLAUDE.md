@@ -15,12 +15,12 @@ pnpm install
 pnpm check          # typecheck + test，送 PR 前的主要關卡
 ```
 
-| 指令 | 用途 |
-|---|---|
-| `pnpm typecheck` | 遞迴跑所有套件的 `tsc` / `vue-tsc` |
-| `pnpm test` | vitest 全部跑一次 |
-| `pnpm test:watch` | watch 模式 |
-| `pnpm build` | 遞迴 build（web 會先產生衛教內容，再 `vue-tsc` → `vite build` → 產生公開 HTML） |
+| 指令              | 用途                                                                            |
+| ----------------- | ------------------------------------------------------------------------------- |
+| `pnpm typecheck`  | 遞迴跑所有套件的 `tsc` / `vue-tsc`                                              |
+| `pnpm test`       | vitest 全部跑一次                                                               |
+| `pnpm test:watch` | watch 模式                                                                      |
+| `pnpm build`      | 遞迴 build（web 會先產生衛教內容，再 `vue-tsc` → `vite build` → 產生公開 HTML） |
 
 跑單一測試檔或單一測試：
 
@@ -40,13 +40,13 @@ pnpm --filter @sunshield/web typecheck
 
 資料與資產產生器（產出物有些會 commit 進 repo）：
 
-| 指令 | 用途 |
-|---|---|
-| `pnpm education:generate` | 由 `docs/education/articles/*.md` 產生 Vue 使用的衛教資料 |
-| `pnpm region-data:build` | 由官方 NLSC SHP 產生行政區界線與索引 |
-| `pnpm region-data:verify` | 驗證上面的產出可重現 |
-| `node tools/icon-system/generate-icons.mjs` | 正規化圖示 SVG、重組預覽板、產生 Vue 用的圖示註冊表（冪等，不碰幾何） |
-| `node tools/fonts/build-fonts.mjs` | 由完整字型 subset 出自行托管的 woff2（原始字型不進 repo，見 `tools/fonts/README.md`） |
+| 指令                                        | 用途                                                                                  |
+| ------------------------------------------- | ------------------------------------------------------------------------------------- |
+| `pnpm education:generate`                   | 由 `docs/education/articles/*.md` 產生 Vue 使用的衛教資料                             |
+| `pnpm region-data:build`                    | 由官方 NLSC SHP 產生行政區界線與索引                                                  |
+| `pnpm region-data:verify`                   | 驗證上面的產出可重現                                                                  |
+| `node tools/icon-system/generate-icons.mjs` | 正規化圖示 SVG、重組預覽板、產生 Vue 用的圖示註冊表（冪等，不碰幾何）                 |
+| `node tools/fonts/build-fonts.mjs`          | 由完整字型 subset 出自行托管的 woff2（原始字型不進 repo，見 `tools/fonts/README.md`） |
 
 Supabase 本機開發：`pnpm supabase:start`、`pnpm supabase:reset`、`pnpm supabase:functions:serve`。
 
@@ -68,15 +68,15 @@ SessionEventStreamV1（事件）→ packages/domain reducer → SessionProjectio
 
 ### 套件邊界
 
-| 套件 | 職責 |
-|---|---|
-| `packages/contracts` | 跨層的版本化 Zod schema。所有層之間傳遞的資料都先過這裡 |
-| `packages/domain` | 純 reducer 與規劃邏輯（planning、ordering、water、corrections） |
-| `packages/platform` | port 介面（儲存、定位、連線、生命週期、雲端），**只有介面沒有實作** |
+| 套件                       | 職責                                                                   |
+| -------------------------- | ---------------------------------------------------------------------- |
+| `packages/contracts`       | 跨層的版本化 Zod schema。所有層之間傳遞的資料都先過這裡                |
+| `packages/domain`          | 純 reducer 與規劃邏輯（planning、ordering、water、corrections）        |
+| `packages/platform`        | port 介面（儲存、定位、連線、生命週期、雲端），**只有介面沒有實作**    |
 | `packages/persistence-web` | Dexie／IndexedDB schema、原子 command transaction、跨分頁 invalidation |
-| `packages/ui` | 設計 token（`src/styles.css`），被 `apps/web` 匯入 |
-| `packages/test-fixtures` | 跨套件共用測試資料與契約測試 |
-| `apps/web` | 唯一可執行應用；`src/adapters/` 是 platform port 的瀏覽器實作 |
+| `packages/ui`              | 設計 token（`src/styles.css`），被 `apps/web` 匯入                     |
+| `packages/test-fixtures`   | 跨套件共用測試資料與契約測試                                           |
+| `apps/web`                 | 唯一可執行應用；`src/adapters/` 是 platform port 的瀏覽器實作          |
 
 依賴方向是單向的：`apps/web` → `platform`／`persistence-web` → `domain` → `contracts`。domain 不知道 persistence 存在。
 
@@ -107,10 +107,11 @@ SessionEventStreamV1（事件）→ packages/domain reducer → SessionProjectio
 ## 設計與文件
 
 - **設計系統唯一權威是根目錄 `DESIGN.md`**：完整色彩 token、字體、間距、元件規範、圖示風格。第十節「與程式碼的落差」是文件與程式碼差異的唯一對照表，不要在別處另立一份。
-- **Claude Design 上有一份由 `DESIGN.md` 產生的 component library**（從 GitHub `main` 同步）。它是下游產物，不是權威——**要改設計先改 `DESIGN.md`**，再讓它重新同步。不要只在 Claude Design 裡調整而沒回寫，否則會多出第四份真相（目前已有 `DESIGN.md`、`styles.css`、`app.css` 三份）。
+- **設計 token 只有三份真相**：`DESIGN.md`（YAML frontmatter）→ `packages/ui/src/styles.css`（token）→ `apps/web/src/assets/app.css`（共用類別）。前兩份的一致性由 `packages/ui/src/tokens.test.ts` 自動守著（2026-08-26 起）。**2026-08-26 已移除 Claude Design 的匯出 bundle**（`uvalert-design-system/`、`防曬補擦流程設計/`），使用者確認不再用 Claude Design 做設計往返；不要再把匯出資料夾 commit 進 repo（`.gitignore` 有擋）。
 - **UX／IA 現行基準**：`docs/decisions/2026-08-15-redesign-sitemap-userflow-current.md`
 - **圖示系統**：`docs/design/icon-system/README.md`。幾何的真實來源是 Illustrator，不要手改 SVG path；改完跑 `generate-icons.mjs`。
 - **畫面的程式碼真實來源**只有 `packages/ui/src/styles.css`（token）與 `apps/web/src/assets/app.css`（共用類別）。文件與程式碼衝突時以程式碼為準。
+- **scoped `<style>` 不准寫死值**：顏色、`border-radius`、`z-index`、`transition-duration` 一律用 `var(--*)`。沒有對應 token＝`DESIGN.md` 的缺口，提出來、不要就地硬寫。`pnpm lint:css`（stylelint，已併進 `pnpm check`）會擋。收斂待辦見 `docs/superpowers/plans/2026-08-26-codebase-consolidation-audit.md`。
 - `docs/archive/2026-08-pre-redesign/` 是舊版 P0 規格與設計的歸檔，只能用來理解歷史，不可當作現行依據。
 
 ### 配色分兩套，範圍不同（最容易搞混）

@@ -42,9 +42,7 @@ describe("S-03 ContextSelector", () => {
       'button[aria-controls="indoor-context-options"]'
     );
     await indoorToggle.trigger("click");
-    expect(
-      indoorToggle.attributes("aria-expanded")
-    ).toBe("true");
+    expect(indoorToggle.attributes("aria-expanded")).toBe("true");
   });
 
   it("區分準備下水與已在水中兩個真值", async () => {
@@ -59,9 +57,7 @@ describe("S-03 ContextSelector", () => {
     await wrapper
       .get('button[aria-controls="water-context-options"]')
       .trigger("click");
-    await wrapper
-      .get('input[value="water_preparing"]')
-      .setValue(true);
+    await wrapper.get('input[value="water_preparing"]').setValue(true);
     expect(wrapper.props("modelValue")).toBe("water_preparing");
 
     await wrapper.get('input[value="water_active"]').setValue(true);
@@ -71,34 +67,46 @@ describe("S-03 ContextSelector", () => {
 });
 
 describe("SetupStepShell", () => {
-  it("顯示情境、塗抹時間、確認設定三步，並讓已完成步驟返回", () => {
+  /*
+   * 2026-08-24：設定合併成單一頁面（/setup）後，這個外框不再有步驟指示器
+   * 與「返回上一步」。原本的斷言檢查的是「步驟 X/2」與跨步驟連結，那些
+   * 已隨兩步流程一起移除；改為確認外框本身該有的東西：標題、說明、取消，
+   * 以及**不再出現**任何步驟字樣或設定流程內部連結。
+   */
+  it("顯示標題、說明與取消，且不再有步驟指示器或跨步驟連結", () => {
     const wrapper = mount(SetupStepShell, {
       props: {
-        step: 2,
-        eyebrow: "Setup / Protection",
-        title: "這次要追蹤哪些部位？",
+        title: "開始防曬提醒",
         description: "測試說明",
         saveStatus: "idle"
-      },
-      global: {
-        stubs: {
-          RouterLink: {
-            props: ["to"],
-            template:
-              '<a :href="to"><slot /></a>'
-          }
-        }
       }
     });
 
-    expect(
-      wrapper
-        .get('a[aria-label="返回步驟 1：情境"]')
-        .attributes("href")
-    ).toBe("/setup/context");
-    expect(wrapper.find('a[href="/setup/timing"]').exists()).toBe(false);
-    expect(wrapper.text()).not.toContain("防護");
-    expect(wrapper.text()).toContain("塗抹時間");
+    expect(wrapper.text()).toContain("開始防曬提醒");
+    expect(wrapper.text()).toContain("測試說明");
+    /*
+     * 2026-08-24：取消鈕改成只有圖示的叉叉（跟其他頁的右上角一致），
+     * 「取消」兩個字移到 aria-label，所以不再出現在 text() 裡。
+     */
+    expect(wrapper.get(".icon-button").attributes("aria-label")).toBe(
+      "取消設定"
+    );
+
+    expect(wrapper.text()).not.toContain("步驟");
+    expect(wrapper.find('[role="progressbar"]').exists()).toBe(false);
+    expect(wrapper.find("a").exists()).toBe(false);
+  });
+
+  it("儲存狀態為 error 時提示草稿未儲存", () => {
+    const wrapper = mount(SetupStepShell, {
+      props: {
+        title: "開始防曬提醒",
+        description: "測試說明",
+        saveStatus: "error"
+      }
+    });
+
+    expect(wrapper.text()).toContain("草稿未儲存");
   });
 });
 
@@ -170,10 +178,11 @@ describe("ProtectionAdjustmentSheet", () => {
       }
     });
 
-    expect(wrapper.get('[role="dialog"]').attributes("aria-modal"))
-      .toBe("true");
+    expect(wrapper.get('[role="dialog"]').attributes("aria-modal")).toBe(
+      "true"
+    );
     expect(wrapper.text()).toContain("調整要提醒的部位");
-    await wrapper.get('button[aria-label="關閉調整"]').trigger("click");
+    await wrapper.get('button[aria-label="關閉"]').trigger("click");
     expect(wrapper.emitted("close")).toHaveLength(1);
   });
 });
@@ -195,8 +204,7 @@ describe("S-04 ZoneProtectionForm", () => {
     await findButton(wrapper, "下一步").trigger("click");
 
     const emitted = wrapper.emitted("submit")?.[0]?.[0] as
-      | ProtectionDraftInput
-      | undefined;
+      ProtectionDraftInput | undefined;
     expect(emitted).toBeDefined();
     if (emitted === undefined) {
       throw new Error("預期元件送出防護設定");
@@ -254,8 +262,7 @@ describe("S-04 ZoneProtectionForm", () => {
     await findButton(wrapper, "下一步").trigger("click");
 
     const emitted = wrapper.emitted("submit")?.[0]?.[0] as
-      | ProtectionDraftInput
-      | undefined;
+      ProtectionDraftInput | undefined;
     expect(emitted?.zones.length).toBeGreaterThan(0);
     for (const zone of emitted?.zones ?? []) {
       expect(zone.skinExposureStatus).toBe("exposed");
@@ -289,8 +296,7 @@ describe("S-04 ZoneProtectionForm", () => {
     await findButton(wrapper, "下一步").trigger("click");
 
     const emitted = wrapper.emitted("submit")?.[0]?.[0] as
-      | ProtectionDraftInput
-      | undefined;
+      ProtectionDraftInput | undefined;
     expect(emitted?.zones.map((zone) => zone.bodyZoneCode)).not.toContain(
       "ears"
     );
@@ -338,10 +344,7 @@ describe("S-04 ZoneProtectionForm", () => {
   });
 });
 
-function findButton(
-  wrapper: ReturnType<typeof mount>,
-  label: string
-) {
+function findButton(wrapper: ReturnType<typeof mount>, label: string) {
   const button = wrapper
     .findAll("button")
     .find((candidate) => candidate.text().includes(label));

@@ -20,8 +20,7 @@ const status = computed(() => {
     return {
       tone: "error",
       icon: "state-warning" as const,
-      message:
-        "目前無法讀取這台裝置上的提醒資料。請稍後重新整理。"
+      message: "目前無法讀取這台裝置上的提醒資料。請稍後重新整理。"
     };
   }
   if (

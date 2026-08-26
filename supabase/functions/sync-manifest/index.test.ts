@@ -62,9 +62,11 @@ describe("sync manifest boundary", () => {
       updated_at: record.updatedAt
     }));
 
-    const response = readSelectedRecords(rows, [], [
-      { recordKind: first.recordKind, recordId: first.recordId }
-    ]);
+    const response = readSelectedRecords(
+      rows,
+      [],
+      [{ recordKind: first.recordKind, recordId: first.recordId }]
+    );
     expect(response.records).toHaveLength(1);
     expect(response.records[0]?.recordId).toBe(first.recordId);
   });
@@ -93,15 +95,17 @@ describe("sync manifest boundary", () => {
   it("會把 Postgres timestamptz 正規化成 contract 要求的 Z 時間", () => {
     const record = makeActiveSessionRecord();
     const manifest = readManifestForUser(
-      [{
-        record_kind: record.recordKind,
-        record_id: record.recordId,
-        schema_version: "sync-v1",
-        revision: record.revision,
-        payload_fingerprint: record.payloadFingerprint,
-        payload: record.payload,
-        updated_at: "2026-08-17 09:00:00+00"
-      }],
+      [
+        {
+          record_kind: record.recordKind,
+          record_id: record.recordId,
+          schema_version: "sync-v1",
+          revision: record.revision,
+          payload_fingerprint: record.payloadFingerprint,
+          payload: record.payload,
+          updated_at: "2026-08-17 09:00:00+00"
+        }
+      ],
       [],
       "2026-08-17 09:00:00+00"
     );
@@ -114,15 +118,17 @@ describe("sync manifest boundary", () => {
     const record = makeActiveSessionRecord();
     expect(() =>
       readManifestForUser(
-        [{
-          record_kind: record.recordKind,
-          record_id: record.recordId,
-          schema_version: "legacy-v0",
-          revision: record.revision,
-          payload_fingerprint: record.payloadFingerprint,
-          payload: record.payload,
-          updated_at: record.updatedAt
-        }],
+        [
+          {
+            record_kind: record.recordKind,
+            record_id: record.recordId,
+            schema_version: "legacy-v0",
+            revision: record.revision,
+            payload_fingerprint: record.payloadFingerprint,
+            payload: record.payload,
+            updated_at: record.updatedAt
+          }
+        ],
         [],
         fetchedAt
       )

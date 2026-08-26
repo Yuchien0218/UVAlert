@@ -1,8 +1,5 @@
 <script setup lang="ts">
-import type {
-  FiveDayUvForecast,
-  UvRiskLevel
-} from "@sunshield/contracts";
+import type { FiveDayUvForecast, UvRiskLevel } from "@sunshield/contracts";
 import { CloudSun } from "@lucide/vue";
 import Icon from "../icons/Icon.vue";
 import type {
@@ -10,6 +7,11 @@ import type {
   UvForecastPhase
 } from "../../features/uv/createUvForecastController";
 import { getUvRiskLevelLabel } from "../../features/uv/uvForecastRules";
+import {
+  formatDate,
+  formatMonthDayTime,
+  formatWeekday
+} from "../../helpers/datetime";
 
 interface Props {
   phase: UvForecastPhase;
@@ -27,27 +29,16 @@ function formatForecastDate(localDate: string): {
   weekday: string;
   date: string;
 } {
-  const [year, month, day] = localDate
-    .split("-")
-    .map((part) => Number(part));
+  const [year, month, day] = localDate.split("-").map((part) => Number(part));
   const date = new Date(year!, month! - 1, day!, 12);
   return {
-    weekday: new Intl.DateTimeFormat("zh-TW", {
-      weekday: "short"
-    }).format(date),
-    date: `${month}/${day}`
+    weekday: formatWeekday(date),
+    date: formatDate(date)
   };
 }
 
 function formatUpdatedAt(instant: string): string {
-  return new Intl.DateTimeFormat("zh-TW", {
-    timeZone: "Asia/Taipei",
-    month: "numeric",
-    day: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
-    hour12: false
-  }).format(new Date(instant));
+  return formatMonthDayTime(instant, { timeZone: "Asia/Taipei" });
 }
 
 function riskClass(riskLevel: UvRiskLevel): string {
@@ -94,14 +85,11 @@ function getUnavailableMessage(error: UvForecastError): string {
       <span>不會影響目前的本機補擦提醒。</span>
     </div>
 
-    <div
-      v-else-if="phase === 'no_region'"
-      class="uv-forecast__state"
-    >
+    <div v-else-if="phase === 'no_region'" class="uv-forecast__state">
       <span>
         請先
         <a class="text-link" href="#outdoor-context">設定地區</a>
-       ，才能查看五日 UV 預報。
+        ，才能查看五日 UV 預報。
       </span>
     </div>
 
@@ -128,9 +116,7 @@ function getUnavailableMessage(error: UvForecastError): string {
         <span v-if="phase === 'cached'" class="uv-forecast__badge">
           已儲存資料
         </span>
-        <span v-else class="uv-forecast__badge">
-          地區預報
-        </span>
+        <span v-else class="uv-forecast__badge"> 地區預報 </span>
       </div>
 
       <ol class="uv-forecast__days" aria-label="未來五日白日時段紫外線預報">
@@ -147,7 +133,11 @@ function getUnavailableMessage(error: UvForecastError): string {
             <span class="screen-reader-only">紫外線指數</span>
             {{ day.uvi }}
           </strong>
-          <span class="uv-day__level-badge" :class="`uv-day__level-badge--${day.riskLevel}`" :aria-label="`風險等級：${getUvRiskLevelLabel(day.riskLevel)}`">
+          <span
+            class="uv-day__level-badge"
+            :class="`uv-day__level-badge--${day.riskLevel}`"
+            :aria-label="`風險等級：${getUvRiskLevelLabel(day.riskLevel)}`"
+          >
             {{ getUvRiskLevelLabel(day.riskLevel) }}
           </span>
         </li>
@@ -163,7 +153,8 @@ function getUnavailableMessage(error: UvForecastError): string {
         </span>
       </p>
       <p class="uv-forecast__note">
-        這是依地區提供的預報，不是即時測站觀測；UV 高低不會延長或縮短你的補擦計時。
+        這是依地區提供的預報，不是即時測站觀測；UV
+        高低不會延長或縮短你的補擦計時。
       </p>
     </template>
   </section>
@@ -196,7 +187,7 @@ function getUnavailableMessage(error: UvForecastError): string {
   justify-items: start;
   gap: var(--space-3);
   color: var(--text-secondary);
-  line-height: 1.7;
+  line-height: 1.6;
 }
 
 .uv-forecast__state strong,
@@ -206,6 +197,7 @@ function getUnavailableMessage(error: UvForecastError): string {
   color: var(--text-primary);
   font-weight: 600;
   font-size: var(--font-size-body);
+  line-height: 1.4;
 }
 
 .uv-forecast__state span {
@@ -340,12 +332,16 @@ function getUnavailableMessage(error: UvForecastError): string {
   color: var(--text-inverse);
 }
 
+/*
+ * 2026-08-25：跟其他 body 級文字一起被批次改成 1.75，但這是 label 級
+ * （12.8px）文字，DESIGN.md「說明／標籤」對應的 CJK 行高是 1.5，改回來。
+ */
 .uv-forecast__source,
 .uv-forecast__note {
   margin: 0;
   color: var(--text-secondary);
   font-size: var(--font-size-label);
-  line-height: 1.7;
+  line-height: 1.5;
 }
 
 .uv-forecast__source span {

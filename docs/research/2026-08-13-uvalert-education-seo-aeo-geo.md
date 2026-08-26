@@ -20,14 +20,14 @@
 
 ### 1.1 建議的公開／私人分界
 
-| 類型 | 是否公開索引 | 原因 |
-|---|---:|---|
-| 衛教首頁、主題分類頁 | 可以 | 有穩定內容與導覽價值，能作為文章入口 |
-| 單篇衛教文章 | 可以 | 文章可用固定網址被搜尋、分享與引用 |
-| 文章搜尋結果、篩選結果、收藏篩選 | 預設不索引 | 內容可能重複、組合數量無限，且不是穩定知識頁 |
-| 個人防曬乳／裝備紀錄 | 不索引 | 屬於使用者資料，不應被公開抓取 |
-| Session、提醒事件、地區／通知設定 | 不索引 | 屬於私人或暫時狀態 |
-| 問題回報、草稿、備份與同步頁 | 不索引 | 含私人資料或流程狀態 |
+| 類型                              | 是否公開索引 | 原因                                         |
+| --------------------------------- | -----------: | -------------------------------------------- |
+| 衛教首頁、主題分類頁              |         可以 | 有穩定內容與導覽價值，能作為文章入口         |
+| 單篇衛教文章                      |         可以 | 文章可用固定網址被搜尋、分享與引用           |
+| 文章搜尋結果、篩選結果、收藏篩選  |   預設不索引 | 內容可能重複、組合數量無限，且不是穩定知識頁 |
+| 個人防曬乳／裝備紀錄              |       不索引 | 屬於使用者資料，不應被公開抓取               |
+| Session、提醒事件、地區／通知設定 |       不索引 | 屬於私人或暫時狀態                           |
+| 問題回報、草稿、備份與同步頁      |       不索引 | 含私人資料或流程狀態                         |
 
 這個分界也是 UX wireframe 的前置條件：每篇公開文章都要有「可單獨開啟、可分享、可返回衛教分類」的完整頁面，而不是只有 App 內抽屜或必須登入才能取得的內容。Google 的 AI 搜尋指南要求頁面先符合一般搜尋的索引與摘要資格；被登入牆或不可讀取的內容不適合當作公開衛教來源。
 
@@ -107,12 +107,12 @@ Google 也明確提醒，沒有「為 SEO 應寫幾字」的固定字數；內�
 
 ### 4.1 建議的 Schema.org 類型
 
-| 類型 | UVAlert 用途 | 注意事項 |
-|---|---|---|
-| `Article` 或 `BlogPosting` | 單篇衛教文章 | 用最符合內容的類型；不要把一般衛教誤標成 `NewsArticle`。Google 說 Article 標記可協助理解標題、作者、圖片與日期，但不保證出現複合式結果。 |
-| `BreadcrumbList` | 首頁 → 防曬衛教 → 文章 | Google 要求至少兩個 `ListItem` 才有資格顯示麵包屑；資料應反映使用者導覽路徑，而不是盲目複製 URL。 |
-| `FAQPage` | 真的由多組可見「問題／答案」組成的頁面 | Schema.org 仍定義此類型，但 Google FAQ rich result 已於 2026-05-07 起不再顯示；不要把它當成獲得 Google FAQ 卡片的承諾。可為內容語意與其他消費者保留，但所有問答必須在頁面上可見且真實存在。 |
-| `WebPage` 的 `lastReviewed`、`reviewedBy` | 表達複查日期／審閱者 | 這些是 Schema.org 語意屬性；要同時在畫面上顯示，不能只藏在 JSON-LD。Google 是否使用或顯示不保證。 |
+| 類型                                      | UVAlert 用途                           | 注意事項                                                                                                                                                                                    |
+| ----------------------------------------- | -------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `Article` 或 `BlogPosting`                | 單篇衛教文章                           | 用最符合內容的類型；不要把一般衛教誤標成 `NewsArticle`。Google 說 Article 標記可協助理解標題、作者、圖片與日期，但不保證出現複合式結果。                                                    |
+| `BreadcrumbList`                          | 首頁 → 防曬衛教 → 文章                 | Google 要求至少兩個 `ListItem` 才有資格顯示麵包屑；資料應反映使用者導覽路徑，而不是盲目複製 URL。                                                                                           |
+| `FAQPage`                                 | 真的由多組可見「問題／答案」組成的頁面 | Schema.org 仍定義此類型，但 Google FAQ rich result 已於 2026-05-07 起不再顯示；不要把它當成獲得 Google FAQ 卡片的承諾。可為內容語意與其他消費者保留，但所有問答必須在頁面上可見且真實存在。 |
+| `WebPage` 的 `lastReviewed`、`reviewedBy` | 表達複查日期／審閱者                   | 這些是 Schema.org 語意屬性；要同時在畫面上顯示，不能只藏在 JSON-LD。Google 是否使用或顯示不保證。                                                                                           |
 
 ### 4.2 `Article` 最小可行資料
 
@@ -225,25 +225,25 @@ W3C/WAI 的寫作與頁面結構指引不是搜尋排名規則，但會直接改
 
 ## 官方來源（查閱日：2026-08-13）
 
-| 來源 | 用途／重點 | 官方更新資訊 |
-|---|---|---|
-| [Google：AI features and your website](https://developers.google.com/search/docs/appearance/ai-features) | AI Overviews／AI Mode 沿用一般 SEO；無額外要求、無特殊 AI 檔案或 Schema.org；內容需可索引、有文字、可抓取且結構化資料與可見內容一致 | Google 頁面標示 2025-12-10 更新 |
-| [Google：AI optimization guide](https://developers.google.com/search/docs/fundamentals/ai-optimization-guide) | 生成式搜尋仍以公開可抓取內容、一般技術 SEO、語意 HTML 與 JavaScript SEO 為基礎；不保證索引或服務 | Google 頁面標示 2026-07-10 更新 |
-| [Google：Creating helpful, reliable, people-first content](https://developers.google.com/search/docs/fundamentals/creating-helpful-content) | 人本內容、清楚來源、作者／專業背景、Who／How／Why、健康／安全 YMYL 與 E-E-A-T | Google 頁面標示 2025-12-10 更新 |
-| [Google：SEO Starter Guide（繁體中文）](https://developers.google.com/search/docs/fundamentals/seo-starter-guide?hl=zh-tw) | 唯一標題、清楚內容、更新、自然搜尋字詞、內部連結、描述性錨定文字與重複內容／canonical 基礎 | Google 頁面標示 2025-12-18 更新 |
-| [Google：Article structured data](https://developers.google.com/search/docs/appearance/structured-data/article) | `Article`／`BlogPosting`、作者、作者 URL、發布／修改日期、圖片、驗證與不保證顯示 | Google 頁面標示 2025-12-10 更新 |
-| [Google：Breadcrumb structured data](https://developers.google.com/search/docs/appearance/structured-data/breadcrumb) | `BreadcrumbList`、至少兩個 ListItem、導覽路徑、Rich Results Test／URL Inspection | Google 頁面標示 2025-12-10 更新 |
-| [Google：General structured data guidelines](https://developers.google.com/search/docs/appearance/structured-data/sd-policies) | 結構化資料需符合政策、與可見內容一致；通過測試也不保證顯示 | 官方文件（查閱 2026-08-13） |
-| [Google：FAQ rich result removal / Search documentation updates](https://developers.google.com/search/updates) | 官方更新說明 FAQ rich result 自 2026-05-07 起不再出現在 Google 搜尋結果；不要把 FAQPage 當成 Google 複合式結果承諾 | 2026-05-08 deprecation／2026-06 文件移除說明 |
-| [Google：Build and submit a sitemap](https://developers.google.com/search/docs/crawling-indexing/sitemaps/build-sitemap) | sitemap 只列希望出現在搜尋的 canonical URL、使用絕對 URL、準確 `lastmod`、sitemap 只是提示 | Google 頁面標示 2026-07-08 更新 |
-| [Google：Canonicalization](https://developers.google.com/search/docs/crawling-indexing/consolidate-duplicate-urls) | self-referential canonical、不要用 robots 做 canonical、sitemap／redirect／canonical 訊號一致 | 官方文件（查閱 2026-08-13） |
-| [Google：Introduction to robots.txt](https://developers.google.com/search/docs/crawling-indexing/robots/intro) | robots 管理抓取，不是隱藏頁面；要阻止索引使用 `noindex`、登入／密碼或移除 | Google 頁面標示 2025-12-10 更新 |
-| [Bing Webmaster Guidelines](https://www.bing.com/webmasters/help/webmaster-guidelines-30fba23a) | Bing／Copilot grounding 與 citation 的官方建議：清楚單一主題、重要資訊靠前、可驗證、結構化資料正確、避免操弄；GEO 不保證引用 | 官方頁面；查閱 2026-08-13（頁面未提供可讀更新日期） |
-| [Schema.org：Article](https://schema.org/Article) | `Article` 語意、headline、author、datePublished、dateModified、citation 等詞彙定義 | Schema.org 官方版本 30.0：2026-03-19 |
-| [Schema.org：FAQPage](https://schema.org/FAQPage) | FAQPage 的語意定義、`lastReviewed`／`reviewedBy` 等 WebPage 屬性；Schema.org 定義不代表 Google 一定提供複合式結果 | Schema.org 官方頁面；查閱 2026-08-13 |
-| [Schema.org：BreadcrumbList](https://schema.org/BreadcrumbList) | BreadcrumbList／ListItem 結構與 JSON-LD 範例 | Schema.org 官方版本 30.0：2026-03-19 |
-| [W3C/WAI：Writing for Web Accessibility](https://www.w3.org/WAI/tips/writing/) | 唯一頁面標題、語意標題、描述性連結文字、圖片替代文字、清楚精簡內容 | W3C/WAI 頁面；查閱 2026-08-13 |
-| [W3C/WAI：Headings](https://www.w3.org/WAI/tutorials/page-structure/headings/) | 標題階層、內容組織、輔助技術導覽與避免跳級 | W3C/WAI 頁面；查閱 2026-08-13 |
+| 來源                                                                                                                                        | 用途／重點                                                                                                                          | 官方更新資訊                                        |
+| ------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------- |
+| [Google：AI features and your website](https://developers.google.com/search/docs/appearance/ai-features)                                    | AI Overviews／AI Mode 沿用一般 SEO；無額外要求、無特殊 AI 檔案或 Schema.org；內容需可索引、有文字、可抓取且結構化資料與可見內容一致 | Google 頁面標示 2025-12-10 更新                     |
+| [Google：AI optimization guide](https://developers.google.com/search/docs/fundamentals/ai-optimization-guide)                               | 生成式搜尋仍以公開可抓取內容、一般技術 SEO、語意 HTML 與 JavaScript SEO 為基礎；不保證索引或服務                                    | Google 頁面標示 2026-07-10 更新                     |
+| [Google：Creating helpful, reliable, people-first content](https://developers.google.com/search/docs/fundamentals/creating-helpful-content) | 人本內容、清楚來源、作者／專業背景、Who／How／Why、健康／安全 YMYL 與 E-E-A-T                                                       | Google 頁面標示 2025-12-10 更新                     |
+| [Google：SEO Starter Guide（繁體中文）](https://developers.google.com/search/docs/fundamentals/seo-starter-guide?hl=zh-tw)                  | 唯一標題、清楚內容、更新、自然搜尋字詞、內部連結、描述性錨定文字與重複內容／canonical 基礎                                          | Google 頁面標示 2025-12-18 更新                     |
+| [Google：Article structured data](https://developers.google.com/search/docs/appearance/structured-data/article)                             | `Article`／`BlogPosting`、作者、作者 URL、發布／修改日期、圖片、驗證與不保證顯示                                                    | Google 頁面標示 2025-12-10 更新                     |
+| [Google：Breadcrumb structured data](https://developers.google.com/search/docs/appearance/structured-data/breadcrumb)                       | `BreadcrumbList`、至少兩個 ListItem、導覽路徑、Rich Results Test／URL Inspection                                                    | Google 頁面標示 2025-12-10 更新                     |
+| [Google：General structured data guidelines](https://developers.google.com/search/docs/appearance/structured-data/sd-policies)              | 結構化資料需符合政策、與可見內容一致；通過測試也不保證顯示                                                                          | 官方文件（查閱 2026-08-13）                         |
+| [Google：FAQ rich result removal / Search documentation updates](https://developers.google.com/search/updates)                              | 官方更新說明 FAQ rich result 自 2026-05-07 起不再出現在 Google 搜尋結果；不要把 FAQPage 當成 Google 複合式結果承諾                  | 2026-05-08 deprecation／2026-06 文件移除說明        |
+| [Google：Build and submit a sitemap](https://developers.google.com/search/docs/crawling-indexing/sitemaps/build-sitemap)                    | sitemap 只列希望出現在搜尋的 canonical URL、使用絕對 URL、準確 `lastmod`、sitemap 只是提示                                          | Google 頁面標示 2026-07-08 更新                     |
+| [Google：Canonicalization](https://developers.google.com/search/docs/crawling-indexing/consolidate-duplicate-urls)                          | self-referential canonical、不要用 robots 做 canonical、sitemap／redirect／canonical 訊號一致                                       | 官方文件（查閱 2026-08-13）                         |
+| [Google：Introduction to robots.txt](https://developers.google.com/search/docs/crawling-indexing/robots/intro)                              | robots 管理抓取，不是隱藏頁面；要阻止索引使用 `noindex`、登入／密碼或移除                                                           | Google 頁面標示 2025-12-10 更新                     |
+| [Bing Webmaster Guidelines](https://www.bing.com/webmasters/help/webmaster-guidelines-30fba23a)                                             | Bing／Copilot grounding 與 citation 的官方建議：清楚單一主題、重要資訊靠前、可驗證、結構化資料正確、避免操弄；GEO 不保證引用        | 官方頁面；查閱 2026-08-13（頁面未提供可讀更新日期） |
+| [Schema.org：Article](https://schema.org/Article)                                                                                           | `Article` 語意、headline、author、datePublished、dateModified、citation 等詞彙定義                                                  | Schema.org 官方版本 30.0：2026-03-19                |
+| [Schema.org：FAQPage](https://schema.org/FAQPage)                                                                                           | FAQPage 的語意定義、`lastReviewed`／`reviewedBy` 等 WebPage 屬性；Schema.org 定義不代表 Google 一定提供複合式結果                   | Schema.org 官方頁面；查閱 2026-08-13                |
+| [Schema.org：BreadcrumbList](https://schema.org/BreadcrumbList)                                                                             | BreadcrumbList／ListItem 結構與 JSON-LD 範例                                                                                        | Schema.org 官方版本 30.0：2026-03-19                |
+| [W3C/WAI：Writing for Web Accessibility](https://www.w3.org/WAI/tips/writing/)                                                              | 唯一頁面標題、語意標題、描述性連結文字、圖片替代文字、清楚精簡內容                                                                  | W3C/WAI 頁面；查閱 2026-08-13                       |
+| [W3C/WAI：Headings](https://www.w3.org/WAI/tutorials/page-structure/headings/)                                                              | 標題階層、內容組織、輔助技術導覽與避免跳級                                                                                          | W3C/WAI 頁面；查閱 2026-08-13                       |
 
 ---
 

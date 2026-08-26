@@ -51,10 +51,7 @@ const REPORT_ACTION_KINDS = new Set<ActionKind>([
 
 /** 在提醒頁就地完成、不換頁的行為。 */
 export type InPlaceBehavior =
-  | "anchor_zones"
-  | "expand_product_label"
-  | "recalibrate_clock"
-  | "ended_state";
+  "anchor_zones" | "expand_product_label" | "recalibrate_clock" | "ended_state";
 
 const IN_PLACE_BEHAVIORS: Partial<Record<ActionKind, InPlaceBehavior>> = {
   review_required_zones: "anchor_zones",
@@ -101,13 +98,15 @@ export function resolveActionRoute(kind: ActionKind): RouteLocationRaw {
   if (kind === "view_conservative_reminder") {
     return { name: "help-how-it-works" };
   }
+  // 2026-08-24：`/reminder` 已移除、內容併入首頁，這些落點改指 home。
+  // #zone-status 錨點仍然有效——部位清單現在在首頁下半部。
   if (IN_PLACE_BEHAVIORS[kind] !== undefined) {
     return kind === "review_required_zones"
-      ? { name: "reminder", hash: "#zone-status" }
-      : { name: "reminder" };
+      ? { name: "home", hash: "#zone-status" }
+      : { name: "home" };
   }
   // 13 個 ActionKind 上面全數涵蓋，這行實際不可達；
-  // placeholder 路由已於 2026-08-08 移除，保留提醒頁當防禦性落點，
+  // placeholder 路由已於 2026-08-08 移除，保留首頁當防禦性落點，
   // 未來若契約新增 ActionKind 也不會導到不存在的 route。
-  return { name: "reminder" };
+  return { name: "home" };
 }

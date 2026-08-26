@@ -84,10 +84,7 @@ export class SunshieldDatabase extends Dexie {
   SessionStartedEvents!: Table<SessionStartedEventV1, string>;
   ZoneTrackingEvents!: Table<ZoneTrackingEventV1, string>;
   ZoneMethodEvents!: Table<ZoneMethodEventV1, string>;
-  ApplicationConfirmationGroups!: Table<
-    ApplicationConfirmationGroupV1,
-    string
-  >;
+  ApplicationConfirmationGroups!: Table<ApplicationConfirmationGroupV1, string>;
   ApplicationEvents!: Table<ApplicationEventV1, string>;
   ProductSafetyEvents!: Table<ProductSafetyEventV1, string>;
   ContextEvents!: Table<ContextEventV1, string>;
@@ -113,18 +110,15 @@ export class SunshieldDatabase extends Dexie {
     super(databaseName);
 
     this.version(1).stores({
-      SunscreenProducts:
-        "&id, usageStatus, updatedAt, [usageStatus+updatedAt]",
+      SunscreenProducts: "&id, usageStatus, updatedAt, [usageStatus+updatedAt]",
       ProtectionSessions:
         "&id, ownerKey, overallStatus, startedAt, endedAt, revision",
       ProtectionZoneStates:
         "[sessionId+zoneInstanceId], sessionId, bodyZoneCode, timingStatus, zoneDueAt",
       SessionStartedEvents:
         "&id, sessionId, [sessionId+effectiveOccurredAt], idempotencyKey",
-      ZoneTrackingEvents:
-        "&id, sessionId, zoneInstanceId, correctionOfEventId",
-      ZoneMethodEvents:
-        "&id, sessionId, zoneInstanceId, correctionOfEventId",
+      ZoneTrackingEvents: "&id, sessionId, zoneInstanceId, correctionOfEventId",
+      ZoneMethodEvents: "&id, sessionId, zoneInstanceId, correctionOfEventId",
       ApplicationConfirmationGroups:
         "&id, sessionId, correctionOfGroupId, appliedAt",
       ApplicationEvents:
@@ -134,10 +128,8 @@ export class SunshieldDatabase extends Dexie {
       ContextEvents:
         "&id, sessionId, contextType, activityIntervalId, correctionOfEventId",
       SessionEndedEvents: "&id, &sessionId, effectiveOccurredAt",
-      WeatherSnapshots:
-        "&id, regionId, sourceKind, fetchedAt, usableUntil",
-      ClockCalibration:
-        "&calibrationRequestId, status, calibratedAtUtc",
+      WeatherSnapshots: "&id, regionId, sourceKind, fetchedAt, usableUntil",
+      ClockCalibration: "&calibrationRequestId, status, calibratedAtUtc",
       SetupDrafts: "&id, localDraftFlowId, expiresAt, updatedAt",
       ConsentRecords: "&id, purpose, policyVersion, occurredAt",
       LocalReminderPresentationPreferences: "&deviceLocalId",
@@ -146,14 +138,12 @@ export class SunshieldDatabase extends Dexie {
       ClientSequences: "[deviceLocalId+sessionId], lastSequence",
       CommandReceipts: "&idempotencyKey, sessionId, createdAt",
       CorrectionSuccessors: "&targetRef, successorId",
-      ZoneIdentityLocks:
-        "[sessionId+bodyZoneCode], zoneInstanceId",
+      ZoneIdentityLocks: "[sessionId+bodyZoneCode], zoneInstanceId",
       ProjectionChecksums: "[sessionId+revision]"
     });
 
     this.version(2).stores({
-      SunscreenProducts:
-        "&productId, status, updatedAt, [status+updatedAt]"
+      SunscreenProducts: "&productId, status, updatedAt, [status+updatedAt]"
     });
 
     this.version(3).stores({

@@ -12,11 +12,17 @@ vi.mock("../../app/injection", () => ({ useWebAppServices: vi.fn() }));
 function makeServices() {
   return {
     auth: {
-      state: shallowReadonly(shallowRef({
-        status: "signed_in" as const,
-        auth: { kind: "signed_in" as const, userId: "user-1", accessTokenExpiresAt: null },
-        errorCode: null
-      })),
+      state: shallowReadonly(
+        shallowRef({
+          status: "signed_in" as const,
+          auth: {
+            kind: "signed_in" as const,
+            userId: "user-1",
+            accessTokenExpiresAt: null
+          },
+          errorCode: null
+        })
+      ),
       refresh: vi.fn(async () => undefined),
       signInWithGoogle: vi.fn(async () => true),
       signOut: vi.fn(async () => true),
@@ -29,8 +35,12 @@ function makeServices() {
 describe("AccountDataPage", () => {
   it("停止同步只改本機同步開關，保留雲端操作入口", async () => {
     const services = makeServices();
-    vi.mocked(useWebAppServices).mockReturnValue(services as unknown as WebAppServices);
-    const wrapper = shallowMount(AccountDataPage);
+    vi.mocked(useWebAppServices).mockReturnValue(
+      services as unknown as WebAppServices
+    );
+    const wrapper = shallowMount(AccountDataPage, {
+      global: { stubs: { ConfirmAction: false } }
+    });
     await wrapper.get("button").trigger("click");
     expect(wrapper.text()).toContain("重新開啟同步");
     expect(services.cloudSync.deleteAccount).not.toHaveBeenCalled();
@@ -38,10 +48,16 @@ describe("AccountDataPage", () => {
 
   it("清除雲端需要第二次確認，成功後才登出", async () => {
     const services = makeServices();
-    vi.mocked(useWebAppServices).mockReturnValue(services as unknown as WebAppServices);
-    const wrapper = shallowMount(AccountDataPage);
+    vi.mocked(useWebAppServices).mockReturnValue(
+      services as unknown as WebAppServices
+    );
+    const wrapper = shallowMount(AccountDataPage, {
+      global: { stubs: { ConfirmAction: false } }
+    });
     const buttons = wrapper.findAll("button");
-    const deleteButton = buttons.find((button) => button.text() === "清除雲端資料");
+    const deleteButton = buttons.find(
+      (button) => button.text() === "清除雲端資料"
+    );
     expect(deleteButton).toBeDefined();
     await deleteButton!.trigger("click");
     expect(services.cloudSync.deleteAccount).not.toHaveBeenCalled();

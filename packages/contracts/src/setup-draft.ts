@@ -36,8 +36,7 @@ export const SetupDraftZoneV1Schema = z
     if (
       zone.skinExposureStatus === "exposed" &&
       (components.has("clothing") ||
-        (!components.has("sunscreen") &&
-          !components.has("other_topical")))
+        (!components.has("sunscreen") && !components.has("other_topical")))
     ) {
       context.addIssue({
         code: "custom",
@@ -130,7 +129,10 @@ export const SetupDraftV1Schema = z
     }
 
     const assignedZoneKeys = new Set<string>();
-    for (const [applicationIndex, application] of draft.applications.entries()) {
+    for (const [
+      applicationIndex,
+      application
+    ] of draft.applications.entries()) {
       for (const [zoneIndex, zoneKey] of application.draftZoneKeys.entries()) {
         if (!zoneKeys.has(zoneKey)) {
           context.addIssue({

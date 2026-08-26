@@ -20,9 +20,12 @@ const productId = computed(() =>
 );
 const isEdit = computed(() => productId.value !== null);
 
-/** 設定流程送來的返回路徑，存完要送回步驟 2。 */
+/**
+ * 設定流程送來的返回路徑，存完要送回設定頁。
+ * 2026-08-24：設定合併成單一頁面後，`/setup/timing` 改為 `/setup`。
+ */
 const returnTo = computed(() =>
-  route.query.returnTo === "/setup/timing" ? "/setup/timing" : null
+  route.query.returnTo === "/setup" ? "/setup" : null
 );
 
 async function handleSaved(): Promise<void> {
@@ -77,8 +80,7 @@ p {
 
 .form-heading p {
   margin-top: var(--space-3);
-  color: var(--text-secondary);
-  line-height: 1.7;
+  color: var(--text-body);
+  line-height: 1.6;
 }
-
 </style>

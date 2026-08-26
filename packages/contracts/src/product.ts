@@ -227,7 +227,9 @@ export type ProductCatalogRecordV1 = z.infer<
   typeof ProductCatalogRecordV1Schema
 >;
 
-export function fingerprintProductLabelSnapshot(snapshot: ProductLabelSnapshotV1): string {
+export function fingerprintProductLabelSnapshot(
+  snapshot: ProductLabelSnapshotV1
+): string {
   const parsed = ProductLabelSnapshotV1Schema.parse(snapshot);
   const source = JSON.stringify(parsed);
   let hash = 0x811c9dc5;
@@ -238,4 +240,3 @@ export function fingerprintProductLabelSnapshot(snapshot: ProductLabelSnapshotV1
   return `snapshot-v1-${(hash >>> 0).toString(16).padStart(8, "0")}`;
 }
 export type ProductEligibility = z.infer<typeof ProductEligibilitySchema>;
-

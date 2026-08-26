@@ -22,9 +22,7 @@ withDefaults(defineProps<Props>(), { requiredReview: null });
     <p v-if="requiredReview" class="under-review__meta">
       需要完成的審查：{{ requiredReview }}
     </p>
-    <p class="under-review__note">
-      這不影響提醒功能。
-    </p>
+    <p class="under-review__note">這不影響提醒功能。</p>
   </section>
 </template>
 
@@ -43,15 +41,17 @@ withDefaults(defineProps<Props>(), { requiredReview: null });
 
 .under-review p {
   margin: 0;
-  color: var(--text-secondary);
-  line-height: 1.7;
+  color: var(--text-body);
+  line-height: 1.6;
 }
 
 .under-review__meta {
+  color: var(--text-secondary);
   font-size: var(--font-size-body);
 }
 
 .under-review__note {
+  color: var(--text-secondary);
   font-size: var(--font-size-body);
 }
 </style>

@@ -25,6 +25,7 @@
 ### Task 1: Deterministic SVG concept generator
 
 **Files:**
+
 - Create: `tools/logo-concepts/generate-logo-concepts.mjs`
 - Create: `tools/logo-concepts/verify-logo-concepts.mjs`
 - Generate: `docs/design/logo-concepts/marks/01-morning-line.svg`
@@ -35,6 +36,7 @@
 - Generate: `docs/design/logo-concepts/marks/06-broadcast-mark.svg`
 
 **Interfaces:**
+
 - `generate-logo-concepts.mjs` exports `CONCEPTS`, `renderMarkSvg(concept)`, `renderLockupSvg(concept)`, `renderBoardSvg(concepts)` and `generateLogoConcepts(outputRoot)`.
 - Each `CONCEPTS` entry has exact fields `{ id, fileStem, chineseName, tagline, mark }`; `mark` returns SVG geometry for a `64 64` viewBox.
 - `verify-logo-concepts.mjs` exports `verifyLogoConcepts(outputRoot)` and exits non-zero when a required asset, accessible title, approved color, exact brand string, viewBox or concept identifier is missing.
@@ -66,6 +68,7 @@ assert.match(lockup, /UVAlert/);
 ### Task 2: Exact lockups and 3×2 comparison board
 
 **Files:**
+
 - Generate: `docs/design/logo-concepts/lockups/01-morning-line.svg`
 - Generate: `docs/design/logo-concepts/lockups/02-sun-window.svg`
 - Generate: `docs/design/logo-concepts/lockups/03-reapply-ring.svg`
@@ -75,6 +78,7 @@ assert.match(lockup, /UVAlert/);
 - Generate: `docs/design/logo-concepts/uvalert-logo-concepts-board.svg`
 
 **Interfaces:**
+
 - Each lockup uses `viewBox="0 0 520 112"`: 64px mark at left, exact Chinese wordmark centered vertically, `UVAlert` below/right at lower visual weight.
 - The board uses `viewBox="0 0 1600 1240"` and six `data-concept` groups arranged as three columns × two rows.
 - Every board cell contains the large two-color mark, the horizontal lockup, a 32px monochrome mark, concept name and the fixed tagline below.
@@ -88,10 +92,12 @@ assert.match(lockup, /UVAlert/);
 ### Task 3: Review guide, visual inspection and commit
 
 **Files:**
+
 - Create: `docs/design/logo-concepts/README.md`
 - Modify: `docs/design/README.md`
 
 **Interfaces:**
+
 - `README.md` explains that these are first-round concepts, lists all six meanings/trade-offs, links every SVG, records the palette/type, and gives a selection checklist.
 - `docs/design/README.md` links the concept folder without declaring any concept as the final production logo.
 

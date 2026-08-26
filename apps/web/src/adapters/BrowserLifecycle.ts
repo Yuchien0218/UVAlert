@@ -9,10 +9,7 @@ export class BrowserLifecycle implements LifecyclePort {
     };
     const handlePageShow = (): void => listener();
 
-    globalThis.document.addEventListener(
-      "visibilitychange",
-      handleVisibility
-    );
+    globalThis.document.addEventListener("visibilitychange", handleVisibility);
     globalThis.addEventListener("pageshow", handlePageShow);
 
     return () => {

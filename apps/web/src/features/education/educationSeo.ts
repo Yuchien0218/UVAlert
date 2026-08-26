@@ -40,7 +40,11 @@ export function applyEducationSeo(input: EducationSeoInput): void {
   setMeta("robots", input.robots);
   setMeta("og:title", input.title, "property");
   setMeta("og:description", input.description, "property");
-  setMeta("og:type", input.article === undefined ? "website" : "article", "property");
+  setMeta(
+    "og:type",
+    input.article === undefined ? "website" : "article",
+    "property"
+  );
   setMeta("og:url", canonicalUrl, "property");
   setMeta("og:site_name", BRAND_NAME, "property");
   setMeta("twitter:card", "summary", "name");
@@ -62,7 +66,10 @@ export function applyEducationSeo(input: EducationSeoInput): void {
       url: getEducationPublicSiteUrl()
     }
   });
-  setJsonLd("breadcrumbs", createBreadcrumbSchema(input.breadcrumbs, canonicalUrl));
+  setJsonLd(
+    "breadcrumbs",
+    createBreadcrumbSchema(input.breadcrumbs, canonicalUrl)
+  );
 
   if (input.article === undefined) {
     removeJsonLd("article");
@@ -100,7 +107,10 @@ function createArticleSchema(article: EducationArticle, canonicalUrl: string) {
   };
 }
 
-function createBreadcrumbSchema(breadcrumbs: EducationBreadcrumb[], currentUrl: string) {
+function createBreadcrumbSchema(
+  breadcrumbs: EducationBreadcrumb[],
+  currentUrl: string
+) {
   const items = breadcrumbs.map((breadcrumb, index) => ({
     "@type": "ListItem",
     position: index + 1,
@@ -122,7 +132,11 @@ function createBreadcrumbSchema(breadcrumbs: EducationBreadcrumb[], currentUrl: 
   };
 }
 
-function setMeta(name: string, content: string, attribute: "name" | "property" = "name") {
+function setMeta(
+  name: string,
+  content: string,
+  attribute: "name" | "property" = "name"
+) {
   const selector = `meta[${attribute}="${CSS.escape(name)}"]`;
   let element = document.head.querySelector<HTMLMetaElement>(selector);
   if (element === null) {
@@ -163,6 +177,8 @@ function setJsonLd(kind: "page" | "article" | "breadcrumbs", value: unknown) {
 
 function removeJsonLd(kind: "page" | "article" | "breadcrumbs") {
   document.head
-    .querySelector(`script[type="application/ld+json"][data-uvalert-seo-kind="${kind}"]`)
+    .querySelector(
+      `script[type="application/ld+json"][data-uvalert-seo-kind="${kind}"]`
+    )
     ?.remove();
 }

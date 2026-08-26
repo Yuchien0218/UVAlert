@@ -40,6 +40,8 @@ const errorMessage = computed(() => {
       return "找不到這個行政區，請重新選擇。";
     case null:
       return "";
+    default:
+      return "";
   }
 });
 </script>
@@ -49,9 +51,7 @@ const errorMessage = computed(() => {
     <div class="location-panel__heading">
       <div>
         <p class="eyebrow--mono">裝置定位</p>
-        <h2 id="location-title" class="location-panel__title">
-          使用目前位置
-        </h2>
+        <h2 id="location-title" class="location-panel__title">使用目前位置</h2>
       </div>
       <LocateFixed :size="25" :stroke-width="1.6" aria-hidden="true" />
     </div>
@@ -105,11 +105,7 @@ const errorMessage = computed(() => {
       </button>
     </div>
 
-    <p
-      v-if="errorMessage"
-      class="location-panel__error"
-      role="alert"
-    >
+    <p v-if="errorMessage" class="location-panel__error" role="alert">
       {{ errorMessage }}
     </p>
   </section>
@@ -142,15 +138,14 @@ const errorMessage = computed(() => {
   font-size: var(--font-size-title-md);
 }
 
-.location-panel__body,
-.location-panel__candidate p {
-  color: var(--text-secondary);
-  line-height: 1.7;
+.location-panel__body {
+  color: var(--text-body);
+  line-height: 1.6;
 }
 
-.location-panel__action,
-.location-panel__candidate .button {
-  min-height: 2.75rem;
+.location-panel__candidate p {
+  color: var(--text-secondary);
+  line-height: 1.6;
 }
 
 .location-panel__candidate {
@@ -165,7 +160,7 @@ const errorMessage = computed(() => {
 }
 
 .location-panel__relocate {
-  min-height: 2.75rem;
+  min-height: var(--tap-target);
   padding-inline: var(--space-2);
   text-decoration: underline;
   text-underline-offset: 0.2rem;
@@ -179,6 +174,6 @@ const errorMessage = computed(() => {
   padding: var(--space-3);
   border-radius: var(--radius-sm);
   background: var(--color-due-soft);
-  line-height: 1.7;
+  line-height: 1.6;
 }
 </style>

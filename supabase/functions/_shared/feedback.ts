@@ -1,5 +1,9 @@
 export const FEEDBACK_SCHEMA_VERSION = "feedback-v1" as const;
-export const FEEDBACK_TYPES = ["bug", "feature_request", "content_correction"] as const;
+export const FEEDBACK_TYPES = [
+  "bug",
+  "feature_request",
+  "content_correction"
+] as const;
 export type FeedbackType = (typeof FEEDBACK_TYPES)[number];
 
 export type FeedbackRequest = {
@@ -49,10 +53,17 @@ export function parseFeedbackRequest(input: unknown): FeedbackRequest {
   const appVersion = requiredText(input.appVersion, 64, "App 版本");
   const route = requiredText(input.route, 256, "目前頁面");
   const contactEmail = optionalText(input.contactEmail, 320, "聯絡信箱");
-  if (contactEmail !== null && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(contactEmail)) {
+  if (
+    contactEmail !== null &&
+    !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(contactEmail)
+  ) {
     throw new FeedbackValidationError("聯絡信箱格式不正確");
   }
-  const userAgentSummary = optionalText(input.userAgentSummary, 256, "瀏覽器摘要");
+  const userAgentSummary = optionalText(
+    input.userAgentSummary,
+    256,
+    "瀏覽器摘要"
+  );
   return {
     schemaVersion: FEEDBACK_SCHEMA_VERSION,
     feedbackType: input.feedbackType,
@@ -85,7 +96,8 @@ export function canonicalFeedback(input: FeedbackRequest): string {
 }
 
 function requiredText(value: unknown, max: number, field: string): string {
-  if (typeof value !== "string") throw new FeedbackValidationError(`${field} 必須是文字`);
+  if (typeof value !== "string")
+    throw new FeedbackValidationError(`${field} 必須是文字`);
   const text = value.trim();
   if (text.length < 1 || text.length > max) {
     throw new FeedbackValidationError(`${field} 長度不正確`);
@@ -93,7 +105,11 @@ function requiredText(value: unknown, max: number, field: string): string {
   return text;
 }
 
-function optionalText(value: unknown, max: number, field: string): string | null {
+function optionalText(
+  value: unknown,
+  max: number,
+  field: string
+): string | null {
   if (value === null || value === undefined || value === "") return null;
   return requiredText(value, max, field);
 }
@@ -106,7 +122,10 @@ function normalizeInstant(value: unknown, field: string): string {
 }
 
 function isFeedbackType(value: unknown): value is FeedbackType {
-  return typeof value === "string" && (FEEDBACK_TYPES as readonly string[]).includes(value);
+  return (
+    typeof value === "string" &&
+    (FEEDBACK_TYPES as readonly string[]).includes(value)
+  );
 }
 
 function isObject(value: unknown): value is Record<string, unknown> {

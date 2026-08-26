@@ -7,22 +7,12 @@ import type {
   LocalIdentityPort,
   SessionRepositoryPort
 } from "@sunshield/platform";
-import {
-  shallowReadonly,
-  shallowRef,
-  type Ref
-} from "vue";
+import { shallowReadonly, shallowRef, type Ref } from "vue";
 
 export type BootPhase =
-  | "idle"
-  | "opening_database"
-  | "restoring_session"
-  | "ready"
-  | "error";
+  "idle" | "opening_database" | "restoring_session" | "ready" | "error";
 
-export type BootErrorCode =
-  | "storage_unavailable"
-  | "restore_failed";
+export type BootErrorCode = "storage_unavailable" | "restore_failed";
 
 export interface AppBootController {
   readonly phase: Readonly<Ref<BootPhase>>;
@@ -51,8 +41,7 @@ export function createAppBootController(
   const connectivityState = shallowRef<ConnectivityStatus>(
     dependencies.connectivity.getCurrentStatus()
   );
-  const currentSessionState =
-    shallowRef<SessionProjection | null>(null);
+  const currentSessionState = shallowRef<SessionProjection | null>(null);
 
   let localVisitorId: string | null = null;
   let bootPromise: Promise<void> | null = null;
@@ -95,14 +84,14 @@ export function createAppBootController(
 
     try {
       await dependencies.repository.open();
-      localVisitorId =
-        await dependencies.identity.getOrCreateLocalVisitorId();
+      localVisitorId = await dependencies.identity.getOrCreateLocalVisitorId();
       subscribeToPlatformSignals();
       phaseState.value = "restoring_session";
       currentSessionState.value =
         await dependencies.repository.getCurrentSession(localVisitorId);
       phaseState.value = "ready";
-    } catch {
+    } catch (error) {
+      console.error("[Boot Error]", error);
       errorCodeState.value = "storage_unavailable";
       phaseState.value = "error";
     }

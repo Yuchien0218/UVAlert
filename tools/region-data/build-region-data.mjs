@@ -28,8 +28,7 @@ const OFFICIAL_DATASET = Object.freeze({
   license: "政府資料開放授權條款第 1 版"
 });
 
-const TWD97_GEOGRAPHIC =
-  "+proj=longlat +ellps=GRS80 +no_defs +type=crs";
+const TWD97_GEOGRAPHIC = "+proj=longlat +ellps=GRS80 +no_defs +type=crs";
 const DEFAULT_SIMPLIFICATION_TOLERANCE = 0.00002;
 const GENERATED_DIRECTORY = resolve(
   dirname(fileURLToPath(import.meta.url)),
@@ -107,9 +106,7 @@ export function selectOfficialShapefileBase(entryNames) {
       .map((name) => name.replace(/\.dbf$/i, ""))
   );
   const candidates = [...shapefileBases].filter(
-    (base) =>
-      databaseBases.has(base) &&
-      /(^|\/)TOWN_MOI_[0-9]+$/i.test(base)
+    (base) => databaseBases.has(base) && /(^|\/)TOWN_MOI_[0-9]+$/i.test(base)
   );
 
   if (candidates.length !== 1) {
@@ -122,32 +119,22 @@ export function selectOfficialShapefileBase(entryNames) {
 }
 
 export function transformGeometryToWgs84(geometry) {
-  if (
-    geometry?.type !== "Polygon" &&
-    geometry?.type !== "MultiPolygon"
-  ) {
+  if (geometry?.type !== "Polygon" && geometry?.type !== "MultiPolygon") {
     throw new Error("Region geometry must be Polygon or MultiPolygon");
   }
 
   return {
     type: geometry.type,
-    coordinates: mapCoordinates(
-      geometry.coordinates,
-      (longitude, latitude) => {
-        const [wgs84Longitude, wgs84Latitude] = proj4(
-          "EPSG:3824",
-          "EPSG:4326",
-          [longitude, latitude]
-        );
-        if (
-          !Number.isFinite(wgs84Longitude) ||
-          !Number.isFinite(wgs84Latitude)
-        ) {
-          throw new Error("Coordinate transformation returned non-finite values");
-        }
-        return [wgs84Longitude, wgs84Latitude];
+    coordinates: mapCoordinates(geometry.coordinates, (longitude, latitude) => {
+      const [wgs84Longitude, wgs84Latitude] = proj4("EPSG:3824", "EPSG:4326", [
+        longitude,
+        latitude
+      ]);
+      if (!Number.isFinite(wgs84Longitude) || !Number.isFinite(wgs84Latitude)) {
+        throw new Error("Coordinate transformation returned non-finite values");
       }
-    )
+      return [wgs84Longitude, wgs84Latitude];
+    })
   };
 }
 
@@ -182,9 +169,7 @@ export function prepareRegionFeature(
 export function createGeneratedArtifacts(features, options) {
   validateRegionFeatures(features);
   const sortedFeatures = [...features].sort((left, right) =>
-    left.properties.regionCode.localeCompare(
-      right.properties.regionCode
-    )
+    left.properties.regionCode.localeCompare(right.properties.regionCode)
   );
   const boundaries = {
     type: "FeatureCollection",
@@ -216,8 +201,7 @@ export function createGeneratedArtifacts(features, options) {
       },
       outputCrs: "EPSG:4326",
       generatedAt: options.generatedAt,
-      simplificationTolerance:
-        options.simplificationTolerance,
+      simplificationTolerance: options.simplificationTolerance,
       featureCount: sortedFeatures.length,
       hashes: {
         boundariesSha256: sha256(serializedBoundaries),

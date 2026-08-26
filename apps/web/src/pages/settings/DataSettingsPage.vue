@@ -2,6 +2,10 @@
 import Icon from "../../components/icons/Icon.vue";
 import { computed, onMounted, shallowRef } from "vue";
 import { useWebAppServices } from "../../app/injection";
+import AppNotice from "../../components/common/AppNotice.vue";
+import ConfirmAction from "../../components/common/ConfirmAction.vue";
+import EmptyStateCard from "../../components/common/EmptyStateCard.vue";
+import { formatDateTime } from "../../helpers/datetime";
 
 /**
  * S-19 本機資料管理。
@@ -23,7 +27,7 @@ onMounted(() => {
 });
 
 function formatTime(value: string | null): string {
-  return value === null ? "沒有紀錄" : new Date(value).toLocaleString("zh-TW");
+  return value === null ? "沒有紀錄" : formatDateTime(value);
 }
 
 async function runClear(scope: ClearScope): Promise<void> {
@@ -40,32 +44,32 @@ async function runClear(scope: ClearScope): Promise<void> {
 <template>
   <div class="page-stack data-page">
     <header class="page-heading">
-      <h1>本機資料管理</h1>
+      <h1 class="page-heading__title">本機資料管理</h1>
       <p>
-         不用登入也能使用；未同步的資料只儲存在這台裝置上。匯出的檔案由你的裝置直接產生，不會上傳、不經後端、不進分析。
+        不用登入也能使用；未同步的資料只儲存在這台裝置上。匯出的檔案由你的裝置直接產生，不會上傳、不經後端、不進分析。
       </p>
     </header>
 
     <section class="app-card" aria-labelledby="cloud-data-link-title">
       <h2 id="cloud-data-link-title">雲端資料請到另一頁管理</h2>
-      <p>本頁只處理這台裝置的本機資料。若你有登入並使用同步，請到登入與雲端資料頁管理。</p>
-      <RouterLink class="button button--quiet" to="/settings/account-data">管理登入與雲端資料</RouterLink>
+      <p>
+        本頁只處理這台裝置的本機資料。若你有登入並使用同步，請到登入與雲端資料頁管理。
+      </p>
+      <RouterLink class="button button--quiet" to="/settings/account-data"
+        >管理登入與雲端資料</RouterLink
+      >
     </section>
 
     <p v-if="localData.phase.value === 'loading'" role="status">
       正在讀取本機資料概況…
     </p>
 
-    <section
+    <EmptyStateCard
       v-else-if="localData.error.value === 'load_failed'"
-      class="app-card"
+      title="暫時讀不到本機資料"
+      body="目前無法讀取這台裝置上的資料。這不代表資料已經消失，請稍後再試；在讀取成功之前建議先不要執行清除。"
       role="alert"
-    >
-      <h2>暫時讀不到本機資料</h2>
-      <p>
-        目前無法讀取這台裝置上的資料。這不代表資料已經消失，請稍後再試；在讀取成功之前建議先不要執行清除。
-      </p>
-    </section>
+    />
 
     <template v-else-if="summary">
       <section class="app-card" aria-labelledby="data-summary-title">
@@ -101,7 +105,8 @@ async function runClear(scope: ClearScope): Promise<void> {
       <section class="app-card" aria-labelledby="data-export-title">
         <h2 id="data-export-title">匯出本機資料</h2>
         <p>
-           產生一個 JSON 檔案，包含你的防曬裝備、提醒紀錄、事件與偏好。檔案會儲存到你選的位置，不會傳到任何伺服器。
+          產生一個 JSON
+          檔案，包含你的防曬裝備、提醒紀錄、事件與偏好。檔案會儲存到你選的位置，不會傳到任何伺服器。
         </p>
         <p class="caution">
           匯出檔案<strong>不包含</strong>裝置識別碼、精確座標與任何金鑰。目前版本<strong>只能匯出，不能匯入還原</strong>；還原能力會與帳號遷移政策一起在之後設計。
@@ -116,20 +121,16 @@ async function runClear(scope: ClearScope): Promise<void> {
           {{ busy ? "處理中…" : "匯出本機資料" }}
         </button>
 
-        <p
-          v-if="localData.notice.value?.kind === 'exported'"
-          class="notice notice--ok"
-          role="status"
-        >
-          已產生 {{ localData.notice.value.fileName }}。請確認檔案已儲存到你要的位置。
-        </p>
-        <p
+        <AppNotice v-if="localData.notice.value?.kind === 'exported'" kind="ok">
+          已產生
+          {{ localData.notice.value.fileName }}。請確認檔案已儲存到你要的位置。
+        </AppNotice>
+        <AppNotice
           v-if="localData.error.value === 'export_failed'"
-          class="notice notice--error"
-          role="alert"
+          kind="error"
         >
           匯出沒有完成，檔案沒有產生。本機資料沒有任何變動，可以再試一次。
-        </p>
+        </AppNotice>
       </section>
 
       <section class="app-card" aria-labelledby="data-clear-title">
@@ -138,26 +139,18 @@ async function runClear(scope: ClearScope): Promise<void> {
           清除無法復原。如果想留下紀錄，<strong>請先在上方匯出</strong>。
         </p>
 
-        <p
-          v-if="localData.notice.value?.kind === 'cleared'"
-          class="notice notice--ok"
-          role="status"
-        >
+        <AppNotice v-if="localData.notice.value?.kind === 'cleared'" kind="ok">
           {{
             localData.notice.value.scope === "drafts"
               ? "設定草稿已清除。"
               : localData.notice.value.scope === "history"
-                 ? "裝備與已結束的提醒歷史已清除。"
+                ? "裝備與已結束的提醒歷史已清除。"
                 : "這台裝置上的資料已全部清除。"
           }}
-        </p>
-        <p
-          v-if="localData.error.value === 'clear_failed'"
-          class="notice notice--error"
-          role="alert"
-        >
+        </AppNotice>
+        <AppNotice v-if="localData.error.value === 'clear_failed'" kind="error">
           清除沒有完成，資料維持原狀。請稍後再試。
-        </p>
+        </AppNotice>
 
         <!-- 清除草稿 -->
         <div class="clear-row">
@@ -165,32 +158,16 @@ async function runClear(scope: ClearScope): Promise<void> {
             <strong>清除設定草稿</strong>
             <p>只刪除還沒建立提醒的設定進度。</p>
           </div>
-          <button
-            v-if="confirming !== 'drafts'"
-            class="button button--quiet"
-            type="button"
-            :disabled="busy || !summary.hasSetupDraft"
-            @click="confirming = 'drafts'"
-          >
-            清除草稿
-          </button>
-          <template v-else>
-            <button
-              class="button button--primary"
-              type="button"
-              :disabled="busy"
-              @click="runClear('drafts')"
-            >
-              清除設定草稿
-            </button>
-            <button
-              class="button button--quiet"
-              type="button"
-              @click="confirming = null"
-            >
-              取消
-            </button>
-          </template>
+          <ConfirmAction
+            :confirming="confirming === 'drafts'"
+            :pending="busy"
+            :trigger-disabled="!summary.hasSetupDraft"
+            trigger-label="清除草稿"
+            confirm-label="清除設定草稿"
+            @trigger="confirming = 'drafts'"
+            @confirm="runClear('drafts')"
+            @cancel="confirming = null"
+          />
         </div>
 
         <!-- 清除裝備與歷史 -->
@@ -204,35 +181,19 @@ async function runClear(scope: ClearScope): Promise<void> {
               </template>
             </p>
           </div>
-          <button
-            v-if="confirming !== 'history'"
-            class="button button--quiet"
-            type="button"
-            :disabled="busy"
-            @click="confirming = 'history'"
+          <ConfirmAction
+            :confirming="confirming === 'history'"
+            :pending="busy"
+            trigger-label="清除裝備與歷史"
+            confirm-label="清除裝備與歷史"
+            @trigger="confirming = 'history'"
+            @confirm="runClear('history')"
+            @cancel="confirming = null"
           >
-              清除裝備與歷史
-          </button>
-          <template v-else>
-            <p class="confirm-note" role="alert">
+            <template #warning>
               裝備清單與已結束的提醒都會消失，之後建立提醒需要重新填寫包裝標示。確定嗎？
-            </p>
-            <button
-              class="button button--primary"
-              type="button"
-              :disabled="busy"
-              @click="runClear('history')"
-            >
-              清除裝備與歷史
-            </button>
-            <button
-              class="button button--quiet"
-              type="button"
-              @click="confirming = null"
-            >
-              取消
-            </button>
-          </template>
+            </template>
+          </ConfirmAction>
         </div>
 
         <!-- 清除全部 -->
@@ -241,24 +202,25 @@ async function runClear(scope: ClearScope): Promise<void> {
             <strong>清除全部本機資料</strong>
             <p>把這台裝置恢復成剛安裝的狀態。</p>
           </div>
-          <button
-            v-if="confirming !== 'all'"
-            class="button button--quiet"
-            type="button"
-            :disabled="busy"
-            @click="confirming = 'all'"
+          <ConfirmAction
+            :confirming="confirming === 'all'"
+            :pending="busy"
+            trigger-label="清除全部"
+            confirm-label="清除全部本機資料"
+            @trigger="confirming = 'all'"
+            @confirm="runClear('all')"
+            @cancel="confirming = null"
           >
-            清除全部
-          </button>
-          <template v-else>
-            <div class="confirm-note" role="alert">
+            <template #warning>
               <p>將會刪除：</p>
               <ul>
                 <li>{{ summary.productCount }} 筆防曬裝備</li>
                 <li v-if="summary.hasActiveSession">
                   <strong>目前進行中的提醒</strong>（倒數會直接消失）
                 </li>
-                <li>{{ summary.endedSessionCount }} 次已結束的提醒與全部事件紀錄</li>
+                <li>
+                  {{ summary.endedSessionCount }} 次已結束的提醒與全部事件紀錄
+                </li>
                 <li>設定草稿、地區與顯示偏好、氣象快取</li>
               </ul>
               <p>
@@ -267,23 +229,8 @@ async function runClear(scope: ClearScope): Promise<void> {
                   你這次還沒有匯出，清除後無法復原。
                 </template>
               </p>
-            </div>
-            <button
-              class="button button--primary"
-              type="button"
-              :disabled="busy"
-              @click="runClear('all')"
-            >
-              清除全部本機資料
-            </button>
-            <button
-              class="button button--quiet"
-              type="button"
-              @click="confirming = null"
-            >
-              取消
-            </button>
-          </template>
+            </template>
+          </ConfirmAction>
         </div>
       </section>
     </template>
@@ -305,8 +252,8 @@ dd {
 }
 
 .page-heading p {
-  color: var(--text-secondary);
-  line-height: 1.7;
+  color: var(--text-body);
+  line-height: 1.6;
 }
 
 .app-card {
@@ -334,28 +281,12 @@ dd {
 }
 
 .caution {
-  color: var(--text-secondary);
-  line-height: 1.7;
+  color: var(--text-body);
+  line-height: 1.6;
 }
 
 .caution strong {
   color: var(--text-primary);
-}
-
-.notice {
-  padding: var(--space-3);
-  border-radius: var(--radius-sm);
-  line-height: 1.7;
-  width: 100%;
-}
-
-.notice--ok {
-  background: var(--color-success-soft, var(--surface-soft));
-  color: var(--text-secondary);
-}
-
-.notice--error {
-  color: var(--color-due);
 }
 
 .clear-row {
@@ -367,26 +298,17 @@ dd {
   border-top: 1px solid var(--border-strong);
 }
 
+.clear-row div > strong {
+  display: block;
+  line-height: 1.4;
+}
+
 .clear-row p {
   color: var(--text-secondary);
-  line-height: 1.7;
+  line-height: 1.6;
 }
 
 .clear-row--danger strong {
   color: var(--color-due);
-}
-
-.confirm-note {
-  width: 100%;
-  padding: var(--space-3);
-  border-radius: var(--radius-sm);
-  border: 1px solid var(--color-due);
-  color: var(--text-secondary);
-  line-height: 1.7;
-}
-
-.confirm-note ul {
-  margin: var(--space-2) 0;
-  padding-inline-start: var(--space-5);
 }
 </style>

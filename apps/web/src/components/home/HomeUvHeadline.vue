@@ -30,9 +30,7 @@ const props = defineProps<{
   note: string | null;
 }>();
 
-const hasValue = computed(
-  () => props.uvi !== null && props.riskLevel !== null
-);
+const hasValue = computed(() => props.uvi !== null && props.riskLevel !== null);
 
 const locationLine = computed(() => {
   const region = props.regionName ?? "臺灣";
@@ -51,7 +49,9 @@ const locationLine = computed(() => {
     </p>
 
     <div v-if="hasValue" class="uv-headline__value">
-      <span class="stat-figure uv-headline__figure">{{ uvi }}</span>
+      <span class="stat-figure stat-figure--display uv-headline__figure">{{
+        uvi
+      }}</span>
       <span class="uv-headline__level">
         {{ getUvRiskLevelLabel(riskLevel!) }}
       </span>
@@ -89,20 +89,16 @@ const locationLine = computed(() => {
   gap: var(--space-2);
 }
 
-.uv-headline__figure {
-  font-size: clamp(3rem, 15vw, 3.75rem);
-}
-
 .uv-headline__level {
-  padding-bottom: 0.25rem;
-  font-size: 1.25rem;
+  padding-bottom: var(--space-1);
+  font-size: var(--font-size-title);
   font-weight: 500;
 }
 
 .uv-headline__empty {
   margin: 0;
   color: var(--text-secondary);
-  font-size: 1.25rem;
+  font-size: var(--font-size-title);
 }
 
 .uv-headline__meta {

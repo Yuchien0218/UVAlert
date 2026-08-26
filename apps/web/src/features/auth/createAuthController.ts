@@ -1,16 +1,8 @@
 import { shallowReadonly, shallowRef, type ShallowRef } from "vue";
-import type {
-  AuthPort,
-  AuthState,
-  LocalSyncPort
-} from "@sunshield/platform";
+import type { AuthPort, AuthState, LocalSyncPort } from "@sunshield/platform";
 
 export type AuthControllerStatus =
-  | "idle"
-  | "signing_in"
-  | "signed_out"
-  | "signed_in"
-  | "error";
+  "idle" | "signing_in" | "signed_out" | "signed_in" | "error";
 
 export type AuthControllerState = {
   status: AuthControllerStatus;

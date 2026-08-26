@@ -5,6 +5,7 @@ import type {
   ZoneProjection
 } from "@sunshield/contracts";
 import type { ConnectivityStatus } from "@sunshield/platform";
+import { formatTime } from "../../helpers/datetime";
 import { calculateRemainingProgress } from "./homeReminderClockPresentation";
 
 export type ReminderTone = "timed" | "soon" | "due" | "untimed";
@@ -126,8 +127,7 @@ export function buildReminderPresentation(options: {
   const affectedZones = zones.filter((zone) =>
     primaryAction.affectedZoneInstanceIds.includes(zone.zoneInstanceId)
   );
-  const presentationZones =
-    affectedZones.length > 0 ? affectedZones : zones;
+  const presentationZones = affectedZones.length > 0 ? affectedZones : zones;
   const zoneLabel = getAffectedZoneLabel(presentationZones);
   const absoluteTime = formatAbsoluteTime(primaryAction.actionAt);
   const actionLabel = ACTION_LABELS[primaryAction.actionKind];
@@ -138,9 +138,10 @@ export function buildReminderPresentation(options: {
       primaryAction.actionAt,
       now
     );
-    const dueMs = primaryAction.actionAt === null
-      ? null
-      : Date.parse(primaryAction.actionAt);
+    const dueMs =
+      primaryAction.actionAt === null
+        ? null
+        : Date.parse(primaryAction.actionAt);
     const progressPercent =
       dueMs !== null && Number.isFinite(dueMs)
         ? calculateProgressPercent(
@@ -179,10 +180,7 @@ export function buildReminderPresentation(options: {
       };
     }
 
-    const relativeTime = formatRelativeTime(
-      primaryAction.actionAt,
-      now
-    );
+    const relativeTime = formatRelativeTime(primaryAction.actionAt, now);
     return {
       tone: "timed",
       eyebrow: "提醒進行中",
@@ -230,13 +228,8 @@ function buildUntimedPresentation(options: {
   connectivity: ConnectivityStatus;
   actionLabel: string;
 }): ReminderPresentation {
-  const {
-    primaryAction,
-    zoneLabel,
-    absoluteTime,
-    connectivity,
-    actionLabel
-  } = options;
+  const { primaryAction, zoneLabel, absoluteTime, connectivity, actionLabel } =
+    options;
   const reasons = new Set(primaryAction.reasonCodes);
   const base = {
     tone: "untimed" as const,
@@ -288,8 +281,7 @@ function buildUntimedPresentation(options: {
       ...base,
       eyebrow: "防護方式不確定",
       title: `請確認${zoneLabel}目前的防護方式`,
-      body:
-        "防護方式尚未確認，目前會採用保守提醒，暫不顯示補擦倒數。確認防護方式後，即可建立對應的提醒時間。",
+      body: "防護方式尚未確認，目前會採用保守提醒，暫不顯示補擦倒數。確認防護方式後，即可建立對應的提醒時間。",
       timeLabel: "未計時",
       ariaLabel: `${zoneLabel}防護方式不確定。`
     };
@@ -334,8 +326,7 @@ function buildUntimedPresentation(options: {
       ...base,
       eyebrow: "無法計算可信時間",
       title: `${zoneLabel}使用的防曬乳身分尚未確認`,
-      body:
-        "防曬乳的標示尚未確認，暫時無法建立補擦倒數。",
+      body: "防曬乳的標示尚未確認，暫時無法建立補擦倒數。",
       timeLabel: "未計時",
       ariaLabel: `${zoneLabel}使用的防曬乳身分尚未確認。`,
       secondaryActions: secondary("update_protection_record")
@@ -378,8 +369,7 @@ function buildUntimedPresentation(options: {
       ...base,
       eyebrow: "入水時間不確定",
       title: `無法判斷${zoneLabel}剩餘的耐水時間`,
-      body:
-        "無法確認你的實際入水時間，因此不會以記錄時間代替。你可以補上或更正入水時間；若仍不確定，請依產品標示保守處理。",
+      body: "無法確認你的實際入水時間，因此不會以記錄時間代替。你可以補上或更正入水時間；若仍不確定，請依產品標示保守處理。",
       timeLabel: "未計時",
       ariaLabel: `無法判斷${zoneLabel}剩餘的耐水時間。`
     };
@@ -425,17 +415,10 @@ function getAffectedZoneLabel(zones: ZoneProjection[]): string {
 
 function formatAbsoluteTime(value: string | null): string {
   if (value === null) return "還沒有時間";
-  return new Intl.DateTimeFormat("zh-TW", {
-    hour: "2-digit",
-    minute: "2-digit",
-    hour12: false
-  }).format(new Date(value));
+  return formatTime(value);
 }
 
-function formatRelativeTime(
-  value: string | null,
-  now: Date
-): string {
+function formatRelativeTime(value: string | null, now: Date): string {
   const minutes = calculateRemainingMinutes(value, now);
   if (minutes === null) return "稍後";
   if (minutes <= 0) return "接近預計時間";

@@ -98,12 +98,12 @@ describe("deriveExpiryStatus", () => {
   });
 
   it("到期日當天仍未過期，隔天才過期", () => {
-    expect(
-      deriveExpiryStatus("2026-08-31", "2026-08-31T12:00:00.000Z")
-    ).toBe("not_expired");
-    expect(
-      deriveExpiryStatus("2026-08-31", "2026-09-01T12:00:00.000Z")
-    ).toBe("expired");
+    expect(deriveExpiryStatus("2026-08-31", "2026-08-31T12:00:00.000Z")).toBe(
+      "not_expired"
+    );
+    expect(deriveExpiryStatus("2026-08-31", "2026-09-01T12:00:00.000Z")).toBe(
+      "expired"
+    );
   });
 });
 

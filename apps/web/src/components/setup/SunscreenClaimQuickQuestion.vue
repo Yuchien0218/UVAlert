@@ -25,30 +25,15 @@ const groupName = `sunscreen-claim-${useId()}`;
     </p>
     <div class="choice-grid choice-grid--row">
       <label>
-        <input
-          v-model="model"
-          type="radio"
-          :name="groupName"
-          value="yes"
-        >
+        <input v-model="model" type="radio" :name="groupName" value="yes" />
         <span>有</span>
       </label>
       <label>
-        <input
-          v-model="model"
-          type="radio"
-          :name="groupName"
-          value="no"
-        >
+        <input v-model="model" type="radio" :name="groupName" value="no" />
         <span>沒有</span>
       </label>
       <label>
-        <input
-          v-model="model"
-          type="radio"
-          :name="groupName"
-          value="unknown"
-        >
+        <input v-model="model" type="radio" :name="groupName" value="unknown" />
         <span>不確定或看不清楚</span>
       </label>
     </div>
@@ -77,16 +62,17 @@ const groupName = `sunscreen-claim-${useId()}`;
   padding: var(--space-4);
   border-radius: var(--radius-sm);
   background: var(--color-untimed-soft, var(--surface-soft));
-  color: var(--text-secondary);
+  color: var(--text-body);
 }
 
 .claim-consequence strong {
   display: block;
   color: var(--text-primary);
+  line-height: 1.4;
 }
 
 .claim-consequence p {
   margin: var(--space-2) 0 0;
-  line-height: 1.7;
+  line-height: 1.6;
 }
 </style>

@@ -5,12 +5,9 @@ import {
 import type { ProductSettingsPort } from "@sunshield/platform";
 import type { SunshieldDatabase } from "../db/database";
 
-const CURRENT_PRODUCT_SNAPSHOT_KEY =
-  "currentProductLabelSnapshotV1";
+const CURRENT_PRODUCT_SNAPSHOT_KEY = "currentProductLabelSnapshotV1";
 
-export class LocalProductSettingsRepository
-  implements ProductSettingsPort
-{
+export class LocalProductSettingsRepository implements ProductSettingsPort {
   readonly #database: SunshieldDatabase;
 
   constructor(database: SunshieldDatabase) {
@@ -44,8 +41,6 @@ export class LocalProductSettingsRepository
   }
 
   async clearCurrentProductSnapshot(): Promise<void> {
-    await this.#database.AppMetadata.delete(
-      CURRENT_PRODUCT_SNAPSHOT_KEY
-    );
+    await this.#database.AppMetadata.delete(CURRENT_PRODUCT_SNAPSHOT_KEY);
   }
 }

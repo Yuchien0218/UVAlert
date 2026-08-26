@@ -32,8 +32,7 @@ const props = withDefaults(defineProps<Props>(), {
   collapsible: false,
   eyebrow: "本次使用",
   title: "只用在這次提醒",
-  description:
-    "只會記錄這次提醒需要的包裝標示，不會新增到你的防曬乳清單。"
+  description: "只會記錄這次提醒需要的包裝標示，不會新增到你的防曬乳清單。"
 });
 
 const value = defineModel<ProductSnapshotFormValue>({
@@ -49,9 +48,7 @@ const groupNames = {
 };
 
 const expanded = shallowRef(false);
-const showQuestions = computed(
-  () => !props.collapsible || expanded.value
-);
+const showQuestions = computed(() => !props.collapsible || expanded.value);
 
 /**
  * 收合時的摘要，只講真正會進倒數的兩件事：間隔與耐水。
@@ -124,7 +121,8 @@ const summary = computed(() => {
         }}
       </legend>
       <p class="question-card__helper">
-        請確認包裝上是否有 SPF、PA 等防曬標示；僅有品牌、成分或「天然」宣稱，無法確認這是防曬乳。
+        請確認包裝上是否有 SPF、PA
+        等防曬標示；僅有品牌、成分或「天然」宣稱，無法確認這是防曬乳。
       </p>
       <div class="choice-grid choice-grid--row">
         <label>
@@ -133,7 +131,7 @@ const summary = computed(() => {
             type="radio"
             :name="groupNames.claim"
             value="yes"
-          >
+          />
           <span>有</span>
         </label>
         <label>
@@ -142,7 +140,7 @@ const summary = computed(() => {
             type="radio"
             :name="groupNames.claim"
             value="no"
-          >
+          />
           <span>沒有</span>
         </label>
         <label>
@@ -151,7 +149,7 @@ const summary = computed(() => {
             type="radio"
             :name="groupNames.claim"
             value="unknown"
-          >
+          />
           <span>不確定或看不清楚</span>
         </label>
       </div>
@@ -190,7 +188,7 @@ const summary = computed(() => {
               type="radio"
               :name="groupNames.wait"
               value="none"
-            >
+            />
             <span>沒有這項說明</span>
           </label>
           <label>
@@ -199,7 +197,7 @@ const summary = computed(() => {
               type="radio"
               :name="groupNames.wait"
               value="explicit"
-            >
+            />
             <span>有明確分鐘數</span>
           </label>
           <label>
@@ -208,7 +206,7 @@ const summary = computed(() => {
               type="radio"
               :name="groupNames.wait"
               value="unknown"
-            >
+            />
             <span>不確定</span>
           </label>
         </div>
@@ -221,7 +219,7 @@ const summary = computed(() => {
             min="1"
             max="240"
             inputmode="numeric"
-          >
+          />
         </label>
       </fieldset>
 
@@ -237,7 +235,7 @@ const summary = computed(() => {
               type="radio"
               :name="groupNames.interval"
               value="none"
-            >
+            />
             <span>沒有明確分鐘數</span>
           </label>
           <label>
@@ -246,7 +244,7 @@ const summary = computed(() => {
               type="radio"
               :name="groupNames.interval"
               value="explicit"
-            >
+            />
             <span>有明確分鐘數</span>
           </label>
           <label>
@@ -255,14 +253,11 @@ const summary = computed(() => {
               type="radio"
               :name="groupNames.interval"
               value="unknown"
-            >
+            />
             <span>不確定</span>
           </label>
         </div>
-        <label
-          v-if="value.intervalAnswer === 'explicit'"
-          class="number-field"
-        >
+        <label v-if="value.intervalAnswer === 'explicit'" class="number-field">
           <span>補擦分鐘數</span>
           <input
             v-model.number="value.intervalMinutes"
@@ -271,7 +266,7 @@ const summary = computed(() => {
             min="1"
             max="1440"
             inputmode="numeric"
-          >
+          />
         </label>
       </fieldset>
 
@@ -287,13 +282,14 @@ const summary = computed(() => {
               type="radio"
               :name="groupNames.waterResistance"
               value="40"
-            >
+            />
             <span>
               耐水
               <span
                 class="stat-figure stat-figure--inline"
                 data-water-resistance="40"
-              >40</span>
+                >40</span
+              >
               分鐘
             </span>
           </label>
@@ -303,13 +299,14 @@ const summary = computed(() => {
               type="radio"
               :name="groupNames.waterResistance"
               value="80"
-            >
+            />
             <span>
               耐水
               <span
                 class="stat-figure stat-figure--inline"
                 data-water-resistance="80"
-              >80</span>
+                >80</span
+              >
               分鐘
             </span>
           </label>
@@ -319,7 +316,7 @@ const summary = computed(() => {
               type="radio"
               :name="groupNames.waterResistance"
               value="not_water_resistant"
-            >
+            />
             <span>明確標示不耐水</span>
           </label>
           <label>
@@ -328,7 +325,7 @@ const summary = computed(() => {
               type="radio"
               :name="groupNames.waterResistance"
               value="no_claim"
-            >
+            />
             <span>沒有耐水標示</span>
           </label>
           <label>
@@ -337,7 +334,7 @@ const summary = computed(() => {
               type="radio"
               :name="groupNames.waterResistance"
               value="unknown"
-            >
+            />
             <span>不確定或看不清楚</span>
           </label>
         </div>
@@ -377,8 +374,8 @@ const summary = computed(() => {
 
 .session-product p:not(.session-product__eyebrow) {
   margin-top: var(--space-2);
-  color: var(--text-secondary);
-  line-height: 1.7;
+  color: var(--text-body);
+  line-height: 1.6;
 }
 
 /* 特異性要壓過上面的 `.session-product p:not(.session-product__eyebrow)`，
@@ -433,10 +430,15 @@ const summary = computed(() => {
   color: var(--text-primary);
 }
 
+.identity-warning strong {
+  display: block;
+  line-height: 1.4;
+}
+
 .identity-warning p {
   margin: var(--space-1) 0 0;
-  color: var(--text-secondary);
+  color: var(--text-body);
   font-size: var(--font-size-body);
-  line-height: 1.7;
+  line-height: 1.6;
 }
 </style>

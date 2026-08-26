@@ -5,17 +5,16 @@ import { BrowserUvForecastClient } from "./BrowserUvForecastClient";
 describe("BrowserUvForecastClient", () => {
   it("以同源 API 取得並驗證五日預報 contract", async () => {
     const forecast = makeFiveDayUvForecast();
-    const fetch = vi.fn(async () =>
-      new Response(JSON.stringify(forecast), {
-        status: 200,
-        headers: { "Content-Type": "application/json" }
-      })
+    const fetch = vi.fn(
+      async () =>
+        new Response(JSON.stringify(forecast), {
+          status: 200,
+          headers: { "Content-Type": "application/json" }
+        })
     );
     const client = new BrowserUvForecastClient({ fetch });
 
-    const result = await client.getFiveDayForecast(
-      forecast.region.regionCode
-    );
+    const result = await client.getFiveDayForecast(forecast.region.regionCode);
 
     expect(result).toEqual(forecast);
     expect(fetch).toHaveBeenCalledWith(
@@ -32,8 +31,8 @@ describe("BrowserUvForecastClient", () => {
       fetch: async () => new Response(null, { status: 503 })
     });
 
-    await expect(
-      client.getFiveDayForecast("TPE-ZHONGZHENG")
-    ).rejects.toThrow("UV_FORECAST_HTTP_503");
+    await expect(client.getFiveDayForecast("TPE-ZHONGZHENG")).rejects.toThrow(
+      "UV_FORECAST_HTTP_503"
+    );
   });
 });

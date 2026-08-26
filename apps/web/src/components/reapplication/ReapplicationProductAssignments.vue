@@ -85,14 +85,20 @@ function optionLabel(choice: ReapplicationProductChoice): string {
 </script>
 
 <template>
-  <section class="app-card assignment-section" aria-labelledby="assignment-title">
+  <section
+    class="app-card assignment-section"
+    aria-labelledby="assignment-title"
+  >
     <h2 id="assignment-title">這次用了哪瓶防曬乳？</h2>
 
     <template v-if="!perZone">
       <p class="assignment-section__helper">
-        {{ selectedZones.length }} 個部位都會記錄成同一瓶防曬乳。這次確認的包裝標示會寫入紀錄。
+        {{ selectedZones.length }}
+        個部位都會記錄成同一瓶防曬乳。這次確認的包裝標示會寫入紀錄。
       </p>
-      <label class="visually-hidden" for="product-shared">全部部位使用的防曬乳</label>
+      <label class="visually-hidden" for="product-shared"
+        >全部部位使用的防曬乳</label
+      >
       <select
         id="product-shared"
         :value="sharedChoiceId"
@@ -109,7 +115,12 @@ function optionLabel(choice: ReapplicationProductChoice): string {
           {{ optionLabel(choice) }}
         </option>
       </select>
-      <p v-if="sharedError" id="product-shared-error" class="form-error" role="alert">
+      <p
+        v-if="sharedError"
+        id="product-shared-error"
+        class="form-error"
+        role="alert"
+      >
         {{ sharedError }}
       </p>
       <p v-else-if="sharedRestriction" class="restriction-note">
@@ -121,9 +132,7 @@ function optionLabel(choice: ReapplicationProductChoice): string {
     </template>
 
     <template v-else>
-      <p class="assignment-section__helper">
-        分別選擇各部位實際使用的防曬乳。
-      </p>
+      <p class="assignment-section__helper">分別選擇各部位實際使用的防曬乳。</p>
       <div
         v-for="zone in selectedZones"
         :key="zone.zoneInstanceId"
@@ -208,7 +217,7 @@ p {
 
 .assignment-section__helper {
   color: var(--text-secondary);
-  line-height: 1.7;
+  line-height: 1.6;
 }
 
 .assignment-row {
@@ -229,10 +238,6 @@ select {
   border-radius: var(--radius-sm);
   color: var(--text-primary);
   background: var(--surface-primary);
-}
-
-.form-error {
-  color: var(--color-due);
 }
 
 .restriction-note {

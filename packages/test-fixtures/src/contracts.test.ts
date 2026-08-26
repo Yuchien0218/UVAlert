@@ -25,9 +25,7 @@ describe("P0 shared contracts", () => {
   });
 
   it("EndSessionCommandV1 保存使用者主動結束原因", () => {
-    const result = EndSessionCommandV1Schema.safeParse(
-      makeEndSessionCommand()
-    );
+    const result = EndSessionCommandV1Schema.safeParse(makeEndSessionCommand());
 
     expect(result.success).toBe(true);
     if (result.success) {
@@ -100,7 +98,9 @@ describe("P0 shared contracts", () => {
       reapplicationIntervalStatus: "explicit_minutes" as const,
       reapplicationIntervalMinutes: null
     };
-    expect(ProductLabelSnapshotV1Schema.safeParse(snapshot).success).toBe(false);
+    expect(ProductLabelSnapshotV1Schema.safeParse(snapshot).success).toBe(
+      false
+    );
   });
 
   it("拒絕 unknown water start 卻帶 activityStartedAt", () => {

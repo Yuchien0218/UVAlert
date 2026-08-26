@@ -3,7 +3,11 @@ import { computed, nextTick, onMounted, shallowRef, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { useWebAppServices } from "../app/injection";
 import Icon from "../components/icons/Icon.vue";
+import QuickTimePicker from "../components/common/QuickTimePicker.vue";
+import SunLoader from "../components/feedback/SunLoader.vue";
+import ZoneSelectorGrid from "../components/reminder/ZoneSelectorGrid.vue";
 import { getZoneLabel } from "../features/reminder/reminderPresentation";
+import { formatDateTime } from "../helpers/datetime";
 
 /**
  * S-10 更正最近事件。
@@ -33,7 +37,7 @@ onMounted(() => {
 watch(
   () => eventCorrection.error.value,
   (value) => {
-    if (value === "not_found") void router.replace({ name: "reminder" });
+    if (value === "not_found") void router.replace({ name: "home" });
   }
 );
 
@@ -42,33 +46,13 @@ watch(
   async (value) => {
     if (value === "success") {
       await nextTick();
-      document
-        .querySelector<HTMLElement>("#correction-success-title")
-        ?.focus();
+      document.querySelector<HTMLElement>("#correction-success-title")?.focus();
     }
   }
 );
 
 function back(): void {
-  void router.push({ name: "reminder" });
-}
-
-function localValue(iso: string): string {
-  const date = new Date(iso);
-  return new Date(date.getTime() - date.getTimezoneOffset() * 60_000)
-    .toISOString()
-    .slice(0, 16);
-}
-
-function isQuickSelected(minutes: number): boolean {
-  return (
-    Math.abs(
-      (Date.parse(eventCorrection.referenceNow.value) -
-        Date.parse(eventCorrection.occurredAt.value)) /
-        60_000 -
-        minutes
-    ) < 0.5
-  );
+  void router.push({ name: "home", hash: "#recent-events" });
 }
 
 function zoneNames(zoneIds: string[]): string {
@@ -97,14 +81,20 @@ async function runVoid(): Promise<void> {
           原本的紀錄會保留下來，你會在後面新增一筆更正。送出前不會改變目前提醒。
         </p>
       </div>
-      <button class="icon-button" type="button" aria-label="返回提醒" @click="back">
+      <button
+        class="icon-button"
+        type="button"
+        aria-label="返回提醒"
+        @click="back"
+      >
         <Icon name="tool-close" :size="24" />
       </button>
     </header>
 
-    <p v-if="eventCorrection.phase.value === 'loading'" role="status">
-      正在讀取這筆紀錄…
-    </p>
+    <SunLoader
+      v-if="eventCorrection.phase.value === 'loading'"
+      label="正在讀取這筆紀錄…"
+    />
 
     <section
       v-else-if="
@@ -121,14 +111,14 @@ async function runVoid(): Promise<void> {
         }}
       </h2>
       <p v-if="eventCorrection.success.value.action === 'void'">
-        {{ eventCorrection.success.value.label }}不再影響目前提醒。原紀錄仍保留在事件歷史中。
+        {{
+          eventCorrection.success.value.label
+        }}不再影響目前提醒。原紀錄仍保留在事件歷史中。
       </p>
       <p v-else>
         {{ eventCorrection.success.value.label }}已更新為
         {{
-          new Date(
-            eventCorrection.success.value.occurredAt
-          ).toLocaleString("zh-TW")
+          formatDateTime(eventCorrection.success.value.occurredAt)
         }}，影響部位：{{ zoneNames(eventCorrection.success.value.zoneIds) }}。
       </p>
       <button class="button button--primary" type="button" @click="back">
@@ -141,7 +131,7 @@ async function runVoid(): Promise<void> {
       <section v-if="alreadyCorrected" class="app-card" role="alert">
         <h2>這筆紀錄已經被更正過</h2>
         <p>
-            同一筆紀錄只能更正一次。請返回提醒頁，從最近事件找到最新的一筆再更正。
+          同一筆紀錄只能更正一次。請返回提醒頁，從最近事件找到最新的一筆再更正。
         </p>
         <button class="button button--primary" type="button" @click="back">
           返回目前提醒
@@ -160,25 +150,12 @@ async function runVoid(): Promise<void> {
           <p v-else class="section-helper">
             取消勾選的部位會從這筆紀錄移除，其他部位不受影響。
           </p>
-          <div class="zone-grid">
-            <label
-              v-for="zone in eventCorrection.selectableZones.value"
-              :key="zone.zoneInstanceId"
-              class="zone-chip"
-            >
-              <input
-                type="checkbox"
-                :checked="
-                  eventCorrection.selectedZoneIds.value.includes(
-                    zone.zoneInstanceId
-                  )
-                "
-                :disabled="eventCorrection.zoneSelectionLocked.value"
-                @change="eventCorrection.toggleZone(zone.zoneInstanceId)"
-              >
-              <span>{{ getZoneLabel(zone) }}</span>
-            </label>
-          </div>
+          <ZoneSelectorGrid
+            :zones="eventCorrection.selectableZones.value"
+            :selected-zone-ids="eventCorrection.selectedZoneIds.value"
+            :locked="eventCorrection.zoneSelectionLocked.value"
+            @toggle="eventCorrection.toggleZone"
+          />
           <p
             v-if="eventCorrection.fieldErrors.value.zones?.[0]"
             class="form-error"
@@ -191,53 +168,16 @@ async function runVoid(): Promise<void> {
           </p>
         </section>
 
-        <section class="app-card time-section" aria-labelledby="correction-time-title">
-          <h2 id="correction-time-title">
-            {{ isGroup ? "實際何時補擦？" : "實際什麼時候發生？" }}
-          </h2>
-          <div class="quick-times">
-            <button
-              v-for="item in [
-                { label: '剛剛', minutes: 0 },
-                { label: '15 分鐘前', minutes: 15 },
-                { label: '30 分鐘前', minutes: 30 },
-                { label: '60 分鐘前', minutes: 60 }
-              ]"
-              :key="item.minutes"
-              class="button button--quiet"
-              type="button"
-              :aria-pressed="isQuickSelected(item.minutes)"
-              @click="eventCorrection.setQuickTime(item.minutes)"
-            >
-              {{ item.label }}
-            </button>
-          </div>
-          <label for="correction-time">自訂日期與時間</label>
-          <input
-            id="correction-time"
-            type="datetime-local"
-            :value="localValue(eventCorrection.occurredAt.value)"
-            @change="
-              eventCorrection.setOccurredAt(
-                new Date(
-                  ($event.target as HTMLInputElement).value
-                ).toISOString()
-              )
-            "
-          >
-          <p class="time-summary">
-            更正後：{{
-              new Date(eventCorrection.occurredAt.value).toLocaleString("zh-TW")
-            }}
-          </p>
-          <p
-            v-if="eventCorrection.fieldErrors.value.occurredAt?.[0]"
-            class="form-error"
-            role="alert"
-          >
-            {{ eventCorrection.fieldErrors.value.occurredAt[0] }}
-          </p>
-        </section>
+        <QuickTimePicker
+          :heading="isGroup ? '實際何時補擦？' : '實際什麼時候發生？'"
+          id-prefix="correction-time"
+          summary-label="更正後："
+          :applied-at="eventCorrection.occurredAt.value"
+          :reference-now="eventCorrection.referenceNow.value"
+          :error="eventCorrection.fieldErrors.value.occurredAt?.[0]"
+          @change="eventCorrection.setOccurredAt"
+          @quick="eventCorrection.setQuickTime"
+        />
 
         <p
           v-if="
@@ -328,68 +268,15 @@ async function runVoid(): Promise<void> {
   padding: var(--space-5);
 }
 
-.success-panel {
-  border-top: 0.35rem solid var(--color-success);
-}
-
 h1,
 h2,
 p {
   margin: 0;
 }
 
-/*
- * 跟 ReportContextEventPage 一直沿用 .flow-heading／.eyebrow 這兩個
- * class 名稱，但只定義過 `.flow-heading p` 的顏色，沒有版面（橫向排列、
- * 內距 div 的直向堆疊）——標題列其實是瀏覽器預設的直向堆疊。跟關閉鈕
- * 收斂順手補上，對齊 ReapplyPage.vue 已有的版本。
- */
-.flow-heading { display: flex; align-items: start; justify-content: space-between; gap: var(--space-4); }
-.flow-heading h1 { font-size: var(--font-size-page-title); }
-.flow-heading div { display: grid; gap: var(--space-3); }
-.flow-heading div > p:last-child {
-  color: var(--text-secondary);
-  line-height: 1.7;
-}
-
 .section-helper {
   color: var(--text-secondary);
-  line-height: 1.7;
-}
-
-.zone-grid {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-2);
-}
-
-.zone-chip {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--space-2);
-  padding: var(--space-2) var(--space-3);
-  border: 1px solid var(--border-strong);
-  border-radius: var(--radius-pill, 999px);
-  min-height: var(--tap-target);
-}
-
-.quick-times {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-2);
-}
-
-.time-section input {
-  min-height: var(--tap-target);
-  padding-inline: var(--space-3);
-  border: 1px solid var(--border-strong);
-  border-radius: var(--radius-sm);
-  color: var(--text-primary);
-  background: var(--surface-primary);
-}
-
-.time-summary {
-  color: var(--text-secondary);
+  line-height: 1.6;
 }
 
 .danger-zone {
@@ -397,27 +284,7 @@ p {
 }
 
 .danger-zone p {
-  color: var(--text-secondary);
-  line-height: 1.7;
-}
-
-.form-error {
-  color: var(--color-due);
-  line-height: 1.7;
-}
-
-.submit-actions {
-  display: grid;
-  gap: var(--space-3);
-}
-
-.submit-actions .button {
-  width: 100%;
-}
-
-@media (min-width: 36rem) {
-  .submit-actions {
-    grid-template-columns: 1fr auto;
-  }
+  color: var(--text-body);
+  line-height: 1.6;
 }
 </style>

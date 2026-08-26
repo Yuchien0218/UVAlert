@@ -230,9 +230,7 @@ function makeSession(zones: ZoneProjection[]): SessionProjection {
     zones,
     primaryAction: {
       ...baseAction,
-      affectedZoneInstanceIds: zones.map(
-        (zone) => zone.zoneInstanceId
-      )
+      affectedZoneInstanceIds: zones.map((zone) => zone.zoneInstanceId)
     },
     derivedFromEventRefs: ["application-1"]
   };

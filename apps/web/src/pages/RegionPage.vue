@@ -50,9 +50,7 @@ function returnToCaller(): Promise<unknown> {
       :phase="region.phase.value"
       :error="region.error.value"
       :candidate="region.candidate.value"
-      :approximate-accuracy-meters="
-        region.approximateAccuracyMeters.value
-      "
+      :approximate-accuracy-meters="region.approximateAccuracyMeters.value"
       @locate="region.useCurrentPosition"
       @confirm="confirmCandidate"
     />
@@ -105,12 +103,12 @@ function returnToCaller(): Promise<unknown> {
 }
 
 .region-skip p {
-  color: var(--text-secondary);
-  line-height: 1.7;
+  color: var(--text-body);
+  line-height: 1.6;
 }
 
 .region-skip__action {
-  min-height: 2.75rem;
+  min-height: var(--tap-target);
   padding-inline: var(--space-2);
   text-decoration: underline;
   text-underline-offset: 0.2rem;

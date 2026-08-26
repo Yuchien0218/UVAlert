@@ -6,10 +6,7 @@ const shellSource = readFileSync(
   "utf8"
 );
 const tokenSource = readFileSync(
-  new URL(
-    "../../../../../packages/ui/src/styles.css",
-    import.meta.url
-  ),
+  new URL("../../../../../packages/ui/src/styles.css", import.meta.url),
   "utf8"
 );
 
@@ -20,8 +17,6 @@ describe("AppShell fixed navigation layout", () => {
     expect(shellSource).toContain("app-shell--with-navigation");
     expect(shellSource).toContain("var(--bottom-nav-height)");
     expect(shellSource).toContain("env(safe-area-inset-bottom)");
-    expect(shellSource).toContain(
-      "route.meta.hideNavigation !== true"
-    );
+    expect(shellSource).toContain("route.meta.hideNavigation !== true");
   });
 });

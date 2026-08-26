@@ -14,8 +14,12 @@ const route = useRoute();
 const categorySlug = computed(() => String(route.params.category ?? ""));
 const category = computed(() => findEducationCategory(categorySlug.value));
 const articles = computed(() => listArticlesForCategory(categorySlug.value));
-const publishableCount = computed(() => articles.value.filter(isEducationArticlePublishable).length);
-const robots = computed(() => (publishableCount.value > 0 ? "index,follow" : "noindex,follow" as const));
+const publishableCount = computed(
+  () => articles.value.filter(isEducationArticlePublishable).length
+);
+const robots = computed(() =>
+  publishableCount.value > 0 ? "index,follow" : ("noindex,follow" as const)
+);
 </script>
 
 <template>
@@ -41,7 +45,11 @@ const robots = computed(() => (publishableCount.value > 0 ? "index,follow" : "no
       <p class="page-heading__body">{{ category.description }}</p>
     </header>
 
-    <aside v-if="publishableCount === 0" class="education-review-note" role="note">
+    <aside
+      v-if="publishableCount === 0"
+      class="education-review-note"
+      role="note"
+    >
       這個主題的文章正在進行專業審閱，暫不列入搜尋索引；你可以先閱讀整理中的版本。
     </aside>
 
@@ -57,7 +65,9 @@ const robots = computed(() => (publishableCount.value > 0 ? "index,follow" : "no
           class="app-card education-article-card"
           :to="educationArticlePath(article.slug)"
         >
-          <span class="education-card-kicker">{{ article.primaryQuestion }}</span>
+          <span class="education-card-kicker">{{
+            article.primaryQuestion
+          }}</span>
           <strong>{{ article.title }}</strong>
           <small>{{ article.summary }}</small>
           <span class="education-card-status">
@@ -80,7 +90,7 @@ const robots = computed(() => (publishableCount.value > 0 ? "index,follow" : "no
   border-radius: var(--radius-md);
   background: var(--surface-primary);
   color: var(--text-secondary);
-  line-height: 1.7;
+  line-height: 1.6;
 }
 
 .education-section-heading {
@@ -97,8 +107,7 @@ const robots = computed(() => (publishableCount.value > 0 ? "index,follow" : "no
 }
 
 .education-section-heading span,
-.education-card-kicker,
-.education-card-status {
+.education-card-kicker {
   color: var(--text-secondary);
   font-size: var(--font-size-caption);
 }
@@ -119,17 +128,11 @@ const robots = computed(() => (publishableCount.value > 0 ? "index,follow" : "no
 .education-article-card strong {
   font-size: var(--font-size-title-sm);
   font-weight: 500;
+  line-height: 1.45;
 }
 
 .education-article-card small {
   color: var(--text-secondary);
-  line-height: 1.7;
-}
-
-.education-card-status {
-  justify-self: start;
-  padding: 0.15rem 0.5rem;
-  border-radius: var(--radius-pill);
-  background: var(--border-subtle);
+  line-height: 1.6;
 }
 </style>

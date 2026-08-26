@@ -1,11 +1,7 @@
 // @vitest-environment happy-dom
 
 import { mount } from "@vue/test-utils";
-import {
-  createMemoryHistory,
-  createRouter,
-  type Router
-} from "vue-router";
+import { createMemoryHistory, createRouter, type Router } from "vue-router";
 import { afterEach, describe, expect, it } from "vitest";
 import EducationArticlePage from "./EducationArticlePage.vue";
 import EducationCategoryPage from "./EducationCategoryPage.vue";
@@ -43,11 +39,16 @@ describe("公開衛教頁", () => {
     expect(wrapper.text()).toContain("回家後與皮膚照顧");
     expect(wrapper.text()).toContain("特殊情況");
     expect(wrapper.text()).toContain("暫不列入搜尋索引");
-    expect(document.querySelector<HTMLMetaElement>('meta[name="robots"]')?.content).toBe("noindex,follow");
+    expect(
+      document.querySelector<HTMLMetaElement>('meta[name="robots"]')?.content
+    ).toBe("noindex,follow");
   });
 
   it("文章頁以可見摘要、審閱狀態與 canonical/Schema 呈現", async () => {
-    const router = makeRouter(EducationArticlePage, "/education/articles/:slug");
+    const router = makeRouter(
+      EducationArticlePage,
+      "/education/articles/:slug"
+    );
     await router.push("/education/articles/what-is-uv-index");
     await router.isReady();
     const wrapper = mount(EducationArticlePage, {
@@ -57,12 +58,19 @@ describe("公開衛教頁", () => {
     expect(wrapper.find("h1").text()).toContain("UV 指數怎麼看");
     expect(wrapper.text()).toContain("專業審閱中");
     expect(wrapper.text()).toContain("本文為一般衛教草稿");
-    expect(document.querySelector<HTMLMetaElement>('meta[name="robots"]')?.content).toBe("noindex,follow");
-    expect(document.querySelector('link[rel="canonical"]')?.getAttribute("href")).toBe(
-      "http://localhost:4173/education/articles/what-is-uv-index"
-    );
-    expect(document.querySelectorAll('script[type="application/ld+json"]')).toHaveLength(3);
-    expect(document.querySelector('script[data-uvalert-seo-kind="article"]')?.textContent).toContain("UV 指數怎麼看");
+    expect(
+      document.querySelector<HTMLMetaElement>('meta[name="robots"]')?.content
+    ).toBe("noindex,follow");
+    expect(
+      document.querySelector('link[rel="canonical"]')?.getAttribute("href")
+    ).toBe("http://localhost:4173/education/articles/what-is-uv-index");
+    expect(
+      document.querySelectorAll('script[type="application/ld+json"]')
+    ).toHaveLength(3);
+    expect(
+      document.querySelector('script[data-uvalert-seo-kind="article"]')
+        ?.textContent
+    ).toContain("UV 指數怎麼看");
   });
 
   it("未知分類不會默默顯示錯誤文章", async () => {
@@ -74,6 +82,8 @@ describe("公開衛教頁", () => {
     });
 
     expect(wrapper.text()).toContain("找不到這篇內容");
-    expect(document.querySelector<HTMLMetaElement>('meta[name="robots"]')?.content).toBe("noindex,follow");
+    expect(
+      document.querySelector<HTMLMetaElement>('meta[name="robots"]')?.content
+    ).toBe("noindex,follow");
   });
 });

@@ -1,12 +1,12 @@
 import { mkdir, writeFile } from "node:fs/promises";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
-import {
-  getPublicSiteUrl,
-  readEducationContent
-} from "./content-reader.mjs";
+import { getPublicSiteUrl, readEducationContent } from "./content-reader.mjs";
 
-const REPOSITORY_ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "../..");
+const REPOSITORY_ROOT = resolve(
+  dirname(fileURLToPath(import.meta.url)),
+  "../.."
+);
 const DIST_DIRECTORY = resolve(REPOSITORY_ROOT, "apps/web/dist");
 
 const PUBLIC_STYLE = `
@@ -45,28 +45,59 @@ th { background: #fff; }
 footer { padding: 0 clamp(1rem, 5vw, 2.75rem) 2.5rem; color: #5a5a5a; font-size: .8rem; }
 `;
 
-export async function generatePublicSite({ distDirectory = DIST_DIRECTORY, environment = process.env } = {}) {
+export async function generatePublicSite({
+  distDirectory = DIST_DIRECTORY,
+  environment = process.env
+} = {}) {
   const content = await readEducationContent();
   const baseUrl = getPublicSiteUrl(environment);
-  if (environment.VITE_PUBLIC_SITE_URL === undefined || environment.VITE_PUBLIC_SITE_URL.trim() === "") {
-    process.stderr.write("VITE_PUBLIC_SITE_URL is not set; generated canonical and sitemap URLs use http://localhost:4173.\n");
+  if (
+    environment.VITE_PUBLIC_SITE_URL === undefined ||
+    environment.VITE_PUBLIC_SITE_URL.trim() === ""
+  ) {
+    process.stderr.write(
+      "VITE_PUBLIC_SITE_URL is not set; generated canonical and sitemap URLs use http://localhost:4173.\n"
+    );
   }
   await mkdir(distDirectory, { recursive: true });
 
-  const publishedArticles = content.articles.filter((article) => article.publishable);
-  const latestPublishedDate = latestDate(publishedArticles.map((article) => article.lastReviewed));
+  const publishedArticles = content.articles.filter(
+    (article) => article.publishable
+  );
+  const latestPublishedDate = latestDate(
+    publishedArticles.map((article) => article.lastReviewed)
+  );
   const educationIndexable = publishedArticles.length > 0;
   await writePublicPage(
     resolve(distDirectory, "education/index.html"),
-    renderEducationIndex(content, baseUrl, educationIndexable, latestPublishedDate)
+    renderEducationIndex(
+      content,
+      baseUrl,
+      educationIndexable,
+      latestPublishedDate
+    )
   );
 
   for (const category of content.categories) {
-    const articles = content.articles.filter((article) => article.category === category.slug);
-    const publishableCount = articles.filter((article) => article.publishable).length;
+    const articles = content.articles.filter(
+      (article) => article.category === category.slug
+    );
+    const publishableCount = articles.filter(
+      (article) => article.publishable
+    ).length;
     await writePublicPage(
       resolve(distDirectory, `education/${category.slug}/index.html`),
-      renderCategoryPage(category, articles, baseUrl, publishableCount > 0, latestDate(articles.filter((article) => article.publishable).map((article) => article.lastReviewed)))
+      renderCategoryPage(
+        category,
+        articles,
+        baseUrl,
+        publishableCount > 0,
+        latestDate(
+          articles
+            .filter((article) => article.publishable)
+            .map((article) => article.lastReviewed)
+        )
+      )
     );
   }
 
@@ -82,7 +113,9 @@ export async function generatePublicSite({ distDirectory = DIST_DIRECTORY, envir
     sitemapUrls.push({ path: "/education", lastmod: latestPublishedDate });
   }
   for (const category of content.categories) {
-    const articles = content.articles.filter((article) => article.category === category.slug && article.publishable);
+    const articles = content.articles.filter(
+      (article) => article.category === category.slug && article.publishable
+    );
     if (articles.length > 0) {
       sitemapUrls.push({
         path: `/education/${category.slug}`,
@@ -91,11 +124,22 @@ export async function generatePublicSite({ distDirectory = DIST_DIRECTORY, envir
     }
   }
   for (const article of publishedArticles) {
-    sitemapUrls.push({ path: `/education/articles/${article.slug}`, lastmod: article.lastReviewed });
+    sitemapUrls.push({
+      path: `/education/articles/${article.slug}`,
+      lastmod: article.lastReviewed
+    });
   }
 
-  await writeFile(resolve(distDirectory, "sitemap.xml"), renderSitemap(baseUrl, sitemapUrls), "utf8");
-  await writeFile(resolve(distDirectory, "robots.txt"), renderRobots(baseUrl), "utf8");
+  await writeFile(
+    resolve(distDirectory, "sitemap.xml"),
+    renderSitemap(baseUrl, sitemapUrls),
+    "utf8"
+  );
+  await writeFile(
+    resolve(distDirectory, "robots.txt"),
+    renderRobots(baseUrl),
+    "utf8"
+  );
   return {
     articleCount: content.articles.length,
     publishedArticleCount: publishedArticles.length,
@@ -107,8 +151,12 @@ export async function generatePublicSite({ distDirectory = DIST_DIRECTORY, envir
 function renderEducationIndex(content, baseUrl, indexable, lastmod) {
   const categories = content.categories
     .map((category) => {
-      const articles = content.articles.filter((article) => article.category === category.slug);
-      const published = articles.filter((article) => article.publishable).length;
+      const articles = content.articles.filter(
+        (article) => article.category === category.slug
+      );
+      const published = articles.filter(
+        (article) => article.publishable
+      ).length;
       return `<a class="card" href="/education/${category.slug}"><span class="kicker">${articles.length} 篇文章</span><strong>${escapeHtml(category.title)}</strong><small>${escapeHtml(category.description)}</small><span class="status">${published > 0 ? `${published} 篇已發布` : "專業審閱中"}</span></a>`;
     })
     .join("\n");
@@ -118,7 +166,8 @@ function renderEducationIndex(content, baseUrl, indexable, lastmod) {
   const body = `<p class="eyebrow">防曬生活編輯部</p><h1>防曬衛教</h1><p class="lead">先回答你正在搜尋的問題，再補上適用情境、限制與官方來源。這裡是一般衛教，不取代診斷或個人醫療建議。</p>${notice}<h2>依一天中的使用流程找答案</h2><div class="card-list">${categories}</div>`;
   return renderDocument({
     title: "防曬衛教",
-    description: "用白話讀懂 UV、防曬乳、補擦、碰水與曬後照護；每篇文章列出官方來源與使用界線。",
+    description:
+      "用白話讀懂 UV、防曬乳、補擦、碰水與曬後照護；每篇文章列出官方來源與使用界線。",
     canonicalPath: "/education",
     robots: indexable ? "index,follow" : "noindex,follow",
     baseUrl,
@@ -131,7 +180,10 @@ function renderEducationIndex(content, baseUrl, indexable, lastmod) {
 
 function renderCategoryPage(category, articles, baseUrl, indexable, lastmod) {
   const cards = articles
-    .map((article) => `<a class="card" href="/education/articles/${article.slug}"><span class="kicker">${escapeHtml(article.primaryQuestion)}</span><strong>${escapeHtml(article.title)}</strong><small>${escapeHtml(article.summary)}</small><span class="status">${article.publishable ? "已發布" : "專業審閱中"}</span></a>`)
+    .map(
+      (article) =>
+        `<a class="card" href="/education/articles/${article.slug}"><span class="kicker">${escapeHtml(article.primaryQuestion)}</span><strong>${escapeHtml(article.title)}</strong><small>${escapeHtml(article.summary)}</small><span class="status">${article.publishable ? "已發布" : "專業審閱中"}</span></a>`
+    )
     .join("\n");
   const notice = indexable
     ? ""
@@ -154,16 +206,28 @@ function renderCategoryPage(category, articles, baseUrl, indexable, lastmod) {
 }
 
 function renderArticlePage(article, content, baseUrl) {
-  const category = content.categories.find((candidate) => candidate.slug === article.category);
+  const category = content.categories.find(
+    (candidate) => candidate.slug === article.category
+  );
   const related = content.articles
-    .filter((candidate) => candidate.category === article.category && candidate.slug !== article.slug)
+    .filter(
+      (candidate) =>
+        candidate.category === article.category &&
+        candidate.slug !== article.slug
+    )
     .slice(0, 3)
-    .map((candidate) => `<li><a href="/education/articles/${candidate.slug}">${escapeHtml(candidate.title)}</a></li>`)
+    .map(
+      (candidate) =>
+        `<li><a href="/education/articles/${candidate.slug}">${escapeHtml(candidate.title)}</a></li>`
+    )
     .join("");
   const notice = article.publishable
     ? ""
     : `<aside class="review-note">這篇文章目前是整理中的衛教草稿，尚未完成 UVAlert 專業審閱；內容僅供閱讀，不代表個人化醫療建議。</aside>`;
-  const relatedSection = related === "" ? "" : `<section class="related"><h2>同主題延伸閱讀</h2><ul>${related}</ul></section>`;
+  const relatedSection =
+    related === ""
+      ? ""
+      : `<section class="related"><h2>同主題延伸閱讀</h2><ul>${related}</ul></section>`;
   const body = `<a class="back-link" href="${category === undefined ? "/education" : `/education/${category.slug}`}">← ${escapeHtml(category?.title ?? "防曬衛教")}</a><p class="eyebrow">${escapeHtml(article.primaryQuestion)}</p><h1>${escapeHtml(article.title)}</h1><p class="summary">${escapeHtml(article.summary)}</p><p class="meta">最後查閱：${escapeHtml(article.lastReviewed)} · ${article.publishable ? "已發布" : "專業審閱中"}</p>${notice}<div class="article-body">${article.bodyHtml}</div>${relatedSection}`;
   return renderDocument({
     title: article.title,
@@ -175,14 +239,27 @@ function renderArticlePage(article, content, baseUrl) {
     article,
     breadcrumbs: [
       { name: "防曬衛教", path: "/education" },
-      ...(category === undefined ? [] : [{ name: category.title, path: `/education/${category.slug}` }]),
+      ...(category === undefined
+        ? []
+        : [{ name: category.title, path: `/education/${category.slug}` }]),
       { name: article.title, path: `/education/articles/${article.slug}` }
     ],
     lastmod: article.lastReviewed
   });
 }
 
-function renderDocument({ title, description, canonicalPath, robots, baseUrl, body, article, breadcrumbs, pageType = "WebPage", lastmod }) {
+function renderDocument({
+  title,
+  description,
+  canonicalPath,
+  robots,
+  baseUrl,
+  body,
+  article,
+  breadcrumbs,
+  pageType = "WebPage",
+  lastmod
+}) {
   const canonicalUrl = `${baseUrl}${canonicalPath}`;
   const pageSchema = {
     "@context": "https://schema.org",
@@ -221,15 +298,24 @@ function renderDocument({ title, description, canonicalPath, robots, baseUrl, bo
     });
   }
   const schemaScripts = schemas
-    .map((schema) => `<script type="application/ld+json">${safeJson(schema)}</script>`)
+    .map(
+      (schema) =>
+        `<script type="application/ld+json">${safeJson(schema)}</script>`
+    )
     .join("");
-  const lastmodMeta = lastmod === undefined ? "" : `<meta name="last-modified" content="${escapeHtml(lastmod)}">`;
+  const lastmodMeta =
+    lastmod === undefined
+      ? ""
+      : `<meta name="last-modified" content="${escapeHtml(lastmod)}">`;
   return `<!doctype html><html lang="zh-Hant"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>${escapeHtml(title)}｜防曬衛教｜UVAlert</title><meta name="description" content="${escapeHtml(description)}"><meta name="robots" content="${robots}"><link rel="canonical" href="${escapeHtml(canonicalUrl)}"><meta property="og:title" content="${escapeHtml(title)}"><meta property="og:description" content="${escapeHtml(description)}"><meta property="og:type" content="${article === undefined ? "website" : "article"}"><meta property="og:url" content="${escapeHtml(canonicalUrl)}"><meta property="og:site_name" content="UVAlert 防曬晴報員">${lastmodMeta}<style>${PUBLIC_STYLE}</style>${schemaScripts}</head><body><header class="site-header"><a href="/">UVAlert 防曬晴報員</a><small>防曬生活編輯部</small></header><main>${body}</main><footer>一般衛教內容；若有持續或加重的不適，請尋求醫療專業協助。</footer></body></html>`;
 }
 
 function renderSitemap(baseUrl, urls) {
   const entries = urls
-    .map(({ path, lastmod }) => `<url><loc>${escapeXml(`${baseUrl}${path}`)}</loc>${lastmod === undefined ? "" : `<lastmod>${escapeXml(lastmod)}</lastmod>`}</url>`)
+    .map(
+      ({ path, lastmod }) =>
+        `<url><loc>${escapeXml(`${baseUrl}${path}`)}</loc>${lastmod === undefined ? "" : `<lastmod>${escapeXml(lastmod)}</lastmod>`}</url>`
+    )
     .join("");
   return `<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">${entries}</urlset>\n`;
 }
@@ -266,7 +352,9 @@ function escapeXml(value) {
 
 async function main() {
   const result = await generatePublicSite();
-  process.stdout.write(`Public education site generated: ${result.articleCount} articles, ${result.publishedArticleCount} published, ${result.sitemapUrlCount} sitemap URLs\n`);
+  process.stdout.write(
+    `Public education site generated: ${result.articleCount} articles, ${result.publishedArticleCount} published, ${result.sitemapUrlCount} sitemap URLs\n`
+  );
 }
 
 if (

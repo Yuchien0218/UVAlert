@@ -68,20 +68,27 @@ function makeCloud(options: {
 }) {
   return {
     getManifest: vi.fn(async () => options.manifest),
-    read: vi.fn(async (_request: SyncReadRequestV1): Promise<SyncReadResponseV1> => options.read ?? {
-      schemaVersion: "sync-v1",
-      records: [],
-      tombstones: []
-    }),
-    commit: vi.fn(async (_request: SyncCommitRequestV1): Promise<SyncCommitResultV1> => {
-      if (options.commitError !== undefined) throw options.commitError;
-      return options.commit ?? {
-        schemaVersion: "sync-v1",
-        committedRecords: [],
-        committedTombstones: [],
-        committedAt: now
-      };
-    }),
+    read: vi.fn(
+      async (_request: SyncReadRequestV1): Promise<SyncReadResponseV1> =>
+        options.read ?? {
+          schemaVersion: "sync-v1",
+          records: [],
+          tombstones: []
+        }
+    ),
+    commit: vi.fn(
+      async (_request: SyncCommitRequestV1): Promise<SyncCommitResultV1> => {
+        if (options.commitError !== undefined) throw options.commitError;
+        return (
+          options.commit ?? {
+            schemaVersion: "sync-v1",
+            committedRecords: [],
+            committedTombstones: [],
+            committedAt: now
+          }
+        );
+      }
+    ),
     delete: vi.fn(async () => ({
       schemaVersion: "sync-v1" as const,
       committedTombstones: [],
@@ -107,8 +114,7 @@ describe("createSyncController", () => {
     const controller = createSyncController({
       local,
       cloud,
-      createId: () => "sync-idempotency",
-      now: () => now
+      createId: () => "sync-idempotency"
     });
 
     const preview = await controller.preparePreview();
@@ -234,7 +240,9 @@ describe("createSyncController", () => {
     });
     await expect(controller.confirm()).resolves.toBe(true);
     expect(cloud.commit).toHaveBeenCalledWith(
-      expect.objectContaining({ tombstones: [expect.objectContaining({ tombstone })] })
+      expect.objectContaining({
+        tombstones: [expect.objectContaining({ tombstone })]
+      })
     );
     expect(local.applyTombstones).toHaveBeenCalledWith([tombstone]);
   });

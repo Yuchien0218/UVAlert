@@ -1,16 +1,9 @@
 import { z } from "zod";
-import {
-  NonEmptyIdSchema,
-  UtcInstantSchema
-} from "./common";
+import { NonEmptyIdSchema, UtcInstantSchema } from "./common";
 import { SessionEventStreamV1Schema } from "./events";
-import {
-  ProductCatalogRecordV1Schema,
-} from "./product";
+import { ProductCatalogRecordV1Schema } from "./product";
 import type { ProductCatalogRecordV1 } from "./product";
-import {
-  ProtectionSessionRecordSchema,
-} from "./records";
+import { ProtectionSessionRecordSchema } from "./records";
 import type { ProtectionSessionRecord } from "./records";
 import { RegionPreferenceV1Schema } from "./weather";
 
@@ -120,9 +113,7 @@ export const SyncRecordEnvelopeV1Schema = z.discriminatedUnion("recordKind", [
   UserPreferencesSyncRecordSchema
 ]);
 
-export type SyncRecordEnvelopeV1 = z.infer<
-  typeof SyncRecordEnvelopeV1Schema
->;
+export type SyncRecordEnvelopeV1 = z.infer<typeof SyncRecordEnvelopeV1Schema>;
 
 export const SyncRecordKeySchema = z.object({
   recordKind: SyncRecordKindSchema,
@@ -138,9 +129,7 @@ export const SyncRecordSummaryV1Schema = SyncRecordKeySchema.extend({
   updatedAt: UtcInstantSchema
 });
 
-export type SyncRecordSummaryV1 = z.infer<
-  typeof SyncRecordSummaryV1Schema
->;
+export type SyncRecordSummaryV1 = z.infer<typeof SyncRecordSummaryV1Schema>;
 
 export const SyncTombstoneV1Schema = SyncRecordKeySchema.extend({
   schemaVersion: z.literal(SYNC_SCHEMA_VERSION),
@@ -179,18 +168,14 @@ export const SyncCommitRecordV1Schema = z.object({
   expectedRevision: z.number().int().nonnegative().nullable()
 });
 
-export type SyncCommitRecordV1 = z.infer<
-  typeof SyncCommitRecordV1Schema
->;
+export type SyncCommitRecordV1 = z.infer<typeof SyncCommitRecordV1Schema>;
 
 export const SyncCommitTombstoneV1Schema = z.object({
   tombstone: SyncTombstoneV1Schema,
   expectedRevision: z.number().int().nonnegative().nullable()
 });
 
-export type SyncCommitTombstoneV1 = z.infer<
-  typeof SyncCommitTombstoneV1Schema
->;
+export type SyncCommitTombstoneV1 = z.infer<typeof SyncCommitTombstoneV1Schema>;
 
 export const SyncCommitRequestV1Schema = z.object({
   schemaVersion: z.literal(SYNC_SCHEMA_VERSION),
@@ -199,9 +184,7 @@ export const SyncCommitRequestV1Schema = z.object({
   tombstones: z.array(SyncCommitTombstoneV1Schema).max(1000)
 });
 
-export type SyncCommitRequestV1 = z.infer<
-  typeof SyncCommitRequestV1Schema
->;
+export type SyncCommitRequestV1 = z.infer<typeof SyncCommitRequestV1Schema>;
 
 export const SyncCommitResultV1Schema = z.object({
   schemaVersion: z.literal(SYNC_SCHEMA_VERSION),
@@ -215,12 +198,14 @@ export type SyncCommitResultV1 = z.infer<typeof SyncCommitResultV1Schema>;
 export const SyncDeleteRequestV1Schema = z.object({
   schemaVersion: z.literal(SYNC_SCHEMA_VERSION),
   idempotencyKey: NonEmptyIdSchema.max(160),
-  records: z.array(
-    z.object({
-      key: SyncRecordKeySchema,
-      expectedRevision: z.number().int().positive()
-    })
-  ).max(1000)
+  records: z
+    .array(
+      z.object({
+        key: SyncRecordKeySchema,
+        expectedRevision: z.number().int().positive()
+      })
+    )
+    .max(1000)
 });
 
 export type SyncDeleteRequestV1 = z.infer<typeof SyncDeleteRequestV1Schema>;

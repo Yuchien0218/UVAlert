@@ -2,7 +2,10 @@ import { readdir, readFile } from "node:fs/promises";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
-const REPOSITORY_ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "../..");
+const REPOSITORY_ROOT = resolve(
+  dirname(fileURLToPath(import.meta.url)),
+  "../.."
+);
 const ARTICLES_DIRECTORY = resolve(REPOSITORY_ROOT, "docs/education/articles");
 const EDUCATION_README = resolve(REPOSITORY_ROOT, "docs/education/README.md");
 
@@ -68,7 +71,9 @@ export async function readEducationContent() {
     const category = CATEGORY_BY_SLUG.get(article.category);
 
     if (category === undefined) {
-      throw new Error(`Unknown education category ${article.category} in ${fileName}`);
+      throw new Error(
+        `Unknown education category ${article.category} in ${fileName}`
+      );
     }
     if (article.slug !== fileName.replace(/\.md$/, "")) {
       throw new Error(`Article slug does not match file name in ${fileName}`);
@@ -89,7 +94,9 @@ export async function readEducationContent() {
     }
     seenSlugs.add(article.slug);
     if (!order.has(article.slug)) {
-      throw new Error(`Article ${article.slug} is missing from docs/education/README.md`);
+      throw new Error(
+        `Article ${article.slug} is missing from docs/education/README.md`
+      );
     }
   }
 
@@ -99,7 +106,9 @@ export async function readEducationContent() {
     }
   }
 
-  parsedArticles.sort((left, right) => order.get(left.slug) - order.get(right.slug));
+  parsedArticles.sort(
+    (left, right) => order.get(left.slug) - order.get(right.slug)
+  );
 
   return {
     categories: CATEGORY_DEFINITIONS,
@@ -140,17 +149,24 @@ export function renderMarkdownToHtml(markdown) {
         items.push((lines[index] ?? "").replace(/^\s*[-*+]\s+/, ""));
         index += 1;
       }
-      output.push(`<ul>${items.map((item) => `<li>${renderInline(item)}</li>`).join("")}</ul>`);
+      output.push(
+        `<ul>${items.map((item) => `<li>${renderInline(item)}</li>`).join("")}</ul>`
+      );
       continue;
     }
 
     if (/^\s*\d+[.)]\s+/.test(line)) {
       const items = [];
-      while (index < lines.length && /^\s*\d+[.)]\s+/.test(lines[index] ?? "")) {
+      while (
+        index < lines.length &&
+        /^\s*\d+[.)]\s+/.test(lines[index] ?? "")
+      ) {
         items.push((lines[index] ?? "").replace(/^\s*\d+[.)]\s+/, ""));
         index += 1;
       }
-      output.push(`<ol>${items.map((item) => `<li>${renderInline(item)}</li>`).join("")}</ol>`);
+      output.push(
+        `<ol>${items.map((item) => `<li>${renderInline(item)}</li>`).join("")}</ol>`
+      );
       continue;
     }
 
@@ -167,7 +183,9 @@ export function renderMarkdownToHtml(markdown) {
         quoteLines.push((lines[index] ?? "").replace(/^>\s?/, ""));
         index += 1;
       }
-      output.push(`<blockquote>${renderInline(quoteLines.join(" "))}</blockquote>`);
+      output.push(
+        `<blockquote>${renderInline(quoteLines.join(" "))}</blockquote>`
+      );
       continue;
     }
 
@@ -206,7 +224,9 @@ function parseArticle(source, sourcePath) {
   }
 
   const frontMatter = parseFrontMatter(normalized.slice(4, closingMarker));
-  const bodyMarkdown = normalized.slice(closingMarker + "\n---\n".length).trim();
+  const bodyMarkdown = normalized
+    .slice(closingMarker + "\n---\n".length)
+    .trim();
   const requiredFields = [
     "title",
     "slug",
@@ -218,7 +238,10 @@ function parseArticle(source, sourcePath) {
     "lastReviewed"
   ];
   for (const field of requiredFields) {
-    if (typeof frontMatter[field] !== "string" || frontMatter[field].length === 0) {
+    if (
+      typeof frontMatter[field] !== "string" ||
+      frontMatter[field].length === 0
+    ) {
       throw new Error(`Missing article field ${field} in ${sourcePath}`);
     }
   }
@@ -258,7 +281,9 @@ function parseFrontMatter(source) {
 
 function readArticleOrder(readme) {
   const order = new Map();
-  const matches = readme.matchAll(/\|\s*[^|]+\s*\|\s*[^|]+\s*\|\s*`([^`]+)`\s*\|/g);
+  const matches = readme.matchAll(
+    /\|\s*[^|]+\s*\|\s*[^|]+\s*\|\s*`([^`]+)`\s*\|/g
+  );
   for (const [index, match] of [...matches].entries()) {
     const slug = match[1];
     if (order.has(slug)) {
@@ -272,7 +297,10 @@ function readArticleOrder(readme) {
 function isTableStart(lines, index) {
   const header = lines[index] ?? "";
   const separator = lines[index + 1] ?? "";
-  return header.includes("|") && /^\s*\|?\s*:?-{3,}:?\s*(\|\s*:?-{3,}:?\s*)+\|?\s*$/.test(separator);
+  return (
+    header.includes("|") &&
+    /^\s*\|?\s*:?-{3,}:?\s*(\|\s*:?-{3,}:?\s*)+\|?\s*$/.test(separator)
+  );
 }
 
 function renderTable(lines, startIndex) {
@@ -291,9 +319,14 @@ function renderTable(lines, startIndex) {
     index += 1;
   }
 
-  const head = headerCells.map((cell) => `<th scope="col">${renderInline(cell)}</th>`).join("");
+  const head = headerCells
+    .map((cell) => `<th scope="col">${renderInline(cell)}</th>`)
+    .join("");
   const body = rows
-    .map((row) => `<tr>${row.map((cell) => `<td>${renderInline(cell)}</td>`).join("")}</tr>`)
+    .map(
+      (row) =>
+        `<tr>${row.map((cell) => `<td>${renderInline(cell)}</td>`).join("")}</tr>`
+    )
     .join("");
   return {
     html: `<div class="education-table-wrap"><table><thead><tr>${head}</tr></thead><tbody>${body}</tbody></table></div>`,
@@ -324,13 +357,17 @@ function renderInline(value) {
   );
   result = result.replace(
     /\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g,
-    (_match, label, url) => protect(`<a href="${url}" target="_blank" rel="noreferrer">${label}</a>`)
+    (_match, label, url) =>
+      protect(`<a href="${url}" target="_blank" rel="noreferrer">${label}</a>`)
   );
   result = result.replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>");
   result = result.replace(/__([^_]+)__/g, "<strong>$1</strong>");
   result = result.replace(/\*([^*]+)\*/g, "<em>$1</em>");
   result = result.replace(/_([^_]+)_/g, "<em>$1</em>");
-  return result.replace(/\u0000(\d+)\u0000/g, (_match, tokenIndex) => tokens[Number(tokenIndex)] ?? "");
+  return result.replace(
+    /\u0000(\d+)\u0000/g,
+    (_match, tokenIndex) => tokens[Number(tokenIndex)] ?? ""
+  );
 }
 
 function escapeHtml(value) {

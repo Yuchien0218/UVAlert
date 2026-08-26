@@ -76,15 +76,20 @@ async function runTest(): Promise<void> {
 
 <template>
   <div class="page-stack notification-settings-page">
+    <!-- 2026-08-24：返回改成右上角只有圖示的叉叉，跟其他頁一致。 -->
     <header class="detail-header">
-      <button class="text-link" type="button" @click="goBack">
-        <Icon name="tool-arrow-left" :size="20" />
-        返回更多
+      <button
+        class="icon-button"
+        type="button"
+        aria-label="返回更多"
+        @click="goBack"
+      >
+        <Icon name="tool-close" :size="24" />
       </button>
     </header>
 
     <header class="page-heading">
-      <h1>通知設定</h1>
+      <h1 class="page-heading__title">通知設定</h1>
       <p>
         在防曬即將失效或該補擦時接收提醒。提醒由這台裝置本機發出，不經由外部伺服器。
       </p>
@@ -115,7 +120,9 @@ async function runTest(): Promise<void> {
         </button>
         <div v-if="showDeniedSteps" id="denied-steps" class="note-box">
           <p>
-            開啟位置依瀏覽器而異，通常在網址列左側的鎖頭或資訊圖示裡找到「網站設定」或「權限」，把通知改為允許；也可以到瀏覽器的「設定 → 隱私權與安全性 → 網站設定 → 通知」找到本網站調整。若系統整體關閉了通知，還需要到作業系統的通知設定裡一併打開。
+            開啟位置依瀏覽器而異，通常在網址列左側的鎖頭或資訊圖示裡找到「網站設定」或「權限」，把通知改為允許；也可以到瀏覽器的「設定
+            → 隱私權與安全性 → 網站設定 →
+            通知」找到本網站調整。若系統整體關閉了通知，還需要到作業系統的通知設定裡一併打開。
           </p>
         </div>
       </div>
@@ -147,7 +154,8 @@ async function runTest(): Promise<void> {
     <section class="app-card" aria-labelledby="delivery-heading">
       <h2 id="delivery-heading">通知傳送說明</h2>
       <p class="delivery-note">
-        <strong>單一提醒原則</strong>：系統每次只會排定下一個最近的補擦到期提醒，避免過多通知干擾。
+        <strong>單一提醒原則</strong
+        >：系統每次只會排定下一個最近的補擦到期提醒，避免過多通知干擾。
       </p>
 
       <div v-if="canDeliverInBackground" class="delivery-emphasis">
@@ -163,20 +171,20 @@ async function runTest(): Promise<void> {
       </div>
     </section>
 
-    <section
-      v-if="isGranted"
-      class="app-card"
-      aria-labelledby="repeat-heading"
-    >
+    <section v-if="isGranted" class="app-card" aria-labelledby="repeat-heading">
       <h2 id="repeat-heading">再次提醒頻率</h2>
-      <div class="repeat-options" role="radiogroup" aria-labelledby="repeat-heading">
+      <div
+        class="repeat-options"
+        role="radiogroup"
+        aria-labelledby="repeat-heading"
+      >
         <label class="repeat-option">
           <input
             type="radio"
             name="reminder-frequency"
             :checked="reminderFrequencyMinutes === null"
             @change="setFrequency(null)"
-          >
+          />
           只提醒一次
         </label>
         <label class="repeat-option">
@@ -185,7 +193,7 @@ async function runTest(): Promise<void> {
             name="reminder-frequency"
             :checked="reminderFrequencyMinutes === 5"
             @change="setFrequency(5)"
-          >
+          />
           每 5 分鐘再提醒一次
         </label>
         <label class="repeat-option">
@@ -194,7 +202,7 @@ async function runTest(): Promise<void> {
             name="reminder-frequency"
             :checked="reminderFrequencyMinutes === 15"
             @change="setFrequency(15)"
-          >
+          />
           每 15 分鐘再提醒一次
         </label>
       </div>
@@ -203,11 +211,7 @@ async function runTest(): Promise<void> {
       </p>
     </section>
 
-    <section
-      v-if="isGranted"
-      class="app-card"
-      aria-labelledby="test-heading"
-    >
+    <section v-if="isGranted" class="app-card" aria-labelledby="test-heading">
       <h2 id="test-heading">裝置測試</h2>
       <p class="delivery-note">送一則測試通知，確認這台裝置目前收得到。</p>
       <button
@@ -232,6 +236,12 @@ async function runTest(): Promise<void> {
 .notification-settings-page {
   display: grid;
   gap: var(--space-4);
+}
+
+/* 右上角的返回鈕靠右。 */
+.detail-header {
+  display: flex;
+  justify-content: flex-end;
 }
 
 .app-card {
@@ -290,7 +300,7 @@ async function runTest(): Promise<void> {
 
 .delivery-emphasis p:not(.delivery-emphasis__title) {
   margin: 0;
-  color: var(--text-secondary);
+  color: var(--text-body);
   line-height: 1.6;
 }
 
@@ -304,11 +314,5 @@ async function runTest(): Promise<void> {
   align-items: center;
   gap: var(--space-2);
   min-height: var(--tap-target);
-}
-
-.form-error {
-  margin: 0;
-  color: var(--color-due);
-  line-height: 1.6;
 }
 </style>

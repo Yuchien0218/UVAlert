@@ -32,16 +32,17 @@ export const SessionStartedEventV1Schema = EventEnvelopeSchema.extend({
   zoneInstanceIds: z.array(NonEmptyIdSchema).min(1)
 });
 
-export const ZoneMethodEventV1Schema = CorrectableEventEnvelopeSchema.safeExtend({
-  schemaVersion: z.literal(EVENT_SCHEMA_VERSION),
-  eventType: z.literal("zone_method"),
-  zoneInstanceId: NonEmptyIdSchema,
-  bodyZoneCode: BodyZoneCodeSchema,
-  customLabel: z.string().trim().min(1).max(80).nullable().default(null),
-  skinExposureStatus: SkinExposureStatusSchema,
-  methodCertainty: MethodCertaintySchema,
-  methodComponents: z.array(MethodComponentSchema)
-});
+export const ZoneMethodEventV1Schema =
+  CorrectableEventEnvelopeSchema.safeExtend({
+    schemaVersion: z.literal(EVENT_SCHEMA_VERSION),
+    eventType: z.literal("zone_method"),
+    zoneInstanceId: NonEmptyIdSchema,
+    bodyZoneCode: BodyZoneCodeSchema,
+    customLabel: z.string().trim().min(1).max(80).nullable().default(null),
+    skinExposureStatus: SkinExposureStatusSchema,
+    methodCertainty: MethodCertaintySchema,
+    methodComponents: z.array(MethodComponentSchema)
+  });
 
 export const ZoneTrackingEventV1Schema =
   CorrectableEventEnvelopeSchema.safeExtend({
@@ -149,12 +150,7 @@ export const WaterEndEventV1Schema = ContextEventBaseSchema.safeExtend({
 });
 
 export const OrdinaryCauseEventV1Schema = ContextEventBaseSchema.safeExtend({
-  contextType: z.enum([
-    "heavy_sweat",
-    "towel",
-    "friction",
-    "hand_wash"
-  ]),
+  contextType: z.enum(["heavy_sweat", "towel", "friction", "hand_wash"]),
   zoneInstanceIds: z.array(NonEmptyIdSchema).min(1)
 });
 
@@ -186,31 +182,23 @@ export const SessionEventStreamV1Schema = z.object({
   sessionStarted: SessionStartedEventV1Schema,
   zoneMethodEvents: z.array(ZoneMethodEventV1Schema),
   zoneTrackingEvents: z.array(ZoneTrackingEventV1Schema),
-  applicationConfirmationGroups: z.array(
-    ApplicationConfirmationGroupV1Schema
-  ),
+  applicationConfirmationGroups: z.array(ApplicationConfirmationGroupV1Schema),
   applicationEvents: z.array(ApplicationEventV1Schema),
   productSafetyEvents: z.array(ProductSafetyEventV1Schema),
   contextEvents: z.array(ContextEventV1Schema),
   sessionEndedEvents: z.array(SessionEndedEventV1Schema)
 });
 
-export type SessionStartedEventV1 = z.infer<
-  typeof SessionStartedEventV1Schema
->;
+export type SessionStartedEventV1 = z.infer<typeof SessionStartedEventV1Schema>;
 export type ZoneMethodEventV1 = z.infer<typeof ZoneMethodEventV1Schema>;
 export type ZoneTrackingEventV1 = z.infer<typeof ZoneTrackingEventV1Schema>;
 export type ApplicationConfirmationGroupV1 = z.infer<
   typeof ApplicationConfirmationGroupV1Schema
 >;
 export type ApplicationEventV1 = z.infer<typeof ApplicationEventV1Schema>;
-export type ProductSafetyEventV1 = z.infer<
-  typeof ProductSafetyEventV1Schema
->;
+export type ProductSafetyEventV1 = z.infer<typeof ProductSafetyEventV1Schema>;
 export type ContextEventV1 = z.infer<typeof ContextEventV1Schema>;
 export type WaterStartEventV1 = z.infer<typeof WaterStartEventV1Schema>;
 export type WaterEndEventV1 = z.infer<typeof WaterEndEventV1Schema>;
 export type SessionEndedEventV1 = z.infer<typeof SessionEndedEventV1Schema>;
-export type SessionEventStreamV1 = z.infer<
-  typeof SessionEventStreamV1Schema
->;
+export type SessionEventStreamV1 = z.infer<typeof SessionEventStreamV1Schema>;

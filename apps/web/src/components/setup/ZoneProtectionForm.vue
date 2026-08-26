@@ -52,17 +52,11 @@ const initialGroupIds = [
       .filter((value): value is BodyZoneGroupId => value !== undefined)
   )
 ];
-const selectedGroupIds = shallowRef<BodyZoneGroupId[]>(
-  initialGroupIds
-);
+const selectedGroupIds = shallowRef<BodyZoneGroupId[]>(initialGroupIds);
 const editing = shallowRef(props.initialZones.length > 0);
 const setupEntryMode = shallowRef(props.initialEntryMode);
-const suggestedPresetId = shallowRef(
-  props.initialSuggestedPresetId
-);
-const suggestedPresetVersion = shallowRef(
-  props.initialSuggestedPresetVersion
-);
+const suggestedPresetId = shallowRef(props.initialSuggestedPresetId);
+const suggestedPresetVersion = shallowRef(props.initialSuggestedPresetVersion);
 const presetDecision = shallowRef(props.initialPresetDecision);
 const includeCustom = shallowRef(
   props.initialZones.some((zone) => zone.bodyZoneCode === "custom")
@@ -93,10 +87,7 @@ function startSelfSelection(): void {
   formError.value = null;
 }
 
-function toggleGroup(
-  groupId: BodyZoneGroupId,
-  checked: boolean
-): void {
+function toggleGroup(groupId: BodyZoneGroupId, checked: boolean): void {
   selectedGroupIds.value = checked
     ? [...selectedGroupIds.value, groupId]
     : selectedGroupIds.value.filter((id) => id !== groupId);
@@ -122,11 +113,7 @@ function submit(): void {
   );
   if (includeCustom.value) {
     zones.push(
-      makeDraftZone(
-        "custom-primary",
-        "custom",
-        customLabel.value.trim()
-      )
+      makeDraftZone("custom-primary", "custom", customLabel.value.trim())
     );
   }
 
@@ -199,9 +186,7 @@ function makeDraftZone(
       <section class="zone-groups app-card">
         <div class="zone-groups__heading">
           <h2>追蹤哪些部位？</h2>
-          <p>
-            選中的部位會開始補擦倒數。被衣物遮住、不需要提醒的部位不用選。
-          </p>
+          <p>選中的部位會開始補擦倒數。被衣物遮住、不需要提醒的部位不用選。</p>
         </div>
 
         <div class="zone-groups__list">
@@ -219,7 +204,7 @@ function makeDraftZone(
                   ($event.target as HTMLInputElement).checked
                 )
               "
-            >
+            />
             <span>
               <strong>{{ group.label }}</strong>
               <small>{{ group.description }}</small>
@@ -227,7 +212,7 @@ function makeDraftZone(
           </label>
 
           <label class="zone-group-choice">
-            <input v-model="includeCustom" type="checkbox">
+            <input v-model="includeCustom" type="checkbox" />
             <span>
               <strong>其他部位</strong>
               <small>自訂文字只儲存在這次提醒中。</small>
@@ -240,7 +225,7 @@ function makeDraftZone(
               type="text"
               maxlength="80"
               autocomplete="off"
-            >
+            />
           </label>
         </div>
       </section>
@@ -249,11 +234,7 @@ function makeDraftZone(
         {{ formError }}
       </p>
 
-      <button
-        class="button button--primary"
-        type="button"
-        @click="submit"
-      >
+      <button class="button button--primary" type="button" @click="submit">
         {{ submitLabel }}
       </button>
     </template>
@@ -273,14 +254,20 @@ function makeDraftZone(
   padding: clamp(1.25rem, 5vw, 2rem);
 }
 
+/*
+ * 2026-08-24：原本用 --color-soon-soft／--color-soon（「即將到期」狀態色）。
+ * 這張卡講的是「這是推薦的部位組合」，跟部位快到期完全無關；狀態色不得
+ * 當裝飾用（DESIGN.md 第二節）。這是 QuickProtectionSummary 同款「快速
+ * 提醒（推薦）」卡的兄弟，那邊已改，這邊當時漏掉。
+ */
 .preset-card__mark {
   display: grid;
   width: 3.25rem;
   height: 3.25rem;
   place-content: center;
   border-radius: 50%;
-  background: var(--color-soon-soft);
-  color: var(--color-soon);
+  background: var(--surface-soft);
+  color: var(--color-primary);
 }
 
 .preset-card__eyebrow {
@@ -290,19 +277,35 @@ function makeDraftZone(
   font-weight: 500;
 }
 
+/*
+ * 2026-08-25：原本固定 1.5rem。這張卡是單一推薦（v-if，非 v-for 重複的
+ * 清單項目），跟 SetupPage .recovery-card h2 一樣是「單一句子的大標題」
+ * 角色，改用同一個 clamp／字距，不再各自寫死。
+ */
 .preset-card__title {
   margin: 0;
-  font-size: 1.5rem;
+  font-size: clamp(1.5rem, 7vw, 2.35rem);
+  letter-spacing: var(--letter-spacing-headline);
 }
 
 .preset-card__body,
 .preset-card__note {
   margin: var(--space-3) 0 0;
-  color: var(--text-secondary);
-  line-height: 1.7;
+  line-height: 1.6;
+}
+
+/*
+ * 2026-08-25：原本跟 __note 共用 --text-secondary。__body 是 h2 底下的
+ * 推薦說明，跟其他「標題下方導言」一樣改用 --text-body；__note 維持
+ * --text-secondary（2026-08-26 起沒有更淺的一級了——muted-soft 對暖象牙
+ * 底只有 4.42:1，過不了 WCAG AA，已移除，見 DESIGN.md 第二節）。
+ */
+.preset-card__body {
+  color: var(--text-body);
 }
 
 .preset-card__note {
+  color: var(--text-secondary);
   font-size: var(--font-size-body);
 }
 
@@ -333,7 +336,7 @@ button.text-link {
 .zone-groups__heading p {
   margin: var(--space-2) 0 0;
   color: var(--text-secondary);
-  line-height: 1.7;
+  line-height: 1.6;
   font-size: var(--font-size-body);
 }
 
@@ -364,6 +367,7 @@ button.text-link {
 
 .zone-group-choice strong {
   font-weight: 500;
+  line-height: 1.4;
 }
 
 .zone-group-choice small {
@@ -390,11 +394,5 @@ button.text-link {
   border-radius: var(--radius-sm);
   background: var(--page-background);
   color: var(--text-primary);
-}
-
-.form-error {
-  margin: 0;
-  color: var(--color-due);
-  line-height: 1.7;
 }
 </style>

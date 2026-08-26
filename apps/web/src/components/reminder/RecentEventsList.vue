@@ -3,6 +3,7 @@ import { ref, computed } from "vue";
 import type { ZoneProjection } from "@sunshield/contracts";
 import type { SessionEventStreamV1 } from "@sunshield/contracts";
 import { getZoneLabel } from "../../features/reminder/reminderPresentation";
+import { formatMonthDayTime, formatTime } from "../../helpers/datetime";
 
 interface Props {
   zones: ZoneProjection[];
@@ -34,7 +35,10 @@ interface DisplayEvent {
   correctable: boolean;
 }
 
-function buildDisplayEvents(zones: ZoneProjection[], events: SessionEventStreamV1 | null): DisplayEvent[] {
+function buildDisplayEvents(
+  zones: ZoneProjection[],
+  events: SessionEventStreamV1 | null
+): DisplayEvent[] {
   if (!events) return [];
 
   const displayEvents: DisplayEvent[] = [];
@@ -59,9 +63,8 @@ function buildDisplayEvents(zones: ZoneProjection[], events: SessionEventStreamV
   for (const event of events.contextEvents) {
     if (event.eventType === "context_event") {
       if (event.contextType === "water_start") {
-        const startLabel = event.startConfidence === "confirmed"
-          ? "入水"
-          : "入水（時間未知）";
+        const startLabel =
+          event.startConfidence === "confirmed" ? "入水" : "入水（時間未知）";
         displayEvents.push({
           id: event.id,
           time: new Date(event.effectiveOccurredAt),
@@ -85,7 +88,12 @@ function buildDisplayEvents(zones: ZoneProjection[], events: SessionEventStreamV
           zoneIds: zones.map((z) => z.zoneInstanceId),
           correctable: false
         });
-      } else if (event.contextType === "heavy_sweat" || event.contextType === "towel" || event.contextType === "friction" || event.contextType === "hand_wash") {
+      } else if (
+        event.contextType === "heavy_sweat" ||
+        event.contextType === "towel" ||
+        event.contextType === "friction" ||
+        event.contextType === "hand_wash"
+      ) {
         const causeLabels: Record<string, string> = {
           heavy_sweat: "流汗",
           towel: "擦拭",
@@ -120,30 +128,26 @@ function buildDisplayEvents(zones: ZoneProjection[], events: SessionEventStreamV
   return displayEvents;
 }
 
-const displayEvents = computed(() => buildDisplayEvents(props.zones, props.events));
+const displayEvents = computed(() =>
+  buildDisplayEvents(props.zones, props.events)
+);
 
-function formatTime(date: Date): string {
+function formatEventTime(date: Date): string {
   const now = new Date();
   const sameDay = date.toDateString() === now.toDateString();
 
   if (!sameDay) {
-    return date.toLocaleString("zh-TW", {
-      month: "numeric",
-      day: "numeric",
-      hour: "2-digit",
-      minute: "2-digit"
-    });
+    return formatMonthDayTime(date);
   }
 
-  return date.toLocaleTimeString("zh-TW", {
-    hour: "2-digit",
-    minute: "2-digit"
-  });
+  return formatTime(date);
 }
 
 function getZoneNames(zoneIds: string[], zones: ZoneProjection[]): string {
   if (zoneIds.length === 0) return "";
-  if (zoneIds.length === zones.filter((z) => z.trackingStatus === "active").length) {
+  if (
+    zoneIds.length === zones.filter((z) => z.trackingStatus === "active").length
+  ) {
     return `${zones.filter((z) => z.trackingStatus === "active").length} 個部位`;
   }
   return zoneIds
@@ -179,14 +183,16 @@ function getZoneNames(zoneIds: string[], zones: ZoneProjection[]): string {
           :type="event.correctable ? 'button' : undefined"
           :aria-label="
             event.correctable
-              ? `更正 ${formatTime(event.time)} 的${event.label}`
+              ? `更正 ${formatEventTime(event.time)} 的${event.label}`
               : undefined
           "
           @click="event.correctable && emit('correct', event.id)"
         >
-          <span class="event-time">{{ formatTime(event.time) }}</span>
+          <span class="event-time">{{ formatEventTime(event.time) }}</span>
           <span class="event-label">{{ event.label }}</span>
-          <span class="event-zones">{{ getZoneNames(event.zoneIds, zones) }}</span>
+          <span class="event-zones">{{
+            getZoneNames(event.zoneIds, zones)
+          }}</span>
         </component>
       </template>
     </div>
@@ -199,7 +205,9 @@ function getZoneNames(zoneIds: string[], zones: ZoneProjection[]): string {
         :aria-expanded="isExpanded"
         @click="isExpanded = !isExpanded"
       >
-        {{ isExpanded ? "收合" : `查看其他 ${displayEvents.length - 1} 筆事件` }}
+        {{
+          isExpanded ? "收合" : `查看其他 ${displayEvents.length - 1} 筆事件`
+        }}
       </button>
     </div>
   </section>
@@ -226,9 +234,14 @@ function getZoneNames(zoneIds: string[], zones: ZoneProjection[]): string {
   color: var(--text-secondary);
 }
 
+/*
+ * 2026-08-24：原本用 --color-untimed-soft（「未計時」狀態色）。這是
+ * role="alert" 的真警告（時間可能不準），改用系統的警告色 soon，
+ * 跟 .identity-warning 一致。
+ */
 .clock-warning {
   padding: var(--space-3) var(--space-4);
-  background: var(--color-untimed-soft);
+  background: var(--color-soon-soft);
   border-radius: var(--radius-sm);
 }
 
@@ -236,7 +249,7 @@ function getZoneNames(zoneIds: string[], zones: ZoneProjection[]): string {
   margin: 0;
   font-size: var(--font-size-body);
   line-height: 1.6;
-  color: var(--text-secondary);
+  color: var(--text-body);
 }
 
 .events-list {

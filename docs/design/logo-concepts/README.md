@@ -11,14 +11,14 @@
 
 ## 六款概念
 
-| # | 概念 | 圖標 | 橫式標誌 | 定位 |
-|---|---|---|---|---|
-| 01 | 晨線 | [SVG](marks/01-morning-line.svg) | [SVG](lockups/01-morning-line.svg) | 每天查看晴報的溫暖起點 |
-| 02 | 晴窗 | [SVG](marks/02-sun-window.svg) | [SVG](lockups/02-sun-window.svg) | 打開一扇生活化的陽光情報窗 |
-| 03 | 補擦環 | [SVG](marks/03-reapply-ring.svg) | [SVG](lockups/03-reapply-ring.svg) | 用未完的節奏記住下一次補擦 |
-| 04 | 日照節點 | [SVG](marks/04-sunlight-nodes.svg) | [SVG](lockups/04-sunlight-nodes.svg) | 在日照變化間輕柔串起補擦節奏 |
-| 05 | 晴報框 | [SVG](marks/05-weather-bulletin-frame.svg) | [SVG](lockups/05-weather-bulletin-frame.svg) | 像每日生活快報一樣整理陽光資訊 |
-| 06 | 播報印記 | [SVG](marks/06-broadcast-mark.svg) | [SVG](lockups/06-broadcast-mark.svg) | 把陽光提醒濃縮成清楚的短報 |
+| #   | 概念     | 圖標                                       | 橫式標誌                                     | 定位                           |
+| --- | -------- | ------------------------------------------ | -------------------------------------------- | ------------------------------ |
+| 01  | 晨線     | [SVG](marks/01-morning-line.svg)           | [SVG](lockups/01-morning-line.svg)           | 每天查看晴報的溫暖起點         |
+| 02  | 晴窗     | [SVG](marks/02-sun-window.svg)             | [SVG](lockups/02-sun-window.svg)             | 打開一扇生活化的陽光情報窗     |
+| 03  | 補擦環   | [SVG](marks/03-reapply-ring.svg)           | [SVG](lockups/03-reapply-ring.svg)           | 用未完的節奏記住下一次補擦     |
+| 04  | 日照節點 | [SVG](marks/04-sunlight-nodes.svg)         | [SVG](lockups/04-sunlight-nodes.svg)         | 在日照變化間輕柔串起補擦節奏   |
+| 05  | 晴報框   | [SVG](marks/05-weather-bulletin-frame.svg) | [SVG](lockups/05-weather-bulletin-frame.svg) | 像每日生活快報一樣整理陽光資訊 |
+| 06  | 播報印記 | [SVG](marks/06-broadcast-mark.svg)         | [SVG](lockups/06-broadcast-mark.svg)         | 把陽光提醒濃縮成清楚的短報     |
 
 ## 調色盤與字體
 
@@ -62,15 +62,15 @@
 
 [`06-broadcast-mark-app-icon-preview/`](06-broadcast-mark-app-icon-preview/) 用 [sharp](https://sharp.pixelplumbing.com/) 把上面的 SVG 轉成點陣圖，尺寸對照 `apps/web/public/manifest.webmanifest` 現有規格：
 
-| 檔案 | 尺寸 | 來源 | 對應用途 |
-|---|---|---|---|
-| `icon-192.png` | 192×192 | filled | PWA icon，`purpose: any` |
-| `icon-512.png` | 512×512 | filled | PWA icon，`purpose: any` |
-| `icon-512-maskable.png` | 512×512 | filled | PWA icon，`purpose: maskable`（圖形已在安全邊界內，可直接沿用同一來源） |
-| `apple-touch-icon-180.png` | 180×180 | filled | iOS 主畫面圖示慣用尺寸 |
-| `favicon-48.png` / `favicon-32.png` / `favicon-16.png` | 48／32／16 | filled | 瀏覽器分頁圖示，16px 是可讀性最嚴苛的尺寸 |
-| `mark-transparent-512.png` | 512×512 | outlined（透明背景） | 一般用途去背素材 |
-| `mark-dark-surface-512.png` | 512×512 | dark-surface | 深色底版面預覽 |
+| 檔案                                                   | 尺寸       | 來源                 | 對應用途                                                                |
+| ------------------------------------------------------ | ---------- | -------------------- | ----------------------------------------------------------------------- |
+| `icon-192.png`                                         | 192×192    | filled               | PWA icon，`purpose: any`                                                |
+| `icon-512.png`                                         | 512×512    | filled               | PWA icon，`purpose: any`                                                |
+| `icon-512-maskable.png`                                | 512×512    | filled               | PWA icon，`purpose: maskable`（圖形已在安全邊界內，可直接沿用同一來源） |
+| `apple-touch-icon-180.png`                             | 180×180    | filled               | iOS 主畫面圖示慣用尺寸                                                  |
+| `favicon-48.png` / `favicon-32.png` / `favicon-16.png` | 48／32／16 | filled               | 瀏覽器分頁圖示，16px 是可讀性最嚴苛的尺寸                               |
+| `mark-transparent-512.png`                             | 512×512    | outlined（透明背景） | 一般用途去背素材                                                        |
+| `mark-dark-surface-512.png`                            | 512×512    | dark-surface         | 深色底版面預覽                                                          |
 
 所有輸出皆已確認為完全不透明（alpha 全通道 255），符合 maskable／apple-touch-icon 不可透明的規範。16px favicon 縮到最小仍可辨認「圓點＋放射線」輪廓，但細節必然比 32px 版簡化，屬預期內的正常取捨。
 

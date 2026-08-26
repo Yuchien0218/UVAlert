@@ -14,10 +14,7 @@ import {
   UtcInstantSchema
 } from "./common";
 import { ProductLabelSnapshotV1Schema } from "./product";
-import {
-  BODY_ZONE_SCHEMA_VERSION,
-  COMMAND_SCHEMA_VERSION
-} from "./versions";
+import { BODY_ZONE_SCHEMA_VERSION, COMMAND_SCHEMA_VERSION } from "./versions";
 
 const CommandEnvelopeFields = {
   commandVersion: z.literal(COMMAND_SCHEMA_VERSION),
@@ -78,7 +75,8 @@ export const StartWaterInputV1Schema = z
     }
     if (
       value.activityStartedAt !== null &&
-      Date.parse(value.activityStartedAt) > Date.parse(value.effectiveOccurredAt)
+      Date.parse(value.activityStartedAt) >
+        Date.parse(value.effectiveOccurredAt)
     ) {
       context.addIssue({
         code: "custom",
@@ -153,8 +151,7 @@ export const StartSessionCommandV1Schema = z
       if (
         zone.skinExposureStatus === "exposed" &&
         (components.has("clothing") ||
-          (!components.has("sunscreen") &&
-            !components.has("other_topical")))
+          (!components.has("sunscreen") && !components.has("other_topical")))
       ) {
         context.addIssue({
           code: "custom",
@@ -205,8 +202,14 @@ export const StartSessionCommandV1Schema = z
 
     if (applicationGroup !== null) {
       const assigned = new Set<string>();
-      for (const [applicationIndex, application] of applicationGroup.applications.entries()) {
-        for (const [zoneIndex, zoneId] of application.zoneInstanceIds.entries()) {
+      for (const [
+        applicationIndex,
+        application
+      ] of applicationGroup.applications.entries()) {
+        for (const [
+          zoneIndex,
+          zoneId
+        ] of application.zoneInstanceIds.entries()) {
           if (!topicalZoneIds.has(zoneId)) {
             context.addIssue({
               code: "custom",
@@ -367,12 +370,7 @@ export const ContextEventDetailInputV1Schema = z.discriminatedUnion(
   "contextType",
   [
     z.object({
-      contextType: z.enum([
-        "heavy_sweat",
-        "towel",
-        "friction",
-        "hand_wash"
-      ]),
+      contextType: z.enum(["heavy_sweat", "towel", "friction", "hand_wash"]),
       zoneInstanceIds: z.array(NonEmptyIdSchema).min(1)
     }),
     z.object({
@@ -429,8 +427,7 @@ export const ReportContextEventCommandV1Schema = z
       }
       if (
         detail.activityStartedAt !== null &&
-        Date.parse(detail.activityStartedAt) >
-          Date.parse(effectiveOccurredAt)
+        Date.parse(detail.activityStartedAt) > Date.parse(effectiveOccurredAt)
       ) {
         context.addIssue({
           code: "custom",
@@ -474,7 +471,10 @@ export const ReapplyCommandV1Schema = z
   .superRefine((command, context) => {
     const zoneIds = new Set<string>();
     const eventIds = new Set<string>();
-    for (const [applicationIndex, application] of command.payload.applications.entries()) {
+    for (const [
+      applicationIndex,
+      application
+    ] of command.payload.applications.entries()) {
       if (application.eventId === command.payload.applicationConfirmationId) {
         context.addIssue({
           code: "custom",
@@ -494,7 +494,13 @@ export const ReapplyCommandV1Schema = z
         if (zoneIds.has(zoneId)) {
           context.addIssue({
             code: "custom",
-            path: ["payload", "applications", applicationIndex, "zoneInstanceIds", zoneIndex],
+            path: [
+              "payload",
+              "applications",
+              applicationIndex,
+              "zoneInstanceIds",
+              zoneIndex
+            ],
             message: "同一補擦確認內每個部位只能出現一次"
           });
         }
@@ -503,9 +509,7 @@ export const ReapplyCommandV1Schema = z
     }
   });
 
-export type StartSessionCommandV1 = z.infer<
-  typeof StartSessionCommandV1Schema
->;
+export type StartSessionCommandV1 = z.infer<typeof StartSessionCommandV1Schema>;
 /**
  * S-10 更正最近事件。
  *

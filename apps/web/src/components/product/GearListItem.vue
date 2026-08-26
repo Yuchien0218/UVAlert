@@ -1,7 +1,10 @@
 <script setup lang="ts">
 import { computed } from "vue";
 import Icon from "../icons/Icon.vue";
-import type { GearCategory, ProductCatalogRecordV1 } from "@sunshield/contracts";
+import type {
+  GearCategory,
+  ProductCatalogRecordV1
+} from "@sunshield/contracts";
 import {
   affectsCountdown,
   formatPurchaseMonth,
@@ -23,7 +26,9 @@ const GEAR_CATEGORY_ICONS: Record<GearCategory, IconName> = {
 };
 
 const safety = computed(() => gearSafetyState(props.product));
-const purchase = computed(() => formatPurchaseMonth(props.product.purchaseMonth));
+const purchase = computed(() =>
+  formatPurchaseMonth(props.product.purchaseMonth)
+);
 
 /**
  * 一行摘要。防曬乳用真實規格（SPF／PA／補擦間隔），沒資料就不編造，
@@ -61,12 +66,15 @@ const summary = computed((): string => {
         <span
           v-if="!affectsCountdown(product.gearCategory)"
           class="gear-item__badge"
-        >不會建立倒數</span>
+          >不會建立倒數</span
+        >
       </p>
       <strong class="gear-item__name">{{ product.displayName }}</strong>
       <p
         class="gear-item__summary"
-        :class="{ [`gear-item__summary--${safety.kind}`]: safety.kind !== 'usable' }"
+        :class="{
+          [`gear-item__summary--${safety.kind}`]: safety.kind !== 'usable'
+        }"
       >
         {{ summary }}
       </p>
@@ -127,11 +135,11 @@ p {
 .gear-item__badge {
   padding: 0 var(--space-2);
   border: 1px solid var(--border-strong);
-  border-radius: var(--radius-pill, 999px);
+  border-radius: var(--radius-pill);
 }
 
 .gear-item__name {
-  font-size: 1.0625rem;
+  font-size: var(--font-size-title-sm);
 }
 
 .gear-item__summary,

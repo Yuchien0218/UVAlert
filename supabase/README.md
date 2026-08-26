@@ -22,14 +22,14 @@ Google OAuth 的 client ID、secret 與 provider allowlist 在 Supabase Dashboar
 
 ## 主要 function
 
-| 路徑 | 登入 | 用途 |
-| --- | --- | --- |
-| `/v1/sync/manifest` | 永久 Auth user | 讀取同步摘要 |
-| `/v1/sync/read` | 永久 Auth user | 讀取使用者確認的 records |
-| `/v1/sync/commit` | 永久 Auth user | 以 revision／idempotency 原子提交 |
-| `/v1/sync/delete` | 永久 Auth user | 建立 tombstone |
-| `/v1/uv/forecast` | 不需要 | 伺服器代理 CWA F-D0047-091 |
-| `/v1/feedback` | 不需要 | 匿名問題回報與意見 |
+| 路徑                 | 登入           | 用途                              |
+| -------------------- | -------------- | --------------------------------- |
+| `/v1/sync/manifest`  | 永久 Auth user | 讀取同步摘要                      |
+| `/v1/sync/read`      | 永久 Auth user | 讀取使用者確認的 records          |
+| `/v1/sync/commit`    | 永久 Auth user | 以 revision／idempotency 原子提交 |
+| `/v1/sync/delete`    | 永久 Auth user | 建立 tombstone                    |
+| `/v1/uv/forecast`    | 不需要         | 伺服器代理 CWA F-D0047-091        |
+| `/v1/feedback`       | 不需要         | 匿名問題回報與意見                |
 | `/v1/account/delete` | 永久 Auth user | 清除 UVAlert 雲端資料與 Auth user |
 
 Supabase 原生 function URL 是 `/functions/v1/<function-name>`；正式網站的 reverse proxy／rewrite 必須把上表 `/v1/*` 對應到各 function。不要把 service-role key 或 CWA API key 放進前端環境變數。

@@ -18,11 +18,13 @@ const taipei: RegionDirectoryEntry = {
   displayName: "臺北市松山區"
 };
 
-function makeDependencies(options: {
-  resolution?: RegionResolution;
-  geolocationError?: DeviceGeolocationError;
-  saveFailure?: boolean;
-} = {}) {
+function makeDependencies(
+  options: {
+    resolution?: RegionResolution;
+    geolocationError?: DeviceGeolocationError;
+    saveFailure?: boolean;
+  } = {}
+) {
   const geolocation = {
     requestCurrentPosition: vi.fn(async () => {
       if (options.geolocationError !== undefined) {
@@ -72,7 +74,9 @@ describe("createRegionController", () => {
     await controller.ensureLoaded();
 
     expect(controller.phase.value).toBe("idle");
-    expect(dependencies.geolocation.requestCurrentPosition).not.toHaveBeenCalled();
+    expect(
+      dependencies.geolocation.requestCurrentPosition
+    ).not.toHaveBeenCalled();
   });
 
   it("keeps coordinates function-local and exposes only a region candidate", async () => {
@@ -85,10 +89,7 @@ describe("createRegionController", () => {
 
     await controller.useCurrentPosition();
 
-    expect(dependencies.resolver.resolve).toHaveBeenCalledWith(
-      121.55,
-      25.05
-    );
+    expect(dependencies.resolver.resolve).toHaveBeenCalledWith(121.55, 25.05);
     expect(controller.phase.value).toBe("confirming");
     expect(controller.candidate.value).toEqual({
       ...taipei,
@@ -170,11 +171,11 @@ describe("createRegionController", () => {
       boundaryDataVersion: "2025-03-18"
     });
 
-    await expect(
-      controller.saveManualRegion("63000010")
-    ).resolves.toBe(true);
+    await expect(controller.saveManualRegion("63000010")).resolves.toBe(true);
 
-    expect(dependencies.geolocation.requestCurrentPosition).not.toHaveBeenCalled();
+    expect(
+      dependencies.geolocation.requestCurrentPosition
+    ).not.toHaveBeenCalled();
     expect(
       dependencies.preferenceRepository.savePreference
     ).toHaveBeenCalledWith({
@@ -215,9 +216,7 @@ describe("createRegionController", () => {
     });
     await controller.ensureLoaded();
 
-    await expect(
-      controller.saveManualRegion("63000010")
-    ).resolves.toBe(false);
+    await expect(controller.saveManualRegion("63000010")).resolves.toBe(false);
 
     expect(controller.preference.value).toBeNull();
     expect(controller.error.value).toBe("storage_error");

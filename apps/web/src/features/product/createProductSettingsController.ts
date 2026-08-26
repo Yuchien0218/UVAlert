@@ -1,23 +1,20 @@
-import type { GearCategory, ProductCatalogRecordV1, ProductLabelSnapshotV1 } from "@sunshield/contracts";
-import type { ProductCatalogPort, ProductSettingsPort } from "@sunshield/platform";
-import {
-  shallowReadonly,
-  shallowRef,
-  type ShallowRef
-} from "vue";
+import type {
+  GearCategory,
+  ProductCatalogRecordV1,
+  ProductLabelSnapshotV1
+} from "@sunshield/contracts";
+import type {
+  ProductCatalogPort,
+  ProductSettingsPort
+} from "@sunshield/platform";
+import { shallowReadonly, shallowRef, type ShallowRef } from "vue";
 
 export type ProductSettingsPhase =
-  | "idle"
-  | "loading"
-  | "ready"
-  | "saving"
-  | "error";
+  "idle" | "loading" | "ready" | "saving" | "error";
 
 export interface ProductSettingsController {
   readonly phase: Readonly<ShallowRef<ProductSettingsPhase>>;
-  readonly snapshot: Readonly<
-    ShallowRef<ProductLabelSnapshotV1 | null>
-  >;
+  readonly snapshot: Readonly<ShallowRef<ProductLabelSnapshotV1 | null>>;
   readonly products: Readonly<ShallowRef<ProductCatalogRecordV1[]>>;
   ensureLoaded(): Promise<void>;
   save(snapshot: ProductLabelSnapshotV1): Promise<boolean>;
@@ -56,8 +53,7 @@ export function createProductSettingsController(
   dependencies: ProductSettingsControllerDependencies
 ): ProductSettingsController {
   const phaseState = shallowRef<ProductSettingsPhase>("idle");
-  const snapshotState =
-    shallowRef<ProductLabelSnapshotV1 | null>(null);
+  const snapshotState = shallowRef<ProductLabelSnapshotV1 | null>(null);
   const productsState = shallowRef<ProductCatalogRecordV1[]>([]);
   let loadPromise: Promise<void> | null = null;
   let loaded = false;
@@ -84,8 +80,13 @@ export function createProductSettingsController(
   }
 
   async function saveProduct(input: SaveGearInput): Promise<boolean> {
-    if (dependencies.catalog === undefined || dependencies.createId === undefined) return save(input.snapshot);
-    const setAsCurrent = input.setAsCurrent ?? input.gearCategory === "sunscreen";
+    if (
+      dependencies.catalog === undefined ||
+      dependencies.createId === undefined
+    )
+      return save(input.snapshot);
+    const setAsCurrent =
+      input.setAsCurrent ?? input.gearCategory === "sunscreen";
     phaseState.value = "saving";
     try {
       const now = nowIso();
@@ -101,7 +102,9 @@ export function createProductSettingsController(
       });
       if (setAsCurrent) {
         // 保存 catalog 修正過到期狀態後的 snapshot，不是表單原值。
-        await dependencies.repository.saveCurrentProductSnapshot(saved.currentSnapshot);
+        await dependencies.repository.saveCurrentProductSnapshot(
+          saved.currentSnapshot
+        );
         snapshotState.value = saved.currentSnapshot;
       }
       productsState.value = await dependencies.catalog.listProducts(now);
@@ -160,14 +163,10 @@ export function createProductSettingsController(
     return loadPromise;
   }
 
-  async function save(
-    snapshot: ProductLabelSnapshotV1
-  ): Promise<boolean> {
+  async function save(snapshot: ProductLabelSnapshotV1): Promise<boolean> {
     phaseState.value = "saving";
     try {
-      await dependencies.repository.saveCurrentProductSnapshot(
-        snapshot
-      );
+      await dependencies.repository.saveCurrentProductSnapshot(snapshot);
       snapshotState.value = snapshot;
       loaded = true;
       phaseState.value = "ready";

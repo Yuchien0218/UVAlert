@@ -8,7 +8,7 @@ import { createAppRouter } from "./router";
 
 const services = createWebAppServices();
 const app = createApp(App);
-const router = createAppRouter(services.boot, undefined, services.setup);
+const router = createAppRouter(services.boot);
 
 provideWebAppServices(app, services);
 app.use(router);

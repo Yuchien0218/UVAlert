@@ -69,9 +69,7 @@ describe("App Boot with real IndexedDB projection", () => {
     await controller.ensureBooted();
 
     expect(controller.phase.value).toBe("ready");
-    expect(controller.currentSession.value?.sessionId).toBe(
-      command.sessionId
-    );
+    expect(controller.currentSession.value?.sessionId).toBe(command.sessionId);
     expect(
       controller.currentSession.value?.primaryAction.presentationType
     ).toBe("timed_ring");

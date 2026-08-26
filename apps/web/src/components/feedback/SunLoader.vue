@@ -14,17 +14,8 @@ withDefaults(defineProps<Props>(), {
 
 <template>
   <div class="sun-loader" role="status" :aria-label="label">
-    <svg
-      class="sun-loader__icon"
-      viewBox="0 0 48 48"
-      aria-hidden="true"
-    >
-      <circle
-        class="sun-loader__center"
-        cx="24"
-        cy="24"
-        r="10"
-      />
+    <svg class="sun-loader__icon" viewBox="0 0 48 48" aria-hidden="true">
+      <circle class="sun-loader__center" cx="24" cy="24" r="10" />
       <line
         v-for="rayIndex in 8"
         :key="rayIndex"

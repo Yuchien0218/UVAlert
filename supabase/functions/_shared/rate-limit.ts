@@ -21,7 +21,9 @@ export class SlidingWindowRateLimiter {
 
   check(key: string, now = Date.now()): RateLimitResult {
     const cutoff = now - this.#windowMs;
-    const recent = (this.#entries.get(key) ?? []).filter((timestamp) => timestamp > cutoff);
+    const recent = (this.#entries.get(key) ?? []).filter(
+      (timestamp) => timestamp > cutoff
+    );
     if (recent.length >= this.#maxRequests) {
       const retryAfterSeconds = Math.max(
         1,
@@ -40,8 +42,12 @@ export class SlidingWindowRateLimiter {
   }
 }
 
-export async function hashClientFingerprint(parts: readonly string[]): Promise<string> {
+export async function hashClientFingerprint(
+  parts: readonly string[]
+): Promise<string> {
   const data = new TextEncoder().encode(parts.join("\u001f"));
   const digest = await crypto.subtle.digest("SHA-256", data);
-  return [...new Uint8Array(digest)].map((byte) => byte.toString(16).padStart(2, "0")).join("");
+  return [...new Uint8Array(digest)]
+    .map((byte) => byte.toString(16).padStart(2, "0"))
+    .join("");
 }

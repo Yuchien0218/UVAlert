@@ -15,15 +15,15 @@
 
 ## 依工作目的找文件
 
-| 如果你要做什麼 | 先讀 | 接著讀 |
-| --- | --- | --- |
-| 了解產品頁面、Sitemap、User Flow | [`decisions/2026-08-15-redesign-sitemap-userflow-current.md`](decisions/2026-08-15-redesign-sitemap-userflow-current.md) | [`decisions/README.md`](decisions/README.md) |
-| 做 wireframe、UI／UX 或前端畫面 | [`../DESIGN.md`](../DESIGN.md) | [`design/README.md`](design/README.md)、[`design/current-direction.md`](design/current-direction.md) |
-| 了解後端、登入、同步、回報 BUG | [`backend/README.md`](backend/README.md) | [`superpowers/specs/README.md`](superpowers/specs/README.md) 中的後端規格 |
-| 修改台灣繁體中文文案 | [`decisions/2026-08-17-copy-audit.md`](decisions/2026-08-17-copy-audit.md) | [`superpowers/specs/2026-08-17-zh-tw-copy-design.md`](superpowers/specs/2026-08-17-zh-tw-copy-design.md) |
-| 編寫或審查衛教文章 | [`education/README.md`](education/README.md) | [`education/sources.md`](education/sources.md)、[`research/README.md`](research/README.md) |
-| 做 SEO／AEO／GEO 公開頁 | [`education/public-seo-implementation.md`](education/public-seo-implementation.md) | [`research/2026-08-13-uvalert-education-seo-aeo-geo.md`](research/2026-08-13-uvalert-education-seo-aeo-geo.md) |
-| 執行既有開發計畫 | [`superpowers/plans/README.md`](superpowers/plans/README.md) | 先確認計畫狀態、分支與目前程式碼，再讀指定計畫 |
+| 如果你要做什麼                   | 先讀                                                                                                                     | 接著讀                                                                                                         |
+| -------------------------------- | ------------------------------------------------------------------------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------- |
+| 了解產品頁面、Sitemap、User Flow | [`decisions/2026-08-15-redesign-sitemap-userflow-current.md`](decisions/2026-08-15-redesign-sitemap-userflow-current.md) | [`decisions/README.md`](decisions/README.md)                                                                   |
+| 做 wireframe、UI／UX 或前端畫面  | [`../DESIGN.md`](../DESIGN.md)                                                                                           | [`design/README.md`](design/README.md)、[`design/current-direction.md`](design/current-direction.md)           |
+| 了解後端、登入、同步、回報 BUG   | [`backend/README.md`](backend/README.md)                                                                                 | [`superpowers/specs/README.md`](superpowers/specs/README.md) 中的後端規格                                      |
+| 修改台灣繁體中文文案             | [`decisions/2026-08-17-copy-audit.md`](decisions/2026-08-17-copy-audit.md)                                               | [`superpowers/specs/2026-08-17-zh-tw-copy-design.md`](superpowers/specs/2026-08-17-zh-tw-copy-design.md)       |
+| 編寫或審查衛教文章               | [`education/README.md`](education/README.md)                                                                             | [`education/sources.md`](education/sources.md)、[`research/README.md`](research/README.md)                     |
+| 做 SEO／AEO／GEO 公開頁          | [`education/public-seo-implementation.md`](education/public-seo-implementation.md)                                       | [`research/2026-08-13-uvalert-education-seo-aeo-geo.md`](research/2026-08-13-uvalert-education-seo-aeo-geo.md) |
+| 執行既有開發計畫                 | [`superpowers/plans/README.md`](superpowers/plans/README.md)                                                             | 先確認計畫狀態、分支與目前程式碼，再讀指定計畫                                                                 |
 
 ## 文件權威性與狀態
 
@@ -39,15 +39,15 @@
 
 ## 目前維護中的文件區
 
-| 目錄 | 內容 | 入口 |
-| --- | --- | --- |
-| `decisions/` | Sitemap、User Flow、文字與產品裁決 | [`decisions/README.md`](decisions/README.md) |
-| `design/` | 視覺方向、wireframe、圖示與 Logo 資產 | [`design/README.md`](design/README.md) |
-| `education/` | 六大衛教分類、文章、來源與公開 SEO 實作 | [`education/README.md`](education/README.md) |
-| `research/` | 官方來源、搜尋問句與 SEO／AEO／GEO 研究 | [`research/README.md`](research/README.md) |
-| `backend/` | Supabase 本機開發、部署與資料邊界入口 | [`backend/README.md`](backend/README.md) |
-| `superpowers/` | 詳細設計規格與實作計畫 | [`superpowers/README.md`](superpowers/README.md) |
-| `archive/` | 重新設計前的歷史資料 | [`archive/2026-08-pre-redesign/README.md`](archive/2026-08-pre-redesign/README.md) |
+| 目錄           | 內容                                    | 入口                                                                               |
+| -------------- | --------------------------------------- | ---------------------------------------------------------------------------------- |
+| `decisions/`   | Sitemap、User Flow、文字與產品裁決      | [`decisions/README.md`](decisions/README.md)                                       |
+| `design/`      | 視覺方向、wireframe、圖示與 Logo 資產   | [`design/README.md`](design/README.md)                                             |
+| `education/`   | 六大衛教分類、文章、來源與公開 SEO 實作 | [`education/README.md`](education/README.md)                                       |
+| `research/`    | 官方來源、搜尋問句與 SEO／AEO／GEO 研究 | [`research/README.md`](research/README.md)                                         |
+| `backend/`     | Supabase 本機開發、部署與資料邊界入口   | [`backend/README.md`](backend/README.md)                                           |
+| `superpowers/` | 詳細設計規格與實作計畫                  | [`superpowers/README.md`](superpowers/README.md)                                   |
+| `archive/`     | 重新設計前的歷史資料                    | [`archive/2026-08-pre-redesign/README.md`](archive/2026-08-pre-redesign/README.md) |
 
 ## 新增或更新文件時必填的開頭資訊
 

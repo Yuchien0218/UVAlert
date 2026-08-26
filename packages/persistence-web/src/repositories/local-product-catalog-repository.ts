@@ -5,8 +5,7 @@ import {
   PRODUCT_CATALOG_RECORD_VERSION,
   ProductCatalogRecordV1Schema,
   ProductLabelSnapshotV1Schema,
-  type ProductCatalogRecordV1,
-  type ProductLabelSnapshotV1
+  type ProductCatalogRecordV1
 } from "@sunshield/contracts";
 import type { ProductCatalogPort, SaveProductInput } from "@sunshield/platform";
 import type { SunshieldDatabase } from "../db/database";
@@ -175,7 +174,10 @@ export class LocalProductCatalogRepository implements ProductCatalogPort {
 
     const parsed = ProductCatalogRecordV1Schema.safeParse(withFingerprint);
     if (!parsed.success) return null;
-    if (raw.schemaVersion !== PRODUCT_CATALOG_RECORD_VERSION || needsExpirySync) {
+    if (
+      raw.schemaVersion !== PRODUCT_CATALOG_RECORD_VERSION ||
+      needsExpirySync
+    ) {
       await this.#database.SunscreenProducts.put(parsed.data);
     }
     return parsed.data;

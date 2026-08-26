@@ -41,9 +41,7 @@ function present(reasonCodes: ReasonCode[]) {
 }
 
 function kinds(reasonCodes: ReasonCode[]): string[] {
-  return present(reasonCodes).secondaryActions.map(
-    (action) => action.kind
-  );
+  return present(reasonCodes).secondaryActions.map((action) => action.kind);
 }
 
 describe("S-07 次要 CTA", () => {
@@ -71,9 +69,7 @@ describe("S-07 次要 CTA", () => {
   });
 
   it("衣物覆蓋的中性方式卡提供「更新防護方式」", () => {
-    expect(kinds(["CLOTHING_COVERED"])).toEqual([
-      "update_protection_method"
-    ]);
+    expect(kinds(["CLOTHING_COVERED"])).toEqual(["update_protection_method"]);
   });
 
   it("一般計時中的提醒沒有次要 CTA，不佔版位", () => {

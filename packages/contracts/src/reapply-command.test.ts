@@ -61,11 +61,36 @@ describe("ReapplyCommandV1Schema", () => {
   });
 
   it.each([
-    ["空 applications", (value: ReturnType<typeof command>) => { value.payload.applications = []; }],
-    ["重複部位", (value: ReturnType<typeof command>) => { value.payload.applications[1]!.zoneInstanceIds = ["zone-a"]; }],
-    ["重複事件 ID", (value: ReturnType<typeof command>) => { value.payload.applications[1]!.eventId = "event-a"; }],
-    ["事件 ID 等於群組 ID", (value: ReturnType<typeof command>) => { value.payload.applications[0]!.eventId = "group-2"; }],
-    ["revision 非正整數", (value: ReturnType<typeof command>) => { value.expectedRevision = 0; }]
+    [
+      "空 applications",
+      (value: ReturnType<typeof command>) => {
+        value.payload.applications = [];
+      }
+    ],
+    [
+      "重複部位",
+      (value: ReturnType<typeof command>) => {
+        value.payload.applications[1]!.zoneInstanceIds = ["zone-a"];
+      }
+    ],
+    [
+      "重複事件 ID",
+      (value: ReturnType<typeof command>) => {
+        value.payload.applications[1]!.eventId = "event-a";
+      }
+    ],
+    [
+      "事件 ID 等於群組 ID",
+      (value: ReturnType<typeof command>) => {
+        value.payload.applications[0]!.eventId = "group-2";
+      }
+    ],
+    [
+      "revision 非正整數",
+      (value: ReturnType<typeof command>) => {
+        value.expectedRevision = 0;
+      }
+    ]
   ])("拒絕%s", (_name, mutate) => {
     const value = command();
     mutate(value);

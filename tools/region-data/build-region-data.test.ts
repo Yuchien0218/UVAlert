@@ -15,9 +15,7 @@ const fixtureUrl = new URL(
 );
 
 async function readFixture() {
-  return JSON.parse(
-    await readFile(fileURLToPath(fixtureUrl), "utf8")
-  );
+  return JSON.parse(await readFile(fileURLToPath(fixtureUrl), "utf8"));
 }
 
 describe("region data build pipeline", () => {

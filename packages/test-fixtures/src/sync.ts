@@ -1,7 +1,4 @@
-import {
-  planStartSession,
-  type StartSessionPlan
-} from "@sunshield/domain";
+import { planStartSession, type StartSessionPlan } from "@sunshield/domain";
 import {
   SYNC_SCHEMA_VERSION,
   SyncRecordEnvelopeV1Schema,

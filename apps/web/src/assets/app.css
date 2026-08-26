@@ -80,11 +80,44 @@
   letter-spacing: var(--letter-spacing-page-title);
 }
 
+/*
+ * 2026-08-25：改用 --text-body（見 styles.css 的 5 級文字色階補齊記錄）。
+ * 這是頁面標題下方的導言段落，跟 --text-secondary 定義的「副標、麵包屑、
+ * 次要文字」不是同一種角色——它是使用者進頁面第一個要讀的內容，DESIGN.md
+ * 把這個角色叫「預設內文」。
+ */
 .page-heading__body {
   max-width: 38rem;
   margin: 0;
-  color: var(--text-secondary);
-  line-height: 1.75;
+  color: var(--text-body);
+  line-height: 1.6;
+}
+
+/* 2026-08-26：收斂三個流程頁重複的標題列版型。 */
+.flow-heading {
+  display: flex;
+  align-items: start;
+  justify-content: space-between;
+  gap: var(--space-4);
+}
+
+.flow-heading h1,
+.flow-heading p {
+  margin: 0;
+}
+
+.flow-heading h1 {
+  font-size: var(--font-size-page-title);
+}
+
+.flow-heading div {
+  display: grid;
+  gap: var(--space-3);
+}
+
+.flow-heading div > p:last-child {
+  color: var(--text-body);
+  line-height: 1.6;
 }
 
 /*
@@ -124,8 +157,15 @@
   color: var(--text-primary);
 }
 
+/*
+ * 2026-08-25：原本是 clamp(3rem, 18vw, 4.75rem)，但沒有任何元件在用這個
+ * modifier——HomeCountdown 與 HomeUvHeadline 各自在 scoped 樣式裡寫了
+ * 逐字相同的 clamp(3rem, 15vw, 3.75rem)，等於同一個角色（首頁大讀數）
+ * 重複定義兩次，外加這裡一份沒人用的死碼。改成兩處實際重複的值，兩個
+ * 元件改套用這個 class，不再各自覆寫 font-size。
+ */
 .stat-figure--display {
-  font-size: clamp(3rem, 18vw, 4.75rem);
+  font-size: clamp(3rem, 15vw, 3.75rem);
 }
 
 .stat-figure--inline {
@@ -138,6 +178,25 @@
   background: var(--surface-primary);
 }
 
+/* 2026-08-26：流程完成後的共通成功面板。 */
+.success-panel {
+  display: grid;
+  gap: var(--space-4);
+  padding: var(--space-5);
+  border-top: 0.35rem solid var(--color-saved);
+}
+
+.success-panel h2,
+.success-panel p {
+  margin: 0;
+}
+
+/* 2026-08-26：收斂九個表單各自定義的行內錯誤文字。 */
+.form-error {
+  margin: 0;
+  color: var(--color-due);
+  line-height: 1.6;
+}
 
 /*
  * Status-tinted cards — use soft background color to communicate urgency
@@ -177,10 +236,17 @@
   --status-soft: var(--color-untimed-soft);
 }
 
-.status-card--success {
-  --status-color: var(--color-success);
-  --status-soft: var(--color-success-soft);
+.status-card--saved {
+  --status-color: var(--color-saved);
+  --status-soft: var(--color-saved-soft);
 }
+
+/*
+ * NOTE：.status-card（＋ 5 個變體）目前是死碼——沒有任何元件 template 用到。
+ * DESIGN.md 第五節的 status-card 規範實際上由 ZoneStatusList.vue 的
+ * .zone-group 實現。清理待 audit 清單的死碼掃描（見
+ * docs/superpowers/plans/2026-08-26-codebase-consolidation-audit.md）。
+ */
 
 /*
  * UVI risk badge — surfaces --color-uvi-low..extreme, which were defined
@@ -202,27 +268,47 @@
 
 .uvi-badge--low {
   --uvi-color: var(--color-uvi-low);
-  --uvi-soft: color-mix(in srgb, var(--color-uvi-low) 14%, var(--surface-primary));
+  --uvi-soft: color-mix(
+    in srgb,
+    var(--color-uvi-low) 14%,
+    var(--surface-primary)
+  );
 }
 
 .uvi-badge--moderate {
   --uvi-color: var(--color-uvi-moderate);
-  --uvi-soft: color-mix(in srgb, var(--color-uvi-moderate) 14%, var(--surface-primary));
+  --uvi-soft: color-mix(
+    in srgb,
+    var(--color-uvi-moderate) 14%,
+    var(--surface-primary)
+  );
 }
 
 .uvi-badge--high {
   --uvi-color: var(--color-uvi-high);
-  --uvi-soft: color-mix(in srgb, var(--color-uvi-high) 14%, var(--surface-primary));
+  --uvi-soft: color-mix(
+    in srgb,
+    var(--color-uvi-high) 14%,
+    var(--surface-primary)
+  );
 }
 
 .uvi-badge--very-high {
   --uvi-color: var(--color-uvi-very-high);
-  --uvi-soft: color-mix(in srgb, var(--color-uvi-very-high) 14%, var(--surface-primary));
+  --uvi-soft: color-mix(
+    in srgb,
+    var(--color-uvi-very-high) 14%,
+    var(--surface-primary)
+  );
 }
 
 .uvi-badge--extreme {
   --uvi-color: var(--color-uvi-extreme);
-  --uvi-soft: color-mix(in srgb, var(--color-uvi-extreme) 14%, var(--surface-primary));
+  --uvi-soft: color-mix(
+    in srgb,
+    var(--color-uvi-extreme) 14%,
+    var(--surface-primary)
+  );
 }
 
 .button {
@@ -272,6 +358,19 @@
 
 .button--quiet {
   border-color: var(--border-subtle);
+}
+
+/*
+ * 2026-08-25：.button--quiet 原本沒有任何 disabled 樣式——停用時看起來
+ * 跟平常一樣可以點，使用者點了沒反應也不知道為什麼（DESIGN.md 第十三節
+ * 規格盲點 3「次要按鈕停用樣式未定義」）。沿用 GearForm.vue
+ * `.category-option--disabled`／SetupStepShell.vue `.icon-button:disabled`
+ * 已經在用的 opacity 0.55 + not-allowed 慣例，不發明新數值。
+ */
+.button--quiet:disabled,
+.button--quiet[aria-disabled="true"] {
+  cursor: not-allowed;
+  opacity: 0.55;
 }
 
 .button-group {
@@ -343,8 +442,15 @@ button.text-link {
 }
 
 /*
- * 選項卡片的「已選取」外觀——cream-strong 底 + primary 邊框
- * （DESIGN.md 第五節 context-option-selected）。
+ * 選項卡片的「已選取」外觀——實心暖灰底 ＋ 低彩度的 muted 邊框。
+ *
+ * 2026-08-24 使用者指定，分三次調整到現在這組：底色從 cream-strong 改成
+ * hairline 這個暖灰（DESIGN.md 第五節 context-option-selected 的舊值是
+ * cream-strong）；補上邊框；邊框再從 primary(#9f5e42) 換成彩度低很多的
+ * muted(#6f5a54)——primary 在這個灰底上太搶眼。**未選取維持原樣**。
+ *
+ * 用線條色 hairline 當填色是刻意的——它比卡片底 surface-soft 深一階，
+ * 選取的項目因此讀起來是「被按下去的區塊」，再靠深色邊框確認。
  *
  * 2026-08-24 收斂：這組顏色邏輯原本在 5 個地方各自實作
  * （ContextSelector、GearForm、ReportContextEventPage、
@@ -357,8 +463,8 @@ button.text-link {
  */
 .option-selected,
 .choice-grid label:has(input:checked) {
-  border-color: var(--color-primary);
-  background: var(--color-surface-cream-strong);
+  border-color: var(--color-muted);
+  background: var(--color-hairline);
 }
 
 /*
@@ -406,7 +512,7 @@ button.text-link {
   margin: 0;
   color: var(--text-secondary);
   font-size: var(--font-size-body);
-  line-height: 1.7;
+  line-height: 1.6;
 }
 
 .choice-grid {
@@ -429,13 +535,19 @@ button.text-link {
   border: 1px solid var(--border-subtle);
   border-radius: var(--radius-sm);
   cursor: pointer;
-  transition: background-color var(--duration-fast) var(--ease-out),
-              color var(--duration-fast) var(--ease-out),
-              border-color var(--duration-fast) var(--ease-out);
+  transition:
+    background-color var(--duration-fast) var(--ease-out),
+    color var(--duration-fast) var(--ease-out),
+    border-color var(--duration-fast) var(--ease-out);
 }
 
+/*
+ * 2026-08-24：hover 原本是 --border-subtle，跟改版後的「已選取」底色
+ * 剛好同一個值——滑過未選項目會長得像已選取。改用更淺的 hairline-soft
+ * 拉開差別。
+ */
 .choice-grid label:hover {
-  background-color: var(--border-subtle);
+  background-color: var(--color-hairline-soft);
 }
 
 .choice-grid label:active {
@@ -483,4 +595,63 @@ button.text-link {
   .button {
     width: 100%;
   }
+}
+
+/*
+ * 操作結果提示框——FeedbackPage、SyncSettingsPage、DataSettingsPage、
+ * AccountDataPage 原本各自 scoped 定義 .notice/.notice--ok/.notice--error，
+ * 其中只有 DataSettingsPage.vue 是有底色的完整卡片，其餘 3 個只是純文字
+ * 變色，彼此已經漂移。2026-08-25 使用者決定統一採用 DataSettingsPage
+ * 的完整版本，收斂成共用類別，搭配 components/common/AppNotice.vue 使用。
+ */
+.notice {
+  margin: 0;
+  padding: var(--space-3);
+  border-radius: var(--radius-sm);
+  line-height: 1.6;
+  width: 100%;
+}
+
+.notice--ok {
+  background: var(--color-saved-soft);
+  color: var(--text-secondary);
+}
+
+.notice--error {
+  color: var(--color-due);
+}
+
+/*
+ * 衛教分類／文章卡片右上角的狀態徽章（「已發布」／「內容審閱中」）。
+ * EducationIndexPage.vue 與 EducationCategoryPage.vue 原本各自 scoped
+ * 定義同一組樣式，連「跟 kicker 共用 color/font-size」這個切法都逐字
+ * 相同——2026-08-25 收斂成共用類別。
+ */
+/*
+ * 送出／取消按鈕列——EventCorrectionPage、ReportContextEventPage、
+ * ReapplyPage 三個檔案逐字重複同一組樣式（含同一個 36rem 斷點），
+ * 2026-08-25 收斂成共用類別。
+ */
+.submit-actions {
+  display: grid;
+  gap: var(--space-3);
+}
+
+.submit-actions .button {
+  width: 100%;
+}
+
+@media (min-width: 36rem) {
+  .submit-actions {
+    grid-template-columns: 1fr auto;
+  }
+}
+
+.education-card-status {
+  justify-self: start;
+  padding: 0.15rem 0.5rem;
+  border-radius: var(--radius-pill);
+  background: var(--border-subtle);
+  color: var(--text-secondary);
+  font-size: var(--font-size-caption);
 }

@@ -7,7 +7,7 @@ const COLORS = Object.freeze({
   terracotta: "#9F5E42",
   espresso: "#2E2925",
   amberGold: "#C1832E",
-  warmInk: "#33291F",
+  warmInk: "#33291F"
 });
 
 /**
@@ -66,16 +66,52 @@ const geometry = {
       <path d="M29 24L39 18" stroke="${COLORS.warmInk}"/>
       <path d="M32 32H46" stroke="${COLORS.warmInk}"/>
       <path d="M29 40L38 45" stroke="${COLORS.amberGold}"/>
-    </g>`,
+    </g>`
 };
 
 export const CONCEPTS = Object.freeze([
-  Object.freeze({ id: "01-morning-line", fileStem: "01-morning-line", chineseName: "晨線", tagline: "每天查看晴報的溫暖起點", mark: geometry.morningLine }),
-  Object.freeze({ id: "02-sun-window", fileStem: "02-sun-window", chineseName: "晴窗", tagline: "打開一扇生活化的陽光情報窗", mark: geometry.sunWindow }),
-  Object.freeze({ id: "03-reapply-ring", fileStem: "03-reapply-ring", chineseName: "補擦環", tagline: "用未完的節奏記住下一次補擦", mark: geometry.reapplyRing }),
-  Object.freeze({ id: "04-sunlight-nodes", fileStem: "04-sunlight-nodes", chineseName: "日照節點", tagline: "在日照變化間輕柔串起補擦節奏", mark: geometry.sunlightNodes }),
-  Object.freeze({ id: "05-weather-bulletin-frame", fileStem: "05-weather-bulletin-frame", chineseName: "晴報框", tagline: "像每日生活快報一樣整理陽光資訊", mark: geometry.weatherBulletinFrame }),
-  Object.freeze({ id: "06-broadcast-mark", fileStem: "06-broadcast-mark", chineseName: "播報印記", tagline: "把陽光提醒濃縮成清楚的短報", mark: geometry.broadcastMark }),
+  Object.freeze({
+    id: "01-morning-line",
+    fileStem: "01-morning-line",
+    chineseName: "晨線",
+    tagline: "每天查看晴報的溫暖起點",
+    mark: geometry.morningLine
+  }),
+  Object.freeze({
+    id: "02-sun-window",
+    fileStem: "02-sun-window",
+    chineseName: "晴窗",
+    tagline: "打開一扇生活化的陽光情報窗",
+    mark: geometry.sunWindow
+  }),
+  Object.freeze({
+    id: "03-reapply-ring",
+    fileStem: "03-reapply-ring",
+    chineseName: "補擦環",
+    tagline: "用未完的節奏記住下一次補擦",
+    mark: geometry.reapplyRing
+  }),
+  Object.freeze({
+    id: "04-sunlight-nodes",
+    fileStem: "04-sunlight-nodes",
+    chineseName: "日照節點",
+    tagline: "在日照變化間輕柔串起補擦節奏",
+    mark: geometry.sunlightNodes
+  }),
+  Object.freeze({
+    id: "05-weather-bulletin-frame",
+    fileStem: "05-weather-bulletin-frame",
+    chineseName: "晴報框",
+    tagline: "像每日生活快報一樣整理陽光資訊",
+    mark: geometry.weatherBulletinFrame
+  }),
+  Object.freeze({
+    id: "06-broadcast-mark",
+    fileStem: "06-broadcast-mark",
+    chineseName: "播報印記",
+    tagline: "把陽光提醒濃縮成清楚的短報",
+    mark: geometry.broadcastMark
+  })
 ]);
 
 function escapeXml(value) {
@@ -94,7 +130,9 @@ function titleFor(concept, asset) {
 function renderMarkGeometry(concept, { monochrome = false } = {}) {
   const mark = concept.mark();
   if (!monochrome) return mark;
-  return mark.replaceAll(COLORS.terracotta, COLORS.espresso).replaceAll(COLORS.amberGold, COLORS.warmInk);
+  return mark
+    .replaceAll(COLORS.terracotta, COLORS.espresso)
+    .replaceAll(COLORS.amberGold, COLORS.warmInk);
 }
 
 export function renderMarkSvg(concept) {
@@ -117,13 +155,14 @@ export function renderLockupSvg(concept) {
 }
 
 export function renderBoardSvg(concepts = CONCEPTS) {
-  const cells = concepts.map((concept, index) => {
-    const column = index % 3;
-    const row = Math.floor(index / 3);
-    const x = 64 + column * 512;
-    const y = 112 + row * 552;
+  const cells = concepts
+    .map((concept, index) => {
+      const column = index % 3;
+      const row = Math.floor(index / 3);
+      const x = 64 + column * 512;
+      const y = 112 + row * 552;
 
-    return `
+      return `
   <g data-concept="${concept.fileStem}" transform="translate(${x} ${y})">
     <g transform="translate(24 40) scale(2)">${renderMarkGeometry(concept)}</g>
     <g transform="translate(190 44)">${renderMarkGeometry(concept)}</g>
@@ -134,7 +173,8 @@ export function renderBoardSvg(concepts = CONCEPTS) {
     <text x="32" y="286" fill="${COLORS.espresso}" font-family="${BOARD_LABEL_FONT}" font-size="17" font-weight="500" lang="zh-Hant-TW">${escapeXml(concept.tagline)}</text>
     <path d="M32 328H448" stroke="${COLORS.espresso}" stroke-width="2" opacity=".24"/>
   </g>`;
-  }).join("");
+    })
+    .join("");
 
   return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 1240" role="img">
   <title>防曬晴報員 UVAlert 六款 Logo 概念比較板</title>
@@ -168,9 +208,9 @@ const BROADCAST_MARK_OUTLINE = Object.freeze({
   rays: Object.freeze([
     Object.freeze({ x1: 29, y1: 24, x2: 39, y2: 18, colorKey: "warmInk" }),
     Object.freeze({ x1: 32, y1: 32, x2: 46, y2: 32, colorKey: "warmInk" }),
-    Object.freeze({ x1: 29, y1: 40, x2: 38, y2: 45, colorKey: "amberGold" }),
+    Object.freeze({ x1: 29, y1: 40, x2: 38, y2: 45, colorKey: "amberGold" })
   ]),
-  rayHalfWidth: 2,
+  rayHalfWidth: 2
 });
 
 function round2(value) {
@@ -197,7 +237,10 @@ function renderBroadcastMarkOutlineBody(colorFor) {
   const { dot, rays, rayHalfWidth } = BROADCAST_MARK_OUTLINE;
   const dotMarkup = `<circle cx="${dot.cx}" cy="${dot.cy}" r="${dot.r}" fill="${colorFor("amberGold")}"/>`;
   const rayMarkup = rays
-    .map((ray) => `<path d="${pillPath(ray.x1, ray.y1, ray.x2, ray.y2, rayHalfWidth)}" fill="${colorFor(ray.colorKey)}"/>`)
+    .map(
+      (ray) =>
+        `<path d="${pillPath(ray.x1, ray.y1, ray.x2, ray.y2, rayHalfWidth)}" fill="${colorFor(ray.colorKey)}"/>`
+    )
     .join("");
   return `<g>${dotMarkup}${rayMarkup}</g>`;
 }
@@ -231,7 +274,9 @@ export function renderDarkSurfaceMarkSvg(concept) {
 `;
 }
 
-export function generateLogoConcepts(outputRoot = resolve("docs/design/logo-concepts")) {
+export function generateLogoConcepts(
+  outputRoot = resolve("docs/design/logo-concepts")
+) {
   const root = resolve(outputRoot);
   const markDirectory = resolve(root, "marks");
   const lockupDirectory = resolve(root, "lockups");
@@ -239,21 +284,43 @@ export function generateLogoConcepts(outputRoot = resolve("docs/design/logo-conc
   mkdirSync(lockupDirectory, { recursive: true });
 
   for (const concept of CONCEPTS) {
-    writeFileSync(resolve(markDirectory, `${concept.fileStem}.svg`), renderMarkSvg(concept), "utf8");
-    writeFileSync(resolve(lockupDirectory, `${concept.fileStem}.svg`), renderLockupSvg(concept), "utf8");
+    writeFileSync(
+      resolve(markDirectory, `${concept.fileStem}.svg`),
+      renderMarkSvg(concept),
+      "utf8"
+    );
+    writeFileSync(
+      resolve(lockupDirectory, `${concept.fileStem}.svg`),
+      renderLockupSvg(concept),
+      "utf8"
+    );
   }
 
-  writeFileSync(resolve(root, "uvalert-logo-concepts-board.svg"), renderBoardSvg(CONCEPTS), "utf8");
+  writeFileSync(
+    resolve(root, "uvalert-logo-concepts-board.svg"),
+    renderBoardSvg(CONCEPTS),
+    "utf8"
+  );
 
-  const safeAreaConcept = CONCEPTS.find((concept) => concept.fileStem === SAFE_AREA_CONCEPT_ID);
+  const safeAreaConcept = CONCEPTS.find(
+    (concept) => concept.fileStem === SAFE_AREA_CONCEPT_ID
+  );
   if (safeAreaConcept) {
     writeFileSync(
       resolve(root, `${SAFE_AREA_CONCEPT_ID}-app-icon-safe-area.svg`),
       renderSafeAreaGuideSvg(safeAreaConcept),
       "utf8"
     );
-    writeFileSync(resolve(root, `${SAFE_AREA_CONCEPT_ID}-outlined.svg`), renderOutlinedMarkSvg(safeAreaConcept), "utf8");
-    writeFileSync(resolve(root, `${SAFE_AREA_CONCEPT_ID}-filled.svg`), renderFilledMarkSvg(safeAreaConcept), "utf8");
+    writeFileSync(
+      resolve(root, `${SAFE_AREA_CONCEPT_ID}-outlined.svg`),
+      renderOutlinedMarkSvg(safeAreaConcept),
+      "utf8"
+    );
+    writeFileSync(
+      resolve(root, `${SAFE_AREA_CONCEPT_ID}-filled.svg`),
+      renderFilledMarkSvg(safeAreaConcept),
+      "utf8"
+    );
     writeFileSync(
       resolve(root, `${SAFE_AREA_CONCEPT_ID}-dark-surface.svg`),
       renderDarkSurfaceMarkSvg(safeAreaConcept),
@@ -261,12 +328,21 @@ export function generateLogoConcepts(outputRoot = resolve("docs/design/logo-conc
     );
   }
 
-  return { outputRoot: root, marks: CONCEPTS.length, lockups: CONCEPTS.length, board: true };
+  return {
+    outputRoot: root,
+    marks: CONCEPTS.length,
+    lockups: CONCEPTS.length,
+    board: true
+  };
 }
 
-const isDirectRun = process.argv[1] && fileURLToPath(import.meta.url) === resolve(process.argv[1]);
+const isDirectRun =
+  process.argv[1] &&
+  fileURLToPath(import.meta.url) === resolve(process.argv[1]);
 
 if (isDirectRun) {
   const result = generateLogoConcepts(process.argv[2]);
-  console.log(`Generated ${result.marks} standalone marks in ${result.outputRoot}`);
+  console.log(
+    `Generated ${result.marks} standalone marks in ${result.outputRoot}`
+  );
 }

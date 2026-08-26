@@ -12,3 +12,10 @@ tools/region-data/source/extracted/
 # 字型原始檔（數 MB）不進 repo，只 commit subset 後的產物。
 # 重新取得方式見 tools/fonts/README.md。
 tools/fonts/source/
+
+# Claude Design 匯出的交接 bundle 不進 repo（下游產物、非權威、會漂移）。
+# 2026-08-26 移除了 uvalert-design-system/ 與 防曬補擦流程設計/，見
+# docs/superpowers/plans/2026-08-26-codebase-consolidation-audit.md 的 C2。
+# 之後的匯出放這個資料夾或 repo 外。
+*.dc.html
+design-exports/
