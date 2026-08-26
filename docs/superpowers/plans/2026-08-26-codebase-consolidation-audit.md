@@ -50,7 +50,8 @@
 | `.recovery-card` | `ZoneProtectionForm` + `SetupPage` 兩份 | B6 |
 | 斷點 | `31rem` ×4（按鈕堆疊，未記錄）、`48rem` ×4（=768px 但用 rem，跟 DESIGN.md §12 的 px 不一致）、`24rem` ×1（未記錄） | D3 |
 | `--shadow-card`／`--shadow-float` | 定義了但全站零使用；值跟 DESIGN.md §7 也對不上 | G1 |
-| `uvalert-design-system/` ＋ `防曬補擦流程設計/` | 兩個 Claude Design 匯出資料夾 checkin repo 根目錄，271 檔約 47 MB（含 15 MB 已退回的字型），無程式碼引用，token 已漂移。**裁決：刪除** | C2 |
+| `uvalert-design-system/` ＋ `防曬補擦流程設計/` | 兩個 Claude Design 匯出資料夾 checkin repo 根目錄，271 檔約 47 MB（含 15 MB 已退回的字型），無程式碼引用，token 已漂移。**✅ 已刪除**（commit `3f38a9d`） | C2 |
+| `DESIGN.md`↔`styles.css` 無 drift 守門 | ✅ **C1 已完成**：`packages/ui/src/tokens.test.ts`（54 測試）比對 colors/rounded/spacing/layout。抓到 5 類落差（`status-saved` 藕紫 vs 綠、`warning`/`error` 無 token、`rounded.full`、`page-gutter-*`）→ D2 裁決 | C1／D2 |
 | `DESIGN.md` §10／§13 | 過期：焦點環（§13 #2）早已系統化、`SUNSHIELD_THEME`（§13 已清）、`.button--quiet:disabled`（§13 #3 已補）文件沒全跟上 | D1／D2 |
 | `--text-tertiary` | 對比度 4.42:1，過不了 WCAG AA 4.5:1，**色值本身不能用在文字上**，全 repo 零使用。**裁決：砍第 5 級** | D4 |
 | `@lucide/vue` 直接 import | 9 檔（`ProductSnapshotEditor`、`SetupProcessBanner`、`RegionLocationPanel`、`RegionPreferenceSummary`、`QuickProtectionSummary`、`ZoneProtectionForm`、`FiveDayUvCard`、`SetupPage`）；wireframe 已凍結，阻塞解除 | E1 |
@@ -159,11 +160,18 @@
 
 ## Task C：token 真相數量
 
-- [ ] **C1：`DESIGN.md` ↔ `styles.css` drift 測試**
-  - 做法：新增 `packages/ui/src/tokens.test.ts`（或 `test-fixtures` 裡）——parse `DESIGN.md` 開頭的 YAML frontmatter（`colors:`／`rounded:`／`spacing:`／`layout:`），對每個值斷言 `styles.css` 有對應的 `--*` 且值相同（允許 hex 大小寫、`0.25rem`↔`4px` 這類等價換算）。
-  - 這會**自動**抓到像 2026-08-25 才發現的 `body-md` 14px vs 16px 那種落差。
-  - 需要一份「DESIGN.md key → styles.css token 名」的對照表（`display-md` → `--font-size-page-title` 之類），這張表本身就是 D2 想要的產物。
-  - **驗證**：測試跑得起來、目前**故意讓它列出所有現存落差**（可以先 `.todo` / `.skip` 標記已知落差，逐一清），不要一開始就強制全綠。
+- [x] **C1：`DESIGN.md` ↔ `styles.css` drift 測試** — 2026-08-26 完成（尚未 commit）
+  - 新增 `packages/ui/src/tokens.test.ts`（54 個測試）——parse `DESIGN.md` frontmatter 的 `colors`／`rounded`／`spacing`／`layout`，逐項比對 `styles.css` `:root` 的對應 token。命名規則：colors `accent-X`／`status-X` → `--color-X`，其餘 1:1；rounded → `--radius-X`；spacing `xxs..section` → `--space-1..10`；layout → `--content-max`／`--tap-target`。值比對：hex 大小寫無關、px↔rem 以 16px 換算。
+  - **不含 typography**（14 級量表 ↔ 8 個 `--font-size-*` 命名太亂，是 D2 的範圍）——只驗證唯一校準過的 `body-md`(16px) ↔ `--font-size-body`。
+  - **KNOWN_DRIFT 機制**：已知對不上的項目列在測試檔的 `KNOWN_DRIFT` 物件（附中文說明），per-key 測試放行；另有一個守門測試斷言「這些項目現在仍然真的有落差」——修好一項後那個測試會失敗，逼你把它從清單移除。
+  - **抓到 5 類現存落差（→ 全部丟給 D2 裁決）**：
+    1. **`colors.status-saved`**：`DESIGN.md` §2 訂藕紫 `#8C6F7A`，並**明文**「刻意用藕紫而非綠色……只有『這次記錄成功』」。但 code 沒有 `--color-saved`，「已儲存／成功」一律用綠色 `--color-success` `#147d64`（`SetupStepShell` 草稿已儲存、3 個 flow 頁的 `.success-panel` 上緣、`.notice--ok`、`SetupPage` 更新提示）。**這是方向性違反設計系統的落差**，最該優先裁。
+    2. **`colors.warning`**：`DESIGN.md` `#C78336`；`styles.css` 沒有 `--color-warning`（實作用 `--color-soon` 兼表警示）。
+    3. **`colors.error`**：`DESIGN.md` `#B84D4C`；沒有 `--color-error`（實作一律 `--color-due`）。
+    4. **`rounded.full`**：`DESIGN.md` 有 `pill:999px` 與 `full:9999px` 兩級；`styles.css` 只有 `--radius-pill`，`full` 從沒用過。
+    5. **`layout.page-gutter-mobile`／`page-gutter-desktop`**（16px／24px）：沒有 token，`AppShell` 用 `clamp(1rem, 5vw, 2.75rem)`。跟 D3 斷點一起處理。
+  - `pnpm check` 通過（84 檔／539 測試）。
+  - **D2 的「DESIGN.md key → token 名」完整對照表**：`tokens.test.ts` 的 `tokenFor()` ＋ `SPACING_MAP`／`LAYOUT_MAP` 就是 colors/rounded/spacing/layout 那半份；typography 那半份還要補。
 
 - [x] **C2：刪除 repo 內的 Claude Design 匯出資料夾** — 2026-08-26 執行（尚未 commit）
   - **裁決（2026-08-26）：刪除。** 使用者確認不再用 Claude Design 做設計往返。
@@ -184,9 +192,15 @@
   - #3 停用狀態：`.button--quiet:disabled` **已補**（2026-08-25）。輸入框、清單項目的停用樣式仍未定義——保留這半句。
   - #10「已清除」段落：確認 `SUNSHIELD_THEME` 那段還準確。
 
-- [ ] **D2：§10「與程式碼的落差」表重建**
-  - 目前只列「中文內文字體」一項。實際落差還有：`DESIGN.md` 14 級字級量表 vs `styles.css` 8 個 token 的命名／數值對應（只校準了 `body-md`）。
-  - 做法：跟 C1 的對照表一起產出——把「哪些 DESIGN.md token 有對應 code token、值一不一致、為什麼」做成完整表格。這張表是 C1 測試的輸入，也是 §10 的內容。
+- [ ] **D2：§10「與程式碼的落差」表重建 ＋ 裁決 C1 抓到的 5 類落差**
+  - 目前 §10 只列「中文內文字體」一項。
+  - **C1（已完成）抓到的落差，D2 要逐一裁決**（詳見 C1 項目）：
+    1. `colors.status-saved` 藕紫 vs code 綠色 `--color-success`——最優先。選項：(a) 依 DESIGN.md 把「已儲存／成功」feedback 全改藕紫、建 `--color-saved`；(b) DESIGN.md §2 放寬「只有 status-card 用藕紫，transient 成功 feedback 可用綠」並把 `--color-success` 補進 §2。
+    2. `colors.warning` / `colors.error`：建 `--color-warning` / `--color-error`，還是把 DESIGN.md 那兩列刪掉（承認實作就是共用 `--color-soon` / `--color-due`）。
+    3. `rounded.full`：刪 DESIGN.md 的 `full` 那列（從沒用過），或補 `--radius-full`。
+    4. `layout.page-gutter-*`：跟 D3 一起——要不要 token 化 `AppShell` 的 `clamp()`。
+  - **typography 對照**：把 `DESIGN.md` 14 級量表 vs `styles.css` 8 個 `--font-size-*` 的命名／數值逐一對到，補進 C1 的 `tokens.test.ts`（typography 那半份目前缺）。這張完整表就是 §10 的內容。
+  - 做法：裁決完後 C1 的 `KNOWN_DRIFT` 逐項清空（清一項那個守門測試會提醒你移除該項）。
 
 - [ ] **D3：§12 斷點補齊**
   - 現況：§12 有 768px/1024px（頁面）+ 36rem/42rem（元件，2026-08-25 補）。程式碼還有 `31rem` ×4（按鈕堆疊：`app.css`、`SessionEndControl`、`QuickProtectionSummary`、`SetupStepShell`）、`48rem` ×4（=768px 頁面斷點，但用 rem：`GearFormSheet`、`ProtectionAdjustmentSheet`、`AppShell`、`MorePage`）、`24rem` ×1（`FiveDayUvCard` 極窄）。
@@ -274,13 +288,14 @@
 
 ## 建議執行順序（依 2026-08-26 裁決更新）
 
-1. **C2**（刪兩個匯出資料夾 ＋ `.gitignore`）— 自成一個 commit，最無風險、立刻縮小 repo
-2. **A1 → A3 → A4**（Stylelint / ESLint / CI，治本）
-3. **A2 一次性格式化**（挑安靜時間窗，單獨 commit）
-4. **B1 + B2 + B4**（`.form-error` / `.flow-heading`+`.success-panel` / region `min-height`——零風險、值不變）
-5. **C1 + D1 + D2 + D3 + D4**（drift 測試 ＋ `DESIGN.md` 校準 ＋ 斷點 ＋ 砍第 5 級文字色，一起做，互為輸入）
-6. **B5**（datetime helper）／ **B3 + useOverlay**（bottom sheet，需測試工作）
-7. **F5**（累積的視覺驗證，獨立 session）
-8. **G1 + G2 + D5**（死碼 ＋ 陰影規範）
-9. **B6 / B7 / F1 / F2 / F3 / F4**（次要收斂與未稽核面向）
-10. **E1**（等使用者產出草稿 SVG）
+- ~~**C2**（刪兩個匯出資料夾 ＋ `.gitignore`）~~ ✅ 2026-08-26 完成（commit `3f38a9d`）
+- ~~**C1**（`DESIGN.md`↔`styles.css` drift 測試）~~ ✅ 2026-08-26 完成（`packages/ui/src/tokens.test.ts`，尚未 commit）——抓到 5 類落差待 D2 裁決
+1. **A1 → A3 → A4**（Stylelint / ESLint / CI，治本）
+2. **A2 一次性格式化**（挑安靜時間窗，單獨 commit）
+3. **B1 + B2 + B4**（`.form-error` / `.flow-heading`+`.success-panel` / region `min-height`——零風險、值不變）
+4. **D1 + D2 + D3 + D4**（`DESIGN.md` 校準 ＋ 斷點 ＋ 砍第 5 級文字色 ＋ 裁決 C1 抓到的 5 類落差，一起做，逐項清 `tokens.test.ts` 的 `KNOWN_DRIFT`）
+5. **B5**（datetime helper）／ **B3 + useOverlay**（bottom sheet，需測試工作）
+6. **F5**（累積的視覺驗證，獨立 session）
+7. **G1 + G2 + D5**（死碼 ＋ 陰影規範）
+8. **B6 / B7 / F1 / F2 / F3 / F4**（次要收斂與未稽核面向）
+9. **E1**（等使用者產出草稿 SVG）
