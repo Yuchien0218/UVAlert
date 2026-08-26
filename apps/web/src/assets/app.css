@@ -93,6 +93,33 @@
   line-height: 1.6;
 }
 
+/* 2026-08-26：收斂三個流程頁重複的標題列版型。 */
+.flow-heading {
+  display: flex;
+  align-items: start;
+  justify-content: space-between;
+  gap: var(--space-4);
+}
+
+.flow-heading h1,
+.flow-heading p {
+  margin: 0;
+}
+
+.flow-heading h1 {
+  font-size: var(--font-size-page-title);
+}
+
+.flow-heading div {
+  display: grid;
+  gap: var(--space-3);
+}
+
+.flow-heading div > p:last-child {
+  color: var(--text-body);
+  line-height: 1.6;
+}
+
 /*
  * 2026-08-24：flow-heading 版型（ReapplyPage／EventCorrectionPage／
  * ReportContextEventPage）逐字重複的 `.eyebrow { letter-spacing: .16em }`
@@ -149,6 +176,26 @@
   border: 1px solid var(--border-subtle);
   border-radius: var(--radius-lg);
   background: var(--surface-primary);
+}
+
+/* 2026-08-26：流程完成後的共通成功面板。 */
+.success-panel {
+  display: grid;
+  gap: var(--space-4);
+  padding: var(--space-5);
+  border-top: 0.35rem solid var(--color-saved);
+}
+
+.success-panel h2,
+.success-panel p {
+  margin: 0;
+}
+
+/* 2026-08-26：收斂九個表單各自定義的行內錯誤文字。 */
+.form-error {
+  margin: 0;
+  color: var(--color-due);
+  line-height: 1.6;
 }
 
 /*

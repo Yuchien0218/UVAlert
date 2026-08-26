@@ -651,6 +651,8 @@ Noto Serif TC 是標題的唯一字型，沒有第二層自托管備援——載
 
 **`page-heading`** — 由三段組成：`eyebrow`（`{typography.caption}`，`{colors.muted}`）、`title`（`{typography.display-md}`，襯線）、`body`（`{typography.body-md}`，`{colors.body}`，`max-width: 38rem`）。eyebrow 與 body 都是選用的。
 
+**`flow-heading`** — 全螢幕操作流程的標題列，標題與說明在左、關閉操作在右；內部以 12px 堆疊，兩側保留 16px 間距。共通實作位於 `apps/web/src/assets/app.css`，目前供重新塗抹、更正紀錄與回報事件三個流程使用。
+
 **`app-card`** — 通用內容卡。背景半透明白 `rgba(255,255,255,0.6)` 疊在 `{colors.canvas}` 上（2026-08-24：純 canvas 版本套用後卡片跟頁面幾乎融在一起，改用半透明白疊加維持一點層次），1px `{colors.hairline}` 邊框，圓角 `{rounded.lg}`，內距 20px。無陰影。這個疊加效果假設卡片背後是 canvas 底色，不要用在深色面板或圖片背景上。
 
 **`page-footer-meta`** — 頁尾的版本、隱私政策、使用條款與資料說明。純文字連結列，`{colors.muted-soft}`，`{typography.body-sm}`。**刻意不做成功能卡片**，避免與「更多」頁的入口卡競爭。
@@ -736,6 +738,8 @@ Noto Serif TC 是標題的唯一字型，沒有第二層自托管備援——載
 **`text-input`** — 背景 `{colors.canvas}`，1px `{colors.hairline}` 邊框，圓角 `{rounded.md}`，內距 10px × 14px，最小高度 44px。行動端字級 16px 避免 iOS 自動放大。
 
 **`text-input-focused`** — 邊框轉為 `{colors.primary}`，外加 3px 深杏桃 15% 透明度的焦點環。
+
+**`form-error`** — 行內欄位錯誤文字。使用 `{colors.status-due}`、行高 1.6，並清除段落預設 margin；共通實作位於 `apps/web/src/assets/app.css`。欄位錯誤邊框、圖示與訊息位置仍需配合完整表單流程定案。
 
 **`badge-pill`** — 分類標籤。背景 `{colors.surface-card}`，`{typography.caption}`，圓角 `{rounded.pill}`。
 
@@ -979,7 +983,7 @@ Noto Serif TC 是標題的唯一字型，沒有第二層自托管備援——載
 1. **Lucide 尚未完全移除。** 剩 9 個檔案仍直接 `import ... from "@lucide/vue"`（`ProductSnapshotEditor`、`SetupProcessBanner`、`RegionLocationPanel`、`RegionPreferenceSummary`、`QuickProtectionSummary`、`ZoneProtectionForm`、`FiveDayUvCard`、`SetupPage`）。wireframe 已凍結、阻塞解除；等使用者產出草稿 SVG 就能替換，`@lucide/vue` 依賴要等那批畫完才能移除。收斂待辦見 `docs/superpowers/plans/2026-08-26-codebase-consolidation-audit.md` E1。
 2. **焦點環已系統化**（2026-08-25 前就已完成，此處補記）。`packages/ui/src/styles.css` 全域規則：`button, a, input, select, textarea` 的 `:focus-visible` → `outline: 0.15rem solid var(--focus-ring); outline-offset: 0.2rem;`。**殘留缺口**：卡片、自訂 widget（如 `.choice-grid` 選項、bottom sheet）的鍵盤焦點樣式未逐一規範。
 3. **停用狀態**：主按鈕（`--color-primary-disabled`）、次要按鈕（`.button--quiet:disabled`：`opacity: 0.55` + `cursor: not-allowed`，2026-08-25 補）皆已定義。**輸入框、清單項目的停用樣式仍未定義。**
-4. **錯誤與驗證狀態：色已定、視覺結構未展開。** 顏色沿用 `{colors.status-due}`（驗證錯誤）／`{colors.status-soon}`（系統警示），見第二節。但欄位邊框、訊息位置、是否加圖示這些**視覺結構**還需要一個實際表單流程才能確認。`.form-error` 目前是 9 個檔案各自 scoped（待收斂，見 audit 清單 B1）。
+4. **錯誤與驗證狀態：行內錯誤文字已統一，其餘視覺結構未展開。** 顏色沿用 `{colors.status-due}`（驗證錯誤）／`{colors.status-soon}`（系統警示），見第二節。2026-08-26 已將 9 個檔案的 `.form-error` 收斂至 `app.css`；欄位邊框、訊息位置與是否加圖示仍需配合實際表單流程確認。
 5. **橫式標誌缺深色底版本。** 正式資產在 `docs/design/logo/`（2026-08-22 定案），但墨咖字標在濃縮咖啡深色面板上幾乎看不見，需要另做反白版。圖標本身已有 `06-broadcast-mark-dark-surface.svg`。
 6. **衛教七部位示意尚未設計。** 規格 4.6 有提到，圖示系統中列為待補。
 7. **功能型圖示尚未設計**（見上方第 1 項）：載入中、快速摘要、調整設定、流程橫幅、產品確認、地區、定位、UV 預報、夜間、傍晚。工具型那批已完成。清單見 `docs/design/icon-system/README.md` 第八節。

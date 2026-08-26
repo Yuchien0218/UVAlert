@@ -115,13 +115,13 @@
 
 **前置**：最好等 A1 上線，這樣收完 lint 會幫忙守住。但 B1／B2／B4 零風險（值不變、已逐字相同），可以先做。
 
-- [ ] **B1：`.form-error` → 單一定義**
+- [x] **B1：`.form-error` → 單一定義**（2026-08-26 完成）
   - 現況：9 檔各自 scoped，3 種寫法（純 `color` / `+line-height:1.6` / `+margin:0`）。檔案：`components/common/QuickTimePicker.vue`、`components/product/GearForm.vue`、`components/reapplication/ReapplicationProductAssignments.vue`、`components/reapplication/ReapplicationZoneSelector.vue`、`components/setup/ZoneProtectionForm.vue`、`pages/EventCorrectionPage.vue`、`pages/ReportContextEventPage.vue`、`pages/settings/NotificationSettingsPage.vue`、`pages/setup/SetupPage.vue`。
   - 做法：在 `app.css` 加共用 `.form-error { margin: 0; color: var(--color-due); line-height: 1.6; }`（取「最完整」版本），9 檔刪除各自 scoped 定義。比照 `app.css` 既有收斂註解慣例補日期與來源。
   - `DESIGN.md` §13 盲點 #4「錯誤與驗證狀態未展開」→ 至少把「inline 欄位錯誤文字」這一塊補進 §5，標明其餘（欄位邊框、圖示、訊息位置）仍待實際表單流程確認。
   - **驗證**：grep 確認 9 檔 scoped 定義都刪乾淨、無死碼；`pnpm check`。視覺上 margin:0 對前 6 個沒寫 margin 的檔案是新行為，累積到 F5。
 
-- [ ] **B2：`.flow-heading` + `.success-panel` → `app.css`**
+- [x] **B2：`.flow-heading` + `.success-panel` → `app.css`**（2026-08-26 完成）
   - 現況：`EventCorrectionPage`／`ReapplyPage`／`ReportContextEventPage` 三份**逐字相同**（`.flow-heading` 的 5 條規則；`.success-panel` 的 grid + `border-top: 0.35rem solid var(--color-success)` + margin reset）。
   - 做法：兩組都搬進 `app.css` 共用類別，三檔刪除 scoped。`0.35rem` 這個值只出現在這一處角色（成功卡上緣強調條），可留字面值或加一個 `--border-emphasis: 0.35rem`（傾向留字面值，單一用途不值得建 token）。
   - 順便：`.flow-heading` 跟 `DESIGN.md` §5 的 `page-heading` 是姊妹（全螢幕流程頁的標題列 vs 一般頁），在 §5 補一個 `flow-heading` 條目指向 `app.css`。
@@ -135,10 +135,11 @@
   - **測試**：`GearFormSheet`／`ProtectionAdjustmentSheet` 若有測試要更新選擇器；新元件要有 `.test.ts`（open/close、Escape、`@click.self`、focus 還原）。
   - **驗證**：`pnpm check`；手動確認兩個 sheet 開關手感與焦點行為不變（需要 preview 工具，累積到 F5）。
 
-- [ ] **B4：region 元件的 `min-height: 2.75rem` → `var(--tap-target)`**
+- [x] **B4：region 元件的 `min-height: 2.75rem` → `var(--tap-target)`**（2026-08-26 完成）
   - 現況：`components/region/RegionLocationPanel.vue`（2 處）、`components/region/RegionManualSelector.vue`（2 處）、`pages/RegionPage.vue`（1 處）。值就是 `--tap-target`。
   - `DESIGN.md` §10 的 2026-08-22 修正記錄明講「元件 scoped CSS 不要自己寫 min-height……要調整尺寸請改 padding 或 token」，當時修了 `OutdoorContextCard`／`EveningUvPrompt`／`FiveDayUvCard`，漏了這 5 處。
   - 做法：5 處改 `var(--tap-target)`，值不變。若這 5 處是套在 `.button` 或共用 class 上，直接刪掉這行（`.button` 本來就帶）——需逐處看選擇器。
+  - 完成結果：3 處非 `.button` 控制項改用 `var(--tap-target)`；2 處 `.button` 覆寫直接刪除，回歸全域 `.button`。
   - **驗證**：`pnpm check`；視覺零變化。
 
 - [ ] **B5：日期／時間格式化 → `apps/web/src/helpers/datetime.ts`**

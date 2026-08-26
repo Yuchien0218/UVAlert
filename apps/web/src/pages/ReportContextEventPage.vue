@@ -254,42 +254,10 @@ function zoneNames(zoneIds: string[]): string {
 </template>
 
 <style scoped>
-/*
- * 這頁跟 EventCorrectionPage 一直沿用 .flow-heading／.eyebrow 這兩個
- * class 名稱，但從未實際定義過任何樣式——標題列其實是瀏覽器預設的
- * 直向堆疊，不是設計稿那種橫向排版。跟關閉鈕收斂順手補上，對齊
- * ReapplyPage.vue 已有的版本。
- */
-.flow-heading {
-  display: flex;
-  align-items: start;
-  justify-content: space-between;
-  gap: var(--space-4);
-}
-.flow-heading h1,
-.flow-heading p {
-  margin: 0;
-}
-.flow-heading h1 {
-  font-size: var(--font-size-page-title);
-}
-.flow-heading div {
-  display: grid;
-  gap: var(--space-3);
-}
-.flow-heading div > p:last-child {
-  color: var(--text-body);
-  line-height: 1.6;
-}
-
 .app-card {
   display: grid;
   gap: var(--space-4);
   padding: var(--space-5);
-}
-
-.success-panel {
-  border-top: 0.35rem solid var(--color-saved);
 }
 
 h2,
@@ -328,11 +296,6 @@ p {
 
 .kind-option span {
   color: var(--text-secondary);
-}
-
-.form-error {
-  color: var(--color-due);
-  line-height: 1.6;
 }
 
 .correction-note {

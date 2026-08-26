@@ -395,10 +395,4 @@ button.text-link {
   background: var(--page-background);
   color: var(--text-primary);
 }
-
-.form-error {
-  margin: 0;
-  color: var(--color-due);
-  line-height: 1.6;
-}
 </style>

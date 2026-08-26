@@ -191,7 +191,7 @@ async function save(): Promise<void> {
 .manual-region__field select,
 .manual-region__field input {
   width: 100%;
-  min-height: 2.75rem;
+  min-height: var(--tap-target);
   padding: var(--space-3);
   border: 1px solid var(--border-subtle);
   border-radius: var(--radius-sm);
@@ -202,9 +202,5 @@ async function save(): Promise<void> {
 
 .manual-region__field select[aria-invalid="true"] {
   border: 2px solid var(--color-due);
-}
-
-.manual-region .button {
-  min-height: 2.75rem;
 }
 </style>

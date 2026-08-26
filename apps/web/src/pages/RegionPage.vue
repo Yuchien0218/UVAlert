@@ -108,7 +108,7 @@ function returnToCaller(): Promise<unknown> {
 }
 
 .region-skip__action {
-  min-height: 2.75rem;
+  min-height: var(--tap-target);
   padding-inline: var(--space-2);
   text-decoration: underline;
   text-underline-offset: 0.2rem;

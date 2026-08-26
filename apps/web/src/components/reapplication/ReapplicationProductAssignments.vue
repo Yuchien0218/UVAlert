@@ -240,10 +240,6 @@ select {
   background: var(--surface-primary);
 }
 
-.form-error {
-  color: var(--color-due);
-}
-
 .restriction-note {
   margin: 0;
   color: var(--color-untimed);

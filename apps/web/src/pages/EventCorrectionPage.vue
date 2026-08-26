@@ -269,38 +269,10 @@ async function runVoid(): Promise<void> {
   padding: var(--space-5);
 }
 
-.success-panel {
-  border-top: 0.35rem solid var(--color-saved);
-}
-
 h1,
 h2,
 p {
   margin: 0;
-}
-
-/*
- * 跟 ReportContextEventPage 一直沿用 .flow-heading／.eyebrow 這兩個
- * class 名稱，但只定義過 `.flow-heading p` 的顏色，沒有版面（橫向排列、
- * 內距 div 的直向堆疊）——標題列其實是瀏覽器預設的直向堆疊。跟關閉鈕
- * 收斂順手補上，對齊 ReapplyPage.vue 已有的版本。
- */
-.flow-heading {
-  display: flex;
-  align-items: start;
-  justify-content: space-between;
-  gap: var(--space-4);
-}
-.flow-heading h1 {
-  font-size: var(--font-size-page-title);
-}
-.flow-heading div {
-  display: grid;
-  gap: var(--space-3);
-}
-.flow-heading div > p:last-child {
-  color: var(--text-body);
-  line-height: 1.6;
 }
 
 .section-helper {
@@ -314,11 +286,6 @@ p {
 
 .danger-zone p {
   color: var(--text-body);
-  line-height: 1.6;
-}
-
-.form-error {
-  color: var(--color-due);
   line-height: 1.6;
 }
 </style>

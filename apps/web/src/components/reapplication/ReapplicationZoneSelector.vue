@@ -87,7 +87,4 @@ legend {
 .zone-choice small {
   color: var(--color-tracking);
 }
-.form-error {
-  color: var(--color-due);
-}
 </style>

@@ -315,10 +315,4 @@ async function runTest(): Promise<void> {
   gap: var(--space-2);
   min-height: var(--tap-target);
 }
-
-.form-error {
-  margin: 0;
-  color: var(--color-due);
-  line-height: 1.6;
-}
 </style>

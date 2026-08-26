@@ -479,12 +479,6 @@ onMounted(async () => {
   line-height: 1.6;
 }
 
-.form-error {
-  margin: 0;
-  color: var(--color-due);
-  line-height: 1.6;
-}
-
 button:disabled {
   cursor: not-allowed;
   opacity: 0.5;

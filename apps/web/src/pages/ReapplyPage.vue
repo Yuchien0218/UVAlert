@@ -228,46 +228,13 @@ function zoneNames(zoneIds: string[]): string {
 </template>
 
 <style scoped>
-.flow-heading {
-  display: flex;
-  align-items: start;
-  justify-content: space-between;
-  gap: var(--space-4);
-}
-.flow-heading h1,
-.flow-heading p {
-  margin: 0;
-}
-.flow-heading h1 {
-  font-size: var(--font-size-page-title);
-}
-.flow-heading div {
-  display: grid;
-  gap: var(--space-3);
-}
-.flow-heading div > p:last-child {
-  color: var(--text-body);
-  line-height: 1.6;
-}
-.submit-error,
-.success-panel {
-  padding: var(--space-5);
-}
 .submit-error {
   display: grid;
   justify-items: start;
   gap: var(--space-3);
+  padding: var(--space-5);
 }
 .submit-error p {
-  margin: 0;
-}
-.success-panel {
-  display: grid;
-  gap: var(--space-4);
-  border-top: 0.35rem solid var(--color-saved);
-}
-.success-panel h2,
-.success-panel p {
   margin: 0;
 }
 .correction-note {

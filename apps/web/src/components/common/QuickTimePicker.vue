@@ -98,7 +98,4 @@ input {
 .time-summary {
   color: var(--text-secondary);
 }
-.form-error {
-  color: var(--color-due);
-}
 </style>

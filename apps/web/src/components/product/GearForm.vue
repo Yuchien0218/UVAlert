@@ -583,9 +583,4 @@ textarea {
 .danger-zone {
   justify-items: start;
 }
-
-.form-error {
-  color: var(--color-due);
-  line-height: 1.6;
-}
 </style>

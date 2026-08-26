@@ -148,11 +148,6 @@ const errorMessage = computed(() => {
   line-height: 1.6;
 }
 
-.location-panel__action,
-.location-panel__candidate .button {
-  min-height: 2.75rem;
-}
-
 .location-panel__candidate {
   display: grid;
   gap: var(--space-3);
@@ -165,7 +160,7 @@ const errorMessage = computed(() => {
 }
 
 .location-panel__relocate {
-  min-height: 2.75rem;
+  min-height: var(--tap-target);
   padding-inline: var(--space-2);
   text-decoration: underline;
   text-underline-offset: 0.2rem;
