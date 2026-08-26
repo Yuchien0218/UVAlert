@@ -316,8 +316,8 @@ function makeDraftZone(
 /*
  * 2026-08-25：原本跟 __note 共用 --text-secondary。__body 是 h2 底下的
  * 推薦說明，跟其他「標題下方導言」一樣改用 --text-body；__note 維持
- * --text-secondary（不降級到 --text-tertiary，見 styles.css 的對比度
- * 警告——muted-soft 對暖象牙底色量出來只有 4.42:1，過不了 WCAG AA）。
+ * --text-secondary（2026-08-26 起沒有更淺的一級了——muted-soft 對暖象牙
+ * 底只有 4.42:1，過不了 WCAG AA，已移除，見 DESIGN.md 第二節）。
  */
 .preset-card__body {
   color: var(--text-body);

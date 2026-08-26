@@ -1,7 +1,7 @@
 # 文字顏色語意 token 補齊
 
 **日期**：2026-08-25（Asia/Taipei），第二輪同日更新
-**狀態**：已完成（第一輪：token 補齊；第二輪：35 處 `--text-secondary`→`--text-body` 重新分類）。`--text-tertiary` 刻意未套用，見第二輪「重要發現」。
+**狀態**：已完成（第一輪：token 補齊；第二輪：35 處 `--text-secondary`→`--text-body` 重新分類）。**2026-08-26：`--text-tertiary` 與 `--color-muted-soft` 已移除**，文字色階定為 4 級（audit 清單 D4，見下方第二輪末的裁決註記）。
 **裁決**：補上 `--text-emphasis`／`--text-body`／`--text-tertiary` 三個語意別名，對齊 `DESIGN.md` 第二節「文字」的 5 級色階；修掉 2 處誤導性的 CSS fallback；第二輪把 35 處「標題／卡片下方導言、通知與警示框內文」從 `--text-secondary` 升級為 `--text-body`。
 **影響範圍**：第一輪視覺零變化。**第二輪有實際可見變化**——35 個檔案裡的說明段落文字從 `muted`（#6F5A54）變深成 `body`（#5A4540），對比度從 5.93:1 提升到 8.2:1，兩者都通過 WCAG AA，方向是變深不是變淺。
 
@@ -41,7 +41,9 @@
 
 > `--color-muted-soft`（`--text-tertiary` 指向的色票）對暖象牙底色 `--color-canvas` 算出來的對比度只有 **4.42:1**，低於 WCAG AA 一般文字要求的 **4.5:1**。DESIGN.md 定義這個 token 的候選用途（說明文字、頁尾細則）全部是一般字級（12–16px），沒有一處大到能套用「大字級 3:1」那個例外。
 
-也就是說 **`DESIGN.md` 這個文字色階裡的第 5 級，色值本身就不能直接用在真正的文字上**——這解釋了為什麼它先前全 repo零筆使用，可能不是疏漏而是先前就沒人敢用。這次刻意不套用，所有「降級」候選維持 `--text-secondary`（5.93:1，通過 AA）。要真的啟用 `--text-tertiary`，需要先把 `--color-muted-soft` 的色值調深到通過 4.5:1（在 `DESIGN.md` 裡調，不是只改 `styles.css`），這是獨立的、需要使用者確認新色票的後續工作，不在這次範圍。
+也就是說 **`DESIGN.md` 這個文字色階裡的第 5 級，色值本身就不能直接用在真正的文字上**——這解釋了為什麼它先前全 repo零筆使用。所有「降級」候選維持 `--text-secondary`（5.93:1，通過 AA）。
+
+> **2026-08-26 裁決（audit 清單 D4）：砍掉第 5 級，不調色票。** 使用者確認：要過 4.5:1 只能壓線，要有安全 margin 就得調到很接近 `--color-muted`（5.93:1），第 5 級失去意義；對健康 App，「多一個踩 AA 邊界的顏色」的代價大於「頁尾細則稍微淡一點」。已移除 `styles.css` 的 `--text-tertiary` 與 `--color-muted-soft`，`DESIGN.md` 第二節文字色階改成 4 級（ink / body-strong / body / muted），並註明「刻意不設更淺的文字色」。上面這 ~25 處「降級候選」**確定維持 `--text-secondary`**，不再是待辦。
 
 ## 驗證
 

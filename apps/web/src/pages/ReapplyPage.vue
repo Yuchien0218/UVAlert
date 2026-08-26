@@ -96,7 +96,7 @@ function zoneNames(zoneIds: string[]): string {
 .submit-error, .success-panel { padding: var(--space-5); }
 .submit-error { display: grid; justify-items: start; gap: var(--space-3); }
 .submit-error p { margin: 0; }
-.success-panel { display: grid; gap: var(--space-4); border-top: .35rem solid var(--color-success); }
+.success-panel { display: grid; gap: var(--space-4); border-top: .35rem solid var(--color-saved); }
 .success-panel h2, .success-panel p { margin: 0; }
 .correction-note { color: var(--text-secondary); line-height: 1.6; }
 .success-groups { margin: 0; padding-inline-start: var(--space-5); line-height: 1.6; }

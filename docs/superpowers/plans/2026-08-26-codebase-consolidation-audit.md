@@ -48,12 +48,13 @@
 | `min-height: 2.75rem` | `RegionLocationPanel`(2)／`RegionManualSelector`(2)／`RegionPage`(1) 寫死，值＝`var(--tap-target)`。2026-08-22 DESIGN.md §10 修正記錄的同一種問題，當時漏掉這 5 處 | B4 |
 | 日期／時間格式化 | `toLocaleString('zh-TW')`／`toLocaleTimeString`／`Intl.DateTimeFormat` 散在 ~13 處，無共用 helper | B5 |
 | `.recovery-card` | `ZoneProtectionForm` + `SetupPage` 兩份 | B6 |
-| 斷點 | `31rem` ×4（按鈕堆疊，未記錄）、`48rem` ×4（=768px 但用 rem，跟 DESIGN.md §12 的 px 不一致）、`24rem` ×1（未記錄） | D3 |
-| `--shadow-card`／`--shadow-float` | 定義了但全站零使用；值跟 DESIGN.md §7 也對不上 | G1 |
-| `uvalert-design-system/` ＋ `防曬補擦流程設計/` | 兩個 Claude Design 匯出資料夾 checkin repo 根目錄，271 檔約 47 MB（含 15 MB 已退回的字型），無程式碼引用，token 已漂移。**✅ 已刪除**（commit `3f38a9d`） | C2 |
-| `DESIGN.md`↔`styles.css` 無 drift 守門 | ✅ **C1 已完成**：`packages/ui/src/tokens.test.ts`（54 測試）比對 colors/rounded/spacing/layout。抓到 5 類落差（`status-saved` 藕紫 vs 綠、`warning`/`error` 無 token、`rounded.full`、`page-gutter-*`）→ D2 裁決 | C1／D2 |
-| `DESIGN.md` §10／§13 | 過期：焦點環（§13 #2）早已系統化、`SUNSHIELD_THEME`（§13 已清）、`.button--quiet:disabled`（§13 #3 已補）文件沒全跟上 | D1／D2 |
-| `--text-tertiary` | 對比度 4.42:1，過不了 WCAG AA 4.5:1，**色值本身不能用在文字上**，全 repo 零使用。**裁決：砍第 5 級** | D4 |
+| 斷點 | ✅ **D3 已做**：DESIGN.md §12 改 rem 標注、補記 `24rem`／`31rem`。程式碼 0 改動 | D3 |
+| `--shadow-card`／`--shadow-float` | ✅ **D5 已做**：從未被引用，已移除；§7 改「完全不用陰影」 | D5 |
+| `uvalert-design-system/` ＋ `防曬補擦流程設計/` | 兩個 Claude Design 匯出資料夾，271 檔約 47 MB。**✅ 已刪除**（commit `3f38a9d`） | C2 |
+| `DESIGN.md`↔`styles.css` 無 drift 守門 | ✅ **C1 已完成**（`tokens.test.ts`）＋ **D2 已把 colors/rounded/spacing/layout 全對齊**（`saved` 改藕紫、刪 `warning`/`error`/`rounded.full`、page-gutter 移出 frontmatter）。typography 對照只文件化 → B8 | C1／D2 |
+| `DESIGN.md` §10／§13 | ✅ **D1／D2 已更新**：§13 盲點對齊現況（焦點環已系統化、Lucide 剩 9 檔等）、§10 加字級量表對照表 | D1／D2 |
+| 字級量表 | `DESIGN.md` 14 級 vs code 8 個 `--font-size-*` 命名／數值不 1:1，只 `body-md` 校準過。§10 有對照表 | **B8**（新）|
+| `--text-tertiary` / `muted-soft` | ✅ **D4 已砍**：對比度 4.42:1 過不了 AA，`styles.css` 與 `DESIGN.md` 都移除，文字色定為 4 級 | D4 |
 | `@lucide/vue` 直接 import | 9 檔（`ProductSnapshotEditor`、`SetupProcessBanner`、`RegionLocationPanel`、`RegionPreferenceSummary`、`QuickProtectionSummary`、`ZoneProtectionForm`、`FiveDayUvCard`、`SetupPage`）；wireframe 已凍結，阻塞解除 | E1 |
 | `EducationArticlePage` 的 `:deep()` 區塊 | 整個長文排版系統活在一個檔案的 scoped CSS，`max-width: 44rem` ×4、`0.9em`、行高 `1.85` 脫離 token | B7 |
 | 使用者可見文案 | 多數 inline 在 template，只有 `reminderPresentation.ts` 集中 labels；沒有字串目錄 | F1 |
@@ -182,42 +183,45 @@
 
 ---
 
-## Task D：`DESIGN.md` 校準 pass
+## Task D：`DESIGN.md` 校準 pass — 2026-08-26 完成（尚未 commit），typography 例外
 
-- [ ] **D1：§13 規格盲點更新**
-  - #1 Lucide：更新為「9 檔仍直接 import」（見 E1），wireframe 已凍結、阻塞解除。
-  - #2 焦點環：**已系統化**——`styles.css` 全域有 `button/a/input/select/textarea:focus-visible { outline: 0.15rem solid var(--focus-ring); outline-offset: 0.2rem; }`。把 #2 改成「已系統化」，或移到 §5/§7 當正式規範，只留「卡片／自訂 widget 的鍵盤焦點樣式未逐一規範」當殘留缺口。
-  - #3 停用狀態：`.button--quiet:disabled` **已補**（2026-08-25）。輸入框、清單項目的停用樣式仍未定義——保留這半句。
-  - #10「已清除」段落：確認 `SUNSHIELD_THEME` 那段還準確。
+- [x] **D1：§13 規格盲點更新** ✅
+  - #1 Lucide → 「剩 9 檔直接 import」＋ 列出檔名 ＋ 指向 E1。
+  - #2 焦點環 → 改成「**已系統化**」＋ 全域規則內容，殘留缺口只剩「卡片／自訂 widget 的鍵盤焦點樣式」。
+  - #3 停用狀態 → 主／次按鈕已定義，輸入框／清單項目仍未定義。
+  - #4 錯誤驗證 → 「色已定（沿用 status-due／soon），視覺結構未展開」。
+  - 「已清除」段落 → 補上 `--color-muted-soft`／`--text-tertiary`／`--shadow-*`／`warning`／`error`／`rounded.full`。
 
-- [ ] **D2：§10「與程式碼的落差」表重建 ＋ 裁決 C1 抓到的 5 類落差**
-  - 目前 §10 只列「中文內文字體」一項。
-  - **C1（已完成）抓到的落差，D2 要逐一裁決**（詳見 C1 項目）：
-    1. `colors.status-saved` 藕紫 vs code 綠色 `--color-success`——最優先。選項：(a) 依 DESIGN.md 把「已儲存／成功」feedback 全改藕紫、建 `--color-saved`；(b) DESIGN.md §2 放寬「只有 status-card 用藕紫，transient 成功 feedback 可用綠」並把 `--color-success` 補進 §2。
-    2. `colors.warning` / `colors.error`：建 `--color-warning` / `--color-error`，還是把 DESIGN.md 那兩列刪掉（承認實作就是共用 `--color-soon` / `--color-due`）。
-    3. `rounded.full`：刪 DESIGN.md 的 `full` 那列（從沒用過），或補 `--radius-full`。
-    4. `layout.page-gutter-*`：跟 D3 一起——要不要 token 化 `AppShell` 的 `clamp()`。
-  - **typography 對照**：把 `DESIGN.md` 14 級量表 vs `styles.css` 8 個 `--font-size-*` 的命名／數值逐一對到，補進 C1 的 `tokens.test.ts`（typography 那半份目前缺）。這張完整表就是 §10 的內容。
-  - 做法：裁決完後 C1 的 `KNOWN_DRIFT` 逐項清空（清一項那個守門測試會提醒你移除該項）。
+- [x] **D2：§10 重建 ＋ 裁決 5 類落差** ✅（typography 只文件化，不重新對齊）
+  - §10 加了「字級量表 ↔ code token 對照表」——documented 6 類 typography 漂移，**不改字級**（重新對齊會動全站，是獨立的視覺工作，見下方新增的 B8）。
+  - 5 類落差裁決（使用者 2026-08-26 確認）：
+    1. **`status-saved` 綠 → 藕紫**：`--color-success #147d64` → `--color-saved #8c6f7a`（＋`--color-saved-soft` color-mix）。8 處 usage 改（`styles.css`、`app.css` 的 `.status-card--saved`＋`.notice--ok`、`SetupStepShell`、3 個 `.success-panel`、`SetupPage` `.update-notice`）。**有視覺變化**：成功卡上緣色條、「草稿已儲存」文字、`.notice--ok` 底色從綠變藕紫。
+    2. **`warning` / `error`**：刪 DESIGN.md frontmatter 兩列，§2 註明沿用 `status-due` / `status-soon`。
+    3. **`rounded.full`**：刪 frontmatter（改補 `rounded.sheet: 24px`，那是 `--radius-sheet` 一直有、文件沒記的）。
+    4. **`page-gutter-*`**：從 frontmatter 移除（是流動 `clamp()` 不是 token），只留 §12 prose。
+  - `tokens.test.ts`：`KNOWN_DRIFT` 清空、`LAYOUT_MAP` 拿掉 page-gutter、新增 `rounded.sheet` 覆蓋、`colors.status-saved` 現在對齊。55 測試通過。
 
-- [ ] **D3：§12 斷點補齊**
-  - 現況：§12 有 768px/1024px（頁面）+ 36rem/42rem（元件，2026-08-25 補）。程式碼還有 `31rem` ×4（按鈕堆疊：`app.css`、`SessionEndControl`、`QuickProtectionSummary`、`SetupStepShell`）、`48rem` ×4（=768px 頁面斷點，但用 rem：`GearFormSheet`、`ProtectionAdjustmentSheet`、`AppShell`、`MorePage`）、`24rem` ×1（`FiveDayUvCard` 極窄）。
-  - 做法：
-    - `48rem` 那 4 處——決定統一單位。要嘛 §12 改用 rem（`48rem`/`64rem`），要嘛那 4 處改回 `768px`。傾向前者（rem 對縮放友善），DESIGN.md §12 一併改。
-    - `31rem`（按鈕列滿版斷點）、`24rem`（極窄縮小）補進 §12「元件層級斷點」小節，跟 36rem/42rem 並列。
-  - **驗證**：`pnpm check`；若改單位，數值等價（`48rem` = `768px`），視覺零變化。
+- [x] **D3：§12 斷點改 rem 標注 ＋ 補元件斷點** ✅
+  - §12 頁面斷點改 `48rem (768px)` / `64rem (1024px)`；元件層級斷點表補 `24rem`（FiveDayUvCard）、`31rem`（按鈕堆疊）。程式碼 0 改動。
 
-- [ ] **D4：砍掉第 5 級文字色（`--text-tertiary` / `muted-soft`）**
-  - 現況：`--text-tertiary` → `--color-muted-soft`（`#856d65`），對 `--color-canvas` 對比度 **4.42:1** < WCAG AA 4.5:1。全 repo 零使用，因為不能用。
-  - **裁決（2026-08-26）：砍第 5 級，不調色票。** 理由：要過 4.5:1 只能壓線（margin 幾乎為零），要有安全 margin（~4.9:1）就得調到很接近 `--color-muted`（5.93:1），第 5 級失去意義。對健康 App，「多一個踩 WCAG 邊界的顏色」的代價大於「頁尾細則稍微明顯一點」。
-  - 做法：
-    - `styles.css` 移除 `--text-tertiary`；`--color-muted-soft` 若無他處引用也一併移除（先 grep 確認）。
-    - `DESIGN.md` §2「文字」表改成 4 級（ink / body-strong / body / muted），移除 `muted-soft` 那列，加一句「刻意不設更淺的文字色——象牙底上過不了 WCAG AA 4.5:1」。
-    - `docs/decisions/2026-08-25-text-color-token-gap.md` 的「降級成 `--text-tertiary`」段落標記為「**不採用**（2026-08-26）——~25 處候選維持 `--text-secondary`（5.93:1）」。
-  - **驗證**：`pnpm check`；視覺零變化（token 本來就沒人用）。C1 的 drift 測試對照表也少一列。
+- [x] **D4：砍第 5 級文字色** ✅
+  - `styles.css` 移除 `--text-tertiary` ＋ `--color-muted-soft`（grep 確認只有註解引用），註解區塊改寫成「4 級 + 為什麼沒有第 5 級」。
+  - `DESIGN.md` §2 文字表刪 `muted-soft` 列、frontmatter 刪 `muted-soft`、加「刻意不設第 5 級」blockquote。
+  - `2026-08-25-text-color-token-gap.md` 的「降級候選」段落標記為確定維持 `--text-secondary`、不再是待辦。
+  - 視覺零變化（token 本來零使用）。
 
-- [ ] **D5：§7 陰影規範對齊**（跟 G1 一起）
-  - §7 寫「浮層 `0 1px 3px rgba(20,20,19,0.08)` 罕用」，`styles.css` 的 `--shadow-card`/`--shadow-float` 值不一樣且沒人用。決定：要嘛把 token 值改成 §7 的規格並在 bottom sheet 上實際套用，要嘛承認「目前完全平面、無陰影」並把 token 刪掉、§7 改寫。傾向後者（DESIGN.md §7 自己說「色塊優先、陰影罕用」）。
+- [x] **D5：§7 陰影** ✅
+  - `styles.css` 移除 `--shadow-card` / `--shadow-float`（從未被引用）。§7 「浮層 極淡陰影」列改成「**目前無陰影**」，加 blockquote 說明未來要陰影再建 `--shadow-overlay`。
+
+### D2 衍生 — 新增待辦
+
+- [ ] **B8：字級量表重新對齊（獨立視覺工作）**
+  - `DESIGN.md` §10 新的「字級量表對照表」列了 6 類 typography 漂移：`display-md` 目標 36px 但 `--font-size-page-title` 是 28–32px 的 clamp；`--font-size-title`/`title-sm`/`title-md`/`section-title` 4 個 token 是 2026-08-24 從散落卡片標題收斂的桶、不對應 DESIGN.md `title-*`；`body-sm`/`caption` 偏小；`display-xl/lg/sm` 沒 token。
+  - 這是**跨全站的字級調整**，會動很多頁面的視覺，需要獨立一輪（可能還要重新想 DESIGN.md 的 14 級量表對這個 8-token 產品是不是太細）。跟 B7（衛教長文排版）性質類似。
+  - 也要把 typography 對照補進 `tokens.test.ts`（目前只驗 `body-md`）。
+
+- [ ] **G3：`.status-card` 死碼**
+  - `app.css` 的 `.status-card` ＋ 5 個變體（含 D2 剛改名的 `.status-card--saved`）沒有任何元件 template 用到——DESIGN.md §5 的 `status-card` 規範實際由 `ZoneStatusList.vue` 的 `.zone-group` 實現。約 40 行死碼，併進死碼掃描。同場加映：`.uvi-badge`（app.css）grep 也查不到 .vue 使用，一起確認。
 
 ---
 
@@ -287,14 +291,14 @@
 ## 建議執行順序（依 2026-08-26 裁決更新）
 
 - ~~**C2**（刪兩個匯出資料夾 ＋ `.gitignore`）~~ ✅ commit `3f38a9d`
-- ~~**C1**（`DESIGN.md`↔`styles.css` drift 測試）~~ ✅ commit `b1cf1db`——抓到 5 類落差待 D2 裁決
-- ~~**A1 + A6**（Stylelint ＋ CLAUDE.md 硬規則，已併進 `pnpm check`）~~ ✅ 2026-08-26 完成（尚未 commit）
+- ~~**C1**（drift 測試）~~ ✅ commit `b1cf1db`
+- ~~**A1 + A6**（Stylelint ＋ CLAUDE.md 硬規則，已併進 `pnpm check`）~~ ✅ commit `fd54628`
+- ~~**D1–D5**（`DESIGN.md` 校準 ＋ 斷點 rem ＋ 砍第 5 級文字色 ＋ 砍 shadow token ＋ `saved` 色改藕紫）~~ ✅ 2026-08-26 完成（尚未 commit）。typography 對照只文件化，重新對齊拆成 **B8**。
 1. **A3 → A4**（ESLint / CI，治本；`pnpm lint` = eslint + 既有的 lint:css）
 2. **A2 一次性格式化**（挑安靜時間窗，單獨 commit）
 3. **B1 + B2 + B4**（`.form-error` / `.flow-heading`+`.success-panel` / region `min-height`——零風險、值不變）
-4. **D1 + D2 + D3 + D4**（`DESIGN.md` 校準 ＋ 斷點 ＋ 砍第 5 級文字色 ＋ 裁決 C1 抓到的 5 類落差，一起做，逐項清 `tokens.test.ts` 的 `KNOWN_DRIFT`）
-5. **B5**（datetime helper）／ **B3 + useOverlay**（bottom sheet，需測試工作）
-6. **F5**（累積的視覺驗證，獨立 session）
-7. **G1 + G2 + D5**（死碼 ＋ 陰影規範）
-8. **B6 / B7 / F1 / F2 / F3 / F4**（次要收斂與未稽核面向）
-9. **E1**（等使用者產出草稿 SVG）
+4. **B5**（datetime helper）／ **B3 + useOverlay**（bottom sheet，需測試工作）
+5. **F5**（累積的視覺驗證，獨立 session）
+6. **G1 + G2 + G3**（死碼：shadow 已於 D5 清；剩 `.status-card` / `.uvi-badge` / ContextSelector focus / unused imports）
+7. **B6 / B7 / B8 / F1 / F2 / F3 / F4**（次要收斂、字級重新對齊、未稽核面向）
+8. **E1**（等使用者產出草稿 SVG）

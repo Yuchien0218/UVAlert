@@ -262,7 +262,7 @@ async function runVoid(): Promise<void> {
 }
 
 .success-panel {
-  border-top: 0.35rem solid var(--color-success);
+  border-top: 0.35rem solid var(--color-saved);
 }
 
 h1,

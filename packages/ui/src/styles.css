@@ -55,12 +55,11 @@
   --color-surface-dark-elevated: #493732;
   --color-surface-dark-soft: #241f1d;
 
-  /* 文字與分隔線 */
+  /* 文字與分隔線（4 級文字色階，見 DESIGN.md 第二節「文字」） */
   --color-ink: #2e2925;
   --color-body: #5a4540;
   --color-body-strong: #46342f;
   --color-muted: #6f5a54;
-  --color-muted-soft: #856d65;
   --color-hairline: #e7d8cf;
   --color-hairline-soft: #f0e6de;
   --color-on-primary: #fff8f0;
@@ -86,8 +85,14 @@
   --color-due-soft: #fdecea;
   --color-untimed: #9d9591;
   --color-untimed-soft: color-mix(in srgb, #9d9591 12%, #faf5ec);
-  --color-success: #147d64;
-  --color-success-soft: #e9f7f1;
+  /*
+   * 「已儲存／這次記錄成功」的回饋色。**藕紫，不是綠色**——DESIGN.md 第二
+   * 節：防曬沒有「完成」狀態，不用綠色暗示安全。2026-08-26 從綠色
+   * --color-success #147d64 改成藕紫（與 --color-mauve 同值），並改名
+   * --color-saved 對齊 DESIGN.md 的 status-saved。
+   */
+  --color-saved: #8c6f7a;
+  --color-saved-soft: color-mix(in srgb, #8c6f7a 12%, #faf5ec);
   --color-uvi-low: #507aa8;
   --color-uvi-moderate: #bd8500;
   --color-uvi-high: #d16627;
@@ -125,30 +130,22 @@
   --text-primary: var(--color-ink);
   --text-secondary: var(--color-muted);
   /*
-   * 2026-08-25 補上：DESIGN.md 第二節「文字」定義了 5 級文字色階
-   * （ink → body-strong → body → muted → muted-soft），但語意別名一直
-   * 只有 primary／secondary 兩級，中間三級只有原始色票、沒有語意名稱。
-   * 結果是該用 body-strong（強調段落與導言）或 body（預設內文）的地方
-   * 只能落在 primary 或 secondary 兩邊——跟字級 token 那次的落差是同一種
-   * 形狀（見 175 行附近的字級收斂記錄）。
+   * 4 級文字色階（DESIGN.md 第二節「文字」）：
+   *   --text-primary   → ink        所有標題與主要文字
+   *   --text-emphasis  → body-strong 強調段落與導言
+   *   --text-body      → body        預設內文
+   *   --text-secondary → muted       副標、麵包屑、次要文字、頁尾細則
    *
-   * 已把 --text-body 套進 35 處「標題／卡片下方的導言段落、對話框說明、
-   * 通知與警示框內文」——這些原本套 --text-secondary，但内容其實是使用者
-   * 要讀的主要文字，不是「次要」。完整清單見
-   * docs/decisions/2026-08-25-text-color-token-gap.md。
-   *
-   * --text-tertiary **刻意沒有套用在任何元件上**：對應的 --color-muted-soft
-   * 對暖象牙底色（--color-canvas）量出來的對比度只有 4.42:1，過不了 WCAG AA
-   * 一般文字要求的 4.5:1（DESIGN.md 定義的候選用途「說明文字、頁尾細則」
-   * 全部是一般字級，沒有一處大到能套用 3:1 那個例外）。這代表 DESIGN.md
-   * 這個 token 的色值本身不能直接拿來用在真的文字上——要嘛之後把
-   * --color-muted-soft 調深到通過 4.5:1 再啟用，要嘛把它的用途限縮成
-   * 裝飾用途（非文字）。在那之前，任何「這段該更不明顯」的需求都留在
-   * --text-secondary（5.93:1，通過 AA），不要改用 --text-tertiary。
+   * 2026-08-26：**刻意不設第 5 級（更淺的文字色）。** 原本 DESIGN.md 有
+   * muted-soft（#856D65）當「說明文字、頁尾細則」，但它對暖象牙底
+   * （--color-canvas）的對比度只有 4.42:1，過不了 WCAG AA 的 4.5:1，而
+   * 候選用途全是一般字級、沒有能套「大字 3:1」例外的。與其為了「頁尾細則
+   * 稍微淡一點」多一個踩 AA 邊界的顏色，不如就讓那些文字停在
+   * --text-secondary（5.93:1）。muted-soft 與 --text-tertiary 已移除。
+   * 見 docs/decisions/2026-08-25-text-color-token-gap.md 的收尾。
    */
   --text-emphasis: var(--color-body-strong);
   --text-body: var(--color-body);
-  --text-tertiary: var(--color-muted-soft);
   --text-inverse: var(--color-on-dark);
   --border-subtle: var(--color-hairline);
   /*
@@ -286,8 +283,12 @@
   --radius-sheet: 1.5rem;
   --radius-pill: 999px;
 
-  --shadow-card: 0 1rem 3rem rgb(18 18 18 / 7%);
-  --shadow-float: 0 1.25rem 3rem rgb(11 11 11 / 16%);
+  /*
+   * 沒有陰影 token：DESIGN.md 第七節「色塊優先、陰影罕用」，目前全站
+   * 完全平面（唯一的 box-shadow 是 AppShell 的 box-shadow: none）。
+   * 未來 bottom sheet 若要極淡浮層陰影，再依 §7 建 --shadow-overlay。
+   * （原 --shadow-card／--shadow-float 從未被引用，2026-08-26 移除。）
+   */
 
   --content-max: 47rem;
   --tap-target: 2.75rem;

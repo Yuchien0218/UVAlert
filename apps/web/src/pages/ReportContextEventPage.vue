@@ -268,7 +268,7 @@ function zoneNames(zoneIds: string[]): string {
 }
 
 .success-panel {
-  border-top: 0.35rem solid var(--color-success);
+  border-top: 0.35rem solid var(--color-saved);
 }
 
 h2,

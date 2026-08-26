@@ -12,7 +12,6 @@ colors:
   body: "#5A4540"
   body-strong: "#46342F"
   muted: "#6F5A54"
-  muted-soft: "#856D65"
   hairline: "#E7D8CF"
   hairline-soft: "#F0E6DE"
   canvas: "#FAF5EC"
@@ -34,8 +33,6 @@ colors:
   status-due: "#C1442F"
   status-untimed: "#9D9591"
   status-saved: "#8C6F7A"
-  warning: "#C78336"
-  error: "#B84D4C"
   uvi-low: "#507AA8"
   uvi-moderate: "#BD8500"
   uvi-high: "#D16627"
@@ -163,8 +160,8 @@ rounded:
   sm: 8px
   md: 14px
   lg: 20px
+  sheet: 24px
   pill: 999px
-  full: 9999px
 
 spacing:
   xxs: 4px
@@ -179,8 +176,6 @@ spacing:
 layout:
   content-max: 752px
   tap-target: 44px
-  page-gutter-mobile: 16px
-  page-gutter-desktop: 24px
 
 components:
   brand-header:
@@ -459,16 +454,19 @@ components:
 
 ### 文字
 
+文字色只有 **4 級**（ink → body-strong → body → muted）。
+
 | Token | Hex | HSL | 用途 |
 |---|---|---|---|
 | `{colors.ink}` | `#2E2925` | `hsl(27, 11%, 16%)` | 所有標題與主要文字。深濃縮咖啡，比純黑柔和 |
 | `{colors.body-strong}` | `#46342F` | `hsl(13, 20%, 23%)` | 強調段落與導言 |
 | `{colors.body}` | `#5A4540` | `hsl(12, 17%, 30%)` | 預設內文 |
-| `{colors.muted}` | `#6F5A54` | `hsl(13, 14%, 38%)` | 副標、麵包屑、次要文字 |
-| `{colors.muted-soft}` | `#856D65` | `hsl(15, 14%, 46%)` | 說明文字、頁尾細則 |
+| `{colors.muted}` | `#6F5A54` | `hsl(13, 14%, 38%)` | 副標、麵包屑、次要文字、**頁尾細則與補充說明**（不再有更淺的一級） |
 | `{colors.on-primary}` | `#FFF8F0` | `hsl(32, 100%, 97%)` | 深杏桃按鈕上的暖象牙文字 |
 | `{colors.on-dark}` | `#FFF8F0` | `hsl(32, 100%, 97%)` | 濃縮咖啡表面上的文字 |
 | `{colors.on-dark-soft}` | `#DCC7BC` | `hsl(21, 31%, 80%)` | 深色表面上的次要標籤 |
+
+> **2026-08-26：刻意不設更淺的第 5 級文字色。** 原本有 `muted-soft`（`#856D65`）當「說明文字、頁尾細則」，但它對暖象牙底 `{colors.canvas}` 的對比度只有 **4.42:1**，過不了 WCAG AA 一般文字的 4.5:1，而所有候選用途都是一般字級、套不到「大字 3:1」例外。與其為了「細則稍微淡一點」多一個踩 AA 邊界的顏色，不如讓那些文字停在 `{colors.muted}`（5.93:1）。程式碼的 `--color-muted-soft`／`--text-tertiary` 已於同日移除。脈絡見 `docs/decisions/2026-08-25-text-color-token-gap.md`。
 
 ### 倒數與部位狀態
 
@@ -480,9 +478,11 @@ components:
 | `{colors.status-soon}` | `#BB6820` | `hsl(28, 71%, 43%)` | 即將到期（2026-08-24 加深一階） |
 | `{colors.status-due}` | `#C1442F` | `hsl(9, 61%, 47%)` | 已到期（2026-08-24 加深一階） |
 | `{colors.status-untimed}` | `#9D9591` | `hsl(19, 6%, 59%)` | 未計時（2026-08-24 從專屬紫色改中性灰——沒有時間資訊，中性灰比紫色貼切） |
-| `{colors.status-saved}` | `#8C6F7A` | `hsl(337, 12%, 49%)` | 已儲存（藕紫，與 accent-mauve 同值） |
+| `{colors.status-saved}` | `#8C6F7A` | `hsl(337, 12%, 49%)` | 已儲存（藕紫，與 accent-mauve 同值）。程式碼是 `--color-saved`／`--color-saved-soft` |
 
-**「已儲存」刻意用藕紫而非綠色。** 專案規則明訂不使用綠色暗示「安全」或「防護有效」——防曬沒有「完成」狀態，只有「這次記錄成功」。藕紫傳達安心但不傳達安全。
+**「已儲存／這次記錄成功」刻意用藕紫而非綠色。** 專案規則明訂不使用綠色暗示「安全」或「防護有效」——防曬沒有「完成」狀態，只有「這次記錄成功」。藕紫傳達安心但不傳達安全。這條**涵蓋所有「操作成功」的回饋**：草稿已儲存、補擦紀錄已儲存、`.notice--ok` 等（2026-08-26 起程式碼一致，原本誤用綠色 `--color-success`）。
+
+**沒有獨立的 `warning` / `error` 色。** 表單驗證錯誤沿用 `{colors.status-due}`（已到期紅），系統警示沿用 `{colors.status-soon}`（即將到期橙）——語意夠接近，不另立 token（2026-08-26：原 frontmatter 有 `warning #C78336` / `error #B84D4C` 兩個從未進 `styles.css` 的色，已移除）。系統的警示強度上限仍是 `{colors.status-due}` 的柔和底色卡（見第九節）。
 
 ### UV 五級風險色
 
@@ -771,9 +771,11 @@ Noto Serif TC 是標題的唯一字型，沒有第二層自托管備援——載
 | 細邊框 | 1px `{colors.hairline}` | 輸入框、`app-card`、五日預報卡 |
 | 暖色卡片 | `{colors.surface-card}` 底、無陰影 | 裝備卡、更多頁入口卡、衛教分類卡 |
 | 深色表面 | `{colors.surface-dark}` 底、無陰影 | （2026-08-23 起首頁倒數不再使用；保留給未來需要深色資料表面的場合） |
-| 浮層 | 極淡陰影 | bottom sheet 與浮動元素（`0 1px 3px rgba(20,20,19,0.08)`，罕用）|
+| 浮層 | **目前無陰影** | bottom sheet 與確認彈窗——靠不透明底色（`--surface-overlay`）＋ 全螢幕遮罩（`--overlay-backdrop`）與內容區隔，不用陰影 |
 
-高度哲學是**色塊優先、陰影罕用**。深度主要來自象牙與濃縮咖啡的表面對比。
+高度哲學是**色塊優先、完全不用陰影**。深度主要來自象牙與濃縮咖啡的表面對比。
+
+> **2026-08-26**：原本這裡寫「浮層 極淡陰影 `0 1px 3px rgba(20,20,19,0.08)`，罕用」，但 `styles.css` 的 `--shadow-card`／`--shadow-float` 從未被任何元件引用（全站唯一的 `box-shadow` 是 `AppShell` 的 `box-shadow: none`）。兩個 token 已移除。未來 bottom sheet 若真的要極淡浮層陰影，再依本節新建 `--shadow-overlay`。
 
 ## 八、圖示風格（Iconography）
 
@@ -838,13 +840,25 @@ Noto Serif TC 是標題的唯一字型，沒有第二層自托管備援——載
 
 ## 十、與程式碼的落差
 
-`README.md` 訂有「文件與程式碼衝突時以程式碼為準」的規則。**色彩已於 2026-08-22 套用完畢。字體有兩層：Cormorant Garamond 版本已於 2026-08-23 套用，但同日稍晚字體目標又改為霞鶩文楷 TC（見上方 2026-08-23 標題字體變更），程式碼尚未跟上新目標。** 目前有兩項刻意或暫時的偏離：
+`README.md` 訂有「文件與程式碼衝突時以程式碼為準」的規則。**色彩已於 2026-08-22 套用、標題字體已於 2026-08-23 定案（Noto Serif TC 單一字型）。** 第二節的 `colors`／`rounded`／`spacing`／`layout` frontmatter 與 `packages/ui/src/styles.css` 的一致性由 `packages/ui/src/tokens.test.ts` 自動守著（2026-08-26 起）。目前**刻意或暫時的偏離**：
 
-| 項目 | 本文件（目標） | 實作 | 為什麼 |
+| 項目 | 本文件（目標） | 實作 | 狀態 / 為什麼 |
 |---|---|---|---|
-| 中文內文字體 | Noto Sans TC | 系統黑體（PingFang TC／微軟正黑） | 內文會渲染使用者輸入的裝備名稱與備註。subset 會缺字，完整 CJK 字型是好幾 MB。詳見 `tools/fonts/README.md` |
+| 中文內文字體 | Noto Sans TC | 系統黑體（PingFang TC／微軟正黑） | 刻意。內文會渲染使用者輸入的裝備名稱與備註，subset 會缺字，完整 CJK 字型好幾 MB。詳見 `tools/fonts/README.md` |
+| **字級量表** | 第三節 14 級編輯量表（`display-xl`…`nav-label`） | `styles.css` 只有 **8 個 `--font-size-*` token**，命名與數值不是 1:1 對應 | **未對齊**。只有 `body-md`(16px) ↔ `--font-size-body` 校準過（2026-08-25）。其餘見下方對照表。重新對齊會動到全站字級，是獨立的視覺工作，見 audit 清單 D2/B7。 |
 
-**已對齊的部分**：品牌與表面色票、行動色、文字色、拉丁內文字體、**標題顯示字體**、圓角（含 4px xs）、UV 五級風險色、倒數五狀態語意色、內容最大寬度 752px、點擊目標 44px、間距基礎單位 4px、單一亮色主題、自訂圖示系統為唯一來源。
+### 字級量表 ↔ code token 對照（2026-08-26）
+
+| 第三節級別 | 目標 | 角色 | code token | code 值 | 狀態 |
+|---|---|---|---|---|---|
+| `body-md` | 16px | 預設內文 | `--font-size-body` | 16px | ✅ 校準（2026-08-25） |
+| `display-md` | 36px | 頁面標題 `page-heading__title` | `--font-size-page-title` | `clamp(1.75rem, 6vw, 2rem)`（28–32px） | ⚠️ 值偏小且是 clamp |
+| `title-lg`/`title-md`/`title-sm` | 22 / 18 / 16px | 章節、卡片、清單標題 | `--font-size-title`(20) / `--font-size-title-md`(21.6) / `--font-size-title-sm`(18.4) / `--font-size-section-title`(18.4) | 18.4–21.6px | ⚠️ 4 個 token 是 2026-08-24 從散落的 1.05–1.35rem 卡片標題**收斂出來的桶**，不是第三節的 `title-*` 級別，命名巧合 |
+| `body-sm` / `caption` | 14 / 13px | 次要說明、徽章、eyebrow | `--font-size-label`(12.8) / `--font-size-caption`(12) | 12–12.8px | ⚠️ 值偏小 |
+| `display-xl` / `display-lg` / `display-sm` | 64 / 48 / 28px | 衛教首頁／分類頁主標、大卡片 | 無 token（各元件 scoped `clamp()`） | — | ⚠️ 未 token 化 |
+| `readout` / `button` / `nav-label` | 14 / 14 / 12px | 讀數、按鈕、導覽標籤 | 無 `--font-size-*`（`.stat-figure`／`.button`／`BottomNavigation` scoped） | — | 角色明確，暫不 token 化 |
+
+**已對齊的部分**：品牌與表面色票、行動色、4 級文字色、拉丁內文字體、**標題顯示字體**、圓角（xs 4px 到 sheet 24px、pill）、UV 五級風險色、倒數五狀態語意色（含 `saved` 藕紫，2026-08-26 修正）、內容最大寬度 752px、點擊目標 44px、間距尺規（`--space-1..12`）、斷點（rem）、單一亮色主題、自訂圖示系統為唯一來源。
 
 > **2026-08-22 色彩套用**：`packages/ui/src/styles.css` 已改為本文件第二節的完整色票——品牌（primary／active／disabled ＋ 四個 accent）、表面（canvas 到三階深色）、文字與分隔線。語意別名一併重新指向：`--page-background` → canvas、`--text-primary` → ink、`--text-secondary` → muted、`--surface-primary` → surface-card、`--border-subtle` → hairline、`--focus-ring` → primary。`manifest.webmanifest` 的 `theme_color`／`background_color` 也換成 `#faf5ec`。
 >
@@ -871,6 +885,15 @@ Noto Serif TC 是標題的唯一字型，沒有第二層自托管備援——載
 > **一併移除 31 個檔案裡的 36 條標題字重覆寫。** Noto Serif TC subset 只有 400 字重，元件若寫 `font-weight: 600` 會觸發瀏覽器合成假粗（faux bold），把筆畫無差別加厚，中文字會糊。這就是第十一節「不要把襯線標題加粗」的技術理由，不只是風格偏好。
 >
 > **webfont 是必要條件不是加分項**：Windows 系統沒有 Noto Serif CJK，中文襯線體只會落到新細明體——那是為 12px 點陣設計的字，放到 28–64px 標題品質很差。只加 token 不載入字型會讓標題比原本更難看。
+
+> **2026-08-26 token 校準（audit 清單 C1/D1–D5）**：
+> - 新增 `packages/ui/src/tokens.test.ts`——自動比對本文件 frontmatter 與 `styles.css`。
+> - **文字色砍到 4 級**：移除 `muted-soft`／`--color-muted-soft`／`--text-tertiary`（對比度 4.42:1 過不了 AA）。頁尾細則停在 `{colors.muted}`。
+> - **`saved` 狀態色從綠改藕紫**：程式碼原本誤用綠色 `--color-success #147d64` 做「已儲存／成功」回饋，違反第二節「不用綠色」原則。改成 `--color-saved #8c6f7a`（藕紫），6 處回饋（草稿已儲存、`.success-panel`、`.notice--ok` 等）跟著變。
+> - **移除從未被引用的 token**：`--shadow-card`／`--shadow-float`（§7 改為「完全不用陰影」）、frontmatter 的 `warning`／`error`（驗證錯誤沿用 `status-due`、警示沿用 `status-soon`）、`rounded.full`。
+> - **新增 `rounded.sheet: 24px`**（`--radius-sheet`，bottom sheet 頂角，2026-08-25 就有 token、本文件沒記）。
+> - **斷點改用 rem 標注**（§12），補記 `24rem`／`31rem` 兩個元件層級斷點。
+> - §13 規格盲點更新：焦點環其實早已系統化、Lucide 剩 9 檔。
 
 ### 深色模式：不做（已從程式碼移除）
 
@@ -911,24 +934,28 @@ Noto Serif TC 是標題的唯一字型，沒有第二層自托管備援——載
 
 ### 斷點
 
+程式碼一律用 `rem`（尊重使用者字級設定），本節同步用 rem 標注（括號為 16px 基準的 px）。
+
 | 名稱 | 寬度 | 主要變化 |
 |---|---|---|
-| 行動 | < 768px | 單欄；更多頁卡片 1 欄；左右留白 16px；倒數數字 ≥ 40px |
-| 平板 | 768–1024px | 更多頁卡片 2 欄；衛教文章列表 2 欄；左右留白 24px |
-| 桌面 | > 1024px | 內容維持 752px 置中；左右留白由容器吸收 |
+| 行動 | < 48rem（768px） | 單欄；更多頁卡片 1 欄；左右留白 16px；倒數數字 ≥ 40px |
+| 平板 | 48–64rem（768–1024px） | 更多頁卡片 2 欄；衛教文章列表 2 欄；左右留白 24px |
+| 桌面 | > 64rem（1024px） | 內容維持 752px 置中；左右留白由容器吸收 |
 
-這是行動優先的 PWA。桌面版不是另一套版面，只是同一套版面在更寬的視窗中置中。
+這是行動優先的 PWA。桌面版不是另一套版面，只是同一套版面在更寬的視窗中置中。左右留白程式碼是流動的 `clamp(1rem, 5vw, 2.75rem)`，不是固定 16／24px 的 token。
 
 ### 元件層級斷點
 
-上表是頁面／版面層級的斷點。除此之外，程式碼裡還有兩個**元件層級**、內容驅動的斷點，跟頁面版面無關，是單一元件自己夠不夠寬決定要不要換排列方式：
+上表是頁面／版面層級的斷點。除此之外，程式碼裡還有幾個**元件層級**、內容驅動的斷點，跟頁面版面無關，是單一元件自己夠不夠寬決定要不要換排列方式：
 
 | 寬度 | 用途 | 出現位置 |
 |---|---|---|
+| 24rem（384px） | 五日 UV 預報卡在極窄螢幕縮小欄內字級 | `FiveDayUvCard` |
+| 31rem（496px） | 主要按鈕從並排改成滿版堆疊（`.button` / `.button-group`） | `app.css`、`SessionEndControl`、`QuickProtectionSummary`、`SetupStepShell` |
 | 36rem（576px） | 送出／取消按鈕列從堆疊改成並排（`.submit-actions`） | `EventCorrectionPage`、`ReportContextEventPage`、`ReapplyPage`（已收斂進 `app.css` 共用類別） |
 | 42rem（672px） | 選項格從單欄改成 2／3 欄（`.choice-grid--row`／`.choice-grid--compact`） | `app.css` |
 
-**2026-08-25 補記**：稽核時發現這兩個斷點沒被記錄，補上這節說明它們是刻意的元件層級設計，不是該併入上方 768px／1024px 頁面斷點的落差。
+**2026-08-25／08-26 補記**：稽核時發現這些斷點沒被記錄，補上說明它們是刻意的元件層級設計，不是該併入上方 48rem／64rem 頁面斷點的落差。
 
 ### 觸控目標
 
@@ -947,17 +974,17 @@ Noto Serif TC 是標題的唯一字型，沒有第二層自托管備援——載
 
 以下項目尚未定義或無法驗證，**實作時不要自行填補，先確認**：
 
-1. **Lucide 尚未完全移除。** 28/38 個圖示已替換（2026-08-22），剩下 10 個功能型圖示刻意等 wireframe 定案再畫，`@lucide/vue` 依賴要等那批畫完才能移除。
-2. **焦點環未系統化。** 只有 `text-input-focused` 有定義。程式碼有 `--focus-ring` token，但按鈕、連結、卡片的鍵盤焦點樣式未在此文件規範。可及性要求焦點環，這是缺口。
-3. **停用狀態只定義了主按鈕與次要按鈕。** 輸入框、清單項目的停用樣式仍未定義。（2026-08-25 補上 `.button--quiet:disabled`：`opacity: 0.55` + `cursor: not-allowed`，沿用 `GearForm.vue`／`SetupStepShell.vue` 既有慣例。）
-4. **錯誤與驗證狀態未展開。** 表單驗證錯誤的視覺（欄位邊框、訊息位置、圖示）需要一個實際的表單流程才能確認。
+1. **Lucide 尚未完全移除。** 剩 9 個檔案仍直接 `import ... from "@lucide/vue"`（`ProductSnapshotEditor`、`SetupProcessBanner`、`RegionLocationPanel`、`RegionPreferenceSummary`、`QuickProtectionSummary`、`ZoneProtectionForm`、`FiveDayUvCard`、`SetupPage`）。wireframe 已凍結、阻塞解除；等使用者產出草稿 SVG 就能替換，`@lucide/vue` 依賴要等那批畫完才能移除。收斂待辦見 `docs/superpowers/plans/2026-08-26-codebase-consolidation-audit.md` E1。
+2. **焦點環已系統化**（2026-08-25 前就已完成，此處補記）。`packages/ui/src/styles.css` 全域規則：`button, a, input, select, textarea` 的 `:focus-visible` → `outline: 0.15rem solid var(--focus-ring); outline-offset: 0.2rem;`。**殘留缺口**：卡片、自訂 widget（如 `.choice-grid` 選項、bottom sheet）的鍵盤焦點樣式未逐一規範。
+3. **停用狀態**：主按鈕（`--color-primary-disabled`）、次要按鈕（`.button--quiet:disabled`：`opacity: 0.55` + `cursor: not-allowed`，2026-08-25 補）皆已定義。**輸入框、清單項目的停用樣式仍未定義。**
+4. **錯誤與驗證狀態：色已定、視覺結構未展開。** 顏色沿用 `{colors.status-due}`（驗證錯誤）／`{colors.status-soon}`（系統警示），見第二節。但欄位邊框、訊息位置、是否加圖示這些**視覺結構**還需要一個實際表單流程才能確認。`.form-error` 目前是 9 個檔案各自 scoped（待收斂，見 audit 清單 B1）。
 5. **橫式標誌缺深色底版本。** 正式資產在 `docs/design/logo/`（2026-08-22 定案），但墨咖字標在濃縮咖啡深色面板上幾乎看不見，需要另做反白版。圖標本身已有 `06-broadcast-mark-dark-surface.svg`。
 6. **衛教七部位示意尚未設計。** 規格 4.6 有提到，圖示系統中列為待補。
-7. **功能型圖示尚未設計**（10 個）：載入中、快速摘要、調整設定、流程橫幅、產品確認、地區、定位、UV 預報、夜間、傍晚。工具型那批已完成。這 10 個綁在可能被 wireframe 重新設計的元件上，刻意延後——清單見 `docs/design/icon-system/README.md` 第八節。
+7. **功能型圖示尚未設計**（見上方第 1 項）：載入中、快速摘要、調整設定、流程橫幅、產品確認、地區、定位、UV 預報、夜間、傍晚。工具型那批已完成。清單見 `docs/design/icon-system/README.md` 第八節。
 8. **分享圖版面未定義。** 裝備分享圖的內容規則已確認（見第九節），但版面、尺寸與品牌標示位置未定。
 9. **`/reminder/reapply` 的最終顯示形式未定**，Sitemap 文件標註仍需在 wireframe 階段確認。
 
-**2026-08-25 已清除**：原第 10 項 `packages/ui/src/index.ts` 的 `SUNSHIELD_THEME = "studio-mono"` 死碼，確認全 repo 沒有任何地方引用後已移除。
+**已清除**：`packages/ui/src/index.ts` 的 `SUNSHIELD_THEME`（2026-08-25）、`--color-muted-soft`／`--text-tertiary`（2026-08-26，見第二節）、`--shadow-card`／`--shadow-float`（2026-08-26，從未被引用）、frontmatter 的 `warning`／`error`／`rounded.full`（2026-08-26）。
 
 ## 十四、迭代指引
 

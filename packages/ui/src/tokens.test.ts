@@ -10,11 +10,13 @@ import { describe, expect, it } from "vitest";
  * colors／rounded／spacing／layout，逐項比對 styles.css 的對應 token。
  *
  * **範圍界定**：typography（14 級編輯量表）與 code 端 8 個 --font-size-* token
- * 的命名對應太亂，是 D2 的工作，本檔案只驗證唯一校準過的 body-md。
+ * 的命名對應太亂，重新對齊會動到全站字級——是獨立的視覺工作（見 DESIGN.md
+ * 第十節的對照表 ＋ audit 清單 D2/B7）。本檔案只驗證唯一校準過的 body-md。
  *
- * **KNOWN_DRIFT**：已知對不上、待 D2 裁決的項目列在下方清單，測試放行；
- * 但另有一個測試守著「這些項目現在仍然真的有落差」——修好一項後那個測試
- * 會失敗，提醒你把它從清單移除。
+ * **KNOWN_DRIFT**：已知對不上、待裁決的項目列在下方清單，測試放行；另有一個
+ * 測試守著「這些項目現在仍然真的有落差」——修好一項後那個測試會失敗，提醒
+ * 你把它移除。2026-08-26 的 D2/D4 已把清單清空（colors/rounded/spacing/layout
+ * 目前全對齊）。
  *
  * vitest 的 cwd 是 repo 根目錄（沿用 apps/web/.../BottomNavigation.test.ts 的前例）。
  */
@@ -68,12 +70,11 @@ const SPACING_MAP: Record<string, string> = {
   section: "--space-10"
 };
 
-const LAYOUT_MAP: Record<string, string | null> = {
+const LAYOUT_MAP: Record<string, string> = {
   "content-max": "--content-max",
-  "tap-target": "--tap-target",
-  // 左右留白沒有對應 token，AppShell 用 clamp()——列入 KNOWN_DRIFT。
-  "page-gutter-mobile": null,
-  "page-gutter-desktop": null
+  "tap-target": "--tap-target"
+  // 左右留白（page-gutter）2026-08-26 從 frontmatter 移除——它是流動的
+  // clamp() 不是 token，只留在 §12 prose。
 };
 
 function tokenFor(section: string, key: string): string | null {
@@ -102,24 +103,15 @@ function normalize(value: string): string {
   return v;
 }
 
-// --- 已知落差（待 D2 裁決）---
+// --- 已知落差（待清空）---
+//
+// 2026-08-26（D2）已解決並從 DESIGN.md frontmatter 一併移除：
+//   colors.warning / colors.error（改沿用 status-soon / status-due）、
+//   rounded.full（只留 pill）、layout.page-gutter-*（改 §12 prose）。
+// 2026-08-26（D4）已解決：colors.muted-soft（連同 --color-muted-soft /
+//   --text-tertiary 一起砍）。
 
-const KNOWN_DRIFT: Record<string, string> = {
-  "colors.status-saved":
-    "DESIGN.md §2 訂藕紫 #8C6F7A（明文「刻意用藕紫不用綠」）；code 把這個狀態改名成 .status-card--success 並用綠色 --color-success #147d64，且 styles.css 沒有 --color-saved。方向相反的落差，待 D2。",
-  "colors.warning":
-    "DESIGN.md #C78336；styles.css 沒有 --color-warning（實作用 --color-soon 兼表警示）。待 D2 決定要不要建 token。",
-  "colors.error":
-    "DESIGN.md #B84D4C；styles.css 沒有 --color-error（實作一律用 --color-due）。待 D2。",
-  // 註：colors.muted-soft 目前值一致（不在 KNOWN_DRIFT），但 D4 已裁決要
-  // 連同 --text-tertiary 一起砍掉——屆時 DESIGN.md §2 那一列與 styles.css
-  // 的 --color-muted-soft 一起移除，這個測試就不再涵蓋它。
-  "rounded.full":
-    "DESIGN.md 有 pill:999px 與 full:9999px 兩級；styles.css 只有 --radius-pill。full 從沒被用過。待 D2。",
-  "layout.page-gutter-mobile":
-    "沒有對應 token——AppShell 用 clamp(1rem, 5vw, 2.75rem)。待 D2/D3 決定要不要 token 化。",
-  "layout.page-gutter-desktop": "同 page-gutter-mobile。"
-};
+const KNOWN_DRIFT: Record<string, string> = {};
 
 // --- 測試 ---
 

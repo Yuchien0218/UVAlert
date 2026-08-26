@@ -106,7 +106,7 @@ defineEmits<{
   display: inline-flex;
   align-items: center;
   gap: var(--space-2);
-  color: var(--color-success);
+  color: var(--color-saved);
   font-size: var(--font-size-caption);
   white-space: nowrap;
 }
