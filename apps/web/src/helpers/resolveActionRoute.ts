@@ -51,10 +51,7 @@ const REPORT_ACTION_KINDS = new Set<ActionKind>([
 
 /** 在提醒頁就地完成、不換頁的行為。 */
 export type InPlaceBehavior =
-  | "anchor_zones"
-  | "expand_product_label"
-  | "recalibrate_clock"
-  | "ended_state";
+  "anchor_zones" | "expand_product_label" | "recalibrate_clock" | "ended_state";
 
 const IN_PLACE_BEHAVIORS: Partial<Record<ActionKind, InPlaceBehavior>> = {
   review_required_zones: "anchor_zones",

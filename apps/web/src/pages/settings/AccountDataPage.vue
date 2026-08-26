@@ -10,7 +10,9 @@ const busy = shallowRef(false);
 const notice = shallowRef<string | null>(null);
 const error = shallowRef<string | null>(null);
 const signedIn = computed(() => auth.state.value.auth.kind === "signed_in");
-const syncDisabled = shallowRef(globalThis.localStorage?.getItem("uvalert.sync.disabled") === "true");
+const syncDisabled = shallowRef(
+  globalThis.localStorage?.getItem("uvalert.sync.disabled") === "true"
+);
 
 onMounted(() => {
   void auth.refresh();
@@ -50,9 +52,13 @@ async function deleteCloudData(): Promise<void> {
     notice.value = "UVAlert 的雲端資料與登入資訊已清除；本機提醒與資料仍保留。";
     confirmingDelete.value = false;
   } catch (caught) {
-    error.value = typeof caught === "object" && caught !== null && "message" in caught && typeof caught.message === "string"
-      ? caught.message
-      : "雲端資料尚未清除，本機資料沒有變動。";
+    error.value =
+      typeof caught === "object" &&
+      caught !== null &&
+      "message" in caught &&
+      typeof caught.message === "string"
+        ? caught.message
+        : "雲端資料尚未清除，本機資料沒有變動。";
   } finally {
     busy.value = false;
   }
@@ -63,13 +69,18 @@ async function deleteCloudData(): Promise<void> {
   <div class="page-stack">
     <header class="page-heading">
       <h1 class="page-heading__title">登入與雲端資料</h1>
-      <p class="page-heading__body">這裡只管理 UVAlert 的雲端資料；清除不會刪除你的 Google 帳號，也不會清除這台裝置的本機提醒。</p>
+      <p class="page-heading__body">
+        這裡只管理 UVAlert 的雲端資料；清除不會刪除你的 Google
+        帳號，也不會清除這台裝置的本機提醒。
+      </p>
     </header>
 
     <section v-if="!signedIn" class="app-card account-card">
       <h2>目前沒有登入</h2>
       <p>你仍可直接使用本機防曬提醒。</p>
-      <RouterLink class="button button--primary" to="/settings/sync">前往同步設定</RouterLink>
+      <RouterLink class="button button--primary" to="/settings/sync"
+        >前往同步設定</RouterLink
+      >
     </section>
 
     <template v-else>
@@ -77,19 +88,43 @@ async function deleteCloudData(): Promise<void> {
         <h2>同步狀態</h2>
         <p v-if="syncDisabled">同步已停止；雲端資料保留中。</p>
         <p v-else>同步已開啟；每次同步前會先顯示預覽。</p>
-        <button v-if="!syncDisabled" class="button button--quiet" type="button" @click="stopSync">停止同步</button>
-        <button v-else class="button button--primary" type="button" @click="enableSync">重新開啟同步</button>
+        <button
+          v-if="!syncDisabled"
+          class="button button--quiet"
+          type="button"
+          @click="stopSync"
+        >
+          停止同步
+        </button>
+        <button
+          v-else
+          class="button button--primary"
+          type="button"
+          @click="enableSync"
+        >
+          重新開啟同步
+        </button>
       </section>
 
       <section class="app-card account-card">
         <h2>登出</h2>
         <p>登出不會清除本機資料或雲端資料。</p>
-        <button class="button button--quiet" type="button" :disabled="busy" @click="signOut">登出 UVAlert</button>
+        <button
+          class="button button--quiet"
+          type="button"
+          :disabled="busy"
+          @click="signOut"
+        >
+          登出 UVAlert
+        </button>
       </section>
 
       <section class="app-card account-card account-card--danger">
         <h2>清除 UVAlert 雲端資料</h2>
-        <p>會刪除 UVAlert 雲端同步資料與 UVAlert 登入；不會刪除 Google 帳號。本機提醒與本機資料不受影響。</p>
+        <p>
+          會刪除 UVAlert 雲端同步資料與 UVAlert 登入；不會刪除 Google
+          帳號。本機提醒與本機資料不受影響。
+        </p>
         <ConfirmAction
           :confirming="confirmingDelete"
           :pending="busy"
@@ -108,13 +143,28 @@ async function deleteCloudData(): Promise<void> {
 
     <AppNotice v-if="notice" kind="ok">{{ notice }}</AppNotice>
     <AppNotice v-if="error" kind="error">{{ error }}</AppNotice>
-    <RouterLink class="text-link text-link--muted" to="/more">返回更多</RouterLink>
+    <RouterLink class="text-link text-link--muted" to="/more"
+      >返回更多</RouterLink
+    >
   </div>
 </template>
 
 <style scoped>
-.account-card { display: grid; gap: var(--space-3); justify-items: start; padding: var(--space-5); }
-.account-card h2, .account-card p { margin: 0; }
-.account-card p { color: var(--text-body); line-height: 1.6; }
-.account-card--danger h2 { color: var(--color-due); }
+.account-card {
+  display: grid;
+  gap: var(--space-3);
+  justify-items: start;
+  padding: var(--space-5);
+}
+.account-card h2,
+.account-card p {
+  margin: 0;
+}
+.account-card p {
+  color: var(--text-body);
+  line-height: 1.6;
+}
+.account-card--danger h2 {
+  color: var(--color-due);
+}
 </style>

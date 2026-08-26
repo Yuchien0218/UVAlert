@@ -1,10 +1,5 @@
 <script setup lang="ts">
-import {
-  computed,
-  nextTick,
-  shallowRef,
-  useTemplateRef
-} from "vue";
+import { computed, nextTick, shallowRef, useTemplateRef } from "vue";
 import type { RegionPhase } from "../../features/region/createRegionController";
 import type { RegionDirectoryEntry } from "../../features/region/TaiwanRegionResolver";
 
@@ -123,11 +118,7 @@ async function save(): Promise<void> {
         @change="handleTownChange"
       >
         <option value="">
-          {{
-            selectedCountyCode === ""
-              ? "請先選擇縣市"
-              : "請選擇鄉鎮市區"
-          }}
+          {{ selectedCountyCode === "" ? "請先選擇縣市" : "請選擇鄉鎮市區" }}
         </option>
         <option
           v-for="town in towns"

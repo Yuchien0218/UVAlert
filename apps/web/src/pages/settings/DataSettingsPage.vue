@@ -45,14 +45,18 @@ async function runClear(scope: ClearScope): Promise<void> {
     <header class="page-heading">
       <h1 class="page-heading__title">本機資料管理</h1>
       <p>
-         不用登入也能使用；未同步的資料只儲存在這台裝置上。匯出的檔案由你的裝置直接產生，不會上傳、不經後端、不進分析。
+        不用登入也能使用；未同步的資料只儲存在這台裝置上。匯出的檔案由你的裝置直接產生，不會上傳、不經後端、不進分析。
       </p>
     </header>
 
     <section class="app-card" aria-labelledby="cloud-data-link-title">
       <h2 id="cloud-data-link-title">雲端資料請到另一頁管理</h2>
-      <p>本頁只處理這台裝置的本機資料。若你有登入並使用同步，請到登入與雲端資料頁管理。</p>
-      <RouterLink class="button button--quiet" to="/settings/account-data">管理登入與雲端資料</RouterLink>
+      <p>
+        本頁只處理這台裝置的本機資料。若你有登入並使用同步，請到登入與雲端資料頁管理。
+      </p>
+      <RouterLink class="button button--quiet" to="/settings/account-data"
+        >管理登入與雲端資料</RouterLink
+      >
     </section>
 
     <p v-if="localData.phase.value === 'loading'" role="status">
@@ -100,7 +104,8 @@ async function runClear(scope: ClearScope): Promise<void> {
       <section class="app-card" aria-labelledby="data-export-title">
         <h2 id="data-export-title">匯出本機資料</h2>
         <p>
-           產生一個 JSON 檔案，包含你的防曬裝備、提醒紀錄、事件與偏好。檔案會儲存到你選的位置，不會傳到任何伺服器。
+          產生一個 JSON
+          檔案，包含你的防曬裝備、提醒紀錄、事件與偏好。檔案會儲存到你選的位置，不會傳到任何伺服器。
         </p>
         <p class="caution">
           匯出檔案<strong>不包含</strong>裝置識別碼、精確座標與任何金鑰。目前版本<strong>只能匯出，不能匯入還原</strong>；還原能力會與帳號遷移政策一起在之後設計。
@@ -116,9 +121,13 @@ async function runClear(scope: ClearScope): Promise<void> {
         </button>
 
         <AppNotice v-if="localData.notice.value?.kind === 'exported'" kind="ok">
-          已產生 {{ localData.notice.value.fileName }}。請確認檔案已儲存到你要的位置。
+          已產生
+          {{ localData.notice.value.fileName }}。請確認檔案已儲存到你要的位置。
         </AppNotice>
-        <AppNotice v-if="localData.error.value === 'export_failed'" kind="error">
+        <AppNotice
+          v-if="localData.error.value === 'export_failed'"
+          kind="error"
+        >
           匯出沒有完成，檔案沒有產生。本機資料沒有任何變動，可以再試一次。
         </AppNotice>
       </section>
@@ -134,7 +143,7 @@ async function runClear(scope: ClearScope): Promise<void> {
             localData.notice.value.scope === "drafts"
               ? "設定草稿已清除。"
               : localData.notice.value.scope === "history"
-                 ? "裝備與已結束的提醒歷史已清除。"
+                ? "裝備與已結束的提醒歷史已清除。"
                 : "這台裝置上的資料已全部清除。"
           }}
         </AppNotice>
@@ -208,7 +217,9 @@ async function runClear(scope: ClearScope): Promise<void> {
                 <li v-if="summary.hasActiveSession">
                   <strong>目前進行中的提醒</strong>（倒數會直接消失）
                 </li>
-                <li>{{ summary.endedSessionCount }} 次已結束的提醒與全部事件紀錄</li>
+                <li>
+                  {{ summary.endedSessionCount }} 次已結束的提醒與全部事件紀錄
+                </li>
                 <li>設定草稿、地區與顯示偏好、氣象快取</li>
               </ul>
               <p>

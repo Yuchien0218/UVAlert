@@ -1,7 +1,4 @@
-import type {
-  FiveDayUvForecast,
-  RegionSelection
-} from "@sunshield/contracts";
+import type { FiveDayUvForecast, RegionSelection } from "@sunshield/contracts";
 import type {
   ConnectivityStatus,
   LifecyclePort,
@@ -28,19 +25,10 @@ export const EVENING_UV_DISMISSAL_STORAGE_KEY =
   "sunshield.evening-uv-dismissed-cycle";
 
 export type UvForecastPhase =
-  | "idle"
-  | "loading"
-  | "no_region"
-  | "ready"
-  | "cached"
-  | "unavailable";
+  "idle" | "loading" | "no_region" | "ready" | "cached" | "unavailable";
 
 export type UvForecastError =
-  | "offline"
-  | "network_error"
-  | "storage_error"
-  | "no_usable_data"
-  | null;
+  "offline" | "network_error" | "storage_error" | "no_usable_data" | null;
 
 interface KeyValueStorage {
   getItem(key: string): string | null;
@@ -56,9 +44,7 @@ export interface UvForecastController {
   readonly phase: Readonly<ShallowRef<UvForecastPhase>>;
   readonly error: Readonly<ShallowRef<UvForecastError>>;
   readonly region: Readonly<ShallowRef<RegionSelection | null>>;
-  readonly forecast: Readonly<
-    ShallowRef<FiveDayUvForecast | null>
-  >;
+  readonly forecast: Readonly<ShallowRef<FiveDayUvForecast | null>>;
   readonly isEvening: ComputedRef<boolean>;
   readonly showEveningPrompt: ComputedRef<boolean>;
   ensureLoaded(): Promise<void>;
@@ -83,21 +69,15 @@ export function createUvForecastController(
 ): UvForecastController {
   const getNow = dependencies.now ?? (() => new Date());
   const storage = dependencies.storage ?? globalThis.localStorage;
-  const scheduler =
-    dependencies.scheduler ?? createBrowserIntervalScheduler();
+  const scheduler = dependencies.scheduler ?? createBrowserIntervalScheduler();
 
   const phaseState = shallowRef<UvForecastPhase>("idle");
   const errorState = shallowRef<UvForecastError>(null);
   const regionState = shallowRef<RegionSelection | null>(null);
-  const forecastState =
-    shallowRef<FiveDayUvForecast | null>(null);
+  const forecastState = shallowRef<FiveDayUvForecast | null>(null);
   const currentTimeState = shallowRef(getNow());
-  const dismissedCycleState = shallowRef(
-    readDismissedCycle(storage)
-  );
-  const isEvening = computed(() =>
-    isFixedEvening(currentTimeState.value)
-  );
+  const dismissedCycleState = shallowRef(readDismissedCycle(storage));
+  const isEvening = computed(() => isFixedEvening(currentTimeState.value));
   const currentEveningCycle = computed(() =>
     getEveningCycleKey(currentTimeState.value)
   );
@@ -106,8 +86,7 @@ export function createUvForecastController(
     return (
       cycle !== null &&
       forecastState.value !== null &&
-      (phaseState.value === "ready" ||
-        phaseState.value === "cached") &&
+      (phaseState.value === "ready" || phaseState.value === "cached") &&
       dismissedCycleState.value !== cycle
     );
   });
@@ -132,20 +111,17 @@ export function createUvForecastController(
     }
   );
 
-  const stopForeground = dependencies.lifecycle.subscribeForeground(
-    () => {
-      currentTimeState.value = getNow();
-      const forecast = forecastState.value;
-      if (
-        phaseState.value === "idle" ||
-        (forecast !== null &&
-          Date.parse(forecast.usableUntil) <=
-            currentTimeState.value.getTime())
-      ) {
-        void refresh();
-      }
+  const stopForeground = dependencies.lifecycle.subscribeForeground(() => {
+    currentTimeState.value = getNow();
+    const forecast = forecastState.value;
+    if (
+      phaseState.value === "idle" ||
+      (forecast !== null &&
+        Date.parse(forecast.usableUntil) <= currentTimeState.value.getTime())
+    ) {
+      void refresh();
     }
-  );
+  });
 
   async function performLoad(): Promise<void> {
     phaseState.value = "loading";
@@ -153,12 +129,9 @@ export function createUvForecastController(
 
     let selectedRegion: RegionSelection | null;
     try {
-      const preference =
-        await dependencies.regionPreference.getPreference();
+      const preference = await dependencies.regionPreference.getPreference();
       selectedRegion =
-        preference?.mode === "selected"
-          ? preference.selection
-          : null;
+        preference?.mode === "selected" ? preference.selection : null;
     } catch {
       regionState.value = null;
       forecastState.value = null;
@@ -294,9 +267,7 @@ function createBrowserIntervalScheduler(): IntervalScheduler {
       return globalThis.setInterval(callback, intervalMs);
     },
     stop(handle): void {
-      globalThis.clearInterval(
-        handle as ReturnType<typeof setInterval>
-      );
+      globalThis.clearInterval(handle as ReturnType<typeof setInterval>);
     }
   };
 }

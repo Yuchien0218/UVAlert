@@ -28,7 +28,7 @@ const emit = defineEmits<{
         :checked="props.selectedZoneIds.includes(zone.zoneInstanceId)"
         :disabled="props.locked"
         @change="emit('toggle', zone.zoneInstanceId)"
-      >
+      />
       <span>{{ getZoneLabel(zone) }}</span>
     </label>
   </div>

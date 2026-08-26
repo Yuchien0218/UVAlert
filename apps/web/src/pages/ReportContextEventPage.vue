@@ -28,9 +28,7 @@ watch(
   async (value) => {
     if (value === "success") {
       await nextTick();
-      document
-        .querySelector<HTMLElement>("#report-success-title")
-        ?.focus();
+      document.querySelector<HTMLElement>("#report-success-title")?.focus();
     }
   }
 );
@@ -57,16 +55,22 @@ function zoneNames(zoneIds: string[]): string {
       <div>
         <p class="eyebrow">記錄狀況</p>
         <h1>記錄這次狀況</h1>
-        <p>
-          記下這次狀況後，相關部位的提醒會更新；確認前不會改變提醒。
-        </p>
+        <p>記下這次狀況後，相關部位的提醒會更新；確認前不會改變提醒。</p>
       </div>
-      <button class="icon-button" type="button" aria-label="返回提醒" @click="cancel">
+      <button
+        class="icon-button"
+        type="button"
+        aria-label="返回提醒"
+        @click="cancel"
+      >
         <Icon name="tool-close" :size="24" />
       </button>
     </header>
 
-    <SunLoader v-if="contextEvent.phase.value === 'loading'" label="正在讀取目前提醒狀態…" />
+    <SunLoader
+      v-if="contextEvent.phase.value === 'loading'"
+      label="正在讀取目前提醒狀態…"
+    />
 
     <section
       v-else-if="
@@ -134,7 +138,10 @@ function zoneNames(zoneIds: string[]): string {
       <template v-if="contextEvent.selectedKind.value">
         <section class="app-card" aria-labelledby="report-zones-title">
           <h2 id="report-zones-title">影響哪些部位？</h2>
-          <p v-if="contextEvent.zoneSelectionLocked.value" class="section-helper">
+          <p
+            v-if="contextEvent.zoneSelectionLocked.value"
+            class="section-helper"
+          >
             離水必須沿用入水時的部位集合，因此這裡不可調整。
           </p>
           <p v-else class="section-helper">
@@ -175,7 +182,7 @@ function zoneNames(zoneIds: string[]): string {
                   contextEvent.waterStartConfidence.value === 'confirmed'
                 "
                 @change="contextEvent.setWaterStartConfidence('confirmed')"
-              >
+              />
               <span>知道，就是下面選的時間</span>
             </label>
             <label>
@@ -183,11 +190,9 @@ function zoneNames(zoneIds: string[]): string {
                 type="radio"
                 name="water-confidence"
                 value="unknown"
-                :checked="
-                  contextEvent.waterStartConfidence.value === 'unknown'
-                "
+                :checked="contextEvent.waterStartConfidence.value === 'unknown'"
                 @change="contextEvent.setWaterStartConfidence('unknown')"
-              >
+              />
               <span>不確定</span>
             </label>
           </div>
@@ -255,11 +260,27 @@ function zoneNames(zoneIds: string[]): string {
  * 直向堆疊，不是設計稿那種橫向排版。跟關閉鈕收斂順手補上，對齊
  * ReapplyPage.vue 已有的版本。
  */
-.flow-heading { display: flex; align-items: start; justify-content: space-between; gap: var(--space-4); }
-.flow-heading h1, .flow-heading p { margin: 0; }
-.flow-heading h1 { font-size: var(--font-size-page-title); }
-.flow-heading div { display: grid; gap: var(--space-3); }
-.flow-heading div > p:last-child { color: var(--text-body); line-height: 1.6; }
+.flow-heading {
+  display: flex;
+  align-items: start;
+  justify-content: space-between;
+  gap: var(--space-4);
+}
+.flow-heading h1,
+.flow-heading p {
+  margin: 0;
+}
+.flow-heading h1 {
+  font-size: var(--font-size-page-title);
+}
+.flow-heading div {
+  display: grid;
+  gap: var(--space-3);
+}
+.flow-heading div > p:last-child {
+  color: var(--text-body);
+  line-height: 1.6;
+}
 
 .app-card {
   display: grid;
@@ -318,5 +339,4 @@ p {
   color: var(--text-secondary);
   line-height: 1.6;
 }
-
 </style>

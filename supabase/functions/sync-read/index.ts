@@ -20,7 +20,11 @@ export async function handleRead(request: Request): Promise<Response> {
   }
   if (request.method !== "POST") {
     return toResponse(
-      errorResponse({ status: 405, code: "VALIDATION_ERROR", message: "只接受 POST" })
+      errorResponse({
+        status: 405,
+        code: "VALIDATION_ERROR",
+        message: "只接受 POST"
+      })
     );
   }
 
@@ -32,7 +36,11 @@ export async function handleRead(request: Request): Promise<Response> {
     requestBody = await request.json();
   } catch {
     return toResponse(
-      errorResponse({ status: 422, code: "VALIDATION_ERROR", message: "JSON 格式不正確" })
+      errorResponse({
+        status: 422,
+        code: "VALIDATION_ERROR",
+        message: "JSON 格式不正確"
+      })
     );
   }
 
@@ -41,7 +49,9 @@ export async function handleRead(request: Request): Promise<Response> {
     const [recordsResult, tombstonesResult] = await Promise.all([
       auth.context.client
         .from("sync_records")
-        .select("record_kind,record_id,schema_version,revision,payload_fingerprint,payload,updated_at")
+        .select(
+          "record_kind,record_id,schema_version,revision,payload_fingerprint,payload,updated_at"
+        )
         .eq("user_id", auth.context.userId),
       auth.context.client
         .from("sync_tombstones")
@@ -50,7 +60,11 @@ export async function handleRead(request: Request): Promise<Response> {
     ]);
     if (recordsResult.error !== null || tombstonesResult.error !== null) {
       return toResponse(
-        errorResponse({ status: 500, code: "SERVER_ERROR", message: "目前無法讀取同步資料" })
+        errorResponse({
+          status: 500,
+          code: "SERVER_ERROR",
+          message: "目前無法讀取同步資料"
+        })
       );
     }
     return jsonResponse(

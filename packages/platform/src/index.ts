@@ -70,9 +70,7 @@ export interface SetupDraftRepositoryPort {
 
 export interface ProductSettingsPort {
   getCurrentProductSnapshot(): Promise<ProductLabelSnapshotV1 | null>;
-  saveCurrentProductSnapshot(
-    snapshot: ProductLabelSnapshotV1
-  ): Promise<void>;
+  saveCurrentProductSnapshot(snapshot: ProductLabelSnapshotV1): Promise<void>;
   clearCurrentProductSnapshot(): Promise<void>;
 }
 
@@ -83,7 +81,9 @@ export interface ReapplicationContext {
 }
 
 export interface ReapplicationRepositoryPort {
-  getReapplicationContext(localVisitorId: string): Promise<ReapplicationContext | null>;
+  getReapplicationContext(
+    localVisitorId: string
+  ): Promise<ReapplicationContext | null>;
   reapply(
     command: ReapplyCommandV1,
     clock: ReducerClock
@@ -250,10 +250,7 @@ export interface DevicePosition {
 }
 
 export type DeviceGeolocationErrorCode =
-  | "permission_denied"
-  | "position_unavailable"
-  | "timeout"
-  | "unsupported";
+  "permission_denied" | "position_unavailable" | "timeout" | "unsupported";
 
 export class DeviceGeolocationError extends Error {
   readonly code: DeviceGeolocationErrorCode;
@@ -270,15 +267,11 @@ export interface DeviceGeolocationPort {
 }
 
 export interface UvForecastApiPort {
-  getFiveDayForecast(
-    regionCode: string
-  ): Promise<FiveDayUvForecast>;
+  getFiveDayForecast(regionCode: string): Promise<FiveDayUvForecast>;
 }
 
 export interface UvForecastSnapshotPort {
-  getLatestForecast(
-    regionCode: string
-  ): Promise<FiveDayUvForecast | null>;
+  getLatestForecast(regionCode: string): Promise<FiveDayUvForecast | null>;
   saveForecast(forecast: FiveDayUvForecast): Promise<void>;
 }
 
@@ -286,9 +279,7 @@ export type ConnectivityStatus = "online" | "offline";
 
 export interface ConnectivityPort {
   getCurrentStatus(): ConnectivityStatus;
-  subscribe(
-    listener: (status: ConnectivityStatus) => void
-  ): () => void;
+  subscribe(listener: (status: ConnectivityStatus) => void): () => void;
 }
 
 export interface LifecyclePort {
@@ -303,9 +294,7 @@ export type InvalidationMessage = {
 };
 
 export interface CrossContextPort {
-  subscribe(
-    listener: (message: InvalidationMessage) => void
-  ): () => void;
+  subscribe(listener: (message: InvalidationMessage) => void): () => void;
 }
 
 /**
@@ -316,10 +305,7 @@ export interface CrossContextPort {
  * 多數瀏覽器不允許程式再次詢問。兩者的畫面文案不一樣，所以不能合併。
  */
 export type NotificationPermissionState =
-  | "granted"
-  | "denied"
-  | "default"
-  | "unsupported";
+  "granted" | "denied" | "default" | "unsupported";
 
 export interface ScheduledNotification {
   /**

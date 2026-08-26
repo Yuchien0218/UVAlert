@@ -52,9 +52,7 @@ export class BrowserGeolocation implements DeviceGeolocationPort {
 
   requestCurrentPosition(): Promise<DevicePosition> {
     if (this.#geolocation === null) {
-      return Promise.reject(
-        new DeviceGeolocationError("unsupported")
-      );
+      return Promise.reject(new DeviceGeolocationError("unsupported"));
     }
 
     return new Promise((resolve, reject) => {

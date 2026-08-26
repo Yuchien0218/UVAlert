@@ -27,16 +27,14 @@ describe("SessionEndControl", () => {
 
     const confirmation = wrapper.get('[role="dialog"]');
     expect(confirmation.attributes("aria-modal")).toBe("true");
-    expect(
-      confirmation.get("p.session-end__confirm-title").text()
-    ).toBe("要結束這次提醒嗎？");
+    expect(confirmation.get("p.session-end__confirm-title").text()).toBe(
+      "要結束這次提醒嗎？"
+    );
     expect(confirmation.attributes("tabindex")).toBeUndefined();
     expect(document.activeElement).toBe(
       confirmation.get("p.session-end__confirm-title").element
     );
-    expect(confirmation.text()).toContain(
-      "結束後會停止所有待處理提示"
-    );
+    expect(confirmation.text()).toContain("結束後會停止所有待處理提示");
 
     await getButton(wrapper, "取消").trigger("click");
 
@@ -75,25 +73,18 @@ describe("SessionEndControl", () => {
     expect(getButton(wrapper, "正在結束…").attributes()).toHaveProperty(
       "disabled"
     );
-    expect(getButton(wrapper, "取消").attributes()).toHaveProperty(
-      "disabled"
-    );
+    expect(getButton(wrapper, "取消").attributes()).toHaveProperty("disabled");
 
     await wrapper.setProps({
       phase: "error",
       error: "persistence_error"
     });
 
-    expect(wrapper.get('[role="alert"]').text()).toContain(
-      "這次提醒仍在運作"
-    );
+    expect(wrapper.get('[role="alert"]').text()).toContain("這次提醒仍在運作");
   });
 });
 
-function getButton(
-  wrapper: ReturnType<typeof mount>,
-  label: string
-) {
+function getButton(wrapper: ReturnType<typeof mount>, label: string) {
   const button = wrapper
     .findAll("button")
     .find((candidate) => candidate.text() === label);

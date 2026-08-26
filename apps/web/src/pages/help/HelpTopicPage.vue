@@ -13,9 +13,7 @@ import { findTopic, isPublishable } from "../../features/help/helpTopics";
  */
 
 const route = useRoute();
-const topic = computed(() =>
-  findTopic(String(route.meta.helpTopicSlug ?? ""))
-);
+const topic = computed(() => findTopic(String(route.meta.helpTopicSlug ?? "")));
 const publishable = computed(() =>
   topic.value === undefined ? false : isPublishable(topic.value)
 );
@@ -32,7 +30,7 @@ const publishable = computed(() =>
     <ContentUnderReview
       v-if="!publishable"
       title="內容正在審查"
-       :body="`這篇內容正在審查中，完成前暫不提供。`"
+      :body="`這篇內容正在審查中，完成前暫不提供。`"
       :required-review="topic?.requiredReview ?? null"
     />
 

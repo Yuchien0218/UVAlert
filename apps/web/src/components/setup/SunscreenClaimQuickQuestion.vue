@@ -25,30 +25,15 @@ const groupName = `sunscreen-claim-${useId()}`;
     </p>
     <div class="choice-grid choice-grid--row">
       <label>
-        <input
-          v-model="model"
-          type="radio"
-          :name="groupName"
-          value="yes"
-        >
+        <input v-model="model" type="radio" :name="groupName" value="yes" />
         <span>有</span>
       </label>
       <label>
-        <input
-          v-model="model"
-          type="radio"
-          :name="groupName"
-          value="no"
-        >
+        <input v-model="model" type="radio" :name="groupName" value="no" />
         <span>沒有</span>
       </label>
       <label>
-        <input
-          v-model="model"
-          type="radio"
-          :name="groupName"
-          value="unknown"
-        >
+        <input v-model="model" type="radio" :name="groupName" value="unknown" />
         <span>不確定或看不清楚</span>
       </label>
     </div>

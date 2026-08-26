@@ -22,9 +22,7 @@ withDefaults(defineProps<Props>(), { requiredReview: null });
     <p v-if="requiredReview" class="under-review__meta">
       需要完成的審查：{{ requiredReview }}
     </p>
-    <p class="under-review__note">
-      這不影響提醒功能。
-    </p>
+    <p class="under-review__note">這不影響提醒功能。</p>
   </section>
 </template>
 

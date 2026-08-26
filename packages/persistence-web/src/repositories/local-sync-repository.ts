@@ -15,10 +15,7 @@ import type {
   LocalSyncPort,
   LocalSyncSnapshot
 } from "@sunshield/platform";
-import {
-  SunshieldDatabase,
-  type SyncMetadataRecord
-} from "../db/database";
+import { SunshieldDatabase, type SyncMetadataRecord } from "../db/database";
 import { LocalProductCatalogRepository } from "./local-product-catalog-repository";
 import { LocalRegionPreferenceRepository } from "./local-region-preference-repository";
 
@@ -198,8 +195,13 @@ export class LocalSyncRepository implements LocalSyncPort {
     const records = inputRecords.map((record) =>
       SyncRecordEnvelopeV1Schema.parse(record)
     );
-    assertUniqueKeys(records.map((record) => syncKey(record.recordKind, record.recordId)));
-    if (records.filter((record) => record.recordKind === "active_session").length > 1) {
+    assertUniqueKeys(
+      records.map((record) => syncKey(record.recordKind, record.recordId))
+    );
+    if (
+      records.filter((record) => record.recordKind === "active_session")
+        .length > 1
+    ) {
       throw new Error("同步資料最多只能包含一個進行中的 Session");
     }
     const syncedAt = this.#now();
@@ -316,14 +318,10 @@ export class LocalSyncRepository implements LocalSyncPort {
               break;
             }
             case "product_catalog":
-              await this.#database.SunscreenProducts.delete(
-                tombstone.recordId
-              );
+              await this.#database.SunscreenProducts.delete(tombstone.recordId);
               break;
             case "region_preference":
-              await this.#database.AppMetadata.delete(
-                "uvRegionPreferenceV1"
-              );
+              await this.#database.AppMetadata.delete("uvRegionPreferenceV1");
               break;
             case "user_preferences":
               await this.#database.AppMetadata.delete(
@@ -531,21 +529,20 @@ export class LocalSyncRepository implements LocalSyncPort {
       this.#database.SessionEndedEvents.where("sessionId")
         .equals(sessionId)
         .delete(),
-      this.#database.ClientSequences
-        .filter((row) => row.sessionId === sessionId)
-        .delete(),
-      this.#database.CommandReceipts
-        .filter((row) => row.sessionId === sessionId)
-        .delete(),
-      this.#database.ZoneIdentityLocks
-        .filter((row) => row.sessionId === sessionId)
-        .delete(),
-      this.#database.ProjectionChecksums
-        .filter((row) => row.sessionId === sessionId)
-        .delete()
+      this.#database.ClientSequences.filter(
+        (row) => row.sessionId === sessionId
+      ).delete(),
+      this.#database.CommandReceipts.filter(
+        (row) => row.sessionId === sessionId
+      ).delete(),
+      this.#database.ZoneIdentityLocks.filter(
+        (row) => row.sessionId === sessionId
+      ).delete(),
+      this.#database.ProjectionChecksums.filter(
+        (row) => row.sessionId === sessionId
+      ).delete()
     ]);
-    await this.#database.ActiveSessionLocks
-      .where("sessionId")
+    await this.#database.ActiveSessionLocks.where("sessionId")
       .equals(sessionId)
       .delete();
   }

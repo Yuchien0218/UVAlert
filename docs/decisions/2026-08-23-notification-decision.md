@@ -15,13 +15,13 @@
 
 ## 一、實測證據（2026-08-23）
 
-| 檢查項目 | 結果 |
-| --- | --- |
-| `Notification.requestPermission` / `pushManager` / `showNotification` | 全 repo **零筆** |
-| Service worker 檔案 | **不存在**（`apps/web/public/` 只有字型、圖示與 `manifest.webmanifest`） |
-| `vite.config.ts` PWA plugin | **沒有**，內容僅 `plugins: [vue()]` |
-| `registerSW` / `vite-plugin-pwa` / `workbox` | 全 repo **零筆** |
-| 原始碼中的「通知」字樣 | 僅出現在圖示標題、`helpTopics.ts` 摘要，與 `InstallPage.vue:102` 一行 |
+| 檢查項目                                                              | 結果                                                                     |
+| --------------------------------------------------------------------- | ------------------------------------------------------------------------ |
+| `Notification.requestPermission` / `pushManager` / `showNotification` | 全 repo **零筆**                                                         |
+| Service worker 檔案                                                   | **不存在**（`apps/web/public/` 只有字型、圖示與 `manifest.webmanifest`） |
+| `vite.config.ts` PWA plugin                                           | **沒有**，內容僅 `plugins: [vue()]`                                      |
+| `registerSW` / `vite-plugin-pwa` / `workbox`                          | 全 repo **零筆**                                                         |
+| 原始碼中的「通知」字樣                                                | 僅出現在圖示標題、`helpTopics.ts` 摘要，與 `InstallPage.vue:102` 一行    |
 
 `apps/web/src/pages/InstallPage.vue:102` 是唯一誠實的一句：
 
@@ -37,12 +37,12 @@
 
 三層都已經替通知鋪好路，只有實作是空的：
 
-| 層 | 現況 |
-| --- | --- |
-| `DESIGN.md` 第五節 | 已為 `global-status-banner` 定義「通知未開啟」「背景通知尚未完成」「目前離線」「背景通知已恢復」四種狀態 |
-| 圖示系統 | 「通知未開啟」「背景通知尚未完成」「背景通知已恢復」「通知設定」四個圖示**已經畫好**（`apps/web/src/generated/icons.generated.ts:57-100`） |
-| `2026-08-22-mvp-flow-review.md` §1.3 | 把它當成「通知**失效**時核心承諾靜默失效」的顯示問題 |
-| 程式碼 | **零實作** |
+| 層                                   | 現況                                                                                                                                       |
+| ------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------ |
+| `DESIGN.md` 第五節                   | 已為 `global-status-banner` 定義「通知未開啟」「背景通知尚未完成」「目前離線」「背景通知已恢復」四種狀態                                   |
+| 圖示系統                             | 「通知未開啟」「背景通知尚未完成」「背景通知已恢復」「通知設定」四個圖示**已經畫好**（`apps/web/src/generated/icons.generated.ts:57-100`） |
+| `2026-08-22-mvp-flow-review.md` §1.3 | 把它當成「通知**失效**時核心承諾靜默失效」的顯示問題                                                                                       |
+| 程式碼                               | **零實作**                                                                                                                                 |
 
 檢討文件 §1.3 的判斷方向正確（「規格把它當成顯示問題，實際上是核心承諾無法交付」），但仍低估了程度——不是失效，是不存在。
 
@@ -50,11 +50,11 @@
 
 考慮過的三條路：
 
-| 選項 | 內容 | 結果 |
-| --- | --- | --- |
-| **A（採用）** | 做 service worker ＋ 本機通知 | **採用**。不需要後端；`showNotification` ＋ 排程可涵蓋主要情境 |
-| B | 明確承認不做，改定位為「開著查看用的補擦計算器」，撤掉所有通知文案、banner 狀態與已畫好的圖示 | 不採用 |
-| C | 維持現狀（規格說有、程式沒有） | **明確否決**。wireframe 會照規格畫出通知狀態，畫完才發現無處可接 |
+| 選項          | 內容                                                                                          | 結果                                                             |
+| ------------- | --------------------------------------------------------------------------------------------- | ---------------------------------------------------------------- |
+| **A（採用）** | 做 service worker ＋ 本機通知                                                                 | **採用**。不需要後端；`showNotification` ＋ 排程可涵蓋主要情境   |
+| B             | 明確承認不做，改定位為「開著查看用的補擦計算器」，撤掉所有通知文案、banner 狀態與已畫好的圖示 | 不採用                                                           |
+| C             | 維持現狀（規格說有、程式沒有）                                                                | **明確否決**。wireframe 會照規格畫出通知狀態，畫完才發現無處可接 |
 
 選 A 的理由：一個「防曬補擦提醒 App」若不會提醒，核心價值不成立。本機通知不需要後端即可交付，成本遠低於它挽回的產品價值。
 
@@ -90,9 +90,9 @@ wireframe `selection07` 的「通知設定 → 通知未開啟」在實作完成
 
 ## 回寫落點
 
-| 項目 | 落點 |
-| --- | --- |
-| 通知實作 | `apps/web/` 新增 service worker；`vite.config.ts` 或 `public/` |
-| `/help/how-it-works` 誠實版內容 | `apps/web/src/features/help/` |
-| banner 狀態實作 | `DESIGN.md` 第五節 `global-status-banner` 規範 |
-| 現行 Sitemap 補通知行為 | `2026-08-15-redesign-sitemap-userflow-current.md` §4 |
+| 項目                            | 落點                                                           |
+| ------------------------------- | -------------------------------------------------------------- |
+| 通知實作                        | `apps/web/` 新增 service worker；`vite.config.ts` 或 `public/` |
+| `/help/how-it-works` 誠實版內容 | `apps/web/src/features/help/`                                  |
+| banner 狀態實作                 | `DESIGN.md` 第五節 `global-status-banner` 規範                 |
+| 現行 Sitemap 補通知行為         | `2026-08-15-redesign-sitemap-userflow-current.md` §4           |

@@ -50,9 +50,7 @@ function returnToCaller(): Promise<unknown> {
       :phase="region.phase.value"
       :error="region.error.value"
       :candidate="region.candidate.value"
-      :approximate-accuracy-meters="
-        region.approximateAccuracyMeters.value
-      "
+      :approximate-accuracy-meters="region.approximateAccuracyMeters.value"
       @locate="region.useCurrentPosition"
       @confirm="confirmCandidate"
     />

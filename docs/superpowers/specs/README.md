@@ -5,11 +5,11 @@
 
 ## 規格清單
 
-| 規格 | 文件內狀態 | 覆蓋範圍 | 配套入口 |
-| --- | --- | --- | --- |
-| [`2026-08-17-backend-foundation-design.md`](2026-08-17-backend-foundation-design.md) | 設計已由產品端確認；文件標註待進入實作 | Supabase、Google 登入、同步、UV 代理、問題回報、資料清除與資料邊界 | [`../../backend/README.md`](../../backend/README.md)、[`../plans/2026-08-17-backend-foundation.md`](../plans/2026-08-17-backend-foundation.md) |
-| [`2026-08-17-zh-tw-copy-design.md`](2026-08-17-zh-tw-copy-design.md) | 產品端已確認；文件標註待進入文案實作 | 台灣繁體中文語氣、統一詞彙、App／PWA 與衛教可見文案 | [`../../decisions/2026-08-17-copy-audit.md`](../../decisions/2026-08-17-copy-audit.md)、[`../plans/2026-08-17-zh-tw-copy.md`](../plans/2026-08-17-zh-tw-copy.md) |
-| [`2026-08-18-uvalert-logo-concepts-design.md`](2026-08-18-uvalert-logo-concepts-design.md) | 方向規格；第一輪概念與正式採用狀態另見設計資產索引 | 六款 Logo 概念、字標、圖標、配色與禁止方向 | [`../../design/logo-concepts/README.md`](../../design/logo-concepts/README.md)、[`../../../DESIGN.md`](../../../DESIGN.md) |
+| 規格                                                                                       | 文件內狀態                                         | 覆蓋範圍                                                           | 配套入口                                                                                                                                                         |
+| ------------------------------------------------------------------------------------------ | -------------------------------------------------- | ------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [`2026-08-17-backend-foundation-design.md`](2026-08-17-backend-foundation-design.md)       | 設計已由產品端確認；文件標註待進入實作             | Supabase、Google 登入、同步、UV 代理、問題回報、資料清除與資料邊界 | [`../../backend/README.md`](../../backend/README.md)、[`../plans/2026-08-17-backend-foundation.md`](../plans/2026-08-17-backend-foundation.md)                   |
+| [`2026-08-17-zh-tw-copy-design.md`](2026-08-17-zh-tw-copy-design.md)                       | 產品端已確認；文件標註待進入文案實作               | 台灣繁體中文語氣、統一詞彙、App／PWA 與衛教可見文案                | [`../../decisions/2026-08-17-copy-audit.md`](../../decisions/2026-08-17-copy-audit.md)、[`../plans/2026-08-17-zh-tw-copy.md`](../plans/2026-08-17-zh-tw-copy.md) |
+| [`2026-08-18-uvalert-logo-concepts-design.md`](2026-08-18-uvalert-logo-concepts-design.md) | 方向規格；第一輪概念與正式採用狀態另見設計資產索引 | 六款 Logo 概念、字標、圖標、配色與禁止方向                         | [`../../design/logo-concepts/README.md`](../../design/logo-concepts/README.md)、[`../../../DESIGN.md`](../../../DESIGN.md)                                       |
 
 ## 讀取規則
 

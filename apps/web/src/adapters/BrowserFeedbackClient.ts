@@ -33,7 +33,12 @@ export class BrowserFeedbackClient implements FeedbackPort {
         body: JSON.stringify(parsed)
       });
     } catch (error) {
-      throw feedbackError(503, "UPSTREAM_UNAVAILABLE", "目前無法連線到回報服務", error);
+      throw feedbackError(
+        503,
+        "UPSTREAM_UNAVAILABLE",
+        "目前無法連線到回報服務",
+        error
+      );
     }
     const body = await readJson(response);
     if (!response.ok) {
@@ -61,11 +66,24 @@ function feedbackError(
 }
 
 function readCode(body: unknown, status: number): CloudError["code"] {
-  if (typeof body === "object" && body !== null && "error" in body &&
-      typeof body.error === "object" && body.error !== null &&
-      "code" in body.error && typeof body.error.code === "string") {
+  if (
+    typeof body === "object" &&
+    body !== null &&
+    "error" in body &&
+    typeof body.error === "object" &&
+    body.error !== null &&
+    "code" in body.error &&
+    typeof body.error.code === "string"
+  ) {
     const code = body.error.code;
-    if (["RATE_LIMITED", "VALIDATION_ERROR", "SERVER_ERROR", "UPSTREAM_UNAVAILABLE"].includes(code)) {
+    if (
+      [
+        "RATE_LIMITED",
+        "VALIDATION_ERROR",
+        "SERVER_ERROR",
+        "UPSTREAM_UNAVAILABLE"
+      ].includes(code)
+    ) {
       return code as CloudError["code"];
     }
   }
@@ -76,9 +94,15 @@ function readCode(body: unknown, status: number): CloudError["code"] {
 }
 
 function readMessage(body: unknown, status: number): string {
-  if (typeof body === "object" && body !== null && "error" in body &&
-      typeof body.error === "object" && body.error !== null &&
-      "message" in body.error && typeof body.error.message === "string") {
+  if (
+    typeof body === "object" &&
+    body !== null &&
+    "error" in body &&
+    typeof body.error === "object" &&
+    body.error !== null &&
+    "message" in body.error &&
+    typeof body.error.message === "string"
+  ) {
     return body.error.message;
   }
   return `回報服務回應 ${status}`;

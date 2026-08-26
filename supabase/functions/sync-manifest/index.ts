@@ -71,6 +71,4 @@ export async function handleManifest(request: Request): Promise<Response> {
   }
 }
 
-Deno.serve(async (request) =>
-  withCors(await handleManifest(request), request)
-);
+Deno.serve(async (request) => withCors(await handleManifest(request), request));

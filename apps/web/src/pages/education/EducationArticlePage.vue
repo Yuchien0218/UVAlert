@@ -15,7 +15,9 @@ const route = useRoute();
 const slug = computed(() => String(route.params.slug ?? ""));
 const article = computed(() => findEducationArticle(slug.value));
 const category = computed(() =>
-  article.value === undefined ? undefined : findEducationCategory(article.value.category)
+  article.value === undefined
+    ? undefined
+    : findEducationCategory(article.value.category)
 );
 const relatedArticles = computed(() =>
   article.value === undefined
@@ -40,30 +42,52 @@ const relatedArticles = computed(() =>
         { name: '防曬衛教', path: '/education' },
         ...(category === undefined
           ? []
-          : [{ name: category.title, path: educationCategoryPath(category.slug) }]),
+          : [
+              {
+                name: category.title,
+                path: educationCategoryPath(category.slug)
+              }
+            ]),
         { name: article.title, path: `/education/articles/${article.slug}` }
       ]"
     />
 
     <header class="education-article-header">
-      <RouterLink class="text-link" :to="category === undefined ? '/education' : educationCategoryPath(category.slug)">
+      <RouterLink
+        class="text-link"
+        :to="
+          category === undefined
+            ? '/education'
+            : educationCategoryPath(category.slug)
+        "
+      >
         ← {{ category?.title ?? "防曬衛教" }}
       </RouterLink>
       <p class="page-heading__eyebrow">{{ article.primaryQuestion }}</p>
       <h1 class="page-heading__title">{{ article.title }}</h1>
       <p class="education-article-summary">{{ article.summary }}</p>
       <p class="education-article-meta">
-        最後查閱：{{ article.lastReviewed }} · {{ article.publishable ? "已發布" : "專業審閱中" }}
+        最後查閱：{{ article.lastReviewed }} ·
+        {{ article.publishable ? "已發布" : "專業審閱中" }}
       </p>
     </header>
 
-    <aside v-if="!article.publishable" class="education-review-note" role="note">
-      這篇文章目前是整理中的衛教草稿，尚未完成 UVAlert 專業審閱；內容僅供閱讀，不代表個人化醫療建議。
+    <aside
+      v-if="!article.publishable"
+      class="education-review-note"
+      role="note"
+    >
+      這篇文章目前是整理中的衛教草稿，尚未完成 UVAlert
+      專業審閱；內容僅供閱讀，不代表個人化醫療建議。
     </aside>
 
     <div class="education-article-body" v-html="article.bodyHtml" />
 
-    <section v-if="relatedArticles.length > 0" class="education-related" aria-labelledby="related-title">
+    <section
+      v-if="relatedArticles.length > 0"
+      class="education-related"
+      aria-labelledby="related-title"
+    >
       <h2 id="related-title">同主題延伸閱讀</h2>
       <nav class="education-related-list" aria-label="同主題文章">
         <RouterLink

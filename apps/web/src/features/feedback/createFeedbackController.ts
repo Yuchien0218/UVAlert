@@ -6,7 +6,8 @@ import {
 } from "@sunshield/contracts";
 import type { CloudError, FeedbackPort } from "@sunshield/platform";
 
-export type FeedbackControllerStatus = "idle" | "submitting" | "submitted" | "error";
+export type FeedbackControllerStatus =
+  "idle" | "submitting" | "submitted" | "error";
 export type FeedbackControllerState = {
   status: FeedbackControllerStatus;
   receipt: FeedbackReceiptV1 | null;
@@ -37,12 +38,18 @@ export function createFeedbackController(options: {
   });
   let disposed = false;
   let submitting = false;
-  const getRoute = options.getRoute ?? (() =>
-    typeof globalThis.location === "undefined" ? "/" : globalThis.location.pathname
-  );
-  const getUserAgentSummary = options.getUserAgentSummary ?? (() =>
-    typeof globalThis.navigator === "undefined" ? null : globalThis.navigator.userAgent.slice(0, 256)
-  );
+  const getRoute =
+    options.getRoute ??
+    (() =>
+      typeof globalThis.location === "undefined"
+        ? "/"
+        : globalThis.location.pathname);
+  const getUserAgentSummary =
+    options.getUserAgentSummary ??
+    (() =>
+      typeof globalThis.navigator === "undefined"
+        ? null
+        : globalThis.navigator.userAgent.slice(0, 256));
 
   async function submit(input: {
     feedbackType: FeedbackType;
@@ -81,7 +88,8 @@ export function createFeedbackController(options: {
     state: shallowReadonly(state),
     submit,
     reset(): void {
-      if (!disposed) state.value = { status: "idle", receipt: null, error: null };
+      if (!disposed)
+        state.value = { status: "idle", receipt: null, error: null };
     },
     dispose(): void {
       disposed = true;
@@ -90,10 +98,16 @@ export function createFeedbackController(options: {
 }
 
 function toCloudError(error: unknown): CloudError {
-  if (typeof error === "object" && error !== null &&
-      "status" in error && typeof error.status === "number" &&
-      "code" in error && typeof error.code === "string" &&
-      "message" in error && typeof error.message === "string") {
+  if (
+    typeof error === "object" &&
+    error !== null &&
+    "status" in error &&
+    typeof error.status === "number" &&
+    "code" in error &&
+    typeof error.code === "string" &&
+    "message" in error &&
+    typeof error.message === "string"
+  ) {
     return error as CloudError;
   }
   return {

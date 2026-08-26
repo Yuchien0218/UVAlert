@@ -46,9 +46,7 @@ export function selectUpcomingForecast(
   });
 }
 
-export function getUvRiskLevelLabel(
-  riskLevel: UvRiskLevel
-): string {
+export function getUvRiskLevelLabel(riskLevel: UvRiskLevel): string {
   switch (riskLevel) {
     case "low":
       return "低量級";

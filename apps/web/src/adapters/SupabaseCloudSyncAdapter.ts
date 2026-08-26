@@ -102,12 +102,7 @@ export class SupabaseCloudSyncAdapter implements CloudSyncPort {
     try {
       return schema.parse(body);
     } catch (error) {
-      throw makeCloudError(
-        502,
-        "SERVER_ERROR",
-        "雲端回應格式不正確",
-        error
-      );
+      throw makeCloudError(502, "SERVER_ERROR", "雲端回應格式不正確", error);
     }
   }
 
@@ -119,13 +114,20 @@ export class SupabaseCloudSyncAdapter implements CloudSyncPort {
         ...init,
         headers: {
           Accept: "application/json",
-          ...(init.body === undefined ? {} : { "Content-Type": "application/json" }),
+          ...(init.body === undefined
+            ? {}
+            : { "Content-Type": "application/json" }),
           ...(init.headers ?? {}),
           Authorization: `Bearer ${accessToken}`
         }
       });
     } catch (error) {
-      throw makeCloudError(503, "UPSTREAM_UNAVAILABLE", "目前無法連線到同步服務", error);
+      throw makeCloudError(
+        503,
+        "UPSTREAM_UNAVAILABLE",
+        "目前無法連線到同步服務",
+        error
+      );
     }
 
     if (!response.ok) {
@@ -161,7 +163,12 @@ export class SupabaseCloudSyncAdapter implements CloudSyncPort {
     try {
       token = await tokenProvider.getAccessToken?.();
     } catch (error) {
-      throw makeCloudError(401, "AUTH_REQUIRED", "無法取得登入憑證，請重新登入", error);
+      throw makeCloudError(
+        401,
+        "AUTH_REQUIRED",
+        "無法取得登入憑證，請重新登入",
+        error
+      );
     }
     if (token === null || token === undefined || token.trim() === "") {
       throw makeCloudError(401, "AUTH_REQUIRED", "登入狀態已過期，請重新登入");

@@ -52,17 +52,11 @@ const initialGroupIds = [
       .filter((value): value is BodyZoneGroupId => value !== undefined)
   )
 ];
-const selectedGroupIds = shallowRef<BodyZoneGroupId[]>(
-  initialGroupIds
-);
+const selectedGroupIds = shallowRef<BodyZoneGroupId[]>(initialGroupIds);
 const editing = shallowRef(props.initialZones.length > 0);
 const setupEntryMode = shallowRef(props.initialEntryMode);
-const suggestedPresetId = shallowRef(
-  props.initialSuggestedPresetId
-);
-const suggestedPresetVersion = shallowRef(
-  props.initialSuggestedPresetVersion
-);
+const suggestedPresetId = shallowRef(props.initialSuggestedPresetId);
+const suggestedPresetVersion = shallowRef(props.initialSuggestedPresetVersion);
 const presetDecision = shallowRef(props.initialPresetDecision);
 const includeCustom = shallowRef(
   props.initialZones.some((zone) => zone.bodyZoneCode === "custom")
@@ -93,10 +87,7 @@ function startSelfSelection(): void {
   formError.value = null;
 }
 
-function toggleGroup(
-  groupId: BodyZoneGroupId,
-  checked: boolean
-): void {
+function toggleGroup(groupId: BodyZoneGroupId, checked: boolean): void {
   selectedGroupIds.value = checked
     ? [...selectedGroupIds.value, groupId]
     : selectedGroupIds.value.filter((id) => id !== groupId);
@@ -122,11 +113,7 @@ function submit(): void {
   );
   if (includeCustom.value) {
     zones.push(
-      makeDraftZone(
-        "custom-primary",
-        "custom",
-        customLabel.value.trim()
-      )
+      makeDraftZone("custom-primary", "custom", customLabel.value.trim())
     );
   }
 
@@ -199,9 +186,7 @@ function makeDraftZone(
       <section class="zone-groups app-card">
         <div class="zone-groups__heading">
           <h2>追蹤哪些部位？</h2>
-          <p>
-            選中的部位會開始補擦倒數。被衣物遮住、不需要提醒的部位不用選。
-          </p>
+          <p>選中的部位會開始補擦倒數。被衣物遮住、不需要提醒的部位不用選。</p>
         </div>
 
         <div class="zone-groups__list">
@@ -219,7 +204,7 @@ function makeDraftZone(
                   ($event.target as HTMLInputElement).checked
                 )
               "
-            >
+            />
             <span>
               <strong>{{ group.label }}</strong>
               <small>{{ group.description }}</small>
@@ -227,7 +212,7 @@ function makeDraftZone(
           </label>
 
           <label class="zone-group-choice">
-            <input v-model="includeCustom" type="checkbox">
+            <input v-model="includeCustom" type="checkbox" />
             <span>
               <strong>其他部位</strong>
               <small>自訂文字只儲存在這次提醒中。</small>
@@ -240,7 +225,7 @@ function makeDraftZone(
               type="text"
               maxlength="80"
               autocomplete="off"
-            >
+            />
           </label>
         </div>
       </section>
@@ -249,11 +234,7 @@ function makeDraftZone(
         {{ formError }}
       </p>
 
-      <button
-        class="button button--primary"
-        type="button"
-        @click="submit"
-      >
+      <button class="button button--primary" type="button" @click="submit">
         {{ submitLabel }}
       </button>
     </template>

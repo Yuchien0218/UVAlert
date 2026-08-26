@@ -152,7 +152,9 @@ describe("DESIGN.md ↔ styles.css token 一致性", () => {
     // DESIGN.md typography.body-md.fontSize = 16px；其餘字級對應待 D2。
     const bodyMd = designMd.match(/body-md:[\s\S]*?fontSize:\s*(\d+)px/)?.[1];
     expect(bodyMd, "DESIGN.md 找不到 body-md fontSize").toBeDefined();
-    expect(normalize(`${bodyMd}px`)).toBe(normalize(cssTokens["--font-size-body"]!));
+    expect(normalize(`${bodyMd}px`)).toBe(
+      normalize(cssTokens["--font-size-body"]!)
+    );
   });
 
   it("KNOWN_DRIFT 的每一項現在仍然真的有落差（修好就從清單移除）", () => {

@@ -130,6 +130,4 @@ export type MethodCertainty = z.infer<typeof MethodCertaintySchema>;
 export type MethodComponent = z.infer<typeof MethodComponentSchema>;
 export type SetupEntryMode = z.infer<typeof SetupEntryModeSchema>;
 export type PresetDecision = z.infer<typeof PresetDecisionSchema>;
-export type SessionEndedReason = z.infer<
-  typeof SessionEndedReasonSchema
->;
+export type SessionEndedReason = z.infer<typeof SessionEndedReasonSchema>;

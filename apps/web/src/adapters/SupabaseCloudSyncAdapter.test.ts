@@ -36,11 +36,12 @@ function manifest() {
 
 describe("SupabaseCloudSyncAdapter", () => {
   it("帶 bearer token 呼叫 manifest，並驗證 response contract", async () => {
-    const fetch = vi.fn(async () =>
-      new Response(JSON.stringify(manifest()), {
-        status: 200,
-        headers: { "Content-Type": "application/json" }
-      })
+    const fetch = vi.fn(
+      async () =>
+        new Response(JSON.stringify(manifest()), {
+          status: 200,
+          headers: { "Content-Type": "application/json" }
+        })
     );
     const adapter = new SupabaseCloudSyncAdapter({
       auth: makeAuth(),
@@ -76,14 +77,15 @@ describe("SupabaseCloudSyncAdapter", () => {
   });
 
   it("保留 409 conflict code，且不把 server stack 暴露成錯誤訊息", async () => {
-    const fetch = vi.fn(async () =>
-      new Response(
-        JSON.stringify({
-          error: { code: "SYNC_CONFLICT", message: "版本衝突" },
-          stack: "private stack"
-        }),
-        { status: 409, headers: { "Content-Type": "application/json" } }
-      )
+    const fetch = vi.fn(
+      async () =>
+        new Response(
+          JSON.stringify({
+            error: { code: "SYNC_CONFLICT", message: "版本衝突" },
+            stack: "private stack"
+          }),
+          { status: 409, headers: { "Content-Type": "application/json" } }
+        )
     );
     const adapter = new SupabaseCloudSyncAdapter({
       auth: makeAuth(),
@@ -91,15 +93,17 @@ describe("SupabaseCloudSyncAdapter", () => {
       baseUrl: "/v1"
     });
 
-    await expect(adapter.read({
-      schemaVersion: "sync-v1",
-      recordKeys: [
-        {
-          recordKind: "active_session",
-          recordId: makeActiveSessionRecord().recordId
-        }
-      ]
-    })).rejects.toMatchObject({
+    await expect(
+      adapter.read({
+        schemaVersion: "sync-v1",
+        recordKeys: [
+          {
+            recordKind: "active_session",
+            recordId: makeActiveSessionRecord().recordId
+          }
+        ]
+      })
+    ).rejects.toMatchObject({
       status: 409,
       code: "SYNC_CONFLICT",
       message: "版本衝突"

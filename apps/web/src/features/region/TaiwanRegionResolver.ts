@@ -1,9 +1,5 @@
 import booleanPointInPolygon from "@turf/boolean-point-in-polygon";
-import type {
-  Feature,
-  MultiPolygon,
-  Polygon
-} from "geojson";
+import type { Feature, MultiPolygon, Polygon } from "geojson";
 
 export interface RegionDirectoryEntry {
   regionCode: string;
@@ -13,8 +9,7 @@ export interface RegionDirectoryEntry {
   displayName: string;
 }
 
-export interface RegionBoundaryProperties
-  extends RegionDirectoryEntry {
+export interface RegionBoundaryProperties extends RegionDirectoryEntry {
   bbox: readonly [number, number, number, number];
 }
 
@@ -38,21 +33,14 @@ export type RegionResolution =
 
 export class TaiwanRegionResolver {
   readonly #features: readonly RegionBoundaryFeature[];
-  readonly #globalBoundingBox: readonly [
-    number,
-    number,
-    number,
-    number
-  ];
+  readonly #globalBoundingBox: readonly [number, number, number, number];
 
   constructor(collection: RegionBoundaryCollection) {
     if (collection.features.length === 0) {
       throw new Error("Region boundary collection cannot be empty");
     }
     this.#features = collection.features;
-    this.#globalBoundingBox = calculateGlobalBoundingBox(
-      collection.features
-    );
+    this.#globalBoundingBox = calculateGlobalBoundingBox(collection.features);
   }
 
   resolve(longitude: number, latitude: number): RegionResolution {

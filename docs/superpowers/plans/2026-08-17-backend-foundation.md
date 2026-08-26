@@ -80,6 +80,7 @@
 ## Task 1: 建立 Supabase 本機 scaffold 與環境邊界
 
 **Files:**
+
 - Create: `supabase/config.toml`
 - Create: `supabase/.env.example`
 - Create: `apps/web/.env.example`
@@ -88,6 +89,7 @@
 - Test: `supabase/functions/_shared/http.test.ts`
 
 **Interfaces:**
+
 - Consumes: 現有 pnpm workspace 與 Vite app。
 - Produces: 可啟動 Supabase 本機服務的設定、前端公開環境變數名稱、統一 JSON error response helper。
 
@@ -165,6 +167,7 @@
 ## Task 2: 建立版本化 sync／feedback contracts 與 platform ports
 
 **Files:**
+
 - Create: `packages/contracts/src/sync.ts`
 - Create: `packages/contracts/src/feedback.ts`
 - Create: `packages/contracts/src/sync.test.ts`
@@ -176,6 +179,7 @@
 - Modify: `packages/test-fixtures/src/index.ts`
 
 **Interfaces:**
+
 - Consumes: `SessionEventStreamV1Schema`、`SessionProjectionSchema`、`ProductCatalogRecordV1Schema`、`RegionPreferenceV1Schema` 與現有 Zod conventions。
 - Produces: `SyncRecordEnvelopeV1Schema`、`SyncManifestV1Schema`、`SyncCommitRequestV1Schema`、`SyncConflictV1Schema`、`FeedbackRequestV1Schema`、`AuthPort`、`CloudSyncPort` 與 `FeedbackPort`。
 
@@ -266,6 +270,7 @@
 ## Task 3: 建立本機 sync snapshot 與同步 metadata
 
 **Files:**
+
 - Create: `packages/persistence-web/src/repositories/local-sync-repository.ts`
 - Create: `packages/persistence-web/src/repositories/local-sync-repository.test.ts`
 - Modify: `packages/persistence-web/src/db/database.ts`
@@ -273,6 +278,7 @@
 - Modify: `packages/platform/src/index.ts`
 
   **Interfaces:**
+
 - Consumes: 現有 `LocalSessionRepository`、`LocalProductCatalogRepository`、`LocalRegionPreferenceRepository`、`LocalDataRepository` 與 Task 2 contracts。
 - Produces: `LocalSyncRepository`，可收集第一版允許同步的本機 snapshot、套用使用者選定的雲端 records，以及保存每筆本機 sync metadata。
 
@@ -314,6 +320,7 @@
 ## Task 4: 建立 Supabase Auth adapter 與同步控制器
 
 **Files:**
+
 - Create: `apps/web/src/adapters/SupabaseAuthAdapter.ts`
 - Create: `apps/web/src/adapters/SupabaseCloudSyncAdapter.ts`
 - Create: `apps/web/src/features/auth/createAuthController.ts`
@@ -324,6 +331,7 @@
 - Modify: `apps/web/src/app/injection.ts`
 
 **Interfaces:**
+
 - Consumes: Task 2 `AuthPort`／`CloudSyncPort`、Task 3 `LocalSyncRepository`、現有 boot／connectivity controller。
 - Produces: Auth state、sync preview state、confirm／cancel／conflict actions，且在任何 cloud error 時不改本機資料。
 
@@ -373,11 +381,13 @@
 ## Task 5: 建立 PostgreSQL migration、索引與 RLS
 
 **Files:**
+
 - Create: `supabase/migrations/20260817000100_backend_foundation.sql`
 - Create: `supabase/tests/backend_foundation.sql`
 - Create: `supabase/seed.sql`
 
 **Interfaces:**
+
 - Consumes: Task 2 的 record kinds、revision、tombstone 與 feedback 欄位。
 - Produces: `sync_records`、`sync_tombstones`、`uv_forecast_cache`、`feedback_submissions` tables；RLS policy；Edge Functions 可使用的 indexes。
 
@@ -406,6 +416,7 @@
 ## Task 6: 實作同步 Edge Functions
 
 **Files:**
+
 - Create: `supabase/functions/_shared/sync.ts`
 - Create: `supabase/functions/_shared/idempotency.ts`
 - Create: `supabase/functions/sync-manifest/index.ts`
@@ -416,6 +427,7 @@
 - Create: `supabase/functions/sync-commit/index.test.ts`
 
 **Interfaces:**
+
 - Consumes: Task 2 contracts、Task 5 tables／RLS、Task 1 HTTP／auth helpers。
 - Produces: `/v1/sync/manifest`、`/v1/sync/read`、`/v1/sync/commit`、`/v1/sync/delete` 的穩定 JSON API。
 
@@ -452,6 +464,7 @@
 ## Task 7: 實作 CWA UV proxy／cache
 
 **Files:**
+
 - Create: `supabase/functions/_shared/cwa.test.ts`
 - Create: `supabase/functions/uv-forecast/index.ts`
 - Create: `supabase/functions/uv-forecast/index.test.ts`
@@ -459,6 +472,7 @@
 - Modify: `apps/web/src/adapters/BrowserUvForecastClient.test.ts`
 
 **Interfaces:**
+
 - Consumes: 現有 `/v1/uv/forecast` client、`FiveDayUvForecastSchema`、CWA F-D0047-091、Task 5 `uv_forecast_cache`。
 - Produces: 不需登入、隱藏 CWA key、可快取且回應格式固定的 UV endpoint。
 
@@ -483,6 +497,7 @@
 ## Task 8: 實作匿名問題回報 API
 
 **Files:**
+
 - Create: `supabase/functions/_shared/rate-limit.ts`
 - Create: `supabase/functions/feedback/index.ts`
 - Create: `supabase/functions/feedback/index.test.ts`
@@ -491,6 +506,7 @@
 - Create: `apps/web/src/features/feedback/createFeedbackController.test.ts`
 
 **Interfaces:**
+
 - Consumes: Task 2 `FeedbackRequestV1Schema`、Task 5 `feedback_submissions`、Task 1 error／CORS helpers。
 - Produces: 不需登入的 `/v1/feedback`，回傳不含私人資料的 feedback receipt。
 
@@ -519,6 +535,7 @@
 ## Task 9: 實作帳號資料清除與同步設定頁
 
 **Files:**
+
 - Create: `supabase/functions/account-delete/index.ts`
 - Create: `supabase/functions/account-delete/index.test.ts`
 - Create: `apps/web/src/pages/settings/SyncSettingsPage.vue`
@@ -530,6 +547,7 @@
 - Modify: `apps/web/src/pages/settings/DataSettingsPage.vue`
 
 **Interfaces:**
+
 - Consumes: Task 4 Auth／Sync controllers、Task 6 sync functions、Task 8 feedback controller。
 - Produces: 同步預覽、確認、衝突、停止同步、登出與刪除 UVAlert 雲端資料的可操作頁面。
 
@@ -560,6 +578,7 @@
 ## Task 10: 端到端驗證、文件與部署檢查
 
 **Files:**
+
 - Create: `supabase/README.md`
 - Create: `docs/backend/README.md`
 - Create: `docs/backend/local-development.md`
@@ -568,6 +587,7 @@
 - Modify: `package.json`
 
 **Interfaces:**
+
 - Consumes: Tasks 1–9 的 migration、functions、front-end controllers 與 tests。
 - Produces: 新開發者可依文件啟動本機 Supabase、執行測試、設定 Google／CWA secrets，並知道如何部署而不暴露 secrets。
 

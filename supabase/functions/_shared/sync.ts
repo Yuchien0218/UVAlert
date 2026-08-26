@@ -128,7 +128,10 @@ export function parseOwnedRecordKey(input: unknown): SyncRecordKey {
 export function validateSyncRecord(input: unknown): SyncRecord {
   const value = asObject(input, "record");
   if (value.schemaVersion !== SYNC_SCHEMA_VERSION) {
-    throw new SyncValidationError("sync schema version 不正確", "schemaVersion");
+    throw new SyncValidationError(
+      "sync schema version 不正確",
+      "schemaVersion"
+    );
   }
   const key = parseOwnedRecordKey(value);
   const revision = assertPositiveInteger(value.revision, "revision");
@@ -152,7 +155,10 @@ export function validateSyncRecord(input: unknown): SyncRecord {
 export function validateSyncTombstone(input: unknown): SyncTombstone {
   const value = asObject(input, "tombstone");
   if (value.schemaVersion !== SYNC_SCHEMA_VERSION) {
-    throw new SyncValidationError("tombstone schema version 不正確", "schemaVersion");
+    throw new SyncValidationError(
+      "tombstone schema version 不正確",
+      "schemaVersion"
+    );
   }
   const key = parseOwnedRecordKey(value);
   return {
@@ -212,7 +218,12 @@ export function parseSyncCommitRequest(input: unknown): SyncCommitRequest {
       recordId: tombstone.recordId
     }))
   ]);
-  return { schemaVersion: SYNC_SCHEMA_VERSION, idempotencyKey, records, tombstones };
+  return {
+    schemaVersion: SYNC_SCHEMA_VERSION,
+    idempotencyKey,
+    records,
+    tombstones
+  };
 }
 
 export function parseSyncDeleteRequest(input: unknown): SyncDeleteRequest {
@@ -227,7 +238,10 @@ export function parseSyncDeleteRequest(input: unknown): SyncDeleteRequest {
     const row = asObject(entry, "records entry");
     return {
       key: parseOwnedRecordKey(row.key),
-      expectedRevision: assertPositiveInteger(row.expectedRevision, "expectedRevision")
+      expectedRevision: assertPositiveInteger(
+        row.expectedRevision,
+        "expectedRevision"
+      )
     };
   });
   assertUniqueKeys(records.map(({ key }) => key));
@@ -237,7 +251,10 @@ export function parseSyncDeleteRequest(input: unknown): SyncDeleteRequest {
 export function validateSyncCommitResult(input: unknown): SyncCommitResult {
   const value = asObject(input, "commit response");
   assertSyncVersion(value);
-  if (!Array.isArray(value.committedRecords) || !Array.isArray(value.committedTombstones)) {
+  if (
+    !Array.isArray(value.committedRecords) ||
+    !Array.isArray(value.committedTombstones)
+  ) {
     throw new SyncValidationError("commit response 格式不正確");
   }
   const committedRecords = value.committedRecords.map((item) => {
@@ -247,11 +264,16 @@ export function validateSyncCommitResult(input: unknown): SyncCommitResult {
       ...key,
       schemaVersion: SYNC_SCHEMA_VERSION,
       revision: assertPositiveInteger(row.revision, "revision"),
-      payloadFingerprint: assertId(row.payloadFingerprint, "payloadFingerprint"),
+      payloadFingerprint: assertId(
+        row.payloadFingerprint,
+        "payloadFingerprint"
+      ),
       updatedAt: assertUtcInstant(row.updatedAt, "updatedAt")
     };
   });
-  const committedTombstones = value.committedTombstones.map(validateSyncTombstone);
+  const committedTombstones = value.committedTombstones.map(
+    validateSyncTombstone
+  );
   return {
     schemaVersion: SYNC_SCHEMA_VERSION,
     committedRecords,
@@ -292,7 +314,10 @@ export function readManifestForUser(
         ...key,
         schemaVersion: SYNC_SCHEMA_VERSION,
         revision: numberRevision(row.revision),
-        payloadFingerprint: assertId(row.payload_fingerprint, "payloadFingerprint"),
+        payloadFingerprint: assertId(
+          row.payload_fingerprint,
+          "payloadFingerprint"
+        ),
         updatedAt: assertUtcInstant(row.updated_at, "updatedAt")
       };
     }),
@@ -310,7 +335,11 @@ export function readSelectedRecords(
   return {
     schemaVersion: SYNC_SCHEMA_VERSION,
     records: records
-      .filter((row) => selected.has(keyString({ recordKind: row.record_kind, recordId: row.record_id })))
+      .filter((row) =>
+        selected.has(
+          keyString({ recordKind: row.record_kind, recordId: row.record_id })
+        )
+      )
       .map((row) =>
         validateSyncRecord({
           recordKind: row.record_kind,
@@ -323,7 +352,11 @@ export function readSelectedRecords(
         })
       ),
     tombstones: tombstones
-      .filter((row) => selected.has(keyString({ recordKind: row.record_kind, recordId: row.record_id })))
+      .filter((row) =>
+        selected.has(
+          keyString({ recordKind: row.record_kind, recordId: row.record_id })
+        )
+      )
       .map(toTombstone)
   };
 }
@@ -348,26 +381,48 @@ export function keyString(key: SyncRecordKey): string {
   return `${key.recordKind}:${key.recordId}`;
 }
 
-function validatePayload(key: SyncRecordKey, payload: Record<string, unknown>): void {
+function validatePayload(
+  key: SyncRecordKey,
+  payload: Record<string, unknown>
+): void {
   switch (key.recordKind) {
     case "active_session":
       validateActiveSession(key, payload);
       return;
     case "product_catalog":
-      if (payload.schemaVersion !== "1.1.0" || payload.productId !== key.recordId) {
-        throw new SyncValidationError("產品 record 與 payload 不一致", "payload");
+      if (
+        payload.schemaVersion !== "1.1.0" ||
+        payload.productId !== key.recordId
+      ) {
+        throw new SyncValidationError(
+          "產品 record 與 payload 不一致",
+          "payload"
+        );
       }
       assertString(payload.displayName, "payload.displayName");
-      if (!isOneOf(payload.gearCategory, ["sunscreen", "clothing", "eyewear", "other_gear"])) {
+      if (
+        !isOneOf(payload.gearCategory, [
+          "sunscreen",
+          "clothing",
+          "eyewear",
+          "other_gear"
+        ])
+      ) {
         throw new SyncValidationError("裝備品類不正確", "payload.gearCategory");
       }
       if (!isObject(payload.currentSnapshot)) {
-        throw new SyncValidationError("產品缺少 currentSnapshot", "payload.currentSnapshot");
+        throw new SyncValidationError(
+          "產品缺少 currentSnapshot",
+          "payload.currentSnapshot"
+        );
       }
       return;
     case "region_preference":
       if (payload.schemaVersion !== "region-preference-v1") {
-        throw new SyncValidationError("行政區 preference schema 不正確", "payload.schemaVersion");
+        throw new SyncValidationError(
+          "行政區 preference schema 不正確",
+          "payload.schemaVersion"
+        );
       }
       if (payload.mode === "selected") {
         const selection = asObject(payload.selection, "payload.selection");
@@ -376,49 +431,85 @@ function validatePayload(key: SyncRecordKey, payload: Record<string, unknown>): 
       } else if (payload.mode === "skipped") {
         assertUtcInstant(payload.skippedAt, "payload.skippedAt");
       } else {
-        throw new SyncValidationError("行政區 preference mode 不正確", "payload.mode");
+        throw new SyncValidationError(
+          "行政區 preference mode 不正確",
+          "payload.mode"
+        );
       }
       return;
     case "user_preferences":
       if (payload.schemaVersion !== "user-preferences-v1") {
-        throw new SyncValidationError("user preferences schema 不正確", "payload.schemaVersion");
+        throw new SyncValidationError(
+          "user preferences schema 不正確",
+          "payload.schemaVersion"
+        );
       }
       if (
         payload.reminderFrequencyMinutes !== null &&
         !isPositiveIntegerWithin(payload.reminderFrequencyMinutes, 120)
       ) {
-        throw new SyncValidationError("提醒頻率不正確", "payload.reminderFrequencyMinutes");
+        throw new SyncValidationError(
+          "提醒頻率不正確",
+          "payload.reminderFrequencyMinutes"
+        );
       }
-      if (typeof payload.soundEnabled !== "boolean" || typeof payload.vibrationEnabled !== "boolean") {
+      if (
+        typeof payload.soundEnabled !== "boolean" ||
+        typeof payload.vibrationEnabled !== "boolean"
+      ) {
         throw new SyncValidationError("提醒偏好格式不正確", "payload");
       }
       return;
   }
 }
 
-function validateActiveSession(key: SyncRecordKey, payload: Record<string, unknown>): void {
+function validateActiveSession(
+  key: SyncRecordKey,
+  payload: Record<string, unknown>
+): void {
   const session = asObject(payload.session, "payload.session");
   if (session.id !== key.recordId || !isObject(payload.eventStream)) {
     throw new SyncValidationError("active session payload 不一致", "payload");
   }
   if (Object.prototype.hasOwnProperty.call(session, "ownerKey")) {
-    throw new SyncValidationError("active session 不得上傳 ownerKey", "payload.session.ownerKey");
+    throw new SyncValidationError(
+      "active session 不得上傳 ownerKey",
+      "payload.session.ownerKey"
+    );
   }
   if (session.endedAt !== null || session.overallStatus === "ended") {
-    throw new SyncValidationError("active session 不得是已結束狀態", "payload.session.endedAt");
+    throw new SyncValidationError(
+      "active session 不得是已結束狀態",
+      "payload.session.endedAt"
+    );
   }
   const stream = asObject(payload.eventStream, "payload.eventStream");
-  const started = asObject(stream.sessionStarted, "payload.eventStream.sessionStarted");
+  const started = asObject(
+    stream.sessionStarted,
+    "payload.eventStream.sessionStarted"
+  );
   if (started.sessionId !== key.recordId) {
-    throw new SyncValidationError("事件流 sessionId 不一致", "payload.eventStream.sessionStarted.sessionId");
+    throw new SyncValidationError(
+      "事件流 sessionId 不一致",
+      "payload.eventStream.sessionStarted.sessionId"
+    );
   }
-  if (!Array.isArray(stream.sessionEndedEvents) || stream.sessionEndedEvents.length > 0) {
-    throw new SyncValidationError("active session 不得含有結束事件", "payload.eventStream.sessionEndedEvents");
+  if (
+    !Array.isArray(stream.sessionEndedEvents) ||
+    stream.sessionEndedEvents.length > 0
+  ) {
+    throw new SyncValidationError(
+      "active session 不得含有結束事件",
+      "payload.eventStream.sessionEndedEvents"
+    );
   }
 }
 
 function toTombstone(row: SyncTombstoneRow): SyncTombstone {
-  const key = parseOwnedRecordKey({ recordKind: row.record_kind, recordId: row.record_id });
+  const key = parseOwnedRecordKey({
+    recordKind: row.record_kind,
+    recordId: row.record_id
+  });
   if (row.schema_version !== SYNC_SCHEMA_VERSION) {
     throw new SyncValidationError("tombstone schema version 不正確");
   }
@@ -432,7 +523,10 @@ function toTombstone(row: SyncTombstoneRow): SyncTombstone {
 
 function assertSyncVersion(value: Record<string, unknown>): void {
   if (value.schemaVersion !== SYNC_SCHEMA_VERSION) {
-    throw new SyncValidationError("sync schema version 不正確", "schemaVersion");
+    throw new SyncValidationError(
+      "sync schema version 不正確",
+      "schemaVersion"
+    );
   }
 }
 
@@ -468,11 +562,20 @@ function assertNonNegativeInteger(value: unknown, field: string): number {
 }
 
 function isPositiveIntegerWithin(value: unknown, maximum: number): boolean {
-  return typeof value === "number" && Number.isSafeInteger(value) && value >= 1 && value <= maximum;
+  return (
+    typeof value === "number" &&
+    Number.isSafeInteger(value) &&
+    value >= 1 &&
+    value <= maximum
+  );
 }
 
 function assertId(value: unknown, field: string): string {
-  if (typeof value !== "string" || value.trim().length === 0 || value.trim().length > 200) {
+  if (
+    typeof value !== "string" ||
+    value.trim().length === 0 ||
+    value.trim().length > 200
+  ) {
     throw new SyncValidationError(`${field} 格式不正確`, field);
   }
   return value.trim();
@@ -493,12 +596,14 @@ function assertUtcInstant(value: unknown, field: string): string {
 }
 
 function asObject(value: unknown, field: string): Record<string, unknown> {
-  if (!isObject(value)) throw new SyncValidationError(`${field} 必須是物件`, field);
+  if (!isObject(value))
+    throw new SyncValidationError(`${field} 必須是物件`, field);
   return value;
 }
 
 function asArray(value: unknown, field: string): unknown[] {
-  if (!Array.isArray(value)) throw new SyncValidationError(`${field} 必須是陣列`, field);
+  if (!Array.isArray(value))
+    throw new SyncValidationError(`${field} 必須是陣列`, field);
   return value;
 }
 
@@ -507,9 +612,15 @@ function isObject(value: unknown): value is Record<string, unknown> {
 }
 
 function isRecordKind(value: unknown): value is SyncRecordKind {
-  return typeof value === "string" && (RECORD_KINDS as readonly string[]).includes(value);
+  return (
+    typeof value === "string" &&
+    (RECORD_KINDS as readonly string[]).includes(value)
+  );
 }
 
-function isOneOf<T extends string>(value: unknown, values: readonly T[]): value is T {
+function isOneOf<T extends string>(
+  value: unknown,
+  values: readonly T[]
+): value is T {
   return typeof value === "string" && values.includes(value as T);
 }

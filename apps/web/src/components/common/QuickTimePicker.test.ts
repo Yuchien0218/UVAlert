@@ -78,6 +78,8 @@ describe("QuickTimePicker", () => {
     });
     const errorParagraph = wrapper.get('[role="alert"]');
     expect(errorParagraph.text()).toBe("時間格式不正確");
-    expect(wrapper.get("input").attributes("aria-describedby")).toBe(errorParagraph.attributes("id"));
+    expect(wrapper.get("input").attributes("aria-describedby")).toBe(
+      errorParagraph.attributes("id")
+    );
   });
 });

@@ -28,16 +28,11 @@ describe("createAppBootController", () => {
       }
     });
 
-    await Promise.all([
-      controller.ensureBooted(),
-      controller.ensureBooted()
-    ]);
+    await Promise.all([controller.ensureBooted(), controller.ensureBooted()]);
 
     expect(repository.open).toHaveBeenCalledTimes(1);
     expect(identity.getOrCreateLocalVisitorId).toHaveBeenCalledTimes(1);
-    expect(repository.getCurrentSession).toHaveBeenCalledWith(
-      "visitor-1"
-    );
+    expect(repository.getCurrentSession).toHaveBeenCalledWith("visitor-1");
     expect(controller.phase.value).toBe("ready");
     expect(controller.currentSession.value).toBeNull();
   });
@@ -45,10 +40,7 @@ describe("createAppBootController", () => {
   it("refreshes on foreground and another context commit", async () => {
     let foregroundListener: (() => void) | undefined;
     let crossContextListener:
-      | ((message: {
-          kind: "data-committed";
-          sourceContextId: string;
-        }) => void)
+      | ((message: { kind: "data-committed"; sourceContextId: string }) => void)
       | undefined;
     const repository = {
       open: vi.fn(async () => undefined),

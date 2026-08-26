@@ -14,21 +14,21 @@
 
 統一改成 `line-height: 1.4`（一般粗體標題），或 `1.45`（明確用 `--font-size-title-sm` 的卡片標題，對齊 DESIGN.md「卡片標題 18–22px → 1.45」）：
 
-| 檔案 | 選擇器 |
-|---|---|
-| `ProductEligibilityNotice.vue` | `.eligibility-notice strong` |
-| `SunscreenClaimQuickQuestion.vue` | `.claim-consequence strong` |
-| `FiveDayUvCard.vue` | `.uv-forecast__state strong, .uv-forecast__meta strong` |
-| `GearForm.vue` | `.no-effect-note strong`（原本沒有 `display: block`，一併補上） |
-| `ProductSnapshotEditor.vue` | `.identity-warning strong`（原本完全沒有這條規則，新增） |
-| `MorePage.vue` | `.entry strong` |
-| `HelpIndexPage.vue` | `.topic-item strong` |
-| `ContextSelector.vue` | `.context-choice strong, .context-group strong` |
-| `ZoneProtectionForm.vue` | `.zone-group-choice strong` |
-| `DataSettingsPage.vue` | `.clear-row div > strong`（原本沒有這條規則，新增） |
-| `AccountDataPage.vue` | `.confirm-note strong`（原本沒有這條規則，新增） |
-| `EducationCategoryPage.vue` | `.education-article-card strong`（1.45，卡片標題） |
-| `EducationIndexPage.vue` | `.education-category-card strong`（1.45，卡片標題） |
+| 檔案                              | 選擇器                                                          |
+| --------------------------------- | --------------------------------------------------------------- |
+| `ProductEligibilityNotice.vue`    | `.eligibility-notice strong`                                    |
+| `SunscreenClaimQuickQuestion.vue` | `.claim-consequence strong`                                     |
+| `FiveDayUvCard.vue`               | `.uv-forecast__state strong, .uv-forecast__meta strong`         |
+| `GearForm.vue`                    | `.no-effect-note strong`（原本沒有 `display: block`，一併補上） |
+| `ProductSnapshotEditor.vue`       | `.identity-warning strong`（原本完全沒有這條規則，新增）        |
+| `MorePage.vue`                    | `.entry strong`                                                 |
+| `HelpIndexPage.vue`               | `.topic-item strong`                                            |
+| `ContextSelector.vue`             | `.context-choice strong, .context-group strong`                 |
+| `ZoneProtectionForm.vue`          | `.zone-group-choice strong`                                     |
+| `DataSettingsPage.vue`            | `.clear-row div > strong`（原本沒有這條規則，新增）             |
+| `AccountDataPage.vue`             | `.confirm-note strong`（原本沒有這條規則，新增）                |
+| `EducationCategoryPage.vue`       | `.education-article-card strong`（1.45，卡片標題）              |
+| `EducationIndexPage.vue`          | `.education-category-card strong`（1.45，卡片標題）             |
 
 ## 刻意不動的部分
 

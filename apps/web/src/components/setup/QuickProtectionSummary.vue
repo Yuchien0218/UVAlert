@@ -1,10 +1,7 @@
 <script setup lang="ts">
 import { SlidersHorizontal, Sparkles } from "@lucide/vue";
 import Icon from "../icons/Icon.vue";
-import type {
-  SessionContext,
-  SetupDraftZoneV1
-} from "@sunshield/contracts";
+import type { SessionContext, SetupDraftZoneV1 } from "@sunshield/contracts";
 import { computed, shallowRef, watch } from "vue";
 import {
   BODY_ZONE_LABELS,
@@ -42,8 +39,7 @@ watch(
 const preset = computed(() => recommendedPresetFor(props.context));
 const zoneLabels = computed(() =>
   props.zones.map(
-    (zone) =>
-      zone.customLabel ?? BODY_ZONE_LABELS[zone.bodyZoneCode]
+    (zone) => zone.customLabel ?? BODY_ZONE_LABELS[zone.bodyZoneCode]
   )
 );
 </script>
@@ -71,10 +67,7 @@ const zoneLabels = computed(() =>
       />
     </button>
 
-    <div
-      v-if="expanded"
-      class="quick-protection__details"
-    >
+    <div v-if="expanded" class="quick-protection__details">
       <p class="quick-protection__summary">{{ preset.summary }}</p>
       <p class="quick-protection__zones">
         這次會套用到：{{ zoneLabels.join("、") }}

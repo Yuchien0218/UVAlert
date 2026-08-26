@@ -12,12 +12,7 @@ interface Props {
   zones: ZoneProjection[];
 }
 
-type ZoneTone =
-  | "tracking"
-  | "soon"
-  | "due"
-  | "untimed"
-  | "neutral";
+type ZoneTone = "tracking" | "soon" | "due" | "untimed" | "neutral";
 
 interface ZoneChip {
   id: string;
@@ -42,8 +37,7 @@ function getEffectiveTimingStatus(
     zone.zoneInstanceId
   );
   const canBecomeDue =
-    zone.timingStatus === "tracking" ||
-    zone.timingStatus === "reapply_soon";
+    zone.timingStatus === "tracking" || zone.timingStatus === "reapply_soon";
 
   return isAffected &&
     canBecomeDue &&
@@ -80,9 +74,7 @@ const groups = computed<ZoneGroup[]>(() => {
   }));
 });
 
-function getTimingLabel(
-  timingStatus: ZoneProjection["timingStatus"]
-): string {
+function getTimingLabel(timingStatus: ZoneProjection["timingStatus"]): string {
   const labels: Record<ZoneProjection["timingStatus"], string> = {
     tracking: "提醒進行中",
     reapply_soon: "快到補擦時間",
@@ -94,16 +86,11 @@ function getTimingLabel(
   return labels[timingStatus];
 }
 
-function getTimingTone(
-  timingStatus: ZoneProjection["timingStatus"]
-): ZoneTone {
+function getTimingTone(timingStatus: ZoneProjection["timingStatus"]): ZoneTone {
   if (timingStatus === "tracking") return "tracking";
   if (timingStatus === "reapply_soon") return "soon";
   if (timingStatus === "reapply_due") return "due";
-  if (
-    timingStatus === "label_wait" ||
-    timingStatus === "untimed_action"
-  ) {
+  if (timingStatus === "label_wait" || timingStatus === "untimed_action") {
     return "untimed";
   }
   return "neutral";

@@ -172,8 +172,8 @@
    * 不是加分項而是必要條件，不要為了省流量把它拿掉。
    */
   --font-serif:
-    "Noto Serif TC Subset", "Noto Serif TC", "Noto Serif CJK TC",
-    ui-serif, serif;
+    "Noto Serif TC Subset", "Noto Serif TC", "Noto Serif CJK TC", ui-serif,
+    serif;
 
   /*
    * 內文：拉丁走 Inter subset，中文交給系統黑體。
@@ -184,10 +184,9 @@
    * 「內文用 Noto Sans TC」有出入，理由記在 tools/fonts/README.md。
    */
   --font-sans:
-    "Inter Subset", Inter, "Noto Sans TC", "PingFang TC",
-    "Microsoft JhengHei", system-ui, sans-serif;
-  --font-mono:
-    "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+    "Inter Subset", Inter, "Noto Sans TC", "PingFang TC", "Microsoft JhengHei",
+    system-ui, sans-serif;
+  --font-mono: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
   --font-size-page-title: clamp(1.75rem, 6vw, 2rem);
   --font-size-section-title: 1.15rem;
   --font-size-label: 0.8rem;

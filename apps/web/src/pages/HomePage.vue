@@ -49,13 +49,8 @@ import {
  * **沒有提醒**的夜間行為從頭到尾不受影響，仍然沒有主 CTA。
  */
 
-const {
-  boot,
-  sessionControl,
-  sessionEvents,
-  productSettings,
-  uvForecast
-} = useWebAppServices();
+const { boot, sessionControl, sessionEvents, productSettings, uvForecast } =
+  useWebAppServices();
 
 /** `view_product_label` 的原地展開；規格語意是「正在等待，不要離開」。 */
 const productLabelExpanded = shallowRef(false);
@@ -68,9 +63,9 @@ const recentEventsRef = shallowRef<{ expand?: () => void } | null>(null);
  */
 const clockTrusted = computed(
   () =>
-    !(
-      boot.currentSession.value?.primaryAction.reasonCodes ?? []
-    ).includes("CLOCK_UNTRUSTED")
+    !(boot.currentSession.value?.primaryAction.reasonCodes ?? []).includes(
+      "CLOCK_UNTRUSTED"
+    )
 );
 const router = useRouter();
 const currentTime = useCurrentTime();
@@ -201,9 +196,7 @@ function handleAction(kind: ActionKind): void {
   }
 }
 
-async function handleSecondaryAction(
-  kind: SecondaryActionKind
-): Promise<void> {
+async function handleSecondaryAction(kind: SecondaryActionKind): Promise<void> {
   switch (kind) {
     case "view_saved_records":
       // 紀錄就在本頁下方；離開頁面反而失去脈絡，所以錨點並展開。
@@ -378,20 +371,20 @@ function handleEndSession(): void {
           <li>
             {{
               productSettings.snapshot.value.preExposureWaitStatus ===
-                'explicit_minutes' &&
+                "explicit_minutes" &&
               productSettings.snapshot.value.preExposureWaitMinutes !== null
                 ? `擦上後需等待 ${productSettings.snapshot.value.preExposureWaitMinutes} 分鐘`
-                : '包裝沒有寫擦上後要等多久'
+                : "包裝沒有寫擦上後要等多久"
             }}
           </li>
           <li>
             {{
               productSettings.snapshot.value.reapplicationIntervalStatus ===
-                'explicit_minutes' &&
+                "explicit_minutes" &&
               productSettings.snapshot.value.reapplicationIntervalMinutes !==
                 null
                 ? `包裝標示的補擦間隔為 ${productSettings.snapshot.value.reapplicationIntervalMinutes} 分鐘`
-                : '包裝沒有寫明補擦間隔'
+                : "包裝沒有寫明補擦間隔"
             }}
           </li>
         </ul>

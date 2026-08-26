@@ -18,9 +18,9 @@ describe("FiveDayUvCard", () => {
 
     expect(wrapper.findAll(".uv-day")).toHaveLength(5);
     expect(
-      wrapper.findAll(".uv-day__value").every((node) =>
-        node.classes().includes("stat-figure")
-      )
+      wrapper
+        .findAll(".uv-day__value")
+        .every((node) => node.classes().includes("stat-figure"))
     ).toBe(true);
     expect(wrapper.get(".uv-forecast__updated-at").classes()).toContain(
       "stat-figure"

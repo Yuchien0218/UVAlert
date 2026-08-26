@@ -10,10 +10,7 @@ export type LocalDataNotice =
   | null;
 
 export type LocalDataError =
-  | "load_failed"
-  | "export_failed"
-  | "clear_failed"
-  | null;
+  "load_failed" | "export_failed" | "clear_failed" | null;
 
 export interface LocalDataController {
   phase: Readonly<ShallowRef<LocalDataPhase>>;

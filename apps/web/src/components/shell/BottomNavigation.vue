@@ -58,9 +58,7 @@ function navigationLabel(to: string, label: string): string {
   left: 0;
   display: grid;
   width: min(100%, var(--content-max));
-  min-height: calc(
-    var(--bottom-nav-height) + env(safe-area-inset-bottom)
-  );
+  min-height: calc(var(--bottom-nav-height) + env(safe-area-inset-bottom));
   grid-template-columns: repeat(3, 1fr);
   margin-inline: auto;
   padding: var(--space-2) max(var(--space-2), env(safe-area-inset-right))

@@ -27,7 +27,14 @@ const ACCENT = "#C1832E";
 const INK = "currentColor";
 
 /** Illustrator 會匯出這些墨色，全部視為「應該是 currentColor」。 */
-const INK_LITERALS = ["#000", "#000000", "#33291f", "#33291F", "#2e2925", "#2E2925"];
+const INK_LITERALS = [
+  "#000",
+  "#000000",
+  "#33291f",
+  "#33291F",
+  "#2e2925",
+  "#2E2925"
+];
 
 /**
  * 圖示登記表——只有 metadata，沒有幾何。
@@ -46,7 +53,11 @@ export const ICONS = Object.freeze([
   { id: "state-due", group: "state", label: "已到期" },
   { id: "state-untimed", group: "state", label: "未計時" },
   { id: "state-notification-off", group: "state", label: "通知未開啟" },
-  { id: "state-notification-pending", group: "state", label: "背景通知尚未完成" },
+  {
+    id: "state-notification-pending",
+    group: "state",
+    label: "背景通知尚未完成"
+  },
   { id: "state-offline", group: "state", label: "目前離線" },
   { id: "state-online", group: "state", label: "背景通知已恢復" },
   { id: "state-success", group: "state", label: "已儲存" },
@@ -63,7 +74,12 @@ export const ICONS = Object.freeze([
 
   // ---- 設定情境（雙色）----
   { id: "context-outdoor", group: "context", label: "一般戶外", twoTone: true },
-  { id: "context-exercise", group: "context", label: "戶外運動", twoTone: true },
+  {
+    id: "context-exercise",
+    group: "context",
+    label: "戶外運動",
+    twoTone: true
+  },
   { id: "context-indoor", group: "context", label: "室內", twoTone: true },
   { id: "context-water", group: "context", label: "水中", twoTone: true },
 
@@ -82,12 +98,42 @@ export const ICONS = Object.freeze([
   { id: "gear-other", group: "gear", label: "其他裝備", twoTone: true },
 
   // ---- 衛教分類（雙色）----
-  { id: "education-uv-basics", group: "education", label: "了解今天的 UV", twoTone: true },
-  { id: "education-before-going-out", group: "education", label: "出門前準備", twoTone: true },
-  { id: "education-reapply", group: "education", label: "外出中的補擦", twoTone: true },
-  { id: "education-sweat-and-water", group: "education", label: "流汗或碰水後", twoTone: true },
-  { id: "education-after-sun-care", group: "education", label: "回家後與皮膚照顧", twoTone: true },
-  { id: "education-special-situations", group: "education", label: "特殊情況", twoTone: true },
+  {
+    id: "education-uv-basics",
+    group: "education",
+    label: "了解今天的 UV",
+    twoTone: true
+  },
+  {
+    id: "education-before-going-out",
+    group: "education",
+    label: "出門前準備",
+    twoTone: true
+  },
+  {
+    id: "education-reapply",
+    group: "education",
+    label: "外出中的補擦",
+    twoTone: true
+  },
+  {
+    id: "education-sweat-and-water",
+    group: "education",
+    label: "流汗或碰水後",
+    twoTone: true
+  },
+  {
+    id: "education-after-sun-care",
+    group: "education",
+    label: "回家後與皮膚照顧",
+    twoTone: true
+  },
+  {
+    id: "education-special-situations",
+    group: "education",
+    label: "特殊情況",
+    twoTone: true
+  },
 
   // ---- 工具型（單色，尚未繪製）----
   // 這批取代 @lucide/vue 的通用圖示。單色是刻意的：它們會出現在各種
@@ -178,7 +224,9 @@ function inlineClassStyles(markup, classProperties) {
     if (merged.size === 0) return "";
 
     return [...merged]
-      .map(([name, value]) => `${name}="${normalizePropertyValue(name, value)}"`)
+      .map(
+        ([name, value]) => `${name}="${normalizePropertyValue(name, value)}"`
+      )
       .join(" ");
   });
 }
@@ -248,7 +296,13 @@ const GROUP_TITLES = Object.freeze({
 });
 
 export const CONFIRMED_GROUPS = Object.freeze(["nav", "state", "more"]);
-export const PENDING_GROUPS = Object.freeze(["context", "event", "gear", "education", "tool"]);
+export const PENDING_GROUPS = Object.freeze([
+  "context",
+  "event",
+  "gear",
+  "education",
+  "tool"
+]);
 
 /** 從正規化後的 SVG 取出可以塞進預覽板的內容，並把 currentColor 換成實色。 */
 function extractBoardBody(normalizedSvg, inkColor) {
@@ -400,11 +454,15 @@ export function buildIcons(
   return { outputRoot: root, normalized, missing, unregistered };
 }
 
-const isDirectRun = process.argv[1] && fileURLToPath(import.meta.url) === resolve(process.argv[1]);
+const isDirectRun =
+  process.argv[1] &&
+  fileURLToPath(import.meta.url) === resolve(process.argv[1]);
 
 if (isDirectRun) {
   const result = buildIcons(process.argv[2]);
-  console.log(`已正規化 ${result.normalized.length} 個圖示 → ${result.outputRoot}`);
+  console.log(
+    `已正規化 ${result.normalized.length} 個圖示 → ${result.outputRoot}`
+  );
 
   if (result.missing.length > 0) {
     console.log(`\n尚未繪製（${result.missing.length}）：`);

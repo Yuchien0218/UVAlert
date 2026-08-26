@@ -19,11 +19,11 @@
 
 ## 套用的變更
 
-| 位置 | 變更前 | 變更後 |
-|---|---|---|
-| `styles.css` | 只有 `--text-primary`／`--text-secondary`／`--text-inverse` | 新增 `--text-emphasis`（→`--color-body-strong`）、`--text-body`（→`--color-body`）、`--text-tertiary`（→`--color-muted-soft`），對齊 DESIGN.md 用途描述 |
-| `HomeLocationPrompt.vue` `.location-prompt__message` | `var(--color-body-strong, var(--text-primary))` | `var(--text-emphasis)` |
-| `HomeNightNotice.vue` `.night-notice__body` | `var(--color-body-strong, var(--text-primary))` | `var(--text-emphasis)` |
+| 位置                                                 | 變更前                                                      | 變更後                                                                                                                                                  |
+| ---------------------------------------------------- | ----------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `styles.css`                                         | 只有 `--text-primary`／`--text-secondary`／`--text-inverse` | 新增 `--text-emphasis`（→`--color-body-strong`）、`--text-body`（→`--color-body`）、`--text-tertiary`（→`--color-muted-soft`），對齊 DESIGN.md 用途描述 |
+| `HomeLocationPrompt.vue` `.location-prompt__message` | `var(--color-body-strong, var(--text-primary))`             | `var(--text-emphasis)`                                                                                                                                  |
+| `HomeNightNotice.vue` `.night-notice__body`          | `var(--color-body-strong, var(--text-primary))`             | `var(--text-emphasis)`                                                                                                                                  |
 
 兩處文案都是空狀態卡片裡「先說明狀況」的單句導言（`HomeLocationPrompt`：「尚未設定地區，所以沒有 UV 資料。」；`HomeNightNotice`：「現在不需要防曬，明早出門前再開始提醒。」），符合 `body-strong` 文件定義的「強調段落與導言」角色，改用新別名純粹是去掉誤導性 fallback，不改變顏色。
 

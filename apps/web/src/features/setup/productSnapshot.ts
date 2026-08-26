@@ -13,12 +13,7 @@ export interface ProductSnapshotFormValue {
   waitMinutes: number | null;
   intervalAnswer: NumericLabelAnswer;
   intervalMinutes: number | null;
-  waterResistance:
-    | "40"
-    | "80"
-    | "not_water_resistant"
-    | "no_claim"
-    | "unknown";
+  waterResistance: "40" | "80" | "not_water_resistant" | "no_claim" | "unknown";
   /**
    * SPF 與 PA 只用來辨識「這罐是哪一罐」，**不進入倒數計算**——
    * `packages/domain` 對這兩個欄位零引用。倒數長度由
@@ -36,9 +31,7 @@ export function makeSessionOnlyProductSnapshot(
   capturedAt: string
 ): ProductLabelSnapshotV1 {
   const identityStatus =
-    value.claimAnswer === "unknown"
-      ? "identity_unconfirmed"
-      : "confirmed";
+    value.claimAnswer === "unknown" ? "identity_unconfirmed" : "confirmed";
   const sunscreenClaimStatus =
     value.claimAnswer === "yes"
       ? "confirmed"
@@ -66,9 +59,7 @@ export function makeSessionOnlyProductSnapshot(
           ? "unknown"
           : "no_numeric_interval",
     reapplicationIntervalMinutes:
-      value.intervalAnswer === "explicit"
-        ? value.intervalMinutes
-        : null,
+      value.intervalAnswer === "explicit" ? value.intervalMinutes : null,
     preExposureWaitStatus:
       value.waitAnswer === "explicit"
         ? "explicit_minutes"

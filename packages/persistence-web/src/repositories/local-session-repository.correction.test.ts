@@ -108,9 +108,7 @@ describe("LocalSessionRepository.correctContextEvent", () => {
       correctionOfEventId: "context-event-1"
     });
     // 這張表在 S-10 之前從未被寫入過。
-    expect(
-      await database.CorrectionSuccessors.get("context-event-1")
-    ).toEqual({
+    expect(await database.CorrectionSuccessors.get("context-event-1")).toEqual({
       targetRef: "context-event-1",
       successorId: "context-event-2"
     });
@@ -215,10 +213,7 @@ describe("LocalSessionRepository.getCorrectionContext", () => {
   it("找不到的事件回傳 null", async () => {
     const { repository, start } = await seedSessionWithEvent();
     expect(
-      await repository.getCorrectionContext(
-        start.owner.localVisitorId,
-        "nope"
-      )
+      await repository.getCorrectionContext(start.owner.localVisitorId, "nope")
     ).toBeNull();
   });
 });

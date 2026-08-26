@@ -39,19 +39,39 @@ const emit = defineEmits<{
   <div v-else-if="$slots.warning" class="confirm-note" role="alert">
     <slot name="warning" />
     <div class="button-row">
-      <button class="button button--primary" type="button" :disabled="props.pending" @click="emit('confirm')">
+      <button
+        class="button button--primary"
+        type="button"
+        :disabled="props.pending"
+        @click="emit('confirm')"
+      >
         {{ props.confirmLabel }}
       </button>
-      <button class="button button--quiet" type="button" :disabled="props.pending" @click="emit('cancel')">
+      <button
+        class="button button--quiet"
+        type="button"
+        :disabled="props.pending"
+        @click="emit('cancel')"
+      >
         {{ props.cancelLabel }}
       </button>
     </div>
   </div>
   <div v-else class="button-row">
-    <button class="button button--primary" type="button" :disabled="props.pending" @click="emit('confirm')">
+    <button
+      class="button button--primary"
+      type="button"
+      :disabled="props.pending"
+      @click="emit('confirm')"
+    >
       {{ props.confirmLabel }}
     </button>
-    <button class="button button--quiet" type="button" :disabled="props.pending" @click="emit('cancel')">
+    <button
+      class="button button--quiet"
+      type="button"
+      :disabled="props.pending"
+      @click="emit('cancel')"
+    >
       {{ props.cancelLabel }}
     </button>
   </div>

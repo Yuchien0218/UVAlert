@@ -10,11 +10,7 @@ import {
   type DeviceGeolocationPort,
   type RegionPreferencePort
 } from "@sunshield/platform";
-import {
-  shallowReadonly,
-  shallowRef,
-  type ShallowRef
-} from "vue";
+import { shallowReadonly, shallowRef, type ShallowRef } from "vue";
 import type {
   RegionDirectoryEntry,
   RegionResolution
@@ -59,13 +55,9 @@ export interface RegionControllerDependencies {
 
 export interface RegionController {
   readonly phase: Readonly<ShallowRef<RegionPhase>>;
-  readonly preference: Readonly<
-    ShallowRef<RegionPreferenceV1 | null>
-  >;
+  readonly preference: Readonly<ShallowRef<RegionPreferenceV1 | null>>;
   readonly candidate: Readonly<ShallowRef<RegionSelection | null>>;
-  readonly approximateAccuracyMeters: Readonly<
-    ShallowRef<number | null>
-  >;
+  readonly approximateAccuracyMeters: Readonly<ShallowRef<number | null>>;
   readonly directory: readonly RegionDirectoryEntry[];
   readonly error: Readonly<ShallowRef<RegionError>>;
   ensureLoaded(): Promise<void>;
@@ -148,10 +140,7 @@ export function createRegionController(
         resolution.region,
         "device_location"
       );
-      accuracyState.value = Math.max(
-        0,
-        Math.round(position.accuracyMeters)
-      );
+      accuracyState.value = Math.max(0, Math.round(position.accuracyMeters));
       phaseState.value = "confirming";
     } catch (error) {
       errorState.value =
@@ -168,9 +157,7 @@ export function createRegionController(
     return saveSelectedPreference(candidate);
   }
 
-  async function saveManualRegion(
-    regionCode: string
-  ): Promise<boolean> {
+  async function saveManualRegion(regionCode: string): Promise<boolean> {
     const entry = directoryByCode.get(regionCode);
     if (entry === undefined) {
       errorState.value = "invalid_region";
@@ -208,9 +195,7 @@ export function createRegionController(
     errorState.value = null;
 
     try {
-      await dependencies.preferenceRepository.savePreference(
-        preference
-      );
+      await dependencies.preferenceRepository.savePreference(preference);
       preferenceState.value = preference;
       candidateState.value = null;
       accuracyState.value = null;

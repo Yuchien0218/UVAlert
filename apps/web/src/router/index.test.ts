@@ -94,9 +94,7 @@ describe("createAppRouter", () => {
 
     expect(ensureBooted).toHaveBeenCalledTimes(1);
     expect(router.currentRoute.value.name).toBe("products");
-    expect(globalThis.document.title).toBe(
-      "防曬裝備｜防曬晴報員"
-    );
+    expect(globalThis.document.title).toBe("防曬裝備｜防曬晴報員");
   });
 
   // 2026-08-24：/reminder 已移除、內容併入首頁。原本斷言該網址停在提醒頁；
@@ -142,9 +140,7 @@ describe("createAppRouter", () => {
     await router.isReady();
 
     expect(router.currentRoute.value.name).toBe("region");
-    expect(globalThis.document.title).toBe(
-      "地區設定｜防曬晴報員"
-    );
+    expect(globalThis.document.title).toBe("地區設定｜防曬晴報員");
   });
 
   it("兩步流程的殘留路徑已移除，落到 404 而不是白畫面", async () => {
@@ -179,8 +175,13 @@ describe("createAppRouter", () => {
   // /reminder 是首頁連過去的「查看完整狀態」詳細頁，不適合當守衛落點。
   it("S-08 沒有 active Session 時回到首頁", async () => {
     const boot = {
-      phase: shallowReadonly(shallowRef("ready")), errorCode: shallowReadonly(shallowRef(null)), connectivity: shallowReadonly(shallowRef("online")), currentSession: shallowReadonly(shallowRef(null)),
-      ensureBooted: vi.fn(async () => undefined), refresh: vi.fn(async () => undefined), dispose: vi.fn()
+      phase: shallowReadonly(shallowRef("ready")),
+      errorCode: shallowReadonly(shallowRef(null)),
+      connectivity: shallowReadonly(shallowRef("online")),
+      currentSession: shallowReadonly(shallowRef(null)),
+      ensureBooted: vi.fn(async () => undefined),
+      refresh: vi.fn(async () => undefined),
+      dispose: vi.fn()
     } as AppBootController;
     const router = createAppRouter(boot, createMemoryHistory());
     await router.push("/reminder/reapply");

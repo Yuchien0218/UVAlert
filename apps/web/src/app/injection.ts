@@ -1,8 +1,4 @@
-import {
-  inject,
-  type App,
-  type InjectionKey
-} from "vue";
+import { inject, type App, type InjectionKey } from "vue";
 import type { WebAppServices } from "./createWebAppServices";
 
 export const WEB_APP_SERVICES_KEY: InjectionKey<WebAppServices> =

@@ -1,11 +1,6 @@
 <script setup lang="ts">
 import Icon from "../icons/Icon.vue";
-import {
-  nextTick,
-  onBeforeUnmount,
-  useTemplateRef,
-  watch
-} from "vue";
+import { nextTick, onBeforeUnmount, useTemplateRef, watch } from "vue";
 import GearForm from "../product/GearForm.vue";
 
 /**
@@ -47,10 +42,7 @@ function handleDocumentKeydown(event: KeyboardEvent): void {
 }
 
 function releasePageLock(): void {
-  globalThis.document?.removeEventListener(
-    "keydown",
-    handleDocumentKeydown
-  );
+  globalThis.document?.removeEventListener("keydown", handleDocumentKeydown);
   if (globalThis.document?.body) {
     globalThis.document.body.style.overflow = previousBodyOverflow;
   }
@@ -64,15 +56,11 @@ watch(
         globalThis.document?.activeElement instanceof HTMLElement
           ? globalThis.document.activeElement
           : null;
-      previousBodyOverflow =
-        globalThis.document?.body.style.overflow ?? "";
+      previousBodyOverflow = globalThis.document?.body.style.overflow ?? "";
       if (globalThis.document?.body) {
         globalThis.document.body.style.overflow = "hidden";
       }
-      globalThis.document?.addEventListener(
-        "keydown",
-        handleDocumentKeydown
-      );
+      globalThis.document?.addEventListener("keydown", handleDocumentKeydown);
       await nextTick();
       dialog.value?.focus();
       return;
@@ -107,9 +95,7 @@ onBeforeUnmount(releasePageLock);
         >
           <header class="sheet__header">
             <div>
-              <h2 id="gear-form-sheet-title">
-                填寫完整的防曬乳包裝標示
-              </h2>
+              <h2 id="gear-form-sheet-title">填寫完整的防曬乳包裝標示</h2>
             </div>
             <button
               class="icon-button"
@@ -183,9 +169,7 @@ onBeforeUnmount(releasePageLock);
   min-height: 0;
   overflow-y: auto;
   overscroll-behavior: contain;
-  padding:
-    var(--space-5)
-    var(--space-5)
+  padding: var(--space-5) var(--space-5)
     max(var(--space-5), env(safe-area-inset-bottom));
 }
 

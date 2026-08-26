@@ -36,7 +36,10 @@ import {
   resolveGroupCorrectionLeaves,
   validateWaterIntervals
 } from "@sunshield/domain";
-import type { CorrectableContextEvent, OpenWaterInterval } from "@sunshield/platform";
+import type {
+  CorrectableContextEvent,
+  OpenWaterInterval
+} from "@sunshield/platform";
 import {
   type CrossContextNotifier,
   NoopCrossContextNotifier
@@ -102,10 +105,9 @@ export class LocalSessionRepository {
           this.#database.ZoneIdentityLocks
         ],
         async (): Promise<TransactionOutcome> => {
-          const existingReceipt =
-            await this.#database.CommandReceipts.get(
-              parsed.data.idempotencyKey
-            );
+          const existingReceipt = await this.#database.CommandReceipts.get(
+            parsed.data.idempotencyKey
+          );
           if (existingReceipt !== undefined) {
             return {
               result:
@@ -114,9 +116,7 @@ export class LocalSessionRepository {
             };
           }
 
-          const ownerKey = ownerKeyFor(
-            parsed.data.owner.localVisitorId
-          );
+          const ownerKey = ownerKeyFor(parsed.data.owner.localVisitorId);
           const activeLock =
             await this.#database.ActiveSessionLocks.get(ownerKey);
           if (activeLock !== undefined) {
@@ -219,10 +219,7 @@ export class LocalSessionRepository {
       );
 
       if (outcome.committed && outcome.result.ok) {
-        this.#publishCommit(
-          outcome.result.sessionId,
-          outcome.result.revision
-        );
+        this.#publishCommit(outcome.result.sessionId, outcome.result.revision);
       }
       return outcome.result;
     } catch {
@@ -262,10 +259,9 @@ export class LocalSessionRepository {
           this.#database.CommandReceipts
         ],
         async (): Promise<TransactionOutcome> => {
-          const existingReceipt =
-            await this.#database.CommandReceipts.get(
-              parsed.data.idempotencyKey
-            );
+          const existingReceipt = await this.#database.CommandReceipts.get(
+            parsed.data.idempotencyKey
+          );
           if (existingReceipt !== undefined) {
             return {
               result:
@@ -287,9 +283,7 @@ export class LocalSessionRepository {
               committed: false
             };
           }
-          const commandOwnerKey = ownerKeyFor(
-            parsed.data.owner.localVisitorId
-          );
+          const commandOwnerKey = ownerKeyFor(parsed.data.owner.localVisitorId);
           if (session.ownerKey !== commandOwnerKey) {
             return {
               result: {
@@ -339,9 +333,7 @@ export class LocalSessionRepository {
           const projection = reduceSession({ stream, revision, clock });
 
           await this.#database.SessionEndedEvents.add(endedEvent);
-          await this.#database.ProtectionZoneStates.bulkPut(
-            projection.zones
-          );
+          await this.#database.ProtectionZoneStates.bulkPut(projection.zones);
           await this.#database.ProtectionSessions.put({
             ...session,
             endedAt: parsed.data.payload.effectiveOccurredAt,
@@ -356,9 +348,7 @@ export class LocalSessionRepository {
           const activeLock =
             await this.#database.ActiveSessionLocks.get(commandOwnerKey);
           if (activeLock?.sessionId === parsed.data.sessionId) {
-            await this.#database.ActiveSessionLocks.delete(
-              commandOwnerKey
-            );
+            await this.#database.ActiveSessionLocks.delete(commandOwnerKey);
           }
           await this.#database.ClientSequences.put({
             deviceLocalId: parsed.data.deviceLocalId,
@@ -385,10 +375,7 @@ export class LocalSessionRepository {
       );
 
       if (outcome.committed && outcome.result.ok) {
-        this.#publishCommit(
-          outcome.result.sessionId,
-          outcome.result.revision
-        );
+        this.#publishCommit(outcome.result.sessionId, outcome.result.revision);
       }
       return outcome.result;
     } catch (error) {
@@ -416,8 +403,15 @@ export class LocalSessionRepository {
   ): Promise<CommandResult<SessionProjection>> {
     const parsed = ReapplyCommandV1Schema.safeParse(rawCommand);
     if (!parsed.success) return validationFailure(parsed.error.issues);
-    if (Date.parse(parsed.data.payload.appliedAt) > Date.parse(clock.trustedNow)) {
-      return { ok: false, code: "VALIDATION_ERROR", fieldErrors: { "payload.appliedAt": ["實際塗抹時間不得晚於可信現在"] }, retryable: false };
+    if (
+      Date.parse(parsed.data.payload.appliedAt) > Date.parse(clock.trustedNow)
+    ) {
+      return {
+        ok: false,
+        code: "VALIDATION_ERROR",
+        fieldErrors: { "payload.appliedAt": ["實際塗抹時間不得晚於可信現在"] },
+        retryable: false
+      };
     }
 
     try {
@@ -440,48 +434,132 @@ export class LocalSessionRepository {
           this.#database.SunscreenProducts
         ],
         async (): Promise<TransactionOutcome> => {
-          const existingReceipt = await this.#database.CommandReceipts.get(parsed.data.idempotencyKey);
+          const existingReceipt = await this.#database.CommandReceipts.get(
+            parsed.data.idempotencyKey
+          );
           if (existingReceipt !== undefined) {
-            return { result: existingReceipt.result as CommandResult<SessionProjection>, committed: false };
+            return {
+              result:
+                existingReceipt.result as CommandResult<SessionProjection>,
+              committed: false
+            };
           }
-          const session = await this.#database.ProtectionSessions.get(parsed.data.sessionId);
+          const session = await this.#database.ProtectionSessions.get(
+            parsed.data.sessionId
+          );
           if (session === undefined || session.endedAt !== null) {
-            return { result: { ok: false, code: "NOT_FOUND", retryable: false }, committed: false };
+            return {
+              result: { ok: false, code: "NOT_FOUND", retryable: false },
+              committed: false
+            };
           }
           const ownerKey = ownerKeyFor(parsed.data.owner.localVisitorId);
           const lock = await this.#database.ActiveSessionLocks.get(ownerKey);
           if (session.ownerKey !== ownerKey || lock?.sessionId !== session.id) {
-            return { result: { ok: false, code: "NOT_FOUND", retryable: false }, committed: false };
+            return {
+              result: { ok: false, code: "NOT_FOUND", retryable: false },
+              committed: false
+            };
           }
           if (session.revision !== parsed.data.expectedRevision) {
-            return { result: { ok: false, code: "REVISION_CONFLICT", currentRevision: session.revision, retryable: false }, committed: false };
+            return {
+              result: {
+                ok: false,
+                code: "REVISION_CONFLICT",
+                currentRevision: session.revision,
+                retryable: false
+              },
+              committed: false
+            };
           }
-          const sequenceKey: [string, string] = [parsed.data.deviceLocalId, parsed.data.sessionId];
-          const sequence = await this.#database.ClientSequences.get(sequenceKey);
-          if (sequence !== undefined && parsed.data.clientSequence <= sequence.lastSequence) {
-            return { result: { ok: false, code: "CLIENT_SEQUENCE_CONFLICT", retryable: false }, committed: false };
+          const sequenceKey: [string, string] = [
+            parsed.data.deviceLocalId,
+            parsed.data.sessionId
+          ];
+          const sequence =
+            await this.#database.ClientSequences.get(sequenceKey);
+          if (
+            sequence !== undefined &&
+            parsed.data.clientSequence <= sequence.lastSequence
+          ) {
+            return {
+              result: {
+                ok: false,
+                code: "CLIENT_SEQUENCE_CONFLICT",
+                retryable: false
+              },
+              committed: false
+            };
           }
 
-          const currentZones = await this.#database.ProtectionZoneStates.where("sessionId").equals(session.id).toArray();
-          const validTopicalZones = new Set(currentZones.filter((zone) =>
-            zone.trackingStatus === "active" &&
-            zone.skinExposureStatus === "exposed" &&
-            zone.methodCertainty === "confirmed" &&
-            zone.methodComponents.some((component) => component === "sunscreen" || component === "other_topical")
-          ).map((zone) => zone.zoneInstanceId));
+          const currentZones = await this.#database.ProtectionZoneStates.where(
+            "sessionId"
+          )
+            .equals(session.id)
+            .toArray();
+          const validTopicalZones = new Set(
+            currentZones
+              .filter(
+                (zone) =>
+                  zone.trackingStatus === "active" &&
+                  zone.skinExposureStatus === "exposed" &&
+                  zone.methodCertainty === "confirmed" &&
+                  zone.methodComponents.some(
+                    (component) =>
+                      component === "sunscreen" || component === "other_topical"
+                  )
+              )
+              .map((zone) => zone.zoneInstanceId)
+          );
           for (const application of parsed.data.payload.applications) {
-            if (application.zoneInstanceIds.some((zoneId) => !validTopicalZones.has(zoneId))) {
-              return { result: { ok: false, code: "VALIDATION_ERROR", retryable: false }, committed: false };
+            if (
+              application.zoneInstanceIds.some(
+                (zoneId) => !validTopicalZones.has(zoneId)
+              )
+            ) {
+              return {
+                result: {
+                  ok: false,
+                  code: "VALIDATION_ERROR",
+                  retryable: false
+                },
+                committed: false
+              };
             }
             if (application.sourceProductId !== null) {
-              const product = await this.#database.SunscreenProducts.get(application.sourceProductId);
-              if (product === undefined || product.status !== "active" ||
-                product.snapshotFingerprint !== application.productSnapshotFingerprint ||
-                JSON.stringify(product.currentSnapshot) !== JSON.stringify(application.productLabelSnapshot)) {
-                return { result: { ok: false, code: "PRODUCT_CONFLICT", retryable: false }, committed: false };
+              const product = await this.#database.SunscreenProducts.get(
+                application.sourceProductId
+              );
+              if (
+                product === undefined ||
+                product.status !== "active" ||
+                product.snapshotFingerprint !==
+                  application.productSnapshotFingerprint ||
+                JSON.stringify(product.currentSnapshot) !==
+                  JSON.stringify(application.productLabelSnapshot)
+              ) {
+                return {
+                  result: {
+                    ok: false,
+                    code: "PRODUCT_CONFLICT",
+                    retryable: false
+                  },
+                  committed: false
+                };
               }
-            } else if (fingerprintProductLabelSnapshot(application.productLabelSnapshot) !== application.productSnapshotFingerprint) {
-              return { result: { ok: false, code: "PRODUCT_CONFLICT", retryable: false }, committed: false };
+            } else if (
+              fingerprintProductLabelSnapshot(
+                application.productLabelSnapshot
+              ) !== application.productSnapshotFingerprint
+            ) {
+              return {
+                result: {
+                  ok: false,
+                  code: "PRODUCT_CONFLICT",
+                  retryable: false
+                },
+                committed: false
+              };
             }
           }
 
@@ -489,9 +567,15 @@ export class LocalSessionRepository {
           const plan = planReapplication(parsed.data, stream, session, clock);
           await this.#database.ApplicationConfirmationGroups.add(plan.group);
           await this.#database.ApplicationEvents.bulkAdd(plan.events);
-          await this.#database.ProtectionZoneStates.bulkPut(plan.projection.zones);
+          await this.#database.ProtectionZoneStates.bulkPut(
+            plan.projection.zones
+          );
           await this.#database.ProtectionSessions.put(plan.session);
-          await this.#database.ClientSequences.put({ deviceLocalId: parsed.data.deviceLocalId, sessionId: parsed.data.sessionId, lastSequence: parsed.data.clientSequence });
+          await this.#database.ClientSequences.put({
+            deviceLocalId: parsed.data.deviceLocalId,
+            sessionId: parsed.data.sessionId,
+            lastSequence: parsed.data.clientSequence
+          });
 
           const result: CommandResult<SessionProjection> = {
             ok: true,
@@ -500,11 +584,18 @@ export class LocalSessionRepository {
             revision: plan.session.revision,
             committedEventIds: plan.committedEventIds
           };
-          await this.#database.CommandReceipts.add({ idempotencyKey: parsed.data.idempotencyKey, commandId: parsed.data.commandId, sessionId: session.id, result, createdAt: clock.trustedNow });
+          await this.#database.CommandReceipts.add({
+            idempotencyKey: parsed.data.idempotencyKey,
+            commandId: parsed.data.commandId,
+            sessionId: session.id,
+            result,
+            createdAt: clock.trustedNow
+          });
           return { result, committed: true };
         }
       );
-      if (outcome.committed && outcome.result.ok) this.#publishCommit(outcome.result.sessionId, outcome.result.revision);
+      if (outcome.committed && outcome.result.ok)
+        this.#publishCommit(outcome.result.sessionId, outcome.result.revision);
       return outcome.result;
     } catch (error) {
       if (error instanceof DomainInvariantError) return mapPlanningError(error);
@@ -518,8 +609,18 @@ export class LocalSessionRepository {
   ): Promise<CommandResult<SessionProjection>> {
     const parsed = ReportContextEventCommandV1Schema.safeParse(rawCommand);
     if (!parsed.success) return validationFailure(parsed.error.issues);
-    if (Date.parse(parsed.data.payload.effectiveOccurredAt) > Date.parse(clock.trustedNow)) {
-      return { ok: false, code: "VALIDATION_ERROR", fieldErrors: { "payload.effectiveOccurredAt": ["事件發生時間不得晚於可信現在"] }, retryable: false };
+    if (
+      Date.parse(parsed.data.payload.effectiveOccurredAt) >
+      Date.parse(clock.trustedNow)
+    ) {
+      return {
+        ok: false,
+        code: "VALIDATION_ERROR",
+        fieldErrors: {
+          "payload.effectiveOccurredAt": ["事件發生時間不得晚於可信現在"]
+        },
+        retryable: false
+      };
     }
 
     try {
@@ -541,43 +642,107 @@ export class LocalSessionRepository {
           this.#database.CommandReceipts
         ],
         async (): Promise<TransactionOutcome> => {
-          const existingReceipt = await this.#database.CommandReceipts.get(parsed.data.idempotencyKey);
+          const existingReceipt = await this.#database.CommandReceipts.get(
+            parsed.data.idempotencyKey
+          );
           if (existingReceipt !== undefined) {
-            return { result: existingReceipt.result as CommandResult<SessionProjection>, committed: false };
+            return {
+              result:
+                existingReceipt.result as CommandResult<SessionProjection>,
+              committed: false
+            };
           }
-          const session = await this.#database.ProtectionSessions.get(parsed.data.sessionId);
+          const session = await this.#database.ProtectionSessions.get(
+            parsed.data.sessionId
+          );
           if (session === undefined || session.endedAt !== null) {
-            return { result: { ok: false, code: "NOT_FOUND", retryable: false }, committed: false };
+            return {
+              result: { ok: false, code: "NOT_FOUND", retryable: false },
+              committed: false
+            };
           }
           const ownerKey = ownerKeyFor(parsed.data.owner.localVisitorId);
           const lock = await this.#database.ActiveSessionLocks.get(ownerKey);
           if (session.ownerKey !== ownerKey || lock?.sessionId !== session.id) {
-            return { result: { ok: false, code: "NOT_FOUND", retryable: false }, committed: false };
+            return {
+              result: { ok: false, code: "NOT_FOUND", retryable: false },
+              committed: false
+            };
           }
           if (session.revision !== parsed.data.expectedRevision) {
-            return { result: { ok: false, code: "REVISION_CONFLICT", currentRevision: session.revision, retryable: false }, committed: false };
+            return {
+              result: {
+                ok: false,
+                code: "REVISION_CONFLICT",
+                currentRevision: session.revision,
+                retryable: false
+              },
+              committed: false
+            };
           }
-          const sequenceKey: [string, string] = [parsed.data.deviceLocalId, parsed.data.sessionId];
-          const sequence = await this.#database.ClientSequences.get(sequenceKey);
-          if (sequence !== undefined && parsed.data.clientSequence <= sequence.lastSequence) {
-            return { result: { ok: false, code: "CLIENT_SEQUENCE_CONFLICT", retryable: false }, committed: false };
+          const sequenceKey: [string, string] = [
+            parsed.data.deviceLocalId,
+            parsed.data.sessionId
+          ];
+          const sequence =
+            await this.#database.ClientSequences.get(sequenceKey);
+          if (
+            sequence !== undefined &&
+            parsed.data.clientSequence <= sequence.lastSequence
+          ) {
+            return {
+              result: {
+                ok: false,
+                code: "CLIENT_SEQUENCE_CONFLICT",
+                retryable: false
+              },
+              committed: false
+            };
           }
 
           // 事件只能掛在這個 Session 仍在追蹤的部位上。
-          const currentZones = await this.#database.ProtectionZoneStates.where("sessionId").equals(session.id).toArray();
+          const currentZones = await this.#database.ProtectionZoneStates.where(
+            "sessionId"
+          )
+            .equals(session.id)
+            .toArray();
           const trackedZones = new Set(
-            currentZones.filter((zone) => zone.trackingStatus === "active").map((zone) => zone.zoneInstanceId)
+            currentZones
+              .filter((zone) => zone.trackingStatus === "active")
+              .map((zone) => zone.zoneInstanceId)
           );
-          if (parsed.data.payload.detail.zoneInstanceIds.some((zoneId: string) => !trackedZones.has(zoneId))) {
-            return { result: { ok: false, code: "VALIDATION_ERROR", fieldErrors: { "payload.detail.zoneInstanceIds": ["含有不屬於目前提醒或已停止追蹤的部位"] }, retryable: false }, committed: false };
+          if (
+            parsed.data.payload.detail.zoneInstanceIds.some(
+              (zoneId: string) => !trackedZones.has(zoneId)
+            )
+          ) {
+            return {
+              result: {
+                ok: false,
+                code: "VALIDATION_ERROR",
+                fieldErrors: {
+                  "payload.detail.zoneInstanceIds": [
+                    "含有不屬於目前提醒或已停止追蹤的部位"
+                  ]
+                },
+                retryable: false
+              },
+              committed: false
+            };
           }
 
           const stream = await this.#loadEventStream(session.id);
           const plan = planContextEvent(parsed.data, stream, session, clock);
           await this.#database.ContextEvents.add(plan.event);
-          await this.#database.ProtectionZoneStates.bulkPut(plan.projection.zones);
+          await this.#database.ProtectionZoneStates.bulkPut(
+            plan.projection.zones
+          );
           await this.#database.ProtectionSessions.put(plan.session);
-          await this.#database.ClientSequences.put({ deviceLocalId: parsed.data.deviceLocalId, sessionId: parsed.data.sessionId, lastSequence: parsed.data.clientSequence });
+          await this.#database.ClientSequences.put({
+            deviceLocalId: parsed.data.deviceLocalId,
+            sessionId: parsed.data.sessionId,
+            lastSequence: parsed.data.clientSequence
+          });
 
           const result: CommandResult<SessionProjection> = {
             ok: true,
@@ -586,11 +751,18 @@ export class LocalSessionRepository {
             revision: plan.session.revision,
             committedEventIds: plan.committedEventIds
           };
-          await this.#database.CommandReceipts.add({ idempotencyKey: parsed.data.idempotencyKey, commandId: parsed.data.commandId, sessionId: session.id, result, createdAt: clock.trustedNow });
+          await this.#database.CommandReceipts.add({
+            idempotencyKey: parsed.data.idempotencyKey,
+            commandId: parsed.data.commandId,
+            sessionId: session.id,
+            result,
+            createdAt: clock.trustedNow
+          });
           return { result, committed: true };
         }
       );
-      if (outcome.committed && outcome.result.ok) this.#publishCommit(outcome.result.sessionId, outcome.result.revision);
+      if (outcome.committed && outcome.result.ok)
+        this.#publishCommit(outcome.result.sessionId, outcome.result.revision);
       return outcome.result;
     } catch (error) {
       if (error instanceof DomainInvariantError) return mapPlanningError(error);
@@ -612,7 +784,12 @@ export class LocalSessionRepository {
       },
       clock,
       async (stream, session) => {
-        const plan = planContextEventCorrection(parsed.data, stream, session, clock);
+        const plan = planContextEventCorrection(
+          parsed.data,
+          stream,
+          session,
+          clock
+        );
         await this.#database.ContextEvents.add(plan.event);
         return plan;
       }
@@ -633,7 +810,12 @@ export class LocalSessionRepository {
       },
       clock,
       async (stream, session) => {
-        const plan = planApplicationGroupCorrection(parsed.data, stream, session, clock);
+        const plan = planApplicationGroupCorrection(
+          parsed.data,
+          stream,
+          session,
+          clock
+        );
         await this.#database.ApplicationConfirmationGroups.add(plan.group);
         if (plan.events.length > 0) {
           await this.#database.ApplicationEvents.bulkAdd(plan.events);
@@ -696,32 +878,76 @@ export class LocalSessionRepository {
           this.#database.CorrectionSuccessors
         ],
         async (): Promise<TransactionOutcome> => {
-          const existingReceipt = await this.#database.CommandReceipts.get(command.idempotencyKey);
+          const existingReceipt = await this.#database.CommandReceipts.get(
+            command.idempotencyKey
+          );
           if (existingReceipt !== undefined) {
-            return { result: existingReceipt.result as CommandResult<SessionProjection>, committed: false };
+            return {
+              result:
+                existingReceipt.result as CommandResult<SessionProjection>,
+              committed: false
+            };
           }
-          const session = await this.#database.ProtectionSessions.get(command.sessionId);
+          const session = await this.#database.ProtectionSessions.get(
+            command.sessionId
+          );
           if (session === undefined || session.endedAt !== null) {
-            return { result: { ok: false, code: "NOT_FOUND", retryable: false }, committed: false };
+            return {
+              result: { ok: false, code: "NOT_FOUND", retryable: false },
+              committed: false
+            };
           }
           const ownerKey = ownerKeyFor(command.owner.localVisitorId);
           const lock = await this.#database.ActiveSessionLocks.get(ownerKey);
           if (session.ownerKey !== ownerKey || lock?.sessionId !== session.id) {
-            return { result: { ok: false, code: "NOT_FOUND", retryable: false }, committed: false };
+            return {
+              result: { ok: false, code: "NOT_FOUND", retryable: false },
+              committed: false
+            };
           }
           if (session.revision !== command.expectedRevision) {
-            return { result: { ok: false, code: "REVISION_CONFLICT", currentRevision: session.revision, retryable: false }, committed: false };
+            return {
+              result: {
+                ok: false,
+                code: "REVISION_CONFLICT",
+                currentRevision: session.revision,
+                retryable: false
+              },
+              committed: false
+            };
           }
-          const sequenceKey: [string, string] = [command.deviceLocalId, command.sessionId];
-          const sequence = await this.#database.ClientSequences.get(sequenceKey);
-          if (sequence !== undefined && command.clientSequence <= sequence.lastSequence) {
-            return { result: { ok: false, code: "CLIENT_SEQUENCE_CONFLICT", retryable: false }, committed: false };
+          const sequenceKey: [string, string] = [
+            command.deviceLocalId,
+            command.sessionId
+          ];
+          const sequence =
+            await this.#database.ClientSequences.get(sequenceKey);
+          if (
+            sequence !== undefined &&
+            command.clientSequence <= sequence.lastSequence
+          ) {
+            return {
+              result: {
+                ok: false,
+                code: "CLIENT_SEQUENCE_CONFLICT",
+                retryable: false
+              },
+              committed: false
+            };
           }
 
           // 先佔住 target：unique index 撞到就代表別的分支已經更正過這一筆。
-          const alreadyCorrected = await this.#database.CorrectionSuccessors.get(input.targetRef);
+          const alreadyCorrected =
+            await this.#database.CorrectionSuccessors.get(input.targetRef);
           if (alreadyCorrected !== undefined) {
-            return { result: { ok: false, code: "CORRECTION_CONFLICT", retryable: false }, committed: false };
+            return {
+              result: {
+                ok: false,
+                code: "CORRECTION_CONFLICT",
+                retryable: false
+              },
+              committed: false
+            };
           }
           await this.#database.CorrectionSuccessors.add({
             targetRef: input.targetRef,
@@ -730,9 +956,15 @@ export class LocalSessionRepository {
 
           const stream = await this.#loadEventStream(session.id);
           const plan = await apply(stream, session);
-          await this.#database.ProtectionZoneStates.bulkPut(plan.projection.zones);
+          await this.#database.ProtectionZoneStates.bulkPut(
+            plan.projection.zones
+          );
           await this.#database.ProtectionSessions.put(plan.session);
-          await this.#database.ClientSequences.put({ deviceLocalId: command.deviceLocalId, sessionId: command.sessionId, lastSequence: command.clientSequence });
+          await this.#database.ClientSequences.put({
+            deviceLocalId: command.deviceLocalId,
+            sessionId: command.sessionId,
+            lastSequence: command.clientSequence
+          });
 
           const result: CommandResult<SessionProjection> = {
             ok: true,
@@ -741,11 +973,18 @@ export class LocalSessionRepository {
             revision: plan.session.revision,
             committedEventIds: plan.committedEventIds
           };
-          await this.#database.CommandReceipts.add({ idempotencyKey: command.idempotencyKey, commandId: command.commandId, sessionId: session.id, result, createdAt: clock.trustedNow });
+          await this.#database.CommandReceipts.add({
+            idempotencyKey: command.idempotencyKey,
+            commandId: command.commandId,
+            sessionId: session.id,
+            result,
+            createdAt: clock.trustedNow
+          });
           return { result, committed: true };
         }
       );
-      if (outcome.committed && outcome.result.ok) this.#publishCommit(outcome.result.sessionId, outcome.result.revision);
+      if (outcome.committed && outcome.result.ok)
+        this.#publishCommit(outcome.result.sessionId, outcome.result.revision);
       return outcome.result;
     } catch (error) {
       if (error instanceof DomainInvariantError) return mapPlanningError(error);
@@ -760,13 +999,9 @@ export class LocalSessionRepository {
       ownerKeyFor(localVisitorId)
     );
     if (lock === undefined) return null;
-    const session = await this.#database.ProtectionSessions.get(
-      lock.sessionId
-    );
+    const session = await this.#database.ProtectionSessions.get(lock.sessionId);
     if (session === undefined) return null;
-    const zones = await this.#database.ProtectionZoneStates.where(
-      "sessionId"
-    )
+    const zones = await this.#database.ProtectionZoneStates.where("sessionId")
       .equals(session.id)
       .toArray();
     let hydratedZones = zones;
@@ -842,7 +1077,9 @@ export class LocalSessionRepository {
     const currentApplications = stream.applicationEvents.filter((event) =>
       currentIds.has(event.id)
     );
-    const products = await new LocalProductCatalogRepository(this.#database).listProducts();
+    const products = await new LocalProductCatalogRepository(
+      this.#database
+    ).listProducts();
     return { session, currentApplications, products };
   }
 
@@ -898,9 +1135,9 @@ export class LocalSessionRepository {
       ).map((event) => event.id)
     );
     const groupLeafIds = new Set(
-      resolveGroupCorrectionLeaves(
-        stream.applicationConfirmationGroups
-      ).map((group) => group.id)
+      resolveGroupCorrectionLeaves(stream.applicationConfirmationGroups).map(
+        (group) => group.id
+      )
     );
 
     const contextTarget = stream.contextEvents.find(

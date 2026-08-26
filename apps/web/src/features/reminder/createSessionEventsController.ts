@@ -42,12 +42,9 @@ export function createSessionEventsController(
   async function performLoad(): Promise<void> {
     phase.value = "loading";
     try {
-      const visitorId =
-        await dependencies.identity.getOrCreateLocalVisitorId();
+      const visitorId = await dependencies.identity.getOrCreateLocalVisitorId();
       const next =
-        await dependencies.repository.getCurrentSessionEventStream(
-          visitorId
-        );
+        await dependencies.repository.getCurrentSessionEventStream(visitorId);
       if (disposed) return;
       stream.value = next;
       loaded = true;

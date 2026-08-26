@@ -67,9 +67,8 @@ async function flush(): Promise<void> {
 describe("createNotificationController", () => {
   it("有下一個到期時間時排一則提醒", async () => {
     const notifications = createNotificationsStub();
-    const currentSession: Ref<SessionProjection | null> = shallowRef(
-      sessionWith()
-    );
+    const currentSession: Ref<SessionProjection | null> =
+      shallowRef(sessionWith());
 
     createNotificationController({
       notifications,
@@ -108,14 +107,8 @@ describe("createNotificationController", () => {
 
   it.each([
     ["沒有 Session", null],
-    [
-      "Session 已結束",
-      sessionWith({ overallStatus: "ended" })
-    ],
-    [
-      "沒有下一個到期時間",
-      sessionWith({ sessionNextDueAt: null })
-    ]
+    ["Session 已結束", sessionWith({ overallStatus: "ended" })],
+    ["沒有下一個到期時間", sessionWith({ sessionNextDueAt: null })]
   ])("%s 時清空排程", async (_label, session) => {
     const notifications = createNotificationsStub();
     const currentSession = shallowRef<SessionProjection | null>(
@@ -135,9 +128,7 @@ describe("createNotificationController", () => {
 
   it("到期時間變動時重排", async () => {
     const notifications = createNotificationsStub();
-    const currentSession = shallowRef<SessionProjection | null>(
-      sessionWith()
-    );
+    const currentSession = shallowRef<SessionProjection | null>(sessionWith());
 
     createNotificationController({
       notifications,
@@ -159,9 +150,7 @@ describe("createNotificationController", () => {
 
   it("補擦後 Session 結束，殘留的排程會被清掉", async () => {
     const notifications = createNotificationsStub();
-    const currentSession = shallowRef<SessionProjection | null>(
-      sessionWith()
-    );
+    const currentSession = shallowRef<SessionProjection | null>(sessionWith());
 
     createNotificationController({
       notifications,
@@ -197,9 +186,7 @@ describe("createNotificationController", () => {
       await controller.requestPermission();
 
       expect(controller.permission.value).toBe("granted");
-      expect(notifications.schedule.mock.calls.length).toBeGreaterThan(
-        before
-      );
+      expect(notifications.schedule.mock.calls.length).toBeGreaterThan(before);
     });
 
     it("被拒絕時不補排", async () => {
@@ -226,9 +213,7 @@ describe("createNotificationController", () => {
 
   it("dispose 後停止追蹤並清空排程", async () => {
     const notifications = createNotificationsStub();
-    const currentSession = shallowRef<SessionProjection | null>(
-      sessionWith()
-    );
+    const currentSession = shallowRef<SessionProjection | null>(sessionWith());
 
     const controller = createNotificationController({
       notifications,

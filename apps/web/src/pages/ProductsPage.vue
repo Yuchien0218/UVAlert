@@ -38,9 +38,7 @@ const past = computed(() =>
   )
 );
 
-const hasAnyGear = computed(
-  () => productSettings.products.value.length > 0
-);
+const hasAnyGear = computed(() => productSettings.products.value.length > 0);
 
 /** 「只有非 sunscreen 裝備」是規格明列的狀態，必須明示沒有可建立倒數的產品。 */
 const hasUsableSunscreen = computed(() =>
@@ -51,15 +49,10 @@ const hasUsableSunscreen = computed(() =>
   )
 );
 
-const loadFailed = computed(
-  () => productSettings.phase.value === "error"
-);
+const loadFailed = computed(() => productSettings.phase.value === "error");
 
 onMounted(() => {
-  void Promise.all([
-    productSettings.ensureLoaded(),
-    setup.ensureLoaded()
-  ]);
+  void Promise.all([productSettings.ensureLoaded(), setup.ensureLoaded()]);
 });
 
 function addGear(): void {
@@ -82,7 +75,10 @@ function openGear(productId: string): void {
 
     <SetupProcessBanner v-if="hasActiveSetupDraft" />
 
-    <SunLoader v-if="productSettings.phase.value === 'loading'" label="正在讀取裝備清單…" />
+    <SunLoader
+      v-if="productSettings.phase.value === 'loading'"
+      label="正在讀取裝備清單…"
+    />
 
     <EmptyStateCard
       v-else-if="loadFailed"

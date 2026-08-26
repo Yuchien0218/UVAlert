@@ -1,4 +1,7 @@
-import type { GearCategory, ProductCatalogRecordV1 } from "@sunshield/contracts";
+import type {
+  GearCategory,
+  ProductCatalogRecordV1
+} from "@sunshield/contracts";
 
 export const GEAR_CATEGORY_LABELS: Record<GearCategory, string> = {
   sunscreen: "防曬乳",

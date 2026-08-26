@@ -34,12 +34,12 @@
 
 ## 三、優先序 1–4 實作結果與 commit
 
-| 優先序 | 內容 | 檔案 | commit |
-| --- | --- | --- | --- |
-| 1 | `/reminder` 補平面線性進度條＋嵌入 `FiveDayUvCard` | `ReminderPanel.vue`、`reminderPresentation.ts`、`ReminderPage.vue` | `2ff3497` |
-| 2 | 裝備清單卡片視覺對齊（品類圖示＋一行摘要，保留使用中／收納中分區） | `GearListItem.vue` | `11faee9` |
-| 3 | 設定流程步驟指示器改線性進度條 | `SetupStepShell.vue` | `1e90fe6` |
-| 4 | 通知設定頁重排＋「如何開啟」展開說明 | `NotificationSettingsPage.vue` | `1241f7e` |
+| 優先序 | 內容                                                               | 檔案                                                               | commit    |
+| ------ | ------------------------------------------------------------------ | ------------------------------------------------------------------ | --------- |
+| 1      | `/reminder` 補平面線性進度條＋嵌入 `FiveDayUvCard`                 | `ReminderPanel.vue`、`reminderPresentation.ts`、`ReminderPage.vue` | `2ff3497` |
+| 2      | 裝備清單卡片視覺對齊（品類圖示＋一行摘要，保留使用中／收納中分區） | `GearListItem.vue`                                                 | `11faee9` |
+| 3      | 設定流程步驟指示器改線性進度條                                     | `SetupStepShell.vue`                                               | `1e90fe6` |
+| 4      | 通知設定頁重排＋「如何開啟」展開說明                               | `NotificationSettingsPage.vue`                                     | `1241f7e` |
 
 另有兩個小修正由另一個併行 session 完成：`SetupProcessBanner.vue`
 顏色語意修正（`238b39f`）、`BrandHeader.vue` 放大 Logo／移除文字
@@ -62,11 +62,11 @@
 「完全沒做」是**舊資訊，且三個都錯**。用 `Grep apps/web/src/router/
 index.ts` 核對後，三條路由全部存在且指向功能完整的頁面：
 
-| 路由 | 元件 | 功能狀態 |
-| --- | --- | --- |
-| `/reminder/report` | `ReportContextEventPage.vue` | 完整：選擇狀況（大量流汗／擦毛巾／明顯摩擦／洗手／游泳下水）→ 影響部位 →（水上活動另問入水時間確信度）→ 實際時間 → 確認，`createContextEventController.ts` 已接好 |
-| `/reminder/event/:id/correct` | `EventCorrectionPage.vue` | 完整：S-10 更正最近事件，原事件不改寫、送出 replace／void 後繼事件，`createEventCorrectionController.ts` 已接好 |
-| `/region` | `RegionPage.vue` | 完整：定位／手動選地區／略過，`RegionLocationPanel`、`RegionManualSelector`、`RegionPreferenceSummary` 都已接好 |
+| 路由                          | 元件                         | 功能狀態                                                                                                                                                          |
+| ----------------------------- | ---------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `/reminder/report`            | `ReportContextEventPage.vue` | 完整：選擇狀況（大量流汗／擦毛巾／明顯摩擦／洗手／游泳下水）→ 影響部位 →（水上活動另問入水時間確信度）→ 實際時間 → 確認，`createContextEventController.ts` 已接好 |
+| `/reminder/event/:id/correct` | `EventCorrectionPage.vue`    | 完整：S-10 更正最近事件，原事件不改寫、送出 replace／void 後繼事件，`createEventCorrectionController.ts` 已接好                                                   |
+| `/region`                     | `RegionPage.vue`             | 完整：定位／手動選地區／略過，`RegionLocationPanel`、`RegionManualSelector`、`RegionPreferenceSummary` 都已接好                                                   |
 
 `ReportContextEventPage.vue`（commit `638c34c`）與 `EventCorrectionPage.vue`
 （commit `e85a914`）都已補上視覺對齊：桌面限制最大寬度並置中、成功

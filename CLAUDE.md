@@ -15,12 +15,12 @@ pnpm install
 pnpm check          # typecheck + test，送 PR 前的主要關卡
 ```
 
-| 指令 | 用途 |
-|---|---|
-| `pnpm typecheck` | 遞迴跑所有套件的 `tsc` / `vue-tsc` |
-| `pnpm test` | vitest 全部跑一次 |
-| `pnpm test:watch` | watch 模式 |
-| `pnpm build` | 遞迴 build（web 會先產生衛教內容，再 `vue-tsc` → `vite build` → 產生公開 HTML） |
+| 指令              | 用途                                                                            |
+| ----------------- | ------------------------------------------------------------------------------- |
+| `pnpm typecheck`  | 遞迴跑所有套件的 `tsc` / `vue-tsc`                                              |
+| `pnpm test`       | vitest 全部跑一次                                                               |
+| `pnpm test:watch` | watch 模式                                                                      |
+| `pnpm build`      | 遞迴 build（web 會先產生衛教內容，再 `vue-tsc` → `vite build` → 產生公開 HTML） |
 
 跑單一測試檔或單一測試：
 
@@ -40,13 +40,13 @@ pnpm --filter @sunshield/web typecheck
 
 資料與資產產生器（產出物有些會 commit 進 repo）：
 
-| 指令 | 用途 |
-|---|---|
-| `pnpm education:generate` | 由 `docs/education/articles/*.md` 產生 Vue 使用的衛教資料 |
-| `pnpm region-data:build` | 由官方 NLSC SHP 產生行政區界線與索引 |
-| `pnpm region-data:verify` | 驗證上面的產出可重現 |
-| `node tools/icon-system/generate-icons.mjs` | 正規化圖示 SVG、重組預覽板、產生 Vue 用的圖示註冊表（冪等，不碰幾何） |
-| `node tools/fonts/build-fonts.mjs` | 由完整字型 subset 出自行托管的 woff2（原始字型不進 repo，見 `tools/fonts/README.md`） |
+| 指令                                        | 用途                                                                                  |
+| ------------------------------------------- | ------------------------------------------------------------------------------------- |
+| `pnpm education:generate`                   | 由 `docs/education/articles/*.md` 產生 Vue 使用的衛教資料                             |
+| `pnpm region-data:build`                    | 由官方 NLSC SHP 產生行政區界線與索引                                                  |
+| `pnpm region-data:verify`                   | 驗證上面的產出可重現                                                                  |
+| `node tools/icon-system/generate-icons.mjs` | 正規化圖示 SVG、重組預覽板、產生 Vue 用的圖示註冊表（冪等，不碰幾何）                 |
+| `node tools/fonts/build-fonts.mjs`          | 由完整字型 subset 出自行托管的 woff2（原始字型不進 repo，見 `tools/fonts/README.md`） |
 
 Supabase 本機開發：`pnpm supabase:start`、`pnpm supabase:reset`、`pnpm supabase:functions:serve`。
 
@@ -68,15 +68,15 @@ SessionEventStreamV1（事件）→ packages/domain reducer → SessionProjectio
 
 ### 套件邊界
 
-| 套件 | 職責 |
-|---|---|
-| `packages/contracts` | 跨層的版本化 Zod schema。所有層之間傳遞的資料都先過這裡 |
-| `packages/domain` | 純 reducer 與規劃邏輯（planning、ordering、water、corrections） |
-| `packages/platform` | port 介面（儲存、定位、連線、生命週期、雲端），**只有介面沒有實作** |
+| 套件                       | 職責                                                                   |
+| -------------------------- | ---------------------------------------------------------------------- |
+| `packages/contracts`       | 跨層的版本化 Zod schema。所有層之間傳遞的資料都先過這裡                |
+| `packages/domain`          | 純 reducer 與規劃邏輯（planning、ordering、water、corrections）        |
+| `packages/platform`        | port 介面（儲存、定位、連線、生命週期、雲端），**只有介面沒有實作**    |
 | `packages/persistence-web` | Dexie／IndexedDB schema、原子 command transaction、跨分頁 invalidation |
-| `packages/ui` | 設計 token（`src/styles.css`），被 `apps/web` 匯入 |
-| `packages/test-fixtures` | 跨套件共用測試資料與契約測試 |
-| `apps/web` | 唯一可執行應用；`src/adapters/` 是 platform port 的瀏覽器實作 |
+| `packages/ui`              | 設計 token（`src/styles.css`），被 `apps/web` 匯入                     |
+| `packages/test-fixtures`   | 跨套件共用測試資料與契約測試                                           |
+| `apps/web`                 | 唯一可執行應用；`src/adapters/` 是 platform port 的瀏覽器實作          |
 
 依賴方向是單向的：`apps/web` → `platform`／`persistence-web` → `domain` → `contracts`。domain 不知道 persistence 存在。
 

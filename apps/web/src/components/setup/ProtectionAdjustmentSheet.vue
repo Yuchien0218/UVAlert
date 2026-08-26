@@ -1,15 +1,7 @@
 <script setup lang="ts">
-import type {
-  SessionContext,
-  SetupDraftV1
-} from "@sunshield/contracts";
+import type { SessionContext, SetupDraftV1 } from "@sunshield/contracts";
 import Icon from "../icons/Icon.vue";
-import {
-  nextTick,
-  onBeforeUnmount,
-  useTemplateRef,
-  watch
-} from "vue";
+import { nextTick, onBeforeUnmount, useTemplateRef, watch } from "vue";
 import type { ProtectionDraftInput } from "../../features/setup/createSetupController";
 import ZoneProtectionForm from "./ZoneProtectionForm.vue";
 
@@ -41,10 +33,7 @@ function handleDocumentKeydown(event: KeyboardEvent): void {
 }
 
 function releasePageLock(): void {
-  globalThis.document?.removeEventListener(
-    "keydown",
-    handleDocumentKeydown
-  );
+  globalThis.document?.removeEventListener("keydown", handleDocumentKeydown);
   if (globalThis.document?.body) {
     globalThis.document.body.style.overflow = previousBodyOverflow;
   }
@@ -58,15 +47,11 @@ watch(
         globalThis.document?.activeElement instanceof HTMLElement
           ? globalThis.document.activeElement
           : null;
-      previousBodyOverflow =
-        globalThis.document?.body.style.overflow ?? "";
+      previousBodyOverflow = globalThis.document?.body.style.overflow ?? "";
       if (globalThis.document?.body) {
         globalThis.document.body.style.overflow = "hidden";
       }
-      globalThis.document?.addEventListener(
-        "keydown",
-        handleDocumentKeydown
-      );
+      globalThis.document?.addEventListener("keydown", handleDocumentKeydown);
       await nextTick();
       dialog.value?.focus();
       return;
@@ -101,9 +86,7 @@ onBeforeUnmount(releasePageLock);
         >
           <header class="sheet__header">
             <div>
-              <h2 id="protection-sheet-title">
-                調整要提醒的部位
-              </h2>
+              <h2 id="protection-sheet-title">調整要提醒的部位</h2>
             </div>
             <button
               class="icon-button"
@@ -122,9 +105,7 @@ onBeforeUnmount(releasePageLock);
               :initial-zones="draft.zones"
               :initial-entry-mode="draft.setupEntryMode"
               :initial-suggested-preset-id="draft.suggestedPresetId"
-              :initial-suggested-preset-version="
-                draft.suggestedPresetVersion
-              "
+              :initial-suggested-preset-version="draft.suggestedPresetVersion"
               :initial-preset-decision="draft.presetDecision"
               submit-label="儲存調整"
               @submit="emit('save', $event)"
@@ -194,9 +175,7 @@ onBeforeUnmount(releasePageLock);
   min-height: 0;
   overflow-y: auto;
   overscroll-behavior: contain;
-  padding:
-    var(--space-5)
-    var(--space-5)
+  padding: var(--space-5) var(--space-5)
     max(var(--space-5), env(safe-area-inset-bottom));
 }
 

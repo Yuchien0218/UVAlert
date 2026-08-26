@@ -123,8 +123,9 @@ export class LocalDataRepository implements LocalDataPort {
         sessionStarted: sessionStartedEvents.map(stripCommandIdentifiers),
         zoneTracking: zoneTrackingEvents.map(stripCommandIdentifiers),
         zoneMethod: zoneMethodEvents.map(stripCommandIdentifiers),
-        applicationConfirmationGroups:
-          applicationConfirmationGroups.map(stripCommandIdentifiers),
+        applicationConfirmationGroups: applicationConfirmationGroups.map(
+          stripCommandIdentifiers
+        ),
         applications: applicationEvents.map(stripCommandIdentifiers),
         productSafety: productSafetyEvents.map(stripCommandIdentifiers),
         context: contextEvents.map(stripCommandIdentifiers),

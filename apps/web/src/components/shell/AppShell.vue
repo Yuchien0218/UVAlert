@@ -9,9 +9,7 @@ import GlobalStatusBanner from "./GlobalStatusBanner.vue";
 const { boot, uvForecast } = useWebAppServices();
 const route = useRoute();
 const mainElement = useTemplateRef<HTMLElement>("mainElement");
-const navigationVisible = computed(
-  () => route.meta.hideNavigation !== true
-);
+const navigationVisible = computed(() => route.meta.hideNavigation !== true);
 
 /**
  * 頁首右上角的 UV 指數（2026-08-24 使用者裁決，取代原本的「本機提醒」）。
@@ -24,7 +22,7 @@ const isNight = computed(() => uvForecast.isEvening.value);
 const headerUvDay = computed(() => {
   const days = uvForecast.forecast.value?.days ?? [];
   if (days.length === 0) return null;
-  return isNight.value ? days[1] ?? null : days[0] ?? null;
+  return isNight.value ? (days[1] ?? null) : (days[0] ?? null);
 });
 
 watch(
@@ -76,15 +74,12 @@ watch(
 
 .app-shell__main {
   width: 100%;
-  padding: clamp(1.5rem, 6vw, 3.5rem)
-    clamp(1rem, 5vw, 2.75rem)
-    var(--space-12);
+  padding: clamp(1.5rem, 6vw, 3.5rem) clamp(1rem, 5vw, 2.75rem) var(--space-12);
 }
 
 .app-shell__main--with-navigation {
   padding-bottom: calc(
-    var(--space-12) + var(--bottom-nav-height) +
-      env(safe-area-inset-bottom)
+    var(--space-12) + var(--bottom-nav-height) + env(safe-area-inset-bottom)
   );
 }
 

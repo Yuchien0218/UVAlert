@@ -42,7 +42,9 @@ const topics = computed(() => listPublishableTopics());
       role="status"
     />
 
-    <RouterLink class="text-link text-link--muted" to="/more">返回更多</RouterLink>
+    <RouterLink class="text-link text-link--muted" to="/more"
+      >返回更多</RouterLink
+    >
   </div>
 </template>
 
@@ -70,5 +72,4 @@ const topics = computed(() => listPublishableTopics());
   color: var(--text-secondary);
   line-height: 1.6;
 }
-
 </style>

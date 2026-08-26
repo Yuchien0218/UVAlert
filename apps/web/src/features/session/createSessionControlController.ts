@@ -10,11 +10,7 @@ import type {
   LocalIdentityPort,
   SessionEndRepositoryPort
 } from "@sunshield/platform";
-import {
-  shallowReadonly,
-  shallowRef,
-  type ShallowRef
-} from "vue";
+import { shallowReadonly, shallowRef, type ShallowRef } from "vue";
 import type { AppBootController } from "../../app/createAppBootController";
 
 export type SessionEndPhase = "idle" | "ending" | "error";
@@ -84,10 +80,7 @@ export function createSessionControlController(
         trustedNow: command.payload.effectiveOccurredAt,
         connectivity: dependencies.getConnectivity()
       };
-      const result = await dependencies.repository.endSession(
-        command,
-        clock
-      );
+      const result = await dependencies.repository.endSession(command, clock);
 
       if (!result.ok) {
         if (
@@ -118,8 +111,7 @@ export function createSessionControlController(
       pendingCommand = null;
       await dependencies.boot.refresh();
       if (
-        dependencies.boot.currentSession.value?.sessionId ===
-        session.sessionId
+        dependencies.boot.currentSession.value?.sessionId === session.sessionId
       ) {
         endErrorState.value = "refresh_failed";
         endPhaseState.value = "error";

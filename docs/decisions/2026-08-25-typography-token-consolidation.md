@@ -16,17 +16,17 @@
 
 ## 套用的變更
 
-| 位置 | 變更前 | 變更後 | 理由 |
-|---|---|---|---|
-| `styles.css` `--font-size-body` | 0.875rem | 1rem | 配合 DESIGN.md body-md 16px 目標 |
-| `app.css` `.stat-figure--display` | `clamp(3rem,18vw,4.75rem)`（沒有元件在用的死碼） | `clamp(3rem,15vw,3.75rem)` | 採用 `HomeCountdown`／`HomeUvHeadline` 逐字重複的實際值，兩元件改套用這個 class 而非各自覆寫 |
-| `HomeCountdown.vue` `.countdown__unit` | `1rem`（魔術數字） | `var(--font-size-body)` | body 調整後數值相同，零視覺變化，去除魔術數字 |
-| `HomeUvHeadline.vue` `.uv-headline__level`／`.uv-headline__empty` | `1.25rem`（魔術數字） | `var(--font-size-title)` | 與既有 token 數值完全相同，零視覺變化 |
-| `GearListItem.vue` `.gear-item__name` | `1.0625rem` | `var(--font-size-title-sm)` | 落在 `styles.css` 2026-08-24 註解已標記、尚未掃完的「1.05–1.2rem 卡片標題」群集內 |
-| `RegionPreferenceSummary.vue` `.region-summary__value` | `1.2rem` | `var(--font-size-title-sm)` | 同上 |
-| `ZoneProtectionForm.vue` `.preset-card__title` | 固定 `1.5rem` | `clamp(1.5rem,7vw,2.35rem)` ＋ `var(--letter-spacing-headline)` | 該卡是單一推薦（`v-if`，非清單重複項），跟 `SetupPage.vue` `.recovery-card h2` 同屬「單一句子大標題」角色，改用同一套 clamp |
-| `EducationArticlePage.vue` `.education-article-summary` | `1rem` | `var(--font-size-body)` | body 調整後數值相同 |
-| `EducationArticlePage.vue` `:deep(h2)` | `1.25rem` | `var(--font-size-title)` | 與既有 token 數值完全相同 |
+| 位置                                                              | 變更前                                           | 變更後                                                          | 理由                                                                                                                        |
+| ----------------------------------------------------------------- | ------------------------------------------------ | --------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------- |
+| `styles.css` `--font-size-body`                                   | 0.875rem                                         | 1rem                                                            | 配合 DESIGN.md body-md 16px 目標                                                                                            |
+| `app.css` `.stat-figure--display`                                 | `clamp(3rem,18vw,4.75rem)`（沒有元件在用的死碼） | `clamp(3rem,15vw,3.75rem)`                                      | 採用 `HomeCountdown`／`HomeUvHeadline` 逐字重複的實際值，兩元件改套用這個 class 而非各自覆寫                                |
+| `HomeCountdown.vue` `.countdown__unit`                            | `1rem`（魔術數字）                               | `var(--font-size-body)`                                         | body 調整後數值相同，零視覺變化，去除魔術數字                                                                               |
+| `HomeUvHeadline.vue` `.uv-headline__level`／`.uv-headline__empty` | `1.25rem`（魔術數字）                            | `var(--font-size-title)`                                        | 與既有 token 數值完全相同，零視覺變化                                                                                       |
+| `GearListItem.vue` `.gear-item__name`                             | `1.0625rem`                                      | `var(--font-size-title-sm)`                                     | 落在 `styles.css` 2026-08-24 註解已標記、尚未掃完的「1.05–1.2rem 卡片標題」群集內                                           |
+| `RegionPreferenceSummary.vue` `.region-summary__value`            | `1.2rem`                                         | `var(--font-size-title-sm)`                                     | 同上                                                                                                                        |
+| `ZoneProtectionForm.vue` `.preset-card__title`                    | 固定 `1.5rem`                                    | `clamp(1.5rem,7vw,2.35rem)` ＋ `var(--letter-spacing-headline)` | 該卡是單一推薦（`v-if`，非清單重複項），跟 `SetupPage.vue` `.recovery-card h2` 同屬「單一句子大標題」角色，改用同一套 clamp |
+| `EducationArticlePage.vue` `.education-article-summary`           | `1rem`                                           | `var(--font-size-body)`                                         | body 調整後數值相同                                                                                                         |
+| `EducationArticlePage.vue` `:deep(h2)`                            | `1.25rem`                                        | `var(--font-size-title)`                                        | 與既有 token 數值完全相同                                                                                                   |
 
 ## 刻意不動的部分
 

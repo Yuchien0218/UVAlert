@@ -15,7 +15,9 @@ describe("generated education content", () => {
       "special-situations"
     ]);
     expect(educationArticles).toHaveLength(48);
-    expect(new Set(educationArticles.map((article) => article.slug)).size).toBe(48);
+    expect(new Set(educationArticles.map((article) => article.slug)).size).toBe(
+      48
+    );
   });
 
   it("每篇文章都有答案型 metadata、可讀 HTML 與安全發布閘門", () => {
@@ -32,6 +34,10 @@ describe("generated education content", () => {
   });
 
   it("保存來源查閱日期，讓公開頁能呈現內容新鮮度", () => {
-    expect(educationArticles.every((article) => /^2026-08-\d{2}$/.test(article.lastReviewed))).toBe(true);
+    expect(
+      educationArticles.every((article) =>
+        /^2026-08-\d{2}$/.test(article.lastReviewed)
+      )
+    ).toBe(true);
   });
 });

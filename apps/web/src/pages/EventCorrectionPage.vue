@@ -45,9 +45,7 @@ watch(
   async (value) => {
     if (value === "success") {
       await nextTick();
-      document
-        .querySelector<HTMLElement>("#correction-success-title")
-        ?.focus();
+      document.querySelector<HTMLElement>("#correction-success-title")?.focus();
     }
   }
 );
@@ -82,12 +80,20 @@ async function runVoid(): Promise<void> {
           原本的紀錄會保留下來，你會在後面新增一筆更正。送出前不會改變目前提醒。
         </p>
       </div>
-      <button class="icon-button" type="button" aria-label="返回提醒" @click="back">
+      <button
+        class="icon-button"
+        type="button"
+        aria-label="返回提醒"
+        @click="back"
+      >
         <Icon name="tool-close" :size="24" />
       </button>
     </header>
 
-    <SunLoader v-if="eventCorrection.phase.value === 'loading'" label="正在讀取這筆紀錄…" />
+    <SunLoader
+      v-if="eventCorrection.phase.value === 'loading'"
+      label="正在讀取這筆紀錄…"
+    />
 
     <section
       v-else-if="
@@ -104,14 +110,16 @@ async function runVoid(): Promise<void> {
         }}
       </h2>
       <p v-if="eventCorrection.success.value.action === 'void'">
-        {{ eventCorrection.success.value.label }}不再影響目前提醒。原紀錄仍保留在事件歷史中。
+        {{
+          eventCorrection.success.value.label
+        }}不再影響目前提醒。原紀錄仍保留在事件歷史中。
       </p>
       <p v-else>
         {{ eventCorrection.success.value.label }}已更新為
         {{
-          new Date(
-            eventCorrection.success.value.occurredAt
-          ).toLocaleString("zh-TW")
+          new Date(eventCorrection.success.value.occurredAt).toLocaleString(
+            "zh-TW"
+          )
         }}，影響部位：{{ zoneNames(eventCorrection.success.value.zoneIds) }}。
       </p>
       <button class="button button--primary" type="button" @click="back">
@@ -124,7 +132,7 @@ async function runVoid(): Promise<void> {
       <section v-if="alreadyCorrected" class="app-card" role="alert">
         <h2>這筆紀錄已經被更正過</h2>
         <p>
-            同一筆紀錄只能更正一次。請返回提醒頁，從最近事件找到最新的一筆再更正。
+          同一筆紀錄只能更正一次。請返回提醒頁，從最近事件找到最新的一筆再更正。
         </p>
         <button class="button button--primary" type="button" @click="back">
           返回目前提醒
@@ -277,9 +285,19 @@ p {
  * 內距 div 的直向堆疊）——標題列其實是瀏覽器預設的直向堆疊。跟關閉鈕
  * 收斂順手補上，對齊 ReapplyPage.vue 已有的版本。
  */
-.flow-heading { display: flex; align-items: start; justify-content: space-between; gap: var(--space-4); }
-.flow-heading h1 { font-size: var(--font-size-page-title); }
-.flow-heading div { display: grid; gap: var(--space-3); }
+.flow-heading {
+  display: flex;
+  align-items: start;
+  justify-content: space-between;
+  gap: var(--space-4);
+}
+.flow-heading h1 {
+  font-size: var(--font-size-page-title);
+}
+.flow-heading div {
+  display: grid;
+  gap: var(--space-3);
+}
 .flow-heading div > p:last-child {
   color: var(--text-body);
   line-height: 1.6;
@@ -303,5 +321,4 @@ p {
   color: var(--color-due);
   line-height: 1.6;
 }
-
 </style>

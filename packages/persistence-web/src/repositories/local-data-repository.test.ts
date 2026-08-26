@@ -150,8 +150,12 @@ describe("LocalDataRepository 摘要與清除", () => {
     await repository.clearProductsAndHistory();
 
     expect(await database.SunscreenProducts.count()).toBe(0);
-    expect(await database.ProtectionSessions.get("session-active")).toBeDefined();
-    expect(await database.ProtectionSessions.get("session-old")).toBeUndefined();
+    expect(
+      await database.ProtectionSessions.get("session-active")
+    ).toBeDefined();
+    expect(
+      await database.ProtectionSessions.get("session-old")
+    ).toBeUndefined();
     expect(await database.ContextEvents.get("event-active")).toBeDefined();
     expect(await database.ContextEvents.get("event-old")).toBeUndefined();
   });

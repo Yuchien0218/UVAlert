@@ -11,7 +11,10 @@ function makeClient() {
   const client = {
     auth: {
       getSession: vi.fn(async () => ({ data: { session }, error: null })),
-      signInWithOAuth: vi.fn(async () => ({ data: { provider: "google" }, error: null })),
+      signInWithOAuth: vi.fn(async () => ({
+        data: { provider: "google" },
+        error: null
+      })),
       signOut: vi.fn(async () => ({ error: null })),
       onAuthStateChange: vi.fn(() => ({
         data: { subscription: { unsubscribe } }

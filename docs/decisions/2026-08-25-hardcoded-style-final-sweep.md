@@ -18,9 +18,9 @@
 
 ## 套用的變更
 
-| 位置 | 變更 |
-|---|---|
-| `packages/ui/src/styles.css` | 新增 `--overlay-backdrop: rgb(0 0 0 / 42%)` |
+| 位置                                                                          | 變更                                           |
+| ----------------------------------------------------------------------------- | ---------------------------------------------- |
+| `packages/ui/src/styles.css`                                                  | 新增 `--overlay-backdrop: rgb(0 0 0 / 42%)`    |
 | `GearFormSheet.vue`／`ProtectionAdjustmentSheet.vue`／`SessionEndControl.vue` | `rgb(0 0 0 / 42%)` → `var(--overlay-backdrop)` |
 
 ## 驗證

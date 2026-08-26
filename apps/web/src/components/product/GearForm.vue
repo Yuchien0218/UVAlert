@@ -92,9 +92,7 @@ const categoryLocked = computed(
 const needsLabelFields = computed(
   () => gearCategory.value === "sunscreen" || gearCategory.value === "clothing"
 );
-const showSunscreenFields = computed(
-  () => gearCategory.value === "sunscreen"
-);
+const showSunscreenFields = computed(() => gearCategory.value === "sunscreen");
 
 const safety = computed(() =>
   existing.value === null ? null : gearSafetyState(existing.value)
@@ -135,7 +133,10 @@ function validate(): string | null {
   ) {
     return "購買月份格式須為 YYYY-MM。";
   }
-  if (expiryDate.value !== "" && !/^\d{4}-\d{2}-\d{2}$/.test(expiryDate.value)) {
+  if (
+    expiryDate.value !== "" &&
+    !/^\d{4}-\d{2}-\d{2}$/.test(expiryDate.value)
+  ) {
     return "到期日格式須為 YYYY-MM-DD。";
   }
   // schema 要求 spf 為正數、paGrade 長度 1–20；先擋住再 parse，
@@ -160,8 +161,7 @@ async function save(): Promise<void> {
   // 避免存下一組看起來會影響倒數、實際不會的資料。
   // SPF／PA 跟其他標示欄位一樣只對 sunscreen 有意義，
   // 非防曬乳品類不保留，避免存下看起來有意義、實際不會被用到的資料。
-  const spf =
-    spfInput.value.trim() === "" ? null : Number(spfInput.value);
+  const spf = spfInput.value.trim() === "" ? null : Number(spfInput.value);
   const paGrade =
     paGradeInput.value.trim() === "" ? null : paGradeInput.value.trim();
 
@@ -195,7 +195,8 @@ async function save(): Promise<void> {
 
   if (!saved) {
     // 儲存失敗時保留表單，不返回列表（S-12）。
-    localError.value = "資料沒有儲存，這件裝備尚未寫入。輸入仍會保留，可以再試一次。";
+    localError.value =
+      "資料沒有儲存，這件裝備尚未寫入。輸入仍會保留，可以再試一次。";
     return;
   }
 
@@ -247,7 +248,7 @@ async function remove(): Promise<void> {
             name="gear-category"
             :value="category"
             :disabled="categoryLocked && category !== 'sunscreen'"
-          >
+          />
           <Icon :name="GEAR_CATEGORY_ICONS[category]" :size="24" />
           <span>{{ label }}</span>
         </label>
@@ -265,7 +266,7 @@ async function remove(): Promise<void> {
         type="text"
         maxlength="80"
         placeholder="例如：通勤用防曬"
-      >
+      />
       <p class="field-helper">
         只用於這台裝置上的選擇，重複的暱稱不會被當成同一件裝備。
       </p>
@@ -286,7 +287,7 @@ async function remove(): Promise<void> {
             inputmode="numeric"
             maxlength="4"
             placeholder="50"
-          >
+          />
         </div>
         <div>
           <label for="gear-pa">PA（選填）</label>
@@ -296,7 +297,7 @@ async function remove(): Promise<void> {
             type="text"
             maxlength="20"
             placeholder="PA++++"
-          >
+          />
         </div>
       </div>
       <p v-if="showSunscreenFields" class="field-helper">
@@ -322,7 +323,9 @@ async function remove(): Promise<void> {
     <section v-else class="app-card no-effect-note" role="status">
       <strong>這件裝備不會建立補擦倒數</strong>
       <p>
-        {{ GEAR_CATEGORY_LABELS[gearCategory] }}沒有會進入計算的包裝標示，因此不需要填寫防曬乳標示欄位。
+        {{
+          GEAR_CATEGORY_LABELS[gearCategory]
+        }}沒有會進入計算的包裝標示，因此不需要填寫防曬乳標示欄位。
       </p>
     </section>
 
@@ -330,7 +333,7 @@ async function remove(): Promise<void> {
       <div class="field-pair">
         <div>
           <label for="gear-purchase">購買月份（選填）</label>
-          <input id="gear-purchase" v-model="purchaseMonth" type="month">
+          <input id="gear-purchase" v-model="purchaseMonth" type="month" />
         </div>
         <div>
           <label for="gear-expiry">
@@ -339,7 +342,7 @@ async function remove(): Promise<void> {
               會影響倒數
             </span>
           </label>
-          <input id="gear-expiry" v-model="expiryDate" type="date">
+          <input id="gear-expiry" v-model="expiryDate" type="date" />
         </div>
       </div>
       <p v-if="affectsCountdown(gearCategory)" class="field-helper">
@@ -348,9 +351,7 @@ async function remove(): Promise<void> {
 
       <label for="gear-note">備註（選填）</label>
       <textarea id="gear-note" v-model="note" maxlength="500" rows="3" />
-      <p class="field-helper">
-        請不要輸入疾病、症狀、用藥或聯絡資料。
-      </p>
+      <p class="field-helper">請不要輸入疾病、症狀、用藥或聯絡資料。</p>
     </section>
 
     <p v-if="localError" class="form-error" role="alert">{{ localError }}</p>

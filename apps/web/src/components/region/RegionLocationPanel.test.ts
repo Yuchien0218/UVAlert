@@ -41,14 +41,10 @@ describe("RegionLocationPanel", () => {
     });
 
     expect(wrapper.findAll(".button--primary")).toHaveLength(1);
-    expect(wrapper.get(".button--primary").text()).toBe(
-      "確認並使用此地區"
-    );
+    expect(wrapper.get(".button--primary").text()).toBe("確認並使用此地區");
     const relocate = wrapper.get('[data-testid="relocate"]');
     expect(relocate.text()).toBe("重新定位");
-    expect(relocate.classes()).toContain(
-      "location-panel__relocate--centered"
-    );
+    expect(relocate.classes()).toContain("location-panel__relocate--centered");
 
     await relocate.trigger("click");
     expect(wrapper.emitted("locate")).toEqual([[]]);

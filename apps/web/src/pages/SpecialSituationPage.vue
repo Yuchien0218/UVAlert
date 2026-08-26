@@ -26,9 +26,10 @@ import ContentUnderReview from "../components/help/ContentUnderReview.vue";
       required-review="醫療／法務"
     />
 
-    <RouterLink class="text-link text-link--muted" to="/more">返回更多</RouterLink>
+    <RouterLink class="text-link text-link--muted" to="/more"
+      >返回更多</RouterLink
+    >
   </div>
 </template>
 
-<style scoped>
-</style>
+<style scoped></style>

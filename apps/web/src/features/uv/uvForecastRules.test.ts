@@ -17,12 +17,8 @@ describe("fixed evening and five-day UV rules", () => {
   });
 
   it("跨午夜仍屬於同一個晚間提醒週期", () => {
-    expect(getEveningCycleKey(new Date(2026, 6, 30, 23, 0))).toBe(
-      "2026-07-30"
-    );
-    expect(getEveningCycleKey(new Date(2026, 6, 31, 2, 0))).toBe(
-      "2026-07-30"
-    );
+    expect(getEveningCycleKey(new Date(2026, 6, 30, 23, 0))).toBe("2026-07-30");
+    expect(getEveningCycleKey(new Date(2026, 6, 31, 2, 0))).toBe("2026-07-30");
     expect(getEveningCycleKey(new Date(2026, 6, 31, 12, 0))).toBeNull();
   });
 

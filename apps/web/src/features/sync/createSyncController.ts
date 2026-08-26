@@ -47,13 +47,7 @@ export type SyncSelection = {
 };
 
 export type SyncControllerStatus =
-  | "idle"
-  | "preparing"
-  | "ready"
-  | "syncing"
-  | "synced"
-  | "cancelled"
-  | "error";
+  "idle" | "preparing" | "ready" | "syncing" | "synced" | "cancelled" | "error";
 
 export type SyncControllerState = {
   status: SyncControllerStatus;
@@ -146,9 +140,7 @@ export function createSyncController(options: {
               tombstones: operation.commitTombstones
             });
       const parsedCommitted =
-        committed === null
-          ? null
-          : SyncCommitResultV1Schema.parse(committed);
+        committed === null ? null : SyncCommitResultV1Schema.parse(committed);
 
       const recordsToApply = [
         ...(remote?.records ?? []),
@@ -206,16 +198,28 @@ function buildSyncPreview(
   manifest: SyncManifestV1
 ): SyncPreview {
   const localRecords = new Map(
-    local.records.map((record) => [recordKey(record.recordKind, record.recordId), record])
+    local.records.map((record) => [
+      recordKey(record.recordKind, record.recordId),
+      record
+    ])
   );
   const localTombstones = new Map(
-    local.tombstones.map((tombstone) => [recordKey(tombstone.recordKind, tombstone.recordId), tombstone])
+    local.tombstones.map((tombstone) => [
+      recordKey(tombstone.recordKind, tombstone.recordId),
+      tombstone
+    ])
   );
   const remoteRecords = new Map(
-    manifest.records.map((summary) => [recordKey(summary.recordKind, summary.recordId), summary])
+    manifest.records.map((summary) => [
+      recordKey(summary.recordKind, summary.recordId),
+      summary
+    ])
   );
   const remoteTombstones = new Map(
-    manifest.tombstones.map((tombstone) => [recordKey(tombstone.recordKind, tombstone.recordId), tombstone])
+    manifest.tombstones.map((tombstone) => [
+      recordKey(tombstone.recordKind, tombstone.recordId),
+      tombstone
+    ])
   );
   const keys = new Set([
     ...localRecords.keys(),
@@ -281,15 +285,22 @@ function classifyItem(
 
 function defaultActionFor(status: SyncItemStatus): SyncAction | null {
   if (status === "local_only" || status === "local_deleted") return "upload";
-  if (status === "remote_only" || status === "remote_deleted") return "download";
+  if (status === "remote_only" || status === "remote_deleted")
+    return "download";
   return status === "unchanged" ? "skip" : null;
 }
 
 function defaultActions(preview: SyncPreview): Record<string, SyncAction> {
   return Object.fromEntries(
     preview.items
-      .filter((item): item is SyncPreviewItem & { defaultAction: SyncAction } => item.defaultAction !== null)
-      .map((item) => [recordKey(item.key.recordKind, item.key.recordId), item.defaultAction])
+      .filter(
+        (item): item is SyncPreviewItem & { defaultAction: SyncAction } =>
+          item.defaultAction !== null
+      )
+      .map((item) => [
+        recordKey(item.key.recordKind, item.key.recordId),
+        item.defaultAction
+      ])
   );
 }
 
@@ -382,7 +393,10 @@ function makeSelectionError(message: string): CloudError {
   return { status: 422, code: "VALIDATION_ERROR", message };
 }
 
-function toCloudError(error: unknown, fallbackCode = "SERVER_ERROR"): CloudError {
+function toCloudError(
+  error: unknown,
+  fallbackCode = "SERVER_ERROR"
+): CloudError {
   if (
     typeof error === "object" &&
     error !== null &&

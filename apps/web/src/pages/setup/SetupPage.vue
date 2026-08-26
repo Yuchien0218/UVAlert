@@ -48,9 +48,7 @@ const route = useRoute();
 const router = useRouter();
 
 const selectedContext = shallowRef<SessionContext | null>(null);
-const applicationTime = shallowRef<string | null>(
-  setup.applicationTime.value
-);
+const applicationTime = shallowRef<string | null>(setup.applicationTime.value);
 const waterStart = shallowRef<WaterStartFormValue | null>(
   setup.waterStart.value
 );
@@ -72,21 +70,14 @@ const needsSunscreenClaim = computed(
  */
 const isNight = computed(() => isFixedEvening(new Date()));
 
-const context = computed(
-  () => setup.draft.value?.initialContext ?? null
-);
-const proposedProtection = computed<QuickProtectionDraft | null>(
-  () =>
-    context.value === null
-      ? null
-      : makeQuickProtectionDraft(context.value)
+const context = computed(() => setup.draft.value?.initialContext ?? null);
+const proposedProtection = computed<QuickProtectionDraft | null>(() =>
+  context.value === null ? null : makeQuickProtectionDraft(context.value)
 );
 const hasConfirmedProtection = computed(
   () => (setup.draft.value?.zones.length ?? 0) > 0
 );
-const needsWaterStart = computed(
-  () => context.value === "water_active"
-);
+const needsWaterStart = computed(() => context.value === "water_active");
 
 /** 選好情境後才顯示後半段，避免一次攤開整頁。 */
 const contextSettled = computed(() => context.value !== null);
@@ -119,8 +110,7 @@ watch(selectedContext, async (value, previous) => {
       await setup.ensureRecommendedProtection();
     }
   } catch {
-    localError.value =
-      "設定內容目前無法儲存，請重新整理後再試一次。";
+    localError.value = "設定內容目前無法儲存，請重新整理後再試一次。";
   }
 });
 
@@ -145,15 +135,12 @@ async function submit(): Promise<void> {
   }
 }
 
-async function saveProtection(
-  input: ProtectionDraftInput
-): Promise<void> {
+async function saveProtection(input: ProtectionDraftInput): Promise<void> {
   if (!(await setup.saveProtection(input))) return;
   applicationTime.value = null;
   waterStart.value = null;
   localError.value = null;
-  protectionNotice.value =
-    "提醒部位已更新，請重新確認實際塗抹時間。";
+  protectionNotice.value = "提醒部位已更新，請重新確認實際塗抹時間。";
   showProtectionAdjustment.value = false;
 }
 
@@ -167,10 +154,7 @@ async function acceptQuickProtection(): Promise<void> {
 }
 
 async function openProtectionAdjustment(): Promise<void> {
-  if (
-    !hasConfirmedProtection.value &&
-    proposedProtection.value !== null
-  ) {
+  if (!hasConfirmedProtection.value && proposedProtection.value !== null) {
     const prepared = await setup.saveProtection({
       ...proposedProtection.value,
       presetDecision: "adjusted"
@@ -238,10 +222,7 @@ function reload(): void {
 }
 
 onMounted(async () => {
-  await Promise.all([
-    setup.ensureLoaded(),
-    productSettings.ensureLoaded()
-  ]);
+  await Promise.all([setup.ensureLoaded(), productSettings.ensureLoaded()]);
   if (context.value !== null) {
     await setup.ensureRecommendedProtection();
   }
@@ -272,11 +253,7 @@ onMounted(async () => {
       <p>
         讀取這台裝置上的設定草稿時發生問題。已經記錄的提醒與裝備不會受影響；請重新整理後再試一次。
       </p>
-      <button
-        class="button button--primary"
-        type="button"
-        @click="reload"
-      >
+      <button class="button button--primary" type="button" @click="reload">
         <Icon name="tool-refresh" :size="20" />
         重新整理
       </button>
@@ -335,11 +312,7 @@ onMounted(async () => {
           @adjust="openProtectionAdjustment"
         />
 
-        <p
-          v-if="protectionNotice"
-          class="update-notice"
-          role="status"
-        >
+        <p v-if="protectionNotice" class="update-notice" role="status">
           {{ protectionNotice }}
         </p>
 
@@ -355,10 +328,7 @@ onMounted(async () => {
           />
 
           <ApplicationTimePicker v-model="applicationTime" />
-          <WaterStartPicker
-            v-if="needsWaterStart"
-            v-model="waterStart"
-          />
+          <WaterStartPicker v-if="needsWaterStart" v-model="waterStart" />
 
           <ProductEligibilityNotice
             :product-snapshot="productSettings.snapshot.value"
@@ -399,9 +369,7 @@ onMounted(async () => {
         設定流程唯一的安全提示（步驟 2 的對應文字原本在
         SetupCompletionSummary，那張摘要已於 2026-08-24 移除）。不要拿掉。
       -->
-      <p class="safety-note">
-        情境只影響提醒間隔，不代表安全曝曬時間。
-      </p>
+      <p class="safety-note">情境只影響提醒間隔，不代表安全曝曬時間。</p>
     </template>
 
     <ProtectionAdjustmentSheet
@@ -433,9 +401,9 @@ onMounted(async () => {
           class="spinner"
         />
         {{
-          setup.phase.value === 'submitting'
-            ? '開始防曬提醒中…'
-            : '開始防曬提醒'
+          setup.phase.value === "submitting"
+            ? "開始防曬提醒中…"
+            : "開始防曬提醒"
         }}
       </button>
     </template>

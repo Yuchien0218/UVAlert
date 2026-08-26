@@ -29,8 +29,7 @@ const selectedQuick = computed(() => {
     quickOptions.find(
       (option) =>
         Math.abs(
-          selectedMs -
-            (referenceNow.getTime() - option.minutesAgo * 60_000)
+          selectedMs - (referenceNow.getTime() - option.minutesAgo * 60_000)
         ) < 5_000
     )?.minutesAgo ?? null
   );
@@ -64,7 +63,9 @@ function selectQuick(minutesAgo: number): void {
         <span class="time-option__label">
           <template v-if="option.figure === null">{{ option.label }}</template>
           <template v-else>
-            <span class="stat-figure stat-figure--inline">{{ option.figure }}</span>
+            <span class="stat-figure stat-figure--inline">{{
+              option.figure
+            }}</span>
             {{ option.suffix }}
           </template>
         </span>
@@ -101,8 +102,9 @@ function selectQuick(minutesAgo: number): void {
   color: var(--text-primary);
   cursor: pointer;
   text-align: left;
-  transition: background-color var(--duration-fast) var(--ease-out),
-              border-color var(--duration-fast) var(--ease-out);
+  transition:
+    background-color var(--duration-fast) var(--ease-out),
+    border-color var(--duration-fast) var(--ease-out);
 }
 
 /* 理由同 app.css 的 .choice-grid label:hover——避免 hover 跟已選取同色。 */
@@ -120,5 +122,4 @@ function selectQuick(minutesAgo: number): void {
   gap: var(--space-2);
   font-weight: 500;
 }
-
 </style>

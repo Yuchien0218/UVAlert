@@ -13,9 +13,7 @@ const validFeedback = {
 
 describe("feedback contracts", () => {
   it("accepts a normal feedback request", () => {
-    expect(FeedbackRequestV1Schema.parse(validFeedback)).toEqual(
-      validFeedback
-    );
+    expect(FeedbackRequestV1Schema.parse(validFeedback)).toEqual(validFeedback);
   });
 
   it("rejects missing messages and malformed contact emails", () => {

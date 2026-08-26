@@ -5,12 +5,12 @@
 
 ## 研究文件
 
-| 文件 | 主要用途 | 使用時機 |
-| --- | --- | --- |
-| [`2026-08-13-uvalert-education-seo-aeo-geo.md`](2026-08-13-uvalert-education-seo-aeo-geo.md) | Google／Bing 官方 SEO、AEO、GEO、結構化資料、YMYL 與可索引性 | 修改公開衛教頁、文章結構、canonical、Schema 或 sitemap 前 |
-| [`2026-08-16-uvalert-sun-education-official-sources.md`](2026-08-16-uvalert-sun-education-official-sources.md) | 六大衛教分類的官方第一手來源、主張與限制 | 寫作或審查基本防曬衛教內容前 |
-| [`2026-08-16-uvalert-expanded-education-sources.md`](2026-08-16-uvalert-expanded-education-sources.md) | UV 預報、低 UV、產品保存、眼周／嘴唇、補擦、熱傷害與曬後照護等擴充主題 | 新增衛教題目或避免文章重複時 |
-| [`2026-08-16-uvalert-search-trends-ocean-friendly-sources.md`](2026-08-16-uvalert-search-trends-ocean-friendly-sources.md) | 近年常見搜尋問句線索、海洋友善主張與證據界線 | 規劃搜尋導向文章、海洋友善內容或選題優先序時 |
+| 文件                                                                                                                       | 主要用途                                                               | 使用時機                                                  |
+| -------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------- | --------------------------------------------------------- |
+| [`2026-08-13-uvalert-education-seo-aeo-geo.md`](2026-08-13-uvalert-education-seo-aeo-geo.md)                               | Google／Bing 官方 SEO、AEO、GEO、結構化資料、YMYL 與可索引性           | 修改公開衛教頁、文章結構、canonical、Schema 或 sitemap 前 |
+| [`2026-08-16-uvalert-sun-education-official-sources.md`](2026-08-16-uvalert-sun-education-official-sources.md)             | 六大衛教分類的官方第一手來源、主張與限制                               | 寫作或審查基本防曬衛教內容前                              |
+| [`2026-08-16-uvalert-expanded-education-sources.md`](2026-08-16-uvalert-expanded-education-sources.md)                     | UV 預報、低 UV、產品保存、眼周／嘴唇、補擦、熱傷害與曬後照護等擴充主題 | 新增衛教題目或避免文章重複時                              |
+| [`2026-08-16-uvalert-search-trends-ocean-friendly-sources.md`](2026-08-16-uvalert-search-trends-ocean-friendly-sources.md) | 近年常見搜尋問句線索、海洋友善主張與證據界線                           | 規劃搜尋導向文章、海洋友善內容或選題優先序時              |
 
 ## 建議閱讀順序
 

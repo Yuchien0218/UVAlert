@@ -39,24 +39,12 @@ import { makeQuickProtectionDraft } from "./setupCatalog";
 
 const DRAFT_TTL_MS = 24 * 60 * 60 * 1_000;
 
-export type SetupPhase =
-  | "idle"
-  | "loading"
-  | "ready"
-  | "submitting"
-  | "error";
+export type SetupPhase = "idle" | "loading" | "ready" | "submitting" | "error";
 
-export type SetupSaveStatus =
-  | "idle"
-  | "saving"
-  | "saved"
-  | "error";
+export type SetupSaveStatus = "idle" | "saving" | "saved" | "error";
 
 export type SetupSubmitError =
-  | "validation_error"
-  | "active_session_conflict"
-  | "persistence_error"
-  | null;
+  "validation_error" | "active_session_conflict" | "persistence_error" | null;
 
 export interface ProtectionDraftInput {
   zones: SetupDraftZoneV1[];
@@ -90,9 +78,7 @@ export interface SetupController {
   readonly recoveryPending: Readonly<ShallowRef<boolean>>;
   readonly applicationTime: Readonly<ShallowRef<string | null>>;
   readonly waterStart: Readonly<ShallowRef<WaterStartFormValue | null>>;
-  readonly fieldErrors: Readonly<
-    ShallowRef<Record<string, string[]>>
-  >;
+  readonly fieldErrors: Readonly<ShallowRef<Record<string, string[]>>>;
   readonly submitError: Readonly<ShallowRef<SetupSubmitError>>;
   readonly hasTopicalZones: ComputedRef<boolean>;
   ensureLoaded(): Promise<void>;
@@ -131,8 +117,8 @@ export function createSetupController(
   const waterStartState = shallowRef<WaterStartFormValue | null>(null);
   const fieldErrorsState = shallowRef<Record<string, string[]>>({});
   const submitErrorState = shallowRef<SetupSubmitError>(null);
-  const hasTopicalZones = computed(() =>
-    draftState.value?.zones.some(hasTopicalMethod) ?? false
+  const hasTopicalZones = computed(
+    () => draftState.value?.zones.some(hasTopicalMethod) ?? false
   );
 
   let loadPromise: Promise<void> | null = null;
@@ -158,11 +144,10 @@ export function createSetupController(
     try {
       await ensureIdentities();
       const ownerKey = ownerKeyFor(localVisitorId!);
-      const storedDraft =
-        await dependencies.draftRepository.getActiveDraft(
-          ownerKey,
-          dependencies.now().toISOString()
-        );
+      const storedDraft = await dependencies.draftRepository.getActiveDraft(
+        ownerKey,
+        dependencies.now().toISOString()
+      );
 
       if (storedDraft === null) {
         draftState.value = makeEmptyDraft(ownerKey);
@@ -171,8 +156,7 @@ export function createSetupController(
         draftState.value = storedDraft;
         applicationTimeState.value =
           storedDraft.pendingTiming?.appliedAt ?? null;
-        waterStartState.value =
-          storedDraft.pendingTiming?.waterStart ?? null;
+        waterStartState.value = storedDraft.pendingTiming?.waterStart ?? null;
         recoveryPendingState.value = true;
       }
       loaded = true;
@@ -214,22 +198,16 @@ export function createSetupController(
       pendingTiming: null,
       createdAt,
       updatedAt: createdAt,
-      expiresAt: new Date(
-        timestamp.getTime() + DRAFT_TTL_MS
-      ).toISOString()
+      expiresAt: new Date(timestamp.getTime() + DRAFT_TTL_MS).toISOString()
     });
   }
 
-  async function persistDraft(
-    partialDraft: SetupDraftV1
-  ): Promise<boolean> {
+  async function persistDraft(partialDraft: SetupDraftV1): Promise<boolean> {
     const timestamp = dependencies.now();
     const parsed = SetupDraftV1Schema.safeParse({
       ...partialDraft,
       updatedAt: timestamp.toISOString(),
-      expiresAt: new Date(
-        timestamp.getTime() + DRAFT_TTL_MS
-      ).toISOString()
+      expiresAt: new Date(timestamp.getTime() + DRAFT_TTL_MS).toISOString()
     });
 
     if (!parsed.success) {
@@ -269,10 +247,7 @@ export function createSetupController(
   function recommendedResumeStep(): SetupDraftStep {
     const draft = draftState.value;
     if (draft?.initialContext === null || draft === null) return "context";
-    if (
-      draft.zones.length === 0 ||
-      draft.zones.some(hasTopicalMethod)
-    ) {
+    if (draft.zones.length === 0 || draft.zones.some(hasTopicalMethod)) {
       return "timing";
     }
     return "review";
@@ -283,25 +258,20 @@ export function createSetupController(
     if (draft.zones.length > 0) return true;
     if (draft.initialContext === null) return false;
 
-    const recommendation = makeQuickProtectionDraft(
-      draft.initialContext
-    );
+    const recommendation = makeQuickProtectionDraft(draft.initialContext);
     return saveProtection({
       ...recommendation,
       presetDecision: "accepted"
     });
   }
 
-  async function saveContext(
-    context: SessionContext
-  ): Promise<boolean> {
+  async function saveContext(context: SessionContext): Promise<boolean> {
     const draft = requireDraft();
     fieldErrorsState.value = {};
     submitErrorState.value = null;
     const contextChanged =
       draft.initialContext !== null && draft.initialContext !== context;
-    const needsQuickProtection =
-      contextChanged || draft.zones.length === 0;
+    const needsQuickProtection = contextChanged || draft.zones.length === 0;
     const quickProtection = needsQuickProtection
       ? makeQuickProtectionDraft(context)
       : null;
@@ -323,17 +293,14 @@ export function createSetupController(
             pendingTiming: null,
             setupEntryMode: quickProtection.setupEntryMode,
             suggestedPresetId: quickProtection.suggestedPresetId,
-            suggestedPresetVersion:
-              quickProtection.suggestedPresetVersion,
+            suggestedPresetVersion: quickProtection.suggestedPresetVersion,
             presetDecision: null
           }
         : {})
     });
   }
 
-  async function saveProtection(
-    input: ProtectionDraftInput
-  ): Promise<boolean> {
+  async function saveProtection(input: ProtectionDraftInput): Promise<boolean> {
     const draft = requireDraft();
     fieldErrorsState.value = {};
     submitErrorState.value = null;
@@ -345,12 +312,9 @@ export function createSetupController(
       return false;
     }
 
-    const parsedZones =
-      SetupDraftZoneV1Schema.array().safeParse(input.zones);
+    const parsedZones = SetupDraftZoneV1Schema.array().safeParse(input.zones);
     if (!parsedZones.success) {
-      fieldErrorsState.value = issuesToFieldErrors(
-        parsedZones.error.issues
-      );
+      fieldErrorsState.value = issuesToFieldErrors(parsedZones.error.issues);
       return false;
     }
 
@@ -371,22 +335,15 @@ export function createSetupController(
     });
   }
 
-  async function savePendingTiming(
-    input: TimingDraftInput
-  ): Promise<boolean> {
+  async function savePendingTiming(input: TimingDraftInput): Promise<boolean> {
     const draft = requireDraft();
     const fieldErrors: Record<string, string[]> = {};
     const trustedNow = dependencies.now();
     const appliedAtMs = Date.parse(input.appliedAt);
     const topicalZones = draft.zones.filter(hasTopicalMethod);
 
-    if (
-      !Number.isFinite(appliedAtMs) ||
-      appliedAtMs > trustedNow.getTime()
-    ) {
-      fieldErrors.appliedAt = [
-        "實際塗抹時間不能晚於目前時間，請重新確認。"
-      ];
+    if (!Number.isFinite(appliedAtMs) || appliedAtMs > trustedNow.getTime()) {
+      fieldErrors.appliedAt = ["實際塗抹時間不能晚於目前時間，請重新確認。"];
     }
     if (topicalZones.length === 0) {
       fieldErrors.zones = ["目前沒有需要記錄防曬乳時間的部位。"];
@@ -394,18 +351,13 @@ export function createSetupController(
 
     if (draft.initialContext === "water_active") {
       if (input.waterStart === null) {
-        fieldErrors.waterStart = [
-          "請確認實際入水時間，或選擇不確定。"
-        ];
+        fieldErrors.waterStart = ["請確認實際入水時間，或選擇不確定。"];
       } else if (
         input.waterStart.confidence === "confirmed" &&
         (input.waterStart.activityStartedAt === null ||
-          Date.parse(input.waterStart.activityStartedAt) >
-            trustedNow.getTime())
+          Date.parse(input.waterStart.activityStartedAt) > trustedNow.getTime())
       ) {
-        fieldErrors.waterStart = [
-          "入水時間不能晚於目前時間。"
-        ];
+        fieldErrors.waterStart = ["入水時間不能晚於目前時間。"];
       }
     }
 
@@ -416,9 +368,7 @@ export function createSetupController(
 
     const normalizedAppliedAt = new Date(appliedAtMs).toISOString();
     const normalizedWaterStart =
-      draft.initialContext === "water_active"
-        ? input.waterStart
-        : null;
+      draft.initialContext === "water_active" ? input.waterStart : null;
     applicationTimeState.value = normalizedAppliedAt;
     waterStartState.value = normalizedWaterStart;
     fieldErrorsState.value = {};
@@ -434,9 +384,7 @@ export function createSetupController(
     });
   }
 
-  async function saveTiming(
-    input: TimingDraftInput
-  ): Promise<boolean> {
+  async function saveTiming(input: TimingDraftInput): Promise<boolean> {
     const draft = requireDraft();
     const fieldErrors: Record<string, string[]> = {};
     const trustedNow = dependencies.now();
@@ -460,13 +408,8 @@ export function createSetupController(
             trustedNow.toISOString()
           ));
 
-    if (
-      !Number.isFinite(appliedAtMs) ||
-      appliedAtMs > trustedNow.getTime()
-    ) {
-      fieldErrors.appliedAt = [
-        "塗抹時間不能晚於目前可信時間，請重新確認。"
-      ];
+    if (!Number.isFinite(appliedAtMs) || appliedAtMs > trustedNow.getTime()) {
+      fieldErrors.appliedAt = ["塗抹時間不能晚於目前可信時間，請重新確認。"];
     }
     if (topicalZones.length === 0) {
       fieldErrors.zones = ["目前沒有需要記錄防曬乳的部位。"];
@@ -477,18 +420,13 @@ export function createSetupController(
 
     if (draft.initialContext === "water_active") {
       if (input.waterStart === null) {
-        fieldErrors.waterStart = [
-          "請確認實際入水時間，或選擇不確定。"
-        ];
+        fieldErrors.waterStart = ["請確認實際入水時間，或選擇不確定。"];
       } else if (
         input.waterStart.confidence === "confirmed" &&
         (input.waterStart.activityStartedAt === null ||
-          Date.parse(input.waterStart.activityStartedAt) >
-            trustedNow.getTime())
+          Date.parse(input.waterStart.activityStartedAt) > trustedNow.getTime())
       ) {
-        fieldErrors.waterStart = [
-          "入水時間不能晚於目前可信時間。"
-        ];
+        fieldErrors.waterStart = ["入水時間不能晚於目前可信時間。"];
       }
     }
 
@@ -499,9 +437,7 @@ export function createSetupController(
 
     applicationTimeState.value = new Date(appliedAtMs).toISOString();
     waterStartState.value =
-      draft.initialContext === "water_active"
-        ? input.waterStart
-        : null;
+      draft.initialContext === "water_active" ? input.waterStart : null;
     fieldErrorsState.value = {};
     submitErrorState.value = null;
 
@@ -514,9 +450,7 @@ export function createSetupController(
           : [
               {
                 draftApplicationKey: dependencies.createId(),
-                draftZoneKeys: topicalZones.map(
-                  (zone) => zone.draftZoneKey
-                ),
+                draftZoneKeys: topicalZones.map((zone) => zone.draftZoneKey),
                 sourceProductId: null,
                 productSnapshotFingerprint: dependencies.createId(),
                 productLabelSnapshot
@@ -622,12 +556,9 @@ export function createSetupController(
     const topicalZones = draft.zones.filter(hasTopicalMethod);
     if (
       topicalZones.length > 0 &&
-      (draft.applications.length === 0 ||
-        applicationTimeState.value === null)
+      (draft.applications.length === 0 || applicationTimeState.value === null)
     ) {
-      fieldErrors.appliedAt = [
-        "請重新確認這次的實際塗抹時間。"
-      ];
+      fieldErrors.appliedAt = ["請重新確認這次的實際塗抹時間。"];
     }
 
     const waterEligibleDraftZones = draft.zones.filter(
@@ -637,8 +568,7 @@ export function createSetupController(
     );
     if (
       draft.initialContext === "water_active" &&
-      (waterStartState.value === null ||
-        waterEligibleDraftZones.length === 0)
+      (waterStartState.value === null || waterEligibleDraftZones.length === 0)
     ) {
       fieldErrors.waterStart = [
         waterEligibleDraftZones.length === 0
@@ -654,10 +584,7 @@ export function createSetupController(
     await ensureIdentities();
     const timestamp = dependencies.now().toISOString();
     const zoneIdByDraftKey = new Map(
-      draft.zones.map((zone) => [
-        zone.draftZoneKey,
-        dependencies.createId()
-      ])
+      draft.zones.map((zone) => [zone.draftZoneKey, dependencies.createId()])
     );
 
     // 沒有塗抹部位、或沒有可信包裝標示時都不送出 applicationGroup：
@@ -670,14 +597,13 @@ export function createSetupController(
             appliedAt: applicationTimeState.value!,
             applications: draft.applications.map((application) => ({
               eventId: dependencies.createId(),
-              zoneInstanceIds: application.draftZoneKeys.map(
-                (draftZoneKey) => zoneIdByDraftKey.get(draftZoneKey)!
+              zoneInstanceIds: application.draftZoneKeys.map((draftZoneKey) =>
+                zoneIdByDraftKey.get(draftZoneKey)!
               ),
               sourceProductId: application.sourceProductId,
               productSnapshotFingerprint:
                 application.productSnapshotFingerprint,
-              productLabelSnapshot:
-                application.productLabelSnapshot
+              productLabelSnapshot: application.productLabelSnapshot
             }))
           };
 
@@ -687,8 +613,8 @@ export function createSetupController(
         : {
             eventId: dependencies.createId(),
             activityIntervalId: dependencies.createId(),
-            zoneInstanceIds: waterEligibleDraftZones.map(
-              (zone) => zoneIdByDraftKey.get(zone.draftZoneKey)!
+            zoneInstanceIds: waterEligibleDraftZones.map((zone) =>
+              zoneIdByDraftKey.get(zone.draftZoneKey)!
             ),
             startConfidence: waterStartState.value!.confidence,
             activityStartedAt:
@@ -737,9 +663,7 @@ export function createSetupController(
     });
 
     if (!parsed.success) {
-      throw new SetupValidationError(
-        issuesToFieldErrors(parsed.error.issues)
-      );
+      throw new SetupValidationError(issuesToFieldErrors(parsed.error.issues));
     }
     return parsed.data;
   }
@@ -788,8 +712,7 @@ function ownerKeyFor(localVisitorId: string): string {
 
 function hasTopicalMethod(zone: SetupDraftZoneV1): boolean {
   return zone.methodComponents.some(
-    (component) =>
-      component === "sunscreen" || component === "other_topical"
+    (component) => component === "sunscreen" || component === "other_topical"
   );
 }
 

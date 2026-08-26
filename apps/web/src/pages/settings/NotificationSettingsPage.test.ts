@@ -10,12 +10,14 @@ import NotificationSettingsPage from "./NotificationSettingsPage.vue";
 
 vi.mock("../../app/injection", () => ({ useWebAppServices: vi.fn() }));
 
-function makeServices(options: {
-  permission?: "default" | "granted" | "denied";
-  isSupported?: boolean;
-  canDeliverInBackground?: boolean;
-  reminderFrequencyMinutes?: number | null;
-} = {}) {
+function makeServices(
+  options: {
+    permission?: "default" | "granted" | "denied";
+    isSupported?: boolean;
+    canDeliverInBackground?: boolean;
+    reminderFrequencyMinutes?: number | null;
+  } = {}
+) {
   const permissionState = shallowRef(options.permission ?? "default");
   const requestPermission = vi.fn(async () => {
     permissionState.value = "granted";
@@ -34,9 +36,7 @@ function makeServices(options: {
       permission: shallowReadonly(permissionState),
       isSupported: options.isSupported ?? true,
       canDeliverInBackground: options.canDeliverInBackground ?? false,
-      reminderFrequencyMinutes: shallowReadonly(
-        reminderFrequencyMinutesState
-      ),
+      reminderFrequencyMinutes: shallowReadonly(reminderFrequencyMinutesState),
       requestPermission,
       setReminderFrequencyMinutes,
       sendTestNotification,
@@ -122,9 +122,7 @@ describe("NotificationSettingsPage", () => {
     expect(wrapper.text()).toContain("再次提醒頻率");
     const options = wrapper.findAll('input[name="reminder-frequency"]');
     expect(options).toHaveLength(3);
-    expect(
-      (options[1]!.element as HTMLInputElement).checked
-    ).toBe(true);
+    expect((options[1]!.element as HTMLInputElement).checked).toBe(true);
 
     await options[2]!.setValue(true);
     expect(

@@ -23,9 +23,7 @@ let sequence: number;
 class SilentNotifier implements CrossContextNotifier {
   publish(_message: InvalidationMessage): void {}
 
-  subscribe(
-    _listener: (message: InvalidationMessage) => void
-  ): () => void {
+  subscribe(_listener: (message: InvalidationMessage) => void): () => void {
     return () => undefined;
   }
 }
@@ -148,9 +146,7 @@ describe("SetupDraft to StartSession transaction", () => {
       waterStart: null
     });
 
-    const storedDraft = await database.SetupDrafts.get(
-      "guest:visitor-setup"
-    );
+    const storedDraft = await database.SetupDrafts.get("guest:visitor-setup");
     expect(storedDraft?.applications).toHaveLength(1);
     expect(storedDraft?.pendingTiming?.appliedAt).toBe(
       "2026-07-29T10:45:00.000Z"
@@ -433,12 +429,11 @@ describe("SetupDraft to StartSession transaction", () => {
 
     expect(result.ok).toBe(true);
     expect(await database.ContextEvents.count()).toBe(1);
-    expect(await database.ContextEvents.toCollection().first())
-      .toMatchObject({
-        contextType: "water_start",
-        startConfidence: "unknown",
-        activityStartedAt: null
-      });
+    expect(await database.ContextEvents.toCollection().first()).toMatchObject({
+      contextType: "water_start",
+      startConfidence: "unknown",
+      activityStartedAt: null
+    });
   });
 
   it("自動套用推薦方案並立即寫入 SetupDraft", async () => {
@@ -448,9 +443,7 @@ describe("SetupDraft to StartSession transaction", () => {
     expect(controller.draft.value?.zones.length).toBeGreaterThan(0);
     expect(controller.draft.value?.presetDecision).toBe("accepted");
 
-    const storedDraft = await database.SetupDrafts.get(
-      "guest:visitor-setup"
-    );
+    const storedDraft = await database.SetupDrafts.get("guest:visitor-setup");
     expect(storedDraft?.zones.length).toBeGreaterThan(0);
     expect(storedDraft?.presetDecision).toBe("accepted");
   });
@@ -466,9 +459,7 @@ describe("SetupDraft to StartSession transaction", () => {
       })
     ).toBe(true);
 
-    const storedDraft = await database.SetupDrafts.get(
-      "guest:visitor-setup"
-    );
+    const storedDraft = await database.SetupDrafts.get("guest:visitor-setup");
     expect(storedDraft?.pendingTiming).toEqual({
       appliedAt: "2026-07-29T10:50:00.000Z",
       waterStart: null

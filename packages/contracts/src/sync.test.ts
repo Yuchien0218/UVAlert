@@ -84,9 +84,7 @@ function makeTombstone() {
 
 describe("sync contracts", () => {
   it("accepts an active session record with a per-record revision", () => {
-    const parsed = SyncRecordEnvelopeV1Schema.parse(
-      makeActiveSessionRecord()
-    );
+    const parsed = SyncRecordEnvelopeV1Schema.parse(makeActiveSessionRecord());
 
     expect(parsed.recordKind).toBe("active_session");
     expect(parsed.revision).toBe(3);

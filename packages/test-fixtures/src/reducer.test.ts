@@ -20,31 +20,27 @@ import {
   makeStartSessionCommand
 } from "./index";
 
-function makeStream(options: {
-  idPrefix?: string;
-  appliedAt?: string;
-  effectiveStartedAt?: string;
-  snapshot?: ProductLabelSnapshotV1;
-  zones?: ReturnType<
-    typeof makeStartSessionCommand
-  >["payload"]["zones"];
-  applicationGroup?: ReturnType<
-    typeof makeStartSessionCommand
-  >["payload"]["applicationGroup"];
-} = {}): SessionEventStreamV1 {
+function makeStream(
+  options: {
+    idPrefix?: string;
+    appliedAt?: string;
+    effectiveStartedAt?: string;
+    snapshot?: ProductLabelSnapshotV1;
+    zones?: ReturnType<typeof makeStartSessionCommand>["payload"]["zones"];
+    applicationGroup?: ReturnType<
+      typeof makeStartSessionCommand
+    >["payload"]["applicationGroup"];
+  } = {}
+): SessionEventStreamV1 {
   const command = makeStartSessionCommand({
-    ...(options.idPrefix === undefined
-      ? {}
-      : { idPrefix: options.idPrefix }),
+    ...(options.idPrefix === undefined ? {} : { idPrefix: options.idPrefix }),
     ...(options.appliedAt === undefined
       ? {}
       : { appliedAt: options.appliedAt }),
     ...(options.effectiveStartedAt === undefined
       ? {}
       : { effectiveStartedAt: options.effectiveStartedAt }),
-    ...(options.snapshot === undefined
-      ? {}
-      : { snapshot: options.snapshot }),
+    ...(options.snapshot === undefined ? {} : { snapshot: options.snapshot }),
     ...(options.zones === undefined ? {} : { zones: options.zones }),
     ...(options.applicationGroup === undefined
       ? {}
@@ -159,10 +155,7 @@ function addTracking(
   });
 }
 
-function addContext(
-  stream: SessionEventStreamV1,
-  event: ContextEventV1
-): void {
+function addContext(stream: SessionEventStreamV1, event: ContextEventV1): void {
   stream.contextEvents.push(event);
 }
 
@@ -255,9 +248,7 @@ describe("P0 reminder reducer fixed vectors", () => {
   ])("$name", ({ snapshot, due }) => {
     const zone = firstZone(makeStream({ snapshot }));
     expect(zone.generalDueAt).toBe(due);
-    expect(zone.zoneTimerStartedAt).toBe(
-      "2026-07-29T10:00:00.000Z"
-    );
+    expect(zone.zoneTimerStartedAt).toBe("2026-07-29T10:00:00.000Z");
   });
 
   it("TV-003 剩餘 30 分鐘為 reapply_soon", () => {
@@ -266,10 +257,8 @@ describe("P0 reminder reducer fixed vectors", () => {
       reapplicationIntervalMinutes: 90
     });
     expect(
-      firstZone(
-        makeStream({ snapshot }),
-        "2026-07-29T11:00:00.000Z"
-      ).timingStatus
+      firstZone(makeStream({ snapshot }), "2026-07-29T11:00:00.000Z")
+        .timingStatus
     ).toBe("reapply_soon");
   });
 
@@ -279,10 +268,8 @@ describe("P0 reminder reducer fixed vectors", () => {
       reapplicationIntervalMinutes: 90
     });
     expect(
-      firstZone(
-        makeStream({ snapshot }),
-        "2026-07-29T10:59:00.000Z"
-      ).timingStatus
+      firstZone(makeStream({ snapshot }), "2026-07-29T10:59:00.000Z")
+        .timingStatus
     ).toBe("tracking");
   });
 
@@ -380,9 +367,7 @@ describe("P0 reminder reducer fixed vectors", () => {
       exposure: "exposed",
       components: ["sunscreen"]
     });
-    expect(firstZone(stream).generalDueAt).toBe(
-      "2026-07-29T11:30:00.000Z"
-    );
+    expect(firstZone(stream).generalDueAt).toBe("2026-07-29T11:30:00.000Z");
   });
 
   it("TV-011 sunscreen 移除後重加不復活舊 Application", () => {
@@ -413,9 +398,7 @@ describe("P0 reminder reducer fixed vectors", () => {
     const stream = makeStream({
       appliedAt: "2026-07-29T09:30:00.000Z"
     });
-    expect(firstZone(stream).generalDueAt).toBe(
-      "2026-07-29T11:30:00.000Z"
-    );
+    expect(firstZone(stream).generalDueAt).toBe("2026-07-29T11:30:00.000Z");
   });
 
   it("TV-013 明確等待建立 LABEL_WAIT", () => {
@@ -477,9 +460,7 @@ describe("P0 reminder reducer fixed vectors", () => {
     const zone = firstZone(stream, "2026-07-29T10:20:00.000Z");
     expect(zone.activeWaterDeadline).toBe(waterDue);
     expect(zone.zoneDueAt).toBe(zoneDue);
-    expect(zone.zoneTimerStartedAt).toBe(
-      "2026-07-29T10:00:00.000Z"
-    );
+    expect(zone.zoneTimerStartedAt).toBe("2026-07-29T10:00:00.000Z");
   });
 
   it("TV-017 塗抹晚於入水時不建立水上期限", () => {
@@ -512,9 +493,7 @@ describe("P0 reminder reducer fixed vectors", () => {
     const zone = result.zones[0]!;
     expect(zone.activeWaterDeadline).toBeNull();
     expect(zone.reasonCodes).toContain("WATER_START_UNKNOWN");
-    expect(result.primaryAction.presentationType).toBe(
-      "untimed_action_card"
-    );
+    expect(result.primaryAction.presentationType).toBe("untimed_action_card");
   });
 
   it("TV-019 耐水未知不移除一般期限", () => {
@@ -553,9 +532,7 @@ describe("P0 reminder reducer fixed vectors", () => {
       snapshot
     });
     const zone = firstZone(stream, "2026-07-29T10:30:00.000Z");
-    expect(zone.activeWaterDeadline).toBe(
-      "2026-07-29T10:40:00.000Z"
-    );
+    expect(zone.activeWaterDeadline).toBe("2026-07-29T10:40:00.000Z");
     expect(zone.generalDueAt).toBe("2026-07-29T12:20:00.000Z");
     expect(zone.zoneDueAt).toBe("2026-07-29T10:40:00.000Z");
   });
@@ -575,12 +552,7 @@ describe("P0 reminder reducer fixed vectors", () => {
       zones
     });
     addContext(stream, {
-      ...eventBase(
-        stream,
-        "water-end",
-        "2026-07-29T10:25:00.000Z",
-        3
-      ),
+      ...eventBase(stream, "water-end", "2026-07-29T10:25:00.000Z", 3),
       eventType: "context_event",
       contextType: "water_end",
       activityIntervalId: "water-interval-1",
@@ -590,9 +562,7 @@ describe("P0 reminder reducer fixed vectors", () => {
       correctionOfEventId: null
     });
     const zone = firstZone(stream, "2026-07-29T10:30:00.000Z");
-    expect(zone.eventTriggeredDeadline).toBe(
-      "2026-07-29T10:25:00.000Z"
-    );
+    expect(zone.eventTriggeredDeadline).toBe("2026-07-29T10:25:00.000Z");
     expect(zone.timingStatus).toBe("reapply_due");
   });
 
@@ -642,7 +612,10 @@ describe("P0 reminder reducer fixed vectors", () => {
         methodCertainty: "confirmed" as const,
         methodComponents: ["sunscreen"] as const
       }
-    ].map((zone) => ({ ...zone, methodComponents: [...zone.methodComponents] }));
+    ].map((zone) => ({
+      ...zone,
+      methodComponents: [...zone.methodComponents]
+    }));
     const stream = makeStream({ zones });
     addContext(
       stream,
@@ -671,10 +644,7 @@ describe("P0 reminder reducer fixed vectors", () => {
       ["friction", "friction", "2026-07-29T10:10:00.000Z", 3],
       ["sweat", "heavy_sweat", "2026-07-29T10:30:00.000Z", 4]
     ] as const) {
-      addContext(
-        stream,
-        causeEvent(stream, { id, type, at, sequence, zones })
-      );
+      addContext(stream, causeEvent(stream, { id, type, at, sequence, zones }));
     }
     expect(firstZone(stream).eventTriggeredDeadline).toBe(
       "2026-07-29T10:10:00.000Z"
@@ -748,21 +718,14 @@ describe("P0 reminder reducer fixed vectors", () => {
     expect(zone.currentApplicationId).toBeNull();
     expect(zone.generalDueAt).toBeNull();
     expect(zone.activeCauseRefs).toContain("towel-before-stop");
-    expect(zone.eventTriggeredDeadline).toBe(
-      "2026-07-29T10:00:00.000Z"
-    );
+    expect(zone.eventTriggeredDeadline).toBe("2026-07-29T10:00:00.000Z");
   });
 
   it("TV-027／028 同一產品安全封鎖使期限失效且重擦不解除", () => {
     const stream = makeStream();
     const zoneId = stream.sessionStarted.zoneInstanceIds[0]!;
     stream.productSafetyEvents.push({
-      ...eventBase(
-        stream,
-        "abnormal-a",
-        "2026-07-29T10:30:00.000Z",
-        2
-      ),
+      ...eventBase(stream, "abnormal-a", "2026-07-29T10:30:00.000Z", 2),
       eventType: "product_safety",
       safetyKind: "abnormal_reported",
       sourceProductId: "fixture-product-a",
@@ -789,12 +752,7 @@ describe("P0 reminder reducer fixed vectors", () => {
     const stream = makeStream();
     const zoneId = stream.sessionStarted.zoneInstanceIds[0]!;
     stream.productSafetyEvents.push({
-      ...eventBase(
-        stream,
-        "abnormal-a",
-        "2026-07-29T10:30:00.000Z",
-        2
-      ),
+      ...eventBase(stream, "abnormal-a", "2026-07-29T10:30:00.000Z", 2),
       eventType: "product_safety",
       safetyKind: "abnormal_reported",
       sourceProductId: "fixture-product-a",
@@ -820,12 +778,7 @@ describe("P0 reminder reducer fixed vectors", () => {
   it("TV-030～032 context／UVI／weather 不參與 reducer deadline", () => {
     const stream = makeStream();
     addContext(stream, {
-      ...eventBase(
-        stream,
-        "indoor",
-        "2026-07-29T10:30:00.000Z",
-        2
-      ),
+      ...eventBase(stream, "indoor", "2026-07-29T10:30:00.000Z", 2),
       eventType: "context_event",
       contextType: "context_changed",
       context: "indoor_away",
@@ -833,9 +786,7 @@ describe("P0 reminder reducer fixed vectors", () => {
       correctionAction: "create",
       correctionOfEventId: null
     });
-    expect(firstZone(stream).zoneDueAt).toBe(
-      "2026-07-29T12:00:00.000Z"
-    );
+    expect(firstZone(stream).zoneDueAt).toBe("2026-07-29T12:00:00.000Z");
   });
 
   it("TV-033 sessionNextDueAt 忽略 null 並取最早", () => {
@@ -895,9 +846,7 @@ describe("P0 reminder reducer fixed vectors", () => {
       ]
     };
     const result = projection(makeStream({ zones, applicationGroup: group }));
-    expect(result.sessionNextDueAt).toBe(
-      "2026-07-29T11:30:00.000Z"
-    );
+    expect(result.sessionNextDueAt).toBe("2026-07-29T11:30:00.000Z");
   });
 
   it("TV-034 無時間狀態優先於其他部位的數字期限", () => {
@@ -949,13 +898,9 @@ describe("P0 reminder reducer fixed vectors", () => {
       ]
     };
     const result = projection(makeStream({ zones, applicationGroup: group }));
-    expect(result.sessionNextDueAt).toBe(
-      "2026-07-29T11:30:00.000Z"
-    );
+    expect(result.sessionNextDueAt).toBe("2026-07-29T11:30:00.000Z");
     expect(result.primaryAction.affectedZoneInstanceIds).toEqual(["ear"]);
-    expect(result.primaryAction.presentationType).toBe(
-      "untimed_action_card"
-    );
+    expect(result.primaryAction.presentationType).toBe("untimed_action_card");
   });
 
   it("TV-035 同呈現層級的不同動作合併為 multi_action", () => {
@@ -1051,12 +996,10 @@ describe("P0 reminder reducer fixed vectors", () => {
     });
     const result = projection(stream, "2026-07-29T11:05:00.000Z");
     expect(
-      result.zones.find((zone) => zone.zoneInstanceId === "face")!
-        .timingStatus
+      result.zones.find((zone) => zone.zoneInstanceId === "face")!.timingStatus
     ).toBe("reapply_due");
     expect(
-      result.zones.find((zone) => zone.zoneInstanceId === "hands")!
-        .generalDueAt
+      result.zones.find((zone) => zone.zoneInstanceId === "hands")!.generalDueAt
     ).toBe("2026-07-29T12:05:00.000Z");
     expect(result.primaryAction.affectedZoneInstanceIds).toEqual(["face"]);
   });
@@ -1141,12 +1084,7 @@ describe("P0 reminder reducer fixed vectors", () => {
   it("TV-040 Session 結束後事件不會重開 Session", () => {
     const stream = makeStream();
     stream.sessionEndedEvents.push({
-      ...eventBase(
-        stream,
-        "session-ended",
-        "2026-07-29T11:00:00.000Z",
-        2
-      ),
+      ...eventBase(stream, "session-ended", "2026-07-29T11:00:00.000Z", 2),
       eventType: "session_ended",
       endedAt: "2026-07-29T11:00:00.000Z",
       endedReason: "user_ended"

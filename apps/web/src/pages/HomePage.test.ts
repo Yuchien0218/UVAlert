@@ -107,7 +107,9 @@ function mockServices(options: Options = {}): void {
       dispose: vi.fn()
     },
     uvForecast: {
-      phase: shallowReadonly(shallowRef(region === null ? "no_region" : "ready")),
+      phase: shallowReadonly(
+        shallowRef(region === null ? "no_region" : "ready")
+      ),
       error: shallowReadonly(shallowRef(null)),
       region: shallowReadonly(shallowRef(region)),
       forecast: shallowReadonly(shallowRef(region === null ? null : forecast)),

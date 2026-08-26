@@ -30,9 +30,7 @@ const props = defineProps<{
   note: string | null;
 }>();
 
-const hasValue = computed(
-  () => props.uvi !== null && props.riskLevel !== null
-);
+const hasValue = computed(() => props.uvi !== null && props.riskLevel !== null);
 
 const locationLine = computed(() => {
   const region = props.regionName ?? "臺灣";
@@ -51,7 +49,9 @@ const locationLine = computed(() => {
     </p>
 
     <div v-if="hasValue" class="uv-headline__value">
-      <span class="stat-figure stat-figure--display uv-headline__figure">{{ uvi }}</span>
+      <span class="stat-figure stat-figure--display uv-headline__figure">{{
+        uvi
+      }}</span>
       <span class="uv-headline__level">
         {{ getUvRiskLevelLabel(riskLevel!) }}
       </span>

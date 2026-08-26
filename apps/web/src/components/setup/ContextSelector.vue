@@ -81,7 +81,7 @@ watch(
         type="radio"
         name="setup-context"
         :value="option.value"
-      >
+      />
       <Icon :name="option.icon" :size="24" />
       <span>
         <strong>{{ option.label }}</strong>
@@ -126,7 +126,7 @@ watch(
             type="radio"
             name="setup-context"
             :value="option.value"
-          >
+          />
           <span>
             <strong>{{ option.label }}</strong>
             <small>{{ option.description }}</small>
@@ -172,7 +172,7 @@ watch(
             type="radio"
             name="setup-context"
             :value="option.value"
-          >
+          />
           <span>
             <strong>{{ option.label }}</strong>
             <small>{{ option.description }}</small>

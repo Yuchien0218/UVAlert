@@ -37,8 +37,7 @@ export function createBrowserNotificationDeps(): NotificationDeps {
       if (!isSupported()) {
         return "unsupported";
       }
-      return globalThis.Notification
-        .permission as NotificationPermissionState;
+      return globalThis.Notification.permission as NotificationPermissionState;
     },
     async requestPermission(): Promise<NotificationPermissionState> {
       const result = await globalThis.Notification.requestPermission();

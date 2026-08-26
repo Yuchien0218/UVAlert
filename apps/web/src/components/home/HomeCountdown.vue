@@ -20,13 +20,9 @@ const props = defineProps<{
 }>();
 
 /** 沒有可信期限時 progressPercent 為 null，此時不畫進度條而不是畫 0%。 */
-const hasProgress = computed(
-  () => props.presentation.progressPercent !== null
-);
+const hasProgress = computed(() => props.presentation.progressPercent !== null);
 
-const toneClass = computed(
-  () => `countdown--${props.presentation.tone}`
-);
+const toneClass = computed(() => `countdown--${props.presentation.tone}`);
 </script>
 
 <template>

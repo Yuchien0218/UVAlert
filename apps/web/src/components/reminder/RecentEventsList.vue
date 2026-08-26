@@ -34,7 +34,10 @@ interface DisplayEvent {
   correctable: boolean;
 }
 
-function buildDisplayEvents(zones: ZoneProjection[], events: SessionEventStreamV1 | null): DisplayEvent[] {
+function buildDisplayEvents(
+  zones: ZoneProjection[],
+  events: SessionEventStreamV1 | null
+): DisplayEvent[] {
   if (!events) return [];
 
   const displayEvents: DisplayEvent[] = [];
@@ -59,9 +62,8 @@ function buildDisplayEvents(zones: ZoneProjection[], events: SessionEventStreamV
   for (const event of events.contextEvents) {
     if (event.eventType === "context_event") {
       if (event.contextType === "water_start") {
-        const startLabel = event.startConfidence === "confirmed"
-          ? "入水"
-          : "入水（時間未知）";
+        const startLabel =
+          event.startConfidence === "confirmed" ? "入水" : "入水（時間未知）";
         displayEvents.push({
           id: event.id,
           time: new Date(event.effectiveOccurredAt),
@@ -85,7 +87,12 @@ function buildDisplayEvents(zones: ZoneProjection[], events: SessionEventStreamV
           zoneIds: zones.map((z) => z.zoneInstanceId),
           correctable: false
         });
-      } else if (event.contextType === "heavy_sweat" || event.contextType === "towel" || event.contextType === "friction" || event.contextType === "hand_wash") {
+      } else if (
+        event.contextType === "heavy_sweat" ||
+        event.contextType === "towel" ||
+        event.contextType === "friction" ||
+        event.contextType === "hand_wash"
+      ) {
         const causeLabels: Record<string, string> = {
           heavy_sweat: "流汗",
           towel: "擦拭",
@@ -120,7 +127,9 @@ function buildDisplayEvents(zones: ZoneProjection[], events: SessionEventStreamV
   return displayEvents;
 }
 
-const displayEvents = computed(() => buildDisplayEvents(props.zones, props.events));
+const displayEvents = computed(() =>
+  buildDisplayEvents(props.zones, props.events)
+);
 
 function formatTime(date: Date): string {
   const now = new Date();
@@ -143,7 +152,9 @@ function formatTime(date: Date): string {
 
 function getZoneNames(zoneIds: string[], zones: ZoneProjection[]): string {
   if (zoneIds.length === 0) return "";
-  if (zoneIds.length === zones.filter((z) => z.trackingStatus === "active").length) {
+  if (
+    zoneIds.length === zones.filter((z) => z.trackingStatus === "active").length
+  ) {
     return `${zones.filter((z) => z.trackingStatus === "active").length} 個部位`;
   }
   return zoneIds
@@ -186,7 +197,9 @@ function getZoneNames(zoneIds: string[], zones: ZoneProjection[]): string {
         >
           <span class="event-time">{{ formatTime(event.time) }}</span>
           <span class="event-label">{{ event.label }}</span>
-          <span class="event-zones">{{ getZoneNames(event.zoneIds, zones) }}</span>
+          <span class="event-zones">{{
+            getZoneNames(event.zoneIds, zones)
+          }}</span>
         </component>
       </template>
     </div>
@@ -199,7 +212,9 @@ function getZoneNames(zoneIds: string[], zones: ZoneProjection[]): string {
         :aria-expanded="isExpanded"
         @click="isExpanded = !isExpanded"
       >
-        {{ isExpanded ? "收合" : `查看其他 ${displayEvents.length - 1} 筆事件` }}
+        {{
+          isExpanded ? "收合" : `查看其他 ${displayEvents.length - 1} 筆事件`
+        }}
       </button>
     </div>
   </section>

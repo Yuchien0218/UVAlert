@@ -31,10 +31,7 @@ defineEmits<{
     <div class="setup-shell__toolbar">
       <span />
 
-      <span
-        v-if="saveStatus === 'saved'"
-        class="setup-shell__save-status"
-      >
+      <span v-if="saveStatus === 'saved'" class="setup-shell__save-status">
         <Icon name="state-online" :size="20" />
         草稿已儲存
       </span>

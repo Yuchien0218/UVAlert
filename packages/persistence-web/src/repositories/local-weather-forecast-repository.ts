@@ -3,16 +3,11 @@ import {
   type FiveDayUvForecast
 } from "@sunshield/contracts";
 import type { UvForecastSnapshotPort } from "@sunshield/platform";
-import type {
-  SunshieldDatabase,
-  WeatherSnapshotRecord
-} from "../db/database";
+import type { SunshieldDatabase, WeatherSnapshotRecord } from "../db/database";
 
 const FIVE_DAY_SOURCE_KIND = "five_day_uv_forecast";
 
-export class LocalWeatherForecastRepository
-  implements UvForecastSnapshotPort
-{
+export class LocalWeatherForecastRepository implements UvForecastSnapshotPort {
   readonly #database: SunshieldDatabase;
 
   constructor(database: SunshieldDatabase) {
@@ -22,8 +17,7 @@ export class LocalWeatherForecastRepository
   async getLatestForecast(
     regionCode: string
   ): Promise<FiveDayUvForecast | null> {
-    const records = await this.#database.WeatherSnapshots
-      .where("regionId")
+    const records = await this.#database.WeatherSnapshots.where("regionId")
       .equals(regionCode)
       .toArray();
 

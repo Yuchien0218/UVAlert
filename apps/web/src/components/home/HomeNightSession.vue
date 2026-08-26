@@ -41,9 +41,8 @@ const startedAt = computed<number | null>(() => {
 
 const trackedZoneCount = computed(
   () =>
-    props.session.zones.filter(
-      (zone) => zone.zoneTimerStartedAt !== null
-    ).length
+    props.session.zones.filter((zone) => zone.zoneTimerStartedAt !== null)
+      .length
 );
 
 const elapsedLabel = computed<string | null>(() => {

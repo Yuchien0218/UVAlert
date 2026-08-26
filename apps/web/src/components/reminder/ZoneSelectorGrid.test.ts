@@ -63,7 +63,9 @@ describe("ZoneSelectorGrid", () => {
     const wrapper = mount(ZoneSelectorGrid, {
       props: { zones: [makeZone()], selectedZoneIds: [], locked: true }
     });
-    expect(wrapper.get("input[type=checkbox]").attributes("disabled")).toBeDefined();
+    expect(
+      wrapper.get("input[type=checkbox]").attributes("disabled")
+    ).toBeDefined();
     expect(wrapper.get("label").classes()).toContain("zone-chip--locked");
   });
 });

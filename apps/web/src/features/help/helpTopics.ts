@@ -103,8 +103,7 @@ export function findTopic(slug: string): HelpTopic | undefined {
  * 與 help 主題同樣做成資料驅動：核准後改成 `APPROVED`，
  * 「更多」頁的入口會自動回來，不必改程式。
  */
-export const SPECIAL_SITUATION_REVIEW_STATUS: ContentReviewStatus =
-  "BLOCKED";
+export const SPECIAL_SITUATION_REVIEW_STATUS: ContentReviewStatus = "BLOCKED";
 
 export function isSpecialSituationPublishable(): boolean {
   return SPECIAL_SITUATION_REVIEW_STATUS === "APPROVED";

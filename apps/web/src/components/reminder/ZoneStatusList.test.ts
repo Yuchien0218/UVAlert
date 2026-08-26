@@ -113,9 +113,7 @@ describe("ZoneStatusList status boundaries", () => {
     const groups = wrapper.findAll(".zone-group");
     expect(groups).toHaveLength(2);
     expect(groups[0]!.classes()).toContain("zone-group--due");
-    expect(groups[0]!.find(".zone-group__status").text()).toBe(
-      "建議現在補擦"
-    );
+    expect(groups[0]!.find(".zone-group__status").text()).toBe("建議現在補擦");
     expect(groups[0]!.findAll(".zone-chip")).toHaveLength(2);
     expect(groups[1]!.classes()).toContain("zone-group--tracking");
     expect(groups[1]!.findAll(".zone-chip")).toHaveLength(1);

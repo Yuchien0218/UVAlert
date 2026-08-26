@@ -148,19 +148,29 @@ export function mapCwaForecast(
   const root = asObject(input, "CWA response");
   const records = asObject(root.records, "CWA records");
   const locations = asArray(records.locations, "CWA locations");
-  const container = locations[0] === undefined
-    ? null
-    : asObject(locations[0], "CWA locations[0]");
-  const rawLocations = container === null ? [] : asArray(container.location, "CWA location");
+  const container =
+    locations[0] === undefined
+      ? null
+      : asObject(locations[0], "CWA locations[0]");
+  const rawLocations =
+    container === null ? [] : asArray(container.location, "CWA location");
   const location = rawLocations
     .map((item) => asObject(item, "CWA location item"))
-    .find((item) => String(item.Geocode ?? item.geocode ?? "") === options.regionCode);
+    .find(
+      (item) =>
+        String(item.Geocode ?? item.geocode ?? "") === options.regionCode
+    );
   if (location === undefined) {
-    throw new CwaMappingError("REGION_NOT_FOUND", "找不到所選行政區的 CWA 預報");
+    throw new CwaMappingError(
+      "REGION_NOT_FOUND",
+      "找不到所選行政區的 CWA 預報"
+    );
   }
 
-  const elements = asArray(location.WeatherElement ?? location.weatherElement, "CWA weatherElement")
-    .map((item) => asObject(item, "CWA weatherElement item"));
+  const elements = asArray(
+    location.WeatherElement ?? location.weatherElement,
+    "CWA weatherElement"
+  ).map((item) => asObject(item, "CWA weatherElement item"));
   const uvElement = elements.find((element) =>
     ["紫外線指數", "UVIndex", "uvIndex"].includes(
       String(element.ElementName ?? element.elementName ?? "")
@@ -169,17 +179,21 @@ export function mapCwaForecast(
   if (uvElement === undefined) {
     throw new CwaMappingError("UV_DATA_MISSING", "CWA 回應沒有紫外線指數");
   }
-  const uvTimes = asArray(uvElement.Time ?? uvElement.time, "CWA UV times")
-    .map((item) => asObject(item, "CWA UV time"));
+  const uvTimes = asArray(uvElement.Time ?? uvElement.time, "CWA UV times").map(
+    (item) => asObject(item, "CWA UV time")
+  );
   const temperatureElement = elements.find((element) =>
     ["平均溫度", "T", "Temperature", "temperature"].includes(
       String(element.ElementName ?? element.elementName ?? "")
     )
   );
-  const temperatureTimes = temperatureElement === undefined
-    ? []
-    : asArray(temperatureElement.Time ?? temperatureElement.time, "CWA temperature times")
-        .map((item) => asObject(item, "CWA temperature time"));
+  const temperatureTimes =
+    temperatureElement === undefined
+      ? []
+      : asArray(
+          temperatureElement.Time ?? temperatureElement.time,
+          "CWA temperature times"
+        ).map((item) => asObject(item, "CWA temperature time"));
 
   const daysByDate = new Map<string, UvForecastPayload["days"][number]>();
   for (const time of uvTimes) {
@@ -192,7 +206,12 @@ export function mapCwaForecast(
       throw new CwaMappingError("INVALID_TIME");
     }
     if (Date.parse(validTo) <= Date.parse(now)) continue;
-    const value = readElementValue(time, ["UVIndex", "uvIndex", "value", "Value"]);
+    const value = readElementValue(time, [
+      "UVIndex",
+      "uvIndex",
+      "value",
+      "Value"
+    ]);
     const uvi = parseUvi(value);
     if (uvi === null) continue;
     const localDate = startSource.slice(0, 10);
@@ -205,7 +224,11 @@ export function mapCwaForecast(
       validTo,
       uvi,
       riskLevel: riskLevelFor(uvi),
-      temperatureCelsius: readTemperature(temperatureTimes, startSource, endSource)
+      temperatureCelsius: readTemperature(
+        temperatureTimes,
+        startSource,
+        endSource
+      )
     } satisfies UvForecastPayload["days"][number];
     const existing = daysByDate.get(localDate);
     if (existing === undefined || candidate.uvi > existing.uvi) {
@@ -214,7 +237,9 @@ export function mapCwaForecast(
   }
 
   const days = [...daysByDate.values()]
-    .sort((left, right) => Date.parse(left.validFrom) - Date.parse(right.validFrom))
+    .sort(
+      (left, right) => Date.parse(left.validFrom) - Date.parse(right.validFrom)
+    )
     .slice(0, 5);
   if (days.length === 0) {
     throw new CwaMappingError("FORECAST_EXPIRED", "CWA 預報已沒有可使用時段");
@@ -225,14 +250,20 @@ export function mapCwaForecast(
     "CWA datasetInfo"
   );
   const issuedAtSource = readString(
-    datasetInfo.IssueTime ?? datasetInfo.issueTime ?? datasetInfo.Update ?? datasetInfo.update
+    datasetInfo.IssueTime ??
+      datasetInfo.issueTime ??
+      datasetInfo.Update ??
+      datasetInfo.update
   );
-  const displayName = readString(location.LocationName ?? location.locationName);
+  const displayName = readString(
+    location.LocationName ?? location.locationName
+  );
   if (displayName === null) {
     throw new CwaMappingError("INVALID_RESPONSE", "CWA 回應缺少行政區名稱");
   }
   const usableUntil = normalizeInstant(
-    options.usableUntil ?? new Date(Date.parse(fetchedAt) + DEFAULT_CACHE_TTL_MS).toISOString(),
+    options.usableUntil ??
+      new Date(Date.parse(fetchedAt) + DEFAULT_CACHE_TTL_MS).toISOString(),
     "usableUntil"
   );
   if (Date.parse(usableUntil) <= Date.parse(fetchedAt)) {
@@ -244,9 +275,10 @@ export function mapCwaForecast(
     sourceKind: "forecast",
     sourceDataset: CWA_DATASET,
     sourceDisplayName: "中央氣象署區域預報",
-    issuedAt: issuedAtSource === null
-      ? fetchedAt
-      : normalizeInstant(issuedAtSource, "issuedAt"),
+    issuedAt:
+      issuedAtSource === null
+        ? fetchedAt
+        : normalizeInstant(issuedAtSource, "issuedAt"),
     fetchedAt,
     usableUntil,
     days
@@ -255,7 +287,10 @@ export function mapCwaForecast(
 
 export function parseCachedForecast(input: unknown): UvForecastPayload {
   const value = asObject(input, "cached forecast");
-  if (value.schemaVersion !== "five-day-uv-v2" || value.sourceDataset !== CWA_DATASET) {
+  if (
+    value.schemaVersion !== "five-day-uv-v2" ||
+    value.sourceDataset !== CWA_DATASET
+  ) {
     throw new CwaMappingError("INVALID_RESPONSE");
   }
   const region = asObject(value.region, "cached region");
@@ -267,7 +302,10 @@ export function parseCachedForecast(input: unknown): UvForecastPayload {
       throw new CwaMappingError("INVALID_UVI");
     }
     const temperature = day.temperatureCelsius;
-    if (temperature !== null && (typeof temperature !== "number" || !Number.isFinite(temperature))) {
+    if (
+      temperature !== null &&
+      (typeof temperature !== "number" || !Number.isFinite(temperature))
+    ) {
       throw new CwaMappingError("INVALID_RESPONSE");
     }
     return {
@@ -298,20 +336,32 @@ export function parseCachedForecast(input: unknown): UvForecastPayload {
   };
 }
 
-function readTemperature(times: Record<string, unknown>[], start: string, end: string): number | null {
+function readTemperature(
+  times: Record<string, unknown>[],
+  start: string,
+  end: string
+): number | null {
   const match = times.find((time) =>
     time.StartTime === start || time.startTime === start
       ? time.EndTime === end || time.endTime === end
       : false
   );
   if (match === undefined) return null;
-  const value = readElementValue(match, ["Temperature", "temperature", "value", "Value"]);
+  const value = readElementValue(match, [
+    "Temperature",
+    "temperature",
+    "value",
+    "Value"
+  ]);
   if (value === null || value === "" || value === "--") return null;
   const parsed = Number(value);
   return Number.isFinite(parsed) ? parsed : null;
 }
 
-function readElementValue(time: Record<string, unknown>, keys: string[]): unknown {
+function readElementValue(
+  time: Record<string, unknown>,
+  keys: string[]
+): unknown {
   const raw = time.ElementValue ?? time.elementValue;
   if (Array.isArray(raw)) {
     const first = raw[0];
@@ -326,7 +376,13 @@ function readElementValue(time: Record<string, unknown>, keys: string[]): unknow
 }
 
 function parseUvi(value: unknown): number | null {
-  if (value === null || value === undefined || value === "" || value === "--" || value === "-99") {
+  if (
+    value === null ||
+    value === undefined ||
+    value === "" ||
+    value === "--" ||
+    value === "-99"
+  ) {
     return null;
   }
   const parsed = typeof value === "number" ? value : Number(value);
@@ -336,7 +392,9 @@ function parseUvi(value: unknown): number | null {
   return parsed;
 }
 
-function riskLevelFor(uvi: number): UvForecastPayload["days"][number]["riskLevel"] {
+function riskLevelFor(
+  uvi: number
+): UvForecastPayload["days"][number]["riskLevel"] {
   if (uvi <= 2) return "low";
   if (uvi <= 5) return "moderate";
   if (uvi <= 7) return "high";
@@ -370,12 +428,14 @@ function readString(value: unknown): string | null {
 }
 
 function asObject(value: unknown, field: string): Record<string, unknown> {
-  if (!isObject(value)) throw new CwaMappingError("INVALID_RESPONSE", `${field} 格式不正確`);
+  if (!isObject(value))
+    throw new CwaMappingError("INVALID_RESPONSE", `${field} 格式不正確`);
   return value;
 }
 
 function asArray(value: unknown, field: string): unknown[] {
-  if (!Array.isArray(value)) throw new CwaMappingError("INVALID_RESPONSE", `${field} 格式不正確`);
+  if (!Array.isArray(value))
+    throw new CwaMappingError("INVALID_RESPONSE", `${field} 格式不正確`);
   return value;
 }
 

@@ -21,9 +21,7 @@ export interface LocalRegionPreferenceRepositoryOptions {
   legacyRegionLookup?: LegacyRegionLookup;
 }
 
-export class LocalRegionPreferenceRepository
-  implements RegionPreferencePort
-{
+export class LocalRegionPreferenceRepository implements RegionPreferencePort {
   readonly #database: SunshieldDatabase;
   readonly #legacyRegionLookup: LegacyRegionLookup | undefined;
 
@@ -36,9 +34,7 @@ export class LocalRegionPreferenceRepository
   }
 
   async getPreference(): Promise<RegionPreferenceV1 | null> {
-    const stored = await this.#database.AppMetadata.get(
-      CURRENT_PREFERENCE_KEY
-    );
+    const stored = await this.#database.AppMetadata.get(CURRENT_PREFERENCE_KEY);
     if (stored !== undefined) {
       return parsePreference(stored.value);
     }
@@ -46,9 +42,7 @@ export class LocalRegionPreferenceRepository
     return this.#migrateLegacySelection();
   }
 
-  async savePreference(
-    preference: RegionPreferenceV1
-  ): Promise<void> {
+  async savePreference(preference: RegionPreferenceV1): Promise<void> {
     const parsed = RegionPreferenceV1Schema.parse(preference);
 
     await this.#database.transaction(
@@ -59,17 +53,13 @@ export class LocalRegionPreferenceRepository
           key: CURRENT_PREFERENCE_KEY,
           value: JSON.stringify(parsed)
         });
-        await this.#database.AppMetadata.delete(
-          LEGACY_SELECTION_KEY
-        );
+        await this.#database.AppMetadata.delete(LEGACY_SELECTION_KEY);
       }
     );
   }
 
   async #migrateLegacySelection(): Promise<RegionPreferenceV1 | null> {
-    const stored = await this.#database.AppMetadata.get(
-      LEGACY_SELECTION_KEY
-    );
+    const stored = await this.#database.AppMetadata.get(LEGACY_SELECTION_KEY);
     if (stored === undefined || this.#legacyRegionLookup === undefined) {
       return null;
     }
@@ -99,9 +89,7 @@ export class LocalRegionPreferenceRepository
           key: CURRENT_PREFERENCE_KEY,
           value: JSON.stringify(preference)
         });
-        await this.#database.AppMetadata.delete(
-          LEGACY_SELECTION_KEY
-        );
+        await this.#database.AppMetadata.delete(LEGACY_SELECTION_KEY);
       }
     );
 
@@ -111,9 +99,7 @@ export class LocalRegionPreferenceRepository
 
 function parsePreference(value: string): RegionPreferenceV1 | null {
   try {
-    const parsed = RegionPreferenceV1Schema.safeParse(
-      JSON.parse(value)
-    );
+    const parsed = RegionPreferenceV1Schema.safeParse(JSON.parse(value));
     return parsed.success ? parsed.data : null;
   } catch {
     return null;

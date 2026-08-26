@@ -3,7 +3,10 @@ import { hashClientFingerprint, SlidingWindowRateLimiter } from "./rate-limit";
 
 describe("feedback rate limit", () => {
   it("在短視窗內限制同一 hashed fingerprint，並提供 retry-after", () => {
-    const limiter = new SlidingWindowRateLimiter({ maxRequests: 2, windowMs: 60_000 });
+    const limiter = new SlidingWindowRateLimiter({
+      maxRequests: 2,
+      windowMs: 60_000
+    });
     expect(limiter.check("hashed-client", 0).allowed).toBe(true);
     expect(limiter.check("hashed-client", 1_000).allowed).toBe(true);
     expect(limiter.check("hashed-client", 2_000)).toMatchObject({

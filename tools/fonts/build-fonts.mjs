@@ -1,4 +1,10 @@
-import { readFileSync, writeFileSync, readdirSync, mkdirSync, existsSync } from "node:fs";
+import {
+  readFileSync,
+  writeFileSync,
+  readdirSync,
+  mkdirSync,
+  existsSync
+} from "node:fs";
 import { resolve, extname } from "node:path";
 import { fileURLToPath } from "node:url";
 import subsetFont from "subset-font";
@@ -183,7 +189,8 @@ export async function buildFonts() {
 }
 
 const isDirectRun =
-  process.argv[1] && fileURLToPath(import.meta.url) === resolve(process.argv[1]);
+  process.argv[1] &&
+  fileURLToPath(import.meta.url) === resolve(process.argv[1]);
 
 if (isDirectRun) {
   const { results, totalCharacters, cjkCount } = await buildFonts();

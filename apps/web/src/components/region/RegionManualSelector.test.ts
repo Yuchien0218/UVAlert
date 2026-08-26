@@ -54,9 +54,9 @@ describe("RegionManualSelector", () => {
     const countyError = wrapper.get("#region-county-error");
     expect(countyError.text()).toBe("請先選擇縣市");
     expect(
-      wrapper.get("#region-county").element.parentElement?.contains(
-        countyError.element
-      )
+      wrapper
+        .get("#region-county")
+        .element.parentElement?.contains(countyError.element)
     ).toBe(true);
     expect(wrapper.emitted("save")).toBeUndefined();
 
@@ -65,13 +65,11 @@ describe("RegionManualSelector", () => {
     const townError = wrapper.get("#region-town-error");
     expect(townError.text()).toBe("請選擇鄉鎮市區");
     expect(
-      wrapper.get("#region-town").element.parentElement?.contains(
-        townError.element
-      )
+      wrapper
+        .get("#region-town")
+        .element.parentElement?.contains(townError.element)
     ).toBe(true);
-    expect(wrapper.get("#region-town").attributes("aria-invalid")).toBe(
-      "true"
-    );
+    expect(wrapper.get("#region-town").attributes("aria-invalid")).toBe("true");
     expect(wrapper.emitted("save")).toBeUndefined();
   });
 
@@ -85,9 +83,7 @@ describe("RegionManualSelector", () => {
     expect(town.text()).not.toContain("宜蘭市");
 
     await town.setValue("63000010");
-    await wrapper
-      .get('[data-testid="save-manual-region"]')
-      .trigger("click");
+    await wrapper.get('[data-testid="save-manual-region"]').trigger("click");
 
     expect(wrapper.emitted("save")).toEqual([["63000010"]]);
   });

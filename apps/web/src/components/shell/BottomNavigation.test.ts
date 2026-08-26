@@ -45,13 +45,13 @@ describe("BottomNavigation", () => {
     });
     const links = wrapper.findAll("a");
 
-    expect(
-      links.map((link) => [link.text(), link.attributes("href")])
-    ).toEqual([
-      ["提醒", "/"],
-      ["裝備", "/products"],
-      ["更多", "/more"]
-    ]);
+    expect(links.map((link) => [link.text(), link.attributes("href")])).toEqual(
+      [
+        ["提醒", "/"],
+        ["裝備", "/products"],
+        ["更多", "/more"]
+      ]
+    );
   });
 
   it("固定在視窗底部並處理安全區與遮蓋層級", () => {
@@ -59,12 +59,8 @@ describe("BottomNavigation", () => {
     expect(bottomNavigationSource).toContain("bottom: 0;");
     expect(bottomNavigationSource).toContain("left: 0;");
     expect(bottomNavigationSource).toContain("right: 0;");
-    expect(bottomNavigationSource).toContain(
-      "var(--bottom-nav-height)"
-    );
-    expect(bottomNavigationSource).toContain(
-      "env(safe-area-inset-bottom)"
-    );
+    expect(bottomNavigationSource).toContain("var(--bottom-nav-height)");
+    expect(bottomNavigationSource).toContain("env(safe-area-inset-bottom)");
     expect(bottomNavigationSource).toMatch(/z-index:\s*(\d+|var\(--[\w-]+\))/);
     expect(bottomNavigationSource).toContain(
       "background: var(--page-background);"
@@ -94,7 +90,9 @@ describe("BottomNavigation", () => {
       global: { plugins: [router] }
     });
 
-    expect(wrapper.find('[data-testid="bottom-nav-badge"]').exists()).toBe(false);
+    expect(wrapper.find('[data-testid="bottom-nav-badge"]').exists()).toBe(
+      false
+    );
   });
 
   it("當 active session 中有部位處於 due 狀態時，提醒分頁圖示右上角顯示同色小紅點", async () => {

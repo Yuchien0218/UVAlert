@@ -13,18 +13,18 @@ node tools/fonts/build-fonts.mjs
 
 原始字型檔**不進 repo**（`.gitignore` 排除 `tools/fonts/source/`），因為完整 Noto Serif TC 就有 24MB。要重新產生得先下載到 `tools/fonts/source/`：
 
-| 檔名 | 來源 | 授權 |
-|---|---|---|
+| 檔名                      | 來源                                                                                                                    | 授權        |
+| ------------------------- | ----------------------------------------------------------------------------------------------------------------------- | ----------- |
 | `NotoSerifTC-Regular.otf` | [notofonts/noto-cjk](https://github.com/notofonts/noto-cjk) → `Serif/OTF/TraditionalChinese/NotoSerifCJKtc-Regular.otf` | SIL OFL 1.1 |
-| `Inter.ttf` | [google/fonts](https://github.com/google/fonts) → `ofl/inter/Inter[opsz,wght].ttf` | SIL OFL 1.1 |
+| `Inter.ttf`               | [google/fonts](https://github.com/google/fonts) → `ofl/inter/Inter[opsz,wght].ttf`                                      | SIL OFL 1.1 |
 
 ## 目前的產出
 
-| 檔案 | 大小 | 原檔 | 比例 |
-|---|---|---|---|
-| `noto-serif-tc-subset.woff2` | 649 KB | 24 MB | 2.7% |
-| `inter-subset.woff2` | 73 KB | 856 KB | 8.5% |
-| **合計** | **722 KB** | | |
+| 檔案                         | 大小       | 原檔   | 比例 |
+| ---------------------------- | ---------- | ------ | ---- |
+| `noto-serif-tc-subset.woff2` | 649 KB     | 24 MB  | 2.7% |
+| `inter-subset.woff2`         | 73 KB      | 856 KB | 8.5% |
+| **合計**                     | **722 KB** |        |      |
 
 只有兩支字型：標題的 Noto Serif TC（中英文都由它負責）與內文拉丁的 Inter。中文內文交給系統黑體，理由見下方第三點。
 
@@ -32,11 +32,11 @@ node tools/fonts/build-fonts.mjs
 
 2026-08-23 移除了原本搭配的 Cormorant Garamond。判斷依據是實測資料，不是風格偏好：
 
-| 項目 | 數字 |
-|---|---|
-| 衛教文章標題總數 | 54 |
-| 含拉丁字母 | 11（20%）|
-| **連續拉丁文字** | **0** |
+| 項目             | 數字      |
+| ---------------- | --------- |
+| 衛教文章標題總數 | 54        |
+| 含拉丁字母       | 11（20%） |
+| **連續拉丁文字** | **0**     |
 
 那 11 個全部是嵌在中文句子裡的縮寫——`UV`、`UVA`、`UVB`、`SPF`、`PA`、`UPF`、`UV400`。**沒有「拉丁標題排版」這個工作**，所以不需要專門的西文顯示體。
 

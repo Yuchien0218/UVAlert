@@ -19,8 +19,7 @@ const emit = defineEmits<{
 }>();
 
 const isConfirming = shallowRef(false);
-const confirmationTitle =
-  useTemplateRef<HTMLElement>("confirmationTitle");
+const confirmationTitle = useTemplateRef<HTMLElement>("confirmationTitle");
 const stopButton = useTemplateRef<HTMLButtonElement>("stopButton");
 
 async function openConfirmation(): Promise<void> {
@@ -81,53 +80,49 @@ function getErrorMessage(error: SessionEndError): string {
       class="session-end__backdrop"
       @click.self="cancelConfirmation"
     >
-    <div
-      class="session-end__confirmation"
-      role="dialog"
-      aria-modal="true"
-      aria-labelledby="session-end-confirm-title"
-      aria-describedby="session-end-confirm-body"
-      @keydown.esc="cancelConfirmation"
-    >
-      <p
-        ref="confirmationTitle"
-        id="session-end-confirm-title"
-        class="session-end__confirm-title"
-        tabindex="-1"
+      <div
+        class="session-end__confirmation"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="session-end-confirm-title"
+        aria-describedby="session-end-confirm-body"
+        @keydown.esc="cancelConfirmation"
       >
-        要結束這次提醒嗎？
-      </p>
-      <p id="session-end-confirm-body" class="session-end__confirm-body">
-        結束後會停止所有待處理提示；裝備紀錄與既有資料不會受影響。
-      </p>
-
-      <p
-        v-if="error !== null"
-        class="session-end__error"
-        role="alert"
-      >
-        {{ getErrorMessage(error) }}
-      </p>
-
-      <div class="session-end__actions">
-        <button
-          class="button session-end__confirm-button"
-          type="button"
-          :disabled="phase === 'ending'"
-          @click="confirmEnd"
+        <p
+          ref="confirmationTitle"
+          id="session-end-confirm-title"
+          class="session-end__confirm-title"
+          tabindex="-1"
         >
-          {{ phase === "ending" ? "正在結束…" : "結束本次提醒" }}
-        </button>
-        <button
-          class="button button--quiet"
-          type="button"
-          :disabled="phase === 'ending'"
-          @click="cancelConfirmation"
-        >
-          取消
-        </button>
+          要結束這次提醒嗎？
+        </p>
+        <p id="session-end-confirm-body" class="session-end__confirm-body">
+          結束後會停止所有待處理提示；裝備紀錄與既有資料不會受影響。
+        </p>
+
+        <p v-if="error !== null" class="session-end__error" role="alert">
+          {{ getErrorMessage(error) }}
+        </p>
+
+        <div class="session-end__actions">
+          <button
+            class="button session-end__confirm-button"
+            type="button"
+            :disabled="phase === 'ending'"
+            @click="confirmEnd"
+          >
+            {{ phase === "ending" ? "正在結束…" : "結束本次提醒" }}
+          </button>
+          <button
+            class="button button--quiet"
+            type="button"
+            :disabled="phase === 'ending'"
+            @click="cancelConfirmation"
+          >
+            取消
+          </button>
+        </div>
       </div>
-    </div>
     </div>
   </div>
 </template>

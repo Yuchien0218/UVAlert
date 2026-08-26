@@ -2,10 +2,7 @@
 
 import { mount } from "@vue/test-utils";
 import { shallowReadonly, shallowRef } from "vue";
-import {
-  createMemoryHistory,
-  createRouter
-} from "vue-router";
+import { createMemoryHistory, createRouter } from "vue-router";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { WebAppServices } from "../app/createWebAppServices";
 import { useWebAppServices } from "../app/injection";

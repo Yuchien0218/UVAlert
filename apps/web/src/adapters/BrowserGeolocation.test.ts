@@ -70,10 +70,7 @@ describe("BrowserGeolocation", () => {
     const permissions = {
       query: vi.fn(async () => ({ state: "denied" as const }))
     };
-    const adapter = new BrowserGeolocation(
-      { getCurrentPosition },
-      permissions
-    );
+    const adapter = new BrowserGeolocation({ getCurrentPosition }, permissions);
 
     await expect(adapter.requestCurrentPosition()).rejects.toMatchObject({
       name: "DeviceGeolocationError",
@@ -85,10 +82,7 @@ describe("BrowserGeolocation", () => {
     const getCurrentPosition = vi.fn((_success, error) => {
       error({ code: 3 });
     });
-    const adapter = new BrowserGeolocation(
-      { getCurrentPosition },
-      null
-    );
+    const adapter = new BrowserGeolocation({ getCurrentPosition }, null);
 
     await expect(adapter.requestCurrentPosition()).rejects.toMatchObject({
       name: "DeviceGeolocationError",
@@ -105,10 +99,7 @@ describe("BrowserGeolocation", () => {
         throw new Error("permission query unavailable");
       })
     };
-    const adapter = new BrowserGeolocation(
-      { getCurrentPosition },
-      permissions
-    );
+    const adapter = new BrowserGeolocation({ getCurrentPosition }, permissions);
 
     await expect(adapter.requestCurrentPosition()).rejects.toMatchObject({
       name: "DeviceGeolocationError",

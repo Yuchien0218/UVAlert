@@ -79,36 +79,36 @@ type StartApplicationGroup =
   StartSessionCommandV1["payload"]["applicationGroup"];
 type StartWater = StartSessionCommandV1["payload"]["waterStart"];
 
-export function makeStartSessionCommand(options: {
-  idPrefix?: string;
-  sessionId?: string;
-  commandId?: string;
-  idempotencyKey?: string;
-  clientSequence?: number;
-  clientCreatedAt?: string;
-  effectiveStartedAt?: string;
-  appliedAt?: string;
-  initialContext?: StartSessionCommandV1["payload"]["initialContext"];
-  zones?: StartZone[];
-  applicationGroup?: StartApplicationGroup | undefined;
-  waterStart?: StartWater | undefined;
-  snapshot?: ProductLabelSnapshotV1;
-} = {}): StartSessionCommandV1 {
+export function makeStartSessionCommand(
+  options: {
+    idPrefix?: string;
+    sessionId?: string;
+    commandId?: string;
+    idempotencyKey?: string;
+    clientSequence?: number;
+    clientCreatedAt?: string;
+    effectiveStartedAt?: string;
+    appliedAt?: string;
+    initialContext?: StartSessionCommandV1["payload"]["initialContext"];
+    zones?: StartZone[];
+    applicationGroup?: StartApplicationGroup | undefined;
+    waterStart?: StartWater | undefined;
+    snapshot?: ProductLabelSnapshotV1;
+  } = {}
+): StartSessionCommandV1 {
   const prefix = options.idPrefix ?? "fixture";
-  const zones =
-    options.zones ??
-    [
-      {
-        zoneInstanceId: `${prefix}-zone-face`,
-        trackingEventId: `${prefix}-tracking-face`,
-        methodEventId: `${prefix}-method-face`,
-        bodyZoneCode: "face_forehead",
-        customLabel: null,
-        skinExposureStatus: "exposed",
-        methodCertainty: "confirmed",
-        methodComponents: ["sunscreen"]
-      }
-    ];
+  const zones = options.zones ?? [
+    {
+      zoneInstanceId: `${prefix}-zone-face`,
+      trackingEventId: `${prefix}-tracking-face`,
+      methodEventId: `${prefix}-method-face`,
+      bodyZoneCode: "face_forehead",
+      customLabel: null,
+      skinExposureStatus: "exposed",
+      methodCertainty: "confirmed",
+      methodComponents: ["sunscreen"]
+    }
+  ];
   const topicalZoneIds = zones
     .filter((zone) =>
       zone.methodComponents.some(
@@ -124,16 +124,14 @@ export function makeStartSessionCommand(options: {
         ? null
         : {
             groupId: `${prefix}-application-group`,
-            appliedAt:
-              options.appliedAt ?? "2026-07-29T10:00:00.000Z",
+            appliedAt: options.appliedAt ?? "2026-07-29T10:00:00.000Z",
             applications: [
               {
                 eventId: `${prefix}-application`,
                 zoneInstanceIds: topicalZoneIds,
                 sourceProductId: `${prefix}-product-a`,
                 productSnapshotFingerprint: `${prefix}-snapshot-a`,
-                productLabelSnapshot:
-                  options.snapshot ?? makeProductSnapshot()
+                productLabelSnapshot: options.snapshot ?? makeProductSnapshot()
               }
             ]
           };
@@ -147,8 +145,7 @@ export function makeStartSessionCommand(options: {
     commandVersion: COMMAND_SCHEMA_VERSION,
     commandType: "start_session",
     commandId: options.commandId ?? `${prefix}-start-command`,
-    idempotencyKey:
-      options.idempotencyKey ?? `${prefix}-start-idempotency`,
+    idempotencyKey: options.idempotencyKey ?? `${prefix}-start-idempotency`,
     owner: {
       type: "guest",
       localVisitorId: "visitor-1"
@@ -156,8 +153,7 @@ export function makeStartSessionCommand(options: {
     deviceLocalId: "device-1",
     sessionId: options.sessionId ?? `${prefix}-session`,
     clientSequence: options.clientSequence ?? 1,
-    clientCreatedAt:
-      options.clientCreatedAt ?? "2026-07-29T10:00:00.000Z",
+    clientCreatedAt: options.clientCreatedAt ?? "2026-07-29T10:00:00.000Z",
     payload: {
       sessionStartedEventId: `${prefix}-session-started`,
       rulesetVersion: DEFAULT_RULESET_VERSION,
@@ -176,21 +172,22 @@ export function makeStartSessionCommand(options: {
   });
 }
 
-export function makeEndSessionCommand(options: {
-  sessionId?: string;
-  expectedRevision?: number;
-  clientSequence?: number;
-  idPrefix?: string;
-  idempotencyKey?: string;
-  effectiveOccurredAt?: string;
-} = {}): EndSessionCommandV1 {
+export function makeEndSessionCommand(
+  options: {
+    sessionId?: string;
+    expectedRevision?: number;
+    clientSequence?: number;
+    idPrefix?: string;
+    idempotencyKey?: string;
+    effectiveOccurredAt?: string;
+  } = {}
+): EndSessionCommandV1 {
   const prefix = options.idPrefix ?? "fixture";
   return {
     commandVersion: COMMAND_SCHEMA_VERSION,
     commandType: "end_session",
     commandId: `${prefix}-end-command`,
-    idempotencyKey:
-      options.idempotencyKey ?? `${prefix}-end-idempotency`,
+    idempotencyKey: options.idempotencyKey ?? `${prefix}-end-idempotency`,
     owner: {
       type: "guest",
       localVisitorId: "visitor-1"

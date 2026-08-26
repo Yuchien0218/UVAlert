@@ -151,7 +151,6 @@
   background: var(--surface-primary);
 }
 
-
 /*
  * Status-tinted cards — use soft background color to communicate urgency
  * at a glance. Pure background fill, no left border or shadow.
@@ -222,27 +221,47 @@
 
 .uvi-badge--low {
   --uvi-color: var(--color-uvi-low);
-  --uvi-soft: color-mix(in srgb, var(--color-uvi-low) 14%, var(--surface-primary));
+  --uvi-soft: color-mix(
+    in srgb,
+    var(--color-uvi-low) 14%,
+    var(--surface-primary)
+  );
 }
 
 .uvi-badge--moderate {
   --uvi-color: var(--color-uvi-moderate);
-  --uvi-soft: color-mix(in srgb, var(--color-uvi-moderate) 14%, var(--surface-primary));
+  --uvi-soft: color-mix(
+    in srgb,
+    var(--color-uvi-moderate) 14%,
+    var(--surface-primary)
+  );
 }
 
 .uvi-badge--high {
   --uvi-color: var(--color-uvi-high);
-  --uvi-soft: color-mix(in srgb, var(--color-uvi-high) 14%, var(--surface-primary));
+  --uvi-soft: color-mix(
+    in srgb,
+    var(--color-uvi-high) 14%,
+    var(--surface-primary)
+  );
 }
 
 .uvi-badge--very-high {
   --uvi-color: var(--color-uvi-very-high);
-  --uvi-soft: color-mix(in srgb, var(--color-uvi-very-high) 14%, var(--surface-primary));
+  --uvi-soft: color-mix(
+    in srgb,
+    var(--color-uvi-very-high) 14%,
+    var(--surface-primary)
+  );
 }
 
 .uvi-badge--extreme {
   --uvi-color: var(--color-uvi-extreme);
-  --uvi-soft: color-mix(in srgb, var(--color-uvi-extreme) 14%, var(--surface-primary));
+  --uvi-soft: color-mix(
+    in srgb,
+    var(--color-uvi-extreme) 14%,
+    var(--surface-primary)
+  );
 }
 
 .button {
@@ -469,9 +488,10 @@ button.text-link {
   border: 1px solid var(--border-subtle);
   border-radius: var(--radius-sm);
   cursor: pointer;
-  transition: background-color var(--duration-fast) var(--ease-out),
-              color var(--duration-fast) var(--ease-out),
-              border-color var(--duration-fast) var(--ease-out);
+  transition:
+    background-color var(--duration-fast) var(--ease-out),
+    color var(--duration-fast) var(--ease-out),
+    border-color var(--duration-fast) var(--ease-out);
 }
 
 /*

@@ -6,7 +6,10 @@ import { describe, expect, it } from "vitest";
 import type { ReapplicationProductChoice } from "../../features/reapplication/createReapplicationController";
 import ReapplicationProductAssignments from "./ReapplicationProductAssignments.vue";
 
-function zone(id: string, code: ZoneProjection["bodyZoneCode"]): ZoneProjection {
+function zone(
+  id: string,
+  code: ZoneProjection["bodyZoneCode"]
+): ZoneProjection {
   return {
     zoneInstanceId: id,
     bodyZoneCode: code,

@@ -138,7 +138,7 @@ water_preparing | water_active
 4. ~~通知：再次提醒頻率＋裝置測試~~ **已完成（2026-08-24）**，見
    `2026-08-23-hifi-redesign-round2-closeout.md`。
 5. 分享圖片（依賴照片儲存機制，`docs/decisions/
-   2026-08-23-wireframe-copy-fixes.md` §四點五已記錄，未排期）。
+2026-08-23-wireframe-copy-fixes.md` §四點五已記錄，未排期）。
 6. 開瓶日期欄位（依賴新資料欄位與 migration，同上，未排期）。
 
 ---

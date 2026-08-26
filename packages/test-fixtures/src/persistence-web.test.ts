@@ -44,9 +44,7 @@ class RecordingNotifier implements CrossContextNotifier {
 
 beforeEach(async () => {
   databaseCounter += 1;
-  database = new SunshieldDatabase(
-    `sunshield-test-${databaseCounter}`
-  );
+  database = new SunshieldDatabase(`sunshield-test-${databaseCounter}`);
   notifier = new RecordingNotifier();
   repository = new LocalSessionRepository({
     database,
@@ -170,8 +168,9 @@ describe("IndexedDB atomic command transactions", () => {
     });
     expect(await database.SessionEndedEvents.count()).toBe(0);
     expect(await database.ActiveSessionLocks.count()).toBe(1);
-    expect((await database.ProtectionSessions.get(start.sessionId))!.revision)
-      .toBe(1);
+    expect(
+      (await database.ProtectionSessions.get(start.sessionId))!.revision
+    ).toBe(1);
   });
 
   it("client sequence 必須嚴格遞增", async () => {
@@ -205,8 +204,9 @@ describe("IndexedDB atomic command transactions", () => {
     });
     expect(await database.SessionEndedEvents.count()).toBe(0);
     expect(await database.ActiveSessionLocks.count()).toBe(1);
-    expect((await database.ProtectionSessions.get(start.sessionId))!.revision)
-      .toBe(1);
+    expect(
+      (await database.ProtectionSessions.get(start.sessionId))!.revision
+    ).toBe(1);
   });
 
   it("End Session 原子更新 revision、projection、receipt 並移除 active lock", async () => {
@@ -223,10 +223,11 @@ describe("IndexedDB atomic command transactions", () => {
     expect(result.data.overallStatus).toBe("ended");
     expect(result.data.primaryAction.actionKind).toBe("view_ended_state");
     expect(await database.SessionEndedEvents.count()).toBe(1);
-    expect(await database.SessionEndedEvents.toCollection().first())
-      .toMatchObject({
-        endedReason: "user_ended"
-      });
+    expect(
+      await database.SessionEndedEvents.toCollection().first()
+    ).toMatchObject({
+      endedReason: "user_ended"
+    });
     expect(await database.ActiveSessionLocks.count()).toBe(0);
     expect(await database.CommandReceipts.count()).toBe(2);
     const stored = await database.ProtectionSessions.get(start.sessionId);
@@ -305,8 +306,7 @@ describe("IndexedDB atomic command transactions", () => {
   it("讀取舊版 zone projection 時從事件還原倒數起點", async () => {
     const start = makeStartSessionCommand();
     await repository.startSession(start, makeClock());
-    const storedZone =
-      (await database.ProtectionZoneStates.toArray())[0];
+    const storedZone = (await database.ProtectionZoneStates.toArray())[0];
     if (storedZone === undefined) {
       throw new Error("Expected a stored zone projection");
     }
@@ -314,9 +314,7 @@ describe("IndexedDB atomic command transactions", () => {
       ...storedZone
     } as Partial<ZoneProjection>;
     delete legacyZone.zoneTimerStartedAt;
-    await database.ProtectionZoneStates.put(
-      legacyZone as ZoneProjection
-    );
+    await database.ProtectionZoneStates.put(legacyZone as ZoneProjection);
 
     const current = await repository.getCurrentSession(
       start.owner.localVisitorId
@@ -368,10 +366,12 @@ describe("SetupDraft local persistence", () => {
     expect(stored).toBeDefined();
     expect(stored).not.toHaveProperty("appliedAt");
     expect(stored).not.toHaveProperty("activityStartedAt");
-    expect(await draftRepository.getActiveDraft(
-      draft.ownerKey,
-      "2026-07-29T11:00:00.000Z"
-    )).not.toBeNull();
+    expect(
+      await draftRepository.getActiveDraft(
+        draft.ownerKey,
+        "2026-07-29T11:00:00.000Z"
+      )
+    ).not.toBeNull();
   });
 
   it("超過 24 小時的草稿視為失效並從 IndexedDB 移除", async () => {
@@ -401,8 +401,7 @@ describe("SetupDraft local persistence", () => {
 
 describe("Region and five-day UV local persistence", () => {
   it("保存及讀取目前選定地區", async () => {
-    const regionRepository =
-      new LocalRegionPreferenceRepository(database);
+    const regionRepository = new LocalRegionPreferenceRepository(database);
     const preference = {
       schemaVersion: REGION_PREFERENCE_SCHEMA_VERSION,
       mode: "selected" as const,
@@ -415,8 +414,7 @@ describe("Region and five-day UV local persistence", () => {
   });
 
   it("明確保存略過地區，而不是把它當成尚未決定", async () => {
-    const regionRepository =
-      new LocalRegionPreferenceRepository(database);
+    const regionRepository = new LocalRegionPreferenceRepository(database);
     const preference = {
       schemaVersion: REGION_PREFERENCE_SCHEMA_VERSION,
       mode: "skipped" as const,
@@ -436,18 +434,13 @@ describe("Region and five-day UV local persistence", () => {
         displayName: "臺北市松山區"
       })
     });
-    const regionRepository = new LocalRegionPreferenceRepository(
-      database,
-      {
-        legacyRegionLookup: {
-          resolve(regionCode) {
-            return regionCode === "63000010"
-              ? makeRegionSelection()
-              : null;
-          }
+    const regionRepository = new LocalRegionPreferenceRepository(database, {
+      legacyRegionLookup: {
+        resolve(regionCode) {
+          return regionCode === "63000010" ? makeRegionSelection() : null;
         }
       }
-    );
+    });
 
     expect(await regionRepository.getPreference()).toEqual({
       schemaVersion: REGION_PREFERENCE_SCHEMA_VERSION,
@@ -457,9 +450,7 @@ describe("Region and five-day UV local persistence", () => {
         selectionMethod: "manual"
       }
     });
-    expect(
-      await database.AppMetadata.get("uvRegionSelection")
-    ).toBeUndefined();
+    expect(await database.AppMetadata.get("uvRegionSelection")).toBeUndefined();
     expect(
       await database.AppMetadata.get("uvRegionPreferenceV1")
     ).toBeDefined();
@@ -473,30 +464,22 @@ describe("Region and five-day UV local persistence", () => {
         displayName: "舊地區"
       })
     });
-    const regionRepository = new LocalRegionPreferenceRepository(
-      database,
-      {
-        legacyRegionLookup: { resolve: () => null }
-      }
-    );
+    const regionRepository = new LocalRegionPreferenceRepository(database, {
+      legacyRegionLookup: { resolve: () => null }
+    });
 
     expect(await regionRepository.getPreference()).toBeNull();
-    expect(
-      await database.AppMetadata.get("uvRegionSelection")
-    ).toBeDefined();
+    expect(await database.AppMetadata.get("uvRegionSelection")).toBeDefined();
   });
 
   it("保存並依地區讀取已驗證的最新五日 UV 快照", async () => {
-    const forecastRepository =
-      new LocalWeatherForecastRepository(database);
+    const forecastRepository = new LocalWeatherForecastRepository(database);
     const forecast = makeFiveDayUvForecast();
 
     await forecastRepository.saveForecast(forecast);
 
     expect(
-      await forecastRepository.getLatestForecast(
-        forecast.region.regionCode
-      )
+      await forecastRepository.getLatestForecast(forecast.region.regionCode)
     ).toEqual(forecast);
     expect(
       await forecastRepository.getLatestForecast("OTHER-REGION")

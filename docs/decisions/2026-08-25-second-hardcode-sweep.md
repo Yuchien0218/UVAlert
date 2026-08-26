@@ -33,16 +33,16 @@
 
 ## 套用的變更
 
-| 位置 | 變更前 | 變更後 |
-|---|---|---|
-| `packages/ui/src/styles.css` | 無 `--radius-sheet` | 新增 `--radius-sheet: 1.5rem` |
-| `GearFormSheet.vue`／`ProtectionAdjustmentSheet.vue` | `border-radius: 1.5rem 1.5rem 0 0` | `border-radius: var(--radius-sheet) var(--radius-sheet) 0 0` |
-| `GearForm.vue`／`GearListItem.vue`／`ZoneSelectorGrid.vue` | `var(--radius-pill, 999px)` | `var(--radius-pill)` |
-| `EducationArticlePage.vue` | `padding-left: 1.5rem` | `padding-left: var(--space-6)` |
-| `HomeUvHeadline.vue` | `padding-bottom: 0.25rem` | `padding-bottom: var(--space-1)` |
-| `EducationIndexPage.vue`／`EducationCategoryPage.vue` | 各自 scoped 定義 `.education-card-status` | 刪除，改用 `app.css` 新增的共用 `.education-card-status` |
-| `InstallPage.vue`／`ReapplyPage.vue`／`ReapplicationReview.vue` | `padding-inline-start: 1.3rem` | `padding-inline-start: var(--space-5)` |
-| `ProductsPage.vue`／`DataSettingsPage.vue` | 手刻 `<section class="app-card" role="alert">` 讀取失敗卡 | 改用 `<EmptyStateCard role="alert">` |
+| 位置                                                            | 變更前                                                    | 變更後                                                       |
+| --------------------------------------------------------------- | --------------------------------------------------------- | ------------------------------------------------------------ |
+| `packages/ui/src/styles.css`                                    | 無 `--radius-sheet`                                       | 新增 `--radius-sheet: 1.5rem`                                |
+| `GearFormSheet.vue`／`ProtectionAdjustmentSheet.vue`            | `border-radius: 1.5rem 1.5rem 0 0`                        | `border-radius: var(--radius-sheet) var(--radius-sheet) 0 0` |
+| `GearForm.vue`／`GearListItem.vue`／`ZoneSelectorGrid.vue`      | `var(--radius-pill, 999px)`                               | `var(--radius-pill)`                                         |
+| `EducationArticlePage.vue`                                      | `padding-left: 1.5rem`                                    | `padding-left: var(--space-6)`                               |
+| `HomeUvHeadline.vue`                                            | `padding-bottom: 0.25rem`                                 | `padding-bottom: var(--space-1)`                             |
+| `EducationIndexPage.vue`／`EducationCategoryPage.vue`           | 各自 scoped 定義 `.education-card-status`                 | 刪除，改用 `app.css` 新增的共用 `.education-card-status`     |
+| `InstallPage.vue`／`ReapplyPage.vue`／`ReapplicationReview.vue` | `padding-inline-start: 1.3rem`                            | `padding-inline-start: var(--space-5)`                       |
+| `ProductsPage.vue`／`DataSettingsPage.vue`                      | 手刻 `<section class="app-card" role="alert">` 讀取失敗卡 | 改用 `<EmptyStateCard role="alert">`                         |
 
 ## 順便發現、這次沒處理的事
 

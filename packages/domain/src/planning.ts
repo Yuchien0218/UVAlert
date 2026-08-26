@@ -161,10 +161,7 @@ export function planContextEvent(
   const { detail, effectiveOccurredAt } = command.payload;
 
   if (Date.parse(effectiveOccurredAt) > Date.parse(clock.trustedNow)) {
-    throw new DomainInvariantError(
-      "FUTURE_EVENT",
-      "事件發生時間不得位於未來"
-    );
+    throw new DomainInvariantError("FUTURE_EVENT", "事件發生時間不得位於未來");
   }
 
   const revision = currentSession.revision + 1;
@@ -314,9 +311,7 @@ export function planApplicationGroupCorrection(
     // void 時 schema 仍要求至少一個部位，沿用 target 的部位集合。
     confirmedZoneInstanceIds:
       applications.length > 0
-        ? applications.flatMap(
-            (application) => application.zoneInstanceIds
-          )
+        ? applications.flatMap((application) => application.zoneInstanceIds)
         : (currentStream.applicationConfirmationGroups.find(
             (candidate) => candidate.id === targetGroupId
           )?.confirmedZoneInstanceIds ?? []),

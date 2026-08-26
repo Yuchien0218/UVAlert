@@ -51,11 +51,7 @@ export const ActionKindSchema = z.enum([
 ]);
 
 export const PrimaryActionSchema = z.object({
-  presentationType: z.enum([
-    "timed_ring",
-    "due_card",
-    "untimed_action_card"
-  ]),
+  presentationType: z.enum(["timed_ring", "due_card", "untimed_action_card"]),
   variant: z
     .enum(["label_wait", "multi_action", "neutral_physical"])
     .nullable(),

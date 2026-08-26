@@ -51,9 +51,7 @@ const errorMessage = computed(() => {
     <div class="location-panel__heading">
       <div>
         <p class="eyebrow--mono">裝置定位</p>
-        <h2 id="location-title" class="location-panel__title">
-          使用目前位置
-        </h2>
+        <h2 id="location-title" class="location-panel__title">使用目前位置</h2>
       </div>
       <LocateFixed :size="25" :stroke-width="1.6" aria-hidden="true" />
     </div>
@@ -107,11 +105,7 @@ const errorMessage = computed(() => {
       </button>
     </div>
 
-    <p
-      v-if="errorMessage"
-      class="location-panel__error"
-      role="alert"
-    >
+    <p v-if="errorMessage" class="location-panel__error" role="alert">
       {{ errorMessage }}
     </p>
   </section>

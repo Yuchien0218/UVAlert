@@ -56,8 +56,7 @@ type CandidateAction = PrimaryAction & {
 
 function isTopical(components: ReadonlyArray<MethodComponent>): boolean {
   return (
-    components.includes("sunscreen") ||
-    components.includes("other_topical")
+    components.includes("sunscreen") || components.includes("other_topical")
   );
 }
 
@@ -69,9 +68,7 @@ function sameStringSet(left: string[], right: string[]): boolean {
   return left.every((value) => rightSet.has(value));
 }
 
-function eligibilityReason(
-  eligibility: ProductEligibility
-): ReasonCode | null {
+function eligibilityReason(eligibility: ProductEligibility): ReasonCode | null {
   switch (eligibility) {
     case "eligible":
       return null;
@@ -91,9 +88,7 @@ function eligibilityReason(
 function causeReason(event: ContextEventV1): ReasonCode | null {
   switch (event.contextType) {
     case "water_start":
-      return event.startConfidence === "unknown"
-        ? "WATER_START_UNKNOWN"
-        : null;
+      return event.startConfidence === "unknown" ? "WATER_START_UNKNOWN" : null;
     case "water_end":
       return "WATER_ENDED";
     case "heavy_sweat":
@@ -246,8 +241,7 @@ function currentApplicationForZone(
     .filter(
       (application) =>
         application.zoneInstanceIds.includes(zoneId) &&
-        application.localAppliedSequence >=
-          activation.localAppliedSequence &&
+        application.localAppliedSequence >= activation.localAppliedSequence &&
         Date.parse(application.appliedAt) >= Date.parse(activationAt)
     )
     .sort(compareApplicationOrder);
@@ -335,10 +329,7 @@ function candidateForZone(zone: ZoneProjection): CandidateAction | null {
     derivedFromEventRefs: zone.derivedFromEventRefs,
     zoneOrder: zoneOrder(zone.bodyZoneCode)
   };
-  if (
-    zone.activeProductSafetyBlock &&
-    zone.skinExposureStatus === "exposed"
-  ) {
+  if (zone.activeProductSafetyBlock && zone.skinExposureStatus === "exposed") {
     return {
       ...base,
       tier: 10,
@@ -527,7 +518,9 @@ export function derivePrimaryAction(
       "Session 沒有可呈現的 primary action"
     );
   }
-  const topTier = candidates.filter((candidate) => candidate.tier === first.tier);
+  const topTier = candidates.filter(
+    (candidate) => candidate.tier === first.tier
+  );
   const actionKinds = new Set(topTier.map((candidate) => candidate.actionKind));
   const affectedZoneInstanceIds = topTier
     .sort(
@@ -616,8 +609,8 @@ export function reduceSession(input: {
       ? applicationSelection.current
       : null;
     const currentEligibility =
-      currentApplication?.productLabelSnapshot
-        .ruleEligibilityAtApplication ?? null;
+      currentApplication?.productLabelSnapshot.ruleEligibilityAtApplication ??
+      null;
     const safety = activeSafetyReasons(
       zoneId,
       currentApplication,
@@ -706,8 +699,8 @@ export function reduceSession(input: {
           .filter(
             (application) =>
               Date.parse(application.appliedAt) <= Date.parse(startedAt) &&
-              application.productLabelSnapshot
-                .ruleEligibilityAtApplication === "eligible"
+              application.productLabelSnapshot.ruleEligibilityAtApplication ===
+                "eligible"
           )
           .sort(compareApplicationOrder)
       );
@@ -730,10 +723,7 @@ export function reduceSession(input: {
         activeWaterDeadline = addMinutes(startedAt, waterMinutes);
         activeWaterStartedAt = startedAt;
         activeRuleIds.push("RR-P0-WATER-001");
-        derivedRefs.push(
-          activeWaterInterval.start.id,
-          intervalApplication.id
-        );
+        derivedRefs.push(activeWaterInterval.start.id, intervalApplication.id);
       } else if (
         intervalApplication !== null &&
         intervalApplication.productLabelSnapshot.waterResistanceStatus ===
@@ -762,8 +752,7 @@ export function reduceSession(input: {
           Date.parse(latestEligibleForCause.appliedAt)
       );
     });
-    const causesApplicable =
-      applicable && tracking.trackingStatus === "active";
+    const causesApplicable = applicable && tracking.trackingStatus === "active";
     const applicableCauses = causesApplicable ? causeEvents : [];
     const timedCauses = applicableCauses.filter(
       (event) => event.contextType !== "water_start"
@@ -804,10 +793,7 @@ export function reduceSession(input: {
               ? eventTriggeredDeadline
               : null;
     const zoneNextActionAt = minInstant([activeLabelReadyAt, zoneDueAt]);
-    if (
-      generalDueAt !== null &&
-      Date.parse(generalDueAt) <= trustedNowMs
-    ) {
+    if (generalDueAt !== null && Date.parse(generalDueAt) <= trustedNowMs) {
       reasonCodes.push("GENERAL_INTERVAL_REACHED");
     }
     if (

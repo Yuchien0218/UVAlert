@@ -65,9 +65,9 @@ describe("ProductSnapshotEditor", () => {
 
     await claimInputs[1]!.setValue(true);
 
-    expect(
-      claimInputs.filter((input) => input.element.checked)
-    ).toHaveLength(1);
+    expect(claimInputs.filter((input) => input.element.checked)).toHaveLength(
+      1
+    );
     expect(claimInputs[1]!.element.checked).toBe(true);
   });
 });

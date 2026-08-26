@@ -22,6 +22,7 @@
 ### Task 1: 建立衛教內容讀取、Markdown 轉 HTML 與 Vue 生成資料
 
 **Files:**
+
 - Create: `tools/education/content-reader.mjs`
 - Create: `tools/education/generate-content.mjs`
 - Create: `apps/web/src/features/education/education-content.generated.ts` (generated)
@@ -30,6 +31,7 @@
 - Modify: `apps/web/package.json`
 
 **Interfaces:**
+
 - `content-reader.mjs` exports `CATEGORY_DEFINITIONS`, `readEducationContent()`, `renderMarkdownToHtml()`, `isPublishable()` and `getPublicSiteUrl()`.
 - `readEducationContent()` returns `{ categories, articles }`; each article includes front matter, `bodyHtml`, `sourcePath`, and `publishable`.
 - `generate-content.mjs` writes a deterministic TypeScript module exporting `educationCategories` and `educationArticles`.
@@ -43,6 +45,7 @@
 ### Task 2: 新增公開衛教路由、頁面與 head 管理
 
 **Files:**
+
 - Create: `apps/web/src/features/education/educationContent.ts`
 - Create: `apps/web/src/features/education/educationSeo.ts`
 - Create: `apps/web/src/components/education/EducationSeoHead.vue`
@@ -56,6 +59,7 @@
 - Modify: `apps/web/src/env.d.ts`
 
 **Interfaces:**
+
 - `educationContent.ts` exports typed `educationCategories`, `educationArticles`, `findEducationArticle(slug)`, `findEducationCategory(slug)`, `listArticlesForCategory(slug)`, and `isEducationArticlePublishable(article)`.
 - `educationSeo.ts` exports `applyEducationSeo(input)` and `clearEducationSeo()`; it owns title, description, robots, canonical, and JSON-LD nodes without duplicating tags on navigation.
 - `EducationSeoHead` accepts `title`, `description`, `canonicalPath`, `robots`, `article?`, and `breadcrumbs` props.
@@ -70,6 +74,7 @@
 ### Task 3: 產生公開靜態頁、robots、sitemap 並更新 PWA shell
 
 **Files:**
+
 - Create: `tools/education/generate-public-site.mjs`
 - Modify: `apps/web/index.html`
 - Modify: `apps/web/package.json`
@@ -78,6 +83,7 @@
 - Modify: `README.md` (only if the root README exists and has a setup section)
 
 **Interfaces:**
+
 - `generate-public-site.mjs` reads the same content reader and writes `apps/web/dist/education/**/index.html`, `apps/web/dist/robots.txt`, and `apps/web/dist/sitemap.xml`.
 - Static pages contain visible HTML, absolute canonical URL, description, robots, Article/BlogPosting and BreadcrumbList JSON-LD; draft pages contain noindex and are omitted from sitemap.
 
@@ -90,6 +96,7 @@
 ### Task 4: 全量驗證、差異檢查與提交
 
 **Files:**
+
 - Modify: files from Tasks 1–3 only.
 
 - [x] **Step 1: Read `C:\Users\yu\.agents\skills\verification-before-completion\SKILL.md` and follow its evidence checklist.**

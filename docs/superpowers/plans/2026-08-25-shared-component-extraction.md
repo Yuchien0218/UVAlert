@@ -114,6 +114,7 @@
 - [x] Step 7: 確認測試 —— `SyncSettingsPage.test.ts`、`AccountDataPage.test.ts`、`AppNotice.test.ts`、`ConfirmAction.test.ts` 共 12 個測試全過；`AccountDataPage.test.ts` 的 `.confirm-note` 選擇器不需修改選擇器本身，但因為 `shallowMount` 預設會把子元件整個換成 stub、內部 DOM 不會渲染，額外加了 `global: { stubs: { ConfirmAction: false } } }` 讓這個元件照常渲染，測試才能命中真正的 DOM。這是計畫草案沒預料到的必要修改。`pnpm --filter @sunshield/web typecheck` 與全專案 `pnpm vitest run`（80 檔／474 測試）皆通過。
 
 **已知的視覺收斂差異（非破壞性，供之後對照）：**
+
 - `DataSettingsPage.vue` 的「清除裝備與歷史」「清除全部」原本 `.confirm-note` 警示框與下方的確認／取消按鈕是分開的兩個區塊（垂直堆疊）；`ConfirmAction` 統一成 `AccountDataPage.vue` 的樣子——按鈕列包在警示框內、並排顯示。
 - `DataSettingsPage.vue` 三組「取消」按鈕原本沒有 `:disabled="busy"`（只有確認按鈕有），`AccountDataPage.vue` 的取消按鈕原本就有。`ConfirmAction` 統一成「pending 時取消也停用」，避免清除進行中被取消造成競態。
 
@@ -196,6 +197,7 @@
 - [x] Step 5: 確認測試與型別 —— `EmptyStateCard.test.ts`（3 案例）、`ProductDetailPage.test.ts`（4 案例）皆過；`pnpm --filter @sunshield/web typecheck` 乾淨；全專案 `pnpm vitest run` 83 檔／485 測試全過。
 
 **已知的視覺收斂差異（非破壞性，供之後對照）：**
+
 - `HelpIndexPage.vue` 原本的空白狀態 padding 是 `clamp(1.25rem, 5vw, 2rem)`（隨螢幕寬度變化）、`gap` 是 `var(--space-3)`；`ProductsPage.vue`／`ProductDetailPage.vue` 原本是固定 `padding: var(--space-5)`、`gap: var(--space-4)`。`EmptyStateCard` 統一採用後者（2 對 1 的既有多數版本），`HelpIndexPage` 在寬螢幕上的空白狀態卡片會比改動前略窄一點。
 
 ---

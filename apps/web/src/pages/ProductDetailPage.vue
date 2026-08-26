@@ -54,9 +54,7 @@ const product = computed(
     ) ?? null
 );
 
-const isSunscreen = computed(
-  () => product.value?.gearCategory === "sunscreen"
-);
+const isSunscreen = computed(() => product.value?.gearCategory === "sunscreen");
 
 const safety = computed(() =>
   product.value === null ? null : gearSafetyState(product.value)
@@ -74,7 +72,9 @@ const canRestore = computed(
 );
 
 const purchase = computed(() =>
-  product.value === null ? null : formatPurchaseMonth(product.value.purchaseMonth)
+  product.value === null
+    ? null
+    : formatPurchaseMonth(product.value.purchaseMonth)
 );
 
 /**
@@ -97,9 +97,7 @@ const specLine = computed(() => {
   return parts.length === 0 ? null : parts.join("・");
 });
 
-const isBusy = computed(
-  () => productSettings.phase.value === "saving"
-);
+const isBusy = computed(() => productSettings.phase.value === "saving");
 
 const actionError = ref<string | null>(null);
 
@@ -160,7 +158,10 @@ async function handleDelete(): Promise<void> {
       </button>
     </header>
 
-    <SunLoader v-if="productSettings.phase.value === 'loading'" label="正在讀取裝備資料…" />
+    <SunLoader
+      v-if="productSettings.phase.value === 'loading'"
+      label="正在讀取裝備資料…"
+    />
 
     <EmptyStateCard
       v-else-if="product === null"
@@ -269,7 +270,9 @@ async function handleDelete(): Promise<void> {
           </button>
         </template>
         <template v-else>
-          <p class="form-error" role="alert">確定要刪除這件裝備？這個動作無法復原。</p>
+          <p class="form-error" role="alert">
+            確定要刪除這件裝備？這個動作無法復原。
+          </p>
           <div class="button-group">
             <button
               class="button button--primary"
