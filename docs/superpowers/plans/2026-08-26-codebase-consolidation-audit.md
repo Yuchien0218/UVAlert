@@ -95,9 +95,10 @@
   - 第一版採非 type-aware recommended 規則；`no-floating-promises` 需要為 monorepo 設定 TypeScript program，且需逐一審核既有 `void foo()`，留待獨立一輪導入，避免在工具落地時混入大量非機械式修改。
   - **驗證**：`pnpm lint` 對現況跑，同 A1 的分類原則處理。
 
-- [ ] **A4：CI**
+- [ ] **A4：CI** — workflow 已於 2026-08-26 實作，待 push／PR 遠端驗證後完成
   - `.github/workflows/ci.yml`：on pull_request + push to main。步驟：`pnpm install --frozen-lockfile` → `pnpm typecheck` → `pnpm test` → `pnpm lint`（→ `pnpm format:check`，先設 `continue-on-error: true` 直到 A2 決定一次性格式化）。
   - Node 24、pnpm 11（對齊 `package.json` engines）。
+  - 採 `actions/checkout@v7`、`actions/setup-node@v7`、`pnpm/action-setup@v6`；pnpm 版本由 `package.json#packageManager` 讀取，並快取 pnpm store。A2 尚未實作，因此這一版不呼叫不存在的 `format:check`。
   - **驗證**：開一個測試 PR 確認 workflow 會跑、會擋。
 
 - [ ] **A5（選配）：pre-commit hook**
