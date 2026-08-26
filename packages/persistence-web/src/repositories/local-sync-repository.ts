@@ -1,6 +1,5 @@
 import {
   ActiveSessionSyncPayloadSchema,
-  RegionPreferenceV1Schema,
   SyncRecordEnvelopeV1Schema,
   SyncTombstoneV1Schema,
   SYNC_SCHEMA_VERSION,

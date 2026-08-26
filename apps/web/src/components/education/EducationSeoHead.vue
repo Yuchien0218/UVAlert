@@ -15,10 +15,13 @@ const props = withDefaults(
     canonicalPath: string;
     robots: EducationRobots;
     breadcrumbs: EducationBreadcrumb[];
-    article?: EducationArticle;
+    article?: EducationArticle | undefined;
     pageType?: "WebPage" | "CollectionPage";
   }>(),
-  { pageType: "WebPage" }
+  {
+    article: undefined,
+    pageType: "WebPage"
+  }
 );
 
 watchEffect(() => {

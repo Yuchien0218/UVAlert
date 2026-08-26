@@ -88,10 +88,11 @@
   - script：`"format": "prettier --write ."`、`"format:check": "prettier --check ."`。
   - **裁決（2026-08-26）：早做一次性格式化。** 順序：(1) 這個 Task 只加 `.prettierrc` + `.editorconfig` + `format:check`（CI 設 `continue-on-error`）；(2) 跑 `ListAgents` 確認沒有其他 session 在動，`pnpm format --write .`，**單獨一個 commit**，訊息「機械格式化，無邏輯變更」；(3) CI 的 `format:check` 轉 blocking。做在 Task B（會動很多檔）之前。
 
-- [ ] **A3：ESLint**
+- [x] **A3：ESLint** — 2026-08-26 完成（尚未 commit）
   - `eslint` + `typescript-eslint` + `eslint-plugin-vue` + `eslint-config-prettier`（關掉跟 Prettier 打架的規則）。
   - 起手式規則集用 recommended 就好，不要一次開太嚴。重點抓：unused imports/vars、`vue/no-unused-components`、`@typescript-eslint/no-floating-promises`（這個 repo 大量 `void foo()`，開了要確認沒有漏網的 unhandled promise）。
   - script：`"lint": "eslint . && pnpm lint:css"`。
+  - 第一版採非 type-aware recommended 規則；`no-floating-promises` 需要為 monorepo 設定 TypeScript program，且需逐一審核既有 `void foo()`，留待獨立一輪導入，避免在工具落地時混入大量非機械式修改。
   - **驗證**：`pnpm lint` 對現況跑，同 A1 的分類原則處理。
 
 - [ ] **A4：CI**

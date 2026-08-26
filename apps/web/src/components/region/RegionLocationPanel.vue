@@ -40,6 +40,8 @@ const errorMessage = computed(() => {
       return "找不到這個行政區，請重新選擇。";
     case null:
       return "";
+    default:
+      return "";
   }
 });
 </script>

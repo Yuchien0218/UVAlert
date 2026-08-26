@@ -107,8 +107,7 @@ describe("createSyncController", () => {
     const controller = createSyncController({
       local,
       cloud,
-      createId: () => "sync-idempotency",
-      now: () => now
+      createId: () => "sync-idempotency"
     });
 
     const preview = await controller.preparePreview();

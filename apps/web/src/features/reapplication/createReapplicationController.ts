@@ -119,7 +119,7 @@ export function createReapplicationController(dependencies: Dependencies): Reapp
     const nextAssignments: Record<string, string> = {};
     for (const application of context.currentApplications) {
       const savedChoiceId = application.sourceProductId === null ? null : `product:${application.sourceProductId}`;
-      let choiceId = savedChoiceId !== null && choices.get(savedChoiceId)?.snapshotFingerprint === application.productSnapshotFingerprint
+      const choiceId = savedChoiceId !== null && choices.get(savedChoiceId)?.snapshotFingerprint === application.productSnapshotFingerprint
         ? savedChoiceId
         : `session:${fingerprintProductLabelSnapshot(application.productLabelSnapshot)}`;
       if (!choices.has(choiceId)) {

@@ -2,10 +2,8 @@ import { shallowReadonly, shallowRef, type ShallowRef } from "vue";
 import {
   SYNC_SCHEMA_VERSION,
   SyncCommitResultV1Schema,
-  SyncReadRequestV1Schema,
   type SyncCommitRecordV1,
   type SyncCommitTombstoneV1,
-  type SyncConflictV1,
   type SyncManifestV1,
   type SyncRecordEnvelopeV1,
   type SyncRecordKey,
@@ -76,7 +74,6 @@ export function createSyncController(options: {
   local: LocalSyncPort;
   cloud: CloudSyncPort;
   createId?: () => string;
-  now?: () => string;
 }): SyncController {
   const state = shallowRef<SyncControllerState>({
     status: "idle",
@@ -84,7 +81,6 @@ export function createSyncController(options: {
     error: null
   });
   const createId = options.createId ?? (() => crypto.randomUUID());
-  const now = options.now ?? (() => new Date().toISOString());
   let disposed = false;
 
   async function preparePreview(): Promise<SyncPreview | null> {

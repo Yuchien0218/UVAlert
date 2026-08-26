@@ -21,12 +21,6 @@ describe("resolveActionRoute", () => {
     "confirm_protection_method",
     "view_protection_options"
   ];
-  const IN_PLACE_KINDS: ActionKind[] = [
-    "review_required_zones",
-    "view_product_label",
-    "recalibrate_clock",
-    "view_ended_state"
-  ];
 
   it.each(REAPPLY_KINDS)("%s 導向 S-08 補擦表單", (kind) => {
     expect(resolveActionRoute(kind)).toEqual({ name: "reminder-reapply" });

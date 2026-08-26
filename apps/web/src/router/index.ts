@@ -5,12 +5,10 @@ import {
   type RouterHistory
 } from "vue-router";
 import type { AppBootController } from "../app/createAppBootController";
-import type { SetupController } from "../features/setup/createSetupController";
 
 export function createAppRouter(
   boot: AppBootController,
-  history: RouterHistory = createWebHistory(),
-  setup?: SetupController
+  history: RouterHistory = createWebHistory()
 ): Router {
   const router = createRouter({
     history,

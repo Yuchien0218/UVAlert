@@ -142,8 +142,7 @@ export function createWebAppServices(
   const sync = createSyncController({
     local: localSync,
     cloud: cloudSync,
-    createId,
-    now: () => new Date().toISOString()
+    createId
   });
   const feedback = createFeedbackController({
     feedback: new BrowserFeedbackClient(),

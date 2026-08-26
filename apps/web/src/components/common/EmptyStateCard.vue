@@ -8,10 +8,13 @@ interface Props {
   title: string;
   body: string;
   titleTag?: "h1" | "h2";
-  role?: "alert" | "status";
+  role?: "alert" | "status" | undefined;
 }
 
-withDefaults(defineProps<Props>(), { titleTag: "h2" });
+withDefaults(defineProps<Props>(), {
+  titleTag: "h2",
+  role: undefined
+});
 </script>
 
 <template>

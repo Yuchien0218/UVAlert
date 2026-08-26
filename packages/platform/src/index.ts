@@ -20,8 +20,7 @@ import type {
   StartSessionCommandV1,
   SyncRecordEnvelopeV1,
   SyncRecordKind,
-  SyncTombstoneV1,
-  UserPreferencesV1
+  SyncTombstoneV1
 } from "@sunshield/contracts";
 
 export * from "./cloud";
