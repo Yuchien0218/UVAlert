@@ -127,11 +127,12 @@
   - 順便：`.flow-heading` 跟 `DESIGN.md` §5 的 `page-heading` 是姊妹（全螢幕流程頁的標題列 vs 一般頁），在 §5 補一個 `flow-heading` 條目指向 `app.css`。
   - **驗證**：`pnpm check`；三頁的成功畫面與標題列視覺應零變化（本來就同一份）。
 
-- [ ] **B3：bottom sheet 外殼 → `<BottomSheet>` 元件**
+- [x] **B3：bottom sheet 外殼 → `<BottomSheet>` 元件**（2026-08-26 完成）
   - 現況：`components/setup/GearFormSheet.vue` + `components/setup/ProtectionAdjustmentSheet.vue` 的 `.sheet`／`.sheet-layer`／`.sheet__header`／開關淡入淡出／`min-height: 0` 幾乎整份重複（2026-08-25 只收了它們的 `border-radius` 與 transition，沒抽外殼）。`components/session/SessionEndControl.vue` 是第三套結構近似的 overlay（`.session-end__backdrop` + `.session-end__confirmation` + 自己的 focus 管理 + Escape）。
   - `DESIGN.md` §5 已經有 `bottom-sheet` 規範（背景 canvas、圓角 `--radius-sheet`、內距 24px）。
   - **裁決（2026-08-26）**：先抽 `apps/web/src/composables/useOverlay.ts`（focus trap ＋ Escape ＋ 捲動鎖 ＋ 焦點還原 ＋ `@click.self` 關閉的 callback），再抽 `components/common/BottomSheet.vue` 用它。props：`open`、`title`、`labelledById`；slot：default、`footer`（可選）。統一：遮罩 `--overlay-backdrop`、面板 `--surface-overlay`、頂角 `--radius-sheet`、`--z-overlay`。`GearFormSheet`／`ProtectionAdjustmentSheet` 改成只放內容。
   - `SessionEndControl` 的確認彈窗**是 dialog 不是 sheet**（置中、非底部），**不做成共用元件**（唯一呼叫端），但改用同一個 `useOverlay` composable，取代它現在自己寫的 focus 管理。
+  - 完成結果：兩個 setup sheet 已改用 `components/common/BottomSheet.vue`；`SessionEndControl` 保留置中 dialog，改用 `useOverlay`。共通行為包含 Escape、遮罩 self-click、Tab／Shift+Tab 循環、背景 inert、body 捲動鎖、焦點還原、多 overlay stack 與卸載清理；破壞性確認初始焦點改至「取消」。
   - **測試**：`GearFormSheet`／`ProtectionAdjustmentSheet` 若有測試要更新選擇器；新元件要有 `.test.ts`（open/close、Escape、`@click.self`、focus 還原）。
   - **驗證**：`pnpm check`；手動確認兩個 sheet 開關手感與焦點行為不變（需要 preview 工具，累積到 F5）。
 
@@ -249,7 +250,7 @@
 
 - [ ] **F2：無障礙一致性稽核**
   - `role="status"` ×24、`role="alert"` ×39、`role="note"` ×3——沒稽核過語意是否用對（例如「操作結果提示」該用 status 還是 alert，全站是否一致）。
-  - 三套 overlay（B3）的 focus trap 目前各寫各的——B3 收 sheet 時一併統一，`SessionEndControl` 的 dialog 也要有 focus trap（目前看起來只有開啟時 focus 標題，沒有 trap）。
+  - 三套 overlay 的 focus trap 已於 B3 統一至 `useOverlay`；後續稽核需確認其他 dialog／自訂 widget 是否仍有漏網實作。
   - 產出：一份 a11y 一致性 checklist，可能引用 `better-accessibility` skill。
 
 - [ ] **F3：測試的脆弱耦合掃描**

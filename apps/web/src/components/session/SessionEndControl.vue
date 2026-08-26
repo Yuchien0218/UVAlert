@@ -1,6 +1,7 @@
 <script setup lang="ts">
-import { nextTick, shallowRef, useTemplateRef } from "vue";
+import { shallowRef, useTemplateRef } from "vue";
 import Icon from "../icons/Icon.vue";
+import { useOverlay } from "../../composables/useOverlay";
 import type {
   SessionEndError,
   SessionEndPhase
@@ -19,22 +20,18 @@ const emit = defineEmits<{
 }>();
 
 const isConfirming = shallowRef(false);
-const confirmationTitle = useTemplateRef<HTMLElement>("confirmationTitle");
-const stopButton = useTemplateRef<HTMLButtonElement>("stopButton");
+const confirmation = useTemplateRef<HTMLElement>("confirmation");
+const cancelButton = useTemplateRef<HTMLButtonElement>("cancelButton");
 
-async function openConfirmation(): Promise<void> {
+function openConfirmation(): void {
   emit("resetError");
   isConfirming.value = true;
-  await nextTick();
-  confirmationTitle.value?.focus();
 }
 
-async function cancelConfirmation(): Promise<void> {
+function cancelConfirmation(): void {
   if (props.phase === "ending") return;
   isConfirming.value = false;
   emit("resetError");
-  await nextTick();
-  stopButton.value?.focus();
 }
 
 function confirmEnd(): void {
@@ -56,6 +53,13 @@ function getErrorMessage(error: SessionEndError): string {
       return "";
   }
 }
+
+const { closeFromBackdrop } = useOverlay({
+  open: isConfirming,
+  container: confirmation,
+  initialFocus: cancelButton,
+  onClose: cancelConfirmation
+});
 </script>
 
 <template>
@@ -66,7 +70,6 @@ function getErrorMessage(error: SessionEndError): string {
   -->
   <div class="session-end">
     <button
-      ref="stopButton"
       class="icon-button"
       type="button"
       aria-label="結束這次提醒"
@@ -75,55 +78,55 @@ function getErrorMessage(error: SessionEndError): string {
       <Icon name="tool-close" :size="24" />
     </button>
 
-    <div
-      v-if="isConfirming"
-      class="session-end__backdrop"
-      @click.self="cancelConfirmation"
-    >
+    <Teleport to="body">
       <div
-        class="session-end__confirmation"
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby="session-end-confirm-title"
-        aria-describedby="session-end-confirm-body"
-        @keydown.esc="cancelConfirmation"
+        v-if="isConfirming"
+        class="session-end__backdrop"
+        data-overlay-root
+        @click.self="closeFromBackdrop"
       >
-        <p
-          ref="confirmationTitle"
-          id="session-end-confirm-title"
-          class="session-end__confirm-title"
+        <div
+          ref="confirmation"
+          class="session-end__confirmation"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="session-end-confirm-title"
+          aria-describedby="session-end-confirm-body"
           tabindex="-1"
         >
-          要結束這次提醒嗎？
-        </p>
-        <p id="session-end-confirm-body" class="session-end__confirm-body">
-          結束後會停止所有待處理提示；裝備紀錄與既有資料不會受影響。
-        </p>
+          <p id="session-end-confirm-title" class="session-end__confirm-title">
+            要結束這次提醒嗎？
+          </p>
+          <p id="session-end-confirm-body" class="session-end__confirm-body">
+            結束後會停止所有待處理提示；裝備紀錄與既有資料不會受影響。
+          </p>
 
-        <p v-if="error !== null" class="session-end__error" role="alert">
-          {{ getErrorMessage(error) }}
-        </p>
+          <p v-if="error !== null" class="session-end__error" role="alert">
+            {{ getErrorMessage(error) }}
+          </p>
 
-        <div class="session-end__actions">
-          <button
-            class="button session-end__confirm-button"
-            type="button"
-            :disabled="phase === 'ending'"
-            @click="confirmEnd"
-          >
-            {{ phase === "ending" ? "正在結束…" : "結束本次提醒" }}
-          </button>
-          <button
-            class="button button--quiet"
-            type="button"
-            :disabled="phase === 'ending'"
-            @click="cancelConfirmation"
-          >
-            取消
-          </button>
+          <div class="session-end__actions">
+            <button
+              class="button session-end__confirm-button"
+              type="button"
+              :disabled="phase === 'ending'"
+              @click="confirmEnd"
+            >
+              {{ phase === "ending" ? "正在結束…" : "結束本次提醒" }}
+            </button>
+            <button
+              ref="cancelButton"
+              class="button button--quiet"
+              type="button"
+              :disabled="phase === 'ending'"
+              @click="cancelConfirmation"
+            >
+              取消
+            </button>
+          </div>
         </div>
       </div>
-    </div>
+    </Teleport>
   </div>
 </template>
 
@@ -163,6 +166,7 @@ function getErrorMessage(error: SessionEndError): string {
   border: 1px solid var(--border-subtle);
   border-radius: var(--radius-lg);
   background: var(--surface-overlay);
+  overscroll-behavior: contain;
 }
 
 /*
@@ -174,10 +178,6 @@ function getErrorMessage(error: SessionEndError): string {
   color: var(--text-primary);
   font-size: var(--font-size-title-sm);
   font-weight: 600;
-}
-
-.session-end__confirm-title:focus {
-  outline: none;
 }
 
 .session-end__error {

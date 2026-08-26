@@ -717,7 +717,7 @@ Noto Serif TC 是標題的唯一字型，沒有第二層自托管備援——載
 
 **`context-option`** ／ **`context-option-selected`** — 情境選項。未選取：`{colors.canvas}` 底、`{colors.hairline}` 邊框。已選取：`{colors.surface-cream-strong}` 底、`{colors.primary}` 邊框。選取態同時有底色與邊框變化，不只靠顏色。
 
-**`bottom-sheet`** — 需要在流程中調整細節時使用（如部位防護調整）。背景 `{colors.canvas}`，圓角 `{rounded.lg}`，內距 24px。用 sheet 而非新頁面，維持流程不中斷。
+**`bottom-sheet`** — 需要在流程中調整細節時使用（如部位防護調整）。面板使用不透明的 `--surface-overlay`、頂角 `--radius-sheet`、內距 20px，搭配 `--overlay-backdrop` 遮罩。用 sheet 而非新頁面，維持流程不中斷。共通實作位於 `components/common/BottomSheet.vue`，並透過 `useOverlay` 統一 Escape 關閉、Tab 焦點循環、背景 inert、捲動鎖與關閉後焦點還原。
 
 ### 按鈕與表單
 
@@ -981,7 +981,7 @@ Noto Serif TC 是標題的唯一字型，沒有第二層自托管備援——載
 以下項目尚未定義或無法驗證，**實作時不要自行填補，先確認**：
 
 1. **Lucide 尚未完全移除。** 剩 9 個檔案仍直接 `import ... from "@lucide/vue"`（`ProductSnapshotEditor`、`SetupProcessBanner`、`RegionLocationPanel`、`RegionPreferenceSummary`、`QuickProtectionSummary`、`ZoneProtectionForm`、`FiveDayUvCard`、`SetupPage`）。wireframe 已凍結、阻塞解除；等使用者產出草稿 SVG 就能替換，`@lucide/vue` 依賴要等那批畫完才能移除。收斂待辦見 `docs/superpowers/plans/2026-08-26-codebase-consolidation-audit.md` E1。
-2. **焦點環已系統化**（2026-08-25 前就已完成，此處補記）。`packages/ui/src/styles.css` 全域規則：`button, a, input, select, textarea` 的 `:focus-visible` → `outline: 0.15rem solid var(--focus-ring); outline-offset: 0.2rem;`。**殘留缺口**：卡片、自訂 widget（如 `.choice-grid` 選項、bottom sheet）的鍵盤焦點樣式未逐一規範。
+2. **焦點環已系統化**（2026-08-25 前就已完成，此處補記）。`packages/ui/src/styles.css` 全域規則：`button, a, input, select, textarea` 的 `:focus-visible` → `outline: 0.15rem solid var(--focus-ring); outline-offset: 0.2rem;`。2026-08-26 已統一 bottom sheet／確認 dialog 的焦點循環與還原。**殘留缺口**：卡片、自訂 widget（如 `.choice-grid` 選項）的鍵盤焦點樣式未逐一規範。
 3. **停用狀態**：主按鈕（`--color-primary-disabled`）、次要按鈕（`.button--quiet:disabled`：`opacity: 0.55` + `cursor: not-allowed`，2026-08-25 補）皆已定義。**輸入框、清單項目的停用樣式仍未定義。**
 4. **錯誤與驗證狀態：行內錯誤文字已統一，其餘視覺結構未展開。** 顏色沿用 `{colors.status-due}`（驗證錯誤）／`{colors.status-soon}`（系統警示），見第二節。2026-08-26 已將 9 個檔案的 `.form-error` 收斂至 `app.css`；欄位邊框、訊息位置與是否加圖示仍需配合實際表單流程確認。
 5. **橫式標誌缺深色底版本。** 正式資產在 `docs/design/logo/`（2026-08-22 定案），但墨咖字標在濃縮咖啡深色面板上幾乎看不見，需要另做反白版。圖標本身已有 `06-broadcast-mark-dark-surface.svg`。

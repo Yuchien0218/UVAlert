@@ -182,7 +182,7 @@ describe("ProtectionAdjustmentSheet", () => {
       "true"
     );
     expect(wrapper.text()).toContain("調整要提醒的部位");
-    await wrapper.get('button[aria-label="關閉調整"]').trigger("click");
+    await wrapper.get('button[aria-label="關閉"]').trigger("click");
     expect(wrapper.emitted("close")).toHaveLength(1);
   });
 });
