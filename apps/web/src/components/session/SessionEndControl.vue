@@ -141,6 +141,7 @@ function getErrorMessage(error: SessionEndError): string {
 .session-end__confirm-body {
   margin: 0;
   color: var(--text-body);
+  font-size: var(--font-size-body);
   line-height: 1.6;
 }
 
@@ -182,10 +183,6 @@ function getErrorMessage(error: SessionEndError): string {
 
 .session-end__confirm-title:focus {
   outline: none;
-}
-
-.session-end__confirm-body {
-  font-size: var(--font-size-body);
 }
 
 .session-end__error {

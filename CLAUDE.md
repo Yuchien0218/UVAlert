@@ -107,10 +107,11 @@ SessionEventStreamV1（事件）→ packages/domain reducer → SessionProjectio
 ## 設計與文件
 
 - **設計系統唯一權威是根目錄 `DESIGN.md`**：完整色彩 token、字體、間距、元件規範、圖示風格。第十節「與程式碼的落差」是文件與程式碼差異的唯一對照表，不要在別處另立一份。
-- **Claude Design 上有一份由 `DESIGN.md` 產生的 component library**（從 GitHub `main` 同步）。它是下游產物，不是權威——**要改設計先改 `DESIGN.md`**，再讓它重新同步。不要只在 Claude Design 裡調整而沒回寫，否則會多出第四份真相（目前已有 `DESIGN.md`、`styles.css`、`app.css` 三份）。
+- **設計 token 只有三份真相**：`DESIGN.md`（YAML frontmatter）→ `packages/ui/src/styles.css`（token）→ `apps/web/src/assets/app.css`（共用類別）。前兩份的一致性由 `packages/ui/src/tokens.test.ts` 自動守著（2026-08-26 起）。**2026-08-26 已移除 Claude Design 的匯出 bundle**（`uvalert-design-system/`、`防曬補擦流程設計/`），使用者確認不再用 Claude Design 做設計往返；不要再把匯出資料夾 commit 進 repo（`.gitignore` 有擋）。
 - **UX／IA 現行基準**：`docs/decisions/2026-08-15-redesign-sitemap-userflow-current.md`
 - **圖示系統**：`docs/design/icon-system/README.md`。幾何的真實來源是 Illustrator，不要手改 SVG path；改完跑 `generate-icons.mjs`。
 - **畫面的程式碼真實來源**只有 `packages/ui/src/styles.css`（token）與 `apps/web/src/assets/app.css`（共用類別）。文件與程式碼衝突時以程式碼為準。
+- **scoped `<style>` 不准寫死值**：顏色、`border-radius`、`z-index`、`transition-duration` 一律用 `var(--*)`。沒有對應 token＝`DESIGN.md` 的缺口，提出來、不要就地硬寫。`pnpm lint:css`（stylelint，已併進 `pnpm check`）會擋。收斂待辦見 `docs/superpowers/plans/2026-08-26-codebase-consolidation-audit.md`。
 - `docs/archive/2026-08-pre-redesign/` 是舊版 P0 規格與設計的歸檔，只能用來理解歷史，不可當作現行依據。
 
 ### 配色分兩套，範圍不同（最容易搞混）

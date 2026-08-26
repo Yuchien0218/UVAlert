@@ -40,7 +40,7 @@
 
 | 項目 | 現況 | 對應 Task |
 | --- | --- | --- |
-| lint／format／CI | 完全不存在 | A |
+| lint／format／CI | Stylelint ✅（A1，已併進 `pnpm check`）；Prettier／ESLint／CI 還沒 | A |
 | `.form-error` | **9 檔各自 scoped**，已漂成 3 種寫法 | B1 |
 | `.flow-heading` | `EventCorrectionPage`／`ReapplyPage`／`ReportContextEventPage` 三份逐字相同 | B2 |
 | `.success-panel` | 同上三檔，`border-top: 0.35rem solid var(--color-success)` + grid + margin reset | B2 |
@@ -69,19 +69,17 @@
 
 **Global note**：這個專案 `pnpm-workspace.yaml` 只有 `apps/*` 與 `packages/*`；工具設定放根目錄。新增的 npm script 命名沿用既有慣例（`typecheck`／`test`／`check`）。
 
-- [ ] **A1：Stylelint**
-  - 加 `stylelint` + `stylelint-config-standard` + `postcss-html`（處理 `.vue` 的 `<style>`）。
-  - 自訂規則（用 `declaration-property-value-disallowed-list` / `declaration-property-unit-allowed-list` 或 `stylelint-declaration-strict-value`）：
-    - `color` / `background` / `background-color` / `border-color` / `fill` / `outline-color` / `box-shadow`：禁止裸 hex/rgb/hsl，只允許 `var(--*)`、`currentColor`、`transparent`、`inherit`、`color-mix(...)`。
-    - `font-size`：只允許 `var(--*)`、`clamp(...)`、`em`、`%`、`inherit`（禁止裸 `rem`/`px`，`1.05em` 這種相對倍率除外）。
-    - `border-radius`：只允許 `var(--*)`、`0`、`50%`、`999px`（`--radius-pill` 的值，可再收）。
-    - `z-index`：只允許 `var(--*)`、`0`、`auto`、`-1`。
-    - `transition-duration` / `animation-duration`：只允許 `var(--*)`、`0s`、`0.01ms`（reduced-motion 用）。
-  - `no-unknown-custom-properties`（或 `stylelint-value-no-unknown-custom-properties`）：抓幽靈 token（例如 2026-08-25 抓到的 `--motion-base`）。載入 `packages/ui/src/styles.css` + `app.css` 當已知 token 來源。
-  - **例外清單**：`BrandHeader.vue` 的 Logo SVG hex（`#33291F`／`#C1832E`，DESIGN.md §8 圖示色系，刻意寫死）用 `/* stylelint-disable-next-line */` 或設定檔的 `overrides` 排除。
-  - `SunLoader.vue` 的 `3.25rem`（元件專屬裝飾尺寸，已有註解）同樣加 disable 註解或列入允許。
-  - 加 script：`"lint:css": "stylelint \"**/*.{css,vue}\" --ignore-path .gitignore"`。
-  - **驗證**：`pnpm lint:css` 對現有程式碼跑一次，把它**現在就會報的錯**分兩類——「已知刻意」加 disable 註解、「真的該收」列進 Task B/D 對應項目（不要在 A1 順手全收，會失焦）。目標是 `pnpm lint:css` 綠燈（靠 disable 註解也算），之後靠它擋新的。
+- [x] **A1：Stylelint** — 2026-08-26 完成（尚未 commit）
+  - 加了 `stylelint@17` + `stylelint-config-standard@40` + `postcss` + `postcss-html`（`.vue` `<style>` 的 customSyntax）+ `stylelint-declaration-strict-value@1.12` + `stylelint-value-no-unknown-custom-properties@6`（root devDeps）。
+  - `stylelint.config.mjs`：
+    - **強制 token（`scale-unlimited/declaration-strict-value`，error）**：`/color$/`／`fill`／`stroke`／`background(-color)`／`z-index`／`border-radius`／`transition-duration`／`animation-duration` 只准 `var(--*)`（＋極少字面值 `0`／`50%`／`auto`／`0s`／gradient／url）。
+    - **幽靈 token（`csstools/value-no-unknown-custom-properties`，error）**：引用未定義的 `--*` 就報錯，token 來源 = `styles.css` ＋ `app.css`；`SunLoader.vue` 由 `:style` 綁定的 `--ray-delay` 用 config 的 inline `importFrom` 物件放行。
+    - `color-hex-length: "long"`（對齊 repo 與 DESIGN.md 的 6 位 hex 慣例）。
+    - Vue 容錯（`:deep()`／`:slotted()`／`::v-deep`）、關掉一批 config-standard 的風格 nitpick（`declaration-block-single-line-max-declarations` 是 repo 刻意的 compact 風格、`media-feature-range-notation: "prefix"` 保留經典 `max-width:` 寫法、`property-no-deprecated` 因 `.screen-reader-only` 的 `clip` hack）。
+  - **不含 `font-size` strict-value**：`EducationArticlePage` 的 `:deep()` 有 `0.9em`／`0.9rem`、`FiveDayUvCard` 有窄螢幕 `0.7rem`——這些是刻意的相對／響應式覆寫，規則要能區分需要更多 `ignoreValues` 調校。留給後續（跟 B7 / D2 typography 一起）。
+  - 加 script `"lint:css": "stylelint \"{packages,apps}/**/*.{css,vue}\""`，並**併進 `pnpm check`**（`typecheck && test && lint:css`）。
+  - **跑第一次的結果**：strict-value 與幽靈 token 規則**全過**——2026-08-25 的五輪收斂已經把顏色／圓角／z-index／duration 清乾淨了，這個規則的作用是「別再長回來」（已用 `color:#123456` 等做過負向測試，確認會擋）。config-standard 的 nitpick 修掉 1 個真的重複（`SessionEndControl.vue` 的 `.session-end__confirm-body` 定義兩次，已合併）＋ 1 個 `#ffffff`→改設 `color-hex-length:"long"`。
+  - **BrandHeader.vue 的 Logo SVG hex**（`#33291F`／`#C1832E`）沒有觸發規則——那些 hex 是寫在 `<svg>` 的 `fill="..."` attribute 上（HTML 屬性，不是 CSS 宣告），stylelint 不管。不需要例外處理。
 
 - [ ] **A2：Prettier + `.editorconfig`**
   - 加 `prettier` + `.prettierrc`（沿用現有程式碼風格：2 空格、雙引號、無分號？——先跑 `prettier --check` 看差異量再決定要不要一次格式化全檔）。
@@ -104,8 +102,8 @@
   - `lefthook`（比 husky 輕）跑 `lint-staged`：暫存的 `.vue`/`.css`/`.ts` 跑 `eslint --fix` + `stylelint --fix` + `prettier --write`。
   - CI 才是真正的防線，這個只是提早回饋。若團隊覺得 hook 煩就跳過。
 
-- [ ] **A6：CLAUDE.md 補硬規則**
-  - 在「設計與文件」或「Session 衛生」一節加：「scoped `<style>` 不准寫裸值（顏色／字級／圓角／z-index／duration）。沒有對應 token＝`DESIGN.md` 的缺口，先提出來、不要就地硬寫。lint 會擋。」
+- [x] **A6：CLAUDE.md 補硬規則** — 2026-08-26 完成（跟 A1 一起）
+  - 「設計與文件」一節加了「scoped `<style>` 不准寫死值……`pnpm lint:css` 會擋」的 bullet。順便把「Claude Design component library / 第四份真相」那條改寫成「三份真相 ＋ `tokens.test.ts` 自動守著 ＋ Claude Design 匯出已於 2026-08-26 移除」。
 
 ---
 
@@ -288,9 +286,10 @@
 
 ## 建議執行順序（依 2026-08-26 裁決更新）
 
-- ~~**C2**（刪兩個匯出資料夾 ＋ `.gitignore`）~~ ✅ 2026-08-26 完成（commit `3f38a9d`）
-- ~~**C1**（`DESIGN.md`↔`styles.css` drift 測試）~~ ✅ 2026-08-26 完成（`packages/ui/src/tokens.test.ts`，尚未 commit）——抓到 5 類落差待 D2 裁決
-1. **A1 → A3 → A4**（Stylelint / ESLint / CI，治本）
+- ~~**C2**（刪兩個匯出資料夾 ＋ `.gitignore`）~~ ✅ commit `3f38a9d`
+- ~~**C1**（`DESIGN.md`↔`styles.css` drift 測試）~~ ✅ commit `b1cf1db`——抓到 5 類落差待 D2 裁決
+- ~~**A1 + A6**（Stylelint ＋ CLAUDE.md 硬規則，已併進 `pnpm check`）~~ ✅ 2026-08-26 完成（尚未 commit）
+1. **A3 → A4**（ESLint / CI，治本；`pnpm lint` = eslint + 既有的 lint:css）
 2. **A2 一次性格式化**（挑安靜時間窗，單獨 commit）
 3. **B1 + B2 + B4**（`.form-error` / `.flow-heading`+`.success-panel` / region `min-height`——零風險、值不變）
 4. **D1 + D2 + D3 + D4**（`DESIGN.md` 校準 ＋ 斷點 ＋ 砍第 5 級文字色 ＋ 裁決 C1 抓到的 5 類落差，一起做，逐項清 `tokens.test.ts` 的 `KNOWN_DRIFT`）
