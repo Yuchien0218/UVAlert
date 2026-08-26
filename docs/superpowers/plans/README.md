@@ -14,6 +14,7 @@
 | [`2026-08-17-zh-tw-copy.md`](2026-08-17-zh-tw-copy.md) | 主要文案整理已有實作提交；計畫 checkbox 未同步封存，不能盲目重新執行 | [`../../decisions/2026-08-17-copy-audit.md`](../../decisions/2026-08-17-copy-audit.md)、目前 `apps/web/src` |
 | [`2026-08-18-uvalert-logo-concepts.md`](2026-08-18-uvalert-logo-concepts.md) | 第一輪概念、字標與比較板已產出；06 播報印記已成為正式 Logo 方向 | [`../../design/logo-concepts/README.md`](../../design/logo-concepts/README.md)、[`../../../DESIGN.md`](../../../DESIGN.md) |
 | [`2026-08-25-shared-component-extraction.md`](2026-08-25-shared-component-extraction.md) | Task 1–4、6 已完成並通過測試／typecheck；Task 5（`MorePage` 導覽清單抽象）使用者決定跳過（單一呼叫端，非重複） | [`../../../DESIGN.md`](../../../DESIGN.md)、`apps/web/src/assets/app.css` |
+| [`2026-08-26-codebase-consolidation-audit.md`](2026-08-26-codebase-consolidation-audit.md) | **盤點清單，7 個 Open Question 已於 2026-08-26 裁決（見文件內表格）。C2（刪除兩個 Claude Design 匯出資料夾）已執行**，其餘 Task A–G 未動工、彼此獨立可分 session 挑做。Task A（lint／CI）是治本，建議接著做。現況數字動工前需重新 grep 核對 | [`../../decisions/2026-08-25-*.md`](../../decisions/) 六份、[`../../../DESIGN.md`](../../../DESIGN.md) §5／§10／§12／§13、`packages/ui/src/styles.css`、`apps/web/src/assets/app.css` |
 
 ## 執行計畫前必做
 
