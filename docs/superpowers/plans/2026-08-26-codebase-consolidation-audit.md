@@ -82,10 +82,11 @@
   - **跑第一次的結果**：strict-value 與幽靈 token 規則**全過**——2026-08-25 的五輪收斂已經把顏色／圓角／z-index／duration 清乾淨了，這個規則的作用是「別再長回來」（已用 `color:#123456` 等做過負向測試，確認會擋）。config-standard 的 nitpick 修掉 1 個真的重複（`SessionEndControl.vue` 的 `.session-end__confirm-body` 定義兩次，已合併）＋ 1 個 `#ffffff`→改設 `color-hex-length:"long"`。
   - **BrandHeader.vue 的 Logo SVG hex**（`#33291F`／`#C1832E`）沒有觸發規則——那些 hex 是寫在 `<svg>` 的 `fill="..."` attribute 上（HTML 屬性，不是 CSS 宣告），stylelint 不管。不需要例外處理。
 
-- [ ] **A2：Prettier + `.editorconfig`**
+- [ ] **A2：Prettier + `.editorconfig`** — 第一階段已於 2026-08-26 完成（尚未 commit）；待一次性格式化與 CI 轉 blocking
   - 加 `prettier` + `.prettierrc`（沿用現有程式碼風格：2 空格、雙引號、無分號？——先跑 `prettier --check` 看差異量再決定要不要一次格式化全檔）。
   - `.editorconfig`：`indent_style=space`、`indent_size=2`、`end_of_line=lf`、`charset=utf-8`、`insert_final_newline=true`、`trim_trailing_whitespace=true`。
   - script：`"format": "prettier --write ."`、`"format:check": "prettier --check ."`。
+  - 第一階段精確鎖定 `prettier@3.9.6`；沿用現況的 2 空格、雙引號、分號、無 trailing comma。產生檔、lockfile、public 資產、歷史 archive、工作暫存與 SVG 不納入格式化。首次 `format:check` 確認 260 個正式來源檔尚待第二階段機械格式化；CI 暫時設為 `continue-on-error`。
   - **裁決（2026-08-26）：早做一次性格式化。** 順序：(1) 這個 Task 只加 `.prettierrc` + `.editorconfig` + `format:check`（CI 設 `continue-on-error`）；(2) 跑 `ListAgents` 確認沒有其他 session 在動，`pnpm format --write .`，**單獨一個 commit**，訊息「機械格式化，無邏輯變更」；(3) CI 的 `format:check` 轉 blocking。做在 Task B（會動很多檔）之前。
 
 - [x] **A3：ESLint** — 2026-08-26 完成（尚未 commit）

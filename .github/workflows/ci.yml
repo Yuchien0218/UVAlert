@@ -44,3 +44,8 @@ jobs:
 
       - name: Lint
         run: pnpm lint
+
+      # A2 第一階段先提供可見性；完成一次性全 repo 格式化後改成 blocking。
+      - name: Check formatting
+        continue-on-error: true
+        run: pnpm format:check

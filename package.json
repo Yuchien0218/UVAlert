@@ -18,6 +18,8 @@
     "education:generate": "node tools/education/generate-content.mjs",
     "region-data:build": "node tools/region-data/build-region-data.mjs",
     "region-data:verify": "node tools/region-data/build-region-data.mjs --verify",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
     "lint": "eslint . && pnpm lint:css",
     "lint:css": "stylelint \"{packages,apps}/**/*.{css,vue}\"",
     "check": "pnpm typecheck && pnpm test && pnpm lint"
@@ -42,6 +44,7 @@
     "happy-dom": "^20.0.0",
     "postcss": "^8.5.23",
     "postcss-html": "^2.0.0",
+    "prettier": "3.9.6",
     "proj4": "^2.21.0",
     "shapefile": "^0.6.6",
     "stylelint": "^17.14.1",

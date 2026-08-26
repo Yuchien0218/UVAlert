@@ -1,0 +1,18 @@
+# Dependencies and build output
+node_modules/
+dist/
+coverage/
+.worktrees/
+.claude/
+.superpowers/
+
+# Generated sources and package-manager output
+**/*.generated.*
+apps/web/src/generated/
+apps/web/public/
+pnpm-lock.yaml
+
+# Historical and externally-authored design artifacts
+docs/archive/
+**/*.svg
+design-exports/
