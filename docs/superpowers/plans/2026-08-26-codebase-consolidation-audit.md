@@ -261,10 +261,12 @@
 - [ ] **F4：`DataSettingsPage` 的 loading 狀態採用 `SunLoader`**
   - `docs/decisions/2026-08-25-second-hardcode-sweep.md` 結尾點名的遺漏：`DataSettingsPage.vue` 仍是手寫 `<p role="status">正在讀取本機資料概況…</p>`，沒用 2026-08-25 Task 3 導入的 `SunLoader`。小改動，順手做。
 
-- [ ] **F5：瀏覽器視覺驗證（累積債）**
+- [x] **F5：瀏覽器視覺驗證（累積債）**（2026-08-26 完成）
   - **每一輪 2026-08-25 sweep 都寫「未經瀏覽器視覺驗證」。** 累計約 25 檔、全站內文 14→16px、行高 1.7→1.6、35 處文字色加深，加上本清單 B1–B4 的收斂。
   - 做法：用 preview 工具（`.claude/launch.json` 的 `web-dev`，**不要用 Bash 直接跑 vite**，見 CLAUDE.md）或 `webapp-testing` skill，逐頁目視：首頁（有／無 session、日／夜）、`/setup`、`/products`、`/products/:id`、`/region`、`/forecast`、衛教文章頁、`DataSettingsPage`、`EventCorrectionPage` 作廢區塊、通知設定。確認 16px 內文沒造成預期外換行、深色內文跟卡片底色搭配正常、sheet 開關手感正常。
-  - 這是**目前最大的單一未驗證風險**，建議獨立一個 session 專門做。
+  - 完成結果：以 Chrome 在 1440×1000 與 390×844 巡檢首頁、setup、產品清單／新增表單、地區、五日預報、衛教首頁／文章、資料設定與通知設定；另以隔離資料完成「建立提醒 → 記錄補擦 → 事件更正」流程。所有頁面無水平溢出、console error 或 page error；字級、行高、文字色與長文換行未見其他回歸。
+  - B3 互動驗證：兩個 bottom sheet 與結束提醒 dialog 的 Escape、遮罩關閉、完整 Tab／Shift+Tab 循環、背景 inert、body 捲動鎖與焦點返回皆通過。發現裝備 sheet 的長標題在 390px 會把關閉按鈕擠出畫面，已在 `BottomSheet` 讓標題可收縮並補回歸測試。
+  - 此項原為最大的單一未驗證風險；本輪已清償，後續可把同一套 viewport／互動矩陣納入重大可見樣式改動的驗收流程。
 
 ---
 

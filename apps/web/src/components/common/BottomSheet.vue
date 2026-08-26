@@ -47,7 +47,7 @@ const { closeFromBackdrop } = useOverlay({
           tabindex="-1"
         >
           <header class="bottom-sheet__header">
-            <h2 :id="labelledById">{{ title }}</h2>
+            <h2 :id="labelledById" style="min-width: 0">{{ title }}</h2>
             <button
               class="icon-button"
               type="button"

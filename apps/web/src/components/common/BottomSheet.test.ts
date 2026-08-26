@@ -29,6 +29,15 @@ describe("BottomSheet", () => {
     );
   });
 
+  it("allows a long title to shrink before the close button on narrow screens", async () => {
+    mountSheet({ title: "填寫完整的防曬乳包裝標示" });
+    await settleOverlay();
+
+    const title = getElement<HTMLElement>(".bottom-sheet__header h2");
+
+    expect(getComputedStyle(title).minWidth).toBe("0");
+  });
+
   it("emits close from Escape and the close button", async () => {
     const wrapper = mountSheet();
     await settleOverlay();
