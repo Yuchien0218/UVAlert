@@ -1,8 +1,0 @@
-/* Motion — DESIGN.md §12. Opacity only; no translate, no scale. */
-:root {
-  --duration-fast: 160ms; /* @kind other */
-  --duration-base: 240ms; /* @kind other */
-  --ease-out: cubic-bezier(0.22, 1, 0.36, 1); /* @kind other */
-  /* Rare float shadow for bottom sheets only. Everything else is flat. */
-  --shadow-float: 0 1px 3px rgb(20 20 19 / 8%);
-}

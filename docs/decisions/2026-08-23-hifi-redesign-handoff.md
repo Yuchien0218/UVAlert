@@ -175,7 +175,8 @@ water_preparing | water_active
 - Session 開始先跑 `ListAgents` 確認沒有其他視窗在動同一批檔案；改完
   記得 commit，不要留 working tree 過夜（`CLAUDE.md` 有實際發生過的
   資料遺失案例）。
-- `uvalert-design-system/` 資料夾是 Claude Design 同步下來的下游產物，
-  **不是權威**，且上次同步是 2026-08-23，可能已經落後於使用者目前在
-  Claude Design 裡實際看到的畫面。改設計前務必先請使用者確認最新畫面
-  或提供截圖，不要只看這個資料夾裡的舊快取。
+- ~~`uvalert-design-system/` 資料夾是 Claude Design 同步下來的下游產物，
+  **不是權威**……~~ **2026-08-26 已移除**（連同 `防曬補擦流程設計/`）——
+  使用者確認不再用 Claude Design 做設計往返，且該 bundle 已漂移、含 15 MB
+  已退回的字型。設計權威仍是 `DESIGN.md` ＋ `packages/ui/src/styles.css`。
+  見 `docs/superpowers/plans/2026-08-26-codebase-consolidation-audit.md` C2。

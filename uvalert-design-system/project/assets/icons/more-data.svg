@@ -1,4 +1,0 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" role="img" data-icon="more-data" data-tone="two">
-  <title>本機資料與隱私</title>
-  <path d="M5.25 12A6.75 2.9 0 0 0 18.75 12" fill="none" stroke="#C1832E" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"></path><ellipse cx="12" cy="7.25" rx="6.75" ry="2.9" fill="none" stroke="currentColor" stroke-width="2.5"></ellipse><path d="M5.25 7.25V16.75A6.75 2.9 0 0 0 18.75 16.75V7.25" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"></path>
-</svg>
