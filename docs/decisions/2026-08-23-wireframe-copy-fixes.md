@@ -164,7 +164,9 @@
 | 夜間 ＋ **沒有** Session | `selection03`（已畫） | 無主 CTA，依 §3.3 補說明與逃生出口 |
 | 夜間 ＋ **有** Session 進行中 | **尚未繪製** | **結束提醒**（收工） |
 
-第二種在程式碼中已實作（`apps/web/src/components/reminder/NightWindDownPrompt.vue`，含測試），但 wireframe 缺這張。行為描述見 `2026-08-15-redesign-sitemap-userflow-current.md` §4.2。
+第二種在程式碼中已實作（首頁 `HomeNightSession.vue` ＋ `SessionEndControl`），但 wireframe 缺這張。行為描述見 `2026-08-15-redesign-sitemap-userflow-current.md` §4.2。
+
+> **2026-08-26 更新**：原文寫「已實作（`NightWindDownPrompt.vue`，含測試）」。該元件其實是舊 `/reminder` 頁專屬，`/reminder` 併入首頁時沒搬過來，2026-08-24 隨日夜共用改版一併刪除。首頁收工版面 2026-08-24 曾一度被推翻、2026-08-26 又改回，元件是 `HomeNightSession.vue` ＋ `SessionEndControl`。見 `2026-08-26-night-session-layout-revert.md`。
 
 ## 四、仍待討論
 

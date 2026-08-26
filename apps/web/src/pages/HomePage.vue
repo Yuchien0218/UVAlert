@@ -8,6 +8,7 @@ import type { SecondaryActionKind } from "../features/reminder/reminderPresentat
 import HomeCountdown from "../components/home/HomeCountdown.vue";
 import HomeLocationPrompt from "../components/home/HomeLocationPrompt.vue";
 import HomeNightNotice from "../components/home/HomeNightNotice.vue";
+import HomeNightSession from "../components/home/HomeNightSession.vue";
 import HomeUvHeadline from "../components/home/HomeUvHeadline.vue";
 import SunLoader from "../components/feedback/SunLoader.vue";
 import SessionEndControl from "../components/session/SessionEndControl.vue";
@@ -33,15 +34,19 @@ import {
  *
  * | 狀態 | 主要行動 |
  * | --- | --- |
- * | 有提醒（日夜共用） | 記錄補擦；夜間多一句「現在不需要防曬」 |
+ * | 有提醒＋白天 | 記錄補擦 |
+ * | 有提醒＋夜間 | 結束提醒（收工版面：不顯示倒數，改顯示已進行多久） |
  * | 無提醒＋白天＋有地區 | 開始防曬提醒 |
  * | 無提醒＋夜間 | 無主 CTA（理由見 HomeNightNotice） |
  * | 無提醒＋無地區 | 設定地區 |
  *
- * 2026-08-24：「有提醒」原本依日夜拆成兩個版面（夜間走收工版：顯示已經過
- * 多久、沒有進度條、主要行動是結束提醒）。使用者反映夜間看不到倒數與進度
- * 條，裁決推翻 2026-08-23 的夜間版面，改為日夜共用。**沒有提醒**的夜間
- * 行為不受影響，仍然沒有主 CTA。
+ * 夜間版面的反覆：2026-08-23 裁決夜間走「收工版面」（HomeNightSession：
+ * 不顯示倒數與進度條，改顯示已進行多久，主要行動是結束提醒——夜間 UV
+ * 為 0，倒數到下次補擦沒有行動價值）。2026-08-24 一度推翻改為日夜共用
+ * （commit 47f44c6），2026-08-26 使用者確認**改回收工版面**，理由是
+ * 「不讓倒數跨夜」。見
+ * docs/decisions/2026-08-26-night-session-layout-revert.md。
+ * **沒有提醒**的夜間行為從頭到尾不受影響，仍然沒有主 CTA。
  */
 
 const {
@@ -281,12 +286,34 @@ function handleEndSession(): void {
     </section>
 
     <!--
-      提醒進行中——**日夜共用同一個版面**（2026-08-24 使用者裁決）。
-      原本夜間走另一套「收工版面」：顯示已經過多久（往上加）、沒有進度條，
-      主要行動是結束提醒（2026-08-23 裁決，理由是夜間 UV 為 0、倒數到下次
-      補擦沒有行動價值）。使用者反映夜間看不到倒數與進度條，確認推翻該裁決
-      ——現在夜間一樣顯示補擦倒數與進度條，只多一句說明現在不需要防曬。
+      夜間＋提醒進行中：收工版面（2026-08-26 使用者確認改回，見檔頭註解）。
+      主要行動是結束提醒，不是補擦——夜間 UV 為 0，繼續倒數沒有行動價值，
+      但系統不自動結束，決定權在使用者（Sitemap §4.2）。刻意不顯示倒數與
+      進度條，改由 HomeNightSession 顯示「已進行多久」。部位清單不放進這個
+      分支，維持「夜間是收工版面」的設計。
     -->
+    <template v-else-if="hasSession && isNight">
+      <SessionEndControl
+        :phase="sessionControl.endPhase.value"
+        :error="sessionControl.endError.value"
+        @confirm="handleEndSession"
+        @reset-error="sessionControl.clearEndError"
+      />
+
+      <HomeNightSession :session="session!" />
+
+      <!-- 夜間也看得到最近紀錄（S-10 事件更正的唯一入口）。 -->
+      <RecentEventsList
+        id="recent-events"
+        ref="recentEventsRef"
+        :zones="session!.zones"
+        :events="sessionEvents.stream.value"
+        :clock-trusted="clockTrusted"
+        @correct="handleCorrectEvent"
+      />
+    </template>
+
+    <!-- 白天＋提醒進行中：日間完整版面（倒數、主 CTA、部位清單、最近紀錄）。 -->
     <template v-else-if="hasSession">
       <!--
         2026-08-24：白天也要能結束提醒。`/reminder` 併入本頁時漏掉了——
@@ -303,14 +330,6 @@ function handleEndSession(): void {
         v-if="clockPresentation !== null"
         :presentation="clockPresentation"
       />
-
-      <!--
-        夜間唯一保留的差異：說明現在不需要防曬。倒數與進度條照常顯示，
-        但不講這句的話，使用者會以為半夜還要爬起來補擦。
-      -->
-      <p v-if="isNight" class="home__night-note" role="status">
-        現在不需要防曬。結束提醒後就不會再收到補擦通知。
-      </p>
 
       <button
         v-if="reminderPresentation !== null"
@@ -474,15 +493,6 @@ function handleEndSession(): void {
 
 .home__cta {
   width: 100%;
-}
-
-.home__night-note {
-  margin: 0;
-  padding: var(--space-4);
-  border-radius: var(--radius-sm);
-  background: var(--surface-soft);
-  color: var(--text-secondary);
-  line-height: 1.6;
 }
 
 .home__spacer {

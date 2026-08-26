@@ -20,6 +20,7 @@
 | `2026-08-25-line-height-consolidation.md` | body 行高 1.7→1.75→1.7→1.6（使用者連續三輪回饋收緊，最終值 1.6，DESIGN.md 已回寫） | 已完成（2026-08-25）——有實際可見變化，未經瀏覽器視覺驗證，1.6 可讀性尤其需要視覺確認 |
 | `2026-08-25-strong-line-height-fix.md` | body 行高調寬後，13 處單行 `<strong>` 標題（警示框、清單卡片）跟著繼承過多留白，改回 1.4／1.45 | 已完成（2026-08-25）——有實際可見變化，未經瀏覽器視覺驗證 |
 | `2026-08-25-second-hardcode-sweep.md` | 字型／圓角／間距／動畫／z-index／斷點硬寫值三輪盤點：字型乾淨；新增 `--radius-sheet`／`--z-nav`／`--z-overlay` token；讀取失敗卡併入 `EmptyStateCard`；`.submit-actions` 收斂；元件層級斷點回寫進 DESIGN.md | 已完成（2026-08-25）——`pnpm check` 全過，未經瀏覽器視覺驗證 |
+| `2026-08-26-night-session-layout-revert.md` | 夜間＋有 Session 版面第三次翻案：改回 2026-08-23 的「收工版面」（不顯示倒數，改顯示已進行多久，主要行動是結束提醒），理由「不讓倒數跨夜」；還原 `HomeNightSession.vue` | 已完成（2026-08-26）——typecheck ＋ `HomePage.test.ts` 通過，未經瀏覽器視覺驗證 |
 
 `2026-08-22-mvp-flow-review.md` 原為待裁決的分析文件，2026-08-23 已逐項裁決完畢，轉為歷史參考。它指出的問題有一部分與實際程式碼不符（例如「三個並行的衛教入口」），採用前請先核對程式碼。
 
@@ -55,6 +56,8 @@
 | Sitemap 文件回寫（六處落差：單頁設定、`/reminder` 移除、頁首 UV、摘要移除、「更多」八張卡、`/forecast` 補記） | `2026-08-15-redesign-sitemap-userflow-current.md` | 已回寫（2026-08-24） |
 | `--font-size-body` 14px→16px 配合 DESIGN.md body-md；7 處字級魔術數字收斂進既有 token | `packages/ui/src/styles.css`、`apps/web/src/assets/app.css`、`HomeCountdown.vue`、`HomeUvHeadline.vue`、`GearListItem.vue`、`RegionPreferenceSummary.vue`、`ZoneProtectionForm.vue`、`EducationArticlePage.vue` | 已完成（2026-08-25）——`pnpm check` 全過，**尚未瀏覽器視覺驗證**，見 `2026-08-25-typography-token-consolidation.md` |
 | 新增 `--radius-sheet` token（bottom sheet 頂角）；讀取失敗卡併入 `EmptyStateCard`；清單縮排統一 `var(--space-5)`；`.education-card-status` 收斂進 `app.css` | `packages/ui/src/styles.css`、`GearFormSheet.vue`、`ProtectionAdjustmentSheet.vue`、`ProductsPage.vue`、`DataSettingsPage.vue`、`InstallPage.vue`、`ReapplyPage.vue`、`ReapplicationReview.vue`、`EducationIndexPage.vue`、`EducationCategoryPage.vue` | 已完成（2026-08-25）——`pnpm check` 全過，見 `2026-08-25-second-hardcode-sweep.md` |
+| 夜間＋有 Session 改回「收工版面」（不顯示倒數，主要行動是結束提醒）；還原 `HomeNightSession.vue`，清掉 Sitemap §4.2 元件清單裡的 `NightWindDownPrompt.vue` | `HomePage.vue`、`HomePage.test.ts`、`HomeNightSession.vue`、`2026-08-15-redesign-sitemap-userflow-current.md` §4.2 | 已完成（2026-08-26）——typecheck ＋ `HomePage.test.ts` 通過，見 `2026-08-26-night-session-layout-revert.md` |
+| Sitemap 回寫「頁首無 UV 時的退回行為」——改顯示「前往地區設定」連結，不再退回提醒狀態文字（實作 2026-08-24 起，文件才補上） | `2026-08-15-redesign-sitemap-userflow-current.md` §二「頁首（BrandHeader）」 | 已回寫（2026-08-26） |
 
 視覺設計另見：
 
