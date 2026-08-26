@@ -7,6 +7,7 @@ import QuickTimePicker from "../components/common/QuickTimePicker.vue";
 import SunLoader from "../components/feedback/SunLoader.vue";
 import ZoneSelectorGrid from "../components/reminder/ZoneSelectorGrid.vue";
 import { getZoneLabel } from "../features/reminder/reminderPresentation";
+import { formatDateTime } from "../helpers/datetime";
 
 const { contextEvent } = useWebAppServices();
 const router = useRouter();
@@ -81,9 +82,7 @@ function zoneNames(zoneIds: string[]): string {
       <h2 id="report-success-title" tabindex="-1">已記錄這次狀況</h2>
       <p>
         {{ contextEvent.success.value.label }}，{{
-          new Date(contextEvent.success.value.occurredAt).toLocaleString(
-            "zh-TW"
-          )
+          formatDateTime(contextEvent.success.value.occurredAt)
         }}。
       </p>
       <p>影響部位：{{ zoneNames(contextEvent.success.value.zoneIds) }}</p>

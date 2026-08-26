@@ -2,6 +2,7 @@
 import type { ZoneProjection } from "@sunshield/contracts";
 import type { ReapplicationProductChoice } from "../../features/reapplication/createReapplicationController";
 import { getZoneLabel } from "../../features/reminder/reminderPresentation";
+import { formatDateTime } from "../../helpers/datetime";
 defineProps<{
   zones: ZoneProjection[];
   selectedZoneIds: string[];
@@ -29,7 +30,7 @@ defineProps<{
         }}
       </li>
     </ul>
-    <p>實際時間：{{ new Date(appliedAt).toLocaleString("zh-TW") }}</p>
+    <p>實際時間：{{ formatDateTime(appliedAt) }}</p>
   </section>
 </template>
 <style scoped>

@@ -8,6 +8,7 @@ import ReapplicationProductAssignments from "../components/reapplication/Reappli
 import QuickTimePicker from "../components/common/QuickTimePicker.vue";
 import ReapplicationReview from "../components/reapplication/ReapplicationReview.vue";
 import { getZoneLabel } from "../features/reminder/reminderPresentation";
+import { formatDateTime } from "../helpers/datetime";
 
 const { reapplication } = useWebAppServices();
 const router = useRouter();
@@ -82,9 +83,7 @@ function zoneNames(zoneIds: string[]): string {
       <h2 id="reapply-success-title" tabindex="-1">補擦紀錄已更新</h2>
       <p>
         已更新 {{ reapplication.success.value.zoneIds.length }} 個部位，{{
-          new Date(reapplication.success.value.appliedAt).toLocaleString(
-            "zh-TW"
-          )
+          formatDateTime(reapplication.success.value.appliedAt)
         }}。其他未選的部位維持原本狀態。
       </p>
       <ul class="success-groups">

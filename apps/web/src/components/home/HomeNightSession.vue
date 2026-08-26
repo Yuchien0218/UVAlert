@@ -2,6 +2,7 @@
 import type { SessionProjection } from "@sunshield/contracts";
 import { computed } from "vue";
 import { useCurrentTime } from "../../composables/useCurrentTime";
+import { formatTime } from "../../helpers/datetime";
 
 /**
  * 夜間、且提醒仍在進行時的首屏（wireframe 09）。
@@ -60,11 +61,7 @@ const elapsedLabel = computed<string | null>(() => {
 
 const startedLabel = computed<string | null>(() => {
   if (startedAt.value === null) return null;
-  return new Date(startedAt.value).toLocaleTimeString("zh-TW", {
-    hour: "2-digit",
-    minute: "2-digit",
-    hour12: false
-  });
+  return formatTime(startedAt.value);
 });
 </script>
 

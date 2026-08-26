@@ -1,4 +1,5 @@
 import type { SessionProjection, ZoneProjection } from "@sunshield/contracts";
+import { formatTime } from "../../helpers/datetime";
 import { getZoneLabel } from "./reminderPresentation";
 
 export type HomeReminderClockTone = "tracking" | "soon" | "due";
@@ -77,7 +78,7 @@ export function buildHomeReminderClockPresentation(
   );
   const tone = getTone(earliest.zone, remainingMs);
   const title = buildTitle(scope, zoneLabel, tone);
-  const absoluteTime = formatAbsoluteTime(earliest.dueAt);
+  const absoluteTime = formatTime(earliest.dueAt);
 
   return {
     tone,
@@ -167,12 +168,4 @@ function getTone(
   }
   if (zone.timingStatus === "reapply_soon") return "soon";
   return "tracking";
-}
-
-function formatAbsoluteTime(value: string): string {
-  return new Intl.DateTimeFormat("zh-TW", {
-    hour: "2-digit",
-    minute: "2-digit",
-    hour12: false
-  }).format(new Date(value));
 }

@@ -5,6 +5,7 @@ import { useWebAppServices } from "../../app/injection";
 import AppNotice from "../../components/common/AppNotice.vue";
 import ConfirmAction from "../../components/common/ConfirmAction.vue";
 import EmptyStateCard from "../../components/common/EmptyStateCard.vue";
+import { formatDateTime } from "../../helpers/datetime";
 
 /**
  * S-19 本機資料管理。
@@ -26,7 +27,7 @@ onMounted(() => {
 });
 
 function formatTime(value: string | null): string {
-  return value === null ? "沒有紀錄" : new Date(value).toLocaleString("zh-TW");
+  return value === null ? "沒有紀錄" : formatDateTime(value);
 }
 
 async function runClear(scope: ClearScope): Promise<void> {

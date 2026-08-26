@@ -142,10 +142,11 @@
   - 完成結果：3 處非 `.button` 控制項改用 `var(--tap-target)`；2 處 `.button` 覆寫直接刪除，回歸全域 `.button`。
   - **驗證**：`pnpm check`；視覺零變化。
 
-- [ ] **B5：日期／時間格式化 → `apps/web/src/helpers/datetime.ts`**
+- [x] **B5：日期／時間格式化 → `apps/web/src/helpers/datetime.ts`**（2026-08-26 完成）
   - 現況 ~13 處：`components/common/QuickTimePicker.vue`、`components/home/HomeNightSession.vue`、`components/reapplication/ReapplicationReview.vue`、`components/reminder/RecentEventsList.vue`（2 處）、`components/uv/FiveDayUvCard.vue`（2 處）、`features/reminder/homeReminderClockPresentation.ts`、`features/reminder/reminderPresentation.ts`、`pages/EventCorrectionPage.vue`、`pages/ReapplyPage.vue`、`pages/ReportContextEventPage.vue`、`pages/settings/DataSettingsPage.vue`。
-  - 做法：建 `helpers/datetime.ts` 匯出 `formatDateTime(iso)`、`formatTime(iso)`、`formatWeekday(iso)`、`formatDate(iso)`，內部統一 `new Intl.DateTimeFormat("zh-TW", {...})`、統一 `hour12: false`。**逐處核對現有 options**——`RecentEventsList` 與 `FiveDayUvCard` 目前用的 options 可能不同，不要強行統一成一種（先列出每處實際 options，相同的併、不同的保留成不同函式）。
+  - 做法：建 `helpers/datetime.ts` 匯出 `formatDateTime(value)`、`formatTime(value)`、`formatMonthDayTime(value, options)`、`formatWeekday(value)`、`formatDate(value)`，內部統一 `new Intl.DateTimeFormat("zh-TW", {...})`、時分格式統一 `hour12: false`。**逐處核對現有 options**——`RecentEventsList` 與 `FiveDayUvCard` 的「月日＋時分」共用同一函式，但後者保留固定 `Asia/Taipei` 時區；近期事件是否為今天的判斷仍留在元件。
   - template 裡的 `{{ new Date(x).toLocaleString('zh-TW') }}` 改成 `{{ formatDateTime(x) }}`。
+  - 完成結果：11 個呼叫端檔案改用 helper；`apps/web/src` 的 `toLocale*` 與 helper 外 `Intl.DateTimeFormat` 已歸零。新增 5 項 formatter 單元測試。
   - `DESIGN.md` §3「倒數與數字規則」有 tabular-nums、單位不斷行的要求——helper 是落實這些的地方，順便檢查有沒有漏。
   - **測試**：`datetime.test.ts` 固定時區跑（happy-dom / node 的 `Intl` 行為），至少涵蓋每個匯出函式。
   - **驗證**：`pnpm check`；每處輸出字串跟改動前逐字比對（這是唯一驗收標準）。

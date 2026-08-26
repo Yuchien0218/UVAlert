@@ -3,6 +3,7 @@ import { ref, computed } from "vue";
 import type { ZoneProjection } from "@sunshield/contracts";
 import type { SessionEventStreamV1 } from "@sunshield/contracts";
 import { getZoneLabel } from "../../features/reminder/reminderPresentation";
+import { formatMonthDayTime, formatTime } from "../../helpers/datetime";
 
 interface Props {
   zones: ZoneProjection[];
@@ -131,23 +132,15 @@ const displayEvents = computed(() =>
   buildDisplayEvents(props.zones, props.events)
 );
 
-function formatTime(date: Date): string {
+function formatEventTime(date: Date): string {
   const now = new Date();
   const sameDay = date.toDateString() === now.toDateString();
 
   if (!sameDay) {
-    return date.toLocaleString("zh-TW", {
-      month: "numeric",
-      day: "numeric",
-      hour: "2-digit",
-      minute: "2-digit"
-    });
+    return formatMonthDayTime(date);
   }
 
-  return date.toLocaleTimeString("zh-TW", {
-    hour: "2-digit",
-    minute: "2-digit"
-  });
+  return formatTime(date);
 }
 
 function getZoneNames(zoneIds: string[], zones: ZoneProjection[]): string {
@@ -190,12 +183,12 @@ function getZoneNames(zoneIds: string[], zones: ZoneProjection[]): string {
           :type="event.correctable ? 'button' : undefined"
           :aria-label="
             event.correctable
-              ? `更正 ${formatTime(event.time)} 的${event.label}`
+              ? `更正 ${formatEventTime(event.time)} 的${event.label}`
               : undefined
           "
           @click="event.correctable && emit('correct', event.id)"
         >
-          <span class="event-time">{{ formatTime(event.time) }}</span>
+          <span class="event-time">{{ formatEventTime(event.time) }}</span>
           <span class="event-label">{{ event.label }}</span>
           <span class="event-zones">{{
             getZoneNames(event.zoneIds, zones)

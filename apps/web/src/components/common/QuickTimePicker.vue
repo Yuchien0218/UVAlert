@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { formatDateTime } from "../../helpers/datetime";
+
 interface Props {
   appliedAt: string;
   referenceNow: string;
@@ -64,7 +66,7 @@ function isSelected(minutes: number): boolean {
       @change="fromLocal(($event.target as HTMLInputElement).value)"
     />
     <p :id="`${idPrefix}-summary`" class="time-summary">
-      {{ summaryLabel }}{{ new Date(appliedAt).toLocaleString("zh-TW") }}
+      {{ summaryLabel }}{{ formatDateTime(appliedAt) }}
     </p>
     <p v-if="error" :id="`${idPrefix}-error`" class="form-error" role="alert">
       {{ error }}

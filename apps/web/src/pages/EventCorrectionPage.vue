@@ -7,6 +7,7 @@ import QuickTimePicker from "../components/common/QuickTimePicker.vue";
 import SunLoader from "../components/feedback/SunLoader.vue";
 import ZoneSelectorGrid from "../components/reminder/ZoneSelectorGrid.vue";
 import { getZoneLabel } from "../features/reminder/reminderPresentation";
+import { formatDateTime } from "../helpers/datetime";
 
 /**
  * S-10 更正最近事件。
@@ -117,9 +118,7 @@ async function runVoid(): Promise<void> {
       <p v-else>
         {{ eventCorrection.success.value.label }}已更新為
         {{
-          new Date(eventCorrection.success.value.occurredAt).toLocaleString(
-            "zh-TW"
-          )
+          formatDateTime(eventCorrection.success.value.occurredAt)
         }}，影響部位：{{ zoneNames(eventCorrection.success.value.zoneIds) }}。
       </p>
       <button class="button button--primary" type="button" @click="back">

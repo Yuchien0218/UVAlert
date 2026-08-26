@@ -5,6 +5,7 @@ import type {
   ZoneProjection
 } from "@sunshield/contracts";
 import type { ConnectivityStatus } from "@sunshield/platform";
+import { formatTime } from "../../helpers/datetime";
 import { calculateRemainingProgress } from "./homeReminderClockPresentation";
 
 export type ReminderTone = "timed" | "soon" | "due" | "untimed";
@@ -414,11 +415,7 @@ function getAffectedZoneLabel(zones: ZoneProjection[]): string {
 
 function formatAbsoluteTime(value: string | null): string {
   if (value === null) return "還沒有時間";
-  return new Intl.DateTimeFormat("zh-TW", {
-    hour: "2-digit",
-    minute: "2-digit",
-    hour12: false
-  }).format(new Date(value));
+  return formatTime(value);
 }
 
 function formatRelativeTime(value: string | null, now: Date): string {

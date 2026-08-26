@@ -7,6 +7,11 @@ import type {
   UvForecastPhase
 } from "../../features/uv/createUvForecastController";
 import { getUvRiskLevelLabel } from "../../features/uv/uvForecastRules";
+import {
+  formatDate,
+  formatMonthDayTime,
+  formatWeekday
+} from "../../helpers/datetime";
 
 interface Props {
   phase: UvForecastPhase;
@@ -27,22 +32,13 @@ function formatForecastDate(localDate: string): {
   const [year, month, day] = localDate.split("-").map((part) => Number(part));
   const date = new Date(year!, month! - 1, day!, 12);
   return {
-    weekday: new Intl.DateTimeFormat("zh-TW", {
-      weekday: "short"
-    }).format(date),
-    date: `${month}/${day}`
+    weekday: formatWeekday(date),
+    date: formatDate(date)
   };
 }
 
 function formatUpdatedAt(instant: string): string {
-  return new Intl.DateTimeFormat("zh-TW", {
-    timeZone: "Asia/Taipei",
-    month: "numeric",
-    day: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
-    hour12: false
-  }).format(new Date(instant));
+  return formatMonthDayTime(instant, { timeZone: "Asia/Taipei" });
 }
 
 function riskClass(riskLevel: UvRiskLevel): string {
