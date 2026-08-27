@@ -135,7 +135,7 @@ const errorMessage = computed(() => {
 
 .location-panel__title {
   margin-top: var(--space-1);
-  font-size: var(--font-size-title-md);
+  font-size: var(--font-size-section-title);
 }
 
 .location-panel__body {
@@ -156,7 +156,7 @@ const errorMessage = computed(() => {
 }
 
 .location-panel__candidate h3 {
-  font-size: var(--font-size-title-sm);
+  font-size: var(--font-size-card-title);
 }
 
 .location-panel__relocate {

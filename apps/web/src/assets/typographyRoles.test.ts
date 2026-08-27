@@ -13,7 +13,16 @@ const migratedFiles = [
   "apps/web/src/components/setup/QuickProtectionSummary.vue",
   "apps/web/src/components/setup/WaterStartPicker.vue",
   "apps/web/src/components/setup/ZoneProtectionForm.vue",
-  "apps/web/src/pages/setup/SetupPage.vue"
+  "apps/web/src/pages/setup/SetupPage.vue",
+  "apps/web/src/components/home/HomeUvHeadline.vue",
+  "apps/web/src/pages/HomePage.vue",
+  "apps/web/src/components/reapplication/ReapplicationZoneSelector.vue",
+  "apps/web/src/components/reminder/ZoneStatusList.vue",
+  "apps/web/src/components/region/RegionLocationPanel.vue",
+  "apps/web/src/components/region/RegionManualSelector.vue",
+  "apps/web/src/components/region/RegionPreferenceSummary.vue",
+  "apps/web/src/pages/RegionPage.vue",
+  "apps/web/src/components/uv/FiveDayUvCard.vue"
 ];
 
 const legacyToken = /--font-size-(?:label|title-sm|title-md|title)\b/;

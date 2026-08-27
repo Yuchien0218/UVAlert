@@ -52,7 +52,7 @@ defineProps<Props>();
 
 .region-summary__value {
   margin-top: var(--space-1);
-  font-size: var(--font-size-title-sm);
+  font-size: var(--font-size-card-title);
   font-weight: 600;
 }
 

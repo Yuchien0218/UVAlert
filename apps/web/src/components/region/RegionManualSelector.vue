@@ -170,7 +170,7 @@ async function save(): Promise<void> {
 }
 
 .manual-region h2 {
-  font-size: var(--font-size-title-md);
+  font-size: var(--font-size-section-title);
 }
 
 .manual-region p {

@@ -185,7 +185,7 @@ function getTimingTone(timingStatus: ZoneProjection["timingStatus"]): ZoneTone {
 .zone-group__status {
   margin: 0;
   color: var(--tone);
-  font-size: var(--font-size-label);
+  font-size: var(--font-size-supporting);
   font-weight: 600;
 }
 
