@@ -88,7 +88,7 @@ function navigationLabel(to: string, label: string): string {
   gap: var(--space-1);
   border-radius: var(--radius-sm);
   color: var(--color-body-strong);
-  font-size: var(--font-size-caption);
+  font-size: var(--font-size-nav-label);
   font-weight: 400;
   text-decoration: none;
 }

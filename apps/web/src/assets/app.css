@@ -68,7 +68,7 @@
 .page-heading__eyebrow {
   margin: 0;
   color: var(--text-secondary);
-  font-size: var(--font-size-label);
+  font-size: var(--font-size-caption);
   font-weight: 500;
 }
 
@@ -493,7 +493,7 @@ button.text-link {
   max-width: 100%;
   margin: 0;
   padding: 0;
-  font-size: var(--font-size-title-sm);
+  font-size: var(--font-size-card-title);
   font-weight: 500;
   overflow-wrap: anywhere;
 }

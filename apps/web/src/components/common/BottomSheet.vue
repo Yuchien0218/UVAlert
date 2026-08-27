@@ -105,7 +105,7 @@ const { closeFromBackdrop } = useOverlay({
 
 .bottom-sheet__header h2 {
   margin: 0;
-  font-size: var(--font-size-title-md);
+  font-size: var(--font-size-section-title);
 }
 
 .bottom-sheet__body {
