@@ -17,4 +17,10 @@ describe("B8 typography role migration", () => {
       expect(readFileSync(file, "utf8")).not.toMatch(legacyToken);
     });
   }
+
+  it("將可換行的安全說明維持在 supporting role", () => {
+    expect(readFileSync("apps/web/src/assets/app.css", "utf8")).toMatch(
+      /\.safety-note\s*\{[^}]*font-size:\s*var\(--font-size-supporting\);/
+    );
+  });
 });

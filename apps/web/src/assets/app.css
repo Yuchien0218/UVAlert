@@ -571,7 +571,7 @@ button.text-link {
 .safety-note {
   margin: 0;
   color: var(--text-secondary);
-  font-size: var(--font-size-caption);
+  font-size: var(--font-size-supporting);
   line-height: 1.6;
 }
 
