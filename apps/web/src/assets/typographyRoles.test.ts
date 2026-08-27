@@ -1,32 +1,20 @@
-import { readFileSync } from "node:fs";
+import { readFileSync, readdirSync } from "node:fs";
+import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 
-const migratedFiles = [
-  "apps/web/src/assets/app.css",
-  "apps/web/src/components/shell/BottomNavigation.vue",
-  "apps/web/src/components/common/BottomSheet.vue",
-  "apps/web/src/components/common/EmptyStateCard.vue",
-  "apps/web/src/components/session/SessionEndControl.vue",
-  "apps/web/src/components/product/GearListItem.vue",
-  "apps/web/src/components/product/ProductSnapshotEditor.vue",
-  "apps/web/src/components/product/SetupProcessBanner.vue",
-  "apps/web/src/components/setup/QuickProtectionSummary.vue",
-  "apps/web/src/components/setup/WaterStartPicker.vue",
-  "apps/web/src/components/setup/ZoneProtectionForm.vue",
-  "apps/web/src/pages/setup/SetupPage.vue",
-  "apps/web/src/components/home/HomeUvHeadline.vue",
-  "apps/web/src/pages/HomePage.vue",
-  "apps/web/src/components/reapplication/ReapplicationZoneSelector.vue",
-  "apps/web/src/components/reminder/ZoneStatusList.vue",
-  "apps/web/src/components/region/RegionLocationPanel.vue",
-  "apps/web/src/components/region/RegionManualSelector.vue",
-  "apps/web/src/components/region/RegionPreferenceSummary.vue",
-  "apps/web/src/pages/RegionPage.vue",
-  "apps/web/src/components/uv/FiveDayUvCard.vue",
-  "apps/web/src/pages/education/EducationIndexPage.vue",
-  "apps/web/src/pages/education/EducationCategoryPage.vue",
-  "apps/web/src/pages/education/EducationArticlePage.vue"
-];
+const sourceRoot = "apps/web/src";
+const currentTestFile = join(sourceRoot, "assets", "typographyRoles.test.ts");
+
+function discoverSourceFiles(directory: string): string[] {
+  return readdirSync(directory, { withFileTypes: true }).flatMap((entry) => {
+    const entryPath = join(directory, entry.name);
+    if (entry.isDirectory()) return discoverSourceFiles(entryPath);
+    if (entryPath === currentTestFile) return [];
+    return /\.(?:vue|css)$/.test(entry.name) ? [entryPath] : [];
+  });
+}
+
+const migratedFiles = discoverSourceFiles(sourceRoot).sort();
 
 const legacyToken = /--font-size-(?:label|title-sm|title-md|title)\b/;
 

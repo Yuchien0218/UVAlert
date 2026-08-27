@@ -196,12 +196,6 @@
   --font-size-caption: 0.75rem;
   --font-size-nav-label: 0.75rem;
 
-  /* B8 migration aliases: remove after every consumer has a semantic role. */
-  --font-size-label: var(--font-size-supporting);
-  --font-size-title-sm: var(--font-size-card-title);
-  --font-size-title: var(--font-size-section-title);
-  --font-size-title-md: var(--font-size-section-title);
-
   /*
    * 2026-08-24 補：字距（letter-spacing）原本 8 個檔案各寫各的魔術數字，
    * 互相對不上。這裡只收斂「真的重複」的三組，不強改只出現一次的數值

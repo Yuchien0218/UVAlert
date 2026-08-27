@@ -187,11 +187,25 @@ describe("DESIGN.md ↔ styles.css token 一致性", () => {
 
     for (const [role, token] of Object.entries(TYPOGRAPHY_MAP)) {
       it(`${role} 對應 ${token}，值一致`, () => {
-        expect(entries[role], `DESIGN.md 缺少 typography.${role}`).toBeDefined();
+        expect(
+          entries[role],
+          `DESIGN.md 缺少 typography.${role}`
+        ).toBeDefined();
         expect(cssTokens[token], `styles.css 缺少 ${token}`).toBeDefined();
         expect(normalize(cssTokens[token]!)).toBe(normalize(entries[role]!));
       });
     }
+
+    it("不再宣告 B8 前的舊字級桶", () => {
+      for (const legacy of [
+        "--font-size-label",
+        "--font-size-title-sm",
+        "--font-size-title",
+        "--font-size-title-md"
+      ]) {
+        expect(cssTokens[legacy]).toBeUndefined();
+      }
+    });
   });
 
   it("KNOWN_DRIFT 的每一項現在仍然真的有落差（修好就從清單移除）", () => {
