@@ -226,7 +226,7 @@
   - 這是**跨全站的字級調整**，會動很多頁面的視覺，需要獨立一輪（可能還要重新想 DESIGN.md 的 14 級量表對這個 8-token 產品是不是太細）。跟 B7（衛教長文排版）性質類似。
   - 也要把 typography 對照補進 `tokens.test.ts`（目前只驗 `body-md`）。
 
-- [ ] **G3：`.status-card` 死碼**
+- [x] **G3：`.status-card` 死碼** — 2026-08-27 完成
   - `app.css` 的 `.status-card` ＋ 5 個變體（含 D2 剛改名的 `.status-card--saved`）沒有任何元件 template 用到——DESIGN.md §5 的 `status-card` 規範實際由 `ZoneStatusList.vue` 的 `.zone-group` 實現。約 40 行死碼，併進死碼掃描。同場加映：`.uvi-badge`（app.css）grep 也查不到 .vue 使用，一起確認。
 
 ---
@@ -243,22 +243,22 @@
 
 ## Task F：尚未被稽核的面向
 
-- [ ] **F1：使用者可見文案的集中度**
+- [x] **F1：使用者可見文案的集中度** — 2026-08-27 完成，見 `docs/decisions/2026-08-27-copy-a11y-test-dead-code-audit.md`
   - 現況：多數字串 inline 在 template；只有 `features/reminder/reminderPresentation.ts` 集中了 `ACTION_LABELS`／`BODY_ZONE_LABELS`。`docs/decisions/2026-08-17-copy-audit.md` 查了**用詞**，沒查**重複與結構**。
   - 做法：先**盤點**（不急著改）——grep 重複字串（「取消」「返回更多」「正在讀取…」變體、錯誤訊息）。判斷哪些值得抽成 `apps/web/src/copy/` 目錄或就近的常數。**不要為了假設性的 i18n 需求全部抽**（這個產品只有繁中）；只抽「真的重複且改一個要 grep 全站」的。
   - 產出：一份「文案重複清單」，本清單再開子項目。
 
-- [ ] **F2：無障礙一致性稽核**
+- [x] **F2：無障礙一致性稽核** — 2026-08-27 完成，留下 1 個 MEDIUM、2 個 LOW 後續項
   - `role="status"` ×24、`role="alert"` ×39、`role="note"` ×3——沒稽核過語意是否用對（例如「操作結果提示」該用 status 還是 alert，全站是否一致）。
   - 三套 overlay 的 focus trap 已於 B3 統一至 `useOverlay`；後續稽核需確認其他 dialog／自訂 widget 是否仍有漏網實作。
   - 產出：一份 a11y 一致性 checklist，可能引用 `better-accessibility` skill。
 
-- [ ] **F3：測試的脆弱耦合掃描**
+- [x] **F3：測試的脆弱耦合掃描** — 2026-08-27 完成
   - 起因：`BottomNavigation.test.ts` 的 `/z-index:\s*\d+/` 是改壞才發現的。
   - 做法：grep 所有 `.test.ts` 裡直接比對 CSS 字面值 / class 名 / 內聯 style 的斷言（`toContain("px")`、`attributes("style")`、`.classes()`、硬寫 class selector）。判斷哪些該改成「驗證行為」而非「驗證實作字串」。
   - `docs/superpowers/plans/2026-08-25-shared-component-extraction.md` 的 Global Constraints 已經點名 `AccountDataPage.test.ts:48` 的 `.confirm-note button.button--primary` 這類——順著查。
 
-- [ ] **F4：`DataSettingsPage` 的 loading 狀態採用 `SunLoader`**
+- [x] **F4：`DataSettingsPage` 的 loading 狀態採用 `SunLoader`** — 2026-08-27 完成（TDD）
   - `docs/decisions/2026-08-25-second-hardcode-sweep.md` 結尾點名的遺漏：`DataSettingsPage.vue` 仍是手寫 `<p role="status">正在讀取本機資料概況…</p>`，沒用 2026-08-25 Task 3 導入的 `SunLoader`。小改動，順手做。
 
 - [x] **F5：瀏覽器視覺驗證（累積債）**（2026-08-26 完成）
@@ -276,7 +276,7 @@
   - `packages/ui/src/styles.css` 定義了，全站零使用（只有 `AppShell.vue` 的 `box-shadow: none`）。
   - 跟 D5 一起決定：刪除 token（傾向），或改值 + 實際套用。
 
-- [ ] **G2：其他死碼順手清**
+- [x] **G2：其他死碼順手清** — 2026-08-27 完成
   - `ContextSelector.vue` 局部重覆宣告的 focus outline（`docs/decisions/2026-08-25-second-hardcode-sweep.md` 判斷為無害死碼，沒清）。
   - A1/A3 上線後，lint 會自己列出 unused imports / dead CSS。
 
