@@ -5,13 +5,13 @@ import { describe, expect, it } from "vitest";
  * DESIGN.md（設計系統唯一權威）↔ styles.css（程式碼真實來源）的漂移守門測試。
  *
  * 起因見 docs/superpowers/plans/2026-08-26-codebase-consolidation-audit.md 的 C1：
- * 2026-08-25 才發現 DESIGN.md 的 body-md 訂 16px，但 --font-size-body 一直是
+ * 2026-08-25 曾發現 DESIGN.md 的 body-md 訂 16px，但 --font-size-body 一直是
  * 14px——沒有任何機制擋住這種落差。這個測試 parse DESIGN.md frontmatter 的
- * colors／rounded／spacing／layout，逐項比對 styles.css 的對應 token。
+ * colors／rounded／spacing／layout／typography，逐項比對 styles.css 的對應 token。
  *
- * **範圍界定**：typography（14 級編輯量表）與 code 端 8 個 --font-size-* token
- * 的命名對應太亂，重新對齊會動到全站字級——是獨立的視覺工作（見 DESIGN.md
- * 第十節的對照表 ＋ audit 清單 D2/B7）。本檔案只驗證唯一校準過的 body-md。
+ * **範圍界定**：B8 將 typography 收斂為七個語意角色；每個 canonical
+ * --font-size-* token 都必須與 DESIGN.md 同值。倒數與讀數是元件級例外，
+ * 不納入一般文字量表。
  *
  * **KNOWN_DRIFT**：已知對不上、待裁決的項目列在下方清單，測試放行；另有一個
  * 測試守著「這些項目現在仍然真的有落差」——修好一項後那個測試會失敗，提醒
@@ -76,6 +76,34 @@ const LAYOUT_MAP: Record<string, string> = {
   // 左右留白（page-gutter）2026-08-26 從 frontmatter 移除——它是流動的
   // clamp() 不是 token，只留在 §12 prose。
 };
+
+const TYPOGRAPHY_MAP: Record<string, string> = {
+  "page-title": "--font-size-page-title",
+  "section-title": "--font-size-section-title",
+  "card-title": "--font-size-card-title",
+  body: "--font-size-body",
+  supporting: "--font-size-supporting",
+  caption: "--font-size-caption",
+  "nav-label": "--font-size-nav-label"
+};
+
+function typographyFontSizes(): Record<string, string> {
+  const fm = designMd.match(/^---\r?\n([\s\S]*?)\r?\n---/)?.[1] ?? "";
+  const section = fm.match(/^typography:\r?\n([\s\S]*?)(?=^\S)/m)?.[1] ?? "";
+  const out: Record<string, string> = {};
+  let currentKey: string | null = null;
+
+  for (const line of section.split(/\r?\n/)) {
+    const role = line.match(/^ {2}([\w-]+):\s*$/);
+    if (role) {
+      currentKey = role[1]!;
+      continue;
+    }
+    const size = line.match(/^ {4}fontSize:\s*(.+)$/);
+    if (currentKey !== null && size) out[currentKey] = size[1]!.trim();
+  }
+  return out;
+}
 
 function tokenFor(section: string, key: string): string | null {
   switch (section) {
@@ -148,13 +176,22 @@ describe("DESIGN.md ↔ styles.css token 一致性", () => {
     });
   }
 
-  it("body-md（唯一校準過的字級）與 --font-size-body 一致", () => {
-    // DESIGN.md typography.body-md.fontSize = 16px；其餘字級對應待 D2。
-    const bodyMd = designMd.match(/body-md:[\s\S]*?fontSize:\s*(\d+)px/)?.[1];
-    expect(bodyMd, "DESIGN.md 找不到 body-md fontSize").toBeDefined();
-    expect(normalize(`${bodyMd}px`)).toBe(
-      normalize(cssTokens["--font-size-body"]!)
-    );
+  describe("typography", () => {
+    const entries = typographyFontSizes();
+
+    it("只公開核准的七個語意角色", () => {
+      expect(Object.keys(entries).sort()).toEqual(
+        Object.keys(TYPOGRAPHY_MAP).sort()
+      );
+    });
+
+    for (const [role, token] of Object.entries(TYPOGRAPHY_MAP)) {
+      it(`${role} 對應 ${token}，值一致`, () => {
+        expect(entries[role], `DESIGN.md 缺少 typography.${role}`).toBeDefined();
+        expect(cssTokens[token], `styles.css 缺少 ${token}`).toBeDefined();
+        expect(normalize(cssTokens[token]!)).toBe(normalize(entries[role]!));
+      });
+    }
   });
 
   it("KNOWN_DRIFT 的每一項現在仍然真的有落差（修好就從清單移除）", () => {
