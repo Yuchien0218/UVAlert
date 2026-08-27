@@ -359,7 +359,7 @@ const summary = computed(() => {
 .session-product__eyebrow {
   margin: 0 0 var(--space-2);
   color: var(--text-secondary);
-  font-size: var(--font-size-label);
+  font-size: var(--font-size-caption);
   font-weight: 500;
 }
 
@@ -406,7 +406,7 @@ const summary = computed(() => {
 
 .number-field span {
   color: var(--text-secondary);
-  font-size: var(--font-size-body);
+  font-size: var(--font-size-supporting);
 }
 
 .number-field input {

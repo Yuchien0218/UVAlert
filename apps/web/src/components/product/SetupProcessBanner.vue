@@ -69,7 +69,7 @@ defineEmits<{
 
 .process-banner__eyebrow {
   color: var(--text-secondary);
-  font-size: var(--font-size-label);
+  font-size: var(--font-size-caption);
   font-weight: 500;
 }
 
@@ -81,7 +81,7 @@ defineEmits<{
 .process-banner__content > p:last-child {
   margin-top: var(--space-2);
   color: var(--text-secondary);
-  font-size: var(--font-size-body);
+  font-size: var(--font-size-supporting);
   line-height: 1.6;
 }
 

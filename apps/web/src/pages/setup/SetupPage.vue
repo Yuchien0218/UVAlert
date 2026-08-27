@@ -442,7 +442,7 @@ onMounted(async () => {
 .recovery-card__eyebrow {
   margin: 0;
   color: var(--text-secondary);
-  font-size: var(--font-size-label);
+  font-size: var(--font-size-caption);
   font-weight: 500;
 }
 

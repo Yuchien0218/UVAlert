@@ -154,13 +154,13 @@ const zoneLabels = computed(() =>
 
 .quick-protection__eyebrow {
   color: var(--text-secondary);
-  font-size: var(--font-size-label);
+  font-size: var(--font-size-caption);
   font-weight: 500;
 }
 
 .quick-protection__header-content h2 {
   margin-top: var(--space-2);
-  font-size: var(--font-size-title-md);
+  font-size: var(--font-size-card-title);
 }
 
 .quick-protection__toggle {
@@ -182,23 +182,22 @@ const zoneLabels = computed(() =>
 
 .quick-protection__summary {
   color: var(--text-secondary);
-  font-size: var(--font-size-body);
+  font-size: var(--font-size-supporting);
   line-height: 1.6;
 }
 
 .quick-protection__zones {
-  font-size: var(--font-size-body);
+  font-size: var(--font-size-supporting);
   color: var(--text-secondary);
   line-height: 1.6;
 }
 
 /*
- * 2026-08-25：跟其他 body 級文字一起被批次改成 1.75，但這是 label 級
- * （12.8px）文字，DESIGN.md「說明／標籤」對應的 CJK 行高是 1.5，改回來。
+ * 2026-08-25：這是說明／標籤角色，DESIGN.md 對應的 CJK 行高是 1.5。
  */
 .quick-protection__note {
   color: var(--text-secondary);
-  font-size: var(--font-size-label);
+  font-size: var(--font-size-supporting);
   line-height: 1.5;
 }
 

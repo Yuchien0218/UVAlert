@@ -6,7 +6,14 @@ const migratedFiles = [
   "apps/web/src/components/shell/BottomNavigation.vue",
   "apps/web/src/components/common/BottomSheet.vue",
   "apps/web/src/components/common/EmptyStateCard.vue",
-  "apps/web/src/components/session/SessionEndControl.vue"
+  "apps/web/src/components/session/SessionEndControl.vue",
+  "apps/web/src/components/product/GearListItem.vue",
+  "apps/web/src/components/product/ProductSnapshotEditor.vue",
+  "apps/web/src/components/product/SetupProcessBanner.vue",
+  "apps/web/src/components/setup/QuickProtectionSummary.vue",
+  "apps/web/src/components/setup/WaterStartPicker.vue",
+  "apps/web/src/components/setup/ZoneProtectionForm.vue",
+  "apps/web/src/pages/setup/SetupPage.vue"
 ];
 
 const legacyToken = /--font-size-(?:label|title-sm|title-md|title)\b/;
