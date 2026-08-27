@@ -139,7 +139,7 @@ const robots = computed(() =>
 }
 
 .education-category-card strong {
-  font-size: var(--font-size-title-sm);
+  font-size: var(--font-size-card-title);
   font-weight: 500;
   line-height: 1.45;
 }

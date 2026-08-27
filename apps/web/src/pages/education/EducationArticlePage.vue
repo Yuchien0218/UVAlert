@@ -144,18 +144,19 @@ const relatedArticles = computed(() =>
 
 .education-article-body {
   max-width: 44rem;
+  font-size: var(--font-size-body);
   line-height: 1.85;
 }
 
 .education-article-body :deep(h2) {
-  margin: var(--space-8) 0 var(--space-3);
-  font-size: var(--font-size-title);
+  margin: var(--space-10) 0 var(--space-3);
+  font-size: var(--font-size-section-title);
   line-height: 1.35;
 }
 
 .education-article-body :deep(h3) {
-  margin: var(--space-6) 0 var(--space-2);
-  font-size: var(--font-size-title-sm);
+  margin: var(--space-8) 0 var(--space-2);
+  font-size: var(--font-size-card-title);
   line-height: 1.45;
 }
 
@@ -186,9 +187,21 @@ const relatedArticles = computed(() =>
 }
 
 .education-article-body :deep(hr) {
-  margin: var(--space-8) 0;
+  width: 7.5rem;
+  height: 0.5rem;
+  margin: var(--space-10) auto;
   border: 0;
-  border-top: 1px solid var(--border-subtle);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 8'%3E%3Cpath d='M1 4C11 0 19 8 29 4S47 0 57 4s18 4 28 0 18-4 34 0' fill='none' stroke='%236F5A54' stroke-opacity='.55' stroke-linecap='round' stroke-width='2'/%3E%3C/svg%3E");
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: 100% 100%;
+}
+
+.education-article-body :deep(hr + p) {
+  margin-top: 0;
+  color: var(--text-secondary);
+  font-size: var(--font-size-caption);
+  line-height: 1.6;
 }
 
 .education-article-body :deep(code) {

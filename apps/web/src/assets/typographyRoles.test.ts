@@ -22,7 +22,10 @@ const migratedFiles = [
   "apps/web/src/components/region/RegionManualSelector.vue",
   "apps/web/src/components/region/RegionPreferenceSummary.vue",
   "apps/web/src/pages/RegionPage.vue",
-  "apps/web/src/components/uv/FiveDayUvCard.vue"
+  "apps/web/src/components/uv/FiveDayUvCard.vue",
+  "apps/web/src/pages/education/EducationIndexPage.vue",
+  "apps/web/src/pages/education/EducationCategoryPage.vue",
+  "apps/web/src/pages/education/EducationArticlePage.vue"
 ];
 
 const legacyToken = /--font-size-(?:label|title-sm|title-md|title)\b/;
