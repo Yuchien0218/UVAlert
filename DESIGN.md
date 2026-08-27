@@ -484,7 +484,7 @@ components:
 >
 > 最終解法是**把西文顯示字整支移除**，而不是換一支。依據是實測資料：54 個衛教文章標題中只有 11 個含拉丁字母，且**全部**是嵌在中文句子裡的縮寫（UV、UVA、UVB、SPF、PA、UPF、UV400），**沒有任何一個是連續拉丁文字**——這個產品根本沒有「拉丁標題排版」這個工作。Noto Serif TC 自帶的拉丁字形本來就是為搭配它的中文而設計，縮寫與中文的視覺重量一致。
 
-系統以 **Noto Serif TC** 為標題顯示字，中英文由同一支字型負責，字重僅 400。**Inter** 為拉丁人文無襯線內文字，搭配 **Noto Sans TC** 處理繁體中文內文、導覽與 UI 標籤。**Noto Sans Mono** 加系統等寬堆疊處理倒數數值與資料讀數——讀數只渲染純數字（見下方讀數字體備註），不需要 CJK 等寬覆蓋。
+系統以 **Noto Serif TC** 為標題顯示字，中英文由同一支字型負責；page title 使用字重 400，section title 使用字重 500。**Inter** 為拉丁人文無襯線內文字，搭配 **Noto Sans TC** 處理繁體中文內文、導覽與 UI 標籤。**Noto Sans Mono** 加系統等寬堆疊處理倒數數值與資料讀數——讀數只渲染純數字（見下方讀數字體備註），不需要 CJK 等寬覆蓋。
 
 **標題不再搭配任何西文顯示字體。** 要加西文襯線體之前，先回頭看上面那段實測資料：沒有連續拉丁標題，就沒有它的工作。
 
@@ -538,15 +538,15 @@ components:
 
 元件內含繁體中文時套用以下覆寫，保留拉丁比例的同時給 CJK 字符足夠的垂直呼吸：
 
-| 角色        | 尺寸 | CJK 行高 | 字距    | 備註                                                   |
-| ----------- | ---: | -------: | ------- | ------------------------------------------------------ |
-| Page title  | 28px |     1.22 | -0.01em | 每頁唯一主標題；兩行標題使用 `text-wrap: balance`     |
-| Section title | 20px |     1.35 | 0       | 頁面區段、Dialog／Bottom Sheet、文章主要章節          |
-| Card title  | 18px |     1.45 | 0       | 字重 500；不用假粗體                                  |
-| Body        | 16px |      1.6 | 0.01em  | 衛教內容與操作文字的預設；輸入內容避免 iOS 自動放大   |
-| Supporting  | 14px |      1.6 | 0.01em  | 可跨行閱讀的次要資訊；重要指示不可降到 caption        |
-| Caption     | 12px |      1.5 | 0.01em  | 短註腳、eyebrow、badge；不承載長段說明                |
-| Nav label   | 12px |      1.4 | 0.01em  | 主要底部導覽標籤                                      |
+| 角色          | 尺寸 | CJK 行高 | 字距    | 備註                                                |
+| ------------- | ---: | -------: | ------- | --------------------------------------------------- |
+| Page title    | 28px |     1.22 | -0.01em | 每頁唯一主標題；兩行標題使用 `text-wrap: balance`   |
+| Section title | 20px |     1.35 | 0       | 頁面區段、Dialog／Bottom Sheet、文章主要章節        |
+| Card title    | 18px |     1.45 | 0       | 字重 500；不用假粗體                                |
+| Body          | 16px |      1.6 | 0.01em  | 衛教內容與操作文字的預設；輸入內容避免 iOS 自動放大 |
+| Supporting    | 14px |      1.6 | 0.01em  | 可跨行閱讀的次要資訊；重要指示不可降到 caption      |
+| Caption       | 12px |      1.5 | 0.01em  | 短註腳、eyebrow、badge；不承載長段說明              |
+| Nav label     | 12px |      1.4 | 0.01em  | 主要底部導覽標籤                                    |
 
 中文衛教段落使用 `max-width: 38em` 避免行長過長。使用 `text-align: start`、`line-break: strict`、`word-break: normal`、`text-wrap: pretty`。不使用 `word-break: break-all` 或全文對齊。
 
@@ -803,22 +803,22 @@ Noto Serif TC 是標題的唯一字型，沒有第二層自托管備援——載
 
 `README.md` 訂有「文件與程式碼衝突時以程式碼為準」的規則。**色彩已於 2026-08-22 套用、標題字體已於 2026-08-23 定案（Noto Serif TC 單一字型）。** 第二節的 `colors`／`rounded`／`spacing`／`layout`／`typography` frontmatter 與 `packages/ui/src/styles.css` 的一致性由 `packages/ui/src/tokens.test.ts` 自動守著。目前**刻意或暫時的偏離**：
 
-| 項目         | 本文件（目標） | 實作                              | 狀態 / 為什麼                                                                 |
-| ------------ | -------------- | --------------------------------- | ----------------------------------------------------------------------------- |
-| 中文內文字體 | Noto Sans TC   | 系統黑體（PingFang TC／微軟正黑） | 刻意。內文會渲染使用者輸入的裝備名稱與備註，subset 會缺字，完整 CJK 字型好幾 MB。詳見 `tools/fonts/README.md` |
-| **字級量表** | 第三節七角色語意量表 | 7 個 canonical `--font-size-*` token | **已對齊**。每個角色的值由 token drift test 比對；倒數與讀數是元件級例外。 |
+| 項目         | 本文件（目標）       | 實作                                 | 狀態 / 為什麼                                                                                                 |
+| ------------ | -------------------- | ------------------------------------ | ------------------------------------------------------------------------------------------------------------- |
+| 中文內文字體 | Noto Sans TC         | 系統黑體（PingFang TC／微軟正黑）    | 刻意。內文會渲染使用者輸入的裝備名稱與備註，subset 會缺字，完整 CJK 字型好幾 MB。詳見 `tools/fonts/README.md` |
+| **字級量表** | 第三節七角色語意量表 | 7 個 canonical `--font-size-*` token | **已對齊**。每個角色的值由 token drift test 比對；倒數與讀數是元件級例外。                                    |
 
 ### 字級量表 ↔ code token 對照（B8）
 
-| 語意角色        | 基準值 | code token                      | code 值      | 狀態                                      |
-| --------------- | -----: | ------------------------------- | ------------ | ----------------------------------------- |
-| `page-title`    |   28px | `--font-size-page-title`        | `1.75rem`    | ✅ drift test 守門                        |
-| `section-title` |   20px | `--font-size-section-title`     | `1.25rem`    | ✅ drift test 守門                        |
-| `card-title`    |   18px | `--font-size-card-title`        | `1.125rem`   | ✅ drift test 守門                        |
-| `body`          |   16px | `--font-size-body`              | `1rem`       | ✅ drift test 守門                        |
-| `supporting`    |   14px | `--font-size-supporting`        | `0.875rem`   | ✅ drift test 守門                        |
-| `caption`       |   12px | `--font-size-caption`           | `0.75rem`    | ✅ drift test 守門                        |
-| `nav-label`     |   12px | `--font-size-nav-label`         | `0.75rem`    | ✅ drift test 守門                        |
+| 語意角色        | 基準值 | code token                  | code 值    | 狀態               |
+| --------------- | -----: | --------------------------- | ---------- | ------------------ |
+| `page-title`    |   28px | `--font-size-page-title`    | `1.75rem`  | ✅ drift test 守門 |
+| `section-title` |   20px | `--font-size-section-title` | `1.25rem`  | ✅ drift test 守門 |
+| `card-title`    |   18px | `--font-size-card-title`    | `1.125rem` | ✅ drift test 守門 |
+| `body`          |   16px | `--font-size-body`          | `1rem`     | ✅ drift test 守門 |
+| `supporting`    |   14px | `--font-size-supporting`    | `0.875rem` | ✅ drift test 守門 |
+| `caption`       |   12px | `--font-size-caption`       | `0.75rem`  | ✅ drift test 守門 |
+| `nav-label`     |   12px | `--font-size-nav-label`     | `0.75rem`  | ✅ drift test 守門 |
 
 `--font-size-label`、`--font-size-title-sm`、`--font-size-title` 與 `--font-size-title-md` 是 B8 遷移別名，僅讓尚未遷移的消費端可執行；後續元件任務必須改用七個 canonical token 後移除。
 
