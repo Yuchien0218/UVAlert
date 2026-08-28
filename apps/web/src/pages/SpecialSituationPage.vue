@@ -17,7 +17,9 @@ import ContentUnderReview from "../components/help/ContentUnderReview.vue";
 <template>
   <div class="page-stack">
     <header class="page-heading">
-      <h1 class="page-heading__title">特殊狀況</h1>
+      <h1 class="page-heading__title" data-typography-role="page-title">
+        特殊狀況
+      </h1>
     </header>
 
     <ContentUnderReview

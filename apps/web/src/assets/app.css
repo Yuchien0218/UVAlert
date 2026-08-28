@@ -60,6 +60,27 @@
   }
 }
 
+/*
+ * Raw heading elements declare their visual role in template markup. This
+ * source-wide contract prevents a new h1/h2/h3 from falling back to browser
+ * defaults while keeping role choice explicit instead of styling by tag name.
+ */
+[data-typography-role="page-title"] {
+  font-size: var(--font-size-page-title);
+}
+
+[data-typography-role="section-title"] {
+  font-size: var(--font-size-section-title);
+}
+
+[data-typography-role="card-title"] {
+  font-size: var(--font-size-card-title);
+}
+
+[data-typography-role="body"] {
+  font-size: var(--font-size-body);
+}
+
 .page-heading {
   display: grid;
   gap: var(--space-3);
@@ -192,7 +213,7 @@
 }
 
 .success-panel h2 {
-  font-size: var(--font-size-card-title);
+  font-size: var(--font-size-section-title);
 }
 
 /* 2026-08-26：收斂九個表單各自定義的行內錯誤文字。 */

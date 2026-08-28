@@ -20,7 +20,9 @@ const body = computed(() =>
 <template>
   <div class="page-stack">
     <header class="page-heading">
-      <h1 class="page-heading__title">{{ heading }}</h1>
+      <h1 class="page-heading__title" data-typography-role="page-title">
+        {{ heading }}
+      </h1>
       <p class="page-heading__body">{{ body }}</p>
     </header>
 

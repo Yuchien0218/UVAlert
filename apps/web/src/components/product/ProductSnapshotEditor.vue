@@ -89,7 +89,7 @@ const summary = computed(() => {
       <PackageCheck :size="25" :stroke-width="1.6" aria-hidden="true" />
       <div>
         <p class="session-product__eyebrow">{{ eyebrow }}</p>
-        <h2>{{ title }}</h2>
+        <h2 data-typography-role="section-title">{{ title }}</h2>
         <p>
           {{ description }}
         </p>

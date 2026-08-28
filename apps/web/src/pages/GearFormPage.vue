@@ -45,7 +45,7 @@ function handleCancel(): void {
   <div class="page-stack gear-form-page">
     <header class="form-heading">
       <div>
-        <h1 class="page-heading__title">
+        <h1 class="page-heading__title" data-typography-role="page-title">
           {{ isEdit ? "編輯防曬裝備" : "新增防曬裝備" }}
         </h1>
         <p>

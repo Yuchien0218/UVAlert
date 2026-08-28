@@ -371,7 +371,7 @@ async function remove(): Promise<void> {
     -->
 
     <section v-if="isEdit" class="app-card danger-zone">
-      <h2>使用狀態</h2>
+      <h2 data-typography-role="card-title">使用狀態</h2>
 
       <p v-if="safety && safety.kind === 'blocked'" class="form-error">
         {{ safety.detail }}同配方的新批次請另建一筆新紀錄，不要用恢復繞過。

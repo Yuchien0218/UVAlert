@@ -27,7 +27,9 @@ async function submit(): Promise<void> {
 <template>
   <div class="page-stack">
     <header class="page-heading">
-      <h1 class="page-heading__title">問題回報與意見回饋</h1>
+      <h1 class="page-heading__title" data-typography-role="page-title">
+        問題回報與意見回饋
+      </h1>
       <p class="page-heading__body">
         不用登入。請描述你遇到的情況，我們只會收到這個表單中的內容。
       </p>

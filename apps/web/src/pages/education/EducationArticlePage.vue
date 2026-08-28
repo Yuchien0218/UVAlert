@@ -64,7 +64,9 @@ const relatedArticles = computed(() =>
         ← {{ category?.title ?? "防曬衛教" }}
       </RouterLink>
       <p class="page-heading__eyebrow">{{ article.primaryQuestion }}</p>
-      <h1 class="page-heading__title">{{ article.title }}</h1>
+      <h1 class="page-heading__title" data-typography-role="page-title">
+        {{ article.title }}
+      </h1>
       <p class="education-article-summary">{{ article.summary }}</p>
       <p class="education-article-meta">
         最後查閱：{{ article.lastReviewed }} ·
@@ -88,7 +90,9 @@ const relatedArticles = computed(() =>
       class="education-related"
       aria-labelledby="related-title"
     >
-      <h2 id="related-title">同主題延伸閱讀</h2>
+      <h2 id="related-title" data-typography-role="section-title">
+        同主題延伸閱讀
+      </h2>
       <nav class="education-related-list" aria-label="同主題文章">
         <RouterLink
           v-for="related in relatedArticles"

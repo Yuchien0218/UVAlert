@@ -57,7 +57,7 @@ const zoneLabels = computed(() =>
       </div>
       <div class="quick-protection__header-content">
         <p class="quick-protection__eyebrow">快速提醒（推薦）</p>
-        <h2>{{ preset.label }}</h2>
+        <h2 data-typography-role="card-title">{{ preset.label }}</h2>
       </div>
       <Icon
         name="tool-chevron-down"

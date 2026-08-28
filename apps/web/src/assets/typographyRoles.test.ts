@@ -18,87 +18,23 @@ const migratedFiles = discoverSourceFiles(sourceRoot).sort();
 
 const legacyToken = /--font-size-(?:label|title-sm|title-md|title)\b/;
 
-const headingRoleRules = [
-  {
-    file: "apps/web/src/components/common/EmptyStateCard.vue",
-    selector: ".empty-state :is(h1, h2)",
-    role: "section-title"
-  },
-  {
-    file: "apps/web/src/assets/app.css",
-    selector: ".success-panel h2",
-    role: "card-title"
-  },
-  {
-    file: "apps/web/src/pages/ProductsPage.vue",
-    selector: ".gear-section-heading h2",
-    role: "section-title"
-  },
-  {
-    file: "apps/web/src/pages/ProductDetailPage.vue",
-    selector: ".spec-section h2",
-    role: "card-title"
-  },
-  {
-    file: "apps/web/src/components/product/GearForm.vue",
-    selector: ".danger-zone h2",
-    role: "card-title"
-  },
-  {
-    file: "apps/web/src/pages/setup/SetupPage.vue",
-    selector: ".load-error h2",
-    role: "card-title"
-  },
-  {
-    file: "apps/web/src/pages/ReportContextEventPage.vue",
-    selector: ".app-card > h2",
-    role: "card-title"
-  },
-  {
-    file: "apps/web/src/pages/EventCorrectionPage.vue",
-    selector: ".app-card > h2",
-    role: "card-title"
-  },
-  {
-    file: "apps/web/src/pages/settings/DataSettingsPage.vue",
-    selector: ".app-card > h2",
-    role: "card-title"
-  },
-  {
-    file: "apps/web/src/pages/settings/NotificationSettingsPage.vue",
-    selector: ".settings-card-heading",
-    role: "card-title"
-  },
-  {
-    file: "apps/web/src/pages/settings/AccountDataPage.vue",
-    selector: ".account-card h2",
-    role: "card-title"
-  },
-  {
-    file: "apps/web/src/pages/settings/SyncSettingsPage.vue",
-    selector: ".sync-card h2",
-    role: "card-title"
-  },
-  {
-    file: "apps/web/src/components/reapplication/ReapplicationProductAssignments.vue",
-    selector: ".assignment-section h2",
-    role: "card-title"
-  },
-  {
-    file: "apps/web/src/components/reapplication/ReapplicationReview.vue",
-    selector: ".review h2",
-    role: "section-title"
-  },
-  {
-    file: "apps/web/src/components/common/QuickTimePicker.vue",
-    selector: ".time-section h2",
-    role: "card-title"
-  }
-] as const;
+const headingRoleTokens = {
+  "page-title": "--font-size-page-title",
+  "section-title": "--font-size-section-title",
+  "card-title": "--font-size-card-title",
+  body: "--font-size-body"
+} as const;
 
-function escapeRegex(value: string): string {
-  return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-}
+const allowedHeadingRolesByTag = {
+  h1: ["page-title"],
+  h2: ["section-title", "card-title", "body"],
+  h3: ["card-title"]
+} as const;
+
+const allowedComponentExceptions = new Set([
+  "apps/web/src/components/setup/ZoneProtectionForm.vue:setup-preset-headline",
+  "apps/web/src/pages/setup/SetupPage.vue:setup-recovery-headline"
+]);
 
 describe("B8 typography role migration", () => {
   for (const file of migratedFiles) {
@@ -130,19 +66,62 @@ describe("B8 typography role migration", () => {
     ).toMatch(/\.education-article-body\s*\{[^}]*min-width:\s*0;/);
   });
 
-  it("為 runtime 可見標題指定語意字級，不落回瀏覽器預設值", () => {
-    for (const { file, selector, role } of headingRoleRules) {
-      expect(readFileSync(file, "utf8"), `${file}: ${selector}`).toMatch(
-        new RegExp(
-          `${escapeRegex(selector)}\\s*\\{[^}]*font-size:\\s*var\\(--font-size-${role}\\);`
-        )
+  it("讓流程完成狀態維持 section-title，不被一般卡片規則覆蓋", () => {
+    expect(readFileSync("apps/web/src/assets/app.css", "utf8")).toMatch(
+      /\.success-panel h2\s*\{[^}]*font-size:\s*var\(--font-size-section-title\);/
+    );
+
+    for (const file of [
+      "apps/web/src/pages/EventCorrectionPage.vue",
+      "apps/web/src/pages/ReportContextEventPage.vue"
+    ]) {
+      expect(readFileSync(file, "utf8"), file).toMatch(
+        /\.app-card:not\(\.success-panel\) > h2\s*\{[^}]*font-size:\s*var\(--font-size-card-title\);/
       );
     }
   });
 
-  it("讓裝備新增與編輯頁使用 page-title role", () => {
-    expect(readFileSync("apps/web/src/pages/GearFormPage.vue", "utf8")).toMatch(
-      /<h1\s+class="page-heading__title">/
-    );
+  it("讓每個 runtime raw heading 明確宣告合法的 typography role", () => {
+    const discoveredExceptions = new Set<string>();
+
+    for (const file of migratedFiles.filter((path) => path.endsWith(".vue"))) {
+      const source = readFileSync(file, "utf8");
+      for (const match of source.matchAll(/<(h[1-3])\b[^>]*>/g)) {
+        const tagName = match[1] as keyof typeof allowedHeadingRolesByTag;
+        const openingTag = match[0];
+        const role = openingTag.match(
+          /\bdata-typography-role="([a-z-]+)"/
+        )?.[1];
+
+        expect(role, `${file}: ${openingTag}`).toBeDefined();
+        expect(
+          allowedHeadingRolesByTag[tagName],
+          `${file}: ${openingTag}`
+        ).toContain(role);
+
+        const exceptionName = openingTag.match(
+          /\bdata-typography-exception="([a-z-]+)"/
+        )?.[1];
+        if (exceptionName !== undefined) {
+          discoveredExceptions.add(
+            `${file.replaceAll("\\", "/")}:${exceptionName}`
+          );
+        }
+      }
+    }
+
+    expect(discoveredExceptions).toEqual(allowedComponentExceptions);
+  });
+
+  it("將 heading role annotation 直接連到 canonical token", () => {
+    const appCss = readFileSync("apps/web/src/assets/app.css", "utf8");
+
+    for (const [role, token] of Object.entries(headingRoleTokens)) {
+      expect(appCss, role).toMatch(
+        new RegExp(
+          `\\[data-typography-role="${role}"\\]\\s*\\{[^}]*font-size:\\s*var\\(${token}\\);`
+        )
+      );
+    }
   });
 });

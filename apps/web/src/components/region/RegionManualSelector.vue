@@ -69,7 +69,9 @@ async function save(): Promise<void> {
 <template>
   <section class="manual-region" aria-labelledby="manual-region-title">
     <header>
-      <h2 id="manual-region-title">手動選擇地區</h2>
+      <h2 id="manual-region-title" data-typography-role="section-title">
+        手動選擇地區
+      </h2>
       <p>行政區清單已儲存在這台裝置，離線時也能選擇。</p>
     </header>
 

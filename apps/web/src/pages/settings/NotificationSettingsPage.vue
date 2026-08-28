@@ -89,7 +89,9 @@ async function runTest(): Promise<void> {
     </header>
 
     <header class="page-heading">
-      <h1 class="page-heading__title">通知設定</h1>
+      <h1 class="page-heading__title" data-typography-role="page-title">
+        通知設定
+      </h1>
       <p>
         在防曬即將失效或該補擦時接收提醒。提醒由這台裝置本機發出，不經由外部伺服器。
       </p>
@@ -97,7 +99,11 @@ async function runTest(): Promise<void> {
 
     <!-- 裝置支援與權限狀態卡片 -->
     <section class="app-card" aria-labelledby="permission-heading">
-      <h2 id="permission-heading" class="status-summary">
+      <h2
+        id="permission-heading"
+        class="status-summary"
+        data-typography-role="section-title"
+      >
         目前狀態：<strong>{{ statusLabel }}</strong>
       </h2>
 
@@ -152,7 +158,13 @@ async function runTest(): Promise<void> {
       視覺層級，不是純段落文字。
     -->
     <section class="app-card" aria-labelledby="delivery-heading">
-      <h2 id="delivery-heading" class="settings-card-heading">通知傳送說明</h2>
+      <h2
+        id="delivery-heading"
+        class="settings-card-heading"
+        data-typography-role="card-title"
+      >
+        通知傳送說明
+      </h2>
       <p class="delivery-note">
         <strong>單一提醒原則</strong
         >：系統每次只會排定下一個最近的補擦到期提醒，避免過多通知干擾。
@@ -172,7 +184,13 @@ async function runTest(): Promise<void> {
     </section>
 
     <section v-if="isGranted" class="app-card" aria-labelledby="repeat-heading">
-      <h2 id="repeat-heading" class="settings-card-heading">再次提醒頻率</h2>
+      <h2
+        id="repeat-heading"
+        class="settings-card-heading"
+        data-typography-role="card-title"
+      >
+        再次提醒頻率
+      </h2>
       <div
         class="repeat-options"
         role="radiogroup"
@@ -212,7 +230,13 @@ async function runTest(): Promise<void> {
     </section>
 
     <section v-if="isGranted" class="app-card" aria-labelledby="test-heading">
-      <h2 id="test-heading" class="settings-card-heading">裝置測試</h2>
+      <h2
+        id="test-heading"
+        class="settings-card-heading"
+        data-typography-role="card-title"
+      >
+        裝置測試
+      </h2>
       <p class="delivery-note">送一則測試通知，確認這台裝置目前收得到。</p>
       <button
         class="button button--quiet"

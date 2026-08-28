@@ -43,7 +43,9 @@ const robots = computed(() =>
 
     <header class="page-heading education-hero">
       <p class="page-heading__eyebrow">防曬生活編輯部</p>
-      <h1 class="page-heading__title">防曬衛教</h1>
+      <h1 class="page-heading__title" data-typography-role="page-title">
+        防曬衛教
+      </h1>
       <p class="page-heading__body">
         先回答你正在搜尋的問題，再補上適用情境、限制與官方來源。這裡是一般衛教，不取代診斷或個人醫療建議。
       </p>
@@ -59,7 +61,12 @@ const robots = computed(() =>
 
     <section aria-labelledby="education-categories-title">
       <div class="education-section-heading">
-        <h2 id="education-categories-title">依一天中的使用流程找答案</h2>
+        <h2
+          id="education-categories-title"
+          data-typography-role="section-title"
+        >
+          依一天中的使用流程找答案
+        </h2>
         <span>{{ categoryCards.length }} 個主題</span>
       </div>
 

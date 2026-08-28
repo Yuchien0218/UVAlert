@@ -13,7 +13,9 @@ defineProps<{
 </script>
 <template>
   <section class="review" aria-labelledby="review-title">
-    <h2 id="review-title">確認這次實際補擦</h2>
+    <h2 id="review-title" data-typography-role="section-title">
+      確認這次實際補擦
+    </h2>
     <p>只有最後確認的部位會更新；其他部位的時間與狀態不會改變。</p>
     <ul>
       <li

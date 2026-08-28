@@ -17,7 +17,7 @@ withDefaults(defineProps<Props>(), { requiredReview: null });
 
 <template>
   <section class="under-review app-card" role="status">
-    <h2>{{ title }}</h2>
+    <h2 data-typography-role="section-title">{{ title }}</h2>
     <p>{{ body }}</p>
     <p v-if="requiredReview" class="under-review__meta">
       需要完成的審查：{{ requiredReview }}

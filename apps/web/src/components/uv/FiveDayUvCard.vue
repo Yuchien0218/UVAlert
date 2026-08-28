@@ -69,7 +69,11 @@ function getUnavailableMessage(error: UvForecastError): string {
   >
     <div class="uv-forecast__heading">
       <div>
-        <h2 id="five-day-uv-title" class="uv-forecast__title">
+        <h2
+          id="five-day-uv-title"
+          class="uv-forecast__title"
+          data-typography-role="section-title"
+        >
           未來 5 天 UV 預報
         </h2>
       </div>
