@@ -19,7 +19,9 @@ withDefaults(defineProps<Props>(), {
 
 <template>
   <section class="app-card empty-state" :role="role">
-    <component :is="titleTag">{{ title }}</component>
+    <component :is="titleTag" data-typography-role="section-title">
+      {{ title }}
+    </component>
     <p>{{ body }}</p>
     <slot name="actions" />
   </section>
@@ -31,10 +33,6 @@ withDefaults(defineProps<Props>(), {
   justify-items: start;
   gap: var(--space-4);
   padding: var(--space-5);
-}
-
-.empty-state :is(h1, h2) {
-  font-size: var(--font-size-section-title);
 }
 
 .empty-state p {

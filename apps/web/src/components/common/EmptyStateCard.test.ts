@@ -9,7 +9,10 @@ describe("EmptyStateCard", () => {
     const wrapper = mount(EmptyStateCard, {
       props: { title: "還沒有任何裝備", body: "把常用的防曬乳與裝備記在這裡。" }
     });
-    expect(wrapper.find("h2").text()).toBe("還沒有任何裝備");
+    expect(wrapper.get("h2").text()).toBe("還沒有任何裝備");
+    expect(wrapper.get("h2").attributes("data-typography-role")).toBe(
+      "section-title"
+    );
     expect(wrapper.find("h1").exists()).toBe(false);
     expect(wrapper.attributes("role")).toBeUndefined();
     expect(wrapper.get("p").text()).toBe("把常用的防曬乳與裝備記在這裡。");
@@ -25,6 +28,9 @@ describe("EmptyStateCard", () => {
       }
     });
     expect(wrapper.find("h1").text()).toBe("找不到這件裝備");
+    expect(wrapper.get("h1").attributes("data-typography-role")).toBe(
+      "section-title"
+    );
     expect(wrapper.find("h2").exists()).toBe(false);
     expect(wrapper.attributes("role")).toBe("alert");
   });
