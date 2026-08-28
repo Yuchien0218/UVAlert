@@ -30,4 +30,13 @@ describe("B8 typography role migration", () => {
       /\.safety-note\s*\{[^}]*font-size:\s*var\(--font-size-supporting\);/
     );
   });
+
+  it("允許衛教文章本文在窄版 grid track 內收縮", () => {
+    expect(
+      readFileSync(
+        "apps/web/src/pages/education/EducationArticlePage.vue",
+        "utf8"
+      )
+    ).toMatch(/\.education-article-body\s*\{[^}]*min-width:\s*0;/);
+  });
 });

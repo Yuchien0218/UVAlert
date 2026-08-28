@@ -144,6 +144,7 @@ const relatedArticles = computed(() =>
 
 .education-article-body {
   max-width: 44rem;
+  min-width: 0;
   font-size: var(--font-size-body);
   line-height: 1.85;
 }
