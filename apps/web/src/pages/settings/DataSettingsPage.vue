@@ -263,6 +263,10 @@ dd {
   justify-items: start;
 }
 
+.app-card > h2 {
+  font-size: var(--font-size-card-title);
+}
+
 .summary-grid {
   display: grid;
   gap: var(--space-3);

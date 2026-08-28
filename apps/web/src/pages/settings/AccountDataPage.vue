@@ -160,6 +160,9 @@ async function deleteCloudData(): Promise<void> {
 .account-card p {
   margin: 0;
 }
+.account-card h2 {
+  font-size: var(--font-size-card-title);
+}
 .account-card p {
   color: var(--text-body);
   line-height: 1.6;

@@ -45,7 +45,9 @@ function handleCancel(): void {
   <div class="page-stack gear-form-page">
     <header class="form-heading">
       <div>
-        <h1>{{ isEdit ? "編輯防曬裝備" : "新增防曬裝備" }}</h1>
+        <h1 class="page-heading__title">
+          {{ isEdit ? "編輯防曬裝備" : "新增防曬裝備" }}
+        </h1>
         <p>
           資料會先儲存在這台裝置；若已開啟同步，之後也可以同步到雲端。非必要欄位可以稍後再補。
         </p>

@@ -33,7 +33,7 @@ withDefaults(defineProps<Props>(), {
   padding: var(--space-5);
 }
 
-.empty-state h2 {
+.empty-state :is(h1, h2) {
   font-size: var(--font-size-section-title);
 }
 

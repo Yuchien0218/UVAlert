@@ -583,4 +583,8 @@ textarea {
 .danger-zone {
   justify-items: start;
 }
+
+.danger-zone h2 {
+  font-size: var(--font-size-card-title);
+}
 </style>

@@ -274,6 +274,10 @@ p {
   margin: 0;
 }
 
+.app-card > h2 {
+  font-size: var(--font-size-card-title);
+}
+
 .section-helper {
   color: var(--text-secondary);
   line-height: 1.6;

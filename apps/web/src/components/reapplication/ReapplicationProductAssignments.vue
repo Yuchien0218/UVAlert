@@ -215,6 +215,10 @@ p {
   margin: 0;
 }
 
+.assignment-section h2 {
+  font-size: var(--font-size-card-title);
+}
+
 .assignment-section__helper {
   color: var(--text-secondary);
   line-height: 1.6;

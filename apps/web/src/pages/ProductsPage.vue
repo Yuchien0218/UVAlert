@@ -218,6 +218,7 @@ section {
 
 .gear-section-heading h2 {
   margin: 0;
+  font-size: var(--font-size-section-title);
 }
 
 .gear-section-count {

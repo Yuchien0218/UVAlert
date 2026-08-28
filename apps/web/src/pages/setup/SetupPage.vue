@@ -434,6 +434,10 @@ onMounted(async () => {
   margin: 0;
 }
 
+.load-error h2 {
+  font-size: var(--font-size-card-title);
+}
+
 .load-error p {
   color: var(--text-body);
   line-height: 1.6;

@@ -329,6 +329,7 @@ async function handleDelete(): Promise<void> {
 
 .spec-section h2 {
   margin: 0;
+  font-size: var(--font-size-card-title);
 }
 
 .spec-list {

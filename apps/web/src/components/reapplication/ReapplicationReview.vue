@@ -43,6 +43,9 @@ p,
 ul {
   margin: 0;
 }
+.review h2 {
+  font-size: var(--font-size-section-title);
+}
 p,
 li {
   line-height: 1.6;

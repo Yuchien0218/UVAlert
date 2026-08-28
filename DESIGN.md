@@ -820,7 +820,7 @@ Noto Serif TC 是標題的唯一字型，沒有第二層自托管備援——載
 | `caption`       |   12px | `--font-size-caption`       | `0.75rem`  | ✅ drift test 守門 |
 | `nav-label`     |   12px | `--font-size-nav-label`     | `0.75rem`  | ✅ drift test 守門 |
 
-`--font-size-label`、`--font-size-title-sm`、`--font-size-title` 與 `--font-size-title-md` 是 B8 遷移別名，僅讓尚未遷移的消費端可執行；後續元件任務必須改用七個 canonical token 後移除。
+B8 遷移期間使用的四個臨時字級別名已移除；目前元件只使用上表七個 canonical token 與經規範保留的讀數例外。
 
 **已對齊的部分**：品牌與表面色票、行動色、4 級文字色、拉丁內文字體、**標題顯示字體**、圓角（xs 4px 到 sheet 24px、pill）、UV 五級風險色、倒數五狀態語意色（含 `saved` 藕紫，2026-08-26 修正）、內容最大寬度 752px、點擊目標 44px、間距尺規（`--space-1..12`）、斷點（rem）、單一亮色主題、自訂圖示系統為唯一來源。
 

@@ -84,6 +84,9 @@ h2,
 p {
   margin: 0;
 }
+.time-section h2 {
+  font-size: var(--font-size-card-title);
+}
 .quick-times {
   display: flex;
   flex-wrap: wrap;

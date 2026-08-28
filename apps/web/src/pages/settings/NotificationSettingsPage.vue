@@ -152,7 +152,7 @@ async function runTest(): Promise<void> {
       視覺層級，不是純段落文字。
     -->
     <section class="app-card" aria-labelledby="delivery-heading">
-      <h2 id="delivery-heading">通知傳送說明</h2>
+      <h2 id="delivery-heading" class="settings-card-heading">通知傳送說明</h2>
       <p class="delivery-note">
         <strong>單一提醒原則</strong
         >：系統每次只會排定下一個最近的補擦到期提醒，避免過多通知干擾。
@@ -172,7 +172,7 @@ async function runTest(): Promise<void> {
     </section>
 
     <section v-if="isGranted" class="app-card" aria-labelledby="repeat-heading">
-      <h2 id="repeat-heading">再次提醒頻率</h2>
+      <h2 id="repeat-heading" class="settings-card-heading">再次提醒頻率</h2>
       <div
         class="repeat-options"
         role="radiogroup"
@@ -212,7 +212,7 @@ async function runTest(): Promise<void> {
     </section>
 
     <section v-if="isGranted" class="app-card" aria-labelledby="test-heading">
-      <h2 id="test-heading">裝置測試</h2>
+      <h2 id="test-heading" class="settings-card-heading">裝置測試</h2>
       <p class="delivery-note">送一則測試通知，確認這台裝置目前收得到。</p>
       <button
         class="button button--quiet"
@@ -253,6 +253,11 @@ async function runTest(): Promise<void> {
 .status-summary {
   margin: 0;
   font-size: var(--font-size-section-title);
+}
+
+.settings-card-heading {
+  margin: 0;
+  font-size: var(--font-size-card-title);
 }
 
 .note-box {

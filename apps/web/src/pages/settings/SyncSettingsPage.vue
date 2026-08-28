@@ -183,6 +183,9 @@ function writeSyncDisabled(value: boolean): void {
 .sync-card p {
   margin: 0;
 }
+.sync-card h2 {
+  font-size: var(--font-size-card-title);
+}
 .sync-card p {
   color: var(--text-body);
   line-height: 1.6;

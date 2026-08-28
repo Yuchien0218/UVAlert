@@ -191,6 +191,10 @@
   margin: 0;
 }
 
+.success-panel h2 {
+  font-size: var(--font-size-card-title);
+}
+
 /* 2026-08-26：收斂九個表單各自定義的行內錯誤文字。 */
 .form-error {
   margin: 0;
