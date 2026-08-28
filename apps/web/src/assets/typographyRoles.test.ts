@@ -31,6 +31,14 @@ describe("B8 typography role migration", () => {
     );
   });
 
+  it("將裝備表單的可換行暱稱說明維持在 supporting role", () => {
+    expect(
+      readFileSync("apps/web/src/components/product/GearForm.vue", "utf8")
+    ).toMatch(
+      /\.field-helper\s*\{[^}]*font-size:\s*var\(--font-size-supporting\);/
+    );
+  });
+
   it("允許衛教文章本文在窄版 grid track 內收縮", () => {
     expect(
       readFileSync(

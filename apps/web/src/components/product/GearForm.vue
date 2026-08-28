@@ -442,7 +442,7 @@ p {
 .field-helper {
   color: var(--text-secondary);
   line-height: 1.6;
-  font-size: var(--font-size-caption);
+  font-size: var(--font-size-supporting);
 }
 
 /*
@@ -539,7 +539,7 @@ p {
 
 .field-pair {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: var(--space-3);
 }
 
