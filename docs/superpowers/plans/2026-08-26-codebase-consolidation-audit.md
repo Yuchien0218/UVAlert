@@ -221,10 +221,12 @@
 
 ### D2 衍生 — 新增待辦
 
-- [ ] **B8：字級量表重新對齊（獨立視覺工作）**
-  - `DESIGN.md` §10 新的「字級量表對照表」列了 6 類 typography 漂移：`display-md` 目標 36px 但 `--font-size-page-title` 是 28–32px 的 clamp；`--font-size-title`/`title-sm`/`title-md`/`section-title` 4 個 token 是 2026-08-24 從散落卡片標題收斂的桶、不對應 DESIGN.md `title-*`；`body-sm`/`caption` 偏小；`display-xl/lg/sm` 沒 token。
-  - 這是**跨全站的字級調整**，會動很多頁面的視覺，需要獨立一輪（可能還要重新想 DESIGN.md 的 14 級量表對這個 8-token 產品是不是太細）。跟 B7（衛教長文排版）性質類似。
-  - 也要把 typography 對照補進 `tokens.test.ts`（目前只驗 `body-md`）。
+- [x] **B8：字級量表重新對齊（獨立視覺工作）** — 2026-08-29 驗證完成（最後實作 commit `daab391`）
+  - 已以七個語意角色取代舊 14 級／桶狀對照：page title 28px、section title 20px、card title 18px、body 16px、supporting 14px、caption 12px、nav label 12px；`DESIGN.md`、runtime token 與 `tokens.test.ts` drift guard 已一致。
+  - 正式 production build `pnpm build` 通過；Vite preview (`http://127.0.0.1:4173/`) 以 Playwright 實際操作建立「Task 7 測試防曬」後，確認 list、detail、真正的 edit route 與 add route。
+  - 視覺矩陣於 390×844、1440×1000、320×844、以及 200% 有效版面（720×500 CSS px，DPR 2）共驗證 70 個頁面／狀態、202 項斷言全數通過：無頁面級水平溢出或標題裁切；按鈕／輸入 16px；導航 12px；page/section/card 標題 28/20/18px；Data Settings 三條原有 full-width divider 仍為 1px solid；article 保留 44rem、1.85 行高、單一 120px wave，320px 表格只在自身 wrapper 捲動。
+  - runtime 僅觀察到 preview 沒有 `/v1/uv/forecast` backend 時的既有 404（已排除為非 B8）；無 B8 歸因的 console error、page error、failed request 或遺失 custom-property 警告。首頁 loading branch 因 router 先 `await boot.ensureBooted()` 才掛載 HomePage，於正式導航流程不可到達；未偽造 loading DOM，已如實記錄為未能目視的架構限制。
+  - B9 icon-first／progressive disclosure 未實作，維持獨立範圍。
 
 - [ ] **G3：`.status-card` 死碼**
   - `app.css` 的 `.status-card` ＋ 5 個變體（含 D2 剛改名的 `.status-card--saved`）沒有任何元件 template 用到——DESIGN.md §5 的 `status-card` 規範實際由 `ZoneStatusList.vue` 的 `.zone-group` 實現。約 40 行死碼，併進死碼掃描。同場加映：`.uvi-badge`（app.css）grep 也查不到 .vue 使用，一起確認。
