@@ -628,7 +628,11 @@ Noto Serif TC 是標題的唯一字型，沒有第二層自托管備援——載
 
 **`page-footer-meta`** — 頁尾的版本、隱私政策、使用條款與資料說明。純文字連結列，`{colors.muted}`，`{typography.supporting}`。**刻意不做成功能卡片**，避免與「更多」頁的入口卡競爭。
 
-**`control-rule-note`** — 貼著某個控制項的**規則**：說明「選了會發生什麼、不選會發生什麼」。左側 2px 縱線 `{colors.muted}`，`padding-inline-start` 12px，文字 `{colors.body}`、`{typography.body}`、行高 1.6。**不加底色、不加外框。**
+**`control-rule-note`** — 貼著某個控制項的**規則**：說明「選了會發生什麼、不選會發生什麼」。文字 `{colors.body}`、`{typography.body}`、行高 1.6。**沒有任何裝飾——不加底色、不加外框、不加縱線。**
+
+**綁定手段是距離，不是裝飾。** 與下方控制項的間距收緊到 8px、與上方標題拉開到 20px，靠鄰近律讓它讀成「這句話屬於下面那組」。這是配合系統性格的選擇：第七節訂的是「無陰影、無邊框」的完全平面，而 `status-card` 更明寫「無左側色條」——**裝飾線不是這個系統的語彙**，用它會讓表單看起來像別的產品。
+
+2026-08-29 曾實作過左側縱線版本，因與上述立場衝突而改掉。
 
 **它不是 helper text。** 第五節上面那句「`{typography.supporting}` 用於欄位標籤、helper text」講的是一般補充說明；這一類是**使用者做那個選擇的當下必須看到的條件**（B9 §3 的不可隱藏清單），所以維持內文字級，不縮到 14px。縮小它等於把規則從決策現場淡出。
 
@@ -636,7 +640,7 @@ Noto Serif TC 是標題的唯一字型，沒有第二層自托管備援——載
 
 | 元件 | 是什麼 | 視覺 |
 | --- | --- | --- |
-| `control-rule-note` | 附屬於下方控制項的規則 | 左縱線，不成塊 |
+| `control-rule-note` | 附屬於下方控制項的規則 | 無裝飾，靠間距綁定 |
 | `note-box` | 獨立的資訊區塊 | `{colors.surface-soft}` 底色，`{typography.supporting}` |
 | `delivery-emphasis` | 需要框起來的能力邊界 | 完整 1px 外框 |
 | `safety-note` | 頁級的健康邊界 | 無框，`{colors.muted}`，`{typography.supporting}` |
