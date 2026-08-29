@@ -41,12 +41,7 @@ const segments = [
 </script>
 
 <template>
-  <svg
-    class="inline-loader"
-    viewBox="0 0 21 8"
-    role="img"
-    :aria-label="label"
-  >
+  <svg class="inline-loader" viewBox="0 0 21 8" role="img" :aria-label="label">
     <rect
       v-for="segment in segments"
       :key="segment.x"
@@ -73,7 +68,8 @@ const segments = [
 
 .inline-loader__segment {
   opacity: 0.25;
-  animation: inline-loader-sweep 1.5s ease-in-out infinite;
+  animation: inline-loader-sweep var(--duration-loader-cycle) var(--ease-in-out)
+    infinite;
   animation-delay: var(--ray-delay);
 }
 

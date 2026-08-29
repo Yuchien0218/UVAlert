@@ -105,7 +105,7 @@ const rays = [
 .broadcast-loader {
   display: inline-flex;
   opacity: 0;
-  animation: broadcast-loader-appear var(--duration-fast) ease-out 0.25s
+  animation: broadcast-loader-appear var(--duration-fast) var(--ease-out) 0.25s
     forwards;
 }
 
@@ -122,7 +122,8 @@ const rays = [
  */
 .broadcast-loader__ray {
   opacity: 0.22;
-  animation: broadcast-loader-sweep 1.5s ease-in-out infinite;
+  animation: broadcast-loader-sweep var(--duration-loader-cycle)
+    var(--ease-in-out) infinite;
   animation-delay: calc(0.25s + var(--ray-delay));
 }
 
@@ -131,7 +132,8 @@ const rays = [
  * 射線發射。射線與圓點刻意不重疊，才會讀成「交棒」而不是「一起閃」。
  */
 .broadcast-loader__core {
-  animation: broadcast-loader-charge 1.5s ease-in-out infinite;
+  animation: broadcast-loader-charge var(--duration-loader-cycle)
+    var(--ease-in-out) infinite;
   animation-delay: 0.25s;
 }
 
