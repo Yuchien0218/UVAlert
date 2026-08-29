@@ -196,10 +196,12 @@ const relatedArticles = computed(() =>
   height: 0.5rem;
   margin: var(--space-10) auto;
   border: 0;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 8'%3E%3Cpath d='M1 4C11 0 19 8 29 4S47 0 57 4s18 4 28 0 18-4 34 0' fill='none' stroke='%236F5A54' stroke-opacity='.55' stroke-linecap='round' stroke-width='2'/%3E%3C/svg%3E");
-  background-position: center;
-  background-repeat: no-repeat;
-  background-size: 100% 100%;
+  background-color: var(--text-secondary);
+  opacity: 0.55;
+  mask-image: var(--mask-wave-divider);
+  mask-position: center;
+  mask-repeat: no-repeat;
+  mask-size: 100% 100%;
 }
 
 .education-article-body :deep(hr + p) {
