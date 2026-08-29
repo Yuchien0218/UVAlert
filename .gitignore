@@ -1,4 +1,5 @@
 node_modules/
+.vercel/
 .pnpm-store/
 .worktrees/
 dist/
@@ -19,3 +20,7 @@ tools/fonts/source/
 # 之後的匯出放這個資料夾或 repo 外。
 *.dc.html
 design-exports/
+
+# 部署與本機祕密。2026-08-29 曾因為這裡沒擋而把 VERCEL_OIDC_TOKEN commit 上去。
+.env*
+.superpowers/brainstorm/
