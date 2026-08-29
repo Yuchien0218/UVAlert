@@ -254,7 +254,9 @@ function getUnavailableMessage(error: UvForecastError): string {
   border-radius: var(--radius-md);
   background: var(--surface-primary);
   text-align: center;
-  transition: all var(--duration-fast) var(--ease-out);
+  /* 只有 border-color 會變（:hover 與 uv-day--* 等級色）；all 會連帶動到
+     之後新增的任何屬性，見 DESIGN.md 第十二節。 */
+  transition: border-color var(--duration-fast) var(--ease-out);
 }
 
 .uv-day:hover {

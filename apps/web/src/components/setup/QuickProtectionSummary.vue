@@ -214,9 +214,11 @@ const zoneLabels = computed(() =>
 @keyframes quickProtectionFadeIn {
   from {
     opacity: 0;
+    transform: translateY(var(--motion-rise));
   }
   to {
     opacity: 1;
+    transform: none;
   }
 }
 

@@ -11,6 +11,7 @@ motion:
   duration-loader-cycle: 1500ms
   ease-out: cubic-bezier(0.25, 0.46, 0.45, 0.94)
   ease-in-out: cubic-bezier(0.65, 0, 0.35, 1)
+  motion-rise: 4px
 
 colors:
   primary: "#9F5E42"
@@ -939,7 +940,43 @@ B8 遷移期間使用的四個臨時字級別名已移除；目前元件只使�
 
 ### 動畫
 
-- **只用 `opacity`，不用位移或縮放。**
+動效的定位：這個產品的情緒基調是**耐心**——核心機制是兩小時的等待，文案也刻意寫「這是協助你記得補擦的提醒，不是安全曝曬時間保證」。動效要支撐這個 tone，不是展示流暢度。2026-08-29 重訂為以下五條。
+
+#### 一、只用 `opacity`，唯一例外是內容進場
+
+狀態切換、圖示內部、hover、loader 一律**純 `opacity`**，不位移、不縮放、不旋轉。
+
+**唯一例外**：內容進場可以加上 `{motion.motion-rise}`（4px）的上移。理由是在 `{colors.canvas}` 這種低對比暖底上，純 0→1 淡入幾乎察覺不到；4px 小到不構成「位移動畫」，只是讓轉場被看見。這個例外**不擴張到其他情境**。
+
+#### 二、時距分兩類
+
+| 類型 | Token | 用在 |
+| --- | --- | --- |
+| 回應手指的 | `{motion.duration-fast}`（160ms） | 按鈕、chevron 展開、遮罩 |
+| 自己發生的 | `{motion.duration-base}`（320ms）／`{motion.duration-slow}`（450ms） | 內容進場、狀態切換 |
+
+**直接操作放慢會讀成延遲；自己發生的事沒有人在等，慢一點才安靜。**
+
+緩動一律 `{motion.ease-out}`；需要對稱進出的循環動畫（loader）用 `{motion.ease-in-out}`，循環長度用 `{motion.duration-loader-cycle}`。
+
+#### 三、禁止 `transition: all`
+
+一律列出要動的屬性。`all` 會連帶動到之後新增的任何屬性——加一個 `background` 就多一個沒人決定過的動畫。**stylelint 會擋**（`declaration-property-value-disallowed-list`）。
+
+#### 四、無限循環動畫必須自己關掉
+
+`packages/ui/src/styles.css` 有全域 `prefers-reduced-motion` 規則，把所有動畫壓到 `0.01ms`、`iteration-count: 1`。一般元件因此**不需要**各自再寫一份。
+
+但**無限循環的動畫必須自己寫 `animation: none` 的覆寫**——`0.01ms` 配 `infinite` 會變成極速閃爍，比不動更糟，對前庭敏感的使用者是反效果。目前適用於 `BroadcastLoader` 與 `InlineLoader`。
+
+#### 五、一次只有一個元素在動
+
+同一個畫面區塊裡不要讓兩個元素同時動——會讀成「整體閃爍」而不是「某件事發生了」。
+
+`BroadcastLoader` 是這條的來源：射線掃完之後圓點才接手蓄能，兩者刻意錯開。初版讓圓點全程靜止，結果整顆讀起來像卡住——**畫面上最大、最飽和的元素靜止不動時，其他元素再怎麼動都會被讀成靜止**。
+
+#### 進場的實作細節
+
 - `page-stack` 的直接子區塊依序淡入（每項延遲 0.08s，上限 0.4s），使用 `fill-mode: backwards` 避免內容先閃現。
 - **時距分兩類**：`{motion.duration-fast}`（160ms）給「回應手指的」——按鈕、chevron 展開、遮罩；`{motion.duration-base}`（320ms）與 `{motion.duration-slow}`（450ms）給「自己發生的」——內容進場、狀態切換。直接操作放慢會讀成延遲；自己發生的事沒有人在等，慢一點才安靜。
 - 緩動一律用 `{motion.ease-out}`；需要對稱進出的循環動畫（loader）用 `{motion.ease-in-out}`，循環長度用 `{motion.duration-loader-cycle}`。

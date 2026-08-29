@@ -65,6 +65,17 @@ export default {
     ],
     "no-empty-source": null,
 
+    /* --- 動效 --- */
+    /*
+     * transition: all 會連帶動到之後新增的任何屬性——加一個 background
+     * 就多一個沒人決定過的動畫。一律列出要動的屬性。
+     * 2026-08-29 加入，當時只有 FiveDayUvCard 一處違規，已改掉。
+     */
+    "declaration-property-value-disallowed-list": {
+      transition: ["/^all\\b/"],
+      "transition-property": ["all"]
+    },
+
     /* --- 這個 repo 的既有慣例，刻意不強制改 --- */
     // kebab-case token 名、BEM-ish class、compact 單行多宣告都是既有風格。
     "custom-property-pattern": null,
