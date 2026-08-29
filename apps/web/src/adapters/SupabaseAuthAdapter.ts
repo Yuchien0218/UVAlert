@@ -4,6 +4,7 @@ import {
   type SupabaseClient
 } from "@supabase/supabase-js";
 import type { AuthPort, AuthState } from "@sunshield/platform";
+import { readConfiguredEnvironmentValue } from "./configuredEnvironment";
 
 export class SupabaseAuthError extends Error {
   readonly code: string;
@@ -121,9 +122,12 @@ export function createSupabaseAuthAdapter(
     });
   }
 
-  const url = options.url ?? import.meta.env.VITE_SUPABASE_URL;
-  const publishableKey =
-    options.publishableKey ?? import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
+  const url = readConfiguredEnvironmentValue(
+    options.url ?? import.meta.env.VITE_SUPABASE_URL
+  );
+  const publishableKey = readConfiguredEnvironmentValue(
+    options.publishableKey ?? import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY
+  );
   if (url === undefined || publishableKey === undefined) {
     return new DisabledAuthAdapter();
   }

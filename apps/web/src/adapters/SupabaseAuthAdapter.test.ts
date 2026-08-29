@@ -1,5 +1,9 @@
 import { describe, expect, it, vi } from "vitest";
-import { SupabaseAuthAdapter } from "./SupabaseAuthAdapter";
+import {
+  createSupabaseAuthAdapter,
+  DisabledAuthAdapter,
+  SupabaseAuthAdapter
+} from "./SupabaseAuthAdapter";
 
 function makeClient() {
   const session = {
@@ -25,6 +29,15 @@ function makeClient() {
 }
 
 describe("SupabaseAuthAdapter", () => {
+  it("Supabase URL 與 key 都是空字串時停用登入，不建立 client", () => {
+    const adapter = createSupabaseAuthAdapter({
+      url: "",
+      publishableKey: ""
+    });
+
+    expect(adapter).toBeInstanceOf(DisabledAuthAdapter);
+  });
+
   it("讀取 session 時只回傳 user id 與 expiry，不把 access token 放進 state", async () => {
     const { client } = makeClient();
     const adapter = new SupabaseAuthAdapter({

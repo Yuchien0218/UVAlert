@@ -20,6 +20,7 @@ import type {
   CloudErrorCode,
   CloudSyncPort
 } from "@sunshield/platform";
+import { readConfiguredEnvironmentValue } from "./configuredEnvironment";
 
 type FetchPort = (
   input: RequestInfo | URL,
@@ -205,10 +206,15 @@ export function createSupabaseCloudSyncAdapter(options: {
   fetch?: FetchPort;
   baseUrl?: string;
 }): CloudSyncPort {
-  const baseUrl = options.baseUrl ?? import.meta.env.VITE_API_BASE_URL;
+  const baseUrl = readConfiguredEnvironmentValue(
+    options.baseUrl ?? import.meta.env.VITE_API_BASE_URL
+  );
   const hasSupabaseConfig =
-    import.meta.env.VITE_SUPABASE_URL !== undefined &&
-    import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY !== undefined;
+    readConfiguredEnvironmentValue(import.meta.env.VITE_SUPABASE_URL) !==
+      undefined &&
+    readConfiguredEnvironmentValue(
+      import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY
+    ) !== undefined;
   if (baseUrl === undefined && !hasSupabaseConfig) {
     return new DisabledCloudSyncAdapter();
   }

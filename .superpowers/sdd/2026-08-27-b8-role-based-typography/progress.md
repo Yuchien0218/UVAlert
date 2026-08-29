@@ -1,0 +1,32 @@
+# SDD ledger — plan: docs/superpowers/plans/2026-08-27-b8-role-based-typography.md
+
+Workspace created: 2026-08-27
+Pre-flight review: clean after correcting Task 5 assertion wording in commit c32d73b.
+Task 1: fix round 1/5 (1 addressed, 0 open — corrected stale Noto Serif TC weight statement; commits 3989890..7d8dd52)
+Task 1: complete (commits c32d73b..7d8dd52, review clean)
+Task 2: fix round 1/5 (1 addressed, 0 open — safety-note moved from caption to supporting; commits 57c2429..9b3a561)
+Task 2: complete (commits 7d8dd52..9b3a561, review clean)
+Task 3: complete (commits 9b3a561..7927f7f, review clean)
+Task 4: complete (commits 7927f7f..a8a84a7, review clean)
+Task 5: complete (commits a8a84a7..5a43a68, review clean)
+Task 6: minor (deferred): DESIGN.md still describes temporary migration aliases after their removal; resolve before final B8 completion.
+Task 6: fix round 1/5 (1 verification gap addressed, 0 open — full format gate passed in LF-normalized HEAD checkout; no new commit)
+Task 6: complete (commits 5a43a68..2b39c18, review clean; 1 deferred minor)
+Task 5: reopened visual fix complete (commit 159eaa7, article table containment review clean)
+Task 3: reopened visual fix complete (commit 7f9b5e8, helper role and product grid containment statically approved; 320px browser recheck pending Task 7)
+Task 7: integration fix implemented (commit d155e59 — shell main min-width containment, complete audited heading-role gaps, dynamic EmptyState heading coverage, and stale DESIGN.md alias note resolved)
+Task 7: integration fix verification (3 focused files / 78 tests pass; full typecheck and 88 files / 641 tests pass; Stylelint, targeted ESLint, targeted Prettier, build, and cached diff check pass; 320px /products/new browser evidence: 0px overflow and 28px h1)
+Task 7: verification note (full pnpm check reaches ESLint then fails only on ignored SDD evidence task-7-qa.mjs: unused tryLoadingState warning and process no-undef error; real edit-route browser recheck remains for the full Task 7 matrix)
+Task 7: final-review fix wave complete (commit eb2594e — 83 raw headings now declare canonical roles; success/status headings use section-title; two plan-approved setup clamp exceptions are separately allowlisted; fresh re-review pending)
+Task 7: final-review fix verification (focused 76 tests pass; full typecheck and 88 files / 642 tests pass; targeted ESLint, Stylelint, targeted Prettier, build, and cached diff check pass; full pnpm check fails only on ignored SDD evidence task-7-qa.mjs)
+Task 7: final-review fix round 2 complete (commit daab391 — dynamic EmptyState h1/h2 now carry section-title role; redundant local font-size rule removed; focused 3 files / 87 tests, web typecheck, Stylelint, targeted ESLint/Prettier, and cached diff check pass; fresh re-review pending)
+Task 7: final F5 production-preview verification complete (HEAD daab391 — fresh pnpm build pass; 70 reached page/state records and 202 assertions pass across 390×844, 1440×1000, 320×844, and 200% effective layout; real UI-created product edit route included; no B8-attributable runtime diagnostics; home loading remains production-unreachable and is documented without fabrication)
+Task 7: complete (commits 2b39c18..d199620, final code review approved; production-preview matrix clean; Home loading limitation recorded; documentation evidence committed)
+Task 7: final whole-branch review reopened (4 Important findings: five-field role contract/cascade, missed semantic headings and guard gaps, multi-line Notification copy at caption size, reachable Home night action at caption size; prior complete line is superseded)
+Task 7: final-review fix wave implemented (commit a945643 — all 4 Important findings addressed; focused 8 files / 167 tests, full 90 files / 646 tests, workspace typecheck, Stylelint, targeted ESLint/Prettier, production build, and F5 212/212 assertions pass; independent scoped re-review pending)
+Task 7: scoped re-review approved (commit a945643 — all 4 Important findings ADDRESSED; no Critical/Important new breakage and no B9, reminder-flow, or Logo scope creep)
+Task 7: minor deferred (packages/ui/src/styles.css:354-360 has an outdated comment; documentation-only and non-blocking)
+Task 7/B8: complete (final scoped re-review approved; deferred minor recorded outside the closed B8 scope)
+Preview blank fix: takeover scope audit complete (2026-08-29 — inherited diff matches brief: four modified adapter files plus new configuredEnvironment helper; no extra tracked implementation files)
+Preview blank fix: focused verification refreshed (2 files / 7 tests pass; changed-files Prettier check failed on four inherited edits, pure formatting pass applied, rerun passed; git diff --check passed)
+Preview blank fix: report recorded (`preview-blank-fix-report.md`); full `pnpm check` and `pnpm build` evidence carried forward from handoff because no diff/brief inconsistency was found

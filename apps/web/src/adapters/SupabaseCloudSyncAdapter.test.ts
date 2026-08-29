@@ -1,7 +1,11 @@
 import { describe, expect, it, vi } from "vitest";
 import type { AuthPort } from "@sunshield/platform";
 import { makeActiveSessionRecord } from "@sunshield/test-fixtures";
-import { SupabaseCloudSyncAdapter } from "./SupabaseCloudSyncAdapter";
+import {
+  createSupabaseCloudSyncAdapter,
+  DisabledCloudSyncAdapter,
+  SupabaseCloudSyncAdapter
+} from "./SupabaseCloudSyncAdapter";
 
 const now = "2026-08-17T09:00:00.000Z";
 
@@ -35,6 +39,15 @@ function manifest() {
 }
 
 describe("SupabaseCloudSyncAdapter", () => {
+  it("cloud-sync base URL 是空字串時停用同步", () => {
+    const adapter = createSupabaseCloudSyncAdapter({
+      auth: makeAuth(),
+      baseUrl: ""
+    });
+
+    expect(adapter).toBeInstanceOf(DisabledCloudSyncAdapter);
+  });
+
   it("帶 bearer token 呼叫 manifest，並驗證 response contract", async () => {
     const fetch = vi.fn(
       async () =>
