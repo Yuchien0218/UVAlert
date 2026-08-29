@@ -10,7 +10,7 @@ import HomeLocationPrompt from "../components/home/HomeLocationPrompt.vue";
 import HomeNightNotice from "../components/home/HomeNightNotice.vue";
 import HomeNightSession from "../components/home/HomeNightSession.vue";
 import HomeUvHeadline from "../components/home/HomeUvHeadline.vue";
-import SunLoader from "../components/feedback/SunLoader.vue";
+import BroadcastLoader from "../components/feedback/BroadcastLoader.vue";
 import SessionEndControl from "../components/session/SessionEndControl.vue";
 import { useCurrentTime } from "../composables/useCurrentTime";
 import { buildHomeReminderClockPresentation } from "../features/reminder/homeReminderClockPresentation";
@@ -258,7 +258,7 @@ function handleEndSession(): void {
       class="home-state home-state--loading"
       role="status"
     >
-      <SunLoader label="正在讀取這台裝置上的提醒" />
+      <BroadcastLoader label="正在讀取這台裝置上的提醒" />
       <p>正在讀取這台裝置上的提醒…</p>
     </section>
 

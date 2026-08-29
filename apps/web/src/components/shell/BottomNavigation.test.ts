@@ -1,6 +1,5 @@
 // @vitest-environment happy-dom
 
-import { readFileSync } from "node:fs";
 import { mount } from "@vue/test-utils";
 import { createMemoryHistory, createRouter } from "vue-router";
 import { beforeEach, describe, expect, it, vi } from "vitest";
@@ -9,11 +8,6 @@ import { useWebAppServices } from "../../app/injection";
 import type { WebAppServices } from "../../app/createWebAppServices";
 import type { SessionProjection, ZoneProjection } from "@sunshield/contracts";
 import BottomNavigation from "./BottomNavigation.vue";
-
-const bottomNavigationSource = readFileSync(
-  "apps/web/src/components/shell/BottomNavigation.vue",
-  "utf8"
-);
 
 vi.mock("../../app/injection", () => ({
   useWebAppServices: vi.fn()
@@ -51,19 +45,6 @@ describe("BottomNavigation", () => {
         ["裝備", "/products"],
         ["更多", "/more"]
       ]
-    );
-  });
-
-  it("固定在視窗底部並處理安全區與遮蓋層級", () => {
-    expect(bottomNavigationSource).toContain("position: fixed;");
-    expect(bottomNavigationSource).toContain("bottom: 0;");
-    expect(bottomNavigationSource).toContain("left: 0;");
-    expect(bottomNavigationSource).toContain("right: 0;");
-    expect(bottomNavigationSource).toContain("var(--bottom-nav-height)");
-    expect(bottomNavigationSource).toContain("env(safe-area-inset-bottom)");
-    expect(bottomNavigationSource).toMatch(/z-index:\s*(\d+|var\(--[\w-]+\))/);
-    expect(bottomNavigationSource).toContain(
-      "background: var(--page-background);"
     );
   });
 

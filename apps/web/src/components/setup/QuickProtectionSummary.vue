@@ -1,8 +1,7 @@
 <script setup lang="ts">
-import { SlidersHorizontal, Sparkles } from "@lucide/vue";
 import Icon from "../icons/Icon.vue";
 import type { SessionContext, SetupDraftZoneV1 } from "@sunshield/contracts";
-import { computed, shallowRef, watch } from "vue";
+import { computed, shallowRef, useId, watch } from "vue";
 import {
   BODY_ZONE_LABELS,
   recommendedPresetFor
@@ -29,6 +28,9 @@ defineEmits<{
  */
 const expanded = shallowRef(props.pending);
 
+/** aria-controls 需要一個穩定 id；同頁可能有多個實例，用 useId 不用寫死。 */
+const detailsId = useId();
+
 watch(
   () => props.pending,
   (pending) => {
@@ -50,24 +52,24 @@ const zoneLabels = computed(() =>
       class="quick-protection__header"
       type="button"
       :aria-expanded="expanded"
+      :aria-controls="detailsId"
       @click="expanded = !expanded"
     >
       <div class="quick-protection__mark">
-        <Sparkles :size="22" aria-hidden="true" />
+        <Icon name="feature-protection-summary" :size="24" />
       </div>
       <div class="quick-protection__header-content">
         <p class="quick-protection__eyebrow">快速提醒（推薦）</p>
         <h2 data-typography-role="card-title">{{ preset.label }}</h2>
       </div>
       <Icon
-        name="tool-chevron-down"
+        :name="expanded ? 'tool-chevron-down' : 'tool-chevron-right'"
         :size="20"
         class="quick-protection__toggle"
-        :class="{ 'quick-protection__toggle--expanded': expanded }"
       />
     </button>
 
-    <div v-if="expanded" class="quick-protection__details">
+    <div v-if="expanded" :id="detailsId" class="quick-protection__details">
       <p class="quick-protection__summary">{{ preset.summary }}</p>
       <p class="quick-protection__zones">
         這次會套用到：{{ zoneLabels.join("、") }}
@@ -89,7 +91,7 @@ const zoneLabels = computed(() =>
           type="button"
           @click="$emit('adjust')"
         >
-          <SlidersHorizontal :size="17" aria-hidden="true" />
+          <Icon name="tool-edit" :size="16" />
           調整要提醒的部位
         </button>
       </div>
@@ -163,14 +165,10 @@ const zoneLabels = computed(() =>
   font-size: var(--font-size-card-title);
 }
 
+/* chevron 改用換 name，理由見 ContextSelector.vue 同名註解（B9 裁決 2）。 */
 .quick-protection__toggle {
   color: var(--text-secondary);
   flex-shrink: 0;
-  transition: transform var(--duration-fast) var(--ease-out);
-}
-
-.quick-protection__toggle--expanded {
-  transform: rotate(180deg);
 }
 
 .quick-protection__details {
@@ -215,9 +213,11 @@ const zoneLabels = computed(() =>
 @keyframes quickProtectionFadeIn {
   from {
     opacity: 0;
+    transform: translateY(var(--motion-rise));
   }
   to {
     opacity: 1;
+    transform: none;
   }
 }
 

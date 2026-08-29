@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { RegionPreferenceV1 } from "@sunshield/contracts";
-import { MapPin } from "@lucide/vue";
+import Icon from "../icons/Icon.vue";
 
 interface Props {
   preference: RegionPreferenceV1 | null;
@@ -11,12 +11,12 @@ defineProps<Props>();
 
 <template>
   <section class="region-summary" aria-labelledby="region-summary-title">
-    <MapPin :size="22" :stroke-width="1.7" aria-hidden="true" />
+    <Icon name="feature-region" :size="24" />
     <div>
       <h2
         id="region-summary-title"
         class="region-summary__title"
-        data-typography-role="body"
+        data-typography-role="card-title"
       >
         目前設定
       </h2>
@@ -52,7 +52,7 @@ defineProps<Props>();
 }
 
 .region-summary__title {
-  font-size: var(--font-size-body);
+  font-size: var(--font-size-card-title);
   color: var(--text-secondary);
 }
 

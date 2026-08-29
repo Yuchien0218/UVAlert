@@ -40,6 +40,11 @@ const INK_LITERALS = [
  * 圖示登記表——只有 metadata，沒有幾何。
  *
  * `file: false` 代表已經規劃但還沒畫，腳本會列出來而不是報錯。
+ *
+ * `board: "new"` 把圖示抽到獨立的預覽板。分板本來只看 group，但一批新圖示
+ * 常常橫跨好幾個 group（2026-08-29 這批就跨 state／tool／feature），塞回原本
+ * 兩張板會有兩個問題：待確認板長到看不完，而且新畫的 state 圖示會混進「已確認」
+ * 那張板。標記過的圖示一律只出現在新板上，審查通過後把標記拿掉即可歸位。
  */
 export const ICONS = Object.freeze([
   // ---- 下排導覽（雙色）----
@@ -147,7 +152,58 @@ export const ICONS = Object.freeze([
   { id: "tool-plus", group: "tool", label: "新增" },
   { id: "tool-download", group: "tool", label: "匯出" },
   { id: "tool-refresh", group: "tool", label: "重新整理" },
-  { id: "tool-reset", group: "tool", label: "重置" }
+  { id: "tool-reset", group: "tool", label: "重置" },
+  { id: "tool-loading", group: "tool", label: "載入中", board: "new" },
+  { id: "tool-edit", group: "tool", label: "編輯", board: "new" },
+  { id: "tool-delete", group: "tool", label: "刪除", board: "new" },
+  { id: "tool-share", group: "tool", label: "分享", board: "new" },
+  { id: "tool-favorite", group: "tool", label: "收藏", board: "new" },
+
+  // ---- 功能型（綁定特定元件，取代最後一批 @lucide/vue）----
+  // 單色或雙色依「會不會被放進按鈕／狀態列」而定：需要繼承外層語意色的
+  // 一律單色，卡片與區塊標題才用雙色。
+  {
+    board: "new",
+    id: "feature-uv-forecast",
+    group: "feature",
+    label: "五日 UV 預報",
+    twoTone: true
+  },
+  {
+    id: "feature-region",
+    group: "feature",
+    label: "地區",
+    twoTone: true,
+    board: "new"
+  },
+  // 這個是系統裡唯一的實心雙色圖示，不是描邊＋填色。閃電在 24 格內用
+  // 2.5 線寬描邊之後內部幾乎沒有面積，琥珀金填進去 36px 以下就看不見了，
+  // 所以改成把實心閃電從腰部切開：上肢琥珀金、下肢墨咖。取捨見 README 第十節。
+  {
+    board: "new",
+    id: "feature-protection-summary",
+    group: "feature",
+    label: "快速防護摘要",
+    twoTone: true
+  },
+  {
+    board: "new",
+    id: "feature-setup-steps",
+    group: "feature",
+    label: "設定流程",
+    twoTone: true
+  },
+  // 名字刻意不叫「產品快照已確認」——那是從 Lucide 的 PackageCheck 沿用的，
+  // 但這張卡片的文案是「本次使用／只用在這次提醒／不會新增到你的防曬乳清單」，
+  // 它是區塊標題不是狀態。改名之後也就不必是單色，可以帶琥珀金重點。
+  {
+    id: "feature-session-product",
+    group: "feature",
+    label: "本次使用的防曬乳",
+    twoTone: true,
+    board: "new"
+  },
+  { id: "feature-locate", group: "feature", label: "取得目前位置", board: "new" }
 ]);
 
 function escapeXml(value) {
@@ -292,16 +348,21 @@ const GROUP_TITLES = Object.freeze({
   event: "事件回報（雙色）",
   gear: "裝備品類（雙色）",
   education: "衛教分類（雙色）",
-  tool: "工具型（單色）"
+  tool: "工具型（單色）",
+  feature: "功能型（雙色／單色混合）"
 });
 
 export const CONFIRMED_GROUPS = Object.freeze(["nav", "state", "more"]);
+/** 新板依 group 排序，但成員由 board: "new" 決定，不是由 group 決定。 */
+export const NEW_BOARD_GROUPS = Object.freeze(["state", "tool", "feature"]);
+
 export const PENDING_GROUPS = Object.freeze([
   "context",
   "event",
   "gear",
   "education",
-  "tool"
+  "tool",
+  "feature"
 ]);
 
 /** 從正規化後的 SVG 取出可以塞進預覽板的內容，並把 currentColor 換成實色。 */
@@ -314,7 +375,12 @@ function extractBoardBody(normalizedSvg, inkColor) {
   return inner.replaceAll(INK, inkColor);
 }
 
-export function renderPreviewBoardSvg(groupKeys, boardTitle, iconBodies) {
+export function renderPreviewBoardSvg(
+  groupKeys,
+  boardTitle,
+  iconBodies,
+  includeIcon = () => true
+) {
   const columns = 4;
   const cellW = 250;
   const cellH = 210;
@@ -324,7 +390,8 @@ export function renderPreviewBoardSvg(groupKeys, boardTitle, iconBodies) {
 
   for (const key of groupKeys) {
     const members = ICONS.filter(
-      (icon) => icon.group === key && iconBodies.has(icon.id)
+      (icon) =>
+        icon.group === key && iconBodies.has(icon.id) && includeIcon(icon)
     );
     if (members.length === 0) continue;
 
@@ -440,14 +507,38 @@ export function buildIcons(
     .map((name) => name.replace(/\.svg$/, ""))
     .filter((id) => !registered.has(id));
 
+  // 標記 board: "new" 的一律只出現在新板上，另外兩張板排除它們
+  const isSettled = (icon) => icon.board !== "new";
+  const isNew = (icon) => icon.board === "new";
+
   writeFileSync(
     resolve(root, "preview-confirmed.svg"),
-    renderPreviewBoardSvg(CONFIRMED_GROUPS, "圖示系統 — 已確認", iconBodies),
+    renderPreviewBoardSvg(
+      CONFIRMED_GROUPS,
+      "圖示系統 — 已確認",
+      iconBodies,
+      isSettled
+    ),
     "utf8"
   );
   writeFileSync(
     resolve(root, "preview-pending-review.svg"),
-    renderPreviewBoardSvg(PENDING_GROUPS, "圖示系統 — 待確認", iconBodies),
+    renderPreviewBoardSvg(
+      PENDING_GROUPS,
+      "圖示系統 — 待確認",
+      iconBodies,
+      isSettled
+    ),
+    "utf8"
+  );
+  writeFileSync(
+    resolve(root, "preview-new-icons.svg"),
+    renderPreviewBoardSvg(
+      NEW_BOARD_GROUPS,
+      "圖示系統 — 2026-08-29 新繪",
+      iconBodies,
+      isNew
+    ),
     "utf8"
   );
 

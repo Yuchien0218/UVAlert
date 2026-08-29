@@ -2,7 +2,17 @@
 version: alpha
 name: 防曬晴報員設計系統
 description: 防曬晴報員（UVAlert）是一個以防曬乳補擦倒數為核心的 Web／PWA。介面建立在暖象牙底色上，標題用文學感襯線體，行動色為深杏桃，倒數與資料面板使用濃縮咖啡色深色表面，狀態色使用藕紫。視覺個性來自象牙／杏桃／藕紫的組合——有陽光感與人文氣息，同時安靜到足以承載每日的健康指引。字體聲音是襯線標題搭配人文無襯線內文。
-target-status: 本文件的色彩與字體是「目標方向」，前端程式碼尚未套用；衝突處理見下方「與程式碼的落差」。
+target-status: 色彩（2026-08-22）、字體（2026-08-23）與動效 token（2026-08-29）皆已套用；colors／rounded／spacing／layout／typography／motion 六個 frontmatter 區塊由 packages/ui/src/tokens.test.ts 自動比對 styles.css。仍有偏離的項目與衝突處理見第十節「與程式碼的落差」。
+
+motion:
+  duration-fast: 160ms
+  duration-base: 320ms
+  duration-slow: 450ms
+  duration-loader-cycle: 1500ms
+  duration-loader-delay: 250ms
+  ease-out: cubic-bezier(0.25, 0.46, 0.45, 0.94)
+  ease-in-out: cubic-bezier(0.65, 0, 0.35, 1)
+  motion-rise: 4px
 
 colors:
   primary: "#9F5E42"
@@ -41,43 +51,43 @@ colors:
 
 typography:
   page-title:
-    fontFamily: "Noto Serif TC, Noto Serif CJK TC, ui-serif, serif"
+    fontFamily: '"Noto Serif TC Subset", "Noto Serif TC", "Noto Serif CJK TC", ui-serif, serif'
     fontSize: 28px
     fontWeight: 400
     lineHeight: 1.22
     letterSpacing: -0.01em
   section-title:
-    fontFamily: "Noto Serif TC, Noto Serif CJK TC, ui-serif, serif"
+    fontFamily: '"Noto Serif TC Subset", "Noto Serif TC", "Noto Serif CJK TC", ui-serif, serif'
     fontSize: 20px
     fontWeight: 500
     lineHeight: 1.35
     letterSpacing: 0
   card-title:
-    fontFamily: "Inter, Noto Sans TC, Noto Sans CJK TC, ui-sans-serif, sans-serif"
+    fontFamily: '"Inter Subset", Inter, "Noto Sans TC", "PingFang TC", "Microsoft JhengHei", system-ui, sans-serif'
     fontSize: 18px
     fontWeight: 500
     lineHeight: 1.45
     letterSpacing: 0
   body:
-    fontFamily: "Inter, Noto Sans TC, Noto Sans CJK TC, ui-sans-serif, sans-serif"
+    fontFamily: '"Inter Subset", Inter, "Noto Sans TC", "PingFang TC", "Microsoft JhengHei", system-ui, sans-serif'
     fontSize: 16px
     fontWeight: 400
     lineHeight: 1.6
     letterSpacing: 0.01em
   supporting:
-    fontFamily: "Inter, Noto Sans TC, Noto Sans CJK TC, ui-sans-serif, sans-serif"
+    fontFamily: '"Inter Subset", Inter, "Noto Sans TC", "PingFang TC", "Microsoft JhengHei", system-ui, sans-serif'
     fontSize: 14px
     fontWeight: 400
     lineHeight: 1.6
     letterSpacing: 0.01em
   caption:
-    fontFamily: "Inter, Noto Sans TC, Noto Sans CJK TC, ui-sans-serif, sans-serif"
+    fontFamily: '"Inter Subset", Inter, "Noto Sans TC", "PingFang TC", "Microsoft JhengHei", system-ui, sans-serif'
     fontSize: 12px
     fontWeight: 500
     lineHeight: 1.5
     letterSpacing: 0.01em
   nav-label:
-    fontFamily: "Inter, Noto Sans TC, Noto Sans CJK TC, ui-sans-serif, sans-serif"
+    fontFamily: '"Inter Subset", Inter, "Noto Sans TC", "PingFang TC", "Microsoft JhengHei", system-ui, sans-serif'
     fontSize: 12px
     fontWeight: 500
     lineHeight: 1.4
@@ -165,7 +175,7 @@ components:
     textColor: "{colors.muted}"
     typography: "{typography.caption}"
   app-card:
-    backgroundColor: "{colors.canvas}"
+    backgroundColor: "{colors.surface-soft}"
     textColor: "{colors.ink}"
     borderColor: "{colors.hairline}"
     rounded: "{rounded.lg}"
@@ -351,7 +361,7 @@ components:
     typography: "{typography.caption}"
   page-footer-meta:
     backgroundColor: transparent
-    textColor: "{colors.muted-soft}"
+    textColor: "{colors.muted}"
     typography: "{typography.supporting}"
 ---
 
@@ -488,7 +498,7 @@ components:
 
 **標題不再搭配任何西文顯示字體。** 要加西文襯線體之前，先回頭看上面那段實測資料：沒有連續拉丁標題，就沒有它的工作。
 
-備援堆疊：標題走 `Noto Serif TC, Noto Serif CJK TC, ui-serif, serif`，內文走 `Inter, Noto Sans TC, Noto Sans CJK TC, ui-sans-serif, sans-serif`。
+runtime 堆疊：標題走 `"Noto Serif TC Subset", "Noto Serif TC", "Noto Serif CJK TC", ui-serif, serif`；內文走 `"Inter Subset", Inter, "Noto Sans TC", "PingFang TC", "Microsoft JhengHei", system-ui, sans-serif`。前兩個名稱是專案自行托管的 subset；後段才是載入失敗時的系統備援。
 
 標題／內文的分工是編輯式的：
 
@@ -602,7 +612,7 @@ Noto Serif TC 是標題的唯一字型，沒有第二層自托管備援——載
 
 圖示在上、文字在下，標籤使用 `{typography.nav-label}`（12px，未選取 400／選取 700）。三項是固定的——不新增衛教專用入口，也不保留獨立「首頁」入口。
 
-**`global-status-banner`** — 承載跨頁的系統狀態：「通知未開啟」「背景通知尚未完成」「目前離線」「背景通知已恢復」。背景 `{colors.surface-soft}`，圓角 `{rounded.md}`。這類狀態**永不阻擋**本機倒數與手動操作，因此樣式是提示而非警示——不使用 `{colors.error}` 底色。
+**`global-status-banner`** — 承載跨頁的系統狀態：「通知未開啟」「背景通知尚未完成」「目前離線」「背景通知已恢復」。背景 `{colors.surface-soft}`，圓角 `{rounded.md}`。這類狀態**永不阻擋**本機倒數與手動操作，因此樣式是提示而非警示——不使用任何警示底色。（系統沒有獨立的 error token，見第二節；警示強度上限是 `{colors.status-due}` 的柔和底色卡。）
 
 ### 頁面骨架
 
@@ -610,9 +620,13 @@ Noto Serif TC 是標題的唯一字型，沒有第二層自托管備援——載
 
 **`flow-heading`** — 全螢幕操作流程的標題列，標題與說明在左、關閉操作在右；內部以 12px 堆疊，兩側保留 16px 間距。共通實作位於 `apps/web/src/assets/app.css`，目前供重新塗抹、更正紀錄與回報事件三個流程使用。
 
-**`app-card`** — 通用內容卡。背景半透明白 `rgba(255,255,255,0.6)` 疊在 `{colors.canvas}` 上（2026-08-24：純 canvas 版本套用後卡片跟頁面幾乎融在一起，改用半透明白疊加維持一點層次），1px `{colors.hairline}` 邊框，圓角 `{rounded.lg}`，內距 20px。無陰影。這個疊加效果假設卡片背後是 canvas 底色，不要用在深色面板或圖片背景上。
+**`app-card`** — 通用內容卡。背景 `{colors.surface-soft}`（暖奶油，不透明），1px `{colors.hairline}` 邊框，圓角 `{rounded.lg}`，內距 20px。無陰影。
 
-**`page-footer-meta`** — 頁尾的版本、隱私政策、使用條款與資料說明。純文字連結列，`{colors.muted-soft}`，`{typography.supporting}`。**刻意不做成功能卡片**，避免與「更多」頁的入口卡競爭。
+> **2026-08-29 更正**：這一段先前寫「半透明白 `rgba(255,255,255,0.6)` 疊在 canvas 上」，frontmatter 又寫 `{colors.canvas}`——**兩者都是舊版**，而且同一天的第十節註記還寫「改回 canvas」，三處互相矛盾。實際的 `--surface-primary` 是 `{colors.surface-soft}`，2026-08-24 當天演進過四個版本（canvas → 半透明白 0.6 → 0.4 → 暖奶油），完整脈絡記在 `packages/ui/src/styles.css` 該 token 上方的註解。
+>
+> 改成不透明色的理由值得留著：**半透明必須依賴「卡片背後真的是 canvas」，一旦蓋在別的東西上就破功**——兩個 bottom sheet 就因此透出背後的文字。所以不要再提案改回半透明。
+
+**`page-footer-meta`** — 頁尾的版本、隱私政策、使用條款與資料說明。純文字連結列，`{colors.muted}`，`{typography.supporting}`。**刻意不做成功能卡片**，避免與「更多」頁的入口卡競爭。
 
 ### 提醒（核心）
 
@@ -658,6 +672,8 @@ Noto Serif TC 是標題的唯一字型，沒有第二層自托管備援——載
 
 排序固定為：通知設定 → 防曬衛教 → 本機資料與隱私 → 問題回報與意見回饋 → 安裝到主畫面 → 說明與關於。「通知設定」卡片顯示簡短狀態文字。
 
+**2026-08-29：「跨裝置同步」已併回「本機資料與隱私」。** 實作原本把這一張拆成 `/settings/data` 與 `/settings/sync` 兩張卡兩個頁面，還在資料頁上放了一張純粹解釋「你要找的東西在另一頁」的補救卡。合併後 `/settings/data` 採單頁分區——本機概況／匯出／清除是第一層（`app-card`），跨裝置同步是次要區塊（無卡片外框，一條 hairline 起手），`/settings/account-data` 維持巢狀獨立頁，從同步區塊進入。**次要性做在「有沒有卡片外框」，不做在字級**：同步區塊裡有登入與上傳雲端的決策資訊，縮字會變成看不清楚而不是變次要。裁決與量測見 `docs/decisions/2026-08-29-settings-data-sync-merge.md`。
+
 ### 衛教
 
 **`education-hero-card`** — 衛教首頁的「了解今天的 UV」大卡片，標示「先從這裡開始」。背景 `{colors.surface-cream-strong}`，標題 `{typography.page-title}`（襯線），圓角 `{rounded.lg}`，內距 24px。這是六個分類中唯一放大的一張。
@@ -670,7 +686,9 @@ Noto Serif TC 是標題的唯一字型，沒有第二層自托管備援——載
 
 ### 開始提醒流程
 
-**`setup-step-shell`** — 兩步驟設定流程的外框（步驟 1 情境、步驟 2 塗抹時間與部位）。承載步驟指示、內容區與底部行動列。整個流程在同一個外框內完成，**不因產品標示、部位調整或通知設定跳離到平行頁面**。
+**`setup-step-shell`** — 設定流程的外框。承載標題、內容區與底部行動列。整個流程在同一個外框內完成，**不因產品標示、部位調整或通知設定跳離到平行頁面**。
+
+> **2026-08-29 更正**：先前寫「兩步驟設定流程（步驟 1 情境、步驟 2 塗抹時間與部位）」，但 `/setup/context` 與 `/setup/timing` 已於 2026-08-24 合併成單頁 `/setup`（理由是「減少跳轉的疲倦感」，見 `docs/decisions/2026-08-15-redesign-sitemap-userflow-current.md` §2.2）。步驟指示器隨之失去對象。
 
 **`context-option`** ／ **`context-option-selected`** — 情境選項。未選取：`{colors.canvas}` 底、`{colors.hairline}` 邊框。已選取：`{colors.surface-cream-strong}` 底、`{colors.primary}` 邊框。選取態同時有底色與邊框變化，不只靠顏色。
 
@@ -697,6 +715,25 @@ Noto Serif TC 是標題的唯一字型，沒有第二層自托管備援——載
 **`text-input-focused`** — 邊框轉為 `{colors.primary}`，外加 3px 深杏桃 15% 透明度的焦點環。
 
 **`form-error`** — 行內欄位錯誤文字。使用 `{colors.status-due}`、行高 1.6，並清除段落預設 margin；共通實作位於 `apps/web/src/assets/app.css`。欄位錯誤邊框、圖示與訊息位置仍需配合完整表單流程定案。
+
+### 展開收合（disclosure）
+
+**2026-08-29（B9 裁決 2）統一。** 先前 5 個實作有四種做法，其中 3 個沒有 `aria-controls`。
+
+允許**兩種**觸發器，依項目性質選一種，同一種元件內不可混用：
+
+| 觸發器 | 用在 | 例子 |
+| --- | --- | --- |
+| **標籤化按鈕** | 按鈕文字本身說明會展開什麼 | 「填寫包裝標示（選填）」「查看其他 3 筆事件」「如何開啟」 |
+| **整列可點** | 這一列就是那個項目本身 | 情境選擇的「室內活動」「水上活動」群組、快速防護摘要的 header |
+
+不論哪一種，三條硬性要求：
+
+1. **必須用真實 `button`**，並同時設 `aria-expanded` 與 **`aria-controls`**。少了 `aria-controls`，螢幕閱讀器無法把觸發器跟被控制的區塊關聯起來。
+2. **chevron 用換圖示 name**：收合 `tool-chevron-right`、展開 `tool-chevron-down`。**不要用 `transform: rotate(180deg)`**——那違反第十二節規則一「只用 opacity」，而且系統本來就有這兩個圖示，不需要 `chevron-up`。
+3. **不加淡入淡出**：chevron 是「回應手指的直接操作」，依第十二節規則二該是即時的。交叉淡入留給「自己發生的」狀態變化（例如倒數跨過補擦門檻）。
+
+收合不清除使用者的輸入、選擇或目前狀態。
 
 **`badge-pill`** — 分類標籤。背景 `{colors.surface-card}`，`{typography.caption}`，圓角 `{rounded.pill}`。
 
@@ -762,7 +799,16 @@ Noto Serif TC 是標題的唯一字型，沒有第二層自托管備援——載
 
 ### 尺寸
 
-從 16 / 20 / 24 三個檔位選，不發明新數值。
+從 **16 / 20 / 24 / 32** 四個檔位選，不發明新數值。
+
+| 檔位 | 角色 |
+| ---: | --- |
+| 16 | 文字行內的輔助圖示（按鈕內、標籤旁） |
+| 20 | 清單列、次要位置 |
+| 24 | 下排導覽、按鈕、區塊標題 |
+| 32 | 卡片或功能入口的主要視覺 |
+
+> **2026-08-29（B9 裁決 1）新增 32 檔位。** 原本只有三檔，24 同時扮演導覽、按鈕與卡片主視覺三種角色；「更多」頁入口卡實測圖示只佔卡片面積 **1.61%**，讀起來是項目符號不是視覺錨點。B9 規格原本另提 18px，**不採用**——它的角色（文字旁的輔助圖示）就是現有的 20，加了只是在小尺寸區塞成四檔。脈絡見 `docs/decisions/2026-08-29-b9-pre-decision.md`。
 
 ### 不依賴顏色的區分方式
 
@@ -774,7 +820,7 @@ Noto Serif TC 是標題的唯一字型，沒有第二層自托管備援——載
 
 **不使用任何第三方圖示素材庫。** 所有圖示都來自 `docs/design/icon-system/` 的自訂系統，以 inline SVG 進入程式碼。理由是圖示的造型語言直接繼承 Logo 的實心圓點＋膠囊線條，素材庫的圖示無法承載這個品牌訊號，混用會讓介面看起來像拼裝的。
 
-**現況（2026-08-22 更新）**：38 個不重複圖示中 28 個已替換完成，透過 `apps/web/src/components/icons/Icon.vue` 這個單一進入點消費自動產生的 `icons.generated.ts`。剩下 11 個元件、10 個功能型圖示仍在用 `@lucide/vue`——刻意延後到 wireframe 定案，因為它們綁定在可能被重新設計的元件上，先畫有報廢風險。`apps/web/package.json` 的 `@lucide/vue` 依賴要等這批也畫完才能移除。清單見 `docs/design/icon-system/README.md` 第八節。
+**現況（2026-08-29 更新）**：**Lucide 已完全移除**。全部圖示都透過 `apps/web/src/components/icons/Icon.vue` 這個單一進入點消費自動產生的 `icons.generated.ts`，`apps/web/package.json` 的 `@lucide/vue` 依賴已刪除。最後一批 11 個（功能型 6、工具型 5）於 2026-08-29 補畫，清單與造型取捨見 `docs/design/icon-system/README.md` 第七、十節，預覽板是 `preview-new-icons.svg`。
 
 ## 九、圖像法則（Imagery Rules）
 
@@ -931,22 +977,59 @@ B8 遷移期間使用的四個臨時字級別名已移除；目前元件只使�
 
 ### 動畫
 
-- **只用 `opacity`，不用位移或縮放。**
-- `page-stack` 的直接子區塊依序淡入（每項延遲 0.08s，上限 0.4s），使用 `fill-mode: backwards` 避免內容先閃現。
-- 轉場時間 `160ms`（快）／ `240ms`（基本），緩動 `cubic-bezier(0.22, 1, 0.36, 1)`。
-- 完整支援 `prefers-reduced-motion: reduce`——該設定開啟時所有動畫直接關閉。
+動效的定位：這個產品的情緒基調是**耐心**——核心機制是兩小時的等待，文案也刻意寫「這是協助你記得補擦的提醒，不是安全曝曬時間保證」。動效要支撐這個 tone，不是展示流暢度。2026-08-29 重訂為以下五條。
+
+#### 一、只用 `opacity`，唯一例外是內容進場
+
+狀態切換、圖示內部、hover、loader 一律**純 `opacity`**，不位移、不縮放、不旋轉。
+
+**唯一例外**：內容進場可以加上 `{motion.motion-rise}`（4px）的上移。理由是在 `{colors.canvas}` 這種低對比暖底上，純 0→1 淡入幾乎察覺不到；4px 小到不構成「位移動畫」，只是讓轉場被看見。這個例外**不擴張到其他情境**。
+
+#### 二、時距分兩類
+
+| 類型 | Token | 用在 |
+| --- | --- | --- |
+| 回應手指的 | `{motion.duration-fast}`（160ms） | 按鈕、chevron 展開、遮罩 |
+| 自己發生的 | `{motion.duration-base}`（320ms）／`{motion.duration-slow}`（450ms） | 內容進場、狀態切換 |
+
+**直接操作放慢會讀成延遲；自己發生的事沒有人在等，慢一點才安靜。**
+
+緩動一律 `{motion.ease-out}`；需要對稱進出的循環動畫（loader）用 `{motion.ease-in-out}`，循環長度用 `{motion.duration-loader-cycle}`。
+
+**loader 出現前先靜默 `{motion.duration-loader-delay}`（250ms）。** 本機優先的讀取多半幾十毫秒就回來，沒有這段延遲的話 loader 會閃一下再消失——那個閃動本身就是最廉價的觀感，跟圖案畫得多好無關。
+
+#### 三、禁止 `transition: all`
+
+一律列出要動的屬性。`all` 會連帶動到之後新增的任何屬性——加一個 `background` 就多一個沒人決定過的動畫。**stylelint 會擋**（`declaration-property-value-disallowed-list`）。
+
+#### 四、無限循環動畫必須自己關掉
+
+`packages/ui/src/styles.css` 有全域 `prefers-reduced-motion` 規則，把所有動畫壓到 `0.01ms`、`iteration-count: 1`。一般元件因此**不需要**各自再寫一份。
+
+但**無限循環的動畫必須自己寫 `animation: none` 的覆寫**——`0.01ms` 配 `infinite` 會變成極速閃爍，比不動更糟，對前庭敏感的使用者是反效果。目前適用於 `BroadcastLoader` 與 `InlineLoader`。
+
+#### 五、一次只有一個元素在動
+
+同一個畫面區塊裡不要讓兩個元素同時動——會讀成「整體閃爍」而不是「某件事發生了」。
+
+`BroadcastLoader` 是這條的來源：射線掃完之後圓點才接手蓄能，兩者刻意錯開。初版讓圓點全程靜止，結果整顆讀起來像卡住——**畫面上最大、最飽和的元素靜止不動時，其他元素再怎麼動都會被讀成靜止**。
+
+#### 進場的實作細節
+
+- `page-stack` 的直接子區塊依序淡入（每項延遲 0.08s，上限 0.4s），使用 `fill-mode: backwards` 避免內容先閃現，並帶 `{motion.motion-rise}` 的上移。
+- 完整支援 `prefers-reduced-motion: reduce`——該設定開啟時所有動畫直接關閉（無限循環動畫另見規則四）。
 
 ## 十三、規格盲點（Gaps）
 
 以下項目尚未定義或無法驗證，**實作時不要自行填補，先確認**：
 
-1. **Lucide 尚未完全移除。** 剩 9 個檔案仍直接 `import ... from "@lucide/vue"`（`ProductSnapshotEditor`、`SetupProcessBanner`、`RegionLocationPanel`、`RegionPreferenceSummary`、`QuickProtectionSummary`、`ZoneProtectionForm`、`FiveDayUvCard`、`SetupPage`）。wireframe 已凍結、阻塞解除；等使用者產出草稿 SVG 就能替換，`@lucide/vue` 依賴要等那批畫完才能移除。收斂待辦見 `docs/superpowers/plans/2026-08-26-codebase-consolidation-audit.md` E1。
+1. **Lucide 已移除（2026-08-29 結案）。** 8 個檔案的 `import ... from "@lucide/vue"` 全部換成 `<Icon name="..." />`，依賴也已從 `apps/web/package.json` 刪除。替換時順帶把散落的尺寸（25／26／22／18／17）收斂回系統的 16／20／24 三檔。剩下的唯一圖示待辦是衛教部位示意，但它的規格（要畫幾個、抽象到什麼程度）尚未裁決——`docs/design/icon-system/README.md` 第七節寫 7 個、`setupCatalog.ts` 實際是 10 個部位，數量對不上。
 2. **焦點環已系統化**（2026-08-25 前就已完成，此處補記）。`packages/ui/src/styles.css` 全域規則：`button, a, input, select, textarea` 的 `:focus-visible` → `outline: 0.15rem solid var(--focus-ring); outline-offset: 0.2rem;`。2026-08-26 已統一 bottom sheet／確認 dialog 的焦點循環與還原。**殘留缺口**：卡片、自訂 widget（如 `.choice-grid` 選項）的鍵盤焦點樣式未逐一規範。
 3. **停用狀態**：主按鈕（`--color-primary-disabled`）、次要按鈕（`.button--quiet:disabled`：`opacity: 0.55` + `cursor: not-allowed`，2026-08-25 補）皆已定義。**輸入框、清單項目的停用樣式仍未定義。**
 4. **錯誤與驗證狀態：行內錯誤文字已統一，其餘視覺結構未展開。** 顏色沿用 `{colors.status-due}`（驗證錯誤）／`{colors.status-soon}`（系統警示），見第二節。2026-08-26 已將 9 個檔案的 `.form-error` 收斂至 `app.css`；欄位邊框、訊息位置與是否加圖示仍需配合實際表單流程確認。
 5. **橫式標誌缺深色底版本。** 正式資產在 `docs/design/logo/`（2026-08-22 定案），但墨咖字標在濃縮咖啡深色面板上幾乎看不見，需要另做反白版。圖標本身已有 `06-broadcast-mark-dark-surface.svg`。
-6. **衛教七部位示意尚未設計。** 規格 4.6 有提到，圖示系統中列為待補。
-7. **功能型圖示尚未設計**（見上方第 1 項）：載入中、快速摘要、調整設定、流程橫幅、產品確認、地區、定位、UV 預報、夜間、傍晚。工具型那批已完成。清單見 `docs/design/icon-system/README.md` 第八節。
+6. **衛教部位示意尚未設計，而且數量還沒定。** 規格 4.6 與圖示系統都提到「七部位」，但 `apps/web/src/features/setup/setupCatalog.ts` 實際是 10 個部位（臉部／耳朵／頸部／手臂／手背／肩膀與身體／腿部／腳背／頭皮／嘴唇）。**動手前要先裁決畫幾個、抽象到什麼程度**，不要照「七」這個數字開工。
+7. ~~功能型圖示尚未設計~~ **已完成（2026-08-29）。** 這一項原本列了十個待設計的功能型圖示，現在全部有著落：載入中改用 `InlineLoader` 元件而非圖示；調整設定沿用既有的 `tool-edit`，不另畫；夜間與傍晚對應的元件在現行程式碼已不存在；其餘六個是 `feature` 群。對照表見 `docs/design/icon-system/README.md` 第七、八節。
 8. **分享圖版面未定義。** 裝備分享圖的內容規則已確認（見第九節），但版面、尺寸與品牌標示位置未定。
 9. **`/reminder/reapply` 的最終顯示形式未定**，Sitemap 文件標註仍需在 wireframe 階段確認。
 

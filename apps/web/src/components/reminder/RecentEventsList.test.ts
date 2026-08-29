@@ -127,6 +127,16 @@ describe("S-07 RecentEventsList", () => {
     expect(wrapper.find("button.event-row").exists()).toBe(false);
   });
 
+  it("最近事件是頁面區段標題", () => {
+    const wrapper = mount(RecentEventsList, {
+      props: { zones, events: makeStream() }
+    });
+
+    expect(
+      wrapper.get("#events-title").attributes("data-typography-role")
+    ).toBe("section-title");
+  });
+
   it("時鐘不可信時顯示警告，但仍列出已儲存的事件", () => {
     const wrapper = mount(RecentEventsList, {
       props: { zones, events: makeStream(), clockTrusted: false }

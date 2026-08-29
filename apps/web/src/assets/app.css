@@ -17,7 +17,7 @@
  * 不會先閃一下滿版內容才淡出重來。
  */
 .page-stack > * {
-  animation: page-stack-fade-in 0.45s ease-out backwards;
+  animation: page-stack-fade-in var(--duration-slow) var(--ease-out) backwards;
 }
 
 .page-stack > *:nth-child(1) {
@@ -44,13 +44,23 @@
   animation-delay: 0.4s;
 }
 
+/*
+ * 進場帶 --motion-rise 的上移。2026-08-29 之前是純 opacity，但在暖象牙
+ * 底色上幾乎看不出來——低對比是這個配色的特性，不是可以靠加長時間解決的。
+ *
+ * 這裡原本還寫死 0.45s ease-out：ease-out 是 CSS 關鍵字，不是設計系統的
+ * --ease-out，所以整個 page-stack 的進場一直用的是瀏覽器預設曲線，跟其他
+ * 轉場不同調。一併改成 token。
+ */
 @keyframes page-stack-fade-in {
   from {
     opacity: 0;
+    transform: translateY(var(--motion-rise));
   }
 
   to {
     opacity: 1;
+    transform: none;
   }
 }
 
@@ -65,20 +75,103 @@
  * source-wide contract prevents a new h1/h2/h3 from falling back to browser
  * defaults while keeping role choice explicit instead of styling by tag name.
  */
-[data-typography-role="page-title"] {
+body [data-typography-role="page-title"][data-typography-role="page-title"] {
+  font-family: var(--font-family-page-title);
+  font-weight: var(--font-weight-page-title);
+  line-height: var(--line-height-page-title);
+  letter-spacing: var(--letter-spacing-page-title);
+}
+
+body
+  [data-typography-role="page-title"][data-typography-role="page-title"]:not(
+    [data-typography-exception]
+  ) {
   font-size: var(--font-size-page-title);
 }
 
-[data-typography-role="section-title"] {
+body
+  [data-typography-role="section-title"][data-typography-role="section-title"] {
+  font-family: var(--font-family-section-title);
+  font-weight: var(--font-weight-section-title);
+  line-height: var(--line-height-section-title);
+  letter-spacing: var(--letter-spacing-section-title);
+}
+
+body
+  [data-typography-role="section-title"][data-typography-role="section-title"]:not(
+    [data-typography-exception]
+  ) {
   font-size: var(--font-size-section-title);
 }
 
-[data-typography-role="card-title"] {
+body [data-typography-role="card-title"][data-typography-role="card-title"] {
+  font-family: var(--font-family-card-title);
+  font-weight: var(--font-weight-card-title);
+  line-height: var(--line-height-card-title);
+  letter-spacing: var(--letter-spacing-card-title);
+}
+
+body
+  [data-typography-role="card-title"][data-typography-role="card-title"]:not(
+    [data-typography-exception]
+  ) {
   font-size: var(--font-size-card-title);
 }
 
-[data-typography-role="body"] {
+body [data-typography-role="body"][data-typography-role="body"] {
+  font-family: var(--font-family-body);
+  font-weight: var(--font-weight-body);
+  line-height: var(--line-height-body);
+  letter-spacing: var(--letter-spacing-body);
+}
+
+body
+  [data-typography-role="body"][data-typography-role="body"]:not(
+    [data-typography-exception]
+  ) {
   font-size: var(--font-size-body);
+}
+
+body [data-typography-role="supporting"][data-typography-role="supporting"] {
+  font-family: var(--font-family-supporting);
+  font-weight: var(--font-weight-supporting);
+  line-height: var(--line-height-supporting);
+  letter-spacing: var(--letter-spacing-supporting);
+}
+
+body
+  [data-typography-role="supporting"][data-typography-role="supporting"]:not(
+    [data-typography-exception]
+  ) {
+  font-size: var(--font-size-supporting);
+}
+
+body [data-typography-role="caption"][data-typography-role="caption"] {
+  font-family: var(--font-family-caption);
+  font-weight: var(--font-weight-caption);
+  line-height: var(--line-height-caption);
+  letter-spacing: var(--letter-spacing-caption);
+}
+
+body
+  [data-typography-role="caption"][data-typography-role="caption"]:not(
+    [data-typography-exception]
+  ) {
+  font-size: var(--font-size-caption);
+}
+
+body [data-typography-role="nav-label"][data-typography-role="nav-label"] {
+  font-family: var(--font-family-nav-label);
+  font-weight: var(--font-weight-nav-label);
+  line-height: var(--line-height-nav-label);
+  letter-spacing: var(--letter-spacing-nav-label);
+}
+
+body
+  [data-typography-role="nav-label"][data-typography-role="nav-label"]:not(
+    [data-typography-exception]
+  ) {
+  font-size: var(--font-size-nav-label);
 }
 
 .page-heading {
@@ -221,119 +314,6 @@
   margin: 0;
   color: var(--color-due);
   line-height: 1.6;
-}
-
-/*
- * Status-tinted cards — use soft background color to communicate urgency
- * at a glance. Pure background fill, no left border or shadow.
- */
-.status-card {
-  --status-color: var(--text-primary);
-  --status-soft: var(--surface-primary);
-  border: none;
-  border-radius: var(--radius-lg);
-  background: var(--status-soft);
-  padding: var(--space-4);
-}
-
-.status-card__label {
-  color: var(--status-color);
-  font-weight: 600;
-}
-
-.status-card--tracking {
-  --status-color: var(--color-tracking);
-  --status-soft: var(--color-tracking-soft);
-}
-
-.status-card--soon {
-  --status-color: var(--color-soon);
-  --status-soft: var(--color-soon-soft);
-}
-
-.status-card--due {
-  --status-color: var(--color-due);
-  --status-soft: var(--color-due-soft);
-}
-
-.status-card--untimed {
-  --status-color: var(--color-untimed);
-  --status-soft: var(--color-untimed-soft);
-}
-
-.status-card--saved {
-  --status-color: var(--color-saved);
-  --status-soft: var(--color-saved-soft);
-}
-
-/*
- * NOTE：.status-card（＋ 5 個變體）目前是死碼——沒有任何元件 template 用到。
- * DESIGN.md 第五節的 status-card 規範實際上由 ZoneStatusList.vue 的
- * .zone-group 實現。清理待 audit 清單的死碼掃描（見
- * docs/superpowers/plans/2026-08-26-codebase-consolidation-audit.md）。
- */
-
-/*
- * UVI risk badge — surfaces --color-uvi-low..extreme, which were defined
- * but unused. This should be the one saturated color moment above the
- * fold on the home screen when a region is set.
- */
-.uvi-badge {
-  --uvi-color: var(--text-primary);
-  --uvi-soft: var(--surface-primary);
-  display: inline-flex;
-  align-items: center;
-  gap: var(--space-2);
-  padding: var(--space-2) var(--space-4);
-  border-radius: var(--radius-pill);
-  background: var(--uvi-soft);
-  color: var(--uvi-color);
-  font-weight: 600;
-}
-
-.uvi-badge--low {
-  --uvi-color: var(--color-uvi-low);
-  --uvi-soft: color-mix(
-    in srgb,
-    var(--color-uvi-low) 14%,
-    var(--surface-primary)
-  );
-}
-
-.uvi-badge--moderate {
-  --uvi-color: var(--color-uvi-moderate);
-  --uvi-soft: color-mix(
-    in srgb,
-    var(--color-uvi-moderate) 14%,
-    var(--surface-primary)
-  );
-}
-
-.uvi-badge--high {
-  --uvi-color: var(--color-uvi-high);
-  --uvi-soft: color-mix(
-    in srgb,
-    var(--color-uvi-high) 14%,
-    var(--surface-primary)
-  );
-}
-
-.uvi-badge--very-high {
-  --uvi-color: var(--color-uvi-very-high);
-  --uvi-soft: color-mix(
-    in srgb,
-    var(--color-uvi-very-high) 14%,
-    var(--surface-primary)
-  );
-}
-
-.uvi-badge--extreme {
-  --uvi-color: var(--color-uvi-extreme);
-  --uvi-soft: color-mix(
-    in srgb,
-    var(--color-uvi-extreme) 14%,
-    var(--surface-primary)
-  );
 }
 
 .button {

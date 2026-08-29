@@ -50,9 +50,8 @@ function frontmatterSection(topKey: string): Record<string, string> {
 const cssTokens: Record<string, string> = (() => {
   const root = stylesCss.match(/:root\s*\{([\s\S]*?)\r?\n\}/)?.[1] ?? "";
   const out: Record<string, string> = {};
-  for (const line of root.split(/\r?\n/)) {
-    const match = line.match(/^\s*(--[\w-]+):\s*([^;]+);/);
-    if (match) out[match[1]!] = match[2]!.trim();
+  for (const match of root.matchAll(/^\s*(--[\w-]+):\s*([\s\S]*?);/gm)) {
+    out[match[1]!] = match[2]!.trim().replace(/\s+/g, " ");
   }
   return out;
 })();
@@ -70,6 +69,10 @@ const SPACING_MAP: Record<string, string> = {
   section: "--space-10"
 };
 
+/**
+ * motion 是 1:1 對應（duration-fast → --duration-fast），不需要 map，
+ * 但列在這裡是為了讓「哪些 section 有被守著」一眼看得完。
+ */
 const LAYOUT_MAP: Record<string, string> = {
   "content-max": "--content-max",
   "tap-target": "--tap-target"
@@ -77,32 +80,69 @@ const LAYOUT_MAP: Record<string, string> = {
   // clamp() 不是 token，只留在 §12 prose。
 };
 
-const TYPOGRAPHY_MAP: Record<string, string> = {
-  "page-title": "--font-size-page-title",
-  "section-title": "--font-size-section-title",
-  "card-title": "--font-size-card-title",
-  body: "--font-size-body",
-  supporting: "--font-size-supporting",
-  caption: "--font-size-caption",
-  "nav-label": "--font-size-nav-label"
-};
+const TYPOGRAPHY_ROLES = [
+  "page-title",
+  "section-title",
+  "card-title",
+  "body",
+  "supporting",
+  "caption",
+  "nav-label"
+] as const;
 
-function typographyFontSizes(): Record<string, string> {
+const TYPOGRAPHY_FIELDS = {
+  fontFamily: "font-family",
+  fontSize: "font-size",
+  fontWeight: "font-weight",
+  lineHeight: "line-height",
+  letterSpacing: "letter-spacing"
+} as const;
+
+type TypographyField = keyof typeof TYPOGRAPHY_FIELDS;
+
+function typographyRoles(): Record<
+  string,
+  Partial<Record<TypographyField, string>>
+> {
   const fm = designMd.match(/^---\r?\n([\s\S]*?)\r?\n---/)?.[1] ?? "";
   const section = fm.match(/^typography:\r?\n([\s\S]*?)(?=^\S)/m)?.[1] ?? "";
-  const out: Record<string, string> = {};
+  const out: Record<string, Partial<Record<TypographyField, string>>> = {};
   let currentKey: string | null = null;
 
   for (const line of section.split(/\r?\n/)) {
     const role = line.match(/^ {2}([\w-]+):\s*$/);
     if (role) {
       currentKey = role[1]!;
+      out[currentKey] = {};
       continue;
     }
-    const size = line.match(/^ {4}fontSize:\s*(.+)$/);
-    if (currentKey !== null && size) out[currentKey] = size[1]!.trim();
+    const field = line.match(
+      /^ {4}(fontFamily|fontSize|fontWeight|lineHeight|letterSpacing):\s*(.+)$/
+    );
+    if (currentKey !== null && field) {
+      out[currentKey]![field[1] as TypographyField] = field[2]!
+        .trim()
+        .replace(/^["']|["']$/g, "");
+    }
   }
   return out;
+}
+
+function typographyToken(role: string, field: TypographyField): string {
+  return `--${TYPOGRAPHY_FIELDS[field]}-${role}`;
+}
+
+function resolveCssToken(
+  token: string,
+  seen = new Set<string>()
+): string | undefined {
+  if (seen.has(token)) throw new Error(`CSS token alias cycle: ${token}`);
+  const value = cssTokens[token];
+  if (value === undefined) return undefined;
+  const alias = value.match(/^var\((--[\w-]+)\)$/);
+  if (alias === null) return value;
+  seen.add(token);
+  return resolveCssToken(alias[1]!, seen);
 }
 
 function tokenFor(section: string, key: string): string | null {
@@ -116,6 +156,8 @@ function tokenFor(section: string, key: string): string | null {
       return SPACING_MAP[key] ?? null;
     case "layout":
       return LAYOUT_MAP[key] ?? null;
+    case "motion":
+      return `--${key}`;
     default:
       return null;
   }
@@ -141,9 +183,99 @@ function normalize(value: string): string {
 
 const KNOWN_DRIFT: Record<string, string> = {};
 
+// --- {token.ref} 解析守門 ---
+
+/**
+ * 收集某個 frontmatter 區塊底下所有兩格縮排的 key（不管有沒有值）。
+ *
+ * 跟 frontmatterSection 的差別：那個要求同一行有值，所以像 typography 這種
+ * 巢狀結構（`  body:` 底下才是欄位）會被整個略過。這裡只要 key。
+ */
+function frontmatterKeys(topKey: string): Set<string> {
+  const fm = designMd.match(/^---\r?\n([\s\S]*?)\r?\n---/)?.[1] ?? "";
+  const out = new Set<string>();
+  let inSection = false;
+  for (const line of fm.split(/\r?\n/)) {
+    if (/^\S/.test(line)) {
+      inSection = line.trimEnd() === `${topKey}:`;
+      continue;
+    }
+    if (!inSection) continue;
+    const match = line.match(/^ {2}([\w-]+):/);
+    if (match) out.add(match[1]!);
+  }
+  return out;
+}
+
+/**
+ * 這些是 DESIGN.md 裡「`{區塊.key}`」寫法會指到的 token 命名空間。
+ *
+ * `components` 刻意不列入：§14 的說明文字裡有 `{component.countdown-block}`
+ * 這種示範寫法（單數、且是舉例不是真的引用），列進來只會製造假警報。
+ */
+const REFERENCEABLE = [
+  "colors",
+  "rounded",
+  "spacing",
+  "layout",
+  "motion",
+  "typography",
+  "typography-cjk"
+] as const;
+
 // --- 測試 ---
 
-const SECTIONS = ["colors", "rounded", "spacing", "layout"] as const;
+const SECTIONS = [
+  "colors",
+  "rounded",
+  "spacing",
+  "layout",
+  "motion"
+] as const;
+
+/**
+ * 幽靈 token 引用守門（2026-08-29 新增）。
+ *
+ * 起因：`muted-soft` 與 `error` 兩個 token 在 2026-08-26 被移除，文件的
+ * 第二節與第十三節都記了「已刪除」，但 `components:` 的 page-footer-meta
+ * 與第五節 prose 仍在引用它們——**同一份文件自己說刪掉了、自己又在用**。
+ *
+ * 上面那組測試比對的是「frontmatter 的值 vs styles.css」，管不到這種
+ * 「引用指向不存在的 key」。stylelint 的 value-no-unknown-custom-properties
+ * 抓的是同一類問題，但它只掃 CSS，掃不到 DESIGN.md 自己。
+ *
+ * 這個測試掃全文（frontmatter 的 components 區塊 ＋ 所有 prose），確認每一個
+ * `{區塊.key}` 都真的解析得到。
+ */
+describe("DESIGN.md 的 {token.ref} 全部解析得到", () => {
+  const defined = new Map<string, Set<string>>(
+    REFERENCEABLE.map((section) => [section, frontmatterKeys(section)])
+  );
+
+  const refs = new Map<string, number[]>();
+  designMd.split(/\r?\n/).forEach((line, index) => {
+    for (const match of line.matchAll(/\{([\w-]+)\.([\w-]+)\}/g)) {
+      const [, section, key] = match;
+      if (!defined.has(section!)) continue;
+      const id = `${section}.${key}`;
+      refs.set(id, [...(refs.get(id) ?? []), index + 1]);
+    }
+  });
+
+  it("有掃到引用（避免正規表達式壞掉時靜默通過）", () => {
+    expect(refs.size).toBeGreaterThan(20);
+  });
+
+  for (const [id, lines] of refs) {
+    const [section, key] = id.split(".") as [string, string];
+    it(`${id} 存在`, () => {
+      expect(
+        defined.get(section)!.has(key),
+        `DESIGN.md 第 ${lines.join("、")} 行引用了 {${id}}，但 frontmatter 的 ${section}: 底下沒有這個 key`
+      ).toBe(true);
+    });
+  }
+});
 
 describe("DESIGN.md ↔ styles.css token 一致性", () => {
   for (const section of SECTIONS) {
@@ -177,22 +309,31 @@ describe("DESIGN.md ↔ styles.css token 一致性", () => {
   }
 
   describe("typography", () => {
-    const entries = typographyFontSizes();
+    const entries = typographyRoles();
 
     it("只公開核准的七個語意角色", () => {
-      expect(Object.keys(entries).sort()).toEqual(
-        Object.keys(TYPOGRAPHY_MAP).sort()
-      );
+      expect(Object.keys(entries).sort()).toEqual([...TYPOGRAPHY_ROLES].sort());
     });
 
-    for (const [role, token] of Object.entries(TYPOGRAPHY_MAP)) {
-      it(`${role} 對應 ${token}，值一致`, () => {
-        expect(
-          entries[role],
-          `DESIGN.md 缺少 typography.${role}`
-        ).toBeDefined();
-        expect(cssTokens[token], `styles.css 缺少 ${token}`).toBeDefined();
-        expect(normalize(cssTokens[token]!)).toBe(normalize(entries[role]!));
+    for (const role of TYPOGRAPHY_ROLES) {
+      it(`${role} 的五個 typography 欄位與 runtime contract 一致`, () => {
+        const designRole = entries[role];
+        expect(designRole, `DESIGN.md 缺少 typography.${role}`).toBeDefined();
+        expect(Object.keys(designRole!).sort()).toEqual(
+          Object.keys(TYPOGRAPHY_FIELDS).sort()
+        );
+
+        for (const field of Object.keys(
+          TYPOGRAPHY_FIELDS
+        ) as TypographyField[]) {
+          const token = typographyToken(role, field);
+          const runtimeValue = resolveCssToken(token);
+          expect(runtimeValue, `styles.css 缺少 ${token}`).toBeDefined();
+          expect(
+            normalize(runtimeValue!.replace(/\s+/g, " ")),
+            `${token} = ${runtimeValue}，DESIGN.md typography.${role}.${field} = ${designRole![field]}`
+          ).toBe(normalize(designRole![field]!));
+        }
       });
     }
 

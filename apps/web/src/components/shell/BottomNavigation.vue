@@ -32,6 +32,7 @@ function navigationLabel(to: string, label: string): string {
       v-for="item in navigationItems"
       :key="item.to"
       class="bottom-nav__item"
+      data-typography-role="nav-label"
       :to="item.to"
       :aria-label="navigationLabel(item.to, item.label)"
     >
@@ -88,8 +89,6 @@ function navigationLabel(to: string, label: string): string {
   gap: var(--space-1);
   border-radius: var(--radius-sm);
   color: var(--color-body-strong);
-  font-size: var(--font-size-nav-label);
-  font-weight: 400;
   text-decoration: none;
 }
 

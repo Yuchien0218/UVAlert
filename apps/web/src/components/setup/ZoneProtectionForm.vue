@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Sparkles } from "@lucide/vue";
+import Icon from "../icons/Icon.vue";
 import type {
   SessionContext,
   SetupDraftV1,
@@ -147,7 +147,7 @@ function makeDraftZone(
   <div class="zone-form">
     <section v-if="!editing" class="preset-card app-card">
       <div class="preset-card__mark">
-        <Sparkles :size="24" aria-hidden="true" />
+        <Icon name="feature-protection-summary" :size="24" />
       </div>
       <div>
         <p class="preset-card__eyebrow">快速提醒（推薦）</p>

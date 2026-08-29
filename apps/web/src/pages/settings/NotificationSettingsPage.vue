@@ -289,7 +289,7 @@ async function runTest(): Promise<void> {
   border-radius: var(--radius-sm);
   background: var(--surface-soft);
   color: var(--text-secondary);
-  font-size: var(--font-size-caption);
+  font-size: var(--font-size-supporting);
   line-height: 1.6;
 }
 
@@ -306,7 +306,7 @@ async function runTest(): Promise<void> {
 .delivery-note {
   margin: 0;
   color: var(--text-secondary);
-  font-size: var(--font-size-caption);
+  font-size: var(--font-size-supporting);
   line-height: 1.6;
 }
 

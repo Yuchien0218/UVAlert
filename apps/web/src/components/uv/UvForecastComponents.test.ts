@@ -3,7 +3,20 @@
 import { makeFiveDayUvForecast } from "@sunshield/test-fixtures";
 import { mount } from "@vue/test-utils";
 import { describe, expect, it } from "vitest";
+import { createRouter, createWebHistory } from "vue-router";
 import FiveDayUvCard from "./FiveDayUvCard.vue";
+
+/**
+ * 「設定地區」是 RouterLink，掛載時需要 router，否則會 warn 並渲染成
+ * 沒有 href 的 <a>。只註冊測試會走到的兩條路由。
+ */
+const router = createRouter({
+  history: createWebHistory(),
+  routes: [
+    { path: "/", component: { template: "<div />" } },
+    { path: "/region", component: { template: "<div />" } }
+  ]
+});
 
 describe("FiveDayUvCard", () => {
   it("顯示五個白日時段、來源與地區預報限制", () => {
@@ -38,11 +51,37 @@ describe("FiveDayUvCard", () => {
         phase: "no_region",
         error: null,
         forecast: null
+      },
+      global: {
+        plugins: [router]
       }
     });
 
     expect(wrapper.text()).toContain("設定地區");
     expect(wrapper.text()).toContain("才能查看五日 UV 預報");
     expect(wrapper.findAll(".uv-day")).toHaveLength(0);
+  });
+
+  /*
+   * 這條守著一個真的送過使用者手上的 bug：「設定地區」原本是
+   * href="#outdoor-context" 的頁內錨點，而這一頁根本沒有那個 id——
+   * 點下去什麼也不會發生。修正記在
+   * docs/decisions/2026-08-23-hifi-redesign-round2-closeout.md 第五節，
+   * 但那次的修正留在一條沒有合併的分支上，main 一直帶著這個 bug 到
+   * 2026-08-29。有測試才不會再掉一次。
+   */
+  it("沒有地區時的「設定地區」連到 /region，不是頁內錨點", () => {
+    const wrapper = mount(FiveDayUvCard, {
+      props: {
+        phase: "no_region",
+        error: null,
+        forecast: null
+      },
+      global: {
+        plugins: [router]
+      }
+    });
+
+    expect(wrapper.get(".text-link").attributes("href")).toBe("/region");
   });
 });

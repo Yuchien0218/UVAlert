@@ -166,14 +166,14 @@ function getZoneNames(zoneIds: string[], zones: ZoneProjection[]): string {
     aria-labelledby="events-title"
   >
     <div class="section-header">
-      <h2 id="events-title" data-typography-role="body">最近事件</h2>
+      <h2 id="events-title" data-typography-role="section-title">最近事件</h2>
     </div>
 
     <div class="clock-warning" v-if="!clockTrusted" role="alert">
       <p>時間可能不準，但已記錄的事件仍會列在下方。</p>
     </div>
 
-    <div class="events-list">
+    <div id="recent-events-list" class="events-list">
       <template v-for="(event, index) in displayEvents" :key="event.id">
         <!-- 預設只顯示最新一筆，展開時顯示全部 -->
         <component
@@ -203,6 +203,7 @@ function getZoneNames(zoneIds: string[], zones: ZoneProjection[]): string {
         class="button button--quiet"
         type="button"
         :aria-expanded="isExpanded"
+        aria-controls="recent-events-list"
         @click="isExpanded = !isExpanded"
       >
         {{
@@ -228,9 +229,6 @@ function getZoneNames(zoneIds: string[], zones: ZoneProjection[]): string {
 
 #events-title {
   margin: 0;
-  font-size: var(--font-size-body);
-  letter-spacing: var(--letter-spacing-eyebrow);
-  text-transform: uppercase;
   color: var(--text-secondary);
 }
 

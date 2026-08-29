@@ -1,5 +1,9 @@
 import { describe, expect, it, vi } from "vitest";
-import { SupabaseAuthAdapter } from "./SupabaseAuthAdapter";
+import {
+  createSupabaseAuthAdapter,
+  DisabledAuthAdapter,
+  SupabaseAuthAdapter
+} from "./SupabaseAuthAdapter";
 
 function makeClient() {
   const session = {
@@ -25,6 +29,36 @@ function makeClient() {
 }
 
 describe("SupabaseAuthAdapter", () => {
+  it("Supabase URL 與 key 都是空字串時停用登入，不建立 client", () => {
+    const adapter = createSupabaseAuthAdapter({
+      url: "",
+      publishableKey: ""
+    });
+
+    expect(adapter).toBeInstanceOf(DisabledAuthAdapter);
+  });
+
+  it.each([
+    { url: "   ", publishableKey: "key" },
+    { url: "https://project.supabase.co", publishableKey: "   " }
+  ])("任一 Supabase 設定只有空白字元時停用登入", ({ url, publishableKey }) => {
+    const adapter = createSupabaseAuthAdapter({
+      url,
+      publishableKey
+    });
+
+    expect(adapter).toBeInstanceOf(DisabledAuthAdapter);
+  });
+
+  it("修剪後仍有內容的 Supabase 設定會保留啟用登入", () => {
+    const adapter = createSupabaseAuthAdapter({
+      url: " https://project.supabase.co ",
+      publishableKey: " publishable-key "
+    });
+
+    expect(adapter).toBeInstanceOf(SupabaseAuthAdapter);
+  });
+
   it("讀取 session 時只回傳 user id 與 expiry，不把 access token 放進 state", async () => {
     const { client } = makeClient();
     const adapter = new SupabaseAuthAdapter({

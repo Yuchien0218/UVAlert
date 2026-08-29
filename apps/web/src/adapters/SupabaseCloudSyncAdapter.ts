@@ -20,6 +20,7 @@ import type {
   CloudErrorCode,
   CloudSyncPort
 } from "@sunshield/platform";
+import { readConfiguredEnvironmentValue } from "./configuredEnvironment";
 
 type FetchPort = (
   input: RequestInfo | URL,
@@ -48,9 +49,7 @@ export class SupabaseCloudSyncAdapter implements CloudSyncPort {
   }) {
     this.#auth = options.auth;
     this.#fetch = options.fetch ?? globalThis.fetch.bind(globalThis);
-    this.#baseUrl = trimTrailingSlash(
-      options.baseUrl ?? import.meta.env.VITE_API_BASE_URL ?? "/v1"
-    );
+    this.#baseUrl = trimTrailingSlash(options.baseUrl ?? "/v1");
   }
 
   async getManifest(): Promise<SyncManifestV1> {
@@ -205,15 +204,25 @@ export function createSupabaseCloudSyncAdapter(options: {
   fetch?: FetchPort;
   baseUrl?: string;
 }): CloudSyncPort {
-  const baseUrl = options.baseUrl ?? import.meta.env.VITE_API_BASE_URL;
+  const hasExplicitBaseUrl = options.baseUrl !== undefined;
+  const baseUrl = readConfiguredEnvironmentValue(
+    options.baseUrl ?? import.meta.env.VITE_API_BASE_URL
+  );
+  if (hasExplicitBaseUrl && baseUrl === undefined) {
+    return new DisabledCloudSyncAdapter();
+  }
   const hasSupabaseConfig =
-    import.meta.env.VITE_SUPABASE_URL !== undefined &&
-    import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY !== undefined;
+    readConfiguredEnvironmentValue(import.meta.env.VITE_SUPABASE_URL) !==
+      undefined &&
+    readConfiguredEnvironmentValue(
+      import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY
+    ) !== undefined;
   if (baseUrl === undefined && !hasSupabaseConfig) {
     return new DisabledCloudSyncAdapter();
   }
   return new SupabaseCloudSyncAdapter({
-    ...options,
+    auth: options.auth,
+    ...(options.fetch === undefined ? {} : { fetch: options.fetch }),
     ...(baseUrl === undefined ? {} : { baseUrl })
   });
 }

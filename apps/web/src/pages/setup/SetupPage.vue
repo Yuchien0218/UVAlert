@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { LoaderCircle } from "@lucide/vue";
 import Icon from "../../components/icons/Icon.vue";
+import InlineLoader from "../../components/feedback/InlineLoader.vue";
 import { computed, onMounted, shallowRef, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import type { SessionContext } from "@sunshield/contracts";
@@ -401,11 +401,7 @@ onMounted(async () => {
         :disabled="setup.phase.value === 'submitting'"
         @click="submit"
       >
-        <LoaderCircle
-          v-if="setup.phase.value === 'submitting'"
-          :size="18"
-          class="spinner"
-        />
+        <InlineLoader v-if="setup.phase.value === 'submitting'" />
         {{
           setup.phase.value === "submitting"
             ? "開始防曬提醒中…"
@@ -494,17 +490,4 @@ button:disabled {
   opacity: 0.5;
 }
 
-.spinner {
-  animation: spin 1s linear infinite;
-  margin-right: 0.5em;
-}
-
-@keyframes spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
-}
 </style>
