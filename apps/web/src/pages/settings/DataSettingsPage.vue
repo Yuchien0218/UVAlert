@@ -9,13 +9,19 @@ import BroadcastLoader from "../../components/feedback/BroadcastLoader.vue";
 import { formatDateTime } from "../../helpers/datetime";
 
 /**
- * S-19 本機資料管理。
+ * S-19 本機資料與隱私。
  *
  * 匯出是 2026-08-07 裁決納入 P0 的：不做帳號的前提下，這是唯一能讓
- * 「不想註冊直接使用」的人也有備份手段的做法。因此文案不得暗示雲端
- * 或跨裝置同步，匯入也必須明講不在 P0 範圍。
+ * 「不想註冊直接使用」的人也有備份手段的做法。因此第一層的文案不得
+ * 暗示雲端，匯入也必須明講不在 P0 範圍。
+ *
+ * 2026-08-29 把 `/settings/sync` 併進本頁的次要區塊——實作原本把
+ * `DESIGN.md` 第五節訂的一張「本機資料與隱私」拆成兩頁，然後又花一
+ * 整張卡解釋「你要找的東西在另一頁」。同步的行為完全沒改，只是模板
+ * 從兩頁收斂成一頁。裁決見
+ * `docs/decisions/2026-08-29-settings-data-sync-merge.md`。
  */
-const { localData } = useWebAppServices();
+const { auth, localData, sync } = useWebAppServices();
 
 type ClearScope = "drafts" | "history" | "all";
 const confirming = shallowRef<ClearScope | null>(null);
@@ -23,8 +29,19 @@ const confirming = shallowRef<ClearScope | null>(null);
 const summary = computed(() => localData.summary.value);
 const busy = computed(() => localData.phase.value === "working");
 
+/* ---- 次要區塊：跨裝置同步（原 SyncSettingsPage，行為未改） ---- */
+const syncDisabled = shallowRef(readSyncDisabled());
+const syncBusy = computed(
+  () =>
+    sync.state.value.status === "preparing" ||
+    sync.state.value.status === "syncing"
+);
+const signedIn = computed(() => auth.state.value.auth.kind === "signed_in");
+const preview = computed(() => sync.state.value.preview);
+
 onMounted(() => {
   void localData.load();
+  void auth.refresh();
 });
 
 function formatTime(value: string | null): string {
@@ -40,30 +57,82 @@ async function runClear(scope: ClearScope): Promise<void> {
         : await localData.clearAll();
   if (ok) confirming.value = null;
 }
+
+async function signIn(): Promise<void> {
+  await auth.signInWithGoogle();
+}
+
+async function prepare(): Promise<void> {
+  if (!syncDisabled.value) await sync.preparePreview();
+}
+
+async function confirmSync(): Promise<void> {
+  await sync.confirm();
+}
+
+function cancelSync(): void {
+  sync.cancelPreview();
+}
+
+function enableSync(): void {
+  writeSyncDisabled(false);
+  syncDisabled.value = false;
+}
+
+function labelFor(kind: string): string {
+  switch (kind) {
+    case "active_session":
+      return "進行中的提醒";
+    case "product_catalog":
+      return "防曬裝備";
+    case "region_preference":
+      return "地區設定";
+    case "user_preferences":
+      return "提醒與顯示偏好";
+    default:
+      return kind;
+  }
+}
+
+function statusLabelFor(status: string): string {
+  switch (status) {
+    case "unchanged":
+      return "兩邊相同";
+    case "conflict":
+      return "需要選擇版本";
+    case "local_only":
+      return "只有本機資料";
+    case "remote_only":
+      return "只有雲端資料";
+    case "local_deleted":
+      return "本機已刪除";
+    case "remote_deleted":
+      return "雲端已刪除";
+    default:
+      return "尚未同步";
+  }
+}
+
+function readSyncDisabled(): boolean {
+  return globalThis.localStorage?.getItem("uvalert.sync.disabled") === "true";
+}
+
+function writeSyncDisabled(value: boolean): void {
+  if (value) globalThis.localStorage?.setItem("uvalert.sync.disabled", "true");
+  else globalThis.localStorage?.removeItem("uvalert.sync.disabled");
+}
 </script>
 
 <template>
   <div class="page-stack data-page">
     <header class="page-heading">
       <h1 class="page-heading__title" data-typography-role="page-title">
-        本機資料管理
+        本機資料與隱私
       </h1>
       <p>
         不用登入也能使用；未同步的資料只儲存在這台裝置上。匯出的檔案由你的裝置直接產生，不會上傳、不經後端、不進分析。
       </p>
     </header>
-
-    <section class="app-card" aria-labelledby="cloud-data-link-title">
-      <h2 id="cloud-data-link-title" data-typography-role="card-title">
-        雲端資料請到另一頁管理
-      </h2>
-      <p>
-        本頁只處理這台裝置的本機資料。若你有登入並使用同步，請到登入與雲端資料頁管理。
-      </p>
-      <RouterLink class="button button--quiet" to="/settings/account-data"
-        >管理登入與雲端資料</RouterLink
-      >
-    </section>
 
     <BroadcastLoader
       v-if="localData.phase.value === 'loading'"
@@ -246,6 +315,105 @@ async function runClear(scope: ClearScope): Promise<void> {
         </div>
       </section>
     </template>
+
+    <!--
+      次要區塊：跨裝置同步。
+
+      DESIGN.md 第六節要求每頁只有一個最主要任務。這裡的主任務是本機
+      備份（概況／匯出／清除三張 app-card），同步是次要的，所以層級差
+      異做在「外框」而不是「字級」——第一層是有底色與內距的卡片，同步
+      群組沒有卡片外框，只有一條 hairline 起手，內容直接落在頁面背景
+      上。字級不縮小是刻意的：這裡有登入與上傳雲端的決策資訊，縮字會
+      變成看不清楚，而不是變次要。
+    -->
+    <section class="sync-group" aria-labelledby="sync-group-title">
+      <h2
+        id="sync-group-title"
+        class="sync-group__title"
+        data-typography-role="card-title"
+      >
+        跨裝置同步
+      </h2>
+      <p class="sync-group__lead">
+        使用防曬提醒不需要帳號。只有你選擇同步時才需要登入，用來同步進行中的提醒、裝備、地區與偏好。
+      </p>
+
+      <div v-if="!signedIn" class="sync-block">
+        <strong>目前使用免登入模式</strong>
+        <p>本機倒數與資料不會因為沒有登入而受影響。</p>
+        <button class="button button--quiet" type="button" @click="signIn">
+          使用 Google 登入同步
+        </button>
+        <AppNotice v-if="auth.state.value.status === 'error'" kind="error">
+          登入未完成，請稍後再試（{{
+            auth.state.value.errorCode
+          }}）。本機資料沒有變動。
+        </AppNotice>
+      </div>
+
+      <div v-else-if="syncDisabled" class="sync-block">
+        <strong>同步已停止</strong>
+        <p>雲端資料仍保留；重新開啟同步前，不會再讀取或上傳雲端資料。</p>
+        <button class="button button--quiet" type="button" @click="enableSync">
+          重新開啟同步
+        </button>
+      </div>
+
+      <div v-else class="sync-block">
+        <strong>先看同步內容</strong>
+        <p>確認後才會上傳或下載；遇到版本不同時，系統不會自動覆蓋任何一邊。</p>
+        <button
+          v-if="preview === null"
+          class="button button--quiet"
+          type="button"
+          :disabled="syncBusy"
+          @click="prepare"
+        >
+          {{ syncBusy ? "讀取中…" : "查看同步預覽" }}
+        </button>
+
+        <template v-else>
+          <ul class="sync-list" aria-label="同步項目">
+            <li
+              v-for="item in preview.items"
+              :key="`${item.key.recordKind}:${item.key.recordId}`"
+            >
+              <strong>{{ labelFor(item.key.recordKind) }}</strong>
+              <span>{{ statusLabelFor(item.status) }}</span>
+            </li>
+          </ul>
+          <div class="button-row">
+            <button
+              class="button button--primary"
+              type="button"
+              :disabled="syncBusy"
+              @click="confirmSync"
+            >
+              {{ syncBusy ? "同步中…" : "同步這些資料" }}
+            </button>
+            <button
+              class="button button--quiet"
+              type="button"
+              :disabled="syncBusy"
+              @click="cancelSync"
+            >
+              取消
+            </button>
+          </div>
+        </template>
+
+        <AppNotice v-if="sync.state.value.status === 'synced'" kind="ok"
+          >同步完成。</AppNotice
+        >
+        <AppNotice v-if="sync.state.value.error" kind="error">
+          {{ sync.state.value.error.message }} 本機資料沒有因雲端錯誤被刪除。
+        </AppNotice>
+      </div>
+
+      <RouterLink class="text-link" to="/settings/account-data"
+        >管理登入與雲端資料</RouterLink
+      >
+    </section>
   </div>
 </template>
 
@@ -326,5 +494,73 @@ dd {
 
 .clear-row--danger strong {
   color: var(--color-due);
+}
+
+/*
+ * 同步群組刻意不用 .app-card：層級差異靠有沒有卡片外框，不靠縮字。
+ * 見模板裡的註解。
+ */
+.sync-group {
+  display: grid;
+  gap: var(--space-3);
+  justify-items: start;
+  padding-top: var(--space-5);
+  border-top: 1px solid var(--border-strong);
+}
+
+/*
+ * 群組標題跟第一層的卡片標題同一個 role（同字級同字重）——次要性完全
+ * 靠「沒有卡片外框」表達。狀態標題用 strong 而不是 h3，沿用本頁
+ * .clear-row 既有的做法，避免在同一個群組裡多開一層標題階層。
+ */
+
+.sync-group__lead {
+  color: var(--text-body);
+  line-height: 1.6;
+}
+
+.sync-block {
+  display: grid;
+  gap: var(--space-3);
+  justify-items: start;
+  width: 100%;
+}
+
+.sync-block > strong {
+  display: block;
+  line-height: 1.4;
+}
+
+.sync-block p {
+  margin: 0;
+  color: var(--text-body);
+  line-height: 1.6;
+}
+
+.sync-list {
+  display: grid;
+  gap: var(--space-2);
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.sync-list li {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding-block: var(--space-2);
+  border-bottom: 1px solid var(--border-strong);
+}
+
+.sync-list span {
+  color: var(--text-secondary);
+}
+
+.button-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
 }
 </style>

@@ -80,7 +80,7 @@ async function deleteCloudData(): Promise<void> {
     <section v-if="!signedIn" class="app-card account-card">
       <h2 data-typography-role="card-title">目前沒有登入</h2>
       <p>你仍可直接使用本機防曬提醒。</p>
-      <RouterLink class="button button--primary" to="/settings/sync"
+      <RouterLink class="button button--primary" to="/settings/data"
         >前往同步設定</RouterLink
       >
     </section>

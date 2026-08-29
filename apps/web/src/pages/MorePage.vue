@@ -52,14 +52,15 @@ const allEntries = [
   {
     to: "/settings/data",
     icon: "more-data",
-    label: "本機資料管理",
-    description: "查看、匯出與清除這台裝置上的資料。"
-  },
-  {
-    to: "/settings/sync",
-    icon: "state-online",
-    label: "跨裝置同步",
-    description: "選擇性登入；同步前會先讓你確認內容。"
+    label: "本機資料與隱私",
+    /*
+     * 2026-08-29：本卡與原「跨裝置同步」卡合併。說明文字經裁決，不是
+     * 實作時自行改寫的——三個分句分別承接本機優先的隱私承諾、免登入
+     * 的決策條件，以及「同步前會先讓你確認內容」這句不可隱藏的前提。
+     * 見 docs/decisions/2026-08-29-settings-data-sync-merge.md 第九節。
+     */
+    description:
+      "資料留在這台裝置；要跨裝置同步才需登入，同步前會先讓你確認內容。"
   },
   {
     to: "/feedback",
