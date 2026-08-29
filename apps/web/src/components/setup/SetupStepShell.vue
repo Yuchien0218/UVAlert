@@ -120,7 +120,12 @@ defineEmits<{
 }
 
 .setup-shell__title {
-  max-width: 16ch;
+  /*
+   * em 不是 ch——1ch 是字型裡「0」的寬度，中文是全形，兩者差 1.79 倍，
+   * 所以 16ch 實際只裝得下約 9 個中文字。改用 em 之後數字寫幾就是幾個
+   * 中文字。理由見 app.css 的 .page-heading__title。
+   */
+  max-width: 16em;
   margin: 0;
   font-size: var(--font-size-page-title);
   letter-spacing: var(--letter-spacing-page-title);
