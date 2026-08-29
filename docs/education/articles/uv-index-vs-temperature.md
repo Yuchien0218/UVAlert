@@ -28,6 +28,8 @@ UV 會受到太陽高度、雲量、臭氧、海拔與地表反射等因素影�
 
 UVAlert 可把氣溫和 UV 並列，但不應用「今天很涼」推論「不用防曬」。若預報資料暫時缺漏，也不應以溫度代替 UV 判斷。
 
+---
+
 ## 文章限制
 
 UV 指數是地區性的環境指標，不是個人的安全曝曬倒數。膚色、使用藥物、所在位置與實際遮蔽仍會影響風險。
@@ -36,7 +38,5 @@ UV 指數是地區性的環境指標，不是個人的安全曝曬倒數。膚�
 
 - [WHO：Radiation: The ultraviolet (UV) index](https://www.who.int/news-room/questions-and-answers/item/radiation-the-ultraviolet-%28uv%29-index)（UV 指數與防護門檻；查閱 2026-08-16）
 - [中央氣象署：紫外線指數預報服務](https://www.cwa.gov.tw/Data/knowledge/announce/service13.pdf)（台灣 UV 分級與預報；查閱 2026-08-16）
-
----
 
 本文為一般衛教草稿，尚未完成 UVAlert 專業審閱。

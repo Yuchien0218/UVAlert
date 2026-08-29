@@ -26,6 +26,8 @@ lastReviewed: 2026-08-16
 
 它方便攜帶，也適合局部補擦，但大面積使用可能較慢；是否足量也不容易只靠外觀看出。可依場景搭配防曬乳，而不是把劑型當作防護高低的排名。
 
+---
+
 ## 文章限制
 
 「四遍」是 AAD 的一般操作建議，不代表所有棒狀產品都有相同塗抹量；產品標示仍優先。
@@ -34,7 +36,5 @@ lastReviewed: 2026-08-16
 
 - [AAD：How to use stick and spray sunscreens](https://www.aad.org/public/everyday-care/sun-protection/shade-clothing-sunscreen/how-to-use-stick-spray-sunscreens)（棒狀防曬四遍並抹勻；查閱 2026-08-16）
 - [FDA：Sunscreen: How to Help Protect Your Skin from the Sun](https://www.fda.gov/drugs/understanding-over-counter-medicines/sunscreen-how-help-protect-your-skin-sun)（依標示使用與補擦；查閱 2026-08-16）
-
----
 
 本文為一般衛教草稿，尚未完成 UVAlert 專業審閱。

@@ -29,6 +29,8 @@ lastReviewed: 2026-08-16
 
 大片水泡、疼痛與腫脹加重、發燒、發冷、噁心、頭暈、眼睛疼痛或感染徵象，都不適合只靠保濕觀察。若受傷皮膚破損，不要把防曬乳或新的保養品硬塗上去。
 
+---
+
 ## 文章限制
 
 本文不推薦特定品牌、藥膏或口服藥，也不替你判定曬傷深度。若有慢性皮膚病、過敏史、懷孕或正在使用藥物，請詢問醫師或藥師。
@@ -38,7 +40,5 @@ lastReviewed: 2026-08-16
 - [AAD：How to treat a sunburn](https://www.aad.org/public/everyday-care/injured-skin/burns/treat-sunburn)（降溫、蘆薈／大豆保濕與補水；查閱 2026-08-16）
 - [NHS：Sunburn](https://www.nhs.uk/conditions/sunburn/)（曬傷期間的保護與求助警訊；查閱 2026-08-16）
 - [衛生福利部食品藥物管理署：正確使用化粧品須知（PDF）](https://www.fda.gov.tw/tc/includes/GetFile.ashx?id=f637608154367822493)（產品不適時停止、清洗與避免摩擦；查閱 2026-08-16）
-
----
 
 本文為一般衛教草稿，尚未完成 UVAlert 專業審閱。

@@ -25,6 +25,8 @@ lastReviewed: 2026-08-16
 
 水泡範圍大、皮膚破損、疼痛或腫脹變嚴重、出現膿或紅線、發燒、頭暈、噁心、眼睛疼痛或畏光，都應尋求醫療協助。若你不確定是曬傷、產品刺激或其他皮膚問題，也不要用更多產品反覆測試。
 
+---
+
 ## 文章限制
 
 本文沒有提供去角質、酸類、A 醇、藥膏或口服藥的個人化使用指示。受傷皮膚的照護會依深度、範圍、年齡與病史而不同，請以醫療人員指示為準。
@@ -34,7 +36,5 @@ lastReviewed: 2026-08-16
 - [AAD：How to treat sunburn](https://www.aad.org/public/everyday-care/injured-skin/burns/treat-sunburn)（保濕、離開陽光與水泡照護；查閱 2026-08-16）
 - [NHS：Sunburn](https://www.nhs.uk/conditions/sunburn/)（避免抓、戳破水泡與曝曬；查閱 2026-08-16）
 - [衛生福利部食品藥物管理署：正確使用化粧品須知（PDF）](https://www.fda.gov.tw/tc/includes/GetFile.ashx?id=f637608154367822493)（皮膚不適時停止、清洗與避免摩擦；查閱 2026-08-16）
-
----
 
 本文為一般衛教草稿，尚未完成 UVAlert 專業審閱。

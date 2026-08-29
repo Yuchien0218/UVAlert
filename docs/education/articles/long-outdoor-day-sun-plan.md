@@ -26,6 +26,8 @@ lastReviewed: 2026-08-16
 
 如果開始頭暈、噁心、頭痛、抽筋、過度疲倦或覺得身體異常發熱，先停止活動、移到涼爽處並處理熱傷害風險；這時不應只按「補擦」按鈕繼續行程。若症狀嚴重或意識不清，應尋求緊急協助。
 
+---
+
 ## 文章限制
 
 本文是活動規劃清單，不是個人運動處方或熱傷害分級。實際活動仍要依年齡、健康狀況、環境溫度與主辦單位安全安排調整。
@@ -36,7 +38,5 @@ lastReviewed: 2026-08-16
 - [WHO：Radiation: Protecting against skin cancer](https://www.who.int/news-room/questions-and-answers/item/radiation-protecting-against-skin-cancer)（遮蔭、衣物與防曬的組合；查閱 2026-08-16）
 - [衛生福利部國民健康署：防曬5裝備學起來 一起遠離熱傷害！](https://www.hpa.gov.tw/Pages/Detail.aspx?nodeid=4576&pid=15862)（飲水、休息與降溫；查閱 2026-08-16）
 - [衛生福利部國民健康署：炎夏防止熱傷害 必備三招「涼、補、心」](https://www.hpa.gov.tw/Pages/Detail.aspx?nodeid=4878&pid=19157)（熱不適的求助方向；查閱 2026-08-16）
-
----
 
 本文為一般衛教草稿，尚未完成 UVAlert 專業審閱。

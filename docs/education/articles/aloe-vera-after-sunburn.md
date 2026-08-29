@@ -26,6 +26,8 @@ lastReviewed: 2026-08-16
 - 補充水分，不抓、不撕脫皮。
 - 水泡保持完整；嚴重症狀尋求醫療協助。
 
+---
+
 ## 文章限制
 
 本文不把蘆薈當成治療，也不推薦特定品牌。嚴重曬傷、感染疑慮或持續惡化不應只靠保養品處理。
@@ -34,7 +36,5 @@ lastReviewed: 2026-08-16
 
 - [AAD：How to treat sunburn](https://www.aad.org/public/everyday-care/injured-skin/burns/treat-sunburn)（含蘆薈／大豆保濕、補水與遮蔽；查閱 2026-08-16）
 - [NHS：Sunburn](https://www.nhs.uk/conditions/sunburn/)（曬傷居家照護及應避免事項；查閱 2026-08-16）
-
----
 
 本文為一般衛教草稿，尚未完成 UVAlert 專業審閱。

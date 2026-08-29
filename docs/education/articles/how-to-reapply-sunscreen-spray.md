@@ -23,6 +23,8 @@ lastReviewed: 2026-08-16
 
 噴霧也要覆蓋耳朵、頸部和衣物邊界。若只在空中形成霧，再走進去，無法確認皮膚是否得到足量與均勻覆蓋。
 
+---
+
 ## 文章限制
 
 不同噴頭與配方的噴出量不同，無法用固定秒數代表足量。氣霧型產品可能有可燃性與吸入風險，必須遵循包裝說明。
@@ -31,7 +33,5 @@ lastReviewed: 2026-08-16
 
 - [AAD：How to use stick and spray sunscreens](https://www.aad.org/public/everyday-care/sun-protection/shade-clothing-sunscreen/how-to-use-stick-spray-sunscreens)（噴至有光澤、抹勻、避免臉部與風；查閱 2026-08-16）
 - [FDA：Sunscreen: How to Help Protect Your Skin from the Sun](https://www.fda.gov/drugs/understanding-over-counter-medicines/sunscreen-how-help-protect-your-skin-sun)（噴霧安全與火源警語；查閱 2026-08-16）
-
----
 
 本文為一般衛教草稿，尚未完成 UVAlert 專業審閱。

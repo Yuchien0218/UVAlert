@@ -31,6 +31,8 @@ UV 不只從頭頂直直照下來，也可能從天空散射或由周圍表面�
 
 沒有可靠的個人環境資料時，不要把某個反射百分比直接加到 UV 指數，也不要自行換算成可曝曬幾分鐘。看所在地預報、活動環境與自己的防護行動，會比複雜計算更實用。
 
+---
+
 ## 文章限制
 
 本文說明的是一般環境風險，不是個人 UV 劑量或曬傷診斷。若眼睛疼痛、畏光，或皮膚出現嚴重紅腫、水泡與全身不適，應尋求醫療協助。
@@ -41,7 +43,5 @@ UV 不只從頭頂直直照下來，也可能從天空散射或由周圍表面�
 - [CDC：Sun Safety Facts](https://www.cdc.gov/skin-cancer/sun-safety/)（水、沙、雪與混凝土反射；查閱 2026-08-16）
 - [AAD：What to wear to protect your skin from the sun](https://www.aad.org/public/everyday-care/sun-protection/shade-clothing-sunscreen/what-to-wear-protect-skin-from-sun)（衣物、帽子與眼睛防護；查閱 2026-08-16）
 - [中央氣象署：紫外線指數預報服務](https://www.cwa.gov.tw/Data/knowledge/announce/service13.pdf)（臺灣 UV 指數分級與預報；查閱 2026-08-16）
-
----
 
 本文為一般衛教草稿，尚未完成 UVAlert 專業審閱。

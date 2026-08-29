@@ -31,6 +31,8 @@ lastReviewed: 2026-08-16
 
 頁面上的「今天 UV 最強時間」應被理解為預報或觀測資料的時間資訊，而不是個人曬傷預測。地點改變、資料更新或實際天候變化，都可能讓實際曝曬不同；資料畫面應同時標示地點、資料類型與更新時間。
 
+---
+
 ## 文章限制
 
 本文不提供個人安全曝曬時間，也不以 UV 高峰替使用者診斷曬傷風險。若需要長時間戶外工作、正在使用可能增加光敏感的藥物，請再向醫師或藥師確認防護方式。
@@ -40,7 +42,5 @@ lastReviewed: 2026-08-16
 - [中央氣象署：紫外線指數預報服務](https://www.cwa.gov.tw/Data/knowledge/announce/service13.pdf)（臺灣 UV 分級、每日最大值與中午前後高峰；查閱 2026-08-16）
 - [WHO：Radiation: The ultraviolet (UV) index](https://www.who.int/news-room/questions-and-answers/item/radiation-the-ultraviolet-%28uv%29-index)（每日 UV 高峰與 UVI 的用途；查閱 2026-08-16）
 - [WHO：Ultraviolet radiation](https://www.who.int/news-room/fact-sheets/detail/ultraviolet-radiation)（時段、遮蔭與整合防護；查閱 2026-08-16）
-
----
 
 本文為一般衛教草稿，尚未完成 UVAlert 專業審閱。

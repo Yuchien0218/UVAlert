@@ -34,6 +34,8 @@ lastReviewed: 2026-08-16
 
 防曬生活不需要每次都一次做到滿分。通勤時先有帽子或遮蔭、外露部位塗足防曬；長時間戶外或水邊活動，再增加衣物、眼鏡與抗水產品。穩定做得到的組合，比買了卻不使用的裝備更有幫助。
 
+---
+
 ## 文章限制
 
 本文不替衣物或眼鏡保證特定防護數值；請以實際產品標示、活動環境與專業建議為準。
@@ -43,7 +45,5 @@ lastReviewed: 2026-08-16
 - [WHO：Ultraviolet radiation](https://www.who.int/news-room/fact-sheets/detail/ultraviolet-radiation)（遮蔭、衣物、帽子、眼鏡與防曬乳的整合防護；查閱 2026-08-16）
 - [AAD：What to wear to protect your skin from the sun](https://www.aad.org/public/everyday-care/sun-protection/shade-clothing-sunscreen/what-to-wear-protect-skin-from-sun)（衣物、UPF、帽子、眼鏡與腳部；查閱 2026-08-16）
 - [FDA：Tips to Stay Safe in the Sun](https://www.fda.gov/consumers/consumer-updates/tips-stay-safe-sun-sunscreen-sunglasses)（遮蔭、衣物、眼鏡與反射；查閱 2026-08-16）
-
----
 
 本文為一般衛教草稿，尚未完成 UVAlert 專業審閱。

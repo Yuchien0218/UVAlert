@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed } from "vue";
 import { useRoute } from "vue-router";
+import EducationArticleSummary from "../../components/education/EducationArticleSummary.vue";
 import EducationSeoHead from "../../components/education/EducationSeoHead.vue";
 import EducationNotFoundPage from "./EducationNotFoundPage.vue";
 import {
@@ -82,6 +83,19 @@ const relatedArticles = computed(() =>
       這篇文章目前是整理中的衛教草稿，尚未完成 UVAlert
       專業審閱；內容僅供閱讀，不代表個人化醫療建議。
     </aside>
+
+    <!--
+      文章的「先說結論」段落。
+
+      產生器把原文的 ## 先說結論 從 bodyMarkdown 抽進 takeawayHtml
+      （tools/education/content-reader.mjs 的 splitLeadTakeaway），所以
+      它不在 bodyHtml 裡——2026-08-29 之前沒有任何地方渲染它，48 篇文章
+      的結論段落全部沒有顯示。
+
+      位置在正文之前是刻意的：DESIGN.md 第一節語調規定「先給結論再補
+      條件」，這段就是那個結論。
+    -->
+    <EducationArticleSummary :html="article.takeawayHtml" />
 
     <div class="education-article-body" v-html="article.bodyHtml" />
 

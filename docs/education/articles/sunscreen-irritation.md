@@ -30,6 +30,8 @@ lastReviewed: 2026-08-16
 
 不要把一次小範圍測試當成「一定不會過敏」的保證，也不要自行判斷是哪一種成分造成問題。等皮膚恢復後，是否更換或再次使用應依專業建議與產品標示決定；在此之前可用衣物、帽子、眼鏡與遮蔭降低曝曬。
 
+---
+
 ## 文章限制
 
 本文不提供抗組織胺、類固醇或其他藥物的劑量與處方。產品不適的原因可能不同，若有既往過敏、皮膚疾病、懷孕或正在用藥，請直接詢問醫療專業人員。
@@ -39,7 +41,5 @@ lastReviewed: 2026-08-16
 - [衛生福利部食品藥物管理署：我覺得皮膚異常，懷疑是化粧品造成，該怎麼辦？](https://www.fda.gov.tw/tc/siteListContent.aspx?id=22059&sid=9096)（停用與就醫方向；查閱 2026-08-16）
 - [衛生福利部食品藥物管理署：正確使用化粧品須知（PDF）](https://www.fda.gov.tw/tc/includes/GetFile.ashx?id=f637608154367822493)（清洗、避免摩擦、保留產品資訊；查閱 2026-08-16）
 - [AAD：How to decode a sunscreen label](https://www.aad.org/public/everyday-care/sun-protection/shade-clothing-sunscreen/understand-sunscreen-labels)（敏感肌與標示的限制；查閱 2026-08-16）
-
----
 
 本文為一般衛教草稿，尚未完成 UVAlert 專業審閱。

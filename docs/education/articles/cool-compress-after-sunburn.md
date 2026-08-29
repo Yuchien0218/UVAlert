@@ -27,6 +27,8 @@ lastReviewed: 2026-08-16
 
 大片水泡、明顯腫脹、發燒、頭痛、暈眩、噁心、脫水或眼睛疼痛時，應尋求醫療協助。
 
+---
+
 ## 文章限制
 
 本文只適用一般輕微曬紅的初步照護，不能判斷燒傷深度或排除熱傷害。
@@ -35,7 +37,5 @@ lastReviewed: 2026-08-16
 
 - [AAD：How to treat sunburn](https://www.aad.org/public/everyday-care/injured-skin/burns/treat-sunburn)（涼水、保濕、補水與水泡照護；查閱 2026-08-16）
 - [NHS：Sunburn](https://www.nhs.uk/conditions/sunburn/)（避免冰塊直接接觸及求助警訊；查閱 2026-08-16）
-
----
 
 本文為一般衛教草稿，尚未完成 UVAlert 專業審閱。

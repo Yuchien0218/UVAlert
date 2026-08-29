@@ -26,6 +26,8 @@ lastReviewed: 2026-08-16
 
 離窗較遠、沒有直射光和整天貼近窗邊，曝曬條件不同。本文不是要求所有人在室內固定兩小時補擦；重點是辨識「長時間、近距離、反覆」的窗邊曝曬。
 
+---
+
 ## 文章限制
 
 不同玻璃與窗膜的 UVA 穿透率不同，不能用一個數字代表所有車窗和建築玻璃。UVAlert 也無法僅靠定位判斷你隔著哪一種玻璃。
@@ -34,7 +36,5 @@ lastReviewed: 2026-08-16
 
 - [CDC：The Surgeon General’s Call to Action to Prevent Skin Cancer](https://stacks.cdc.gov/view/cdc/24419/cdc_24419_DS1.pdf)（UVA 可穿透玻璃及累積曝曬；查閱 2026-08-16）
 - [WHO：Ultraviolet radiation](https://www.who.int/news-room/fact-sheets/detail/ultraviolet-radiation)（UVA／UVB 健康影響與整合防護；查閱 2026-08-16）
-
----
 
 本文為一般衛教草稿，尚未完成 UVAlert 專業審閱。

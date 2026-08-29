@@ -30,6 +30,8 @@ lastReviewed: 2026-08-16
 
 產品紀錄可提供「使用後不適」的備註欄、照片與產品資訊匯出，但應明確標示為使用者紀錄，不是醫療判定。分享給醫師或藥師前，讓使用者確認內容，並避免把私人資料公開分享給不必要的人。
 
+---
+
 ## 文章限制
 
 本文不判斷是刺激、過敏、曬傷或其他皮膚疾病，也不提供藥物治療。若停止使用後仍持續或反覆不適，請諮詢皮膚科醫師或藥師。
@@ -39,7 +41,5 @@ lastReviewed: 2026-08-16
 - [衛生福利部食品藥物管理署：我覺得皮膚異常，懷疑是化粧品造成，該怎麼辦？](https://www.fda.gov.tw/tc/siteListContent.aspx?id=22059&sid=9096)（停止使用與保留產品資訊；查閱 2026-08-16）
 - [衛生福利部食品藥物管理署：正確使用化粧品須知（PDF）](https://www.fda.gov.tw/tc/includes/GetFile.ashx?id=f637608154367822493)（帶產品／成分資訊尋求協助；查閱 2026-08-16）
 - [AAD：How to decode a sunscreen label](https://www.aad.org/public/everyday-care/sun-protection/shade-clothing-sunscreen/understand-sunscreen-labels)（產品標示與敏感肌資訊；查閱 2026-08-16）
-
----
 
 本文為一般衛教草稿，尚未完成 UVAlert 專業審閱。

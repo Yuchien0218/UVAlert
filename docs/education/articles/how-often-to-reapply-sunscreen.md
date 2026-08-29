@@ -35,6 +35,8 @@ UVAlert 將「不知道間隔」的情境設定為 120 分鐘，是讓人比較�
 
 不用因為晚了而放棄。先離開直射陽光或找到遮蔭，接著依產品說明把裸露部位重新、均勻塗抹；後續再從新的實際補擦時間開始記錄。防曬是降低 UV 曝曬的行動，不是一次遲到就「全部失效」或需要加倍塗抹。
 
+---
+
 ## 文章限制
 
 本文的兩小時是一般衛教與產品提醒概念，不是所有產品、膚質或活動的固定醫療規則。實際仍以產品標示與專業意見為準。
@@ -44,7 +46,5 @@ UVAlert 將「不知道間隔」的情境設定為 120 分鐘，是讓人比較�
 - [AAD：How to apply sunscreen](https://www.aad.org/public/everyday-care/sun-protection/shade-clothing-sunscreen/how-to-apply-sunscreen)（每兩小時、流汗／游泳後補擦；查閱 2026-08-16）
 - [FDA：Sunscreen: How to Help Protect Your Skin from the Sun](https://www.fda.gov/drugs/understanding-over-counter-medicines/sunscreen-how-help-protect-your-skin-sun?linkId=100000002918349)（抗水不是防水、依標示補擦；查閱 2026-08-16）
 - [衛生福利部食品藥物管理署：食藥好文網／防曬化粧品](https://www.fda.gov.tw/TC/siteListContent.aspx?id=51160&sid=13694)（台灣消費者補擦提醒；查閱 2026-08-16）
-
----
 
 本文為一般衛教草稿，尚未完成 UVAlert 專業審閱。

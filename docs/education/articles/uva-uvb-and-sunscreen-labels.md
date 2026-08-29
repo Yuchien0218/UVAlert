@@ -42,6 +42,8 @@ UVB 比較常和皮膚曬紅、曬傷有關；UVA 能深入皮膚，與膚色變
 
 FDA 特別提醒，SPF 不是「原本能曬 1 小時，就能用 SPF 30 曬 30 小時」的時間換算。太陽強度、地點、時段、用量與產品是否被擦掉，都會改變實際曝曬量。UVAlert 的 120 分鐘提醒是保守的補擦提醒，不是 SPF 的計算結果。
 
+---
+
 ## 文章限制
 
 PA 的標示方式與產品法規可能依市場不同；購買台灣產品時仍以包裝、許可與使用說明為準。若你有皮膚疾病、正在接受治療或使用可能增加光敏感的藥物，請向醫師或藥師詢問。
@@ -51,7 +53,5 @@ PA 的標示方式與產品法規可能依市場不同；購買台灣產品時�
 - [衛生福利部食品藥物管理署：防曬乳的 PA 值是不是表示抗 UVB？](https://www.fda.gov.tw/tc/newsContent.aspx?cid=5049&id=25128)（UVA／UVB、SPF／PA；查閱 2026-08-16）
 - [衛生福利部食品藥物管理署：食藥好文網／防曬化粧品](https://www.fda.gov.tw/TC/siteListContent.aspx?id=51160&sid=13694)（產品標示與使用情境；查閱 2026-08-16）
 - [FDA：Sunscreen: How to Help Protect Your Skin from the Sun](https://www.fda.gov/drugs/understanding-over-counter-medicines/sunscreen-how-help-protect-your-skin-sun?linkId=100000002918349)（SPF、廣效與不可用時間倍數理解；查閱 2026-08-16）
-
----
 
 本文為一般衛教草稿，尚未完成 UVAlert 專業審閱。

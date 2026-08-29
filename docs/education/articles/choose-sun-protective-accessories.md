@@ -41,6 +41,8 @@ FDA 建議找 UV400 或「100% UV 防護」標示。鏡片顏色深淺、品牌�
 
 配件是防曬乳倒數之外的日常紀錄：可以記下品牌、UPF／UV 標示、購買時間、價格、是否容易使用與實際遮蔽感受，但不要把使用者評價當成醫療防護保證。
 
+---
+
 ## 文章限制
 
 UPF、UV400 與「100% UV 防護」的標示制度可能依市場與產品類型不同；購買時應以產品標示與在地規範為準。本文不替特定品牌認證，也不保證單一配件能完全阻隔 UV；高 UV 或反射環境仍要減少曝曬並採用多層防護。
@@ -51,7 +53,5 @@ UPF、UV400 與「100% UV 防護」的標示制度可能依市場與產品類型
 - [AAD：What to wear to protect your skin from the sun](https://www.aad.org/public/everyday-care/sun-protection/shade-clothing-sunscreen/what-to-wear-protect-skin-from-sun)（UPF、衣物、帽子、眼鏡與腳部遮蔽；查閱 2026-08-16）
 - [WHO：Radiation: Protecting against skin cancer](https://www.who.int/news-room/questions-and-answers/item/radiation-protecting-against-skin-cancer)（寬邊帽、衣物、眼鏡、遮蔭與反射環境；查閱 2026-08-16）
 - [CDC：Sun Safety Facts](https://www.cdc.gov/skin-cancer/sun-safety/)（遮蔭、衣物、帽子與眼鏡的組合防護；查閱 2026-08-16）
-
----
 
 本文為一般衛教草稿，尚未完成 UVAlert 專業審閱。

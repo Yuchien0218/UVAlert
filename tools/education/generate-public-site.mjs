@@ -29,6 +29,10 @@ h3 { margin: 1.75rem 0 .5rem; font-size: 1.05rem; }
 .card strong { font-size: 1.05rem; font-weight: 600; }
 .card small, .kicker, .meta { color: #5a5a5a; font-size: .8rem; }
 .status { justify-self: start; padding: .1rem .5rem; border-radius: 999px; background: #e3e3e3; color: #5a5a5a; font-size: .75rem; }
+/* 文章的「先說結論」段落。產生器把它從 bodyHtml 抽走放進 takeawayHtml，
+   所以要單獨渲染，否則整篇文章會少掉結論。 */
+.article-takeaway { max-width: 44rem; margin: 0 0 1.5rem; padding: 1rem 1.25rem; border-radius: .5rem; background: #f4ece2; }
+.article-takeaway p { margin: 0; line-height: 1.7; }
 .article-body { max-width: 44rem; }
 .article-body p { margin: 0 0 1rem; }
 .article-body ul, .article-body ol { margin: 0 0 1.25rem; padding-left: 1.5rem; }
@@ -228,7 +232,7 @@ function renderArticlePage(article, content, baseUrl) {
     related === ""
       ? ""
       : `<section class="related"><h2>同主題延伸閱讀</h2><ul>${related}</ul></section>`;
-  const body = `<a class="back-link" href="${category === undefined ? "/education" : `/education/${category.slug}`}">← ${escapeHtml(category?.title ?? "防曬衛教")}</a><p class="eyebrow">${escapeHtml(article.primaryQuestion)}</p><h1>${escapeHtml(article.title)}</h1><p class="summary">${escapeHtml(article.summary)}</p><p class="meta">最後查閱：${escapeHtml(article.lastReviewed)} · ${article.publishable ? "已發布" : "專業審閱中"}</p>${notice}<div class="article-body">${article.bodyHtml}</div>${relatedSection}`;
+  const body = `<a class="back-link" href="${category === undefined ? "/education" : `/education/${category.slug}`}">← ${escapeHtml(category?.title ?? "防曬衛教")}</a><p class="eyebrow">${escapeHtml(article.primaryQuestion)}</p><h1>${escapeHtml(article.title)}</h1><p class="summary">${escapeHtml(article.summary)}</p><p class="meta">最後查閱：${escapeHtml(article.lastReviewed)} · ${article.publishable ? "已發布" : "專業審閱中"}</p>${notice}<div class="article-takeaway">${article.takeawayHtml}</div><div class="article-body">${article.bodyHtml}</div>${relatedSection}`;
   return renderDocument({
     title: article.title,
     description: article.summary,
