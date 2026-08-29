@@ -2,7 +2,6 @@
 title: "保養、防曬、底妝順序怎麼排？出門前這樣比較不容易漏"
 slug: skincare-sunscreen-makeup-order
 category: before-going-out
-categoryTitle: "出門前準備"
 summary: "一般可先完成保養，再均勻塗防曬，最後上妝。重點不是等待神奇分鐘數，而是依產品說明、避免搓掉已塗好的防曬。"
 primaryQuestion: "保養品、防曬乳和底妝的正確順序是什麼？"
 status: draft

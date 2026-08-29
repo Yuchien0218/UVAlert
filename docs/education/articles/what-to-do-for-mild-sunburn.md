@@ -2,7 +2,6 @@
 title: "已經曬紅了，先做什麼比較好？"
 slug: what-to-do-for-mild-sunburn
 category: after-sun-care
-categoryTitle: "回家後與皮膚照顧"
 summary: "先離開陽光並讓皮膚降溫，再溫和保濕、補充水分；不要戳破水泡或繼續曝曬。若症狀嚴重或出現全身不適，應尋求醫療協助。"
 primaryQuestion: "皮膚曬紅或輕微曬傷後，第一步要做什麼？"
 status: draft

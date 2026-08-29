@@ -2,7 +2,6 @@
 title: "防曬和防蚊液先擦哪個？兩種產品分開完成"
 slug: sunscreen-and-insect-repellent-order
 category: reapply-sunscreen
-categoryTitle: "外出中的補擦"
 summary: "需要同時使用時，一般先擦防曬，再擦防蚊液。防曬常需補擦，防蚊液則依其標示，不要跟著每次防曬一起重複。"
 primaryQuestion: "防曬乳和防蚊液應該先擦哪一個？"
 status: draft

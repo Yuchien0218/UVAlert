@@ -2,7 +2,6 @@
 title: "防曬配件怎麼挑？UPF、UV400、寬邊帽與陽傘一次看懂"
 slug: choose-sun-protective-accessories
 category: before-going-out
-categoryTitle: "出門前準備"
 summary: "挑防曬配件時，衣物看 UPF 或織法，太陽眼鏡看 UV400／100% UV 防護，帽子看遮蔽範圍；陽傘與遮蔭能降低直射，但不能取代完整防護。"
 primaryQuestion: "帽子、太陽眼鏡、防曬衣物和陽傘要怎麼挑？"
 status: draft

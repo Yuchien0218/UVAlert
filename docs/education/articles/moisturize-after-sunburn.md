@@ -2,7 +2,6 @@
 title: "曬後保濕怎麼做？先降溫，再選自己能耐受的產品"
 slug: moisturize-after-sunburn
 category: after-sun-care
-categoryTitle: "回家後與皮膚照顧"
 summary: "曬後先離開陽光並讓皮膚降溫，接著在皮膚微濕時使用能耐受的保濕產品；一擦就刺痛就先停用，不必追求複雜的修護配方。"
 primaryQuestion: "曬傷後可以擦什麼保濕？蘆薈或乳液都可以嗎？"
 status: draft

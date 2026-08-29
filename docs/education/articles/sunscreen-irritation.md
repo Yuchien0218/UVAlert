@@ -2,7 +2,6 @@
 title: "擦防曬後紅、腫、癢或刺痛，先做什麼？"
 slug: sunscreen-irritation
 category: special-situations
-categoryTitle: "特殊情況"
 summary: "擦防曬後出現紅、腫、癢或刺痛，先停止可疑產品、用清水溫和洗去並避免摩擦與陽光；持續、加重或伴隨全身反應時應尋求醫療協助。"
 primaryQuestion: "擦完防曬後皮膚不舒服，應該繼續擦還是先洗掉？"
 status: draft

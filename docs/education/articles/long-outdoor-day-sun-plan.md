@@ -2,7 +2,6 @@
 title: "長時間戶外活動怎麼安排？把遮蔭、補水與補擦放進同一張清單"
 slug: long-outdoor-day-sun-plan
 category: sweat-and-water
-categoryTitle: "流汗或碰水後"
 summary: "長時間戶外不要只準備一瓶防曬乳；把 UV 高峰、遮蔭、衣物、補水、休息與事件後補擦一起安排，途中再依實際狀況調整。"
 primaryQuestion: "要在戶外待一整天，防曬和休息該怎麼安排？"
 status: draft

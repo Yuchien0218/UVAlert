@@ -2,7 +2,6 @@
 title: "陰天、下雨或待在室內，還需要防曬嗎？"
 slug: cloudy-days-still-need-protection
 category: uv-basics
-categoryTitle: "了解今天的 UV"
 summary: "陰天不等於沒有紫外線；雲層、反射面與靠窗位置都可能讓曝曬情境不同。是否需要防護，要看 UV、活動位置與停留時間，不只看體感溫度。"
 primaryQuestion: "陰天或下雨天是不是就不用防曬？"
 status: draft

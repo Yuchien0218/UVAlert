@@ -2,7 +2,6 @@
 title: "曬後不適分不清原因時：先離開陽光，再觀察三件事"
 slug: red-stinging-itchy-skin-three-steps
 category: special-situations
-categoryTitle: "特殊情況"
 summary: "紅、刺、癢可能和曬傷、產品刺激或其他皮膚問題有關；不要自行診斷，先離開陽光、停止可疑產品，再觀察發生時間、皮膚變化與全身症狀。"
 primaryQuestion: "曬後紅、刺、癢，怎麼分辨是曬傷還是防曬造成的不適？"
 status: draft

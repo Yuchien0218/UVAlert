@@ -2,7 +2,6 @@
 title: "防曬和防熱傷害是兩件事：流汗時不要只看倒數"
 slug: sun-protection-and-heat-illness
 category: sweat-and-water
-categoryTitle: "流汗或碰水後"
 summary: "防曬乳主要降低皮膚 UV 傷害，不能預防熱傷害；戶外流汗時要分開處理補擦、補水、休息與降溫。"
 primaryQuestion: "擦防曬乳可以預防中暑或熱傷害嗎？"
 status: draft

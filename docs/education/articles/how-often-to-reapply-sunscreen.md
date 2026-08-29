@@ -2,7 +2,6 @@
 title: "防曬多久補擦一次？把『兩小時』用對"
 slug: how-often-to-reapply-sunscreen
 category: reapply-sunscreen
-categoryTitle: "外出中的補擦"
 summary: "一般持續戶外活動時，可把每兩小時當成補擦提醒；游泳、流汗或擦毛巾後要更早依產品標示處理。兩小時不是 SPF 的時間公式，也不是安全保證。"
 primaryQuestion: "防曬乳通常多久需要補擦？"
 status: draft

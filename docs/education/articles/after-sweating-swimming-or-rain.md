@@ -2,7 +2,6 @@
 title: "流汗、游泳、淋雨或擦毛巾後，何時要重新補擦？"
 slug: after-sweating-swimming-or-rain
 category: sweat-and-water
-categoryTitle: "流汗或碰水後"
 summary: "流汗、游泳、淋雨或毛巾擦乾，都可能讓防曬變得不均勻；先到安全處輕按吸乾，再依防曬乳標示重新塗抹，不要只等原本倒數結束。"
 primaryQuestion: "流汗、碰水或淋雨後，要不要立刻補擦防曬？"
 status: draft

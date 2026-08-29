@@ -2,7 +2,6 @@
 title: "天氣不熱，UV 就不強嗎？溫度和紫外線要分開看"
 slug: uv-index-vs-temperature
 category: uv-basics
-categoryTitle: "了解今天的 UV"
 summary: "氣溫與 UV 指數不是同一項資料。涼爽、有風甚至部分多雲的日子，仍可能有需要防護的紫外線。"
 primaryQuestion: "天氣不熱時，紫外線也會很強嗎？"
 status: draft

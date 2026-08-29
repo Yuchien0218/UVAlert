@@ -2,7 +2,6 @@
 title: "嬰幼兒怎麼防曬？6 個月以下先靠遮蔭與衣物"
 slug: sun-protection-for-babies
 category: special-situations
-categoryTitle: "特殊情況"
 summary: "6 個月以下嬰兒以避免直曬、遮蔭與衣物為主；無法完全遮住的小範圍是否使用防曬，應依兒科建議與產品標示。"
 primaryQuestion: "未滿 6 個月的嬰兒可以擦防曬乳嗎？"
 status: draft

@@ -2,7 +2,6 @@
 title: "吃藥或擦藥後更怕曬？先看藥袋上的光敏感提醒"
 slug: medications-and-sun-sensitivity
 category: special-situations
-categoryTitle: "特殊情況"
 summary: "部分藥物可能增加皮膚對陽光的敏感，但不能只靠網路名單自行停藥。查看藥袋、詢問藥師，並加強遮蔽與防曬。"
 primaryQuestion: "哪些藥會讓皮膚更容易曬傷？需要停藥嗎？"
 status: draft

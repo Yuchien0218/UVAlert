@@ -2,7 +2,6 @@
 title: "眼周、嘴唇、耳朵和頭皮也要防護嗎？不同部位要用對方式"
 slug: sunscreen-around-eyes-lips-and-scalp
 category: before-going-out
-categoryTitle: "出門前準備"
 summary: "臉、耳朵、嘴唇、頸部、頭頂稀疏處與腳背都可能是裸露部位；眼周與嘴唇要選適合的產品，避免把一般防曬直接弄進眼睛或嘴巴。"
 primaryQuestion: "防曬乳可以擦在眼皮、嘴唇和頭皮嗎？"
 status: draft

@@ -2,7 +2,6 @@
 title: "UV 預報和觀測差在哪裡？看懂資料時間，才不會誤會"
 slug: uv-forecast-and-observation
 category: uv-basics
-categoryTitle: "了解今天的 UV"
 summary: "UV 預報是用來安排今天的活動，觀測是氣象站實際量到的資料；兩者都不是個人皮膚曝曬量。查看 UV 時要一起確認地點、資料類型與更新時間。"
 primaryQuestion: "App 顯示的 UV 是預報還是實際觀測？"
 status: draft

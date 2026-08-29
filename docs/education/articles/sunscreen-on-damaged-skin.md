@@ -2,7 +2,6 @@
 title: "皮膚破皮或還在曬傷，可以直接補防曬嗎？"
 slug: sunscreen-on-damaged-skin
 category: special-situations
-categoryTitle: "特殊情況"
 summary: "受傷、破皮或明顯曬傷的皮膚不要為了完成倒數而硬塗防曬；先用衣物與遮蔭保護，並依產品警語與醫療建議處理。"
 primaryQuestion: "破皮、脫皮或曬傷的地方可以擦防曬乳嗎？"
 status: draft

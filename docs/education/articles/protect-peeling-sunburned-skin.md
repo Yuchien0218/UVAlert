@@ -2,7 +2,6 @@
 title: "脫皮、緊繃或仍然敏感時，怎麼保護皮膚？"
 slug: protect-peeling-sunburned-skin
 category: after-sun-care
-categoryTitle: "回家後與皮膚照顧"
 summary: "曬後脫皮通常表示皮膚仍在修復；不要撕、搓或去角質，先保濕、穿柔軟衣物並避開陽光，破皮、水泡或持續惡化時請尋求醫療協助。"
 primaryQuestion: "曬後脫皮或緊繃時，可以把皮撕掉或繼續擦防曬嗎？"
 status: draft

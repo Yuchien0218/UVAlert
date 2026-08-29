@@ -2,7 +2,6 @@
 title: "防曬乳怎麼挑？先看這三個標示"
 slug: choose-sunscreen-by-activity
 category: before-going-out
-categoryTitle: "出門前準備"
 summary: "先看廣效防護、SPF／PA 與抗水標示，再依活動選擇你能足量塗抹並願意補擦的防曬乳。沒有一瓶防曬乳適合所有情境。"
 primaryQuestion: "挑防曬乳時，最先要看哪些資訊？"
 status: draft

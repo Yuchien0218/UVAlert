@@ -2,7 +2,6 @@
 title: "一天中什麼時候 UV 比較強？先看高峰，再安排防護"
 slug: when-is-uv-strongest
 category: uv-basics
-categoryTitle: "了解今天的 UV"
 summary: "UV 通常在太陽高度較高的中午前後比較強；中央氣象署也提供每日最大值預報與觀測。高峰時間是安排防護的參考，不是個人可以曝曬多久的倒數。"
 primaryQuestion: "一天中什麼時候紫外線最強？"
 status: draft

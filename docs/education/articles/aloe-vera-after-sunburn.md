@@ -2,7 +2,6 @@
 title: "曬後擦蘆薈有用嗎？可以舒緩，但不能把皮膚傷害倒轉"
 slug: aloe-vera-after-sunburn
 category: after-sun-care
-categoryTitle: "回家後與皮膚照顧"
 summary: "含蘆薈的保濕產品可能讓輕微曬傷感覺較舒服，但不是曬傷解藥。先降溫、補水、避免再曝曬更重要。"
 primaryQuestion: "曬傷後擦蘆薈可以讓皮膚立刻恢復嗎？"
 status: draft

@@ -2,7 +2,6 @@
 title: "去海邊怎麼防曬更海洋友善？先用衣物減少需要塗抹的面積"
 slug: ocean-friendly-sun-protection-at-beach
 category: sweat-and-water
-categoryTitle: "流汗或碰水後"
 summary: "海洋友善不是只換一瓶防曬。防曬衣、帽子、遮蔭、遵守當地規定和正確使用裸露部位防曬，可以一起降低曝曬與產品進水。"
 primaryQuestion: "去海邊時，怎麼兼顧皮膚防護與海洋環境？"
 status: draft

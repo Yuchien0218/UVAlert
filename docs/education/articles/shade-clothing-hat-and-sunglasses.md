@@ -2,7 +2,6 @@
 title: "防曬不只靠防曬乳：衣物、帽子、眼鏡與遮蔭怎麼搭配？"
 slug: shade-clothing-hat-and-sunglasses
 category: before-going-out
-categoryTitle: "出門前準備"
 summary: "遮蔭、衣物、帽子與眼鏡可以先替皮膚與眼睛減少 UV 曝曬，防曬乳則補足衣物沒有覆蓋的區域。多種方法一起使用，比只依靠單一方式更穩定。"
 primaryQuestion: "除了擦防曬乳，還能怎麼降低紫外線曝曬？"
 status: draft

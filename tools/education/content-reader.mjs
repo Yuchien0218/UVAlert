@@ -81,7 +81,6 @@ export async function readEducationContent() {
 
     parsedArticles.push({
       ...article,
-      categoryTitle: article.categoryTitle || category.title,
       publishable: isPublishable(article),
       sourcePath
     });
@@ -274,7 +273,6 @@ function parseArticle(source, sourcePath) {
     title: frontMatter.title,
     slug: frontMatter.slug,
     category: frontMatter.category,
-    categoryTitle: frontMatter.categoryTitle ?? "",
     summary: frontMatter.summary,
     primaryQuestion: frontMatter.primaryQuestion,
     status: frontMatter.status,

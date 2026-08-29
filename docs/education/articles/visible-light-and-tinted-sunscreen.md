@@ -2,7 +2,6 @@
 title: "潤色防曬真的能防藍光嗎？先分清太陽可見光與螢幕藍光"
 slug: visible-light-and-tinted-sunscreen
 category: uv-basics
-categoryTitle: "了解今天的 UV"
 summary: "潤色防曬中的氧化鐵可能增加對太陽可見光的防護，對容易色素沉澱者較有意義；這不等於所有產品都能防螢幕藍光。"
 primaryQuestion: "潤色防曬可以防藍光嗎？"
 status: draft
