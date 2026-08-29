@@ -133,16 +133,10 @@ export function createAppRouter(
         name: "settings-data",
         component: () => import("../pages/settings/DataSettingsPage.vue"),
         meta: {
-          title: "本機資料管理",
-          heading: "本機資料管理",
+          title: "本機資料與隱私",
+          heading: "本機資料與隱私",
           body: "查看、匯出與清除本機資料；匯出不上傳、不經後端。"
         }
-      },
-      {
-        path: "/settings/sync",
-        name: "settings-sync",
-        component: () => import("../pages/settings/SyncSettingsPage.vue"),
-        meta: { title: "跨裝置同步" }
       },
       {
         path: "/settings/account-data",
