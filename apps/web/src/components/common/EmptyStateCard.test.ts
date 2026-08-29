@@ -29,7 +29,7 @@ describe("EmptyStateCard", () => {
     });
     expect(wrapper.find("h1").text()).toBe("找不到這件裝備");
     expect(wrapper.get("h1").attributes("data-typography-role")).toBe(
-      "section-title"
+      "page-title"
     );
     expect(wrapper.find("h2").exists()).toBe(false);
     expect(wrapper.attributes("role")).toBe("alert");

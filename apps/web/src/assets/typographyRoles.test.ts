@@ -18,16 +18,27 @@ const migratedFiles = discoverSourceFiles(sourceRoot).sort();
 
 const legacyToken = /--font-size-(?:label|title-sm|title-md|title)\b/;
 
-const headingRoleTokens = {
-  "page-title": "--font-size-page-title",
-  "section-title": "--font-size-section-title",
-  "card-title": "--font-size-card-title",
-  body: "--font-size-body"
-} as const;
+const typographyRoles = [
+  "page-title",
+  "section-title",
+  "card-title",
+  "body",
+  "supporting",
+  "caption",
+  "nav-label"
+] as const;
+
+const typographyProperties = [
+  "font-family",
+  "font-size",
+  "font-weight",
+  "line-height",
+  "letter-spacing"
+] as const;
 
 const allowedHeadingRolesByTag = {
   h1: ["page-title"],
-  h2: ["section-title", "card-title", "body"],
+  h2: ["section-title", "card-title"],
   h3: ["card-title"]
 } as const;
 
@@ -55,6 +66,21 @@ describe("B8 typography role migration", () => {
     ).toMatch(
       /\.field-helper\s*\{[^}]*font-size:\s*var\(--font-size-supporting\);/
     );
+  });
+
+  it("將通知設定的可換行說明維持在 supporting role", () => {
+    const source = readFileSync(
+      "apps/web/src/pages/settings/NotificationSettingsPage.vue",
+      "utf8"
+    );
+
+    for (const selector of ["note-box", "delivery-note"]) {
+      expect(source, selector).toMatch(
+        new RegExp(
+          `\\.${selector}\\s*\\{[^}]*font-size:\\s*var\\(--font-size-supporting\\);`
+        )
+      );
+    }
   });
 
   it("允許衛教文章本文在窄版 grid track 內收縮", () => {
@@ -113,15 +139,29 @@ describe("B8 typography role migration", () => {
     expect(discoveredExceptions).toEqual(allowedComponentExceptions);
   });
 
-  it("將 heading role annotation 直接連到 canonical token", () => {
+  it("將七個 role annotation 的完整 contract 直接連到 canonical token", () => {
     const appCss = readFileSync("apps/web/src/assets/app.css", "utf8");
 
-    for (const [role, token] of Object.entries(headingRoleTokens)) {
-      expect(appCss, role).toMatch(
-        new RegExp(
-          `\\[data-typography-role="${role}"\\]\\s*\\{[^}]*font-size:\\s*var\\(${token}\\);`
+    for (const role of typographyRoles) {
+      const declarations = [
+        ...appCss.matchAll(
+          new RegExp(
+            `[^{}]*\\[data-typography-role="${role}"\\][^{}]*\\{([\\s\\S]*?)\\}`,
+            "g"
+          )
         )
-      );
+      ]
+        .map((match) => match[1])
+        .join("\n");
+      expect(declarations, role).not.toBe("");
+
+      for (const property of typographyProperties) {
+        expect(declarations, `${role}.${property}`).toMatch(
+          new RegExp(
+            `${property}:\\s*var\\(--${property}-${role.replaceAll("_", "-")}\\);`
+          )
+        );
+      }
     }
   });
 });

@@ -41,43 +41,43 @@ colors:
 
 typography:
   page-title:
-    fontFamily: "Noto Serif TC, Noto Serif CJK TC, ui-serif, serif"
+    fontFamily: '"Noto Serif TC Subset", "Noto Serif TC", "Noto Serif CJK TC", ui-serif, serif'
     fontSize: 28px
     fontWeight: 400
     lineHeight: 1.22
     letterSpacing: -0.01em
   section-title:
-    fontFamily: "Noto Serif TC, Noto Serif CJK TC, ui-serif, serif"
+    fontFamily: '"Noto Serif TC Subset", "Noto Serif TC", "Noto Serif CJK TC", ui-serif, serif'
     fontSize: 20px
     fontWeight: 500
     lineHeight: 1.35
     letterSpacing: 0
   card-title:
-    fontFamily: "Inter, Noto Sans TC, Noto Sans CJK TC, ui-sans-serif, sans-serif"
+    fontFamily: '"Inter Subset", Inter, "Noto Sans TC", "PingFang TC", "Microsoft JhengHei", system-ui, sans-serif'
     fontSize: 18px
     fontWeight: 500
     lineHeight: 1.45
     letterSpacing: 0
   body:
-    fontFamily: "Inter, Noto Sans TC, Noto Sans CJK TC, ui-sans-serif, sans-serif"
+    fontFamily: '"Inter Subset", Inter, "Noto Sans TC", "PingFang TC", "Microsoft JhengHei", system-ui, sans-serif'
     fontSize: 16px
     fontWeight: 400
     lineHeight: 1.6
     letterSpacing: 0.01em
   supporting:
-    fontFamily: "Inter, Noto Sans TC, Noto Sans CJK TC, ui-sans-serif, sans-serif"
+    fontFamily: '"Inter Subset", Inter, "Noto Sans TC", "PingFang TC", "Microsoft JhengHei", system-ui, sans-serif'
     fontSize: 14px
     fontWeight: 400
     lineHeight: 1.6
     letterSpacing: 0.01em
   caption:
-    fontFamily: "Inter, Noto Sans TC, Noto Sans CJK TC, ui-sans-serif, sans-serif"
+    fontFamily: '"Inter Subset", Inter, "Noto Sans TC", "PingFang TC", "Microsoft JhengHei", system-ui, sans-serif'
     fontSize: 12px
     fontWeight: 500
     lineHeight: 1.5
     letterSpacing: 0.01em
   nav-label:
-    fontFamily: "Inter, Noto Sans TC, Noto Sans CJK TC, ui-sans-serif, sans-serif"
+    fontFamily: '"Inter Subset", Inter, "Noto Sans TC", "PingFang TC", "Microsoft JhengHei", system-ui, sans-serif'
     fontSize: 12px
     fontWeight: 500
     lineHeight: 1.4
@@ -488,7 +488,7 @@ components:
 
 **標題不再搭配任何西文顯示字體。** 要加西文襯線體之前，先回頭看上面那段實測資料：沒有連續拉丁標題，就沒有它的工作。
 
-備援堆疊：標題走 `Noto Serif TC, Noto Serif CJK TC, ui-serif, serif`，內文走 `Inter, Noto Sans TC, Noto Sans CJK TC, ui-sans-serif, sans-serif`。
+runtime 堆疊：標題走 `"Noto Serif TC Subset", "Noto Serif TC", "Noto Serif CJK TC", ui-serif, serif`；內文走 `"Inter Subset", Inter, "Noto Sans TC", "PingFang TC", "Microsoft JhengHei", system-ui, sans-serif`。前兩個名稱是專案自行托管的 subset；後段才是載入失敗時的系統備援。
 
 標題／內文的分工是編輯式的：
 

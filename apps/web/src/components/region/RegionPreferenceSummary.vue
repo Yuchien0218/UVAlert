@@ -16,7 +16,7 @@ defineProps<Props>();
       <h2
         id="region-summary-title"
         class="region-summary__title"
-        data-typography-role="body"
+        data-typography-role="card-title"
       >
         目前設定
       </h2>
@@ -52,7 +52,7 @@ defineProps<Props>();
 }
 
 .region-summary__title {
-  font-size: var(--font-size-body);
+  font-size: var(--font-size-card-title);
   color: var(--text-secondary);
 }
 

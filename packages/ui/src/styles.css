@@ -188,13 +188,41 @@
     system-ui, sans-serif;
   --font-mono: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
   /* B8 role-based typography scale: docs/superpowers/specs/2026-08-27-b8-role-based-typography-design.md */
+  --font-family-page-title: var(--font-serif);
   --font-size-page-title: 1.75rem;
+  --font-weight-page-title: 400;
+  --line-height-page-title: 1.22;
+  --letter-spacing-page-title: -0.01em;
+  --font-family-section-title: var(--font-serif);
   --font-size-section-title: 1.25rem;
+  --font-weight-section-title: 500;
+  --line-height-section-title: 1.35;
+  --letter-spacing-section-title: 0;
+  --font-family-card-title: var(--font-sans);
   --font-size-card-title: 1.125rem;
+  --font-weight-card-title: 500;
+  --line-height-card-title: 1.45;
+  --letter-spacing-card-title: 0;
+  --font-family-body: var(--font-sans);
   --font-size-body: 1rem;
+  --font-weight-body: 400;
+  --line-height-body: 1.6;
+  --letter-spacing-body: 0.01em;
+  --font-family-supporting: var(--font-sans);
   --font-size-supporting: 0.875rem;
+  --font-weight-supporting: 400;
+  --line-height-supporting: 1.6;
+  --letter-spacing-supporting: 0.01em;
+  --font-family-caption: var(--font-sans);
   --font-size-caption: 0.75rem;
+  --font-weight-caption: 500;
+  --line-height-caption: 1.5;
+  --letter-spacing-caption: 0.01em;
+  --font-family-nav-label: var(--font-sans);
   --font-size-nav-label: 0.75rem;
+  --font-weight-nav-label: 500;
+  --line-height-nav-label: 1.4;
+  --letter-spacing-nav-label: 0.01em;
 
   /*
    * 2026-08-24 補：字距（letter-spacing）原本 8 個檔案各寫各的魔術數字，
@@ -226,7 +254,6 @@
   --letter-spacing-mono-label: 0.12em;
   --letter-spacing-headline: -0.04em;
   --letter-spacing-readout: -0.02em;
-  --letter-spacing-page-title: -0.055em;
 
   --space-1: 0.25rem;
   --space-2: 0.5rem;
@@ -317,8 +344,11 @@ body {
   min-height: 100svh;
   margin: 0;
   background: var(--page-background);
-  line-height: 1.6;
-  letter-spacing: normal;
+  font-family: var(--font-family-body);
+  font-size: var(--font-size-body);
+  font-weight: var(--font-weight-body);
+  line-height: var(--line-height-body);
+  letter-spacing: var(--letter-spacing-body);
 }
 
 /*
@@ -331,9 +361,6 @@ body {
 h1,
 h2,
 h3 {
-  font-family: var(--font-serif);
-  font-weight: 400;
-  letter-spacing: -0.01em;
   /*
    * 2026-08-24：清掉瀏覽器預設的 margin（h1 是 0.67em，32px 標題就是
    * 上下各 21.44px）。版面一律用容器的 gap 排，留著預設 margin 會讓

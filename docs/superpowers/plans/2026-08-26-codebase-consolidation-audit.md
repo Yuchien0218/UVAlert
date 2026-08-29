@@ -221,10 +221,10 @@
 
 ### D2 衍生 — 新增待辦
 
-- [x] **B8：字級量表重新對齊（獨立視覺工作）** — 2026-08-29 驗證完成（最後實作 commit `daab391`）
+- [ ] **B8：字級量表重新對齊（獨立視覺工作）** — 2026-08-29 已完成實作與 F5；最終審查修正待獨立 scoped re-review
   - 已以七個語意角色取代舊 14 級／桶狀對照：page title 28px、section title 20px、card title 18px、body 16px、supporting 14px、caption 12px、nav label 12px；`DESIGN.md`、runtime token 與 `tokens.test.ts` drift guard 已一致。
   - 正式 production build `pnpm build` 通過；Vite preview (`http://127.0.0.1:4173/`) 以 Playwright 實際操作建立「Task 7 測試防曬」後，確認 list、detail、真正的 edit route 與 add route。
-  - 視覺矩陣於 390×844、1440×1000、320×844、以及 200% 有效版面（720×500 CSS px，DPR 2）共驗證 70 個頁面／狀態、202 項斷言全數通過：無頁面級水平溢出或標題裁切；按鈕／輸入 16px；導航 12px；page/section/card 標題 28/20/18px；Data Settings 三條原有 full-width divider 仍為 1px solid；article 保留 44rem、1.85 行高、單一 120px wave，320px 表格只在自身 wrapper 捲動。
+  - 第一輪視覺矩陣於 390×844、1440×1000、320×844、以及 200% 有效版面（720×500 CSS px，DPR 2）共驗證 70 個頁面／狀態、202 項斷言全數通過：無頁面級水平溢出或標題裁切；按鈕／輸入 16px；導航 12px；page/section/card 標題 28/20/18px；Data Settings 三條原有 full-width divider 仍為 1px solid；article 保留 44rem、1.85 行高、單一 120px wave，320px 表格只在自身 wrapper 捲動。最終審查修正後的重驗證據另由 fix-wave report 記錄，通過獨立複審後才重新勾選完成。
   - runtime 僅觀察到 preview 沒有 `/v1/uv/forecast` backend 時的既有 404（已排除為非 B8）；無 B8 歸因的 console error、page error、failed request 或遺失 custom-property 警告。首頁 loading branch 因 router 先 `await boot.ensureBooted()` 才掛載 HomePage，於正式導航流程不可到達；未偽造 loading DOM，已如實記錄為未能目視的架構限制。
   - B9 icon-first／progressive disclosure 未實作，維持獨立範圍。
 

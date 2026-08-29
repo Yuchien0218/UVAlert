@@ -65,20 +65,103 @@
  * source-wide contract prevents a new h1/h2/h3 from falling back to browser
  * defaults while keeping role choice explicit instead of styling by tag name.
  */
-[data-typography-role="page-title"] {
+body [data-typography-role="page-title"][data-typography-role="page-title"] {
+  font-family: var(--font-family-page-title);
+  font-weight: var(--font-weight-page-title);
+  line-height: var(--line-height-page-title);
+  letter-spacing: var(--letter-spacing-page-title);
+}
+
+body
+  [data-typography-role="page-title"][data-typography-role="page-title"]:not(
+    [data-typography-exception]
+  ) {
   font-size: var(--font-size-page-title);
 }
 
-[data-typography-role="section-title"] {
+body
+  [data-typography-role="section-title"][data-typography-role="section-title"] {
+  font-family: var(--font-family-section-title);
+  font-weight: var(--font-weight-section-title);
+  line-height: var(--line-height-section-title);
+  letter-spacing: var(--letter-spacing-section-title);
+}
+
+body
+  [data-typography-role="section-title"][data-typography-role="section-title"]:not(
+    [data-typography-exception]
+  ) {
   font-size: var(--font-size-section-title);
 }
 
-[data-typography-role="card-title"] {
+body [data-typography-role="card-title"][data-typography-role="card-title"] {
+  font-family: var(--font-family-card-title);
+  font-weight: var(--font-weight-card-title);
+  line-height: var(--line-height-card-title);
+  letter-spacing: var(--letter-spacing-card-title);
+}
+
+body
+  [data-typography-role="card-title"][data-typography-role="card-title"]:not(
+    [data-typography-exception]
+  ) {
   font-size: var(--font-size-card-title);
 }
 
-[data-typography-role="body"] {
+body [data-typography-role="body"][data-typography-role="body"] {
+  font-family: var(--font-family-body);
+  font-weight: var(--font-weight-body);
+  line-height: var(--line-height-body);
+  letter-spacing: var(--letter-spacing-body);
+}
+
+body
+  [data-typography-role="body"][data-typography-role="body"]:not(
+    [data-typography-exception]
+  ) {
   font-size: var(--font-size-body);
+}
+
+body [data-typography-role="supporting"][data-typography-role="supporting"] {
+  font-family: var(--font-family-supporting);
+  font-weight: var(--font-weight-supporting);
+  line-height: var(--line-height-supporting);
+  letter-spacing: var(--letter-spacing-supporting);
+}
+
+body
+  [data-typography-role="supporting"][data-typography-role="supporting"]:not(
+    [data-typography-exception]
+  ) {
+  font-size: var(--font-size-supporting);
+}
+
+body [data-typography-role="caption"][data-typography-role="caption"] {
+  font-family: var(--font-family-caption);
+  font-weight: var(--font-weight-caption);
+  line-height: var(--line-height-caption);
+  letter-spacing: var(--letter-spacing-caption);
+}
+
+body
+  [data-typography-role="caption"][data-typography-role="caption"]:not(
+    [data-typography-exception]
+  ) {
+  font-size: var(--font-size-caption);
+}
+
+body [data-typography-role="nav-label"][data-typography-role="nav-label"] {
+  font-family: var(--font-family-nav-label);
+  font-weight: var(--font-weight-nav-label);
+  line-height: var(--line-height-nav-label);
+  letter-spacing: var(--letter-spacing-nav-label);
+}
+
+body
+  [data-typography-role="nav-label"][data-typography-role="nav-label"]:not(
+    [data-typography-exception]
+  ) {
+  font-size: var(--font-size-nav-label);
 }
 
 .page-heading {

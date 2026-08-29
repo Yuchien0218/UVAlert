@@ -50,9 +50,8 @@ function frontmatterSection(topKey: string): Record<string, string> {
 const cssTokens: Record<string, string> = (() => {
   const root = stylesCss.match(/:root\s*\{([\s\S]*?)\r?\n\}/)?.[1] ?? "";
   const out: Record<string, string> = {};
-  for (const line of root.split(/\r?\n/)) {
-    const match = line.match(/^\s*(--[\w-]+):\s*([^;]+);/);
-    if (match) out[match[1]!] = match[2]!.trim();
+  for (const match of root.matchAll(/^\s*(--[\w-]+):\s*([\s\S]*?);/gm)) {
+    out[match[1]!] = match[2]!.trim().replace(/\s+/g, " ");
   }
   return out;
 })();
@@ -77,32 +76,69 @@ const LAYOUT_MAP: Record<string, string> = {
   // clamp() 不是 token，只留在 §12 prose。
 };
 
-const TYPOGRAPHY_MAP: Record<string, string> = {
-  "page-title": "--font-size-page-title",
-  "section-title": "--font-size-section-title",
-  "card-title": "--font-size-card-title",
-  body: "--font-size-body",
-  supporting: "--font-size-supporting",
-  caption: "--font-size-caption",
-  "nav-label": "--font-size-nav-label"
-};
+const TYPOGRAPHY_ROLES = [
+  "page-title",
+  "section-title",
+  "card-title",
+  "body",
+  "supporting",
+  "caption",
+  "nav-label"
+] as const;
 
-function typographyFontSizes(): Record<string, string> {
+const TYPOGRAPHY_FIELDS = {
+  fontFamily: "font-family",
+  fontSize: "font-size",
+  fontWeight: "font-weight",
+  lineHeight: "line-height",
+  letterSpacing: "letter-spacing"
+} as const;
+
+type TypographyField = keyof typeof TYPOGRAPHY_FIELDS;
+
+function typographyRoles(): Record<
+  string,
+  Partial<Record<TypographyField, string>>
+> {
   const fm = designMd.match(/^---\r?\n([\s\S]*?)\r?\n---/)?.[1] ?? "";
   const section = fm.match(/^typography:\r?\n([\s\S]*?)(?=^\S)/m)?.[1] ?? "";
-  const out: Record<string, string> = {};
+  const out: Record<string, Partial<Record<TypographyField, string>>> = {};
   let currentKey: string | null = null;
 
   for (const line of section.split(/\r?\n/)) {
     const role = line.match(/^ {2}([\w-]+):\s*$/);
     if (role) {
       currentKey = role[1]!;
+      out[currentKey] = {};
       continue;
     }
-    const size = line.match(/^ {4}fontSize:\s*(.+)$/);
-    if (currentKey !== null && size) out[currentKey] = size[1]!.trim();
+    const field = line.match(
+      /^ {4}(fontFamily|fontSize|fontWeight|lineHeight|letterSpacing):\s*(.+)$/
+    );
+    if (currentKey !== null && field) {
+      out[currentKey]![field[1] as TypographyField] = field[2]!
+        .trim()
+        .replace(/^["']|["']$/g, "");
+    }
   }
   return out;
+}
+
+function typographyToken(role: string, field: TypographyField): string {
+  return `--${TYPOGRAPHY_FIELDS[field]}-${role}`;
+}
+
+function resolveCssToken(
+  token: string,
+  seen = new Set<string>()
+): string | undefined {
+  if (seen.has(token)) throw new Error(`CSS token alias cycle: ${token}`);
+  const value = cssTokens[token];
+  if (value === undefined) return undefined;
+  const alias = value.match(/^var\((--[\w-]+)\)$/);
+  if (alias === null) return value;
+  seen.add(token);
+  return resolveCssToken(alias[1]!, seen);
 }
 
 function tokenFor(section: string, key: string): string | null {
@@ -177,22 +213,31 @@ describe("DESIGN.md ↔ styles.css token 一致性", () => {
   }
 
   describe("typography", () => {
-    const entries = typographyFontSizes();
+    const entries = typographyRoles();
 
     it("只公開核准的七個語意角色", () => {
-      expect(Object.keys(entries).sort()).toEqual(
-        Object.keys(TYPOGRAPHY_MAP).sort()
-      );
+      expect(Object.keys(entries).sort()).toEqual([...TYPOGRAPHY_ROLES].sort());
     });
 
-    for (const [role, token] of Object.entries(TYPOGRAPHY_MAP)) {
-      it(`${role} 對應 ${token}，值一致`, () => {
-        expect(
-          entries[role],
-          `DESIGN.md 缺少 typography.${role}`
-        ).toBeDefined();
-        expect(cssTokens[token], `styles.css 缺少 ${token}`).toBeDefined();
-        expect(normalize(cssTokens[token]!)).toBe(normalize(entries[role]!));
+    for (const role of TYPOGRAPHY_ROLES) {
+      it(`${role} 的五個 typography 欄位與 runtime contract 一致`, () => {
+        const designRole = entries[role];
+        expect(designRole, `DESIGN.md 缺少 typography.${role}`).toBeDefined();
+        expect(Object.keys(designRole!).sort()).toEqual(
+          Object.keys(TYPOGRAPHY_FIELDS).sort()
+        );
+
+        for (const field of Object.keys(
+          TYPOGRAPHY_FIELDS
+        ) as TypographyField[]) {
+          const token = typographyToken(role, field);
+          const runtimeValue = resolveCssToken(token);
+          expect(runtimeValue, `styles.css 缺少 ${token}`).toBeDefined();
+          expect(
+            normalize(runtimeValue!.replace(/\s+/g, " ")),
+            `${token} = ${runtimeValue}，DESIGN.md typography.${role}.${field} = ${designRole![field]}`
+          ).toBe(normalize(designRole![field]!));
+        }
       });
     }
 
