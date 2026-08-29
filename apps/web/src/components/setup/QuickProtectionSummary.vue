@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { SlidersHorizontal, Sparkles } from "@lucide/vue";
 import Icon from "../icons/Icon.vue";
 import type { SessionContext, SetupDraftZoneV1 } from "@sunshield/contracts";
 import { computed, shallowRef, watch } from "vue";
@@ -53,7 +52,7 @@ const zoneLabels = computed(() =>
       @click="expanded = !expanded"
     >
       <div class="quick-protection__mark">
-        <Sparkles :size="22" aria-hidden="true" />
+        <Icon name="feature-protection-summary" :size="24" />
       </div>
       <div class="quick-protection__header-content">
         <p class="quick-protection__eyebrow">快速提醒（推薦）</p>
@@ -89,7 +88,7 @@ const zoneLabels = computed(() =>
           type="button"
           @click="$emit('adjust')"
         >
-          <SlidersHorizontal :size="17" aria-hidden="true" />
+          <Icon name="tool-edit" :size="16" />
           調整要提醒的部位
         </button>
       </div>

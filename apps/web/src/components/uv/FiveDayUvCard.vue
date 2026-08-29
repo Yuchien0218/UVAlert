@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import type { FiveDayUvForecast, UvRiskLevel } from "@sunshield/contracts";
-import { CloudSun } from "@lucide/vue";
 import Icon from "../icons/Icon.vue";
 import type {
   UvForecastError,
@@ -77,7 +76,7 @@ function getUnavailableMessage(error: UvForecastError): string {
           未來 5 天 UV 預報
         </h2>
       </div>
-      <CloudSun :size="26" :stroke-width="1.5" aria-hidden="true" />
+      <Icon name="feature-uv-forecast" :size="24" />
     </div>
 
     <div

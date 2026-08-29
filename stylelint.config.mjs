@@ -140,7 +140,7 @@ export default {
         importFrom: [
           ...TOKEN_SOURCES,
           // 由 Vue 模板 :style 綁定、CSS 端看不到的 local custom property。
-          // 目前只有 SunLoader.vue 的逐條光線動畫延遲一個。
+          // 目前只有掃描延遲一個，BroadcastLoader.vue 與 InlineLoader.vue 共用。
           { "custom-properties": { "--ray-delay": "0s" } }
         ]
       }

@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { PackageCheck } from "@lucide/vue";
 import Icon from "../icons/Icon.vue";
 import { computed, shallowRef, useId } from "vue";
 import type { ProductSnapshotFormValue } from "../../features/setup/productSnapshot";
@@ -86,7 +85,7 @@ const summary = computed(() => {
 <template>
   <div class="product-editor">
     <section class="session-product app-card">
-      <PackageCheck :size="25" :stroke-width="1.6" aria-hidden="true" />
+      <Icon name="feature-session-product" :size="24" />
       <div>
         <p class="session-product__eyebrow">{{ eyebrow }}</p>
         <h2 data-typography-role="section-title">{{ title }}</h2>

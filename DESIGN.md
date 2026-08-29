@@ -774,7 +774,7 @@ Noto Serif TC 是標題的唯一字型，沒有第二層自托管備援——載
 
 **不使用任何第三方圖示素材庫。** 所有圖示都來自 `docs/design/icon-system/` 的自訂系統，以 inline SVG 進入程式碼。理由是圖示的造型語言直接繼承 Logo 的實心圓點＋膠囊線條，素材庫的圖示無法承載這個品牌訊號，混用會讓介面看起來像拼裝的。
 
-**現況（2026-08-22 更新）**：38 個不重複圖示中 28 個已替換完成，透過 `apps/web/src/components/icons/Icon.vue` 這個單一進入點消費自動產生的 `icons.generated.ts`。剩下 11 個元件、10 個功能型圖示仍在用 `@lucide/vue`——刻意延後到 wireframe 定案，因為它們綁定在可能被重新設計的元件上，先畫有報廢風險。`apps/web/package.json` 的 `@lucide/vue` 依賴要等這批也畫完才能移除。清單見 `docs/design/icon-system/README.md` 第八節。
+**現況（2026-08-29 更新）**：**Lucide 已完全移除**。全部圖示都透過 `apps/web/src/components/icons/Icon.vue` 這個單一進入點消費自動產生的 `icons.generated.ts`，`apps/web/package.json` 的 `@lucide/vue` 依賴已刪除。最後一批 11 個（功能型 6、工具型 5）於 2026-08-29 補畫，清單與造型取捨見 `docs/design/icon-system/README.md` 第七、十節，預覽板是 `preview-new-icons.svg`。
 
 ## 九、圖像法則（Imagery Rules）
 
@@ -940,7 +940,7 @@ B8 遷移期間使用的四個臨時字級別名已移除；目前元件只使�
 
 以下項目尚未定義或無法驗證，**實作時不要自行填補，先確認**：
 
-1. **Lucide 尚未完全移除。** 剩 9 個檔案仍直接 `import ... from "@lucide/vue"`（`ProductSnapshotEditor`、`SetupProcessBanner`、`RegionLocationPanel`、`RegionPreferenceSummary`、`QuickProtectionSummary`、`ZoneProtectionForm`、`FiveDayUvCard`、`SetupPage`）。wireframe 已凍結、阻塞解除；等使用者產出草稿 SVG 就能替換，`@lucide/vue` 依賴要等那批畫完才能移除。收斂待辦見 `docs/superpowers/plans/2026-08-26-codebase-consolidation-audit.md` E1。
+1. **Lucide 已移除（2026-08-29 結案）。** 8 個檔案的 `import ... from "@lucide/vue"` 全部換成 `<Icon name="..." />`，依賴也已從 `apps/web/package.json` 刪除。替換時順帶把散落的尺寸（25／26／22／18／17）收斂回系統的 16／20／24 三檔。剩下的唯一圖示待辦是衛教部位示意，但它的規格（要畫幾個、抽象到什麼程度）尚未裁決——`docs/design/icon-system/README.md` 第七節寫 7 個、`setupCatalog.ts` 實際是 10 個部位，數量對不上。
 2. **焦點環已系統化**（2026-08-25 前就已完成，此處補記）。`packages/ui/src/styles.css` 全域規則：`button, a, input, select, textarea` 的 `:focus-visible` → `outline: 0.15rem solid var(--focus-ring); outline-offset: 0.2rem;`。2026-08-26 已統一 bottom sheet／確認 dialog 的焦點循環與還原。**殘留缺口**：卡片、自訂 widget（如 `.choice-grid` 選項）的鍵盤焦點樣式未逐一規範。
 3. **停用狀態**：主按鈕（`--color-primary-disabled`）、次要按鈕（`.button--quiet:disabled`：`opacity: 0.55` + `cursor: not-allowed`，2026-08-25 補）皆已定義。**輸入框、清單項目的停用樣式仍未定義。**
 4. **錯誤與驗證狀態：行內錯誤文字已統一，其餘視覺結構未展開。** 顏色沿用 `{colors.status-due}`（驗證錯誤）／`{colors.status-soon}`（系統警示），見第二節。2026-08-26 已將 9 個檔案的 `.form-error` 收斂至 `app.css`；欄位邊框、訊息位置與是否加圖示仍需配合實際表單流程確認。

@@ -55,7 +55,7 @@
 | `DESIGN.md` §10／§13                                            | ✅ **D1／D2 已更新**：§13 盲點對齊現況（焦點環已系統化、Lucide 剩 9 檔等）、§10 加字級量表對照表                                                                                                                  | D1／D2       |
 | 字級量表                                                        | `DESIGN.md` 14 級 vs code 8 個 `--font-size-*` 命名／數值不 1:1，只 `body-md` 校準過。§10 有對照表                                                                                                                | **B8**（新） |
 | `--text-tertiary` / `muted-soft`                                | ✅ **D4 已砍**：對比度 4.42:1 過不了 AA，`styles.css` 與 `DESIGN.md` 都移除，文字色定為 4 級                                                                                                                      | D4           |
-| `@lucide/vue` 直接 import                                       | 9 檔（`ProductSnapshotEditor`、`SetupProcessBanner`、`RegionLocationPanel`、`RegionPreferenceSummary`、`QuickProtectionSummary`、`ZoneProtectionForm`、`FiveDayUvCard`、`SetupPage`）；wireframe 已凍結，阻塞解除 | E1           |
+| `@lucide/vue` 直接 import                                       | **0 檔（2026-08-29 結案）**，依賴已從 `apps/web/package.json` 移除                                                                                                                                             | E1 ✅        |
 | `EducationArticlePage` 的 `:deep()` 區塊                        | 整個長文排版系統活在一個檔案的 scoped CSS，`max-width: 44rem` ×4、`0.9em`、行高 `1.85` 脫離 token                                                                                                                 | B7           |
 | 使用者可見文案                                                  | 多數 inline 在 template，只有 `reminderPresentation.ts` 集中 labels；沒有字串目錄                                                                                                                                 | F1           |
 | 測試脆弱耦合                                                    | `BottomNavigation.test.ts` 的 z-index regex 是改壞才發現的，可能還有其他把 CSS 字面值寫進斷言的測試                                                                                                               | F3           |
@@ -235,11 +235,11 @@
 
 ## Task E：完成 icon 遷移
 
-- [ ] **E1：9 個 `@lucide/vue` 殘留改用自訂 Icon 系統**
+- [x] **E1：`@lucide/vue` 殘留改用自訂 Icon 系統（2026-08-29 完成）**
   - 檔案：`components/product/ProductSnapshotEditor.vue`（`PackageCheck`）、`components/product/SetupProcessBanner.vue`（`ClipboardList`）、`components/region/RegionLocationPanel.vue`（`LocateFixed`）、`components/region/RegionPreferenceSummary.vue`（`MapPin`）、`components/setup/QuickProtectionSummary.vue`（`SlidersHorizontal`、`Sparkles`）、`components/setup/ZoneProtectionForm.vue`（`Sparkles`）、`components/uv/FiveDayUvCard.vue`（`CloudSun`）、`pages/setup/SetupPage.vue`（`LoaderCircle`）。
   - `DESIGN.md` §13 #7 列的 10 個功能型圖示（載入中、快速摘要、調整設定、流程橫幅、產品確認、地區、定位、UV 預報、夜間、傍晚）對應這批。
   - **裁決（2026-08-26）：(c) 先 defer。** 使用者稍後產出草稿 SVG，屆時流程為：使用者提供草稿 → AGENT 放進 `docs/design/icon-system/icons/<id>.svg`、跑 `node tools/icon-system/generate-icons.mjs` 正規化（`#000`→`currentColor`、內聯 class、注入 `<title>`／data 屬性）→ 確認 `icons.generated.ts` 有新條目 → 逐檔把 `import { X } from "@lucide/vue"` 換成 `<Icon name="...">` → 9 檔全換完才從 `apps/web/package.json` 移除 `@lucide/vue`。
-  - 在那之前**不阻塞其他 Task**；`@lucide/vue` 依賴保留。優先序最低。
+  - **實際執行（2026-08-29）**：草稿改由 AGENT 直接畫（使用者要求），12 個新圖示進 `docs/design/icon-system/icons/`、登記進 `generate-icons.mjs`（新增 `feature` 群組與 `board: "new"` 分板欄位）、8 個元件的 import 換成 `<Icon name="..." />`、`@lucide/vue` 依賴移除。`pnpm check` 全綠。幾何的真實來源仍是 Illustrator——這批是**手寫路徑的草稿**，之後若要調整造型，請在 Illustrator 重畫再覆蓋，不要改 SVG path。
 
 ---
 
@@ -260,7 +260,7 @@
   - 做法：grep 所有 `.test.ts` 裡直接比對 CSS 字面值 / class 名 / 內聯 style 的斷言（`toContain("px")`、`attributes("style")`、`.classes()`、硬寫 class selector）。判斷哪些該改成「驗證行為」而非「驗證實作字串」。
   - `docs/superpowers/plans/2026-08-25-shared-component-extraction.md` 的 Global Constraints 已經點名 `AccountDataPage.test.ts:48` 的 `.confirm-note button.button--primary` 這類——順著查。
 
-- [ ] **F4：`DataSettingsPage` 的 loading 狀態採用 `SunLoader`**
+- [ ] **F4：`DataSettingsPage` 的 loading 狀態採用 `BroadcastLoader`**（2026-08-29 起 `SunLoader` 已更名並改成播報印記動畫）
   - `docs/decisions/2026-08-25-second-hardcode-sweep.md` 結尾點名的遺漏：`DataSettingsPage.vue` 仍是手寫 `<p role="status">正在讀取本機資料概況…</p>`，沒用 2026-08-25 Task 3 導入的 `SunLoader`。小改動，順手做。
 
 - [x] **F5：瀏覽器視覺驗證（累積債）**（2026-08-26 完成）
