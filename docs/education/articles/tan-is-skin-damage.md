@@ -2,7 +2,6 @@
 title: "曬黑代表健康嗎？「先曬出底色」也不能預防曬傷"
 slug: tan-is-skin-damage
 category: after-sun-care
-categoryTitle: "回家後與皮膚照顧"
 summary: "曬黑是皮膚受到 UV 後增加色素的反應，不是健康或安全的證明。底曬提供的保護很有限，不能取代防曬。"
 primaryQuestion: "先曬黑一點，之後是不是比較不容易曬傷？"
 status: draft

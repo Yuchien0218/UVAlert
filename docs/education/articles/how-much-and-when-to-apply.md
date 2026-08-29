@@ -2,7 +2,6 @@
 title: "防曬乳什麼時候擦、要擦多少？"
 slug: how-much-and-when-to-apply
 category: before-going-out
-categoryTitle: "出門前準備"
 summary: "在出門前依產品指示提早塗抹，均勻覆蓋衣物沒有遮住的皮膚。少量薄抹會讓標示的防護效果打折，之後還要依活動狀況補擦。"
 primaryQuestion: "防曬乳應該在出門前多久擦？要擦多少？"
 status: draft

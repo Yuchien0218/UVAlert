@@ -2,7 +2,6 @@
 title: "物理性、化學性、混合型防曬怎麼選？別只看名稱"
 slug: mineral-chemical-hybrid-sunscreen
 category: before-going-out
-categoryTitle: "出門前準備"
 summary: "三種名稱主要依 UV 濾劑分類。真正要一起看的，是廣效、SPF、抗水需求、膚感與是否願意足量使用。"
 primaryQuestion: "物理性、化學性和混合型防曬，哪一種比較好？"
 status: draft

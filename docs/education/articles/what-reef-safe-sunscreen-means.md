@@ -2,7 +2,6 @@
 title: "海洋友善、reef-safe 防曬怎麼看？先別把標語當認證"
 slug: what-reef-safe-sunscreen-means
 category: sweat-and-water
-categoryTitle: "流汗或碰水後"
 summary: "reef-safe 或 ocean-friendly 並沒有全球一致的官方定義。選購時應查看完整成分、所在地規定與產品證據，而不是只看正面標語。"
 primaryQuestion: "標示海洋友善或 reef-safe 的防曬，真的有統一認證嗎？"
 status: draft

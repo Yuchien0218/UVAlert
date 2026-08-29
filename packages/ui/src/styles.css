@@ -289,10 +289,13 @@
    * 區塊本來就用 --space-3（12px）＋單一 gap，跟這組「更細的標題→內文
    * 收緊」語意不同，不套用；已套用在 .question-card（見 app.css），
    * 把 legend→helper 的間距從跟其他區塊同值的 16px 收緊成 8px。
+   *
+   * 2026-08-30：原本引進三個，但 --space-stack-body-note 與
+   * --space-stack-block 從未被任何地方引用，移除。留著的 token 會讓人
+   * 以為某處正在用它、改動時要顧慮它。要用時再加回來即可（它們只是
+   * --space-1／--space-6 的語意別名，不是新數值）。
    */
   --space-stack-title-body: var(--space-2);
-  --space-stack-body-note: var(--space-1);
-  --space-stack-block: var(--space-6);
 
   --radius-xs: 0.25rem;
   --radius-sm: 0.5rem;

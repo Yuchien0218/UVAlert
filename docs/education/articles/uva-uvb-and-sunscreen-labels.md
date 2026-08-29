@@ -2,7 +2,6 @@
 title: "UVA、UVB、SPF、PA 到底差在哪裡？"
 slug: uva-uvb-and-sunscreen-labels
 category: uv-basics
-categoryTitle: "了解今天的 UV"
 summary: "SPF 主要反映 UVB 防護，PA 是 UVA 防護標示。看懂兩者後，還要搭配廣效防護、足量塗抹與遮蔽，不能把數字當成可曝曬時間。"
 primaryQuestion: "SPF 和 PA 分別在看什麼？"
 status: draft

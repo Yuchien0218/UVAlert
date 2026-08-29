@@ -327,11 +327,7 @@ function writeSyncDisabled(value: boolean): void {
       變成看不清楚，而不是變次要。
     -->
     <section class="sync-group" aria-labelledby="sync-group-title">
-      <h2
-        id="sync-group-title"
-        class="sync-group__title"
-        data-typography-role="card-title"
-      >
+      <h2 id="sync-group-title" data-typography-role="card-title">
         跨裝置同步
       </h2>
       <p class="sync-group__lead">

@@ -2,7 +2,6 @@
 title: "防曬棒怎麼補才均勻？不要只輕輕滑過一次"
 slug: how-to-reapply-sunscreen-stick
 category: reapply-sunscreen
-categoryTitle: "外出中的補擦"
 summary: "AAD 建議每個區域來回塗抹四遍，再用手抹勻。防曬棒方便攜帶，但仍要處理邊界、凹處與漏擦。"
 primaryQuestion: "防曬棒需要來回塗幾次，才能完成補擦？"
 status: draft

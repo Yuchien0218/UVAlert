@@ -2,7 +2,6 @@
 title: "防曬乳真的會影響珊瑚嗎？目前知道與還不知道的事"
 slug: sunscreen-and-coral-reefs
 category: sweat-and-water
-categoryTitle: "流汗或碰水後"
 summary: "部分 UV 濾劑在實驗與環境研究中顯示可能影響水生生物，但真實海域的濃度、長期效果與成分差異仍在研究。"
 primaryQuestion: "防曬乳中的成分真的會傷害珊瑚嗎？"
 status: draft

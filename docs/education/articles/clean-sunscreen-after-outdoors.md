@@ -2,7 +2,6 @@
 title: "回家後怎麼清潔防曬，才不需要用力搓？"
 slug: clean-sunscreen-after-outdoors
 category: after-sun-care
-categoryTitle: "回家後與皮膚照顧"
 summary: "回家後先依防曬乳標示與劑型選擇溫和清潔；潤色或抗水型防曬可能需要先卸妝再清洗，不必為了追求乾淨而反覆用力搓揉。"
 primaryQuestion: "回家後要怎麼把防曬清潔乾淨？"
 status: draft

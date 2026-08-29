@@ -2,7 +2,6 @@
 title: "帶妝或正在忙，怎麼把補擦做完？"
 slug: reapply-when-wearing-makeup
 category: reapply-sunscreen
-categoryTitle: "外出中的補擦"
 summary: "帶妝時沒有一種補擦方式適合所有人；先看防曬乳標示，確保防曬真的均勻覆蓋裸露皮膚。做不到時先遮蔭，再找能完整補擦的時機。"
 primaryQuestion: "帶妝時要怎麼補擦防曬？"
 status: draft

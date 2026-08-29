@@ -2,7 +2,6 @@
 title: "曬傷出現哪些狀況，應該尋求醫療協助？"
 slug: when-sunburn-needs-medical-care
 category: special-situations
-categoryTitle: "特殊情況"
 summary: "大片水泡、持續加重的疼痛或腫脹、發燒發冷、頭暈噁心、脫水、眼睛疼痛或感染徵象，都不適合只靠居家照護或 App 觀察。"
 primaryQuestion: "曬傷到什麼程度需要看醫師？"
 status: draft

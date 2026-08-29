@@ -2,7 +2,6 @@
 title: "曬紅後可以冰敷嗎？用涼水降溫，不要讓冰塊直接碰皮膚"
 slug: cool-compress-after-sunburn
 category: after-sun-care
-categoryTitle: "回家後與皮膚照顧"
 summary: "輕微曬傷可用涼水淋浴或涼濕敷布幫助降溫；避免冰塊直接接觸皮膚，也不要再曝曬。"
 primaryQuestion: "曬傷後可以直接用冰塊冰敷嗎？"
 status: draft

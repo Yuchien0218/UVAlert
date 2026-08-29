@@ -2,7 +2,6 @@
 title: "防曬噴霧怎麼補？看得到光澤後還要用手抹勻"
 slug: how-to-reapply-sunscreen-spray
 category: reapply-sunscreen
-categoryTitle: "外出中的補擦"
 summary: "噴霧要近距離均勻噴到皮膚出現光澤，再用手抹勻。不要直接噴臉、不要吸入，也要遠離火源。"
 primaryQuestion: "防曬噴霧直接噴一下就完成補擦了嗎？"
 status: draft

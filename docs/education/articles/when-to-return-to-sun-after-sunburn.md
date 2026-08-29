@@ -2,7 +2,6 @@
 title: "曬傷後多久可以再出門？恢復前先以遮蔽為主"
 slug: when-to-return-to-sun-after-sunburn
 category: after-sun-care
-categoryTitle: "回家後與皮膚照顧"
 summary: "曬傷皮膚恢復前應避開直射陽光；若不得不外出，先用衣物、帽子與遮蔭保護，不要把防曬倒數當成受傷皮膚可以曝曬的許可。"
 primaryQuestion: "曬傷或脫皮後，什麼時候才能再曬太陽？"
 status: draft

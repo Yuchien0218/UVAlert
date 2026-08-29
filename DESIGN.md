@@ -620,7 +620,15 @@ Noto Serif TC 是標題的唯一字型，沒有第二層自托管備援——載
 
 **`flow-heading`** — 全螢幕操作流程的標題列，標題與說明在左、關閉操作在右；內部以 12px 堆疊，兩側保留 16px 間距。共通實作位於 `apps/web/src/assets/app.css`，目前供重新塗抹、更正紀錄與回報事件三個流程使用。
 
-**`app-card`** — 通用內容卡。背景 `{colors.surface-soft}`（暖奶油，不透明），1px `{colors.hairline}` 邊框，圓角 `{rounded.lg}`，內距 20px。無陰影。
+**`app-card`** — 通用內容卡的**表面基元**。背景 `{colors.surface-soft}`（暖奶油，不透明），1px `{colors.hairline}` 邊框，圓角 `{rounded.lg}`。無陰影。
+
+**它不提供內距。** 內距由具體的卡片 class 給（`question-card`、`install-card`、各頁自己的覆寫等），慣用值是 20px。
+
+**2026-08-30 更正**：本節原本寫「內距 20px」，但 `app.css` 的 `.app-card` 從來沒有 padding——那 20px 被複製在 6 頁的 scoped 樣式裡。這裡改成描述實際行為（CLAUDE.md：文件與程式碼衝突時以程式碼為準）。
+
+**為什麼不把內距收進 `.app-card`**：20 幾處用法已經由併用的 class 供應內距（`question-card app-card` 6 處、`install-card app-card` 4 處…），加進去會全部變成雙重內距。
+
+**代價與守門**：這個分工的風險是「忘記補內距的用法會直接破圖，而且沒有任何東西會提醒」——2026-08-24 的 `.product-label` 就是這樣，樣式在重構中遺失後只剩 `.app-card`，內容貼著邊框六天沒被發現。`apps/web/src/assets/appCardPadding.test.ts` 現在守著每一處 `.app-card` 都有內距來源。可收合卡片（`quick-protection`、`context-group`）把內距放在整列寬的觸發器上，是測試裡具名的例外。
 
 > **2026-08-29 更正**：這一段先前寫「半透明白 `rgba(255,255,255,0.6)` 疊在 canvas 上」，frontmatter 又寫 `{colors.canvas}`——**兩者都是舊版**，而且同一天的第十節註記還寫「改回 canvas」，三處互相矛盾。實際的 `--surface-primary` 是 `{colors.surface-soft}`，2026-08-24 當天演進過四個版本（canvas → 半透明白 0.6 → 0.4 → 暖奶油），完整脈絡記在 `packages/ui/src/styles.css` 該 token 上方的註解。
 >
@@ -932,7 +940,7 @@ B8 遷移期間使用的四個臨時字級別名已移除；目前元件只使�
 > 1. **`--surface-primary` 改回 `{colors.canvas}`**，取代 2026-08-22 一度指向的 `{colors.surface-card}`。本節第五節的 `app-card` 規範本來就寫「背景 canvas、1px hairline 邊框」（見上方 654 行），2026-08-22 那次色彩套用其實是改錯方向；Claude Design 的下游元件庫一直維持 canvas＋hairline 版本。這次改動會讓 `app-card`、輸入框、bottom sheet 等所有引用 `--surface-primary` 的元件變成跟頁面同色，只靠 hairline 分隔——`HomeCountdown`／`ReminderPanel`／`BottomNavigation` 三處直接引用 `{colors.surface-card}`，不受影響。
 > 2. **`{colors.status-tracking}`／`{colors.status-soon}`／`{colors.status-due}` 加深一階**（`#2F6FBB`→`#3F76A5`、`#A86100`→`#BB6820`、`#CC3333`→`#C1442F`），**`{colors.status-untimed}` 從紫色 `#5B3CC4` 改成中性灰 `#9D9591`**——untimed 語意是「沒有時間資訊」，中性灰比專屬紫色貼切，也是 Claude Design 已經套用的方向。
 >
-> 同時引進 Claude Design 定義的 stack 間距 token（`--space-stack-title-body` 8px／`--space-stack-body-note` 4px／`--space-stack-block` 24px，數值分別等於既有的 `--space-2`／`--space-1`／`--space-6`，純語意別名）。已套用在 `question-card` 的 legend→內文間距（見 `apps/web/src/assets/app.css`）；`.page-heading`／`.flow-heading` 維持原本的 `--space-3`（12px）單一 gap，語意不同，不套用。
+> 同時引進 Claude Design 定義的 stack 間距 token。**2026-08-30 更正**：原本引進三個，但只有 `--space-stack-title-body`（8px，等於 `--space-2`）真的被用在 `question-card` 的 legend→內文間距；`--space-stack-body-note` 與 `--space-stack-block` 從未被任何地方引用，已移除——留著的 token 會讓人以為某處正在用它。`.page-heading`／`.flow-heading` 維持原本的 `--space-3`（12px）單一 gap，語意不同，不套用。
 
 > **2026-08-22 更正**：「點擊目標 44px」先前寫成已對齊，但實際有三個元件用區域 CSS 覆寫把共用 `.button` 的 `min-height: var(--tap-target)` 壓成 `2.5rem`（40px）——`OutdoorContextCard`、`EveningUvPrompt`、`FiveDayUvCard`。三處皆已改為刪除該行、回歸共用 token（不是改寫成 44px，避免再寫死數值）。
 >

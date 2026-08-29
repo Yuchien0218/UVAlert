@@ -2,7 +2,6 @@
 title: "這些部位最容易漏擦：臉、耳朵、脖子到腳背"
 slug: easy-to-miss-sunscreen-areas
 category: reapply-sunscreen
-categoryTitle: "外出中的補擦"
 summary: "補擦時不要只看臉頰。耳朵、頸部、手背、腳背、唇部與頭頂等裸露位置常被忽略，可以固定順序逐區確認。"
 primaryQuestion: "補擦防曬時，哪些部位最容易忘記？"
 status: draft

@@ -2,7 +2,6 @@
 title: "SPF 30 和 SPF 50 差多少？數字越高不代表可以越久不補"
 slug: spf-30-vs-50
 category: before-going-out
-categoryTitle: "出門前準備"
 summary: "SPF 主要反映對曬傷相關 UVB 的防護測試結果，不是可安全曝曬時間。高 SPF 仍需足量、均勻並依活動補擦。"
 primaryQuestion: "SPF 30 和 SPF 50 應該選哪一個？"
 status: draft

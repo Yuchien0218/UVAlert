@@ -2,7 +2,6 @@
 title: "水面、沙地與陰影：為什麼遮住了還是要留意 UV？"
 slug: sun-and-water-reflection
 category: sweat-and-water
-categoryTitle: "流汗或碰水後"
 summary: "水面、沙地、雪地與混凝土都可能反射紫外線；遮蔭能降低曝曬但不是完全隔絕，因此仍要搭配衣物、帽子、眼鏡與防曬乳。"
 primaryQuestion: "在水邊、沙地或陰影下，還需要防曬嗎？"
 status: draft

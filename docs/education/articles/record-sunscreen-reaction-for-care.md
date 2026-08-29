@@ -2,7 +2,6 @@
 title: "防曬後不舒服，記下哪些資訊才方便後續求助？"
 slug: record-sunscreen-reaction-for-care
 category: special-situations
-categoryTitle: "特殊情況"
 summary: "若使用防曬後出現不適，保留產品與成分資訊，記下使用時間、部位和症狀變化；這些資料能幫助醫師或藥師了解情況。"
 primaryQuestion: "防曬造成不舒服時，要記錄哪些資訊？"
 status: draft

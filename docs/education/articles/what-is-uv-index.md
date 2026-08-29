@@ -2,7 +2,6 @@
 title: "UV 指數怎麼看？先看數字，再決定怎麼防曬"
 slug: what-is-uv-index
 category: uv-basics
-categoryTitle: "了解今天的 UV"
 summary: "UV 指數是環境紫外線強度的提示，不是個人可以曬多久的倒數。先看今天的指數，再安排遮蔭、衣物、帽子、眼鏡與防曬乳。"
 primaryQuestion: "今天的 UV 指數代表什麼？"
 status: draft

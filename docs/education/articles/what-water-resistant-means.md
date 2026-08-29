@@ -2,7 +2,6 @@
 title: "『抗水』不是『防水』：怎麼看懂 40／80 分鐘？"
 slug: what-water-resistant-means
 category: sweat-and-water
-categoryTitle: "流汗或碰水後"
 summary: "Water-resistant 代表防曬乳在特定測試條件與標示時間內維持防護，不代表永久防水；游泳、流汗或擦乾後仍要依防曬乳標示重新補擦。"
 primaryQuestion: "防曬乳寫抗水或 40／80 分鐘，實際上代表什麼？"
 status: draft

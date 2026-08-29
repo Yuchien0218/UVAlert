@@ -2,7 +2,6 @@
 title: "忘記補擦防曬了，現在補還來得及嗎？"
 slug: forgot-to-reapply-sunscreen
 category: reapply-sunscreen
-categoryTitle: "外出中的補擦"
 summary: "忘記補擦不代表只能放棄；先離開直射或找到遮蔭，再依產品標示重新塗抹，不需要加倍塗厚，也不要把延遲當成已經沒有防護。"
 primaryQuestion: "防曬超過兩小時沒補擦，現在要怎麼補救？"
 status: draft

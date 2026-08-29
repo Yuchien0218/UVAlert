@@ -2,7 +2,6 @@
 title: "坐窗邊或開車也會曬到嗎？玻璃後的 UVA 這樣看"
 slug: uva-through-windows
 category: uv-basics
-categoryTitle: "了解今天的 UV"
 summary: "一般玻璃可阻擋大部分 UVB，但部分 UVA 仍可能穿透。是否需要額外防護，要看距離、曝曬時間與玻璃種類。"
 primaryQuestion: "待在窗邊或車內還需要防曬嗎？"
 status: draft

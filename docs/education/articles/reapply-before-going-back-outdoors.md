@@ -2,7 +2,6 @@
 title: "在室內一段時間後又要出門，防曬要重新檢查嗎？"
 slug: reapply-before-going-back-outdoors
 category: reapply-sunscreen
-categoryTitle: "外出中的補擦"
 summary: "準備再次外出時，先看上次塗抹時間與中間是否流汗、碰水或擦拭；若已接近一般兩小時節點或有事件，就先補擦再出門。"
 primaryQuestion: "早上擦過防曬，下午再出門前需要重新補擦嗎？"
 status: draft

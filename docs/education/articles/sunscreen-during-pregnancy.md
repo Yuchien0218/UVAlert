@@ -2,7 +2,6 @@
 title: "懷孕時可以擦防曬嗎？先以遮蔽為主，再看成分與個人狀況"
 slug: sunscreen-during-pregnancy
 category: special-situations
-categoryTitle: "特殊情況"
 summary: "孕期仍需要避免過度 UV 曝曬。可先用衣物、帽子與遮蔭，產品選擇則依標示與產科或皮膚科專業建議。"
 primaryQuestion: "懷孕期間可以使用防曬乳嗎？"
 status: draft
