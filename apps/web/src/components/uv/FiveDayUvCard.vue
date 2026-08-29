@@ -91,7 +91,7 @@ function getUnavailableMessage(error: UvForecastError): string {
     <div v-else-if="phase === 'no_region'" class="uv-forecast__state">
       <span>
         請先
-        <a class="text-link" href="#outdoor-context">設定地區</a>
+        <RouterLink class="text-link" to="/region">設定地區</RouterLink>
         ，才能查看五日 UV 預報。
       </span>
     </div>
