@@ -248,7 +248,7 @@ const SECTIONS = [
  * `{區塊.key}` 都真的解析得到。
  */
 describe("DESIGN.md 的 {token.ref} 全部解析得到", () => {
-  const defined = new Map(
+  const defined = new Map<string, Set<string>>(
     REFERENCEABLE.map((section) => [section, frontmatterKeys(section)])
   );
 
