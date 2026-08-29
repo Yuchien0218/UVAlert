@@ -27,6 +27,8 @@ lastReviewed: 2026-08-16
 
 可讓使用者自行提高提醒敏感度，但 App 不應根據藥名自動計算「安全曝曬時間」，也不應建議停藥。
 
+---
+
 ## 文章限制
 
 本文是一般用藥安全提醒，不提供藥物診斷、交互作用判讀或劑量調整。
@@ -35,7 +37,5 @@ lastReviewed: 2026-08-16
 
 - [FDA：The Sun and Your Medicine](https://www.fda.gov/drugs/special-features/sun-and-your-medicine)（藥物光敏感、標示與專業諮詢；查閱 2026-08-16）
 - [MedlinePlus：Drug-induced photosensitivity](https://medlineplus.gov/ency/article/000131.htm)（光敏感反應與照護概念；查閱 2026-08-16）
-
----
 
 本文為一般衛教草稿，尚未完成 UVAlert 專業審閱。

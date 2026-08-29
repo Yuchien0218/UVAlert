@@ -29,6 +29,8 @@ lastReviewed: 2026-08-16
 3. 敏感、刺痛或容易長痘時，依膚況查看成分、無香料或不致粉刺等資訊，先小範圍試用。
 4. 最後比較泛白、黏膩、乾燥和上妝相容性，因為不好用的產品更容易被少擦或放棄。
 
+---
+
 ## 文章限制
 
 「天然」「物理」「化學」都不能單獨保證安全、溫和或海洋友善。不同地區核准成分也不同，應以所在地法規與產品標示為準。
@@ -37,7 +39,5 @@ lastReviewed: 2026-08-16
 
 - [衛生福利部食品藥物管理署：物理性與化學性防曬](https://www.fda.gov.tw/Tc/PublishOtherEpaperContent.aspx?id=1519&r=2101262437&tid=4827)（成分類型與作用；查閱 2026-08-16）
 - [AAD：How to decode a sunscreen label](https://www.aad.org/public/everyday-care/sun-protection/shade-clothing-sunscreen/understand-sunscreen-labels)（礦物、化學與混合型說明；查閱 2026-08-16）
-
----
 
 本文為一般衛教草稿，尚未完成 UVAlert 專業審閱。

@@ -29,6 +29,8 @@ lastReviewed: 2026-08-16
 
 App 可以允許使用者暫停或記錄「受傷部位暫不塗抹」，但不應顯示成「已防護」或繼續用倒數製造安全感。對受傷皮膚，實際遮蔽和醫療建議優先於提醒完成率。
 
+---
+
 ## 文章限制
 
 不同產品與皮膚傷口狀況可能有不同警語；本文不判斷傷口深度、感染或恢復時間，也不提供傷口用藥指示。若有大片水泡、破皮、膿液、紅線或疼痛腫脹惡化，請尋求醫療協助。
@@ -38,7 +40,5 @@ App 可以允許使用者暫停或記錄「受傷部位暫不塗抹」，但不�
 - [FDA：Labeling and Effectiveness Testing: Sunscreen Drug Products](https://www.fda.gov/regulatory-information/search-fda-guidance-documents/labeling-and-effectiveness-testing-sunscreen-drug-products-over-counter-human-use-small-entity)（「不要用於受損或破皮皮膚」的產品標示；查閱 2026-08-16）
 - [衛生福利部食品藥物管理署：正確使用化粧品須知（PDF）](https://www.fda.gov.tw/tc/includes/GetFile.ashx?id=f637608154367822493)（皮膚不適時停止、清洗與避免摩擦；查閱 2026-08-16）
 - [AAD：How to treat a sunburn](https://www.aad.org/public/everyday-care/injured-skin/burns/treat-sunburn)（曬傷與水泡的一般照護；查閱 2026-08-16）
-
----
 
 本文為一般衛教草稿，尚未完成 UVAlert 專業審閱。

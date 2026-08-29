@@ -33,6 +33,8 @@ lastReviewed: 2026-08-16
 - 不要用力去角質、搓掉脫皮，或在破損皮膚上硬塗防曬乳。
 - 不要自行把藥物、精油或偏方當成治療；需要用藥時先問醫師或藥師。
 
+---
+
 ## 文章限制
 
 發燒、發冷、噁心、頭暈、明顯脫水、眼睛疼痛或畏光、大片水泡、感染徵象及快速惡化的疼痛，都不適合只在家觀察。兒童、嬰幼兒、長者或有慢性病者若曬傷，也應更早諮詢專業人員。
@@ -42,7 +44,5 @@ lastReviewed: 2026-08-16
 - [AAD：How to treat sunburn](https://www.aad.org/public/everyday-care/injured-skin/burns/treat-sunburn)（離開陽光、降溫、保濕、補水與水泡照護；查閱 2026-08-16）
 - [CDC：Preventing Sunburn](https://www.cdc.gov/skin-cancer/prevention/sunburn.html)（曬傷後避免再次曝曬與警示症狀；查閱 2026-08-16）
 - [NHS：Sunburn](https://www.nhs.uk/conditions/sunburn/)（曬傷後避免事項與求助警訊；查閱 2026-08-16）
-
----
 
 本文為一般衛教草稿，尚未完成 UVAlert 專業審閱。

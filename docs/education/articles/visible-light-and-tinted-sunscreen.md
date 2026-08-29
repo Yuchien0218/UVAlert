@@ -24,6 +24,8 @@ lastReviewed: 2026-08-16
 2. 講的是太陽可見光，還是電子螢幕？
 3. 是否仍具備你戶外活動需要的廣效、SPF 與抗水標示？
 
+---
+
 ## 文章限制
 
 本文不替特定潤色產品背書，也不把化妝遮瑕效果等同防曬測試結果。若因肝斑、色素疾病接受治療，應依皮膚科專業建議選擇產品。
@@ -32,7 +34,5 @@ lastReviewed: 2026-08-16
 
 - [AAD：How to decode a sunscreen label](https://www.aad.org/public/everyday-care/sun-protection/shade-clothing-sunscreen/understand-sunscreen-labels)（氧化鐵、潤色防曬與太陽可見光；查閱 2026-08-16）
 - [WHO：Ultraviolet radiation](https://www.who.int/news-room/fact-sheets/detail/ultraviolet-radiation)（紫外線範圍與健康影響；查閱 2026-08-16）
-
----
 
 本文為一般衛教草稿，尚未完成 UVAlert 專業審閱。

@@ -43,6 +43,8 @@ UV 指數（UVI）用來表示到達地面的紫外線強度與可能造成傷�
 
 UVAlert 的倒數是協助記住補擦的工具；它不會把 UV 指數轉換成個人安全時間，也不取代防曬乳標示或醫療專業建議。
 
+---
+
 ## 文章限制
 
 本文不判斷個人是否會曬傷，也不提供疾病、藥物或特殊膚況的個人化曝曬建議。若你正在使用可能增加光敏感的藥物，請向醫師或藥師確認適合的防護方式。
@@ -52,7 +54,5 @@ UVAlert 的倒數是協助記住補擦的工具；它不會把 UV 指數轉換�
 - [中央氣象署：紫外線指數預報服務](https://www.cwa.gov.tw/Data/knowledge/announce/service13.pdf)（台灣分級與預報說明；查閱 2026-08-16）
 - [WHO：Radiation: The ultraviolet (UV) index](https://www.who.int/news-room/questions-and-answers/item/radiation-the-ultraviolet-%28uv%29-index)（UVI 意義與依指數採取防護；查閱 2026-08-16）
 - [WHO：Ultraviolet radiation](https://www.who.int/news-room/fact-sheets/detail/ultraviolet-radiation)（UV 健康影響與整合防護；查閱 2026-08-16）
-
----
 
 本文為一般衛教草稿，尚未完成 UVAlert 專業審閱。

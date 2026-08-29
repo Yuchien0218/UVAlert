@@ -36,6 +36,8 @@ lastReviewed: 2026-08-16
 
 事件記錄的目的，是讓你知道「發生過需要補擦的事」，不是替你判定產品已經失效。記錄後先完成實際補擦，再從新的補擦時間開始倒數；如果當下正在開車、游泳或處在不安全位置，先到安全地方再處理。
 
+---
+
 ## 文章限制
 
 本文不會依雨量、汗量或照片判定防曬剩餘比例，也不把抗水時間當成個人安全保證。若皮膚出現明顯紅腫、刺痛、破皮或水泡，先停止在受刺激部位塗抹，改以遮蔽和醫療建議為優先。
@@ -46,7 +48,5 @@ lastReviewed: 2026-08-16
 - [AAD：How to decode a sunscreen label](https://www.aad.org/public/everyday-care/sun-protection/shade-clothing-sunscreen/understand-sunscreen-labels)（抗水與毛巾擦乾後補擦；查閱 2026-08-16）
 - [FDA：Sunscreen: How to Help Protect Your Skin from the Sun](https://www.fda.gov/drugs/understanding-over-counter-medicines/sunscreen-how-help-protect-your-skin-sun)（依產品標籤與活動補擦；查閱 2026-08-16）
 - [國民健康署：防曬5裝備學起來 一起遠離熱傷害！](https://www.hpa.gov.tw/Pages/Detail.aspx?nodeid=4576&pid=15862)（流汗、補水、休息與降溫；查閱 2026-08-16）
-
----
 
 本文為一般衛教草稿，尚未完成 UVAlert 專業審閱。

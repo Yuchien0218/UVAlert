@@ -27,6 +27,8 @@ lastReviewed: 2026-08-16
 
 彩妝上的 SPF 是在規定用量下測得；實際上妝量常不足以均勻覆蓋所有裸露位置。若有戶外曝曬需求，不宜只靠少量底妝代替完整防護。
 
+---
+
 ## 文章限制
 
 產品配方差異很大，本文不保證任何兩項產品一定相容。持續紅、腫、癢或刺痛時應停用並尋求適當協助。
@@ -35,7 +37,5 @@ lastReviewed: 2026-08-16
 
 - [AAD：How to apply sunscreen](https://www.aad.org/public/everyday-care/sun-protection/shade-clothing-sunscreen/how-to-apply-sunscreen)（出門前、足量與均勻塗抹；查閱 2026-08-16）
 - [AAD：How to decode a sunscreen label](https://www.aad.org/public/everyday-care/sun-protection/shade-clothing-sunscreen/understand-sunscreen-labels)（帶妝使用與產品形式；查閱 2026-08-16）
-
----
 
 本文為一般衛教草稿，尚未完成 UVAlert 專業審閱。

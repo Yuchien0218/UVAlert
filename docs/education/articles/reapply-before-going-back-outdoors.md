@@ -30,6 +30,8 @@ lastReviewed: 2026-08-16
 
 再次出門前的補擦，是「實際行動優先」的檢查點。補擦完成後，再從實際時間重新開始倒數；如果仍在室內且沒有曝曬，倒數不是用來替代出門前的產品標示檢查。
 
+---
+
 ## 文章限制
 
 本文不判定室內窗邊、車內或特定場所的個人 UV 劑量，也不提供「短暫外出一定不用補擦」的保證。實際仍以活動、遮蔽、產品標示與個人狀況綜合判斷。
@@ -39,7 +41,5 @@ lastReviewed: 2026-08-16
 - [AAD：How to apply sunscreen](https://www.aad.org/public/everyday-care/sun-protection/shade-clothing-sunscreen/how-to-apply-sunscreen)（兩小時與事件後補擦；查閱 2026-08-16）
 - [FDA：Sunscreen: How to Help Protect Your Skin from the Sun](https://www.fda.gov/drugs/understanding-over-counter-medicines/sunscreen-how-help-protect-your-skin-sun)（依活動與標示補擦；查閱 2026-08-16）
 - [WHO：Ultraviolet radiation](https://www.who.int/news-room/fact-sheets/detail/ultraviolet-radiation)（遮蔭、衣物與防曬的組合；查閱 2026-08-16）
-
----
 
 本文為一般衛教草稿，尚未完成 UVAlert 專業審閱。

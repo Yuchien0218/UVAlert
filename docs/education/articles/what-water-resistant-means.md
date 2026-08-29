@@ -34,6 +34,8 @@ lastReviewed: 2026-08-16
 3. **到安全處理的地方**：先離開水邊或直射陽光，輕按吸乾水分，不要用力來回摩擦。
 4. **依產品標示補擦**：在皮膚沒有明顯紅腫、刺痛或破損時，重新均勻塗抹裸露部位。
 
+---
+
 ## 文章限制
 
 40／80 分鐘是美國 FDA 的產品測試與標示脈絡，不是臺灣所有產品的通用法規數字。購買與使用時應以臺灣核准的產品標籤、仿單或說明書為準；若皮膚已經不舒服或受傷，不要只靠防曬倒數判斷，請參考「特殊情況」或詢問醫療專業人員。
@@ -43,7 +45,5 @@ lastReviewed: 2026-08-16
 - [FDA：Sunscreen: How to Help Protect Your Skin from the Sun](https://www.fda.gov/drugs/understanding-over-counter-medicines/sunscreen-how-help-protect-your-skin-sun)（抗水不是防水、依標籤補擦；查閱 2026-08-16）
 - [FDA：Labeling and Effectiveness Testing: Sunscreen Drug Products](https://www.fda.gov/regulatory-information/search-fda-guidance-documents/labeling-and-effectiveness-testing-sunscreen-drug-products-over-counter-human-use-small-entity)（40／80 分鐘測試與標示脈絡；查閱 2026-08-16）
 - [AAD：How to decode a sunscreen label](https://www.aad.org/public/everyday-care/sun-protection/shade-clothing-sunscreen/understand-sunscreen-labels)（抗水標示與事件後補擦；查閱 2026-08-16）
-
----
 
 本文為一般衛教草稿，尚未完成 UVAlert 專業審閱。

@@ -25,6 +25,8 @@ lastReviewed: 2026-08-16
 3. 裸露皮膚仍要適當防護，不因環境疑慮而放棄防曬。
 4. 不把「天然」「礦物」或單一標語當成零風險證明。
 
+---
+
 ## 文章限制
 
 本文不判定單一品牌或配方是否對珊瑚安全，也不提供永久有效的成分黑名單。
@@ -33,7 +35,5 @@ lastReviewed: 2026-08-16
 
 - [EPA：UV Filters in Sunscreens and Aquatic Environmental Health](https://www.epa.gov/water-research/uv-filters-sunscreens-and-aquatic-environmental-health)（環境研究與不確定性；查閱 2026-08-16）
 - [NOAA：Skincare Chemicals and Coral Reefs](https://oceanservice.noaa.gov/news/sunscreen-corals.html)（防曬成分與水生生物研究概況；查閱 2026-08-16）
-
----
 
 本文為一般衛教草稿，尚未完成 UVAlert 專業審閱。

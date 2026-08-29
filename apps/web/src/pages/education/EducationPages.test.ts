@@ -60,8 +60,13 @@ describe("公開衛教頁", () => {
     expect(wrapper.text()).toContain("本文為一般衛教草稿");
     const divider = wrapper.find(".education-article-body hr");
     expect(divider.exists()).toBe(true);
-    expect(wrapper.get(".education-article-body hr + p").text()).toContain(
-      "本文為一般衛教草稿"
+    /*
+     * 2026-08-29：分隔線從結尾註記之前移到「文章限制」之前，作用改成標
+     * 示「文章本體到此為止，以下是限制、來源與審閱狀態」。所以這裡守的
+     * 是它緊接著「文章限制」標題，不再是緊接著結尾註記。
+     */
+    expect(wrapper.get(".education-article-body hr + h2").text()).toContain(
+      "文章限制"
     );
     expect(
       document.querySelector<HTMLMetaElement>('meta[name="robots"]')?.content

@@ -29,6 +29,8 @@ lastReviewed: 2026-08-16
 
 防曬效果和產品種類、足量、均勻度、活動與重新塗抹都有關；一次加倍不會把之前漏掉的時間補回來，也可能增加黏膩、刺激或誤入眼口的機會。把「現在重新做好」比「補償過去」更實際。
 
+---
+
 ## 文章限制
 
 本文不估算你已經受到多少 UV，也不保證補擦後不會曬傷。若你經常忘記，可以把防曬和出門、吃午餐或喝水等日常節點綁在一起，並使用 UVAlert 做記憶輔助。
@@ -38,7 +40,5 @@ lastReviewed: 2026-08-16
 - [FDA：Sunscreen quiz](https://www.accessdata.fda.gov/cder/sunscreen/index.html)（重新塗抹不會把已發生的曝曬重置；查閱 2026-08-16）
 - [AAD：How to apply sunscreen](https://www.aad.org/public/everyday-care/sun-protection/shade-clothing-sunscreen/how-to-apply-sunscreen)（兩小時與事件後補擦；查閱 2026-08-16）
 - [AAD：How to treat a sunburn](https://www.aad.org/public/everyday-care/injured-skin/burns/treat-sunburn)（曬紅後的基本照護與求助警訊；查閱 2026-08-16）
-
----
 
 本文為一般衛教草稿，尚未完成 UVAlert 專業審閱。

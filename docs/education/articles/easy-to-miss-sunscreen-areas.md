@@ -44,6 +44,8 @@ UVAlert 的提醒部位分成七區，你可以把它當成補擦時的檢查順
 
 把補擦順序固定成「臉 → 耳頸 → 手臂 → 手 → 身體 → 腿 → 腳」，每次照同一條路線走。UVAlert 的部位紀錄是幫助你回想與提醒，不是檢查你是否達到醫療上所需的防護量。
 
+---
+
 ## 文章限制
 
 本文提供位置檢查方法，不替任何人判斷需要塗抹的實際面積；請依衣物、產品標示、活動與專業建議調整。
@@ -53,7 +55,5 @@ UVAlert 的提醒部位分成七區，你可以把它當成補擦時的檢查順
 - [AAD：How to apply sunscreen](https://www.aad.org/public/everyday-care/sun-protection/shade-clothing-sunscreen/how-to-apply-sunscreen)（臉、耳朵、頸部、手、腳與頭皮等裸露部位；查閱 2026-08-16）
 - [FDA：Tips to Stay Safe in the Sun](https://www.fda.gov/consumers/consumer-updates/tips-stay-safe-sun-sunscreen-sunglasses)（耳朵、頸部、手、腳與唇部的防護提醒；查閱 2026-08-16）
 - [WHO：Ultraviolet radiation](https://www.who.int/news-room/fact-sheets/detail/ultraviolet-radiation)（衣物與遮蔽優先的整合防護；查閱 2026-08-16）
-
----
 
 本文為一般衛教草稿，尚未完成 UVAlert 專業審閱。

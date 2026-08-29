@@ -24,6 +24,8 @@ lastReviewed: 2026-08-16
 
 不需要用力去角質或急著美白。先停止刻意曝曬，觀察是否有紅、痛、水泡或不適，之後恢復規律防護。
 
+---
+
 ## 文章限制
 
 本文討論的是 UV 造成的曬黑，不等同疾病或藥物造成的色素變化。持續或不尋常的皮膚變化應由專業人員評估。
@@ -32,7 +34,5 @@ lastReviewed: 2026-08-16
 
 - [CDC：Reducing Risk for Skin Cancer](https://www.cdc.gov/skin-cancer/prevention/index.html)（UV 後膚色改變代表傷害；查閱 2026-08-16）
 - [MedlinePlus：Tanning](https://medlineplus.gov/tanning.html)（底曬不能預防曬傷與 UV 風險；查閱 2026-08-16）
-
----
 
 本文為一般衛教草稿，尚未完成 UVAlert 專業審閱。
