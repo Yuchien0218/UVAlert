@@ -2,7 +2,7 @@
 version: alpha
 name: 防曬晴報員設計系統
 description: 防曬晴報員（UVAlert）是一個以防曬乳補擦倒數為核心的 Web／PWA。介面建立在暖象牙底色上，標題用文學感襯線體，行動色為深杏桃，倒數與資料面板使用濃縮咖啡色深色表面，狀態色使用藕紫。視覺個性來自象牙／杏桃／藕紫的組合——有陽光感與人文氣息，同時安靜到足以承載每日的健康指引。字體聲音是襯線標題搭配人文無襯線內文。
-target-status: 本文件的色彩與字體是「目標方向」，前端程式碼尚未套用；衝突處理見下方「與程式碼的落差」。
+target-status: 色彩（2026-08-22）、字體（2026-08-23）與動效 token（2026-08-29）皆已套用；colors／rounded／spacing／layout／typography／motion 六個 frontmatter 區塊由 packages/ui/src/tokens.test.ts 自動比對 styles.css。仍有偏離的項目與衝突處理見第十節「與程式碼的落差」。
 
 motion:
   duration-fast: 160ms
@@ -174,7 +174,7 @@ components:
     textColor: "{colors.muted}"
     typography: "{typography.caption}"
   app-card:
-    backgroundColor: "{colors.canvas}"
+    backgroundColor: "{colors.surface-soft}"
     textColor: "{colors.ink}"
     borderColor: "{colors.hairline}"
     rounded: "{rounded.lg}"
@@ -360,7 +360,7 @@ components:
     typography: "{typography.caption}"
   page-footer-meta:
     backgroundColor: transparent
-    textColor: "{colors.muted-soft}"
+    textColor: "{colors.muted}"
     typography: "{typography.supporting}"
 ---
 
@@ -611,7 +611,7 @@ Noto Serif TC 是標題的唯一字型，沒有第二層自托管備援——載
 
 圖示在上、文字在下，標籤使用 `{typography.nav-label}`（12px，未選取 400／選取 700）。三項是固定的——不新增衛教專用入口，也不保留獨立「首頁」入口。
 
-**`global-status-banner`** — 承載跨頁的系統狀態：「通知未開啟」「背景通知尚未完成」「目前離線」「背景通知已恢復」。背景 `{colors.surface-soft}`，圓角 `{rounded.md}`。這類狀態**永不阻擋**本機倒數與手動操作，因此樣式是提示而非警示——不使用 `{colors.error}` 底色。
+**`global-status-banner`** — 承載跨頁的系統狀態：「通知未開啟」「背景通知尚未完成」「目前離線」「背景通知已恢復」。背景 `{colors.surface-soft}`，圓角 `{rounded.md}`。這類狀態**永不阻擋**本機倒數與手動操作，因此樣式是提示而非警示——不使用任何警示底色。（系統沒有獨立的 error token，見第二節；警示強度上限是 `{colors.status-due}` 的柔和底色卡。）
 
 ### 頁面骨架
 
@@ -619,9 +619,13 @@ Noto Serif TC 是標題的唯一字型，沒有第二層自托管備援——載
 
 **`flow-heading`** — 全螢幕操作流程的標題列，標題與說明在左、關閉操作在右；內部以 12px 堆疊，兩側保留 16px 間距。共通實作位於 `apps/web/src/assets/app.css`，目前供重新塗抹、更正紀錄與回報事件三個流程使用。
 
-**`app-card`** — 通用內容卡。背景半透明白 `rgba(255,255,255,0.6)` 疊在 `{colors.canvas}` 上（2026-08-24：純 canvas 版本套用後卡片跟頁面幾乎融在一起，改用半透明白疊加維持一點層次），1px `{colors.hairline}` 邊框，圓角 `{rounded.lg}`，內距 20px。無陰影。這個疊加效果假設卡片背後是 canvas 底色，不要用在深色面板或圖片背景上。
+**`app-card`** — 通用內容卡。背景 `{colors.surface-soft}`（暖奶油，不透明），1px `{colors.hairline}` 邊框，圓角 `{rounded.lg}`，內距 20px。無陰影。
 
-**`page-footer-meta`** — 頁尾的版本、隱私政策、使用條款與資料說明。純文字連結列，`{colors.muted-soft}`，`{typography.supporting}`。**刻意不做成功能卡片**，避免與「更多」頁的入口卡競爭。
+> **2026-08-29 更正**：這一段先前寫「半透明白 `rgba(255,255,255,0.6)` 疊在 canvas 上」，frontmatter 又寫 `{colors.canvas}`——**兩者都是舊版**，而且同一天的第十節註記還寫「改回 canvas」，三處互相矛盾。實際的 `--surface-primary` 是 `{colors.surface-soft}`，2026-08-24 當天演進過四個版本（canvas → 半透明白 0.6 → 0.4 → 暖奶油），完整脈絡記在 `packages/ui/src/styles.css` 該 token 上方的註解。
+>
+> 改成不透明色的理由值得留著：**半透明必須依賴「卡片背後真的是 canvas」，一旦蓋在別的東西上就破功**——兩個 bottom sheet 就因此透出背後的文字。所以不要再提案改回半透明。
+
+**`page-footer-meta`** — 頁尾的版本、隱私政策、使用條款與資料說明。純文字連結列，`{colors.muted}`，`{typography.supporting}`。**刻意不做成功能卡片**，避免與「更多」頁的入口卡競爭。
 
 ### 提醒（核心）
 
@@ -679,7 +683,9 @@ Noto Serif TC 是標題的唯一字型，沒有第二層自托管備援——載
 
 ### 開始提醒流程
 
-**`setup-step-shell`** — 兩步驟設定流程的外框（步驟 1 情境、步驟 2 塗抹時間與部位）。承載步驟指示、內容區與底部行動列。整個流程在同一個外框內完成，**不因產品標示、部位調整或通知設定跳離到平行頁面**。
+**`setup-step-shell`** — 設定流程的外框。承載標題、內容區與底部行動列。整個流程在同一個外框內完成，**不因產品標示、部位調整或通知設定跳離到平行頁面**。
+
+> **2026-08-29 更正**：先前寫「兩步驟設定流程（步驟 1 情境、步驟 2 塗抹時間與部位）」，但 `/setup/context` 與 `/setup/timing` 已於 2026-08-24 合併成單頁 `/setup`（理由是「減少跳轉的疲倦感」，見 `docs/decisions/2026-08-15-redesign-sitemap-userflow-current.md` §2.2）。步驟指示器隨之失去對象。
 
 **`context-option`** ／ **`context-option-selected`** — 情境選項。未選取：`{colors.canvas}` 底、`{colors.hairline}` 邊框。已選取：`{colors.surface-cream-strong}` 底、`{colors.primary}` 邊框。選取態同時有底色與邊框變化，不只靠顏色。
 
