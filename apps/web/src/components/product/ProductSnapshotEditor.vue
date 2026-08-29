@@ -379,7 +379,7 @@ const summary = computed(() => {
 .session-product p:not(.session-product__eyebrow) {
   margin-top: var(--space-2);
   color: var(--text-body);
-  line-height: 1.6;
+  line-height: var(--line-height-body);
 }
 
 /* 特異性要壓過上面的 `.session-product p:not(.session-product__eyebrow)`，
@@ -443,6 +443,6 @@ const summary = computed(() => {
   margin: var(--space-1) 0 0;
   color: var(--text-body);
   font-size: var(--font-size-body);
-  line-height: 1.6;
+  line-height: var(--line-height-body);
 }
 </style>

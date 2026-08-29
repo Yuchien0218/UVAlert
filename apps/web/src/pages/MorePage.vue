@@ -174,6 +174,6 @@ const entries = computed(() =>
 .entry small {
   margin-top: var(--space-1);
   color: var(--text-secondary);
-  line-height: 1.6;
+  line-height: var(--line-height-body);
 }
 </style>

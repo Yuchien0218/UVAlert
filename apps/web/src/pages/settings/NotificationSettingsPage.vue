@@ -294,7 +294,7 @@ async function runTest(): Promise<void> {
   background: var(--surface-soft);
   color: var(--text-secondary);
   font-size: var(--font-size-supporting);
-  line-height: 1.6;
+  line-height: var(--line-height-body);
 }
 
 .note-box p,
@@ -311,7 +311,7 @@ async function runTest(): Promise<void> {
   margin: 0;
   color: var(--text-secondary);
   font-size: var(--font-size-supporting);
-  line-height: 1.6;
+  line-height: var(--line-height-body);
 }
 
 .delivery-emphasis {
@@ -334,7 +334,7 @@ async function runTest(): Promise<void> {
 .delivery-emphasis p:not(.delivery-emphasis__title) {
   margin: 0;
   color: var(--text-body);
-  line-height: 1.6;
+  line-height: var(--line-height-body);
 }
 
 .repeat-options {

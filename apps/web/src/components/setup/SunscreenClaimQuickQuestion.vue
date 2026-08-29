@@ -73,6 +73,6 @@ const groupName = `sunscreen-claim-${useId()}`;
 
 .claim-consequence p {
   margin: var(--space-2) 0 0;
-  line-height: 1.6;
+  line-height: var(--line-height-body);
 }
 </style>

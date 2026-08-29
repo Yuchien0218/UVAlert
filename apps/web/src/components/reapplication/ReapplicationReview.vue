@@ -50,7 +50,7 @@ ul {
 }
 p,
 li {
-  line-height: 1.6;
+  line-height: var(--line-height-body);
 }
 ul {
   padding-inline-start: var(--space-5);

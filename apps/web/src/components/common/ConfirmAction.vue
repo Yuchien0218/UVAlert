@@ -86,7 +86,7 @@ const emit = defineEmits<{
   border-radius: var(--radius-sm);
   border: 1px solid var(--color-due);
   color: var(--text-secondary);
-  line-height: 1.6;
+  line-height: var(--line-height-body);
 }
 
 .confirm-note :deep(strong) {

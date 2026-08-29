@@ -140,7 +140,7 @@ const { closeFromBackdrop } = useOverlay({
   margin: 0;
   color: var(--text-body);
   font-size: var(--font-size-body);
-  line-height: 1.6;
+  line-height: var(--line-height-body);
 }
 
 /*
@@ -188,7 +188,7 @@ const { closeFromBackdrop } = useOverlay({
   border-left: 3px solid var(--color-due);
   color: var(--text-primary);
   font-size: var(--font-size-body);
-  line-height: 1.6;
+  line-height: var(--line-height-body);
 }
 
 .session-end__actions {

@@ -42,7 +42,7 @@ withDefaults(defineProps<Props>(), { requiredReview: null });
 .under-review p {
   margin: 0;
   color: var(--text-body);
-  line-height: 1.6;
+  line-height: var(--line-height-body);
 }
 
 .under-review__meta {

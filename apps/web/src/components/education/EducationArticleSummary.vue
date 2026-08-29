@@ -3,7 +3,7 @@ defineProps<{ html: string }>();
 </script>
 
 <template>
-  <section class="education-summary" aria-label="文章摘要">
+  <section class="education-summary prose-block" aria-label="文章摘要">
     <div class="education-summary__content" v-html="html" />
   </section>
 </template>
@@ -22,6 +22,6 @@ defineProps<{ html: string }>();
   margin: 0;
   color: var(--text-body);
   font-size: var(--font-size-body);
-  line-height: 1.7;
+  line-height: var(--line-height-body);
 }
 </style>

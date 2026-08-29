@@ -72,6 +72,6 @@ const topics = computed(() => listPublishableTopics());
 
 .topic-item small {
   color: var(--text-secondary);
-  line-height: 1.6;
+  line-height: var(--line-height-body);
 }
 </style>

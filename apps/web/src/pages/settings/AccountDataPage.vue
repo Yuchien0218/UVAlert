@@ -167,7 +167,7 @@ async function deleteCloudData(): Promise<void> {
 }
 .account-card p {
   color: var(--text-body);
-  line-height: 1.6;
+  line-height: var(--line-height-body);
 }
 .account-card--danger h2 {
   color: var(--color-due);

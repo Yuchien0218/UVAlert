@@ -244,12 +244,12 @@ function zoneNames(zoneIds: string[]): string {
 }
 .correction-note {
   color: var(--text-secondary);
-  line-height: 1.6;
+  line-height: var(--line-height-body);
 }
 .success-groups {
   margin: 0;
   padding-inline-start: var(--space-5);
-  line-height: 1.6;
+  line-height: var(--line-height-body);
 }
 /*
  * 2026-08-24：原本用 --color-untimed-soft（「未計時」狀態色）。這是
@@ -268,6 +268,6 @@ function zoneNames(zoneIds: string[]): string {
 }
 .refresh-warning p {
   margin: 0;
-  line-height: 1.6;
+  line-height: var(--line-height-body);
 }
 </style>

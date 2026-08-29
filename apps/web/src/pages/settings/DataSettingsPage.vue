@@ -433,7 +433,7 @@ dd {
 
 .page-heading p {
   color: var(--text-body);
-  line-height: 1.6;
+  line-height: var(--line-height-body);
 }
 
 .app-card {
@@ -466,7 +466,7 @@ dd {
 
 .caution {
   color: var(--text-body);
-  line-height: 1.6;
+  line-height: var(--line-height-body);
 }
 
 .caution strong {
@@ -489,7 +489,7 @@ dd {
 
 .clear-row p {
   color: var(--text-secondary);
-  line-height: 1.6;
+  line-height: var(--line-height-body);
 }
 
 .clear-row--danger strong {
@@ -516,7 +516,7 @@ dd {
 
 .sync-group__lead {
   color: var(--text-body);
-  line-height: 1.6;
+  line-height: var(--line-height-body);
 }
 
 .sync-block {
@@ -534,7 +534,7 @@ dd {
 .sync-block p {
   margin: 0;
   color: var(--text-body);
-  line-height: 1.6;
+  line-height: var(--line-height-body);
 }
 
 .sync-list {

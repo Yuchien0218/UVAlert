@@ -201,8 +201,19 @@ body
   font-weight: 500;
 }
 
+/*
+ * 標題寬度用 em 不用 ch。
+ *
+ * 2026-08-30：原本是 max-width: 14ch，來自第一個 commit 的鷹架，
+ * DESIGN.md 從來沒有規範過。問題是 **ch 對中文是錯的單位**——1ch 是字
+ * 型裡「0」的寬度（28px 字級下約 15.8px），而中文是全形（約 28.2px），
+ * 差 1.79 倍。所以 14ch 實際只裝得下約 7.7 個中文字：
+ * 「問題回報與意見回饋」才 9 個字就被壓成兩行，而畫面還有兩倍空間。
+ *
+ * 改用 em：1em 正好是一個全形字，數字寫幾就是幾個中文字。
+ */
 .page-heading__title {
-  max-width: 14ch;
+  max-width: 18em;
   margin: 0;
   font-size: var(--font-size-page-title);
   line-height: 0.98;
@@ -219,7 +230,7 @@ body
   max-width: 38rem;
   margin: 0;
   color: var(--text-body);
-  line-height: 1.6;
+  line-height: var(--line-height-body);
 }
 
 /* 2026-08-26：收斂三個流程頁重複的標題列版型。 */
@@ -246,7 +257,7 @@ body
 
 .flow-heading div > p:last-child {
   color: var(--text-body);
-  line-height: 1.6;
+  line-height: var(--line-height-body);
 }
 
 /*
@@ -328,7 +339,7 @@ body
 .form-error {
   margin: 0;
   color: var(--color-due);
-  line-height: 1.6;
+  line-height: var(--line-height-body);
 }
 
 .button {
@@ -532,7 +543,7 @@ button.text-link {
   margin: 0;
   color: var(--text-secondary);
   font-size: var(--font-size-body);
-  line-height: 1.6;
+  line-height: var(--line-height-body);
 }
 
 .choice-grid {
@@ -588,11 +599,49 @@ button.text-link {
   }
 }
 
+/*
+ * 長文段落的排版。2026-08-30 新增。
+ *
+ * 只給「真的有多行段落」的地方用——文章正文、文章摘要、衛教頁段落。
+ * **不要套在 UI 標籤、卡片描述或按鈕上**：兩端對齊在 2–3 個字的標籤上
+ * 會把字距拉得很誇張。
+ *
+ * word-break: break-all 刻意不用。中文本來就逐字換行，不需要任何設定；
+ * break-all 唯一的實際作用是把英文單字從字母中間切開（UVAlert →
+ * UVAle/rt），而衛教文章滿是 UV／SPF／WHO 與英文來源標題。
+ * overflow-wrap: break-word 只在「一個詞自己就放不下整行」時才斷，例如
+ * 長網址——那才是該斷的情況。
+ *
+ * text-wrap: pretty 用來避免窄螢幕的孤字行；375px 一行約 21 個中文字，
+ * 末行只剩一兩字時兩端對齊會特別突兀。
+ */
+.prose-block {
+  text-wrap: pretty;
+  overflow-wrap: break-word;
+}
+
+/*
+ * 兩端對齊只給段落，清單維持靠左。
+ *
+ * 2026-08-30：全英文的長條目（例如「資料來源」的
+ * "FDA：Sunscreen: How to Help Protect Your Skin from the Sun"）在兩端
+ * 對齊下，單字之間會被拉得很開——中文行沒這個問題，因為每字等寬。
+ *
+ * 中文兩端對齊要處理得漂亮需要 text-justify: inter-ideograph（Chrome
+ * 不支援）與 hanging-punctuation（只有 Safari），所以這是瀏覽器的天花
+ * 板，不是設定問題。清單本來就慣用參差右緣，讓它靠左同時解決英文條目
+ * 被拉開與中文條目的一致性。
+ */
+.prose-block p,
+p.prose-block {
+  text-align: justify;
+}
+
 .safety-note {
   margin: 0;
   color: var(--text-secondary);
   font-size: var(--font-size-supporting);
-  line-height: 1.6;
+  line-height: var(--line-height-body);
 }
 
 /*
@@ -625,7 +674,7 @@ button.text-link {
     calc(var(--space-2) - var(--space-4));
   margin-inline: 0;
   color: var(--text-body);
-  line-height: 1.6;
+  line-height: var(--line-height-body);
 }
 
 .screen-reader-only {
@@ -661,7 +710,7 @@ button.text-link {
   margin: 0;
   padding: var(--space-3);
   border-radius: var(--radius-sm);
-  line-height: 1.6;
+  line-height: var(--line-height-body);
   width: 100%;
 }
 

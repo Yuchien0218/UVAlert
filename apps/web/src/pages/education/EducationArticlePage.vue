@@ -68,7 +68,9 @@ const relatedArticles = computed(() =>
       <h1 class="page-heading__title" data-typography-role="page-title">
         {{ article.title }}
       </h1>
-      <p class="education-article-summary">{{ article.summary }}</p>
+      <p class="education-article-summary prose-block">
+        {{ article.summary }}
+      </p>
       <p class="education-article-meta">
         最後查閱：{{ article.lastReviewed }} ·
         {{ article.publishable ? "已發布" : "專業審閱中" }}
@@ -97,7 +99,7 @@ const relatedArticles = computed(() =>
     -->
     <EducationArticleSummary :html="article.takeawayHtml" />
 
-    <div class="education-article-body" v-html="article.bodyHtml" />
+    <div class="education-article-body prose-block" v-html="article.bodyHtml" />
 
     <section
       v-if="relatedArticles.length > 0"
@@ -133,14 +135,16 @@ const relatedArticles = computed(() =>
 }
 
 .education-article-header .page-heading__title {
-  max-width: 24ch;
+  /* 同樣改用 em——理由見 app.css 的 .page-heading__title。文章標題較長，
+     放寬到 24 個全形字；實際仍會先被容器寬度收住。 */
+  max-width: 24em;
 }
 
 .education-article-summary {
   margin: 0;
   color: var(--text-body);
   font-size: var(--font-size-body);
-  line-height: 1.6;
+  line-height: var(--line-height-body);
 }
 
 .education-article-meta,
@@ -157,35 +161,35 @@ const relatedArticles = computed(() =>
   border-radius: var(--radius-md);
   background: var(--surface-primary);
   color: var(--text-secondary);
-  line-height: 1.6;
+  line-height: var(--line-height-body);
 }
 
 .education-article-body {
   max-width: 44rem;
   min-width: 0;
   font-size: var(--font-size-body);
-  line-height: 1.85;
+  line-height: var(--line-height-body);
 }
 
 .education-article-body :deep(h2) {
-  margin: var(--space-10) 0 var(--space-3);
+  margin: var(--prose-heading-gap-before) 0 var(--prose-heading-gap-after);
   font-size: var(--font-size-section-title);
-  line-height: 1.35;
+  line-height: var(--line-height-section-title);
 }
 
 .education-article-body :deep(h3) {
-  margin: var(--space-8) 0 var(--space-2);
+  margin: var(--prose-subheading-gap-before) 0 var(--prose-heading-gap-after);
   font-size: var(--font-size-card-title);
-  line-height: 1.45;
+  line-height: var(--line-height-card-title);
 }
 
 .education-article-body :deep(p) {
-  margin: 0 0 var(--space-4);
+  margin: 0 0 var(--prose-paragraph-gap);
 }
 
 .education-article-body :deep(ul),
 .education-article-body :deep(ol) {
-  margin: 0 0 var(--space-5);
+  margin: 0 0 var(--prose-paragraph-gap);
   padding-left: var(--space-6);
 }
 
@@ -222,7 +226,7 @@ const relatedArticles = computed(() =>
   margin-top: 0;
   color: var(--text-secondary);
   font-size: var(--font-size-caption);
-  line-height: 1.6;
+  line-height: var(--line-height-body);
 }
 
 .education-article-body :deep(code) {
