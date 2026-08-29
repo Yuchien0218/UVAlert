@@ -5,6 +5,7 @@ import { useWebAppServices } from "../../app/injection";
 import AppNotice from "../../components/common/AppNotice.vue";
 import ConfirmAction from "../../components/common/ConfirmAction.vue";
 import EmptyStateCard from "../../components/common/EmptyStateCard.vue";
+import BroadcastLoader from "../../components/feedback/BroadcastLoader.vue";
 import { formatDateTime } from "../../helpers/datetime";
 
 /**
@@ -64,9 +65,10 @@ async function runClear(scope: ClearScope): Promise<void> {
       >
     </section>
 
-    <p v-if="localData.phase.value === 'loading'" role="status">
-      正在讀取本機資料概況…
-    </p>
+    <BroadcastLoader
+      v-if="localData.phase.value === 'loading'"
+      label="正在讀取本機資料概況"
+    />
 
     <EmptyStateCard
       v-else-if="localData.error.value === 'load_failed'"

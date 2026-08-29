@@ -61,7 +61,11 @@ describe("AccountDataPage", () => {
     expect(deleteButton).toBeDefined();
     await deleteButton!.trigger("click");
     expect(services.cloudSync.deleteAccount).not.toHaveBeenCalled();
-    await wrapper.get(".confirm-note button.button--primary").trigger("click");
+    const confirmButton = wrapper
+      .findAll("button")
+      .find((button) => button.text() === "清除雲端資料");
+    expect(confirmButton).toBeDefined();
+    await confirmButton!.trigger("click");
     expect(services.cloudSync.deleteAccount).toHaveBeenCalledTimes(1);
     expect(services.auth.signOut).toHaveBeenCalledTimes(1);
   });

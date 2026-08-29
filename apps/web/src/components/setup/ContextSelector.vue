@@ -221,8 +221,7 @@ watch(
 }
 
 .context-choice:has(.context-choice__input:focus-visible),
-.context-group__option:has(input:focus-visible),
-.context-group__toggle:focus-visible {
+.context-group__option:has(input:focus-visible) {
   outline: 0.15rem solid var(--focus-ring);
   outline-offset: 0.2rem;
 }

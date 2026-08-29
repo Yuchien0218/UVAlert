@@ -1,14 +1,14 @@
 # UVAlert Vercel 部署狀態
 
-**紀錄日期**：2026-08-27（Asia/Taipei）；**2026-08-29 補註，見文末**  
+**紀錄日期**：2026-08-27（Asia/Taipei）；**2026-08-29 補註，見文末**
 **用途**：區分目前可供測試的 Vercel preview，與尚未更新的正式網址；本文件是部署現況，不代表正式後端已上線。
 
 ## 目前網址
 
-| 類型 | 網址 | 已驗證狀態 | 備註 |
-| --- | --- | --- | --- |
-| 正式網域 | `https://uv-alert-web.vercel.app` | 根頁 HTTP 200；manifest 與 Service Worker HTTP 200 | 仍指向 `main` 的 commit `9e6cc20`，沒有這次 preview 修正。 |
-| 預覽部署 | `https://uv-alert-1zy1w2zxl-yuu15.vercel.app` | Vercel Ready；使用者已回報可開啟 | 目前受 Vercel Authentication 保護；登入同一 Vercel 帳號的使用者可開啟。 |
+| 類型     | 網址                                          | 已驗證狀態                                         | 備註                                                                    |
+| -------- | --------------------------------------------- | -------------------------------------------------- | ----------------------------------------------------------------------- |
+| 正式網域 | `https://uv-alert-web.vercel.app`             | 根頁 HTTP 200；manifest 與 Service Worker HTTP 200 | 仍指向 `main` 的 commit `9e6cc20`，沒有這次 preview 修正。              |
+| 預覽部署 | `https://uv-alert-1zy1w2zxl-yuu15.vercel.app` | Vercel Ready；使用者已回報可開啟                   | 目前受 Vercel Authentication 保護；登入同一 Vercel 帳號的使用者可開啟。 |
 
 ## 正式網址的限制
 
