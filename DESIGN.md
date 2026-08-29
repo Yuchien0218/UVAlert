@@ -9,6 +9,7 @@ motion:
   duration-base: 320ms
   duration-slow: 450ms
   duration-loader-cycle: 1500ms
+  duration-loader-delay: 250ms
   ease-out: cubic-bezier(0.25, 0.46, 0.45, 0.94)
   ease-in-out: cubic-bezier(0.65, 0, 0.35, 1)
   motion-rise: 4px
@@ -992,6 +993,8 @@ B8 遷移期間使用的四個臨時字級別名已移除；目前元件只使�
 **直接操作放慢會讀成延遲；自己發生的事沒有人在等，慢一點才安靜。**
 
 緩動一律 `{motion.ease-out}`；需要對稱進出的循環動畫（loader）用 `{motion.ease-in-out}`，循環長度用 `{motion.duration-loader-cycle}`。
+
+**loader 出現前先靜默 `{motion.duration-loader-delay}`（250ms）。** 本機優先的讀取多半幾十毫秒就回來，沒有這段延遲的話 loader 會閃一下再消失——那個閃動本身就是最廉價的觀感，跟圖案畫得多好無關。
 
 #### 三、禁止 `transition: all`
 

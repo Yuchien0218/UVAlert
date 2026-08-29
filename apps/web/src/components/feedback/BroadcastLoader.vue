@@ -105,8 +105,8 @@ const rays = [
 .broadcast-loader {
   display: inline-flex;
   opacity: 0;
-  animation: broadcast-loader-appear var(--duration-fast) var(--ease-out) 0.25s
-    forwards;
+  animation: broadcast-loader-appear var(--duration-fast) var(--ease-out)
+    var(--duration-loader-delay) forwards;
 }
 
 /* 3.25rem 是這顆 loading 圖示專屬的裝飾尺寸，不在 DESIGN.md 的
@@ -124,7 +124,7 @@ const rays = [
   opacity: 0.22;
   animation: broadcast-loader-sweep var(--duration-loader-cycle)
     var(--ease-in-out) infinite;
-  animation-delay: calc(0.25s + var(--ray-delay));
+  animation-delay: calc(var(--duration-loader-delay) + var(--ray-delay));
 }
 
 /*
@@ -134,7 +134,7 @@ const rays = [
 .broadcast-loader__core {
   animation: broadcast-loader-charge var(--duration-loader-cycle)
     var(--ease-in-out) infinite;
-  animation-delay: 0.25s;
+  animation-delay: var(--duration-loader-delay);
 }
 
 @keyframes broadcast-loader-charge {
@@ -178,7 +178,8 @@ const rays = [
  */
 @media (prefers-reduced-motion: reduce) {
   .broadcast-loader {
-    animation: broadcast-loader-appear 0s linear 0.25s forwards;
+    animation: broadcast-loader-appear 0s var(--ease-out)
+      var(--duration-loader-delay) forwards;
   }
 
   .broadcast-loader__ray {
