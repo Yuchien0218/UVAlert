@@ -21,6 +21,7 @@
 | `2026-08-25-strong-line-height-fix.md`            | body 行高調寬後，13 處單行 `<strong>` 標題（警示框、清單卡片）跟著繼承過多留白，改回 1.4／1.45                                                                                                              | 已完成（2026-08-25）——有實際可見變化，未經瀏覽器視覺驗證                             |
 | `2026-08-25-second-hardcode-sweep.md`             | 字型／圓角／間距／動畫／z-index／斷點硬寫值三輪盤點：字型乾淨；新增 `--radius-sheet`／`--z-nav`／`--z-overlay` token；讀取失敗卡併入 `EmptyStateCard`；`.submit-actions` 收斂；元件層級斷點回寫進 DESIGN.md | 已完成（2026-08-25）——`pnpm check` 全過，未經瀏覽器視覺驗證                          |
 | `2026-08-26-night-session-layout-revert.md`       | 夜間＋有 Session 版面第三次翻案：改回 2026-08-23 的「收工版面」（不顯示倒數，改顯示已進行多久，主要行動是結束提醒），理由「不讓倒數跨夜」；還原 `HomeNightSession.vue`                                      | 已完成（2026-08-26）——typecheck ＋ `HomePage.test.ts` 通過，未經瀏覽器視覺驗證       |
+| `2026-08-29-icon-completion-and-motion-rules.md`  | 最後 11 個圖示補完＋`@lucide/vue` 移除；動畫規則重訂成五條並讓 stylelint／tokens 測試守住；倒數狀態圖示接線 | 已完成（2026-08-29）——`pnpm check` 全過，**目視驗證只做了一部分**，見文件第三節 |
 
 `2026-08-22-mvp-flow-review.md` 原為待裁決的分析文件，2026-08-23 已逐項裁決完畢，轉為歷史參考。它指出的問題有一部分與實際程式碼不符（例如「三個並行的衛教入口」），採用前請先核對程式碼。
 
@@ -58,6 +59,12 @@
 | 新增 `--radius-sheet` token（bottom sheet 頂角）；讀取失敗卡併入 `EmptyStateCard`；清單縮排統一 `var(--space-5)`；`.education-card-status` 收斂進 `app.css` | `packages/ui/src/styles.css`、`GearFormSheet.vue`、`ProtectionAdjustmentSheet.vue`、`ProductsPage.vue`、`DataSettingsPage.vue`、`InstallPage.vue`、`ReapplyPage.vue`、`ReapplicationReview.vue`、`EducationIndexPage.vue`、`EducationCategoryPage.vue` | 已完成（2026-08-25）——`pnpm check` 全過，見 `2026-08-25-second-hardcode-sweep.md`                                  |
 | 夜間＋有 Session 改回「收工版面」（不顯示倒數，主要行動是結束提醒）；還原 `HomeNightSession.vue`，清掉 Sitemap §4.2 元件清單裡的 `NightWindDownPrompt.vue`  | `HomePage.vue`、`HomePage.test.ts`、`HomeNightSession.vue`、`2026-08-15-redesign-sitemap-userflow-current.md` §4.2                                                                                                                                     | 已完成（2026-08-26）——typecheck ＋ `HomePage.test.ts` 通過，見 `2026-08-26-night-session-layout-revert.md`         |
 | Sitemap 回寫「頁首無 UV 時的退回行為」——改顯示「前往地區設定」連結，不再退回提醒狀態文字（實作 2026-08-24 起，文件才補上）                                  | `2026-08-15-redesign-sitemap-userflow-current.md` §二「頁首（BrandHeader）」                                                                                                                                                                           | 已回寫（2026-08-26）                                                                                               |
+| 最後 8 處 `@lucide/vue` 換成自訂圖示；新增 11 個圖示與 `feature` 群；搜尋與「調整部位」裁決為不畫（後者沿用 `tool-edit`） | `docs/design/icon-system/README.md` §七／§八／§十、`tools/icon-system/generate-icons.mjs`、`apps/web/package.json`、`DESIGN.md` §八 | 已完成（2026-08-29，commit `a1d0dcf`） |
+| 倒數狀態接上 `state-tracking`／`soon`／`due` 圖示，修好「狀態必須同時有色彩、圖示與文字」的違規 | `HomeCountdown.vue` | 已完成（2026-08-29，commit `fafacfb`） |
+| 動效 token 補齊（`--duration-slow`／`--duration-loader-cycle`／`--ease-in-out`／`--motion-rise`）並納入漂移守門測試 | `packages/ui/src/styles.css`、`DESIGN.md` frontmatter `motion:`、`packages/ui/src/tokens.test.ts` | 已完成（2026-08-29，commit `fafacfb`／`1cf0f02`） |
+| `--ease-out` 改成 easeOutQuad、`--duration-base` 240ms→320ms（原曲線的彈射感與「安靜」的定位相反） | `packages/ui/src/styles.css`、`DESIGN.md` frontmatter | 已完成（2026-08-29，commit `fafacfb`）——**全站手感改動，僅 AGENT 看過** |
+| 動畫規則重訂成五條（opacity 例外、時距分兩類、禁 `transition: all`、無限循環自己關、一次一個元素動） | `DESIGN.md` §12「動畫」、`stylelint.config.mjs` | 已完成（2026-08-29，commit `1cf0f02`） |
+| 載入動畫改用播報印記；按鈕 spinner 去掉 `transform: rotate` | `BroadcastLoader.vue`（新）、`InlineLoader.vue`（新）、`SunLoader.vue`（刪除）、`SetupPage.vue` | 已完成（2026-08-29，commit `a1d0dcf`） |
 
 視覺設計另見：
 
