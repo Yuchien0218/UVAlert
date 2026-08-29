@@ -19,7 +19,7 @@ a { color: #2f6fbb; }
 .site-header small { color: #5a5a5a; }
 main { padding: clamp(1.5rem, 6vw, 3.5rem) clamp(1rem, 5vw, 2.75rem) 4rem; }
 .eyebrow { margin: 0 0 .75rem; color: #5a5a5a; font-size: .8rem; }
-h1 { max-width: 25ch; margin: 0 0 1rem; font-size: clamp(1.8rem, 7vw, 2.5rem); line-height: 1.2; letter-spacing: -.04em; }
+h1 { max-width: 25em; margin: 0 0 1rem; font-size: clamp(1.8rem, 7vw, 2.5rem); line-height: 1.2; letter-spacing: -.04em; }
 h2 { margin: 2rem 0 .75rem; font-size: 1.25rem; line-height: 1.35; }
 h3 { margin: 1.75rem 0 .5rem; font-size: 1.05rem; }
 .lead, .summary { color: #5a5a5a; }

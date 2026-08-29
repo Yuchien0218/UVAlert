@@ -478,6 +478,32 @@ function handleEndSession(): void {
 
 <style scoped>
 /*
+ * 2026-08-30 補回：這兩個 class 的樣式在 51026aa（2026-08-24「/reminder
+ * 併入首頁」）時遺失——模板搬過來了，但 scoped 樣式留在被刪除的
+ * ReminderPage.vue 裡。兩者在畫面上掛著 class 卻沒有任何規則。
+ *
+ * .product-label 只剩 .app-card，而 .app-card 只提供邊框／圓角／底色、
+ * 沒有 padding，所以內容會貼著邊框。
+ *
+ * 行高改用 token（原本寫死 1.7），對齊 2026-08-30 的行高收斂。
+ */
+.inline-notice {
+  margin: 0;
+  padding: var(--space-4);
+  border-radius: var(--radius-sm);
+  background: var(--surface-soft);
+  color: var(--text-secondary);
+  line-height: var(--line-height-body);
+}
+
+.product-label {
+  display: grid;
+  justify-items: start;
+  gap: var(--space-3);
+  padding: var(--space-5);
+}
+
+/*
  * 首屏要在不捲動的情況下顯示 UV、下一步與主 CTA（DESIGN.md 第四節：
  * 「單一畫面要在不捲動的情況下顯示倒數、狀態與下一步」），所以整體間距
  * 比其他頁緊湊，並用 spacer 把安全提示壓到底部。
