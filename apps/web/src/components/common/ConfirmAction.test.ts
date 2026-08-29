@@ -30,7 +30,7 @@ describe("ConfirmAction", () => {
     expect(wrapper.get("button").attributes("disabled")).toBeDefined();
   });
 
-  it("有 warning slot 時，確認態包在 .confirm-note 裡並 emit confirm／cancel", async () => {
+  it("有 warning slot 時會呈現警示，並 emit confirm／cancel", async () => {
     const wrapper = mount(ConfirmAction, {
       props: {
         confirming: true,
@@ -39,15 +39,18 @@ describe("ConfirmAction", () => {
       },
       slots: { warning: "確定要清除嗎？" }
     });
-    expect(wrapper.find(".confirm-note").exists()).toBe(true);
-    expect(wrapper.get(".confirm-note").text()).toContain("確定要清除嗎？");
-    await wrapper.get(".confirm-note button.button--primary").trigger("click");
+    const warning = wrapper.get('[role="alert"]');
+    expect(warning.text()).toContain("確定要清除嗎？");
+    const buttons = warning.findAll("button");
+    await buttons
+      .find((button) => button.text() === "確定清除")!
+      .trigger("click");
     expect(wrapper.emitted("confirm")).toHaveLength(1);
-    await wrapper.get(".confirm-note button.button--quiet").trigger("click");
+    await buttons.find((button) => button.text() === "取消")!.trigger("click");
     expect(wrapper.emitted("cancel")).toHaveLength(1);
   });
 
-  it("沒有 warning slot 時，確認態不套 .confirm-note，只顯示按鈕列", () => {
+  it("沒有 warning slot 時，確認態只顯示按鈕列", () => {
     const wrapper = mount(ConfirmAction, {
       props: {
         confirming: true,
@@ -55,7 +58,7 @@ describe("ConfirmAction", () => {
         confirmLabel: "確定清除"
       }
     });
-    expect(wrapper.find(".confirm-note").exists()).toBe(false);
+    expect(wrapper.find('[role="alert"]').exists()).toBe(false);
     expect(wrapper.findAll("button")).toHaveLength(2);
   });
 

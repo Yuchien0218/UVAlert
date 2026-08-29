@@ -38,27 +38,27 @@
 
 ## 現況速查表（2026-08-26 掃描）
 
-| 項目                                                            | 現況                                                                                                                                                                                                              | 對應 Task    |
-| --------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------ |
-| lint／format／CI                                                | Stylelint ✅（A1，已併進 `pnpm check`）；Prettier／ESLint／CI 還沒                                                                                                                                                | A            |
-| `.form-error`                                                   | **9 檔各自 scoped**，已漂成 3 種寫法                                                                                                                                                                              | B1           |
-| `.flow-heading`                                                 | `EventCorrectionPage`／`ReapplyPage`／`ReportContextEventPage` 三份逐字相同                                                                                                                                       | B2           |
-| `.success-panel`                                                | 同上三檔，`border-top: 0.35rem solid var(--color-success)` + grid + margin reset                                                                                                                                  | B2           |
-| bottom sheet 外殼（`.sheet`／`.sheet-layer`／`.sheet__header`） | `GearFormSheet` + `ProtectionAdjustmentSheet` 幾乎整個重複；`SessionEndControl` 是第三套類似 overlay + focus trap                                                                                                 | B3           |
-| `min-height: 2.75rem`                                           | `RegionLocationPanel`(2)／`RegionManualSelector`(2)／`RegionPage`(1) 寫死，值＝`var(--tap-target)`。2026-08-22 DESIGN.md §10 修正記錄的同一種問題，當時漏掉這 5 處                                                | B4           |
-| 日期／時間格式化                                                | `toLocaleString('zh-TW')`／`toLocaleTimeString`／`Intl.DateTimeFormat` 散在 ~13 處，無共用 helper                                                                                                                 | B5           |
-| `.recovery-card`                                                | `ZoneProtectionForm` + `SetupPage` 兩份                                                                                                                                                                           | B6           |
-| 斷點                                                            | ✅ **D3 已做**：DESIGN.md §12 改 rem 標注、補記 `24rem`／`31rem`。程式碼 0 改動                                                                                                                                   | D3           |
-| `--shadow-card`／`--shadow-float`                               | ✅ **D5 已做**：從未被引用，已移除；§7 改「完全不用陰影」                                                                                                                                                         | D5           |
-| `uvalert-design-system/` ＋ `防曬補擦流程設計/`                 | 兩個 Claude Design 匯出資料夾，271 檔約 47 MB。**✅ 已刪除**（commit `3f38a9d`）                                                                                                                                  | C2           |
-| `DESIGN.md`↔`styles.css` 無 drift 守門                          | ✅ **C1 已完成**（`tokens.test.ts`）＋ **D2 已把 colors/rounded/spacing/layout 全對齊**（`saved` 改藕紫、刪 `warning`/`error`/`rounded.full`、page-gutter 移出 frontmatter）。typography 對照只文件化 → B8        | C1／D2       |
-| `DESIGN.md` §10／§13                                            | ✅ **D1／D2 已更新**：§13 盲點對齊現況（焦點環已系統化、Lucide 剩 9 檔等）、§10 加字級量表對照表                                                                                                                  | D1／D2       |
-| 字級量表                                                        | `DESIGN.md` 14 級 vs code 8 個 `--font-size-*` 命名／數值不 1:1，只 `body-md` 校準過。§10 有對照表                                                                                                                | **B8**（新） |
-| `--text-tertiary` / `muted-soft`                                | ✅ **D4 已砍**：對比度 4.42:1 過不了 AA，`styles.css` 與 `DESIGN.md` 都移除，文字色定為 4 級                                                                                                                      | D4           |
-| `@lucide/vue` 直接 import                                       | **0 檔（2026-08-29 結案）**，依賴已從 `apps/web/package.json` 移除                                                                                                                                             | E1 ✅        |
-| `EducationArticlePage` 的 `:deep()` 區塊                        | 整個長文排版系統活在一個檔案的 scoped CSS，`max-width: 44rem` ×4、`0.9em`、行高 `1.85` 脫離 token                                                                                                                 | B7           |
-| 使用者可見文案                                                  | 多數 inline 在 template，只有 `reminderPresentation.ts` 集中 labels；沒有字串目錄                                                                                                                                 | F1           |
-| 測試脆弱耦合                                                    | `BottomNavigation.test.ts` 的 z-index regex 是改壞才發現的，可能還有其他把 CSS 字面值寫進斷言的測試                                                                                                               | F3           |
+| 項目                                                            | 現況                                                                                                                                                                                                       | 對應 Task    |
+| --------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------ |
+| lint／format／CI                                                | Stylelint ✅（A1，已併進 `pnpm check`）；Prettier／ESLint／CI 還沒                                                                                                                                         | A            |
+| `.form-error`                                                   | **9 檔各自 scoped**，已漂成 3 種寫法                                                                                                                                                                       | B1           |
+| `.flow-heading`                                                 | `EventCorrectionPage`／`ReapplyPage`／`ReportContextEventPage` 三份逐字相同                                                                                                                                | B2           |
+| `.success-panel`                                                | 同上三檔，`border-top: 0.35rem solid var(--color-success)` + grid + margin reset                                                                                                                           | B2           |
+| bottom sheet 外殼（`.sheet`／`.sheet-layer`／`.sheet__header`） | `GearFormSheet` + `ProtectionAdjustmentSheet` 幾乎整個重複；`SessionEndControl` 是第三套類似 overlay + focus trap                                                                                          | B3           |
+| `min-height: 2.75rem`                                           | `RegionLocationPanel`(2)／`RegionManualSelector`(2)／`RegionPage`(1) 寫死，值＝`var(--tap-target)`。2026-08-22 DESIGN.md §10 修正記錄的同一種問題，當時漏掉這 5 處                                         | B4           |
+| 日期／時間格式化                                                | `toLocaleString('zh-TW')`／`toLocaleTimeString`／`Intl.DateTimeFormat` 散在 ~13 處，無共用 helper                                                                                                          | B5           |
+| `.recovery-card`                                                | `ZoneProtectionForm` + `SetupPage` 兩份                                                                                                                                                                    | B6           |
+| 斷點                                                            | ✅ **D3 已做**：DESIGN.md §12 改 rem 標注、補記 `24rem`／`31rem`。程式碼 0 改動                                                                                                                            | D3           |
+| `--shadow-card`／`--shadow-float`                               | ✅ **D5 已做**：從未被引用，已移除；§7 改「完全不用陰影」                                                                                                                                                  | D5           |
+| `uvalert-design-system/` ＋ `防曬補擦流程設計/`                 | 兩個 Claude Design 匯出資料夾，271 檔約 47 MB。**✅ 已刪除**（commit `3f38a9d`）                                                                                                                           | C2           |
+| `DESIGN.md`↔`styles.css` 無 drift 守門                          | ✅ **C1 已完成**（`tokens.test.ts`）＋ **D2 已把 colors/rounded/spacing/layout 全對齊**（`saved` 改藕紫、刪 `warning`/`error`/`rounded.full`、page-gutter 移出 frontmatter）。typography 對照只文件化 → B8 | C1／D2       |
+| `DESIGN.md` §10／§13                                            | ✅ **D1／D2 已更新**：§13 盲點對齊現況（焦點環已系統化、Lucide 剩 9 檔等）、§10 加字級量表對照表                                                                                                           | D1／D2       |
+| 字級量表                                                        | `DESIGN.md` 14 級 vs code 8 個 `--font-size-*` 命名／數值不 1:1，只 `body-md` 校準過。§10 有對照表                                                                                                         | **B8**（新） |
+| `--text-tertiary` / `muted-soft`                                | ✅ **D4 已砍**：對比度 4.42:1 過不了 AA，`styles.css` 與 `DESIGN.md` 都移除，文字色定為 4 級                                                                                                               | D4           |
+| `@lucide/vue` 直接 import                                       | **0 檔（2026-08-29 結案）**，依賴已從 `apps/web/package.json` 移除                                                                                                                                         | E1 ✅        |
+| `EducationArticlePage` 的 `:deep()` 區塊                        | 整個長文排版系統活在一個檔案的 scoped CSS，`max-width: 44rem` ×4、`0.9em`、行高 `1.85` 脫離 token                                                                                                          | B7           |
+| 使用者可見文案                                                  | 多數 inline 在 template，只有 `reminderPresentation.ts` 集中 labels；沒有字串目錄                                                                                                                          | F1           |
+| 測試脆弱耦合                                                    | `BottomNavigation.test.ts` 的 z-index regex 是改壞才發現的，可能還有其他把 CSS 字面值寫進斷言的測試                                                                                                        | F3           |
 
 **已經乾淨、不需處理**：.vue scoped 裡零硬寫 hex/rgb（顏色掃很徹底）、`transition:` 已全部 token 化、`font-family` 只有 3 處全套 `--font-mono`、`letter-spacing` 只有一處集中定義、`packages/` domain 層工廠化良好。
 
@@ -228,7 +228,7 @@
   - runtime 僅觀察到 preview 沒有 `/v1/uv/forecast` backend 時的既有 404（已排除為非 B8）；無 B8 歸因的 console error、page error、failed request 或遺失 custom-property 警告。首頁 loading branch 因 router 先 `await boot.ensureBooted()` 才掛載 HomePage，於正式導航流程不可到達；未偽造 loading DOM，已如實記錄為未能目視的架構限制。
   - B9 icon-first／progressive disclosure 未實作，維持獨立範圍。
 
-- [ ] **G3：`.status-card` 死碼**
+- [x] **G3：`.status-card` 死碼** — 2026-08-27 完成
   - `app.css` 的 `.status-card` ＋ 5 個變體（含 D2 剛改名的 `.status-card--saved`）沒有任何元件 template 用到——DESIGN.md §5 的 `status-card` 規範實際由 `ZoneStatusList.vue` 的 `.zone-group` 實現。約 40 行死碼，併進死碼掃描。同場加映：`.uvi-badge`（app.css）grep 也查不到 .vue 使用，一起確認。
 
 ---
@@ -245,23 +245,23 @@
 
 ## Task F：尚未被稽核的面向
 
-- [ ] **F1：使用者可見文案的集中度**
+- [x] **F1：使用者可見文案的集中度** — 2026-08-27 完成，見 `docs/decisions/2026-08-27-copy-a11y-test-dead-code-audit.md`
   - 現況：多數字串 inline 在 template；只有 `features/reminder/reminderPresentation.ts` 集中了 `ACTION_LABELS`／`BODY_ZONE_LABELS`。`docs/decisions/2026-08-17-copy-audit.md` 查了**用詞**，沒查**重複與結構**。
   - 做法：先**盤點**（不急著改）——grep 重複字串（「取消」「返回更多」「正在讀取…」變體、錯誤訊息）。判斷哪些值得抽成 `apps/web/src/copy/` 目錄或就近的常數。**不要為了假設性的 i18n 需求全部抽**（這個產品只有繁中）；只抽「真的重複且改一個要 grep 全站」的。
   - 產出：一份「文案重複清單」，本清單再開子項目。
 
-- [ ] **F2：無障礙一致性稽核**
+- [x] **F2：無障礙一致性稽核** — 2026-08-27 完成，留下 1 個 MEDIUM、2 個 LOW 後續項
   - `role="status"` ×24、`role="alert"` ×39、`role="note"` ×3——沒稽核過語意是否用對（例如「操作結果提示」該用 status 還是 alert，全站是否一致）。
   - 三套 overlay 的 focus trap 已於 B3 統一至 `useOverlay`；後續稽核需確認其他 dialog／自訂 widget 是否仍有漏網實作。
   - 產出：一份 a11y 一致性 checklist，可能引用 `better-accessibility` skill。
 
-- [ ] **F3：測試的脆弱耦合掃描**
+- [x] **F3：測試的脆弱耦合掃描** — 2026-08-27 完成
   - 起因：`BottomNavigation.test.ts` 的 `/z-index:\s*\d+/` 是改壞才發現的。
   - 做法：grep 所有 `.test.ts` 裡直接比對 CSS 字面值 / class 名 / 內聯 style 的斷言（`toContain("px")`、`attributes("style")`、`.classes()`、硬寫 class selector）。判斷哪些該改成「驗證行為」而非「驗證實作字串」。
   - `docs/superpowers/plans/2026-08-25-shared-component-extraction.md` 的 Global Constraints 已經點名 `AccountDataPage.test.ts:48` 的 `.confirm-note button.button--primary` 這類——順著查。
 
-- [ ] **F4：`DataSettingsPage` 的 loading 狀態採用 `BroadcastLoader`**（2026-08-29 起 `SunLoader` 已更名並改成播報印記動畫）
-  - `docs/decisions/2026-08-25-second-hardcode-sweep.md` 結尾點名的遺漏：`DataSettingsPage.vue` 仍是手寫 `<p role="status">正在讀取本機資料概況…</p>`，沒用 2026-08-25 Task 3 導入的 `SunLoader`。小改動，順手做。
+- [x] **F4：`DataSettingsPage` 的 loading 狀態採用 `BroadcastLoader`** — 2026-08-29 合併完成（原 `SunLoader` 已改為播報印記動畫）
+  - `docs/decisions/2026-08-25-second-hardcode-sweep.md` 結尾點名的遺漏已完成：`DataSettingsPage.vue` 不再手寫 `<p role="status">正在讀取本機資料概況…</p>`，改用 `BroadcastLoader label="正在讀取本機資料概況"`。保留具體 accessible name，並遵循現行全頁載入元件契約。
 
 - [x] **F5：瀏覽器視覺驗證（累積債）**（2026-08-26 完成）
   - **每一輪 2026-08-25 sweep 都寫「未經瀏覽器視覺驗證」。** 累計約 25 檔、全站內文 14→16px、行高 1.7→1.6、35 處文字色加深，加上本清單 B1–B4 的收斂。
@@ -278,7 +278,7 @@
   - `packages/ui/src/styles.css` 定義了，全站零使用（只有 `AppShell.vue` 的 `box-shadow: none`）。
   - 跟 D5 一起決定：刪除 token（傾向），或改值 + 實際套用。
 
-- [ ] **G2：其他死碼順手清**
+- [x] **G2：其他死碼順手清** — 2026-08-27 完成
   - `ContextSelector.vue` 局部重覆宣告的 focus outline（`docs/decisions/2026-08-25-second-hardcode-sweep.md` 判斷為無害死碼，沒清）。
   - A1/A3 上線後，lint 會自己列出 unused imports / dead CSS。
 
