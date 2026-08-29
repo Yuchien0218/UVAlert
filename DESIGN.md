@@ -977,10 +977,8 @@ B8 遷移期間使用的四個臨時字級別名已移除；目前元件只使�
 
 #### 進場的實作細節
 
-- `page-stack` 的直接子區塊依序淡入（每項延遲 0.08s，上限 0.4s），使用 `fill-mode: backwards` 避免內容先閃現。
-- **時距分兩類**：`{motion.duration-fast}`（160ms）給「回應手指的」——按鈕、chevron 展開、遮罩；`{motion.duration-base}`（320ms）與 `{motion.duration-slow}`（450ms）給「自己發生的」——內容進場、狀態切換。直接操作放慢會讀成延遲；自己發生的事沒有人在等，慢一點才安靜。
-- 緩動一律用 `{motion.ease-out}`；需要對稱進出的循環動畫（loader）用 `{motion.ease-in-out}`，循環長度用 `{motion.duration-loader-cycle}`。
-- 完整支援 `prefers-reduced-motion: reduce`——該設定開啟時所有動畫直接關閉。
+- `page-stack` 的直接子區塊依序淡入（每項延遲 0.08s，上限 0.4s），使用 `fill-mode: backwards` 避免內容先閃現，並帶 `{motion.motion-rise}` 的上移。
+- 完整支援 `prefers-reduced-motion: reduce`——該設定開啟時所有動畫直接關閉（無限循環動畫另見規則四）。
 
 ## 十三、規格盲點（Gaps）
 
@@ -991,8 +989,8 @@ B8 遷移期間使用的四個臨時字級別名已移除；目前元件只使�
 3. **停用狀態**：主按鈕（`--color-primary-disabled`）、次要按鈕（`.button--quiet:disabled`：`opacity: 0.55` + `cursor: not-allowed`，2026-08-25 補）皆已定義。**輸入框、清單項目的停用樣式仍未定義。**
 4. **錯誤與驗證狀態：行內錯誤文字已統一，其餘視覺結構未展開。** 顏色沿用 `{colors.status-due}`（驗證錯誤）／`{colors.status-soon}`（系統警示），見第二節。2026-08-26 已將 9 個檔案的 `.form-error` 收斂至 `app.css`；欄位邊框、訊息位置與是否加圖示仍需配合實際表單流程確認。
 5. **橫式標誌缺深色底版本。** 正式資產在 `docs/design/logo/`（2026-08-22 定案），但墨咖字標在濃縮咖啡深色面板上幾乎看不見，需要另做反白版。圖標本身已有 `06-broadcast-mark-dark-surface.svg`。
-6. **衛教七部位示意尚未設計。** 規格 4.6 有提到，圖示系統中列為待補。
-7. **功能型圖示尚未設計**（見上方第 1 項）：載入中、快速摘要、調整設定、流程橫幅、產品確認、地區、定位、UV 預報、夜間、傍晚。工具型那批已完成。清單見 `docs/design/icon-system/README.md` 第八節。
+6. **衛教部位示意尚未設計，而且數量還沒定。** 規格 4.6 與圖示系統都提到「七部位」，但 `apps/web/src/features/setup/setupCatalog.ts` 實際是 10 個部位（臉部／耳朵／頸部／手臂／手背／肩膀與身體／腿部／腳背／頭皮／嘴唇）。**動手前要先裁決畫幾個、抽象到什麼程度**，不要照「七」這個數字開工。
+7. ~~功能型圖示尚未設計~~ **已完成（2026-08-29）。** 這一項原本列了十個待設計的功能型圖示，現在全部有著落：載入中改用 `InlineLoader` 元件而非圖示；調整設定沿用既有的 `tool-edit`，不另畫；夜間與傍晚對應的元件在現行程式碼已不存在；其餘六個是 `feature` 群。對照表見 `docs/design/icon-system/README.md` 第七、八節。
 8. **分享圖版面未定義。** 裝備分享圖的內容規則已確認（見第九節），但版面、尺寸與品牌標示位置未定。
 9. **`/reminder/reapply` 的最終顯示形式未定**，Sitemap 文件標註仍需在 wireframe 階段確認。
 
