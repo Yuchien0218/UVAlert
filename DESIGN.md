@@ -72,7 +72,7 @@ typography:
     fontFamily: '"Inter Subset", Inter, "Noto Sans TC", "PingFang TC", "Microsoft JhengHei", system-ui, sans-serif'
     fontSize: 16px
     fontWeight: 400
-    lineHeight: 1.6
+    lineHeight: 1.5
     letterSpacing: 0.01em
   supporting:
     fontFamily: '"Inter Subset", Inter, "Noto Sans TC", "PingFang TC", "Microsoft JhengHei", system-ui, sans-serif'
@@ -521,7 +521,7 @@ runtime 堆疊：標題走 `"Noto Serif TC Subset", "Noto Serif TC", "Noto Serif
 | `{typography.page-title}`    | 28px | 400  | 1.22 | -0.01em | 每頁唯一主標題、設定流程主標題 — Noto Serif TC |
 | `{typography.section-title}` | 20px | 500  | 1.35 | 0       | 頁面區段、Dialog／Bottom Sheet、文章主要章節   |
 | `{typography.card-title}`    | 18px | 500  | 1.45 | 0       | 卡片標題、欄位群組標題、文章次級標題           |
-| `{typography.body}`          | 16px | 400  | 1.6  | 0.01em  | 正文、按鈕、輸入內容與一般操作文字             |
+| `{typography.body}`          | 16px | 400  | 1.5  | 0.01em  | 正文、按鈕、輸入內容與一般操作文字             |
 | `{typography.supporting}`    | 14px | 400  | 1.6  | 0.01em  | 欄位標籤、helper text、次要資訊與補充文字      |
 | `{typography.caption}`       | 12px | 500  | 1.5  | 0.01em  | 短註腳、時間戳、eyebrow、badge                 |
 | `{typography.nav-label}`     | 12px | 500  | 1.4  | 0.01em  | 主要底部導覽標籤                               |
@@ -749,7 +749,7 @@ Noto Serif TC 是標題的唯一字型，沒有第二層自托管備援——載
 
 | Token | 值 | 用途 |
 | --- | --- | --- |
-| `--line-height-body` | 1.6 | 正文行高（與全站內文同一個 token） |
+| `--line-height-body` | 1.5 | 正文行高（與全站內文同一個 token） |
 | `--prose-paragraph-gap` | 12px | 段落與清單的下緣間距 |
 | `--prose-heading-gap-before` | 32px | 章節標題（h2）上緣 |
 | `--prose-subheading-gap-before` | 24px | 次級標題（h3）上緣 |

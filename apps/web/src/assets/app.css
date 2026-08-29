@@ -605,9 +605,24 @@ button.text-link {
  * 末行只剩一兩字時兩端對齊會特別突兀。
  */
 .prose-block {
-  text-align: justify;
   text-wrap: pretty;
   overflow-wrap: break-word;
+}
+
+/*
+ * 兩端對齊只給段落，清單維持靠左。
+ *
+ * 2026-08-30：全英文的長條目（例如「資料來源」的
+ * "FDA：Sunscreen: How to Help Protect Your Skin from the Sun"）在兩端
+ * 對齊下，單字之間會被拉得很開——中文行沒這個問題，因為每字等寬。
+ *
+ * 中文兩端對齊要處理得漂亮需要 text-justify: inter-ideograph（Chrome
+ * 不支援）與 hanging-punctuation（只有 Safari），所以這是瀏覽器的天花
+ * 板，不是設定問題。清單本來就慣用參差右緣，讓它靠左同時解決英文條目
+ * 被拉開與中文條目的一致性。
+ */
+.prose-block p {
+  text-align: justify;
 }
 
 .safety-note {

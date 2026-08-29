@@ -12,7 +12,7 @@ const DIST_DIRECTORY = resolve(REPOSITORY_ROOT, "apps/web/dist");
 const PUBLIC_STYLE = `
 :root { color-scheme: light; font-family: -apple-system, BlinkMacSystemFont, "Noto Sans TC", "Microsoft JhengHei", sans-serif; color: #121212; background: #f9f9f9; }
 * { box-sizing: border-box; }
-body { max-width: 47rem; min-width: 20rem; margin: 0 auto; background: #f9f9f9; line-height: 1.6; }
+body { max-width: 47rem; min-width: 20rem; margin: 0 auto; background: #f9f9f9; line-height: 1.5; }
 a { color: #2f6fbb; }
 .site-header { display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding: 1.25rem clamp(1rem, 5vw, 2.75rem); border-bottom: 1px solid #e3e3e3; background: #fff; }
 .site-header a { color: inherit; font-weight: 600; text-decoration: none; }
@@ -33,7 +33,8 @@ h3 { margin: 1.75rem 0 .5rem; font-size: 1.05rem; }
    所以要單獨渲染，否則整篇文章會少掉結論。 */
 .article-takeaway { max-width: 44rem; margin: 0 0 1.5rem; padding: 1rem 1.25rem; border-radius: .5rem; background: #f4ece2; }
 .article-takeaway p { margin: 0; line-height: 1.6; }
-.article-body, .article-takeaway { text-align: justify; text-wrap: pretty; overflow-wrap: break-word; }
+.article-body, .article-takeaway { text-wrap: pretty; overflow-wrap: break-word; }
+.article-body p, .article-takeaway p { text-align: justify; }
 .article-body { max-width: 44rem; }
 .article-body p { margin: 0 0 .75rem; }
 .article-body ul, .article-body ol { margin: 0 0 1.25rem; padding-left: 1.5rem; }
