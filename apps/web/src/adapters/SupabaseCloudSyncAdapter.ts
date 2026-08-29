@@ -49,9 +49,7 @@ export class SupabaseCloudSyncAdapter implements CloudSyncPort {
   }) {
     this.#auth = options.auth;
     this.#fetch = options.fetch ?? globalThis.fetch.bind(globalThis);
-    this.#baseUrl = trimTrailingSlash(
-      options.baseUrl ?? import.meta.env.VITE_API_BASE_URL ?? "/v1"
-    );
+    this.#baseUrl = trimTrailingSlash(options.baseUrl ?? "/v1");
   }
 
   async getManifest(): Promise<SyncManifestV1> {

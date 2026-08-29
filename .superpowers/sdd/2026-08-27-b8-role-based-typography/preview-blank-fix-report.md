@@ -90,3 +90,42 @@ DONE_WITH_CONCERNS
 ### Round 1 concerns
 
 - Focused and full verification still required running outside the managed sandbox because the worktree test/build tooling needs parent-directory and installed-package access that the sandbox blocks.
+
+## Fix round 2
+
+### Reviewer findings addressed
+
+- Preserved the two intended cloud-sync semantics precisely:
+  - explicit blank / whitespace `baseUrl` from the caller disables sync
+  - omitted `baseUrl` plus blank / whitespace `VITE_API_BASE_URL` and nonblank Supabase env still creates an active adapter that uses the existing `/v1` fallback
+- Removed the remaining constructor path that re-read raw `import.meta.env.VITE_API_BASE_URL` and could bypass factory normalization.
+- Made the cloud-sync environment matrix hermetic by explicitly stubbing all three env values in every case.
+
+### TDD evidence
+
+- Red:
+  - A new public-seam regression called `createSupabaseCloudSyncAdapter({ auth, fetch })` with `VITE_API_BASE_URL="   "` and nonblank Supabase env.
+  - The failure was behavioral, not a test error: `getManifest()` resolved, but the actual fetch URL was `"   /sync/manifest"` instead of the required `"/v1/sync/manifest"`.
+- Green:
+  - After the minimal constructor fallback fix, the cloud-sync focused suite passed at `1` file / `11` tests.
+  - The adapter/helper focused suite then passed at `3` files / `21` tests.
+
+### Minimal implementation
+
+- Kept normalization responsibility in the factory.
+- Changed `SupabaseCloudSyncAdapter` constructor to use `options.baseUrl ?? "/v1"` instead of re-reading `import.meta.env.VITE_API_BASE_URL`.
+- Left the explicit-blank disable guard from round 1 intact, so caller-provided blank `baseUrl` still returns `DisabledCloudSyncAdapter`.
+
+### Fresh verification
+
+- Focused cloud-sync red reproduced exactly one failure at the request URL seam.
+- Focused cloud-sync green: `1` file / `11` tests passed.
+- Focused adapter/helper suite: `3` files / `21` tests passed.
+- `pnpm check`: passed fresh; all workspace typechecks completed, `91` test files / `662` tests passed, then ESLint and Stylelint completed with exit code `0`.
+- `pnpm build`: passed fresh. Existing warnings remain:
+  - chunk-size warning for large production bundles
+  - `VITE_PUBLIC_SITE_URL is not set`, so generated canonical/sitemap URLs use `http://localhost:4173`
+
+### Round 2 concerns
+
+- Focused and full verification still required running outside the managed sandbox because the worktree tooling needs parent-directory and installed-package access that the sandbox blocks.
