@@ -9,7 +9,6 @@
     "typecheck": "vue-tsc --noEmit -p tsconfig.json"
   },
   "dependencies": {
-    "@lucide/vue": "^1.27.0",
     "@sunshield/contracts": "workspace:*",
     "@sunshield/persistence-web": "workspace:*",
     "@sunshield/platform": "workspace:*",

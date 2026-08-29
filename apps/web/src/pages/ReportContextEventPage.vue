@@ -4,7 +4,7 @@ import { useRouter } from "vue-router";
 import { useWebAppServices } from "../app/injection";
 import Icon from "../components/icons/Icon.vue";
 import QuickTimePicker from "../components/common/QuickTimePicker.vue";
-import SunLoader from "../components/feedback/SunLoader.vue";
+import BroadcastLoader from "../components/feedback/BroadcastLoader.vue";
 import ZoneSelectorGrid from "../components/reminder/ZoneSelectorGrid.vue";
 import { getZoneLabel } from "../features/reminder/reminderPresentation";
 import { formatDateTime } from "../helpers/datetime";
@@ -68,7 +68,7 @@ function zoneNames(zoneIds: string[]): string {
       </button>
     </header>
 
-    <SunLoader
+    <BroadcastLoader
       v-if="contextEvent.phase.value === 'loading'"
       label="正在讀取目前提醒狀態…"
     />
