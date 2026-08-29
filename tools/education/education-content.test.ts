@@ -3,6 +3,7 @@ import {
   educationArticles,
   educationCategories
 } from "../../apps/web/src/features/education/education-content.generated";
+import { readEducationContent } from "./content-reader.mjs";
 
 describe("generated education content", () => {
   it("保留六個固定分類與文章索引順序", () => {
@@ -39,5 +40,26 @@ describe("generated education content", () => {
         /^2026-08-\d{2}$/.test(article.lastReviewed)
       )
     ).toBe(true);
+  });
+
+  it("extracts the lead conclusion from rendered article body", async () => {
+    const content = await readEducationContent();
+    const article = content.articles.find(
+      (candidate) => candidate.slug === "what-is-uv-index"
+    );
+
+    expect(article?.takeawayHtml).toContain("UV 指數（UVI）");
+    expect(article?.takeawayHtml).toMatch(/^<p>.*<\/p>$/s);
+    expect(article?.bodyHtml).not.toContain("先說結論");
+    expect(article?.bodyHtml).toContain("<h2>台灣常見的五級分法</h2>");
+  });
+
+  it("requires every article to start with one conclusion paragraph", async () => {
+    const content = await readEducationContent();
+
+    for (const article of content.articles) {
+      expect(article.takeawayHtml, article.slug).toMatch(/^<p>.+<\/p>$/s);
+      expect(article.bodyHtml, article.slug).not.toContain("先說結論");
+    }
   });
 });

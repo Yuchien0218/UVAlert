@@ -213,6 +213,28 @@ export function renderMarkdownToHtml(markdown) {
   return output.join("\n");
 }
 
+export function splitLeadTakeaway(bodyMarkdown, sourcePath) {
+  const normalized = bodyMarkdown.replaceAll("\r\n", "\n").trim();
+  const heading = "## 先說結論";
+  const nextSectionIndex = normalized.indexOf("\n## ", heading.length);
+  if (!normalized.startsWith(`${heading}\n`) || nextSectionIndex < 0) {
+    throw new Error(`Missing leading conclusion section in ${sourcePath}`);
+  }
+
+  const takeawayMarkdown = normalized
+    .slice(heading.length, nextSectionIndex)
+    .trim();
+  const takeawayHtml = renderMarkdownToHtml(takeawayMarkdown);
+  if (!/^<p>.+<\/p>$/s.test(takeawayHtml)) {
+    throw new Error(`Leading conclusion must be one paragraph in ${sourcePath}`);
+  }
+
+  return {
+    takeawayHtml,
+    bodyMarkdown: normalized.slice(nextSectionIndex + 1).trim()
+  };
+}
+
 function parseArticle(source, sourcePath) {
   const normalized = source.replaceAll("\r\n", "\n");
   if (!normalized.startsWith("---\n")) {
@@ -246,6 +268,8 @@ function parseArticle(source, sourcePath) {
     }
   }
 
+  const lead = splitLeadTakeaway(bodyMarkdown, sourcePath);
+
   return {
     title: frontMatter.title,
     slug: frontMatter.slug,
@@ -257,7 +281,8 @@ function parseArticle(source, sourcePath) {
     reviewStatus: frontMatter.reviewStatus,
     lastReviewed: frontMatter.lastReviewed,
     bodyMarkdown,
-    bodyHtml: renderMarkdownToHtml(bodyMarkdown)
+    takeawayHtml: lead.takeawayHtml,
+    bodyHtml: renderMarkdownToHtml(lead.bodyMarkdown)
   };
 }
 
