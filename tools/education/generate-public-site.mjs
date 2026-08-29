@@ -12,7 +12,7 @@ const DIST_DIRECTORY = resolve(REPOSITORY_ROOT, "apps/web/dist");
 const PUBLIC_STYLE = `
 :root { color-scheme: light; font-family: -apple-system, BlinkMacSystemFont, "Noto Sans TC", "Microsoft JhengHei", sans-serif; color: #121212; background: #f9f9f9; }
 * { box-sizing: border-box; }
-body { max-width: 47rem; min-width: 20rem; margin: 0 auto; background: #f9f9f9; line-height: 1.75; }
+body { max-width: 47rem; min-width: 20rem; margin: 0 auto; background: #f9f9f9; line-height: 1.6; }
 a { color: #2f6fbb; }
 .site-header { display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding: 1.25rem clamp(1rem, 5vw, 2.75rem); border-bottom: 1px solid #e3e3e3; background: #fff; }
 .site-header a { color: inherit; font-weight: 600; text-decoration: none; }
@@ -20,7 +20,7 @@ a { color: #2f6fbb; }
 main { padding: clamp(1.5rem, 6vw, 3.5rem) clamp(1rem, 5vw, 2.75rem) 4rem; }
 .eyebrow { margin: 0 0 .75rem; color: #5a5a5a; font-size: .8rem; }
 h1 { max-width: 25ch; margin: 0 0 1rem; font-size: clamp(1.8rem, 7vw, 2.5rem); line-height: 1.2; letter-spacing: -.04em; }
-h2 { margin: 2.5rem 0 .75rem; font-size: 1.25rem; line-height: 1.35; }
+h2 { margin: 2rem 0 .75rem; font-size: 1.25rem; line-height: 1.35; }
 h3 { margin: 1.75rem 0 .5rem; font-size: 1.05rem; }
 .lead, .summary { color: #5a5a5a; }
 .review-note { margin: 1.5rem 0; padding: 1rem 1.25rem; border: 1px solid #e3e3e3; border-radius: .875rem; background: #fff; color: #5a5a5a; }
@@ -32,9 +32,10 @@ h3 { margin: 1.75rem 0 .5rem; font-size: 1.05rem; }
 /* 文章的「先說結論」段落。產生器把它從 bodyHtml 抽走放進 takeawayHtml，
    所以要單獨渲染，否則整篇文章會少掉結論。 */
 .article-takeaway { max-width: 44rem; margin: 0 0 1.5rem; padding: 1rem 1.25rem; border-radius: .5rem; background: #f4ece2; }
-.article-takeaway p { margin: 0; line-height: 1.7; }
+.article-takeaway p { margin: 0; line-height: 1.6; }
+.article-body, .article-takeaway { text-align: justify; text-wrap: pretty; overflow-wrap: break-word; }
 .article-body { max-width: 44rem; }
-.article-body p { margin: 0 0 1rem; }
+.article-body p { margin: 0 0 .75rem; }
 .article-body ul, .article-body ol { margin: 0 0 1.25rem; padding-left: 1.5rem; }
 .article-body li + li { margin-top: .5rem; }
 .article-body blockquote { margin: 1.25rem 0; padding-left: 1rem; border-left: .2rem solid #e3e3e3; color: #5a5a5a; }

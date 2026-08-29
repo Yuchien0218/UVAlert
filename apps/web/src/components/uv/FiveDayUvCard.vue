@@ -190,7 +190,7 @@ function getUnavailableMessage(error: UvForecastError): string {
   justify-items: start;
   gap: var(--space-3);
   color: var(--text-secondary);
-  line-height: 1.6;
+  line-height: var(--line-height-body);
 }
 
 .uv-forecast__state strong,
@@ -345,7 +345,7 @@ function getUnavailableMessage(error: UvForecastError): string {
   margin: 0;
   color: var(--text-secondary);
   font-size: var(--font-size-supporting);
-  line-height: 1.5;
+  line-height: var(--line-height-caption);
 }
 
 .uv-forecast__source span {

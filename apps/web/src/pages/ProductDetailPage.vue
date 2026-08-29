@@ -374,7 +374,7 @@ async function handleDelete(): Promise<void> {
   margin: 0;
   padding: var(--space-3);
   border-radius: var(--radius-sm);
-  line-height: 1.6;
+  line-height: var(--line-height-body);
 }
 
 .spec-safety--blocked {

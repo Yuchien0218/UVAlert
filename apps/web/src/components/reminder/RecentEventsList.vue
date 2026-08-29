@@ -246,7 +246,7 @@ function getZoneNames(zoneIds: string[], zones: ZoneProjection[]): string {
 .clock-warning p {
   margin: 0;
   font-size: var(--font-size-body);
-  line-height: 1.6;
+  line-height: var(--line-height-body);
   color: var(--text-body);
 }
 
@@ -268,7 +268,7 @@ function getZoneNames(zoneIds: string[], zones: ZoneProjection[]): string {
   color: var(--text-primary);
   font: inherit;
   font-size: var(--font-size-body);
-  line-height: 1.6;
+  line-height: var(--line-height-body);
   text-align: left;
 }
 

@@ -442,7 +442,7 @@ onMounted(async () => {
 
 .load-error p {
   color: var(--text-body);
-  line-height: 1.6;
+  line-height: var(--line-height-body);
 }
 
 .recovery-card__eyebrow {
@@ -464,7 +464,7 @@ onMounted(async () => {
 
 .recovery-card > p:last-of-type {
   color: var(--text-body);
-  line-height: 1.6;
+  line-height: var(--line-height-body);
 }
 
 .update-notice {
@@ -473,7 +473,7 @@ onMounted(async () => {
   border-radius: var(--radius-sm);
   background: var(--color-saved-soft);
   color: var(--text-secondary);
-  line-height: 1.6;
+  line-height: var(--line-height-body);
 }
 
 .night-notice {
@@ -482,7 +482,7 @@ onMounted(async () => {
   border-radius: var(--radius-sm);
   background: var(--surface-soft);
   color: var(--text-secondary);
-  line-height: 1.6;
+  line-height: var(--line-height-body);
 }
 
 button:disabled {

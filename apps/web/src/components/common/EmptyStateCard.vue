@@ -43,6 +43,6 @@ const titleTypographyRole = computed(() =>
 .empty-state p {
   margin: 0;
   color: var(--text-body);
-  line-height: 1.6;
+  line-height: var(--line-height-body);
 }
 </style>

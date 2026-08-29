@@ -297,7 +297,7 @@ function makeDraftZone(
 .preset-card__body,
 .preset-card__note {
   margin: var(--space-3) 0 0;
-  line-height: 1.6;
+  line-height: var(--line-height-body);
 }
 
 /*
@@ -342,7 +342,7 @@ button.text-link {
 .zone-groups__heading p {
   margin: var(--space-2) 0 0;
   color: var(--text-secondary);
-  line-height: 1.6;
+  line-height: var(--line-height-body);
   font-size: var(--font-size-supporting);
 }
 

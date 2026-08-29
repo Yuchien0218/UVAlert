@@ -94,7 +94,7 @@ const robots = computed(() =>
   border-radius: var(--radius-md);
   background: var(--surface-primary);
   color: var(--text-secondary);
-  line-height: 1.6;
+  line-height: var(--line-height-body);
 }
 
 .education-section-heading {
@@ -132,11 +132,11 @@ const robots = computed(() =>
 .education-article-card strong {
   font-size: var(--font-size-card-title);
   font-weight: 500;
-  line-height: 1.45;
+  line-height: var(--line-height-card-title);
 }
 
 .education-article-card small {
   color: var(--text-secondary);
-  line-height: 1.6;
+  line-height: var(--line-height-body);
 }
 </style>

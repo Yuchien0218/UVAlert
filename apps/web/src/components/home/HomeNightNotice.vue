@@ -44,7 +44,7 @@ defineEmits<{ start: [] }>();
   margin: 0;
   color: var(--text-emphasis);
   font-size: var(--font-size-body);
-  line-height: 1.6;
+  line-height: var(--line-height-body);
 }
 
 .night-notice__escape {

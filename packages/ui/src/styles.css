@@ -225,6 +225,22 @@
   --letter-spacing-nav-label: 0.01em;
 
   /*
+   * 長文（prose）節奏。
+   *
+   * 2026-08-30 新增。起因：2026-08-25 那次行距收斂用 sed 掃「1.7」，而
+   * 衛教文章正文是 1.85（來自更早的 SEO 頁 commit），所以整批漏掉——
+   * 全站 105 處 line-height 裡只有 2 處用 token，其餘各寫各的，改一處
+   * 其他不會跟著動。
+   *
+   * 這三個是「長文段落的節奏」而不是新的字級，所以放在字級 token 之後
+   * 而不是併進 typography 量表。要調整長文鬆緊改這裡，不要回頭改各頁。
+   */
+  --prose-paragraph-gap: var(--space-3);
+  --prose-heading-gap-before: var(--space-8);
+  --prose-subheading-gap-before: var(--space-6);
+  --prose-heading-gap-after: var(--space-3);
+
+  /*
    * 2026-08-24 補：字距（letter-spacing）原本 8 個檔案各寫各的魔術數字，
    * 互相對不上。這裡只收斂「真的重複」的三組，不強改只出現一次的數值
    * （那些各自獨立，不是重複問題，改了是視覺決定，不是收斂）：

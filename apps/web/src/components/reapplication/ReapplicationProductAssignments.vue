@@ -223,7 +223,7 @@ p {
 
 .assignment-section__helper {
   color: var(--text-secondary);
-  line-height: 1.6;
+  line-height: var(--line-height-body);
 }
 
 .assignment-row {
@@ -249,7 +249,7 @@ select {
 .restriction-note {
   margin: 0;
   color: var(--color-untimed);
-  line-height: 1.6;
+  line-height: var(--line-height-body);
 }
 
 .visually-hidden {

@@ -148,12 +148,12 @@ const errorMessage = computed(() => {
 
 .location-panel__body {
   color: var(--text-body);
-  line-height: 1.6;
+  line-height: var(--line-height-body);
 }
 
 .location-panel__candidate p {
   color: var(--text-secondary);
-  line-height: 1.6;
+  line-height: var(--line-height-body);
 }
 
 .location-panel__candidate {
@@ -182,6 +182,6 @@ const errorMessage = computed(() => {
   padding: var(--space-3);
   border-radius: var(--radius-sm);
   background: var(--color-due-soft);
-  line-height: 1.6;
+  line-height: var(--line-height-body);
 }
 </style>

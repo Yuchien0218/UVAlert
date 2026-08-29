@@ -94,6 +94,6 @@ const warning = computed(() => {
   margin: var(--space-2) 0 0;
   color: var(--text-body);
   font-size: var(--font-size-body);
-  line-height: 1.6;
+  line-height: var(--line-height-body);
 }
 </style>

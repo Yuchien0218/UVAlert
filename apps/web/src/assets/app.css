@@ -219,7 +219,7 @@ body
   max-width: 38rem;
   margin: 0;
   color: var(--text-body);
-  line-height: 1.6;
+  line-height: var(--line-height-body);
 }
 
 /* 2026-08-26：收斂三個流程頁重複的標題列版型。 */
@@ -246,7 +246,7 @@ body
 
 .flow-heading div > p:last-child {
   color: var(--text-body);
-  line-height: 1.6;
+  line-height: var(--line-height-body);
 }
 
 /*
@@ -328,7 +328,7 @@ body
 .form-error {
   margin: 0;
   color: var(--color-due);
-  line-height: 1.6;
+  line-height: var(--line-height-body);
 }
 
 .button {
@@ -532,7 +532,7 @@ button.text-link {
   margin: 0;
   color: var(--text-secondary);
   font-size: var(--font-size-body);
-  line-height: 1.6;
+  line-height: var(--line-height-body);
 }
 
 .choice-grid {
@@ -588,11 +588,33 @@ button.text-link {
   }
 }
 
+/*
+ * 長文段落的排版。2026-08-30 新增。
+ *
+ * 只給「真的有多行段落」的地方用——文章正文、文章摘要、衛教頁段落。
+ * **不要套在 UI 標籤、卡片描述或按鈕上**：兩端對齊在 2–3 個字的標籤上
+ * 會把字距拉得很誇張。
+ *
+ * word-break: break-all 刻意不用。中文本來就逐字換行，不需要任何設定；
+ * break-all 唯一的實際作用是把英文單字從字母中間切開（UVAlert →
+ * UVAle/rt），而衛教文章滿是 UV／SPF／WHO 與英文來源標題。
+ * overflow-wrap: break-word 只在「一個詞自己就放不下整行」時才斷，例如
+ * 長網址——那才是該斷的情況。
+ *
+ * text-wrap: pretty 用來避免窄螢幕的孤字行；375px 一行約 21 個中文字，
+ * 末行只剩一兩字時兩端對齊會特別突兀。
+ */
+.prose-block {
+  text-align: justify;
+  text-wrap: pretty;
+  overflow-wrap: break-word;
+}
+
 .safety-note {
   margin: 0;
   color: var(--text-secondary);
   font-size: var(--font-size-supporting);
-  line-height: 1.6;
+  line-height: var(--line-height-body);
 }
 
 /*
@@ -625,7 +647,7 @@ button.text-link {
     calc(var(--space-2) - var(--space-4));
   margin-inline: 0;
   color: var(--text-body);
-  line-height: 1.6;
+  line-height: var(--line-height-body);
 }
 
 .screen-reader-only {
@@ -661,7 +683,7 @@ button.text-link {
   margin: 0;
   padding: var(--space-3);
   border-radius: var(--radius-sm);
-  line-height: 1.6;
+  line-height: var(--line-height-body);
   width: 100%;
 }
 

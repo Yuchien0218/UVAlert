@@ -146,7 +146,7 @@ p {
 .gear-item__meta,
 .gear-item__note {
   color: var(--text-secondary);
-  line-height: 1.6;
+  line-height: var(--line-height-body);
 }
 
 .gear-item__summary--blocked {

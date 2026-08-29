@@ -178,7 +178,7 @@ async function save(): Promise<void> {
 .manual-region p {
   margin-top: var(--space-2);
   color: var(--text-body);
-  line-height: 1.6;
+  line-height: var(--line-height-body);
 }
 
 .manual-region__field {

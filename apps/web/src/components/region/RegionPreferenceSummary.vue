@@ -65,6 +65,6 @@ defineProps<Props>();
 .region-summary__note {
   margin-top: var(--space-2);
   color: var(--text-secondary);
-  line-height: 1.6;
+  line-height: var(--line-height-body);
 }
 </style>

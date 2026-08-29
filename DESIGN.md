@@ -741,6 +741,30 @@ Noto Serif TC 是標題的唯一字型，沒有第二層自托管備援——載
 
 **`form-error`** — 行內欄位錯誤文字。使用 `{colors.status-due}`、行高 1.6，並清除段落預設 margin；共通實作位於 `apps/web/src/assets/app.css`。欄位錯誤邊框、圖示與訊息位置仍需配合完整表單流程定案。
 
+### 長文節奏（prose）
+
+**2026-08-30 收斂。** 衛教文章正文原本行高 1.85、段落間距 16px、章節標題上緣 40px，全部是各頁寫死的值。1.85 從來沒有被裁決過——它來自更早的 SEO 頁 commit，2026-08-25 那次行距收斂用 sed 掃「1.7」所以整批漏掉，B8 也明寫「維持既有寬鬆行高」不碰。
+
+現行值一律由 token 決定，改一次全站跟著動：
+
+| Token | 值 | 用途 |
+| --- | --- | --- |
+| `--line-height-body` | 1.6 | 正文行高（與全站內文同一個 token） |
+| `--prose-paragraph-gap` | 12px | 段落與清單的下緣間距 |
+| `--prose-heading-gap-before` | 32px | 章節標題（h2）上緣 |
+| `--prose-subheading-gap-before` | 24px | 次級標題（h3）上緣 |
+| `--prose-heading-gap-after` | 12px | 標題下緣（兩級共用） |
+
+標題「遠離上一段、靠近下一段」的歸屬節奏維持（32:12 與 24:12），只是絕對值收斂——手機上 40px 偏大。
+
+**`.prose-block` 長文排版三件套**（`app.css`）：`text-align: justify`＋`text-wrap: pretty`＋`overflow-wrap: break-word`。
+
+只給真的有多行段落的地方用——文章正文、文章摘要。**不要套在 UI 標籤、卡片描述或按鈕上**：兩端對齊在 2–3 個字的標籤上會把字距拉得很誇張。
+
+**刻意不用 `word-break: break-all`。** 中文本來就逐字換行，不需要任何設定；`break-all` 唯一的實際作用是把英文單字從字母中間切開（UVAlert → UVAle/rt），而衛教文章滿是 UV／SPF／WHO 與英文來源標題。`overflow-wrap: break-word` 只在「一個詞自己就放不下整行」時才斷，例如長網址——那才是該斷的情況。
+
+公開衛教靜態頁是獨立產生器、不吃 CSS 變數，數值只能手抄；`tools/education/publicSiteRhythm.test.ts` 守著兩邊不漂開。
+
 ### 展開收合（disclosure）
 
 **2026-08-29（B9 裁決 2）統一。** 先前 5 個實作有四種做法，其中 3 個沒有 `aria-controls`。

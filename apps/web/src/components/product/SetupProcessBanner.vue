@@ -77,7 +77,7 @@ defineEmits<{
   margin-top: var(--space-2);
   color: var(--text-secondary);
   font-size: var(--font-size-supporting);
-  line-height: 1.6;
+  line-height: var(--line-height-body);
 }
 
 .process-banner__action {

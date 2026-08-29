@@ -441,7 +441,7 @@ p {
 
 .field-helper {
   color: var(--text-secondary);
-  line-height: 1.6;
+  line-height: var(--line-height-body);
   font-size: var(--font-size-supporting);
 }
 
@@ -501,12 +501,12 @@ p {
   border-radius: var(--radius-sm);
   background: var(--color-surface-soft);
   color: var(--text-secondary);
-  line-height: 1.6;
+  line-height: var(--line-height-body);
 }
 
 .no-effect-note {
   color: var(--text-secondary);
-  line-height: 1.6;
+  line-height: var(--line-height-body);
 }
 
 .no-effect-note strong {

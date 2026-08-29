@@ -64,7 +64,7 @@ legend {
 }
 .section-help {
   color: var(--text-secondary);
-  line-height: 1.6;
+  line-height: var(--line-height-body);
 }
 .mode-actions {
   display: flex;
