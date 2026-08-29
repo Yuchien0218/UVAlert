@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed } from "vue";
 import Icon from "../components/icons/Icon.vue";
+import type { IconName } from "../generated/icons.generated";
 import {
   isSpecialSituationPublishable,
   listPublishableTopics
@@ -14,28 +15,45 @@ import {
  * 在 App 裡沒有任何進入點。顯示設定已移到 `/settings/display`。
  */
 
-const allEntries = [
+interface MoreEntry {
+  to: string;
+  icon: IconName;
+  label: string;
+  /** 選填——重述標題、沒有新資訊的說明一律不寫（B9 分類表）。 */
+  description?: string;
+}
+
+const allEntries: readonly MoreEntry[] = [
   {
     to: "/settings/notifications",
     icon: "more-notifications",
-    label: "通知設定",
+    label: "通知設定"
     /*
-     * 不寫「背景通知」——目前沒有背景通知，用這個詞會讓使用者以為
-     * 關掉瀏覽器仍收得到（Sitemap §4.3，2026-08-23 裁決）。
+     * 沒有 description 是刻意的：原本的「開啟或管理補擦提醒通知。」
+     * 純粹重述標題，沒有帶進任何新資訊（B9 分類表第 1 項）。
+     *
+     * 若之後要補回文字，不要寫「背景通知」——目前沒有背景通知，用這
+     * 個詞會讓使用者以為關掉瀏覽器仍收得到（Sitemap §4.3，2026-08-23
+     * 裁決）。
      */
-    description: "開啟或管理補擦提醒通知。"
   },
   {
     to: "/education",
     icon: "more-education",
     label: "防曬衛教",
-    description: "用白話讀懂 UV、防曬乳、補擦與曬後照護。"
+    /*
+     * 「六個主題」是會過期的事實——加第七個衛教分類這句就變錯的。
+     * MorePage.test.ts 有一條測試把它跟 docs/education/articles 的
+     * category frontmatter 綁在一起，改分類數就會紅。裁決與代價見
+     * docs/decisions/2026-08-29-b9-pre-decision.md 第八節。
+     */
+    description: "從 UV 到曬後照護，共六個主題。"
   },
   {
     to: "/help",
     icon: "more-about",
     label: "常見問題",
-    description: "防曬乳、提醒時間與使用限制的說明。"
+    description: "防曬乳、提醒時間與使用限制。"
   },
   {
     to: "/special-situation",
@@ -68,7 +86,7 @@ const allEntries = [
     label: "問題回報與意見回饋",
     description: "不用登入也可以回報錯誤或提供建議。"
   }
-] as const;
+];
 
 /**
  * 內容未過審的入口不列出。
@@ -107,10 +125,10 @@ const entries = computed(() =>
         class="entry"
         :to="entry.to"
       >
-        <Icon :name="entry.icon" :size="20" />
+        <Icon :name="entry.icon" :size="32" />
         <span>
           <strong>{{ entry.label }}</strong>
-          <small>{{ entry.description }}</small>
+          <small v-if="entry.description">{{ entry.description }}</small>
         </span>
       </RouterLink>
     </nav>
