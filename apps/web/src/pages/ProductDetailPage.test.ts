@@ -143,6 +143,9 @@ describe("ProductDetailPage", () => {
     const { wrapper } = await mountDetail(null, "non-existent");
 
     expect(wrapper.text()).toContain("找不到這件裝備");
+    expect(wrapper.get("h1").attributes("data-typography-role")).toBe(
+      "page-title"
+    );
   });
 
   describe("主要行動依狀態切換", () => {

@@ -151,7 +151,13 @@ function makeDraftZone(
       </div>
       <div>
         <p class="preset-card__eyebrow">快速提醒（推薦）</p>
-        <h2 class="preset-card__title">{{ preset.label }}</h2>
+        <h2
+          class="preset-card__title"
+          data-typography-role="card-title"
+          data-typography-exception="setup-preset-headline"
+        >
+          {{ preset.label }}
+        </h2>
         <p class="preset-card__body">{{ preset.summary }}</p>
         <p class="preset-card__note">
           這只是建議組合；確認前不會建立任何提醒資料。
@@ -185,7 +191,7 @@ function makeDraftZone(
     <template v-else>
       <section class="zone-groups app-card">
         <div class="zone-groups__heading">
-          <h2>追蹤哪些部位？</h2>
+          <h2 data-typography-role="section-title">追蹤哪些部位？</h2>
           <p>選中的部位會開始補擦倒數。被衣物遮住、不需要提醒的部位不用選。</p>
         </div>
 
@@ -273,7 +279,7 @@ function makeDraftZone(
 .preset-card__eyebrow {
   margin: 0 0 var(--space-2);
   color: var(--text-secondary);
-  font-size: var(--font-size-label);
+  font-size: var(--font-size-caption);
   font-weight: 500;
 }
 
@@ -306,7 +312,7 @@ function makeDraftZone(
 
 .preset-card__note {
   color: var(--text-secondary);
-  font-size: var(--font-size-body);
+  font-size: var(--font-size-supporting);
 }
 
 .preset-card__actions,
@@ -337,7 +343,7 @@ button.text-link {
   margin: var(--space-2) 0 0;
   color: var(--text-secondary);
   line-height: 1.6;
-  font-size: var(--font-size-body);
+  font-size: var(--font-size-supporting);
 }
 
 .zone-groups__list {
@@ -384,7 +390,7 @@ button.text-link {
 
 .field span {
   color: var(--text-secondary);
-  font-size: var(--font-size-body);
+  font-size: var(--font-size-supporting);
 }
 
 .field input {

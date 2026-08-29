@@ -25,6 +25,7 @@ defineEmits<{ start: [] }>();
     -->
     <button
       class="text-link night-notice__escape"
+      data-typography-role="body"
       type="button"
       @click="$emit('start')"
     >
@@ -52,7 +53,6 @@ defineEmits<{ start: [] }>();
   border: 0;
   background: none;
   font: inherit;
-  font-size: var(--font-size-caption);
   cursor: pointer;
 }
 </style>

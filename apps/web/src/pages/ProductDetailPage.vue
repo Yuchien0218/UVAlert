@@ -183,11 +183,13 @@ async function handleDelete(): Promise<void> {
           {{ GEAR_CATEGORY_LABELS[product.gearCategory] }}
           <span v-if="isArchived" class="category-badge__state">・收納中</span>
         </p>
-        <h1 class="page-heading__title">{{ product.displayName }}</h1>
+        <h1 class="page-heading__title" data-typography-role="page-title">
+          {{ product.displayName }}
+        </h1>
       </header>
 
       <section class="app-card spec-section">
-        <h2>裝備資訊</h2>
+        <h2 data-typography-role="card-title">裝備資訊</h2>
         <dl class="spec-list">
           <div v-if="specLine !== null" class="spec-row">
             <dt>規格</dt>
@@ -329,6 +331,7 @@ async function handleDelete(): Promise<void> {
 
 .spec-section h2 {
   margin: 0;
+  font-size: var(--font-size-card-title);
 }
 
 .spec-list {

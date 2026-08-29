@@ -13,7 +13,13 @@ defineProps<Props>();
   <section class="region-summary" aria-labelledby="region-summary-title">
     <MapPin :size="22" :stroke-width="1.7" aria-hidden="true" />
     <div>
-      <h2 id="region-summary-title" class="region-summary__title">目前設定</h2>
+      <h2
+        id="region-summary-title"
+        class="region-summary__title"
+        data-typography-role="card-title"
+      >
+        目前設定
+      </h2>
       <p class="region-summary__value">
         <template v-if="preference?.mode === 'selected'">
           {{ preference.selection.displayName }}
@@ -46,13 +52,13 @@ defineProps<Props>();
 }
 
 .region-summary__title {
-  font-size: var(--font-size-body);
+  font-size: var(--font-size-card-title);
   color: var(--text-secondary);
 }
 
 .region-summary__value {
   margin-top: var(--space-1);
-  font-size: var(--font-size-title-sm);
+  font-size: var(--font-size-card-title);
   font-weight: 600;
 }
 

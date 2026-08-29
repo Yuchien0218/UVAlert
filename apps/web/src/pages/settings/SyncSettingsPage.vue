@@ -85,14 +85,16 @@ function writeSyncDisabled(value: boolean): void {
 <template>
   <div class="page-stack">
     <header class="page-heading">
-      <h1 class="page-heading__title">跨裝置同步</h1>
+      <h1 class="page-heading__title" data-typography-role="page-title">
+        跨裝置同步
+      </h1>
       <p class="page-heading__body">
         使用防曬提醒不需要帳號。只有你選擇同步時才需要登入，用來同步進行中的提醒、裝備、地區與偏好。
       </p>
     </header>
 
     <section v-if="!signedIn" class="app-card sync-card">
-      <h2>目前使用免登入模式</h2>
+      <h2 data-typography-role="card-title">目前使用免登入模式</h2>
       <p>本機倒數與資料不會因為沒有登入而受影響。</p>
       <button class="button button--primary" type="button" @click="signIn">
         使用 Google 登入同步
@@ -105,7 +107,7 @@ function writeSyncDisabled(value: boolean): void {
     </section>
 
     <section v-else-if="syncDisabled" class="app-card sync-card">
-      <h2>同步已停止</h2>
+      <h2 data-typography-role="card-title">同步已停止</h2>
       <p>雲端資料仍保留；重新開啟同步前，不會再讀取或上傳雲端資料。</p>
       <button class="button button--primary" type="button" @click="enableSync">
         重新開啟同步
@@ -113,7 +115,7 @@ function writeSyncDisabled(value: boolean): void {
     </section>
 
     <section v-else class="app-card sync-card">
-      <h2>先看同步內容</h2>
+      <h2 data-typography-role="card-title">先看同步內容</h2>
       <p>確認後才會上傳或下載；遇到版本不同時，系統不會自動覆蓋任何一邊。</p>
       <button
         v-if="preview === null"
@@ -182,6 +184,9 @@ function writeSyncDisabled(value: boolean): void {
 .sync-card h2,
 .sync-card p {
   margin: 0;
+}
+.sync-card h2 {
+  font-size: var(--font-size-card-title);
 }
 .sync-card p {
   color: var(--text-body);

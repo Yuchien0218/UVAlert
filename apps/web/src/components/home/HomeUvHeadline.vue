@@ -91,14 +91,14 @@ const locationLine = computed(() => {
 
 .uv-headline__level {
   padding-bottom: var(--space-1);
-  font-size: var(--font-size-title);
+  font-size: var(--font-size-section-title);
   font-weight: 500;
 }
 
 .uv-headline__empty {
   margin: 0;
   color: var(--text-secondary);
-  font-size: var(--font-size-title);
+  font-size: var(--font-size-section-title);
 }
 
 .uv-headline__meta {

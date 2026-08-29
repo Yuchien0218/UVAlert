@@ -22,7 +22,7 @@ const publishable = computed(() =>
 <template>
   <div class="page-stack">
     <header class="page-heading">
-      <h1 class="page-heading__title">
+      <h1 class="page-heading__title" data-typography-role="page-title">
         {{ topic?.title ?? "說明" }}
       </h1>
     </header>

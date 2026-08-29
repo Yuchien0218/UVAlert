@@ -40,91 +40,48 @@ colors:
   uvi-extreme: "#7D4BB3"
 
 typography:
-  display-xl:
-    fontFamily: "Noto Serif TC, Noto Serif CJK TC, ui-serif, serif"
-    fontSize: 64px
-    fontWeight: 400
-    lineHeight: 1.05
-    letterSpacing: -1.5px
-  display-lg:
-    fontFamily: "Noto Serif TC, Noto Serif CJK TC, ui-serif, serif"
-    fontSize: 48px
-    fontWeight: 400
-    lineHeight: 1.1
-    letterSpacing: -1px
-  display-md:
-    fontFamily: "Noto Serif TC, Noto Serif CJK TC, ui-serif, serif"
-    fontSize: 36px
-    fontWeight: 400
-    lineHeight: 1.15
-    letterSpacing: -0.5px
-  display-sm:
-    fontFamily: "Noto Serif TC, Noto Serif CJK TC, ui-serif, serif"
+  page-title:
+    fontFamily: '"Noto Serif TC Subset", "Noto Serif TC", "Noto Serif CJK TC", ui-serif, serif'
     fontSize: 28px
     fontWeight: 400
-    lineHeight: 1.2
-    letterSpacing: -0.3px
-  title-lg:
-    fontFamily: "Inter, Noto Sans TC, Noto Sans CJK TC, ui-sans-serif, sans-serif"
-    fontSize: 22px
+    lineHeight: 1.22
+    letterSpacing: -0.01em
+  section-title:
+    fontFamily: '"Noto Serif TC Subset", "Noto Serif TC", "Noto Serif CJK TC", ui-serif, serif'
+    fontSize: 20px
     fontWeight: 500
-    lineHeight: 1.3
+    lineHeight: 1.35
     letterSpacing: 0
-  title-md:
-    fontFamily: "Inter, Noto Sans TC, Noto Sans CJK TC, ui-sans-serif, sans-serif"
+  card-title:
+    fontFamily: '"Inter Subset", Inter, "Noto Sans TC", "PingFang TC", "Microsoft JhengHei", system-ui, sans-serif'
     fontSize: 18px
     fontWeight: 500
-    lineHeight: 1.4
+    lineHeight: 1.45
     letterSpacing: 0
-  title-sm:
-    fontFamily: "Inter, Noto Sans TC, Noto Sans CJK TC, ui-sans-serif, sans-serif"
-    fontSize: 16px
-    fontWeight: 500
-    lineHeight: 1.4
-    letterSpacing: 0
-  body-md:
-    fontFamily: "Inter, Noto Sans TC, Noto Sans CJK TC, ui-sans-serif, sans-serif"
+  body:
+    fontFamily: '"Inter Subset", Inter, "Noto Sans TC", "PingFang TC", "Microsoft JhengHei", system-ui, sans-serif'
     fontSize: 16px
     fontWeight: 400
-    lineHeight: 1.55
-    letterSpacing: 0
-  body-sm:
-    fontFamily: "Inter, Noto Sans TC, Noto Sans CJK TC, ui-sans-serif, sans-serif"
-    fontSize: 14px
-    fontWeight: 400
-    lineHeight: 1.55
-    letterSpacing: 0
-  caption:
-    fontFamily: "Inter, Noto Sans TC, Noto Sans CJK TC, ui-sans-serif, sans-serif"
-    fontSize: 13px
-    fontWeight: 500
-    lineHeight: 1.4
-    letterSpacing: 0
-  caption-uppercase:
-    fontFamily: "Inter, Noto Sans TC, Noto Sans CJK TC, ui-sans-serif, sans-serif"
-    fontSize: 12px
-    fontWeight: 500
-    lineHeight: 1.4
-    letterSpacing: 1.5px
-  readout:
-    fontFamily: "Noto Sans Mono CJK TC, ui-monospace, SFMono-Regular, Menlo, Consolas, monospace"
-    fontSize: 14px
-    fontWeight: 600
     lineHeight: 1.6
-    letterSpacing: -0.02em
-    fontVariantNumeric: tabular-nums
-  button:
-    fontFamily: "Inter, Noto Sans TC, Noto Sans CJK TC, ui-sans-serif, sans-serif"
+    letterSpacing: 0.01em
+  supporting:
+    fontFamily: '"Inter Subset", Inter, "Noto Sans TC", "PingFang TC", "Microsoft JhengHei", system-ui, sans-serif'
     fontSize: 14px
+    fontWeight: 400
+    lineHeight: 1.6
+    letterSpacing: 0.01em
+  caption:
+    fontFamily: '"Inter Subset", Inter, "Noto Sans TC", "PingFang TC", "Microsoft JhengHei", system-ui, sans-serif'
+    fontSize: 12px
     fontWeight: 500
-    lineHeight: 1
-    letterSpacing: 0
+    lineHeight: 1.5
+    letterSpacing: 0.01em
   nav-label:
-    fontFamily: "Inter, Noto Sans TC, Noto Sans CJK TC, ui-sans-serif, sans-serif"
+    fontFamily: '"Inter Subset", Inter, "Noto Sans TC", "PingFang TC", "Microsoft JhengHei", system-ui, sans-serif'
     fontSize: 12px
     fontWeight: 500
     lineHeight: 1.4
-    letterSpacing: 0
+    letterSpacing: 0.01em
 
 typography-cjk:
   display:
@@ -154,6 +111,13 @@ typography-cjk:
     lineHeight: 0.95
     letterSpacing: -0.02em
     fontVariantNumeric: tabular-nums
+  readout:
+    fontFamily: "Noto Sans Mono CJK TC, ui-monospace, SFMono-Regular, Menlo, Consolas, monospace"
+    fontSize: 14px
+    fontWeight: 600
+    lineHeight: 1.6
+    letterSpacing: -0.02em
+    fontVariantNumeric: tabular-nums
 
 rounded:
   xs: 4px
@@ -181,7 +145,7 @@ components:
   brand-header:
     backgroundColor: "{colors.canvas}"
     textColor: "{colors.ink}"
-    typography: "{typography.title-md}"
+    typography: "{typography.card-title}"
   bottom-nav:
     backgroundColor: "{colors.canvas}"
     textColor: "{colors.body-strong}"
@@ -191,12 +155,12 @@ components:
   global-status-banner:
     backgroundColor: "{colors.surface-soft}"
     textColor: "{colors.body}"
-    typography: "{typography.body-sm}"
+    typography: "{typography.supporting}"
     rounded: "{rounded.md}"
     padding: 12px 16px
   page-heading:
     textColor: "{colors.ink}"
-    typography: "{typography.display-md}"
+    typography: "{typography.page-title}"
   page-heading-eyebrow:
     textColor: "{colors.muted}"
     typography: "{typography.caption}"
@@ -219,7 +183,7 @@ components:
     rounded: "{rounded.xs}"
   stat-figure:
     textColor: "{colors.ink}"
-    typography: "{typography.readout}"
+    typography: "{typography-cjk.readout}"
   status-card-tracking:
     backgroundColor: "color-mix(in srgb, {colors.status-tracking} 12%, {colors.canvas})"
     labelColor: "{colors.status-tracking}"
@@ -248,7 +212,7 @@ components:
   zone-status-row:
     backgroundColor: transparent
     textColor: "{colors.ink}"
-    typography: "{typography.body-md}"
+    typography: "{typography.body}"
     borderColor: "{colors.hairline-soft}"
   uvi-badge:
     typography: "{typography.caption}"
@@ -263,37 +227,37 @@ components:
   gear-list-item:
     backgroundColor: "{colors.surface-card}"
     textColor: "{colors.ink}"
-    typography: "{typography.title-sm}"
+    typography: "{typography.card-title}"
     rounded: "{rounded.lg}"
     padding: 16px
   more-entry-card:
     backgroundColor: "{colors.surface-card}"
     textColor: "{colors.ink}"
-    typography: "{typography.title-sm}"
+    typography: "{typography.card-title}"
     rounded: "{rounded.lg}"
     padding: 20px
   education-hero-card:
     backgroundColor: "{colors.surface-cream-strong}"
     textColor: "{colors.ink}"
-    typography: "{typography.display-sm}"
+    typography: "{typography.page-title}"
     rounded: "{rounded.lg}"
     padding: 24px
   education-category-card:
     backgroundColor: "{colors.surface-card}"
     textColor: "{colors.ink}"
-    typography: "{typography.title-md}"
+    typography: "{typography.card-title}"
     rounded: "{rounded.lg}"
     padding: 20px
   education-source-block:
     backgroundColor: "{colors.surface-soft}"
     textColor: "{colors.muted}"
-    typography: "{typography.body-sm}"
+    typography: "{typography.supporting}"
     rounded: "{rounded.md}"
     padding: 16px
   setup-step-shell:
     backgroundColor: "{colors.canvas}"
     textColor: "{colors.ink}"
-    typography: "{typography.body-md}"
+    typography: "{typography.body}"
   context-option:
     backgroundColor: "{colors.canvas}"
     textColor: "{colors.ink}"
@@ -313,7 +277,7 @@ components:
   button-primary:
     backgroundColor: "{colors.primary}"
     textColor: "{colors.on-primary}"
-    typography: "{typography.button}"
+    typography: "{typography.body}"
     rounded: "{rounded.md}"
     padding: 12px 20px
     minHeight: 44px
@@ -329,7 +293,7 @@ components:
     backgroundColor: transparent
     textColor: "{colors.ink}"
     borderColor: "{colors.ink}"
-    typography: "{typography.button}"
+    typography: "{typography.body}"
     rounded: "{rounded.md}"
     padding: 12px 20px
     minHeight: 44px
@@ -337,14 +301,14 @@ components:
     backgroundColor: transparent
     textColor: "{colors.ink}"
     borderColor: "{colors.hairline}"
-    typography: "{typography.button}"
+    typography: "{typography.body}"
     rounded: "{rounded.md}"
     padding: 12px 20px
     minHeight: 44px
   button-on-dark:
     backgroundColor: "{colors.surface-dark-elevated}"
     textColor: "{colors.on-dark}"
-    typography: "{typography.button}"
+    typography: "{typography.body}"
     rounded: "{rounded.md}"
     padding: 12px 20px
     minHeight: 44px
@@ -357,12 +321,12 @@ components:
   text-link:
     backgroundColor: transparent
     textColor: "{colors.primary}"
-    typography: "{typography.body-md}"
+    typography: "{typography.body}"
   text-input:
     backgroundColor: "{colors.canvas}"
     textColor: "{colors.ink}"
     borderColor: "{colors.hairline}"
-    typography: "{typography.body-md}"
+    typography: "{typography.body}"
     rounded: "{rounded.md}"
     padding: 10px 14px
     minHeight: 44px
@@ -388,7 +352,7 @@ components:
   page-footer-meta:
     backgroundColor: transparent
     textColor: "{colors.muted-soft}"
-    typography: "{typography.body-sm}"
+    typography: "{typography.supporting}"
 ---
 
 ## 一、品牌本質（Brand Essence）
@@ -520,15 +484,15 @@ components:
 >
 > 最終解法是**把西文顯示字整支移除**，而不是換一支。依據是實測資料：54 個衛教文章標題中只有 11 個含拉丁字母，且**全部**是嵌在中文句子裡的縮寫（UV、UVA、UVB、SPF、PA、UPF、UV400），**沒有任何一個是連續拉丁文字**——這個產品根本沒有「拉丁標題排版」這個工作。Noto Serif TC 自帶的拉丁字形本來就是為搭配它的中文而設計，縮寫與中文的視覺重量一致。
 
-系統以 **Noto Serif TC** 為標題顯示字，中英文由同一支字型負責，字重僅 400。**Inter** 為拉丁人文無襯線內文字，搭配 **Noto Sans TC** 處理繁體中文內文、導覽與 UI 標籤。**Noto Sans Mono** 加系統等寬堆疊處理倒數數值與資料讀數——讀數只渲染純數字（見下方讀數字體備註），不需要 CJK 等寬覆蓋。
+系統以 **Noto Serif TC** 為標題顯示字，中英文由同一支字型負責；page title 使用字重 400，section title 使用字重 500。**Inter** 為拉丁人文無襯線內文字，搭配 **Noto Sans TC** 處理繁體中文內文、導覽與 UI 標籤。**Noto Sans Mono** 加系統等寬堆疊處理倒數數值與資料讀數——讀數只渲染純數字（見下方讀數字體備註），不需要 CJK 等寬覆蓋。
 
 **標題不再搭配任何西文顯示字體。** 要加西文襯線體之前，先回頭看上面那段實測資料：沒有連續拉丁標題，就沒有它的工作。
 
-備援堆疊：標題走 `Noto Serif TC, Noto Serif CJK TC, ui-serif, serif`，內文走 `Inter, Noto Sans TC, Noto Sans CJK TC, ui-sans-serif, sans-serif`。
+runtime 堆疊：標題走 `"Noto Serif TC Subset", "Noto Serif TC", "Noto Serif CJK TC", ui-serif, serif`；內文走 `"Inter Subset", Inter, "Noto Sans TC", "PingFang TC", "Microsoft JhengHei", system-ui, sans-serif`。前兩個名稱是專案自行托管的 subset；後段才是載入失敗時的系統備援。
 
 標題／內文的分工是編輯式的：
 
-- Noto Serif TC（字重 400，負字距）→ h1、h2、h3、頁面主標
+- Noto Serif TC（page title 400、section title 500）→ h1、h2、h3、頁面主標
 - Inter ＋ Noto Sans TC（字重 400–500）→ 內文、導覽、按鈕、說明、標籤
 - Noto Sans Mono ＋ 系統等寬 → 倒數數值、UV 指數、時間戳記
 
@@ -542,22 +506,17 @@ components:
 
 ### 階層
 
-| Token                            | 尺寸 | 字重 | 行高 | 字距    | 用途                              |
-| -------------------------------- | ---- | ---- | ---- | ------- | --------------------------------- |
-| `{typography.display-xl}`        | 64px | 400  | 1.05 | -1.5px  | 衛教首頁主標 — Noto Serif TC      |
-| `{typography.display-lg}`        | 48px | 400  | 1.1  | -1px    | 衛教分類頁主標                    |
-| `{typography.display-md}`        | 36px | 400  | 1.15 | -0.5px  | 頁面標題（`page-heading__title`） |
-| `{typography.display-sm}`        | 28px | 400  | 1.2  | -0.3px  | 衛教首頁大卡片標題、區塊標題      |
-| `{typography.title-lg}`          | 22px | 500  | 1.3  | 0       | 文章章節標題 — Inter              |
-| `{typography.title-md}`          | 18px | 500  | 1.4  | 0       | 卡片標題、導言段落                |
-| `{typography.title-sm}`          | 16px | 500  | 1.4  | 0       | 裝備卡標題、清單標籤              |
-| `{typography.body-md}`           | 16px | 400  | 1.55 | 0       | 預設內文 — Inter                  |
-| `{typography.body-sm}`           | 14px | 400  | 1.55 | 0       | 次要說明、頁尾                    |
-| `{typography.caption}`           | 13px | 500  | 1.4  | 0       | 徽章標籤、eyebrow、安全提示       |
-| `{typography.caption-uppercase}` | 12px | 500  | 1.4  | 1.5px   | 分類標記                          |
-| `{typography.readout}`           | 14px | 600  | 1.6  | -0.02em | 資料讀數（UV 指數、時間戳記）     |
-| `{typography.button}`            | 14px | 500  | 1.0  | 0       | 按鈕標籤                          |
-| `{typography.nav-label}`         | 12px | 500  | 1.4  | 0       | 下排導覽標籤                      |
+| Token                        | 尺寸 | 字重 | 行高 | 字距    | 用途                                           |
+| ---------------------------- | ---- | ---- | ---- | ------- | ---------------------------------------------- |
+| `{typography.page-title}`    | 28px | 400  | 1.22 | -0.01em | 每頁唯一主標題、設定流程主標題 — Noto Serif TC |
+| `{typography.section-title}` | 20px | 500  | 1.35 | 0       | 頁面區段、Dialog／Bottom Sheet、文章主要章節   |
+| `{typography.card-title}`    | 18px | 500  | 1.45 | 0       | 卡片標題、欄位群組標題、文章次級標題           |
+| `{typography.body}`          | 16px | 400  | 1.6  | 0.01em  | 正文、按鈕、輸入內容與一般操作文字             |
+| `{typography.supporting}`    | 14px | 400  | 1.6  | 0.01em  | 欄位標籤、helper text、次要資訊與補充文字      |
+| `{typography.caption}`       | 12px | 500  | 1.5  | 0.01em  | 短註腳、時間戳、eyebrow、badge                 |
+| `{typography.nav-label}`     | 12px | 500  | 1.4  | 0.01em  | 主要底部導覽標籤                               |
+
+倒數與資料讀數是元件級例外，保留在 `typography-cjk` 與下方的數字規則；它們不屬於一般文字字級量表。
 
 ### 繁體中文字體建議
 
@@ -579,17 +538,15 @@ components:
 
 元件內含繁體中文時套用以下覆寫，保留拉丁比例的同時給 CJK 字符足夠的垂直呼吸：
 
-| 角色       |    尺寸 | CJK 行高 |        字距 | 備註                                                                                                                                           |
-| ---------- | ------: | -------: | ----------: | ---------------------------------------------------------------------------------------------------------------------------------------------- |
-| Display XL |    64px |     1.15 |     -0.02em | 兩行標題使用 `text-wrap: balance`                                                                                                              |
-| Display LG |    48px |     1.18 |    -0.015em | 標題控制在兩到三行                                                                                                                             |
-| Display MD |    36px |     1.22 |     -0.01em | 頁面標題                                                                                                                                       |
-| Display SM |    28px |     1.28 |           0 | 短中文標籤避免緊字距                                                                                                                           |
-| 卡片標題   | 18–22px |     1.45 |           0 | 字重 500；不用假粗體                                                                                                                           |
-| Body MD    |    16px |      1.6 |      0.01em | 倒數說明與衛教內容的預設。2026-08-25 連續調整：字級從 14px 調到 16px 時先跟著配對值訂成 1.75，使用者陸續回饋收緊到 1.7、再到 1.6，目前是最終值 |
-| Body SM    |    14px |      1.7 |      0.01em | 僅細則；重要指示不用這級                                                                                                                       |
-| 說明／標籤 | 12–13px |      1.5 | 0.01–0.02em | 標籤保持簡短、盡量一行                                                                                                                         |
-| 按鈕／導覽 | 14–16px | 1.3–1.45 |      0.01em | 行動端輸入框用 16px 避免 iOS 自動放大                                                                                                          |
+| 角色          | 尺寸 | CJK 行高 | 字距    | 備註                                                |
+| ------------- | ---: | -------: | ------- | --------------------------------------------------- |
+| Page title    | 28px |     1.22 | -0.01em | 每頁唯一主標題；兩行標題使用 `text-wrap: balance`   |
+| Section title | 20px |     1.35 | 0       | 頁面區段、Dialog／Bottom Sheet、文章主要章節        |
+| Card title    | 18px |     1.45 | 0       | 字重 500；不用假粗體                                |
+| Body          | 16px |      1.6 | 0.01em  | 衛教內容與操作文字的預設；輸入內容避免 iOS 自動放大 |
+| Supporting    | 14px |      1.6 | 0.01em  | 可跨行閱讀的次要資訊；重要指示不可降到 caption      |
+| Caption       | 12px |      1.5 | 0.01em  | 短註腳、eyebrow、badge；不承載長段說明              |
+| Nav label     | 12px |      1.4 | 0.01em  | 主要底部導覽標籤                                    |
 
 中文衛教段落使用 `max-width: 38em` 避免行長過長。使用 `text-align: start`、`line-break: strict`、`word-break: normal`、`text-wrap: pretty`。不使用 `word-break: break-all` 或全文對齊。
 
@@ -611,7 +568,7 @@ components:
 
 ### 原則
 
-標題尺寸使用字重 400（regular），永不加粗。負字距（拉丁 -0.3 到 -1.5px；中文覆寫 -0.02em 到 0）是必要的——襯線標題失去負字距就失去沉穩的編輯節奏。襯線字給產品一個文學性、經過思考的聲音；換成無襯線標題會讓體驗變得跟其他工具型 App 沒有差別。
+page title 使用字重 400 與 -0.01em 字距；section title 的字重 500 是區段層級所需的明確性。襯線字給產品一個文學性、經過思考的聲音；換成無襯線標題會讓體驗變得跟其他工具型 App 沒有差別。
 
 內文段落維持字重 400，標籤與強調短語 500。無襯線內文是人文式的（Inter ＋ Noto Sans TC）——不是幾何式。Helvetica 或 Arial 過於中性，會破壞溫暖的編輯感。
 
@@ -649,13 +606,13 @@ Noto Serif TC 是標題的唯一字型，沒有第二層自托管備援——載
 
 ### 頁面骨架
 
-**`page-heading`** — 由三段組成：`eyebrow`（`{typography.caption}`，`{colors.muted}`）、`title`（`{typography.display-md}`，襯線）、`body`（`{typography.body-md}`，`{colors.body}`，`max-width: 38rem`）。eyebrow 與 body 都是選用的。
+**`page-heading`** — 由三段組成：`eyebrow`（`{typography.caption}`，`{colors.muted}`）、`title`（`{typography.page-title}`，襯線）、`body`（`{typography.body}`，`{colors.body}`，`max-width: 38rem`）。eyebrow 與 body 都是選用的。
 
 **`flow-heading`** — 全螢幕操作流程的標題列，標題與說明在左、關閉操作在右；內部以 12px 堆疊，兩側保留 16px 間距。共通實作位於 `apps/web/src/assets/app.css`，目前供重新塗抹、更正紀錄與回報事件三個流程使用。
 
 **`app-card`** — 通用內容卡。背景半透明白 `rgba(255,255,255,0.6)` 疊在 `{colors.canvas}` 上（2026-08-24：純 canvas 版本套用後卡片跟頁面幾乎融在一起，改用半透明白疊加維持一點層次），1px `{colors.hairline}` 邊框，圓角 `{rounded.lg}`，內距 20px。無陰影。這個疊加效果假設卡片背後是 canvas 底色，不要用在深色面板或圖片背景上。
 
-**`page-footer-meta`** — 頁尾的版本、隱私政策、使用條款與資料說明。純文字連結列，`{colors.muted-soft}`，`{typography.body-sm}`。**刻意不做成功能卡片**，避免與「更多」頁的入口卡競爭。
+**`page-footer-meta`** — 頁尾的版本、隱私政策、使用條款與資料說明。純文字連結列，`{colors.muted-soft}`，`{typography.supporting}`。**刻意不做成功能卡片**，避免與「更多」頁的入口卡競爭。
 
 ### 提醒（核心）
 
@@ -691,7 +648,7 @@ Noto Serif TC 是標題的唯一字型，沒有第二層自托管備援——載
 
 ### 裝備
 
-**`gear-list-item`** — 裝備清單項目。背景 `{colors.surface-card}`，圓角 `{rounded.lg}`，內距 16px。承載品類圖示、裝備名稱（`{typography.title-sm}`）與摘要。點擊進入詳情頁。
+**`gear-list-item`** — 裝備清單項目。背景 `{colors.surface-card}`，圓角 `{rounded.lg}`，內距 16px。承載品類圖示、裝備名稱（`{typography.card-title}`）與摘要。點擊進入詳情頁。
 
 **`badge-unverified`** — 標示資料尚未完整的防曬乳使用「標示尚未確認」徽章，背景 `{colors.surface-soft}`、文字 `{colors.muted}`。**這類產品仍列在「目前使用」**，不降級、不隱藏——只是明確標示不確定性。
 
@@ -703,11 +660,11 @@ Noto Serif TC 是標題的唯一字型，沒有第二層自托管備援——載
 
 ### 衛教
 
-**`education-hero-card`** — 衛教首頁的「了解今天的 UV」大卡片，標示「先從這裡開始」。背景 `{colors.surface-cream-strong}`，標題 `{typography.display-sm}`（襯線），圓角 `{rounded.lg}`，內距 24px。這是六個分類中唯一放大的一張。
+**`education-hero-card`** — 衛教首頁的「了解今天的 UV」大卡片，標示「先從這裡開始」。背景 `{colors.surface-cream-strong}`，標題 `{typography.page-title}`（襯線），圓角 `{rounded.lg}`，內距 24px。這是六個分類中唯一放大的一張。
 
-**`education-category-card`** — 其餘五個分類卡。背景 `{colors.surface-card}`，標題 `{typography.title-md}`，圓角 `{rounded.lg}`，內距 20px。分類文章列表使用兩欄卡片網格。
+**`education-category-card`** — 其餘五個分類卡。背景 `{colors.surface-card}`，標題 `{typography.card-title}`，圓角 `{rounded.lg}`，內距 20px。分類文章列表使用兩欄卡片網格。
 
-**`education-source-block`** — 文章底部的資料來源與審閱資訊。背景 `{colors.surface-soft}`，文字 `{colors.muted}`，`{typography.body-sm}`，圓角 `{rounded.md}`。**來源與審閱狀態不能藏在互動之後**——這是健康內容可查證性的基礎。
+**`education-source-block`** — 文章底部的資料來源與審閱資訊。背景 `{colors.surface-soft}`，文字 `{colors.muted}`，`{typography.supporting}`，圓角 `{rounded.md}`。**來源與審閱狀態不能藏在互動之後**——這是健康內容可查證性的基礎。
 
 文章頁另包含麵包屑、可展開段落目錄、2 篇相關文章與回到分類的入口。PWA 內開啟時保留下排導覽與收藏操作；從搜尋或外部分享進入時使用獨立公開閱讀版面，不顯示收藏、Session、產品或位置等個人資料。
 
@@ -844,23 +801,26 @@ Noto Serif TC 是標題的唯一字型，沒有第二層自托管備援——載
 
 ## 十、與程式碼的落差
 
-`README.md` 訂有「文件與程式碼衝突時以程式碼為準」的規則。**色彩已於 2026-08-22 套用、標題字體已於 2026-08-23 定案（Noto Serif TC 單一字型）。** 第二節的 `colors`／`rounded`／`spacing`／`layout` frontmatter 與 `packages/ui/src/styles.css` 的一致性由 `packages/ui/src/tokens.test.ts` 自動守著（2026-08-26 起）。目前**刻意或暫時的偏離**：
+`README.md` 訂有「文件與程式碼衝突時以程式碼為準」的規則。**色彩已於 2026-08-22 套用、標題字體已於 2026-08-23 定案（Noto Serif TC 單一字型）。** 第二節的 `colors`／`rounded`／`spacing`／`layout`／`typography` frontmatter 與 `packages/ui/src/styles.css` 的一致性由 `packages/ui/src/tokens.test.ts` 自動守著。目前**刻意或暫時的偏離**：
 
-| 項目         | 本文件（目標）                                   | 實作                                                                      | 狀態 / 為什麼                                                                                                                                                 |
-| ------------ | ------------------------------------------------ | ------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 中文內文字體 | Noto Sans TC                                     | 系統黑體（PingFang TC／微軟正黑）                                         | 刻意。內文會渲染使用者輸入的裝備名稱與備註，subset 會缺字，完整 CJK 字型好幾 MB。詳見 `tools/fonts/README.md`                                                 |
-| **字級量表** | 第三節 14 級編輯量表（`display-xl`…`nav-label`） | `styles.css` 只有 **8 個 `--font-size-*` token**，命名與數值不是 1:1 對應 | **未對齊**。只有 `body-md`(16px) ↔ `--font-size-body` 校準過（2026-08-25）。其餘見下方對照表。重新對齊會動到全站字級，是獨立的視覺工作，見 audit 清單 D2/B7。 |
+| 項目         | 本文件（目標）       | 實作                                 | 狀態 / 為什麼                                                                                                 |
+| ------------ | -------------------- | ------------------------------------ | ------------------------------------------------------------------------------------------------------------- |
+| 中文內文字體 | Noto Sans TC         | 系統黑體（PingFang TC／微軟正黑）    | 刻意。內文會渲染使用者輸入的裝備名稱與備註，subset 會缺字，完整 CJK 字型好幾 MB。詳見 `tools/fonts/README.md` |
+| **字級量表** | 第三節七角色語意量表 | 7 個 canonical `--font-size-*` token | **已對齊**。每個角色的值由 token drift test 比對；倒數與讀數是元件級例外。                                    |
 
-### 字級量表 ↔ code token 對照（2026-08-26）
+### 字級量表 ↔ code token 對照（B8）
 
-| 第三節級別                                 | 目標           | 角色                           | code token                                                                                                                | code 值                                | 狀態                                                                                                              |
-| ------------------------------------------ | -------------- | ------------------------------ | ------------------------------------------------------------------------------------------------------------------------- | -------------------------------------- | ----------------------------------------------------------------------------------------------------------------- |
-| `body-md`                                  | 16px           | 預設內文                       | `--font-size-body`                                                                                                        | 16px                                   | ✅ 校準（2026-08-25）                                                                                             |
-| `display-md`                               | 36px           | 頁面標題 `page-heading__title` | `--font-size-page-title`                                                                                                  | `clamp(1.75rem, 6vw, 2rem)`（28–32px） | ⚠️ 值偏小且是 clamp                                                                                               |
-| `title-lg`/`title-md`/`title-sm`           | 22 / 18 / 16px | 章節、卡片、清單標題           | `--font-size-title`(20) / `--font-size-title-md`(21.6) / `--font-size-title-sm`(18.4) / `--font-size-section-title`(18.4) | 18.4–21.6px                            | ⚠️ 4 個 token 是 2026-08-24 從散落的 1.05–1.35rem 卡片標題**收斂出來的桶**，不是第三節的 `title-*` 級別，命名巧合 |
-| `body-sm` / `caption`                      | 14 / 13px      | 次要說明、徽章、eyebrow        | `--font-size-label`(12.8) / `--font-size-caption`(12)                                                                     | 12–12.8px                              | ⚠️ 值偏小                                                                                                         |
-| `display-xl` / `display-lg` / `display-sm` | 64 / 48 / 28px | 衛教首頁／分類頁主標、大卡片   | 無 token（各元件 scoped `clamp()`）                                                                                       | —                                      | ⚠️ 未 token 化                                                                                                    |
-| `readout` / `button` / `nav-label`         | 14 / 14 / 12px | 讀數、按鈕、導覽標籤           | 無 `--font-size-*`（`.stat-figure`／`.button`／`BottomNavigation` scoped）                                                | —                                      | 角色明確，暫不 token 化                                                                                           |
+| 語意角色        | 基準值 | code token                  | code 值    | 狀態               |
+| --------------- | -----: | --------------------------- | ---------- | ------------------ |
+| `page-title`    |   28px | `--font-size-page-title`    | `1.75rem`  | ✅ drift test 守門 |
+| `section-title` |   20px | `--font-size-section-title` | `1.25rem`  | ✅ drift test 守門 |
+| `card-title`    |   18px | `--font-size-card-title`    | `1.125rem` | ✅ drift test 守門 |
+| `body`          |   16px | `--font-size-body`          | `1rem`     | ✅ drift test 守門 |
+| `supporting`    |   14px | `--font-size-supporting`    | `0.875rem` | ✅ drift test 守門 |
+| `caption`       |   12px | `--font-size-caption`       | `0.75rem`  | ✅ drift test 守門 |
+| `nav-label`     |   12px | `--font-size-nav-label`     | `0.75rem`  | ✅ drift test 守門 |
+
+B8 遷移期間使用的四個臨時字級別名已移除；目前元件只使用上表七個 canonical token 與經規範保留的讀數例外。
 
 **已對齊的部分**：品牌與表面色票、行動色、4 級文字色、拉丁內文字體、**標題顯示字體**、圓角（xs 4px 到 sheet 24px、pill）、UV 五級風險色、倒數五狀態語意色（含 `saved` 藕紫，2026-08-26 修正）、內容最大寬度 752px、點擊目標 44px、間距尺規（`--space-1..12`）、斷點（rem）、單一亮色主題、自訂圖示系統為唯一來源。
 

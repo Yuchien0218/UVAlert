@@ -41,7 +41,9 @@ const robots = computed(() =>
     <header class="page-heading">
       <RouterLink class="text-link" to="/education">← 防曬衛教</RouterLink>
       <p class="page-heading__eyebrow">衛教分類</p>
-      <h1 class="page-heading__title">{{ category.title }}</h1>
+      <h1 class="page-heading__title" data-typography-role="page-title">
+        {{ category.title }}
+      </h1>
       <p class="page-heading__body">{{ category.description }}</p>
     </header>
 
@@ -55,7 +57,9 @@ const robots = computed(() =>
 
     <section aria-labelledby="category-articles-title">
       <div class="education-section-heading">
-        <h2 id="category-articles-title">文章</h2>
+        <h2 id="category-articles-title" data-typography-role="section-title">
+          文章
+        </h2>
         <span>{{ articles.length }} 篇</span>
       </div>
       <div class="education-article-list">
@@ -126,7 +130,7 @@ const robots = computed(() =>
 }
 
 .education-article-card strong {
-  font-size: var(--font-size-title-sm);
+  font-size: var(--font-size-card-title);
   font-weight: 500;
   line-height: 1.45;
 }

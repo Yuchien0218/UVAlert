@@ -19,4 +19,8 @@ describe("AppShell fixed navigation layout", () => {
     expect(shellSource).toContain("env(safe-area-inset-bottom)");
     expect(shellSource).toContain("route.meta.hideNavigation !== true");
   });
+
+  it("允許主要內容 grid item 在 320px 內收縮", () => {
+    expect(shellSource).toMatch(/\.app-shell__main\s*\{[^}]*min-width:\s*0;/);
+  });
 });

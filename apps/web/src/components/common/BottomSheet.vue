@@ -47,7 +47,13 @@ const { closeFromBackdrop } = useOverlay({
           tabindex="-1"
         >
           <header class="bottom-sheet__header">
-            <h2 :id="labelledById" style="min-width: 0">{{ title }}</h2>
+            <h2
+              :id="labelledById"
+              data-typography-role="section-title"
+              style="min-width: 0"
+            >
+              {{ title }}
+            </h2>
             <button
               class="icon-button"
               type="button"
@@ -105,7 +111,7 @@ const { closeFromBackdrop } = useOverlay({
 
 .bottom-sheet__header h2 {
   margin: 0;
-  font-size: var(--font-size-title-md);
+  font-size: var(--font-size-section-title);
 }
 
 .bottom-sheet__body {

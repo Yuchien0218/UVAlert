@@ -187,38 +187,42 @@
     "Inter Subset", Inter, "Noto Sans TC", "PingFang TC", "Microsoft JhengHei",
     system-ui, sans-serif;
   --font-mono: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
-  --font-size-page-title: clamp(1.75rem, 6vw, 2rem);
-  --font-size-section-title: 1.15rem;
-  --font-size-label: 0.8rem;
-  /*
-   * 2026-08-25：0.875rem（14px）→ 1rem（16px），改配合 DESIGN.md 第三節
-   * body-md 的 16px 目標（使用者確認方向是「改程式碼配合文件」，不是反過來
-   * 把文件降到 14px）。原本這個 token 名稱是 body，實際套用的卻是文件定義
-   * 的 body-sm（14px，次要說明）那一級，全站主要內文因此比文件規格小一號。
-   * 這裡只調整這一個 token；title-sm／title／title-md 等其他 token 跟
-   * DESIGN.md 階層表的數值落差不在這次範圍內，見文件第十節。
-   */
+  /* B8 role-based typography scale: docs/superpowers/specs/2026-08-27-b8-role-based-typography-design.md */
+  --font-family-page-title: var(--font-serif);
+  --font-size-page-title: 1.75rem;
+  --font-weight-page-title: 400;
+  --line-height-page-title: 1.22;
+  --letter-spacing-page-title: -0.01em;
+  --font-family-section-title: var(--font-serif);
+  --font-size-section-title: 1.25rem;
+  --font-weight-section-title: 500;
+  --line-height-section-title: 1.35;
+  --letter-spacing-section-title: 0;
+  --font-family-card-title: var(--font-sans);
+  --font-size-card-title: 1.125rem;
+  --font-weight-card-title: 500;
+  --line-height-card-title: 1.45;
+  --letter-spacing-card-title: 0;
+  --font-family-body: var(--font-sans);
   --font-size-body: 1rem;
+  --font-weight-body: 400;
+  --line-height-body: 1.6;
+  --letter-spacing-body: 0.01em;
+  --font-family-supporting: var(--font-sans);
+  --font-size-supporting: 0.875rem;
+  --font-weight-supporting: 400;
+  --line-height-supporting: 1.6;
+  --letter-spacing-supporting: 0.01em;
+  --font-family-caption: var(--font-sans);
   --font-size-caption: 0.75rem;
-  /*
-   * 2026-08-24 補上：DESIGN.md 原本只有 5 級，實測發現 body（0.875rem）
-   * 跟 section-title（1.15rem）之間有大量卡片／fieldset 標題各自寫死
-   * 接近的數值（1.05–1.2rem 那批，13 種散在 30+ 檔案）。title-sm 先
-   * 收斂最密集的區間，跟 section-title 同值但語意是「卡片內的小標題」，
-   * 不是頁面區塊標題。title-md 收斂 sheet 標題那組（3 個檔案完全一致
-   * 的 1.35rem）。
-   */
-  --font-size-title-sm: 1.15rem;
-  /*
-   * 2026-08-24 補：介於 title-sm（1.15）跟 title-md（1.35）之間，
-   * 收斂區塊／對話框標題角色（SessionEndControl 對話框標題、
-   * HomePage 狀態標題、ReapplicationZoneSelector legend）——這三處
-   * 數值巧合都是 1.25rem 且角色相同；UV 等級標籤與衛教文章 H2 數值
-   * 雖然也是 1.25rem，但角色不同，不併進來（前者不是標題，後者是
-   * 獨立的內文排版）。
-   */
-  --font-size-title: 1.25rem;
-  --font-size-title-md: 1.35rem;
+  --font-weight-caption: 500;
+  --line-height-caption: 1.5;
+  --letter-spacing-caption: 0.01em;
+  --font-family-nav-label: var(--font-sans);
+  --font-size-nav-label: 0.75rem;
+  --font-weight-nav-label: 500;
+  --line-height-nav-label: 1.4;
+  --letter-spacing-nav-label: 0.01em;
 
   /*
    * 2026-08-24 補：字距（letter-spacing）原本 8 個檔案各寫各的魔術數字，
@@ -250,7 +254,6 @@
   --letter-spacing-mono-label: 0.12em;
   --letter-spacing-headline: -0.04em;
   --letter-spacing-readout: -0.02em;
-  --letter-spacing-page-title: -0.055em;
 
   --space-1: 0.25rem;
   --space-2: 0.5rem;
@@ -341,8 +344,11 @@ body {
   min-height: 100svh;
   margin: 0;
   background: var(--page-background);
-  line-height: 1.6;
-  letter-spacing: normal;
+  font-family: var(--font-family-body);
+  font-size: var(--font-size-body);
+  font-weight: var(--font-weight-body);
+  line-height: var(--line-height-body);
+  letter-spacing: var(--letter-spacing-body);
 }
 
 /*
@@ -355,9 +361,6 @@ body {
 h1,
 h2,
 h3 {
-  font-family: var(--font-serif);
-  font-weight: 400;
-  letter-spacing: -0.01em;
   /*
    * 2026-08-24：清掉瀏覽器預設的 margin（h1 是 0.67em，32px 標題就是
    * 上下各 21.44px）。版面一律用容器的 gap 排，留著預設 margin 會讓

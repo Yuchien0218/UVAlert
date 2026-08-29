@@ -17,7 +17,9 @@ defineEmits<{
     />
     <div class="process-banner__content">
       <p class="process-banner__eyebrow">提醒設定進行中</p>
-      <h2 id="setup-process-title">提醒設定尚未完成</h2>
+      <h2 id="setup-process-title" data-typography-role="section-title">
+        提醒設定尚未完成
+      </h2>
       <p>完成防曬乳設定後，可以返回繼續確認實際塗抹時間。</p>
     </div>
     <button
@@ -69,7 +71,7 @@ defineEmits<{
 
 .process-banner__eyebrow {
   color: var(--text-secondary);
-  font-size: var(--font-size-label);
+  font-size: var(--font-size-caption);
   font-weight: 500;
 }
 
@@ -81,7 +83,7 @@ defineEmits<{
 .process-banner__content > p:last-child {
   margin-top: var(--space-2);
   color: var(--text-secondary);
-  font-size: var(--font-size-body);
+  font-size: var(--font-size-supporting);
   line-height: 1.6;
 }
 

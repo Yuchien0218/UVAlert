@@ -58,6 +58,11 @@ describe("公開衛教頁", () => {
     expect(wrapper.find("h1").text()).toContain("UV 指數怎麼看");
     expect(wrapper.text()).toContain("專業審閱中");
     expect(wrapper.text()).toContain("本文為一般衛教草稿");
+    const divider = wrapper.find(".education-article-body hr");
+    expect(divider.exists()).toBe(true);
+    expect(wrapper.get(".education-article-body hr + p").text()).toContain(
+      "本文為一般衛教草稿"
+    );
     expect(
       document.querySelector<HTMLMetaElement>('meta[name="robots"]')?.content
     ).toBe("noindex,follow");

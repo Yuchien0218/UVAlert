@@ -69,7 +69,11 @@ function getUnavailableMessage(error: UvForecastError): string {
   >
     <div class="uv-forecast__heading">
       <div>
-        <h2 id="five-day-uv-title" class="uv-forecast__title">
+        <h2
+          id="five-day-uv-title"
+          class="uv-forecast__title"
+          data-typography-role="section-title"
+        >
           未來 5 天 UV 預報
         </h2>
       </div>
@@ -283,7 +287,7 @@ function getUnavailableMessage(error: UvForecastError): string {
   top: var(--space-2);
   right: var(--space-2);
   color: var(--text-secondary);
-  font-size: var(--font-size-label);
+  font-size: var(--font-size-caption);
   font-weight: 500;
   line-height: 1;
 }
@@ -333,14 +337,13 @@ function getUnavailableMessage(error: UvForecastError): string {
 }
 
 /*
- * 2026-08-25：跟其他 body 級文字一起被批次改成 1.75，但這是 label 級
- * （12.8px）文字，DESIGN.md「說明／標籤」對應的 CJK 行高是 1.5，改回來。
+ * 來源與預報註記屬 supporting role；CJK 行高維持 1.5。
  */
 .uv-forecast__source,
 .uv-forecast__note {
   margin: 0;
   color: var(--text-secondary);
-  font-size: var(--font-size-label);
+  font-size: var(--font-size-supporting);
   line-height: 1.5;
 }
 

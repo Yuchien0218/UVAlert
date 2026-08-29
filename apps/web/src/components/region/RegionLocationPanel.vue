@@ -51,7 +51,13 @@ const errorMessage = computed(() => {
     <div class="location-panel__heading">
       <div>
         <p class="eyebrow--mono">裝置定位</p>
-        <h2 id="location-title" class="location-panel__title">使用目前位置</h2>
+        <h2
+          id="location-title"
+          class="location-panel__title"
+          data-typography-role="section-title"
+        >
+          使用目前位置
+        </h2>
       </div>
       <LocateFixed :size="25" :stroke-width="1.6" aria-hidden="true" />
     </div>
@@ -78,7 +84,9 @@ const errorMessage = computed(() => {
       aria-labelledby="location-candidate-title"
       aria-live="polite"
     >
-      <h3 id="location-candidate-title">確認所在行政區</h3>
+      <h3 id="location-candidate-title" data-typography-role="card-title">
+        確認所在行政區
+      </h3>
       <p>
         系統配對為 <strong>{{ candidate.displayName }}</strong>
         <template v-if="approximateAccuracyMeters !== null">
@@ -135,7 +143,7 @@ const errorMessage = computed(() => {
 
 .location-panel__title {
   margin-top: var(--space-1);
-  font-size: var(--font-size-title-md);
+  font-size: var(--font-size-section-title);
 }
 
 .location-panel__body {
@@ -156,7 +164,7 @@ const errorMessage = computed(() => {
 }
 
 .location-panel__candidate h3 {
-  font-size: var(--font-size-title-sm);
+  font-size: var(--font-size-card-title);
 }
 
 .location-panel__relocate {

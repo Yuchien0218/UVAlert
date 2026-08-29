@@ -5,13 +5,13 @@ import { describe, expect, it } from "vitest";
  * DESIGN.md（設計系統唯一權威）↔ styles.css（程式碼真實來源）的漂移守門測試。
  *
  * 起因見 docs/superpowers/plans/2026-08-26-codebase-consolidation-audit.md 的 C1：
- * 2026-08-25 才發現 DESIGN.md 的 body-md 訂 16px，但 --font-size-body 一直是
+ * 2026-08-25 曾發現 DESIGN.md 的 body-md 訂 16px，但 --font-size-body 一直是
  * 14px——沒有任何機制擋住這種落差。這個測試 parse DESIGN.md frontmatter 的
- * colors／rounded／spacing／layout，逐項比對 styles.css 的對應 token。
+ * colors／rounded／spacing／layout／typography，逐項比對 styles.css 的對應 token。
  *
- * **範圍界定**：typography（14 級編輯量表）與 code 端 8 個 --font-size-* token
- * 的命名對應太亂，重新對齊會動到全站字級——是獨立的視覺工作（見 DESIGN.md
- * 第十節的對照表 ＋ audit 清單 D2/B7）。本檔案只驗證唯一校準過的 body-md。
+ * **範圍界定**：B8 將 typography 收斂為七個語意角色；每個 canonical
+ * --font-size-* token 都必須與 DESIGN.md 同值。倒數與讀數是元件級例外，
+ * 不納入一般文字量表。
  *
  * **KNOWN_DRIFT**：已知對不上、待裁決的項目列在下方清單，測試放行；另有一個
  * 測試守著「這些項目現在仍然真的有落差」——修好一項後那個測試會失敗，提醒
@@ -50,9 +50,8 @@ function frontmatterSection(topKey: string): Record<string, string> {
 const cssTokens: Record<string, string> = (() => {
   const root = stylesCss.match(/:root\s*\{([\s\S]*?)\r?\n\}/)?.[1] ?? "";
   const out: Record<string, string> = {};
-  for (const line of root.split(/\r?\n/)) {
-    const match = line.match(/^\s*(--[\w-]+):\s*([^;]+);/);
-    if (match) out[match[1]!] = match[2]!.trim();
+  for (const match of root.matchAll(/^\s*(--[\w-]+):\s*([\s\S]*?);/gm)) {
+    out[match[1]!] = match[2]!.trim().replace(/\s+/g, " ");
   }
   return out;
 })();
@@ -76,6 +75,71 @@ const LAYOUT_MAP: Record<string, string> = {
   // 左右留白（page-gutter）2026-08-26 從 frontmatter 移除——它是流動的
   // clamp() 不是 token，只留在 §12 prose。
 };
+
+const TYPOGRAPHY_ROLES = [
+  "page-title",
+  "section-title",
+  "card-title",
+  "body",
+  "supporting",
+  "caption",
+  "nav-label"
+] as const;
+
+const TYPOGRAPHY_FIELDS = {
+  fontFamily: "font-family",
+  fontSize: "font-size",
+  fontWeight: "font-weight",
+  lineHeight: "line-height",
+  letterSpacing: "letter-spacing"
+} as const;
+
+type TypographyField = keyof typeof TYPOGRAPHY_FIELDS;
+
+function typographyRoles(): Record<
+  string,
+  Partial<Record<TypographyField, string>>
+> {
+  const fm = designMd.match(/^---\r?\n([\s\S]*?)\r?\n---/)?.[1] ?? "";
+  const section = fm.match(/^typography:\r?\n([\s\S]*?)(?=^\S)/m)?.[1] ?? "";
+  const out: Record<string, Partial<Record<TypographyField, string>>> = {};
+  let currentKey: string | null = null;
+
+  for (const line of section.split(/\r?\n/)) {
+    const role = line.match(/^ {2}([\w-]+):\s*$/);
+    if (role) {
+      currentKey = role[1]!;
+      out[currentKey] = {};
+      continue;
+    }
+    const field = line.match(
+      /^ {4}(fontFamily|fontSize|fontWeight|lineHeight|letterSpacing):\s*(.+)$/
+    );
+    if (currentKey !== null && field) {
+      out[currentKey]![field[1] as TypographyField] = field[2]!
+        .trim()
+        .replace(/^["']|["']$/g, "");
+    }
+  }
+  return out;
+}
+
+function typographyToken(role: string, field: TypographyField): string {
+  return `--${TYPOGRAPHY_FIELDS[field]}-${role}`;
+}
+
+function resolveCssToken(
+  token: string,
+  seen = new Set<string>()
+): string | undefined {
+  if (seen.has(token)) throw new Error(`CSS token alias cycle: ${token}`);
+  const value = cssTokens[token];
+  if (value === undefined) return undefined;
+  const alias = value.match(/^var\((--[\w-]+)\)$/);
+  if (alias === null) return value;
+  seen.add(token);
+  return resolveCssToken(alias[1]!, seen);
+}
 
 function tokenFor(section: string, key: string): string | null {
   switch (section) {
@@ -148,13 +212,45 @@ describe("DESIGN.md ↔ styles.css token 一致性", () => {
     });
   }
 
-  it("body-md（唯一校準過的字級）與 --font-size-body 一致", () => {
-    // DESIGN.md typography.body-md.fontSize = 16px；其餘字級對應待 D2。
-    const bodyMd = designMd.match(/body-md:[\s\S]*?fontSize:\s*(\d+)px/)?.[1];
-    expect(bodyMd, "DESIGN.md 找不到 body-md fontSize").toBeDefined();
-    expect(normalize(`${bodyMd}px`)).toBe(
-      normalize(cssTokens["--font-size-body"]!)
-    );
+  describe("typography", () => {
+    const entries = typographyRoles();
+
+    it("只公開核准的七個語意角色", () => {
+      expect(Object.keys(entries).sort()).toEqual([...TYPOGRAPHY_ROLES].sort());
+    });
+
+    for (const role of TYPOGRAPHY_ROLES) {
+      it(`${role} 的五個 typography 欄位與 runtime contract 一致`, () => {
+        const designRole = entries[role];
+        expect(designRole, `DESIGN.md 缺少 typography.${role}`).toBeDefined();
+        expect(Object.keys(designRole!).sort()).toEqual(
+          Object.keys(TYPOGRAPHY_FIELDS).sort()
+        );
+
+        for (const field of Object.keys(
+          TYPOGRAPHY_FIELDS
+        ) as TypographyField[]) {
+          const token = typographyToken(role, field);
+          const runtimeValue = resolveCssToken(token);
+          expect(runtimeValue, `styles.css 缺少 ${token}`).toBeDefined();
+          expect(
+            normalize(runtimeValue!.replace(/\s+/g, " ")),
+            `${token} = ${runtimeValue}，DESIGN.md typography.${role}.${field} = ${designRole![field]}`
+          ).toBe(normalize(designRole![field]!));
+        }
+      });
+    }
+
+    it("不再宣告 B8 前的舊字級桶", () => {
+      for (const legacy of [
+        "--font-size-label",
+        "--font-size-title-sm",
+        "--font-size-title",
+        "--font-size-title-md"
+      ]) {
+        expect(cssTokens[legacy]).toBeUndefined();
+      }
+    });
   });
 
   it("KNOWN_DRIFT 的每一項現在仍然真的有落差（修好就從清單移除）", () => {

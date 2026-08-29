@@ -74,6 +74,7 @@ watch(
 
 .app-shell__main {
   width: 100%;
+  min-width: 0;
   padding: clamp(1.5rem, 6vw, 3.5rem) clamp(1rem, 5vw, 2.75rem) var(--space-12);
 }
 

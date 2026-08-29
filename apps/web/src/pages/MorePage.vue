@@ -91,7 +91,9 @@ const entries = computed(() =>
 <template>
   <div class="page-stack">
     <header class="page-heading">
-      <h1 class="page-heading__title">更多</h1>
+      <h1 class="page-heading__title" data-typography-role="page-title">
+        更多
+      </h1>
       <p class="page-heading__body">
         說明內容、問題回報與這台裝置上的設定都在這裡。
       </p>

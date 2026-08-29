@@ -249,7 +249,7 @@ onMounted(async () => {
       class="load-error app-card"
       role="alert"
     >
-      <h2>目前無法開始設定</h2>
+      <h2 data-typography-role="section-title">目前無法開始設定</h2>
       <p>
         讀取這台裝置上的設定草稿時發生問題。已經記錄的提醒與裝備不會受影響；請重新整理後再試一次。
       </p>
@@ -264,7 +264,13 @@ onMounted(async () => {
       class="recovery-card app-card"
     >
       <p class="recovery-card__eyebrow">尚未建立提醒</p>
-      <h2>繼續未完成的設定？</h2>
+      <h2
+        class="recovery-card__title"
+        data-typography-role="card-title"
+        data-typography-exception="setup-recovery-headline"
+      >
+        繼續未完成的設定？
+      </h2>
       <p>這份設定尚未建立提醒。你可以接著完成，或重新開始。</p>
       <div class="button-group">
         <button
@@ -434,6 +440,10 @@ onMounted(async () => {
   margin: 0;
 }
 
+.load-error h2 {
+  font-size: var(--font-size-section-title);
+}
+
 .load-error p {
   color: var(--text-body);
   line-height: 1.6;
@@ -442,7 +452,7 @@ onMounted(async () => {
 .recovery-card__eyebrow {
   margin: 0;
   color: var(--text-secondary);
-  font-size: var(--font-size-label);
+  font-size: var(--font-size-caption);
   font-weight: 500;
 }
 
@@ -451,7 +461,7 @@ onMounted(async () => {
   margin: 0;
 }
 
-.recovery-card h2 {
+.recovery-card__title {
   font-size: clamp(1.5rem, 7vw, 2.35rem);
   letter-spacing: var(--letter-spacing-headline);
 }

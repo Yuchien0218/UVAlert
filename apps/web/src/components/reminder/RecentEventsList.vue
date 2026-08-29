@@ -166,7 +166,7 @@ function getZoneNames(zoneIds: string[], zones: ZoneProjection[]): string {
     aria-labelledby="events-title"
   >
     <div class="section-header">
-      <h2 id="events-title">最近事件</h2>
+      <h2 id="events-title" data-typography-role="section-title">最近事件</h2>
     </div>
 
     <div class="clock-warning" v-if="!clockTrusted" role="alert">
@@ -228,9 +228,6 @@ function getZoneNames(zoneIds: string[], zones: ZoneProjection[]): string {
 
 #events-title {
   margin: 0;
-  font-size: var(--font-size-body);
-  letter-spacing: var(--letter-spacing-eyebrow);
-  text-transform: uppercase;
   color: var(--text-secondary);
 }
 

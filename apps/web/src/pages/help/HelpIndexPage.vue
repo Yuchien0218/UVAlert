@@ -17,7 +17,9 @@ const topics = computed(() => listPublishableTopics());
 <template>
   <div class="page-stack">
     <header class="page-heading">
-      <h1 class="page-heading__title">常見問題</h1>
+      <h1 class="page-heading__title" data-typography-role="page-title">
+        常見問題
+      </h1>
       <p class="page-heading__body">
         這些內容說明防曬乳、提醒時間與使用限制。閱讀不會修改目前的提醒狀態。
       </p>

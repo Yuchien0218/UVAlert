@@ -67,7 +67,9 @@ function openGear(productId: string): void {
 <template>
   <div class="page-stack gear-page">
     <header class="page-heading">
-      <h1 class="page-heading__title">我的防曬裝備</h1>
+      <h1 class="page-heading__title" data-typography-role="page-title">
+        我的防曬裝備
+      </h1>
       <p>
         這份清單會先儲存在這台裝置。只有防曬乳會建立補擦倒數；其他裝備只做紀錄。
       </p>
@@ -131,7 +133,9 @@ function openGear(productId: string): void {
 
         <section aria-labelledby="gear-current-title">
           <div class="gear-section-heading">
-            <h2 id="gear-current-title">使用中</h2>
+            <h2 id="gear-current-title" data-typography-role="section-title">
+              使用中
+            </h2>
           </div>
           <p v-if="current.length === 0" class="section-empty">
             目前沒有使用中的裝備。
@@ -153,7 +157,9 @@ function openGear(productId: string): void {
         -->
         <section v-if="past.length > 0" aria-labelledby="gear-past-title">
           <div class="gear-section-heading">
-            <h2 id="gear-past-title">收納中</h2>
+            <h2 id="gear-past-title" data-typography-role="section-title">
+              收納中
+            </h2>
             <span class="gear-section-count">{{ past.length }} 件</span>
           </div>
           <p class="section-empty">
@@ -218,6 +224,7 @@ section {
 
 .gear-section-heading h2 {
   margin: 0;
+  font-size: var(--font-size-section-title);
 }
 
 .gear-section-count {
