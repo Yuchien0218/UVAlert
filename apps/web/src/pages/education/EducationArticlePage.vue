@@ -68,7 +68,9 @@ const relatedArticles = computed(() =>
       <h1 class="page-heading__title" data-typography-role="page-title">
         {{ article.title }}
       </h1>
-      <p class="education-article-summary">{{ article.summary }}</p>
+      <p class="education-article-summary prose-block">
+        {{ article.summary }}
+      </p>
       <p class="education-article-meta">
         最後查閱：{{ article.lastReviewed }} ·
         {{ article.publishable ? "已發布" : "專業審閱中" }}
@@ -133,7 +135,9 @@ const relatedArticles = computed(() =>
 }
 
 .education-article-header .page-heading__title {
-  max-width: 24ch;
+  /* 同樣改用 em——理由見 app.css 的 .page-heading__title。文章標題較長，
+     放寬到 24 個全形字；實際仍會先被容器寬度收住。 */
+  max-width: 24em;
 }
 
 .education-article-summary {

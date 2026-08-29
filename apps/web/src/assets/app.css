@@ -201,8 +201,19 @@ body
   font-weight: 500;
 }
 
+/*
+ * 標題寬度用 em 不用 ch。
+ *
+ * 2026-08-30：原本是 max-width: 14ch，來自第一個 commit 的鷹架，
+ * DESIGN.md 從來沒有規範過。問題是 **ch 對中文是錯的單位**——1ch 是字
+ * 型裡「0」的寬度（28px 字級下約 15.8px），而中文是全形（約 28.2px），
+ * 差 1.79 倍。所以 14ch 實際只裝得下約 7.7 個中文字：
+ * 「問題回報與意見回饋」才 9 個字就被壓成兩行，而畫面還有兩倍空間。
+ *
+ * 改用 em：1em 正好是一個全形字，數字寫幾就是幾個中文字。
+ */
 .page-heading__title {
-  max-width: 14ch;
+  max-width: 18em;
   margin: 0;
   font-size: var(--font-size-page-title);
   line-height: 0.98;
@@ -621,7 +632,8 @@ button.text-link {
  * 板，不是設定問題。清單本來就慣用參差右緣，讓它靠左同時解決英文條目
  * 被拉開與中文條目的一致性。
  */
-.prose-block p {
+.prose-block p,
+p.prose-block {
   text-align: justify;
 }
 
