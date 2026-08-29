@@ -99,6 +99,7 @@ const summary = computed(() => {
             class="button button--quiet session-product__toggle"
             type="button"
             :aria-expanded="expanded"
+            :aria-controls="`${groupPrefix}-questions`"
             @click="expanded = !expanded"
           >
             <Icon
@@ -111,7 +112,11 @@ const summary = computed(() => {
       </div>
     </section>
 
-    <fieldset v-if="showQuestions" class="question-card app-card">
+    <fieldset
+      v-if="showQuestions"
+      :id="`${groupPrefix}-questions`"
+      class="question-card app-card"
+    >
       <legend>
         {{
           otherTopicalOnly
