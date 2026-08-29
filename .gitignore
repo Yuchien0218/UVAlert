@@ -21,6 +21,14 @@ tools/fonts/source/
 *.dc.html
 design-exports/
 
-# 部署與本機祕密。2026-08-29 曾因為這裡沒擋而把 VERCEL_OIDC_TOKEN commit 上去。
+# 部署產物與本機祕密。
+#
+# 2026-08-29：.env.local 先前是「未追蹤但也沒被忽略」，一次 git add -A 就把
+# Vercel CLI 產生的 VERCEL_OIDC_TOKEN commit 進這個 public repo。那個 token
+# 當下其實已經過期（OIDC 是 12 小時短效憑證，無法手動撤銷、只能等它到期），
+# 所以沒有造成實際暴露，但同樣的洞會讓下一個真的還活著的祕密溜出去。
 .env*
+.vercel/
+
+# brainstorm 預覽伺服器的本機狀態（含 localhost 專用 token 與 pid）。
 .superpowers/brainstorm/
