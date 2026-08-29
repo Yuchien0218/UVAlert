@@ -69,6 +69,10 @@ const SPACING_MAP: Record<string, string> = {
   section: "--space-10"
 };
 
+/**
+ * motion 是 1:1 對應（duration-fast → --duration-fast），不需要 map，
+ * 但列在這裡是為了讓「哪些 section 有被守著」一眼看得完。
+ */
 const LAYOUT_MAP: Record<string, string> = {
   "content-max": "--content-max",
   "tap-target": "--tap-target"
@@ -152,6 +156,8 @@ function tokenFor(section: string, key: string): string | null {
       return SPACING_MAP[key] ?? null;
     case "layout":
       return LAYOUT_MAP[key] ?? null;
+    case "motion":
+      return `--${key}`;
     default:
       return null;
   }
@@ -179,7 +185,13 @@ const KNOWN_DRIFT: Record<string, string> = {};
 
 // --- 測試 ---
 
-const SECTIONS = ["colors", "rounded", "spacing", "layout"] as const;
+const SECTIONS = [
+  "colors",
+  "rounded",
+  "spacing",
+  "layout",
+  "motion"
+] as const;
 
 describe("DESIGN.md ↔ styles.css token 一致性", () => {
   for (const section of SECTIONS) {

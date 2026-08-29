@@ -4,7 +4,7 @@
  *
  * 取代 2026-08-29 之前的做法——`tool-loading` 圖示套 `transform: rotate`
  * 無限旋轉。那個做法有兩個問題：它是最通用的那種轉圈，而且**違反 DESIGN.md
- * 第八節「動畫只用 opacity，不用位移或縮放」**。轉圈是從 Lucide spinner
+ * 第十二節「動畫只用 opacity，不用位移或縮放」**。轉圈是從 Lucide spinner
  * 沿用下來的慣性，不是這個設計系統的決定。
  *
  * 造型是 `BroadcastLoader` 的直線版：那顆是播報印記的射線由內而外掃過，

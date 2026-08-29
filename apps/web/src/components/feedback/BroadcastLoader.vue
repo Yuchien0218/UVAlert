@@ -16,7 +16,7 @@
  * 2. **顏色寫死 Logo 的墨咖／琥珀金**，跟 `BrandHeader.vue` 同一個做法。
  *    `packages/ui/src/styles.css` 沒有這兩個色的 token，因為那份是「介面」
  *    配色，Logo 與圖示是另一套（DESIGN.md 第八節），兩者刻意不互相代入。
- * 3. **只用 opacity 動畫**，不旋轉、不位移、不縮放（DESIGN.md 第八節）。
+ * 3. **只用 opacity 動畫**，不旋轉、不位移、不縮放（DESIGN.md 第十二節）。
  *
  * 節奏是刻意調過的，不是等距循環：
  *

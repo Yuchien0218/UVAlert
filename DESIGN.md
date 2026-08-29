@@ -4,6 +4,14 @@ name: 防曬晴報員設計系統
 description: 防曬晴報員（UVAlert）是一個以防曬乳補擦倒數為核心的 Web／PWA。介面建立在暖象牙底色上，標題用文學感襯線體，行動色為深杏桃，倒數與資料面板使用濃縮咖啡色深色表面，狀態色使用藕紫。視覺個性來自象牙／杏桃／藕紫的組合——有陽光感與人文氣息，同時安靜到足以承載每日的健康指引。字體聲音是襯線標題搭配人文無襯線內文。
 target-status: 本文件的色彩與字體是「目標方向」，前端程式碼尚未套用；衝突處理見下方「與程式碼的落差」。
 
+motion:
+  duration-fast: 160ms
+  duration-base: 320ms
+  duration-slow: 450ms
+  duration-loader-cycle: 1500ms
+  ease-out: cubic-bezier(0.25, 0.46, 0.45, 0.94)
+  ease-in-out: cubic-bezier(0.65, 0, 0.35, 1)
+
 colors:
   primary: "#9F5E42"
   primary-active: "#804536"
@@ -933,7 +941,8 @@ B8 遷移期間使用的四個臨時字級別名已移除；目前元件只使�
 
 - **只用 `opacity`，不用位移或縮放。**
 - `page-stack` 的直接子區塊依序淡入（每項延遲 0.08s，上限 0.4s），使用 `fill-mode: backwards` 避免內容先閃現。
-- 轉場時間 `160ms`（快）／ `240ms`（基本），緩動 `cubic-bezier(0.22, 1, 0.36, 1)`。
+- **時距分兩類**：`{motion.duration-fast}`（160ms）給「回應手指的」——按鈕、chevron 展開、遮罩；`{motion.duration-base}`（320ms）與 `{motion.duration-slow}`（450ms）給「自己發生的」——內容進場、狀態切換。直接操作放慢會讀成延遲；自己發生的事沒有人在等，慢一點才安靜。
+- 緩動一律用 `{motion.ease-out}`；需要對稱進出的循環動畫（loader）用 `{motion.ease-in-out}`，循環長度用 `{motion.duration-loader-cycle}`。
 - 完整支援 `prefers-reduced-motion: reduce`——該設定開啟時所有動畫直接關閉。
 
 ## 十三、規格盲點（Gaps）
