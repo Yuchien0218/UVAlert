@@ -89,7 +89,9 @@ function optionLabel(choice: ReapplicationProductChoice): string {
     class="app-card assignment-section"
     aria-labelledby="assignment-title"
   >
-    <h2 id="assignment-title">這次用了哪瓶防曬乳？</h2>
+    <h2 id="assignment-title" data-typography-role="card-title">
+      這次用了哪瓶防曬乳？
+    </h2>
 
     <template v-if="!perZone">
       <p class="assignment-section__helper">
@@ -213,6 +215,10 @@ function optionLabel(choice: ReapplicationProductChoice): string {
 h2,
 p {
   margin: 0;
+}
+
+.assignment-section h2 {
+  font-size: var(--font-size-card-title);
 }
 
 .assignment-section__helper {

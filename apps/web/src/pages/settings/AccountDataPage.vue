@@ -68,7 +68,9 @@ async function deleteCloudData(): Promise<void> {
 <template>
   <div class="page-stack">
     <header class="page-heading">
-      <h1 class="page-heading__title">登入與雲端資料</h1>
+      <h1 class="page-heading__title" data-typography-role="page-title">
+        登入與雲端資料
+      </h1>
       <p class="page-heading__body">
         這裡只管理 UVAlert 的雲端資料；清除不會刪除你的 Google
         帳號，也不會清除這台裝置的本機提醒。
@@ -76,7 +78,7 @@ async function deleteCloudData(): Promise<void> {
     </header>
 
     <section v-if="!signedIn" class="app-card account-card">
-      <h2>目前沒有登入</h2>
+      <h2 data-typography-role="card-title">目前沒有登入</h2>
       <p>你仍可直接使用本機防曬提醒。</p>
       <RouterLink class="button button--primary" to="/settings/sync"
         >前往同步設定</RouterLink
@@ -85,7 +87,7 @@ async function deleteCloudData(): Promise<void> {
 
     <template v-else>
       <section class="app-card account-card">
-        <h2>同步狀態</h2>
+        <h2 data-typography-role="card-title">同步狀態</h2>
         <p v-if="syncDisabled">同步已停止；雲端資料保留中。</p>
         <p v-else>同步已開啟；每次同步前會先顯示預覽。</p>
         <button
@@ -107,7 +109,7 @@ async function deleteCloudData(): Promise<void> {
       </section>
 
       <section class="app-card account-card">
-        <h2>登出</h2>
+        <h2 data-typography-role="card-title">登出</h2>
         <p>登出不會清除本機資料或雲端資料。</p>
         <button
           class="button button--quiet"
@@ -120,7 +122,7 @@ async function deleteCloudData(): Promise<void> {
       </section>
 
       <section class="app-card account-card account-card--danger">
-        <h2>清除 UVAlert 雲端資料</h2>
+        <h2 data-typography-role="card-title">清除 UVAlert 雲端資料</h2>
         <p>
           會刪除 UVAlert 雲端同步資料與 UVAlert 登入；不會刪除 Google
           帳號。本機提醒與本機資料不受影響。
@@ -159,6 +161,9 @@ async function deleteCloudData(): Promise<void> {
 .account-card h2,
 .account-card p {
   margin: 0;
+}
+.account-card h2 {
+  font-size: var(--font-size-card-title);
 }
 .account-card p {
   color: var(--text-body);

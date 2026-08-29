@@ -309,6 +309,72 @@ export const ICONS = {
     title: "重置",
     body: `<title>重置</title>
   <path fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" d="M5.5 11.45A6.6 6.6 0 1 0 12 6"/> <path fill="currentColor" d="M12.6 3.4L7.6 6L12.6 8.6Z"/>`
+  },
+  "tool-loading": {
+    viewBox: "0 0 24 24",
+    title: "載入中",
+    body: `<title>載入中</title>
+  <path d="M12 4.25A7.75 7.75 0 1 1 4.25 12" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>`
+  },
+  "tool-edit": {
+    viewBox: "0 0 24 24",
+    title: "編輯",
+    body: `<title>編輯</title>
+  <path fill="none" stroke="currentColor" stroke-linecap="round" stroke-width="2.5" stroke-linejoin="round" d="M15.5,5.6l3.7,3.7-9.1,9.1-4.1.9.9-4.1L15.5,5.6Z"/> <path fill="none" stroke="currentColor" stroke-linecap="round" stroke-width="2.5" d="M13,8.4l3.6,3.5"/>`
+  },
+  "tool-delete": {
+    viewBox: "0 0 24 24",
+    title: "刪除",
+    body: `<title>刪除</title>
+  <path fill="none" stroke="currentColor" stroke-linecap="round" stroke-width="2.5" d="M4.4,8.4h15.2"/> <path fill="none" stroke="currentColor" stroke-linecap="round" stroke-width="2.5" stroke-linejoin="round" d="M9.4,8.4v-2.3c0-.7.6-1.3,1.3-1.3h2.6c.7,0,1.3.6,1.3,1.3h0v2.3"/> <path fill="none" stroke="currentColor" stroke-linecap="round" stroke-width="2.5" stroke-linejoin="round" d="M6.5,8.4l.8,10.5c.1,1,.9,1.7,1.9,1.7h5.6c1,0,1.8-.7,1.9-1.7l.8-10.5"/>`
+  },
+  "tool-share": {
+    viewBox: "0 0 24 24",
+    title: "分享",
+    body: `<title>分享</title>
+  <path d="M5.8 12L18.2 5.9" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/> <path d="M5.8 12L18.2 18.1" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/> <circle cx="5.8" cy="12" r="2.75" fill="currentColor"/> <circle cx="18.2" cy="5.9" r="2.75" fill="currentColor"/> <circle cx="18.2" cy="18.1" r="2.75" fill="currentColor"/>`
+  },
+  "tool-favorite": {
+    viewBox: "0 0 24 24",
+    title: "收藏",
+    body: `<title>收藏</title>
+  <path d="M5.8 3.9H18.2A0.9 0.9 0 0 1 19.1 4.8V20.1L12 15.5L4.9 20.1V4.8A0.9 0.9 0 0 1 5.8 3.9Z" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>`
+  },
+  "feature-uv-forecast": {
+    viewBox: "0 0 24 24",
+    title: "五日 UV 預報",
+    body: `<title>五日 UV 預報</title>
+  <circle cx="12" cy="11.8" r="3.7" fill="#C1832E"/> <path d="M12 5.8L12 3.6" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/> <path d="M17.2 8.8L19.1 7.7" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/> <path d="M17.2 14.8L19.1 15.9" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/> <path d="M12 17.8L12 20" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/> <path d="M6.8 14.8L4.9 15.9" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/> <path d="M6.8 8.8L4.9 7.7" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>`
+  },
+  "feature-region": {
+    viewBox: "0 0 24 24",
+    title: "地區",
+    body: `<title>地區</title>
+  <circle cx="12" cy="9.9" r="2.3" fill="#C1832E"/> <path d="M12 20.6C12 20.6 18.4 14.9 18.4 9.9A6.4 6.4 0 0 0 5.6 9.9C5.6 14.9 12 20.6 12 20.6Z" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>`
+  },
+  "feature-protection-summary": {
+    viewBox: "0 0 24 24",
+    title: "快速防護摘要",
+    body: `<title>快速防護摘要</title>
+  <path d="M13.6 3.8L6.4 13.3L12.1 13.4L12.7 10.8Z" fill="#C1832E" stroke="#C1832E" stroke-width="2.5" stroke-linejoin="round"/> <path d="M11.7 13.3L10.4 20.2L17.6 10.7L12.3 10.7Z" fill="currentColor" stroke="currentColor" stroke-width="2.5" stroke-linejoin="round"/>`
+  },
+  "feature-setup-steps": {
+    viewBox: "0 0 24 24",
+    title: "設定流程",
+    body: `<title>設定流程</title>
+  <rect x="8.8" y="2.6" width="6.4" height="3.4" rx="1.3" ry="1.3" fill="#C1832E"/> <path d="M8.8 4.3H6.9A1.9 1.9 0 0 0 5 6.2V18.8A1.9 1.9 0 0 0 6.9 20.7H17.1A1.9 1.9 0 0 0 19 18.8V6.2A1.9 1.9 0 0 0 17.1 4.3H15.2" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/> <path d="M9 11.4H15" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/> <path d="M9 15.8H15" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>`
+  },
+  "feature-session-product": {
+    viewBox: "0 0 24 24",
+    title: "本次使用的防曬乳",
+    body: `<title>本次使用的防曬乳</title>
+  <circle cx="8.8" cy="8.8" r="2.3" fill="#C1832E"/> <path d="M11.2 3.5H5.9A2.4 2.4 0 0 0 3.5 5.9V11.2A2 2 0 0 0 4.1 12.6L11.6 20.1A2.4 2.4 0 0 0 15 20.1L20.1 15A2.4 2.4 0 0 0 20.1 11.6L12.6 4.1A2 2 0 0 0 11.2 3.5Z" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>`
+  },
+  "feature-locate": {
+    viewBox: "0 0 24 24",
+    title: "取得目前位置",
+    body: `<title>取得目前位置</title>
+  <path d="M4.6 11.6L19.4 4.6L12.4 19.4L11.6 11.6Z" fill="currentColor" stroke="currentColor" stroke-width="2.5" stroke-linejoin="round"/>`
   }
 } as const satisfies Record<string, IconEntry>;
 

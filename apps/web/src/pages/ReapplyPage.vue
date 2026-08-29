@@ -57,7 +57,7 @@ function zoneNames(zoneIds: string[]): string {
     <header class="flow-heading">
       <div>
         <p class="eyebrow">補擦紀錄</p>
-        <h1>記錄補擦</h1>
+        <h1 data-typography-role="page-title">記錄補擦</h1>
         <p>請確認要記錄的部位、防曬乳與時間；儲存前不會更新提醒。</p>
       </div>
       <button
@@ -80,7 +80,13 @@ function zoneNames(zoneIds: string[]): string {
       "
       class="app-card success-panel"
     >
-      <h2 id="reapply-success-title" tabindex="-1">補擦紀錄已更新</h2>
+      <h2
+        id="reapply-success-title"
+        data-typography-role="section-title"
+        tabindex="-1"
+      >
+        補擦紀錄已更新
+      </h2>
       <p>
         已更新 {{ reapplication.success.value.zoneIds.length }} 個部位，{{
           formatDateTime(reapplication.success.value.appliedAt)

@@ -5,13 +5,13 @@ import { shallowReadonly, shallowRef } from "vue";
 import { describe, expect, it, vi } from "vitest";
 import type { WebAppServices } from "../../app/createWebAppServices";
 import { useWebAppServices } from "../../app/injection";
-import SunLoader from "../../components/feedback/SunLoader.vue";
+import BroadcastLoader from "../../components/feedback/BroadcastLoader.vue";
 import DataSettingsPage from "./DataSettingsPage.vue";
 
 vi.mock("../../app/injection", () => ({ useWebAppServices: vi.fn() }));
 
 describe("DataSettingsPage", () => {
-  it("讀取本機資料時以具名 SunLoader 傳達進度", () => {
+  it("讀取本機資料時以具名 BroadcastLoader 傳達進度", () => {
     const services = {
       localData: {
         phase: shallowReadonly(shallowRef("loading" as const)),
@@ -30,7 +30,7 @@ describe("DataSettingsPage", () => {
       global: { stubs: { RouterLink: true } }
     });
 
-    const loader = wrapper.getComponent(SunLoader);
+    const loader = wrapper.getComponent(BroadcastLoader);
     expect(loader.attributes("role")).toBe("status");
     expect(loader.attributes("aria-label")).toBe("正在讀取本機資料概況");
   });

@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import type { FiveDayUvForecast, UvRiskLevel } from "@sunshield/contracts";
-import { CloudSun } from "@lucide/vue";
 import Icon from "../icons/Icon.vue";
 import type {
   UvForecastError,
@@ -69,11 +68,15 @@ function getUnavailableMessage(error: UvForecastError): string {
   >
     <div class="uv-forecast__heading">
       <div>
-        <h2 id="five-day-uv-title" class="uv-forecast__title">
+        <h2
+          id="five-day-uv-title"
+          class="uv-forecast__title"
+          data-typography-role="section-title"
+        >
           未來 5 天 UV 預報
         </h2>
       </div>
-      <CloudSun :size="26" :stroke-width="1.5" aria-hidden="true" />
+      <Icon name="feature-uv-forecast" :size="24" />
     </div>
 
     <div
@@ -88,7 +91,7 @@ function getUnavailableMessage(error: UvForecastError): string {
     <div v-else-if="phase === 'no_region'" class="uv-forecast__state">
       <span>
         請先
-        <a class="text-link" href="#outdoor-context">設定地區</a>
+        <RouterLink class="text-link" to="/region">設定地區</RouterLink>
         ，才能查看五日 UV 預報。
       </span>
     </div>
@@ -251,7 +254,9 @@ function getUnavailableMessage(error: UvForecastError): string {
   border-radius: var(--radius-md);
   background: var(--surface-primary);
   text-align: center;
-  transition: all var(--duration-fast) var(--ease-out);
+  /* 只有 border-color 會變（:hover 與 uv-day--* 等級色）；all 會連帶動到
+     之後新增的任何屬性，見 DESIGN.md 第十二節。 */
+  transition: border-color var(--duration-fast) var(--ease-out);
 }
 
 .uv-day:hover {
@@ -283,7 +288,7 @@ function getUnavailableMessage(error: UvForecastError): string {
   top: var(--space-2);
   right: var(--space-2);
   color: var(--text-secondary);
-  font-size: var(--font-size-label);
+  font-size: var(--font-size-caption);
   font-weight: 500;
   line-height: 1;
 }
@@ -333,14 +338,13 @@ function getUnavailableMessage(error: UvForecastError): string {
 }
 
 /*
- * 2026-08-25：跟其他 body 級文字一起被批次改成 1.75，但這是 label 級
- * （12.8px）文字，DESIGN.md「說明／標籤」對應的 CJK 行高是 1.5，改回來。
+ * 來源與預報註記屬 supporting role；CJK 行高維持 1.5。
  */
 .uv-forecast__source,
 .uv-forecast__note {
   margin: 0;
   color: var(--text-secondary);
-  font-size: var(--font-size-label);
+  font-size: var(--font-size-supporting);
   line-height: 1.5;
 }
 

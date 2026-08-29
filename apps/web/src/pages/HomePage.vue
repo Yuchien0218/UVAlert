@@ -10,7 +10,7 @@ import HomeLocationPrompt from "../components/home/HomeLocationPrompt.vue";
 import HomeNightNotice from "../components/home/HomeNightNotice.vue";
 import HomeNightSession from "../components/home/HomeNightSession.vue";
 import HomeUvHeadline from "../components/home/HomeUvHeadline.vue";
-import SunLoader from "../components/feedback/SunLoader.vue";
+import BroadcastLoader from "../components/feedback/BroadcastLoader.vue";
 import SessionEndControl from "../components/session/SessionEndControl.vue";
 import { useCurrentTime } from "../composables/useCurrentTime";
 import { buildHomeReminderClockPresentation } from "../features/reminder/homeReminderClockPresentation";
@@ -248,7 +248,7 @@ function handleEndSession(): void {
       但每一頁仍需要一個 h1，否則螢幕閱讀器的標題導覽在這一頁是空的。
       舊版的 h1 在 HomeReminderSummary 裡，拆掉那個元件時一併消失了。
     -->
-    <h1 class="screen-reader-only">提醒</h1>
+    <h1 class="screen-reader-only" data-typography-role="page-title">提醒</h1>
 
     <section
       v-if="
@@ -258,7 +258,7 @@ function handleEndSession(): void {
       class="home-state home-state--loading"
       role="status"
     >
-      <SunLoader label="正在讀取這台裝置上的提醒" />
+      <BroadcastLoader label="正在讀取這台裝置上的提醒" />
       <p>正在讀取這台裝置上的提醒…</p>
     </section>
 
@@ -267,7 +267,7 @@ function handleEndSession(): void {
       class="home-state"
       role="alert"
     >
-      <h2>無法讀取提醒</h2>
+      <h2 data-typography-role="section-title">無法讀取提醒</h2>
       <p>原有資料不會被空白內容取代，請重新讀取。</p>
       <button
         class="button button--primary"
@@ -366,7 +366,9 @@ function handleEndSession(): void {
         class="product-label app-card"
         aria-labelledby="product-label-title"
       >
-        <h2 id="product-label-title">目前防曬乳的包裝標示</h2>
+        <h2 id="product-label-title" data-typography-role="section-title">
+          目前防曬乳的包裝標示
+        </h2>
         <ul>
           <li>
             {{
@@ -513,6 +515,6 @@ function handleEndSession(): void {
 
 .home-state h2 {
   color: var(--text-primary);
-  font-size: var(--font-size-title);
+  font-size: var(--font-size-section-title);
 }
 </style>

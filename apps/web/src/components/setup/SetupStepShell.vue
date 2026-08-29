@@ -61,7 +61,9 @@ defineEmits<{
     </div>
 
     <header class="setup-shell__heading">
-      <h1 class="setup-shell__title">{{ title }}</h1>
+      <h1 class="setup-shell__title" data-typography-role="page-title">
+        {{ title }}
+      </h1>
       <p class="setup-shell__description">{{ description }}</p>
     </header>
 

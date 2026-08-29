@@ -101,7 +101,13 @@ function getTimingTone(timingStatus: ZoneProjection["timingStatus"]): ZoneTone {
   <section id="zone-status" class="zone-list" aria-labelledby="zones-title">
     <div class="zone-list__heading">
       <div>
-        <h2 id="zones-title" class="zone-list__title">各部位狀態</h2>
+        <h2
+          id="zones-title"
+          class="zone-list__title"
+          data-typography-role="section-title"
+        >
+          各部位狀態
+        </h2>
       </div>
     </div>
 
@@ -185,7 +191,7 @@ function getTimingTone(timingStatus: ZoneProjection["timingStatus"]): ZoneTone {
 .zone-group__status {
   margin: 0;
   color: var(--tone);
-  font-size: var(--font-size-label);
+  font-size: var(--font-size-supporting);
   font-weight: 600;
 }
 

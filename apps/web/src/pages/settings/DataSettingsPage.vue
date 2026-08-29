@@ -5,7 +5,7 @@ import { useWebAppServices } from "../../app/injection";
 import AppNotice from "../../components/common/AppNotice.vue";
 import ConfirmAction from "../../components/common/ConfirmAction.vue";
 import EmptyStateCard from "../../components/common/EmptyStateCard.vue";
-import SunLoader from "../../components/feedback/SunLoader.vue";
+import BroadcastLoader from "../../components/feedback/BroadcastLoader.vue";
 import { formatDateTime } from "../../helpers/datetime";
 
 /**
@@ -45,14 +45,18 @@ async function runClear(scope: ClearScope): Promise<void> {
 <template>
   <div class="page-stack data-page">
     <header class="page-heading">
-      <h1 class="page-heading__title">本機資料管理</h1>
+      <h1 class="page-heading__title" data-typography-role="page-title">
+        本機資料管理
+      </h1>
       <p>
         不用登入也能使用；未同步的資料只儲存在這台裝置上。匯出的檔案由你的裝置直接產生，不會上傳、不經後端、不進分析。
       </p>
     </header>
 
     <section class="app-card" aria-labelledby="cloud-data-link-title">
-      <h2 id="cloud-data-link-title">雲端資料請到另一頁管理</h2>
+      <h2 id="cloud-data-link-title" data-typography-role="card-title">
+        雲端資料請到另一頁管理
+      </h2>
       <p>
         本頁只處理這台裝置的本機資料。若你有登入並使用同步，請到登入與雲端資料頁管理。
       </p>
@@ -61,7 +65,7 @@ async function runClear(scope: ClearScope): Promise<void> {
       >
     </section>
 
-    <SunLoader
+    <BroadcastLoader
       v-if="localData.phase.value === 'loading'"
       label="正在讀取本機資料概況"
     />
@@ -75,7 +79,9 @@ async function runClear(scope: ClearScope): Promise<void> {
 
     <template v-else-if="summary">
       <section class="app-card" aria-labelledby="data-summary-title">
-        <h2 id="data-summary-title">這台裝置儲存了什麼</h2>
+        <h2 id="data-summary-title" data-typography-role="card-title">
+          這台裝置儲存了什麼
+        </h2>
         <dl class="summary-grid">
           <div>
             <dt>防曬裝備</dt>
@@ -105,7 +111,9 @@ async function runClear(scope: ClearScope): Promise<void> {
       </section>
 
       <section class="app-card" aria-labelledby="data-export-title">
-        <h2 id="data-export-title">匯出本機資料</h2>
+        <h2 id="data-export-title" data-typography-role="card-title">
+          匯出本機資料
+        </h2>
         <p>
           產生一個 JSON
           檔案，包含你的防曬裝備、提醒紀錄、事件與偏好。檔案會儲存到你選的位置，不會傳到任何伺服器。
@@ -136,7 +144,9 @@ async function runClear(scope: ClearScope): Promise<void> {
       </section>
 
       <section class="app-card" aria-labelledby="data-clear-title">
-        <h2 id="data-clear-title">清除本機資料</h2>
+        <h2 id="data-clear-title" data-typography-role="card-title">
+          清除本機資料
+        </h2>
         <p class="caution">
           清除無法復原。如果想留下紀錄，<strong>請先在上方匯出</strong>。
         </p>
@@ -263,6 +273,10 @@ dd {
   gap: var(--space-4);
   padding: var(--space-5);
   justify-items: start;
+}
+
+.app-card > h2 {
+  font-size: var(--font-size-card-title);
 }
 
 .summary-grid {

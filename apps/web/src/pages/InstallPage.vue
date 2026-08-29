@@ -54,19 +54,21 @@ async function install(): Promise<void> {
 <template>
   <div class="page-stack">
     <header class="page-heading">
-      <h1 class="page-heading__title">安裝到手機</h1>
+      <h1 class="page-heading__title" data-typography-role="page-title">
+        安裝到手機
+      </h1>
       <p class="page-heading__body">
         安裝後資料較不容易因關閉瀏覽器分頁而遺失。<strong>不安裝也可以正常使用</strong>。
       </p>
     </header>
 
     <section v-if="isStandalone" class="install-card app-card" role="status">
-      <h2>已安裝</h2>
+      <h2 data-typography-role="section-title">已安裝</h2>
       <p>你已經可以從主畫面開啟防曬晴報員。</p>
     </section>
 
     <section v-else-if="deferredPrompt" class="install-card app-card">
-      <h2>可以安裝到這台裝置</h2>
+      <h2 data-typography-role="section-title">可以安裝到這台裝置</h2>
       <p>
         安裝後會在主畫面出現圖示，開啟速度較快；本機資料也較不容易因清除瀏覽器資料而遺失。
       </p>
@@ -76,7 +78,7 @@ async function install(): Promise<void> {
     </section>
 
     <section v-else-if="isIos" class="install-card app-card">
-      <h2>用 Safari 加入主畫面</h2>
+      <h2 data-typography-role="section-title">用 Safari 加入主畫面</h2>
       <ol>
         <li>點下方的分享按鈕。</li>
         <li>選擇「加入主畫面」。</li>
@@ -86,7 +88,7 @@ async function install(): Promise<void> {
     </section>
 
     <section v-else class="install-card app-card">
-      <h2>從瀏覽器選單安裝</h2>
+      <h2 data-typography-role="section-title">從瀏覽器選單安裝</h2>
       <p>
         開啟瀏覽器選單，尋找「安裝應用程式」或「加入主畫面」。
         找不到時，用一般瀏覽器仍然可以完整使用。
@@ -99,7 +101,7 @@ async function install(): Promise<void> {
     </p>
 
     <section class="limits app-card">
-      <h2>需要知道的限制</h2>
+      <h2 data-typography-role="section-title">需要知道的限制</h2>
       <ul>
         <li>不安裝仍可使用全部核心功能。</li>
         <li>安裝不會讓系統在關閉頁面後保證送出通知。</li>

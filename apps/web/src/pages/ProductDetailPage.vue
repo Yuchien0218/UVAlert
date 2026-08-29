@@ -2,7 +2,7 @@
 import { computed, onMounted, ref } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import Icon from "../components/icons/Icon.vue";
-import SunLoader from "../components/feedback/SunLoader.vue";
+import BroadcastLoader from "../components/feedback/BroadcastLoader.vue";
 import EmptyStateCard from "../components/common/EmptyStateCard.vue";
 import { useWebAppServices } from "../app/injection";
 import {
@@ -158,7 +158,7 @@ async function handleDelete(): Promise<void> {
       </button>
     </header>
 
-    <SunLoader
+    <BroadcastLoader
       v-if="productSettings.phase.value === 'loading'"
       label="正在讀取裝備資料…"
     />
@@ -183,11 +183,13 @@ async function handleDelete(): Promise<void> {
           {{ GEAR_CATEGORY_LABELS[product.gearCategory] }}
           <span v-if="isArchived" class="category-badge__state">・收納中</span>
         </p>
-        <h1 class="page-heading__title">{{ product.displayName }}</h1>
+        <h1 class="page-heading__title" data-typography-role="page-title">
+          {{ product.displayName }}
+        </h1>
       </header>
 
       <section class="app-card spec-section">
-        <h2>裝備資訊</h2>
+        <h2 data-typography-role="card-title">裝備資訊</h2>
         <dl class="spec-list">
           <div v-if="specLine !== null" class="spec-row">
             <dt>規格</dt>
@@ -329,6 +331,7 @@ async function handleDelete(): Promise<void> {
 
 .spec-section h2 {
   margin: 0;
+  font-size: var(--font-size-card-title);
 }
 
 .spec-list {

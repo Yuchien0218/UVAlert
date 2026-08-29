@@ -4,7 +4,7 @@ import { useRouter } from "vue-router";
 import { useWebAppServices } from "../app/injection";
 import Icon from "../components/icons/Icon.vue";
 import QuickTimePicker from "../components/common/QuickTimePicker.vue";
-import SunLoader from "../components/feedback/SunLoader.vue";
+import BroadcastLoader from "../components/feedback/BroadcastLoader.vue";
 import ZoneSelectorGrid from "../components/reminder/ZoneSelectorGrid.vue";
 import { getZoneLabel } from "../features/reminder/reminderPresentation";
 import { formatDateTime } from "../helpers/datetime";
@@ -55,7 +55,7 @@ function zoneNames(zoneIds: string[]): string {
     <header class="flow-heading">
       <div>
         <p class="eyebrow">記錄狀況</p>
-        <h1>記錄這次狀況</h1>
+        <h1 data-typography-role="page-title">記錄這次狀況</h1>
         <p>記下這次狀況後，相關部位的提醒會更新；確認前不會改變提醒。</p>
       </div>
       <button
@@ -68,7 +68,7 @@ function zoneNames(zoneIds: string[]): string {
       </button>
     </header>
 
-    <SunLoader
+    <BroadcastLoader
       v-if="contextEvent.phase.value === 'loading'"
       label="正在讀取目前提醒狀態…"
     />
@@ -79,7 +79,13 @@ function zoneNames(zoneIds: string[]): string {
       "
       class="app-card success-panel"
     >
-      <h2 id="report-success-title" tabindex="-1">已記錄這次狀況</h2>
+      <h2
+        id="report-success-title"
+        data-typography-role="section-title"
+        tabindex="-1"
+      >
+        已記錄這次狀況
+      </h2>
       <p>
         {{ contextEvent.success.value.label }}，{{
           formatDateTime(contextEvent.success.value.occurredAt)
@@ -104,7 +110,9 @@ function zoneNames(zoneIds: string[]): string {
     <template v-else-if="contextEvent.session.value">
       <!-- 第一層：事件選擇 -->
       <section class="app-card" aria-labelledby="report-kind-title">
-        <h2 id="report-kind-title">發生了什麼？</h2>
+        <h2 id="report-kind-title" data-typography-role="card-title">
+          發生了什麼？
+        </h2>
         <p class="section-helper">
           選擇最符合的一項。沒有可以結束的水上活動時，不會顯示「離水」。
         </p>
@@ -136,7 +144,9 @@ function zoneNames(zoneIds: string[]): string {
       <!-- 第二層：確認 -->
       <template v-if="contextEvent.selectedKind.value">
         <section class="app-card" aria-labelledby="report-zones-title">
-          <h2 id="report-zones-title">影響哪些部位？</h2>
+          <h2 id="report-zones-title" data-typography-role="card-title">
+            影響哪些部位？
+          </h2>
           <p
             v-if="contextEvent.zoneSelectionLocked.value"
             class="section-helper"
@@ -167,7 +177,9 @@ function zoneNames(zoneIds: string[]): string {
           class="app-card"
           aria-labelledby="report-water-title"
         >
-          <h2 id="report-water-title">知道實際下水時間嗎？</h2>
+          <h2 id="report-water-title" data-typography-role="card-title">
+            知道實際下水時間嗎？
+          </h2>
           <p class="section-helper">
             不確定時不會建立耐水倒數，避免顯示不可信的時間。
           </p>
@@ -262,6 +274,10 @@ function zoneNames(zoneIds: string[]): string {
 h2,
 p {
   margin: 0;
+}
+
+.app-card:not(.success-panel) > h2 {
+  font-size: var(--font-size-card-title);
 }
 
 .section-helper {

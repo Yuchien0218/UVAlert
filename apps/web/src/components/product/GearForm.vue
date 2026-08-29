@@ -371,7 +371,7 @@ async function remove(): Promise<void> {
     -->
 
     <section v-if="isEdit" class="app-card danger-zone">
-      <h2>使用狀態</h2>
+      <h2 data-typography-role="card-title">使用狀態</h2>
 
       <p v-if="safety && safety.kind === 'blocked'" class="form-error">
         {{ safety.detail }}同配方的新批次請另建一筆新紀錄，不要用恢復繞過。
@@ -442,7 +442,7 @@ p {
 .field-helper {
   color: var(--text-secondary);
   line-height: 1.6;
-  font-size: var(--font-size-caption);
+  font-size: var(--font-size-supporting);
 }
 
 /*
@@ -539,7 +539,7 @@ p {
 
 .field-pair {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: var(--space-3);
 }
 
@@ -582,5 +582,9 @@ textarea {
 
 .danger-zone {
   justify-items: start;
+}
+
+.danger-zone h2 {
+  font-size: var(--font-size-card-title);
 }
 </style>

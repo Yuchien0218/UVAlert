@@ -13,7 +13,9 @@ import EducationSeoHead from "../../components/education/EducationSeoHead.vue";
     />
     <header class="page-heading">
       <p class="page-heading__eyebrow">防曬衛教</p>
-      <h1 class="page-heading__title">找不到這篇內容</h1>
+      <h1 class="page-heading__title" data-typography-role="page-title">
+        找不到這篇內容
+      </h1>
       <p class="page-heading__body">
         連結可能已更新，請回到衛教首頁重新選擇文章。
       </p>

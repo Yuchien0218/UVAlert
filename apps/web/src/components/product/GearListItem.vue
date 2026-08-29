@@ -139,7 +139,7 @@ p {
 }
 
 .gear-item__name {
-  font-size: var(--font-size-title-sm);
+  font-size: var(--font-size-card-title);
 }
 
 .gear-item__summary,

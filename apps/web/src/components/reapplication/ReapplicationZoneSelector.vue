@@ -59,7 +59,7 @@ fieldset {
 }
 legend {
   padding: 0;
-  font-size: var(--font-size-title);
+  font-size: var(--font-size-section-title);
   font-weight: 700;
 }
 .section-help {

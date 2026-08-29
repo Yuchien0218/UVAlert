@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { PackageCheck } from "@lucide/vue";
 import Icon from "../icons/Icon.vue";
 import { computed, shallowRef, useId } from "vue";
 import type { ProductSnapshotFormValue } from "../../features/setup/productSnapshot";
@@ -86,10 +85,10 @@ const summary = computed(() => {
 <template>
   <div class="product-editor">
     <section class="session-product app-card">
-      <PackageCheck :size="25" :stroke-width="1.6" aria-hidden="true" />
+      <Icon name="feature-session-product" :size="24" />
       <div>
         <p class="session-product__eyebrow">{{ eyebrow }}</p>
-        <h2>{{ title }}</h2>
+        <h2 data-typography-role="section-title">{{ title }}</h2>
         <p>
           {{ description }}
         </p>
@@ -100,6 +99,7 @@ const summary = computed(() => {
             class="button button--quiet session-product__toggle"
             type="button"
             :aria-expanded="expanded"
+            :aria-controls="`${groupPrefix}-questions`"
             @click="expanded = !expanded"
           >
             <Icon
@@ -112,7 +112,11 @@ const summary = computed(() => {
       </div>
     </section>
 
-    <fieldset v-if="showQuestions" class="question-card app-card">
+    <fieldset
+      v-if="showQuestions"
+      :id="`${groupPrefix}-questions`"
+      class="question-card app-card"
+    >
       <legend>
         {{
           otherTopicalOnly
@@ -359,7 +363,7 @@ const summary = computed(() => {
 .session-product__eyebrow {
   margin: 0 0 var(--space-2);
   color: var(--text-secondary);
-  font-size: var(--font-size-label);
+  font-size: var(--font-size-caption);
   font-weight: 500;
 }
 
@@ -406,7 +410,7 @@ const summary = computed(() => {
 
 .number-field span {
   color: var(--text-secondary);
-  font-size: var(--font-size-body);
+  font-size: var(--font-size-supporting);
 }
 
 .number-field input {

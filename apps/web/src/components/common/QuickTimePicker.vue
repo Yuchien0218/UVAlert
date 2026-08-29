@@ -39,7 +39,9 @@ function isSelected(minutes: number): boolean {
 
 <template>
   <section class="app-card time-section" :aria-labelledby="`${idPrefix}-title`">
-    <h2 :id="`${idPrefix}-title`">{{ heading }}</h2>
+    <h2 :id="`${idPrefix}-title`" data-typography-role="card-title">
+      {{ heading }}
+    </h2>
     <div class="quick-times">
       <button
         v-for="item in [
@@ -83,6 +85,9 @@ function isSelected(minutes: number): boolean {
 h2,
 p {
   margin: 0;
+}
+.time-section h2 {
+  font-size: var(--font-size-card-title);
 }
 .quick-times {
   display: flex;

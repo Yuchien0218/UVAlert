@@ -4,7 +4,7 @@ import { useRoute, useRouter } from "vue-router";
 import { useWebAppServices } from "../app/injection";
 import Icon from "../components/icons/Icon.vue";
 import QuickTimePicker from "../components/common/QuickTimePicker.vue";
-import SunLoader from "../components/feedback/SunLoader.vue";
+import BroadcastLoader from "../components/feedback/BroadcastLoader.vue";
 import ZoneSelectorGrid from "../components/reminder/ZoneSelectorGrid.vue";
 import { getZoneLabel } from "../features/reminder/reminderPresentation";
 import { formatDateTime } from "../helpers/datetime";
@@ -76,7 +76,7 @@ async function runVoid(): Promise<void> {
     <header class="flow-heading">
       <div>
         <p class="eyebrow">更正紀錄</p>
-        <h1>更正這筆紀錄</h1>
+        <h1 data-typography-role="page-title">更正這筆紀錄</h1>
         <p>
           原本的紀錄會保留下來，你會在後面新增一筆更正。送出前不會改變目前提醒。
         </p>
@@ -91,7 +91,7 @@ async function runVoid(): Promise<void> {
       </button>
     </header>
 
-    <SunLoader
+    <BroadcastLoader
       v-if="eventCorrection.phase.value === 'loading'"
       label="正在讀取這筆紀錄…"
     />
@@ -103,7 +103,11 @@ async function runVoid(): Promise<void> {
       "
       class="app-card success-panel"
     >
-      <h2 id="correction-success-title" tabindex="-1">
+      <h2
+        id="correction-success-title"
+        data-typography-role="section-title"
+        tabindex="-1"
+      >
         {{
           eventCorrection.success.value.action === "void"
             ? "已作廢這筆紀錄"
@@ -129,7 +133,7 @@ async function runVoid(): Promise<void> {
     <template v-else-if="eventCorrection.context.value">
       <!-- 目標已被更正：顯示最新狀態，不允許建立第二個 successor -->
       <section v-if="alreadyCorrected" class="app-card" role="alert">
-        <h2>這筆紀錄已經被更正過</h2>
+        <h2 data-typography-role="card-title">這筆紀錄已經被更正過</h2>
         <p>
           同一筆紀錄只能更正一次。請返回提醒頁，從最近事件找到最新的一筆再更正。
         </p>
@@ -140,7 +144,9 @@ async function runVoid(): Promise<void> {
 
       <template v-else>
         <section class="app-card" aria-labelledby="correction-zones-title">
-          <h2 id="correction-zones-title">影響哪些部位？</h2>
+          <h2 id="correction-zones-title" data-typography-role="card-title">
+            影響哪些部位？
+          </h2>
           <p
             v-if="eventCorrection.zoneSelectionLocked.value"
             class="section-helper"
@@ -222,7 +228,7 @@ async function runVoid(): Promise<void> {
         </div>
 
         <section class="app-card danger-zone">
-          <h2>作廢這筆紀錄</h2>
+          <h2 data-typography-role="card-title">作廢這筆紀錄</h2>
           <template v-if="!confirmingVoid">
             <p>
               如果這筆紀錄根本不該存在，可以作廢它。原紀錄仍會留在事件歷史中，只是不再影響提醒。
@@ -272,6 +278,10 @@ h1,
 h2,
 p {
   margin: 0;
+}
+
+.app-card:not(.success-panel) > h2 {
+  font-size: var(--font-size-card-title);
 }
 
 .section-helper {

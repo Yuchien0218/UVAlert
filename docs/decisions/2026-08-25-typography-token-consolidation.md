@@ -37,4 +37,10 @@
 ## 驗證
 
 - `pnpm check`（typecheck + 全部 78 個測試檔、466 筆測試）全數通過。
-- 未執行瀏覽器視覺驗證——本機沒有可用的 preview 工具，且直接用 Bash 起 dev server 有跟其他 session 搶 port 5173 的風險（見 `CLAUDE.md` session 衛生一節），這次改動又牽涉全站絕大多數頁面。**建議下一個有 preview 工具可用的 session 或人工檢查以下頁面**：首頁（倒數／UV headline 兩種狀態）、裝備清單、地區設定摘要、單頁設定流程（`/setup` 推薦卡）、衛教文章頁——確認 16px 內文沒有造成預期外的換行或版面擠壓。
+- **2026-08-29 已完成視覺驗證**（見文末）。以下是當初的說明，保留脈絡：未執行瀏覽器視覺驗證——本機沒有可用的 preview 工具，且直接用 Bash 起 dev server 有跟其他 session 搶 port 5173 的風險（見 `CLAUDE.md` session 衛生一節），這次改動又牽涉全站絕大多數頁面。**建議下一個有 preview 工具可用的 session 或人工檢查以下頁面**：首頁（倒數／UV headline 兩種狀態）、裝備清單、地區設定摘要、單頁設定流程（`/setup` 推薦卡）、衛教文章頁——確認 16px 內文沒有造成預期外的換行或版面擠壓。
+
+## 2026-08-29 視覺驗證結果：通過
+
+實測 `--font-size-body` 渲染為 **16px**，行高 25.6px。走過首頁、`/products`、`/settings/data`、`/setup`、衛教文章頁，**沒有發現預期外的換行或版面擠壓**。
+
+順帶確認一件當初沒人查的事：衛教文章頁底部的表格會出現水平捲軸，但那是 `.education-table-wrap` 自己的 `overflow-x: auto` 容器，**頁面本身沒有水平捲動**（實測 `scrollingElement.scrollWidth === clientWidth`），沒有違反 DESIGN.md 第十二節。

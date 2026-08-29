@@ -96,14 +96,14 @@ function toLocalInputValue(date: Date): string {
 
 .water-start legend {
   padding: 0;
-  font-size: var(--font-size-title-sm);
+  font-size: var(--font-size-card-title);
   font-weight: 500;
 }
 
 .water-start > p {
   margin: 0;
   color: var(--text-secondary);
-  font-size: var(--font-size-body);
+  font-size: var(--font-size-supporting);
   line-height: 1.6;
 }
 
@@ -136,7 +136,7 @@ function toLocalInputValue(date: Date): string {
 
 .water-start label span {
   color: var(--text-secondary);
-  font-size: var(--font-size-body);
+  font-size: var(--font-size-supporting);
 }
 
 .water-start input {

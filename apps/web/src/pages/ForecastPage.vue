@@ -25,7 +25,9 @@ onMounted(() => {
 <template>
   <div class="page-stack">
     <header class="page-heading">
-      <h1 class="page-heading__title">五日 UV 預報</h1>
+      <h1 class="page-heading__title" data-typography-role="page-title">
+        五日 UV 預報
+      </h1>
       <p class="page-heading__body">依你設定的地區顯示未來五天的紫外線指數。</p>
     </header>
 

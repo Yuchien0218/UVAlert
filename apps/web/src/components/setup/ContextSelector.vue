@@ -103,9 +103,8 @@ watch(
           <small>近直射窗邊／遠離直射光</small>
         </div>
         <Icon
-          name="tool-chevron-down"
+          :name="indoorExpanded ? 'tool-chevron-down' : 'tool-chevron-right'"
           class="context-group__chevron"
-          :class="{ 'context-group__chevron--expanded': indoorExpanded }"
           :size="20"
         />
       </button>
@@ -149,9 +148,8 @@ watch(
           <small>準備下水／已在水中</small>
         </div>
         <Icon
-          name="tool-chevron-down"
+          :name="waterExpanded ? 'tool-chevron-down' : 'tool-chevron-right'"
           class="context-group__chevron"
-          :class="{ 'context-group__chevron--expanded': waterExpanded }"
           :size="20"
         />
       </button>
@@ -273,9 +271,15 @@ watch(
   transition: transform var(--duration-fast) var(--ease-out);
 }
 
-.context-group__chevron--expanded {
-  transform: rotate(180deg);
-}
+/*
+ * 2026-08-29（B9 裁決 2）：原本是 tool-chevron-down 加 transform:
+ * rotate(180deg) 的動畫。那違反 DESIGN.md 第十二節規則一「只用 opacity」
+ * ——圖示內部不做位移、縮放或旋轉。改成換圖示 name（收合 right、展開
+ * down），兩個圖示本來就都存在，也不需要新畫 chevron-up。
+ *
+ * 刻意不加淡入淡出：chevron 是「回應手指的直接操作」，依規則二該是即時的；
+ * 交叉淡入留給「自己發生的」狀態變化（例如 HomeCountdown 的倒數跨門檻）。
+ */
 
 .context-group__options {
   display: grid;

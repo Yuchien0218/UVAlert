@@ -176,7 +176,7 @@ const { closeFromBackdrop } = useOverlay({
 .session-end__confirm-title {
   margin: 0;
   color: var(--text-primary);
-  font-size: var(--font-size-title-sm);
+  font-size: var(--font-size-card-title);
   font-weight: 600;
 }
 
