@@ -113,7 +113,7 @@ function zoneNames(zoneIds: string[]): string {
         <h2 id="report-kind-title" data-typography-role="card-title">
           發生了什麼？
         </h2>
-        <p class="section-helper">
+        <p class="control-rule-note">
           選擇最符合的一項。沒有可以結束的水上活動時，不會顯示「離水」。
         </p>
         <div class="kind-grid">
@@ -149,11 +149,11 @@ function zoneNames(zoneIds: string[]): string {
           </h2>
           <p
             v-if="contextEvent.zoneSelectionLocked.value"
-            class="section-helper"
+            class="control-rule-note"
           >
             離水必須沿用入水時的部位集合，因此這裡不可調整。
           </p>
-          <p v-else class="section-helper">
+          <p v-else class="control-rule-note">
             只勾選這次實際受影響的部位；未勾選的部位狀態不會改變。
           </p>
           <ZoneSelectorGrid
@@ -180,7 +180,7 @@ function zoneNames(zoneIds: string[]): string {
           <h2 id="report-water-title" data-typography-role="card-title">
             知道實際下水時間嗎？
           </h2>
-          <p class="section-helper">
+          <p class="control-rule-note">
             不確定時不會建立耐水倒數，避免顯示不可信的時間。
           </p>
           <div class="choice-grid choice-grid--row">
@@ -278,11 +278,6 @@ p {
 
 .app-card:not(.success-panel) > h2 {
   font-size: var(--font-size-card-title);
-}
-
-.section-helper {
-  color: var(--text-secondary);
-  line-height: 1.6;
 }
 
 .kind-grid {
