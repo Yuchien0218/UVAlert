@@ -149,11 +149,11 @@ async function runVoid(): Promise<void> {
           </h2>
           <p
             v-if="eventCorrection.zoneSelectionLocked.value"
-            class="section-helper"
+            class="control-rule-note"
           >
             這段水上活動已經有對應的離水紀錄。改動入水的部位會讓那筆離水失去配對，因此這裡不可調整；需要改的話請先更正離水那一筆。
           </p>
-          <p v-else class="section-helper">
+          <p v-else class="control-rule-note">
             取消勾選的部位會從這筆紀錄移除，其他部位不受影響。
           </p>
           <ZoneSelectorGrid
@@ -169,7 +169,7 @@ async function runVoid(): Promise<void> {
           >
             {{ eventCorrection.fieldErrors.value.zones[0] }}
           </p>
-          <p v-if="isGroup" class="section-helper">
+          <p v-if="isGroup" class="control-rule-note">
             這次補擦使用的防曬乳會原樣沿用，更正不會改變防曬乳紀錄。
           </p>
         </section>
@@ -282,11 +282,6 @@ p {
 
 .app-card:not(.success-panel) > h2 {
   font-size: var(--font-size-card-title);
-}
-
-.section-helper {
-  color: var(--text-secondary);
-  line-height: 1.6;
 }
 
 .danger-zone {

@@ -595,6 +595,26 @@ button.text-link {
   line-height: 1.6;
 }
 
+/*
+ * 貼著某個控制項的「規則」——說明選了會發生什麼、不選會發生什麼。
+ *
+ * 先前兩頁各自定義了一份完全相同的 .section-helper，而且名字叫
+ * helper、字級跟內文一樣，讀起來就是普通說明文字。但這 12 段在 B9
+ * 第二輪的逐段分類裡全部落在「使用者做那個選擇的當下必須看到的條件」
+ * ——收不得，也不該淡出。
+ *
+ * 刻意維持內文字級：DESIGN.md 說 helper text 用 supporting(14px)，但
+ * 這一類不是 helper text（見 DESIGN.md 第五節 control-rule-note）。
+ * 也刻意不用框：單一表單頁會出現 3–5 段，每段套框會變成一串盒子。
+ */
+.control-rule-note {
+  margin: 0;
+  border-inline-start: 2px solid var(--text-secondary);
+  padding-inline-start: var(--space-3);
+  color: var(--text-body);
+  line-height: 1.6;
+}
+
 .screen-reader-only {
   position: absolute;
   width: 1px;

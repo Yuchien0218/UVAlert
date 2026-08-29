@@ -628,6 +628,21 @@ Noto Serif TC 是標題的唯一字型，沒有第二層自托管備援——載
 
 **`page-footer-meta`** — 頁尾的版本、隱私政策、使用條款與資料說明。純文字連結列，`{colors.muted}`，`{typography.supporting}`。**刻意不做成功能卡片**，避免與「更多」頁的入口卡競爭。
 
+**`control-rule-note`** — 貼著某個控制項的**規則**：說明「選了會發生什麼、不選會發生什麼」。左側 2px 縱線 `{colors.muted}`，`padding-inline-start` 12px，文字 `{colors.body}`、`{typography.body}`、行高 1.6。**不加底色、不加外框。**
+
+**它不是 helper text。** 第五節上面那句「`{typography.supporting}` 用於欄位標籤、helper text」講的是一般補充說明；這一類是**使用者做那個選擇的當下必須看到的條件**（B9 §3 的不可隱藏清單），所以維持內文字級，不縮到 14px。縮小它等於把規則從決策現場淡出。
+
+與相鄰三種的分工：
+
+| 元件 | 是什麼 | 視覺 |
+| --- | --- | --- |
+| `control-rule-note` | 附屬於下方控制項的規則 | 左縱線，不成塊 |
+| `note-box` | 獨立的資訊區塊 | `{colors.surface-soft}` 底色，`{typography.supporting}` |
+| `delivery-emphasis` | 需要框起來的能力邊界 | 完整 1px 外框 |
+| `safety-note` | 頁級的健康邊界 | 無框，`{colors.muted}`，`{typography.supporting}` |
+
+**不要用框。** 這種規則在單一表單頁可能出現 3–5 段（`ReportContextEventPage` 有 4 段、`EventCorrectionPage` 有 3 段），每段都套 `note-box` 或 `delivery-emphasis` 會把表單變成一串盒子，反而更難掃讀。縱線的作用是「把這句話綁在它下面那個控制項上」，不是把它變成獨立區塊。
+
 ### 提醒（核心）
 
 **`countdown-block`** — 產品的核心。倒數數值直接放在暖象牙畫布上（`{colors.canvas}`），數字使用 `{typography-cjk.countdown}`（tabular-nums），文字 `{colors.ink}`。**不是卡片，沒有底色與邊框。**

@@ -237,7 +237,11 @@ async function runTest(): Promise<void> {
       >
         裝置測試
       </h2>
-      <p class="delivery-note">送一則測試通知，確認這台裝置目前收得到。</p>
+      <!--
+        沒有說明文字是刻意的：原本的「送一則測試通知，確認這台裝置目前
+        收得到。」幾乎重述按鈕文字「送出測試通知」，沒有帶進新資訊
+        （B9 第二輪分類，2026-08-29 裁決）。
+      -->
       <button
         class="button button--quiet"
         type="button"
