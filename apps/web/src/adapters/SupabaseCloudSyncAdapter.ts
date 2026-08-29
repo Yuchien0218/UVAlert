@@ -206,9 +206,13 @@ export function createSupabaseCloudSyncAdapter(options: {
   fetch?: FetchPort;
   baseUrl?: string;
 }): CloudSyncPort {
+  const hasExplicitBaseUrl = options.baseUrl !== undefined;
   const baseUrl = readConfiguredEnvironmentValue(
     options.baseUrl ?? import.meta.env.VITE_API_BASE_URL
   );
+  if (hasExplicitBaseUrl && baseUrl === undefined) {
+    return new DisabledCloudSyncAdapter();
+  }
   const hasSupabaseConfig =
     readConfiguredEnvironmentValue(import.meta.env.VITE_SUPABASE_URL) !==
       undefined &&
@@ -219,7 +223,8 @@ export function createSupabaseCloudSyncAdapter(options: {
     return new DisabledCloudSyncAdapter();
   }
   return new SupabaseCloudSyncAdapter({
-    ...options,
+    auth: options.auth,
+    ...(options.fetch === undefined ? {} : { fetch: options.fetch }),
     ...(baseUrl === undefined ? {} : { baseUrl })
   });
 }

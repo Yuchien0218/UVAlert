@@ -1,4 +1,4 @@
-import { describe, expect, it, vi } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import type { AuthPort } from "@sunshield/platform";
 import { makeActiveSessionRecord } from "@sunshield/test-fixtures";
 import {
@@ -39,6 +39,10 @@ function manifest() {
 }
 
 describe("SupabaseCloudSyncAdapter", () => {
+  afterEach(() => {
+    vi.unstubAllEnvs();
+  });
+
   it("cloud-sync base URL 是空字串時停用同步", () => {
     const adapter = createSupabaseCloudSyncAdapter({
       auth: makeAuth(),
@@ -47,6 +51,70 @@ describe("SupabaseCloudSyncAdapter", () => {
 
     expect(adapter).toBeInstanceOf(DisabledCloudSyncAdapter);
   });
+
+  it("cloud-sync base URL 只有空白字元且 Supabase 已設定時仍停用同步", () => {
+    vi.stubEnv("VITE_SUPABASE_URL", "https://project.supabase.co");
+    vi.stubEnv("VITE_SUPABASE_PUBLISHABLE_KEY", "publishable-key");
+
+    const adapter = createSupabaseCloudSyncAdapter({
+      auth: makeAuth(),
+      baseUrl: "   "
+    });
+
+    expect(adapter).toBeInstanceOf(DisabledCloudSyncAdapter);
+  });
+
+  it.each([
+    {
+      baseUrl: "   ",
+      supabaseUrl: undefined,
+      publishableKey: undefined,
+      expected: DisabledCloudSyncAdapter
+    },
+    {
+      baseUrl: " /v1 ",
+      supabaseUrl: undefined,
+      publishableKey: undefined,
+      expected: SupabaseCloudSyncAdapter
+    },
+    {
+      baseUrl: undefined,
+      supabaseUrl: " https://project.supabase.co ",
+      publishableKey: " publishable-key ",
+      expected: SupabaseCloudSyncAdapter
+    },
+    {
+      baseUrl: undefined,
+      supabaseUrl: "   ",
+      publishableKey: "publishable-key",
+      expected: DisabledCloudSyncAdapter
+    }
+  ])(
+    "依環境矩陣選擇正確的 cloud-sync adapter",
+    ({ baseUrl, supabaseUrl, publishableKey, expected }) => {
+      if (baseUrl === undefined) {
+        vi.unstubAllEnvs();
+      } else {
+        vi.stubEnv("VITE_API_BASE_URL", baseUrl);
+      }
+      if (supabaseUrl === undefined) {
+        vi.stubEnv("VITE_SUPABASE_URL", "");
+      } else {
+        vi.stubEnv("VITE_SUPABASE_URL", supabaseUrl);
+      }
+      if (publishableKey === undefined) {
+        vi.stubEnv("VITE_SUPABASE_PUBLISHABLE_KEY", "");
+      } else {
+        vi.stubEnv("VITE_SUPABASE_PUBLISHABLE_KEY", publishableKey);
+      }
+
+      const adapter = createSupabaseCloudSyncAdapter({
+        auth: makeAuth()
+      });
+
+      expect(adapter).toBeInstanceOf(expected);
+    }
+  );
 
   it("帶 bearer token 呼叫 manifest，並驗證 response contract", async () => {
     const fetch = vi.fn(

@@ -30,3 +30,6 @@ Task 7/B8: complete (final scoped re-review approved; deferred minor recorded ou
 Preview blank fix: takeover scope audit complete (2026-08-29 — inherited diff matches brief: four modified adapter files plus new configuredEnvironment helper; no extra tracked implementation files)
 Preview blank fix: focused verification refreshed (2 files / 7 tests pass; changed-files Prettier check failed on four inherited edits, pure formatting pass applied, rerun passed; git diff --check passed)
 Preview blank fix: report recorded (`preview-blank-fix-report.md`); full `pnpm check` and `pnpm build` evidence carried forward from handoff because no diff/brief inconsistency was found
+Preview blank fix: fix round 1 red reproduced (2026-08-29 — explicit blank/whitespace `baseUrl` with nonblank Supabase env still returned `SupabaseCloudSyncAdapter`; reviewer finding confirmed by focused public-factory test)
+Preview blank fix: fix round 1 green complete (minimal cloud-sync factory fix plus direct helper/auth/cloud coverage; focused suite 3 files / 19 tests pass)
+Preview blank fix: fix round 1 full verification fresh (full `pnpm check` exit 0 after workspace typechecks, 91 files / 660 tests, ESLint, and Stylelint; `pnpm build` exit 0 with existing chunk-size and unset `VITE_PUBLIC_SITE_URL` warnings; changed-files Prettier and `git diff --check` pass)

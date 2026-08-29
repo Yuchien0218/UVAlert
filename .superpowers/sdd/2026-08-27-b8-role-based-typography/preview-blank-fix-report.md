@@ -51,3 +51,42 @@ DONE_WITH_CONCERNS
 
 - The red-phase failure evidence and the full `pnpm check` / `pnpm build` results are inherited from the prior implementer handoff, not freshly rerun in this takeover.
 - Running focused verification inside the managed sandbox hit the known worktree parent-directory access restriction, so the focused Vitest and Prettier commands were rerun outside the sandbox to obtain usable evidence.
+
+## Fix round 1
+
+### Reviewer findings addressed
+
+- `SupabaseCloudSyncAdapter` factory previously normalized `baseUrl` and then still re-enabled sync through fallback construction when a blank explicit `baseUrl` was passed alongside nonblank Supabase env config.
+- Focused coverage did not directly guard helper normalization, auth single-field blank handling, whitespace handling, or the cloud-sync environment matrix.
+
+### Additional scoped change
+
+- Added `apps/web/src/adapters/configuredEnvironment.test.ts`.
+- This is the only tracked file beyond the original five code files, and it is strictly required to satisfy the reviewer's requested direct helper table coverage for `undefined`, empty, whitespace-only, and trimmed nonblank inputs.
+
+### TDD evidence
+
+- Red:
+  - Focused suite failed only at `SupabaseCloudSyncAdapter` when `createSupabaseCloudSyncAdapter({ auth, baseUrl: "   " })` was evaluated with nonblank `VITE_SUPABASE_URL` and `VITE_SUPABASE_PUBLISHABLE_KEY`.
+  - Failure was behavioral, not a test error: the factory returned `SupabaseCloudSyncAdapter` instead of `DisabledCloudSyncAdapter`.
+- Green:
+  - After the minimal factory fix, focused Vitest passed at `3` files / `19` tests.
+
+### Minimal implementation
+
+- Kept `readConfiguredEnvironmentValue()` unchanged.
+- In `createSupabaseCloudSyncAdapter()`, treated an explicitly provided `baseUrl` that normalizes to `undefined` as an immediate disabled case.
+- Preserved the existing env-driven `/v1` fallback path only for cases where callers do not explicitly pass `baseUrl`.
+
+### Fresh verification
+
+- `pnpm check`: passed fresh; all workspace typechecks completed, `91` test files / `660` tests passed, then ESLint and Stylelint completed with exit code `0`.
+- `pnpm build`: passed fresh. Existing warnings remain:
+  - chunk-size warning for large production bundles
+  - `VITE_PUBLIC_SITE_URL is not set`, so generated canonical/sitemap URLs use `http://localhost:4173`
+- Changed-files Prettier check failed once on `apps/web/src/adapters/SupabaseAuthAdapter.test.ts`; after a pure formatting rewrite, the changed-files Prettier check passed.
+- `git diff --check`: passed.
+
+### Round 1 concerns
+
+- Focused and full verification still required running outside the managed sandbox because the worktree test/build tooling needs parent-directory and installed-package access that the sandbox blocks.
