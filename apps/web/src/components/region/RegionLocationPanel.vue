@@ -1,11 +1,11 @@
 <script setup lang="ts">
 import { computed } from "vue";
-import { LocateFixed } from "@lucide/vue";
 import type {
   RegionError,
   RegionPhase
 } from "../../features/region/createRegionController";
 import type { RegionSelection } from "@sunshield/contracts";
+import Icon from "../icons/Icon.vue";
 
 interface Props {
   phase: RegionPhase;
@@ -59,7 +59,7 @@ const errorMessage = computed(() => {
           使用目前位置
         </h2>
       </div>
-      <LocateFixed :size="25" :stroke-width="1.6" aria-hidden="true" />
+      <Icon name="feature-locate" :size="24" />
     </div>
 
     <p class="location-panel__body">

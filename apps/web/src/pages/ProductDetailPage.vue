@@ -2,7 +2,7 @@
 import { computed, onMounted, ref } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import Icon from "../components/icons/Icon.vue";
-import SunLoader from "../components/feedback/SunLoader.vue";
+import BroadcastLoader from "../components/feedback/BroadcastLoader.vue";
 import EmptyStateCard from "../components/common/EmptyStateCard.vue";
 import { useWebAppServices } from "../app/injection";
 import {
@@ -158,7 +158,7 @@ async function handleDelete(): Promise<void> {
       </button>
     </header>
 
-    <SunLoader
+    <BroadcastLoader
       v-if="productSettings.phase.value === 'loading'"
       label="正在讀取裝備資料…"
     />

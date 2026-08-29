@@ -17,7 +17,7 @@
  * 不會先閃一下滿版內容才淡出重來。
  */
 .page-stack > * {
-  animation: page-stack-fade-in 0.45s ease-out backwards;
+  animation: page-stack-fade-in var(--duration-slow) var(--ease-out) backwards;
 }
 
 .page-stack > *:nth-child(1) {
@@ -44,13 +44,23 @@
   animation-delay: 0.4s;
 }
 
+/*
+ * 進場帶 --motion-rise 的上移。2026-08-29 之前是純 opacity，但在暖象牙
+ * 底色上幾乎看不出來——低對比是這個配色的特性，不是可以靠加長時間解決的。
+ *
+ * 這裡原本還寫死 0.45s ease-out：ease-out 是 CSS 關鍵字，不是設計系統的
+ * --ease-out，所以整個 page-stack 的進場一直用的是瀏覽器預設曲線，跟其他
+ * 轉場不同調。一併改成 token。
+ */
 @keyframes page-stack-fade-in {
   from {
     opacity: 0;
+    transform: translateY(var(--motion-rise));
   }
 
   to {
     opacity: 1;
+    transform: none;
   }
 }
 

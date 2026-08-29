@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import type { FiveDayUvForecast, UvRiskLevel } from "@sunshield/contracts";
-import { CloudSun } from "@lucide/vue";
 import Icon from "../icons/Icon.vue";
 import type {
   UvForecastError,
@@ -77,7 +76,7 @@ function getUnavailableMessage(error: UvForecastError): string {
           未來 5 天 UV 預報
         </h2>
       </div>
-      <CloudSun :size="26" :stroke-width="1.5" aria-hidden="true" />
+      <Icon name="feature-uv-forecast" :size="24" />
     </div>
 
     <div
@@ -92,7 +91,7 @@ function getUnavailableMessage(error: UvForecastError): string {
     <div v-else-if="phase === 'no_region'" class="uv-forecast__state">
       <span>
         請先
-        <a class="text-link" href="#outdoor-context">設定地區</a>
+        <RouterLink class="text-link" to="/region">設定地區</RouterLink>
         ，才能查看五日 UV 預報。
       </span>
     </div>
@@ -255,7 +254,9 @@ function getUnavailableMessage(error: UvForecastError): string {
   border-radius: var(--radius-md);
   background: var(--surface-primary);
   text-align: center;
-  transition: all var(--duration-fast) var(--ease-out);
+  /* 只有 border-color 會變（:hover 與 uv-day--* 等級色）；all 會連帶動到
+     之後新增的任何屬性，見 DESIGN.md 第十二節。 */
+  transition: border-color var(--duration-fast) var(--ease-out);
 }
 
 .uv-day:hover {

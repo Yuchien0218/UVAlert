@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { ClipboardList } from "@lucide/vue";
 import Icon from "../icons/Icon.vue";
 
 defineEmits<{
@@ -9,12 +8,7 @@ defineEmits<{
 
 <template>
   <aside class="process-banner" aria-labelledby="setup-process-title">
-    <ClipboardList
-      class="process-banner__icon"
-      :size="24"
-      :stroke-width="1.6"
-      aria-hidden="true"
-    />
+    <Icon name="feature-setup-steps" :size="24" class="process-banner__icon" />
     <div class="process-banner__content">
       <p class="process-banner__eyebrow">提醒設定進行中</p>
       <h2 id="setup-process-title" data-typography-role="section-title">
@@ -40,9 +34,8 @@ defineEmits<{
  * 即將到期是完全不同的語意——同一個顏色會讓使用者把「該去完成設定」
  * 跟「該去補擦」搞混。改用 --color-surface-cream-strong ＋
  * --color-primary，跟 context-option-selected 同一組配色：「需要你
- * 採取行動」而不是「警示」。圖示本身仍是 @lucide/vue 的 ClipboardList，
- * 屬於 DESIGN.md 第十三節列的 10 個刻意延後圖示之一（流程橫幅），要等
- * Illustrator 來源畫好才能換成自訂圖示，這次先不動。
+ * 採取行動」而不是「警示」。2026-08-29 圖示已換成自訂的
+ * feature-setup-steps，不再使用 @lucide/vue。
  */
 .process-banner {
   display: grid;

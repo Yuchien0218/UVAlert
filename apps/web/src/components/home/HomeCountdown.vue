@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed } from "vue";
+import Icon from "../icons/Icon.vue";
 import type { HomeReminderClockPresentation } from "../../features/reminder/homeReminderClockPresentation";
 
 /**
@@ -13,6 +14,17 @@ import type { HomeReminderClockPresentation } from "../../features/reminder/home
  * 進度條顏色跟著狀態走（追蹤中／即將到期／已到期），但顏色**永遠搭配
  * 文字標示**——DESIGN.md 第十一節「不要單靠顏色傳達狀態」。剩餘時間、
  * 部位名稱與預計時間都是文字，色彩只是加強。
+ *
+ * **2026-08-29 補上狀態圖示。** 規則其實是「狀態必須同時有色彩、圖示與
+ * 文字」（docs/design/current-direction.md），但這裡一直只有色彩與文字——
+ * state-tracking／soon／due 三顆剩餘量計量表圖示畫好了卻沒有任何地方引用。
+ * 那組圖示的造型是為了這個位置收斂的（icon-system README 第十節記了五個
+ * 被否決的概念），格數承載意義，灰階與色盲情況下仍可區分。
+ *
+ * 狀態切換是這個 App 最重要的一刻——時間跨過補擦門檻。原本它是硬切：
+ * 只有進度條寬度有 transition，顏色與文字瞬間變。現在圖示交叉淡入、
+ * 顏色也跟著過渡，用 --duration-slow 而不是 --duration-base，因為這不是
+ * 回應手指的操作，是自己發生的事，慢一點才讀得到。
  */
 
 const props = defineProps<{
@@ -23,6 +35,18 @@ const props = defineProps<{
 const hasProgress = computed(() => props.presentation.progressPercent !== null);
 
 const toneClass = computed(() => `countdown--${props.presentation.tone}`);
+
+/**
+ * tone 的三個值跟圖示 id 是 1:1 的，但仍然明寫成對照表而不是字串拼接——
+ * 拼接會讓 IconName 的字面量聯集失效，之後改名也不會被 typecheck 抓到。
+ */
+const STATE_ICON = {
+  tracking: "state-tracking",
+  soon: "state-soon",
+  due: "state-due"
+} as const;
+
+const stateIcon = computed(() => STATE_ICON[props.presentation.tone]);
 </script>
 
 <template>
@@ -37,7 +61,15 @@ const toneClass = computed(() => `countdown--${props.presentation.tone}`);
     </div>
 
     <p class="countdown__detail">
-      {{ presentation.title }}・{{ presentation.timeLabel }}
+      <Transition name="countdown-state" mode="out-in">
+        <Icon
+          :key="presentation.tone"
+          :name="stateIcon"
+          :size="20"
+          class="countdown__state-icon"
+        />
+      </Transition>
+      <span>{{ presentation.title }}・{{ presentation.timeLabel }}</span>
     </p>
 
     <div
@@ -82,8 +114,31 @@ const toneClass = computed(() => `countdown--${props.presentation.tone}`);
 }
 
 .countdown__detail {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
   margin: 0;
   font-size: var(--font-size-body);
+}
+
+/*
+ * 圖示繼承 --tone-color。狀態圖示是單色的（icon-system README 第二節），
+ * 就是為了這種情境——一份幾何走遍所有狀態，顏色由外層語意色決定。
+ */
+.countdown__state-icon {
+  flex: none;
+  color: var(--tone-color, var(--color-tracking));
+  transition: color var(--duration-slow) var(--ease-out);
+}
+
+.countdown-state-enter-active,
+.countdown-state-leave-active {
+  transition: opacity var(--duration-slow) var(--ease-out);
+}
+
+.countdown-state-enter-from,
+.countdown-state-leave-to {
+  opacity: 0;
 }
 
 .countdown__track {
@@ -97,7 +152,9 @@ const toneClass = computed(() => `countdown--${props.presentation.tone}`);
 .countdown__fill {
   height: 100%;
   background: var(--tone-color, var(--color-tracking));
-  transition: width var(--duration-base) var(--ease-out);
+  transition:
+    width var(--duration-base) var(--ease-out),
+    background-color var(--duration-slow) var(--ease-out);
 }
 
 .countdown--tracking {
@@ -113,7 +170,10 @@ const toneClass = computed(() => `countdown--${props.presentation.tone}`);
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .countdown__fill {
+  .countdown__fill,
+  .countdown__state-icon,
+  .countdown-state-enter-active,
+  .countdown-state-leave-active {
     transition: none;
   }
 }

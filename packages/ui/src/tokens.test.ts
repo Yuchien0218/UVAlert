@@ -69,6 +69,10 @@ const SPACING_MAP: Record<string, string> = {
   section: "--space-10"
 };
 
+/**
+ * motion 是 1:1 對應（duration-fast → --duration-fast），不需要 map，
+ * 但列在這裡是為了讓「哪些 section 有被守著」一眼看得完。
+ */
 const LAYOUT_MAP: Record<string, string> = {
   "content-max": "--content-max",
   "tap-target": "--tap-target"
@@ -152,6 +156,8 @@ function tokenFor(section: string, key: string): string | null {
       return SPACING_MAP[key] ?? null;
     case "layout":
       return LAYOUT_MAP[key] ?? null;
+    case "motion":
+      return `--${key}`;
     default:
       return null;
   }
@@ -177,9 +183,99 @@ function normalize(value: string): string {
 
 const KNOWN_DRIFT: Record<string, string> = {};
 
+// --- {token.ref} 解析守門 ---
+
+/**
+ * 收集某個 frontmatter 區塊底下所有兩格縮排的 key（不管有沒有值）。
+ *
+ * 跟 frontmatterSection 的差別：那個要求同一行有值，所以像 typography 這種
+ * 巢狀結構（`  body:` 底下才是欄位）會被整個略過。這裡只要 key。
+ */
+function frontmatterKeys(topKey: string): Set<string> {
+  const fm = designMd.match(/^---\r?\n([\s\S]*?)\r?\n---/)?.[1] ?? "";
+  const out = new Set<string>();
+  let inSection = false;
+  for (const line of fm.split(/\r?\n/)) {
+    if (/^\S/.test(line)) {
+      inSection = line.trimEnd() === `${topKey}:`;
+      continue;
+    }
+    if (!inSection) continue;
+    const match = line.match(/^ {2}([\w-]+):/);
+    if (match) out.add(match[1]!);
+  }
+  return out;
+}
+
+/**
+ * 這些是 DESIGN.md 裡「`{區塊.key}`」寫法會指到的 token 命名空間。
+ *
+ * `components` 刻意不列入：§14 的說明文字裡有 `{component.countdown-block}`
+ * 這種示範寫法（單數、且是舉例不是真的引用），列進來只會製造假警報。
+ */
+const REFERENCEABLE = [
+  "colors",
+  "rounded",
+  "spacing",
+  "layout",
+  "motion",
+  "typography",
+  "typography-cjk"
+] as const;
+
 // --- 測試 ---
 
-const SECTIONS = ["colors", "rounded", "spacing", "layout"] as const;
+const SECTIONS = [
+  "colors",
+  "rounded",
+  "spacing",
+  "layout",
+  "motion"
+] as const;
+
+/**
+ * 幽靈 token 引用守門（2026-08-29 新增）。
+ *
+ * 起因：`muted-soft` 與 `error` 兩個 token 在 2026-08-26 被移除，文件的
+ * 第二節與第十三節都記了「已刪除」，但 `components:` 的 page-footer-meta
+ * 與第五節 prose 仍在引用它們——**同一份文件自己說刪掉了、自己又在用**。
+ *
+ * 上面那組測試比對的是「frontmatter 的值 vs styles.css」，管不到這種
+ * 「引用指向不存在的 key」。stylelint 的 value-no-unknown-custom-properties
+ * 抓的是同一類問題，但它只掃 CSS，掃不到 DESIGN.md 自己。
+ *
+ * 這個測試掃全文（frontmatter 的 components 區塊 ＋ 所有 prose），確認每一個
+ * `{區塊.key}` 都真的解析得到。
+ */
+describe("DESIGN.md 的 {token.ref} 全部解析得到", () => {
+  const defined = new Map<string, Set<string>>(
+    REFERENCEABLE.map((section) => [section, frontmatterKeys(section)])
+  );
+
+  const refs = new Map<string, number[]>();
+  designMd.split(/\r?\n/).forEach((line, index) => {
+    for (const match of line.matchAll(/\{([\w-]+)\.([\w-]+)\}/g)) {
+      const [, section, key] = match;
+      if (!defined.has(section!)) continue;
+      const id = `${section}.${key}`;
+      refs.set(id, [...(refs.get(id) ?? []), index + 1]);
+    }
+  });
+
+  it("有掃到引用（避免正規表達式壞掉時靜默通過）", () => {
+    expect(refs.size).toBeGreaterThan(20);
+  });
+
+  for (const [id, lines] of refs) {
+    const [section, key] = id.split(".") as [string, string];
+    it(`${id} 存在`, () => {
+      expect(
+        defined.get(section)!.has(key),
+        `DESIGN.md 第 ${lines.join("、")} 行引用了 {${id}}，但 frontmatter 的 ${section}: 底下沒有這個 key`
+      ).toBe(true);
+    });
+  }
+});
 
 describe("DESIGN.md ↔ styles.css token 一致性", () => {
   for (const section of SECTIONS) {

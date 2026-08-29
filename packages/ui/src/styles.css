@@ -295,9 +295,45 @@
   --content-max: 47rem;
   --tap-target: 2.75rem;
   --bottom-nav-height: 4.5rem;
+  /*
+   * 動效 token。2026-08-29 補上 slow／loader-cycle／ease-in-out——原本
+   * 只有 fast 與 base，所以 page-stack 的 0.45s 進場與兩顆 loader 的 1.5s
+   * 循環都只能寫死。缺 token 就地硬寫正是 stylelint 那條規則要擋的事。
+   *
+   * loader-cycle 獨立於 slow：它不是「一次轉場要多久」，而是「一輪循環
+   * 要多久」，兩者調整的理由不同（轉場跟著手感走，循環跟著呼吸節奏走）。
+   *
+   * loader-delay 是 loader 出現前的靜默期。本機優先的讀取多半幾十毫秒
+   * 就回來，沒有這段延遲的話 loader 會閃一下再消失——那個閃動本身就是
+   * 最廉價的觀感，跟圖案畫得多好無關。
+   *
+   * **時距分兩類**：fast 給「回應手指的」（按鈕、chevron 展開、遮罩），
+   * base／slow 給「自己發生的」（內容進場、狀態切換）。直接操作放慢會
+   * 讀成延遲；自己發生的事沒有人在等，慢一點才安靜。base 2026-08-29 從
+   * 240ms 調到 320ms 就是照這條分的。
+   *
+   * ease-out 同日從 cubic-bezier(0.22, 1, 0.36, 1) 換成 easeOutQuad。
+   * 原本那條的第二個控制點是 1，會產生輕微的彈射感——那是爽快的 SaaS
+   * 產品的手感，跟這個設計系統「安靜到足以承載每日的健康指引」的定位
+   * 相反。新曲線一樣是減速收尾，但沒有戲劇性的尾巴。
+   */
   --duration-fast: 160ms;
-  --duration-base: 240ms;
-  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --duration-base: 320ms;
+  --duration-slow: 450ms;
+  --duration-loader-cycle: 1500ms;
+  --duration-loader-delay: 250ms;
+  --ease-out: cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+
+  /*
+   * 內容進場的上移距離。2026-08-29 開的例外：系統原本規定「動畫只用
+   * opacity，不用位移或縮放」，但在 #FAF5EC 這種低對比暖底上，純粹的
+   * 0→1 淡入幾乎察覺不到。4px 小到不構成「位移動畫」，只是讓轉場被看見。
+   *
+   * 例外只涵蓋**內容進場**。狀態切換、圖示內部、hover、loader 一律
+   * 維持純 opacity——見 DESIGN.md 第十二節。
+   */
+  --motion-rise: 4px;
 
   /*
    * 2026-08-25：z-index 只有兩層——常駐的下排導覽列，跟蓋過它的全螢幕

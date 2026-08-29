@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import Icon from "../components/icons/Icon.vue";
-import SunLoader from "../components/feedback/SunLoader.vue";
+import BroadcastLoader from "../components/feedback/BroadcastLoader.vue";
 import EmptyStateCard from "../components/common/EmptyStateCard.vue";
 import { computed, onMounted } from "vue";
 import { useRouter } from "vue-router";
@@ -77,7 +77,7 @@ function openGear(productId: string): void {
 
     <SetupProcessBanner v-if="hasActiveSetupDraft" />
 
-    <SunLoader
+    <BroadcastLoader
       v-if="productSettings.phase.value === 'loading'"
       label="正在讀取裝備清單…"
     />

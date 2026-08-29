@@ -65,6 +65,38 @@ export default {
     ],
     "no-empty-source": null,
 
+    /* --- 動效 --- */
+    /*
+     * transition: all 會連帶動到之後新增的任何屬性——加一個 background
+     * 就多一個沒人決定過的動畫。一律列出要動的屬性。
+     * 2026-08-29 加入，當時只有 FiveDayUvCard 一處違規，已改掉。
+     *
+     * 同日稍晚補上簡寫的漏洞：declaration-strict-value 只列了長寫的
+     * transition-duration／animation-duration，**兩個簡寫完全沒被守到**。
+     * 兩顆 loader 就是這樣把 1.5s、ease-in-out、ease-out 寫死溜過去的
+     * ——而且是在同一個 session 裡才剛建好 --duration-loader-cycle 與
+     * --ease-in-out token 的情況下。2026-08-25 也修過兩處
+     * `transition: opacity 180ms ease`，同樣沒有機制擋住它長回來。
+     *
+     * 擋兩類寫死值：時間字面量（1.5s／240ms）與緩動關鍵字或函式
+     * （ease、linear、cubic-bezier(...)）。`0s` 放行——那是「不要動畫」
+     * 的意思，不是沒套 token。
+     */
+    "declaration-property-value-disallowed-list": {
+      transition: [
+        "/^all\\b/",
+        "/(^|[\\s,])[1-9]\\d*\\.?\\d*m?s(?![\\w-])/",
+        "/(^|[\\s,])0\\.\\d+m?s(?![\\w-])/",
+        "/(^|[\\s,])(ease|ease-in|ease-out|ease-in-out|linear|step-start|step-end|cubic-bezier\\(|steps\\()/"
+      ],
+      "transition-property": ["all"],
+      animation: [
+        "/(^|[\\s,])[1-9]\\d*\\.?\\d*m?s(?![\\w-])/",
+        "/(^|[\\s,])0\\.\\d+m?s(?![\\w-])/",
+        "/(^|[\\s,])(ease|ease-in|ease-out|ease-in-out|linear|step-start|step-end|cubic-bezier\\(|steps\\()/"
+      ]
+    },
+
     /* --- 這個 repo 的既有慣例，刻意不強制改 --- */
     // kebab-case token 名、BEM-ish class、compact 單行多宣告都是既有風格。
     "custom-property-pattern": null,
@@ -140,7 +172,7 @@ export default {
         importFrom: [
           ...TOKEN_SOURCES,
           // 由 Vue 模板 :style 綁定、CSS 端看不到的 local custom property。
-          // 目前只有 SunLoader.vue 的逐條光線動畫延遲一個。
+          // 目前只有掃描延遲一個，BroadcastLoader.vue 與 InlineLoader.vue 共用。
           { "custom-properties": { "--ray-delay": "0s" } }
         ]
       }

@@ -47,4 +47,23 @@
 
 ## 驗證
 
-`pnpm check`（typecheck + 78 個測試檔、466 筆測試）全數通過。第二輪的 35 處改動是實際可見的顏色加深（見上方對比度數字，方向上更安全不是更冒險），但**沒有經過瀏覽器視覺驗證**——本機沒有 preview 工具可用，理由同 [[2026-08-25-typography-token-consolidation.md]]。建議下一個有瀏覽器可用的環境抽查幾個代表性頁面（`/products`、`/setup`、`DataSettingsPage`、`EventCorrectionPage` 的作廢區塊）確認深色內文跟卡片底色的搭配沒有意外問題。
+`pnpm check`（typecheck + 78 個測試檔、466 筆測試）全數通過。第二輪的 35 處改動是實際可見的顏色加深（見上方對比度數字，方向上更安全不是更冒險），~~但**沒有經過瀏覽器視覺驗證**~~——**2026-08-29 已補驗，見下節。**
+
+## 2026-08-29 視覺驗證結果：通過
+
+抽查 `/products`、`/setup`、`/settings/data` 與衛教文章頁，加深後的內文（`--color-body` #5A4540）在暖象牙底與兩種卡片底色上都讀得清楚。
+
+**當初只算過對 canvas 的對比度，沒人算過對卡片底色的。** 這次補算：
+
+| 前景 → 背景 | 對比度 |
+| --- | --- |
+| `body` → `canvas` | 8.19:1 |
+| `body` → `surface-soft` | 7.69:1 |
+| `body` → `surface-card` | 6.99:1 |
+| `muted` → `canvas` | 5.92:1 |
+| `muted` → `surface-soft` | 5.56:1 |
+| `muted` → `surface-card` | **5.05:1** |
+
+最差的一組是 `muted` 疊在 `surface-card` 上的 5.05:1，仍然通過 WCAG AA 的 4.5:1。**沒有意外問題。**
+
+（順帶一提：這也再次確認了砍掉第 5 級文字色是對的——`muted-soft` 對 canvas 就只有 4.42:1，疊在卡片上會更低，一定過不了。）
