@@ -741,6 +741,8 @@ Noto Serif TC 是標題的唯一字型，沒有第二層自托管備援——載
 
 收合不清除使用者的輸入、選擇或目前狀態。
 
+**這份契約是給「確實需要收合的項目」用的，不是待辦清單。** 2026-08-29 結案：不再系統性地把既有說明文字改成可展開（兩輪逐項分類，48 個判定單位裡只有 2 個可收，且都是單句）。要不要收，依項目自己的性質判斷——健康／安全邊界、不可逆操作後果、採取動作前必須知道的條件、來源與審閱狀態一律常駐；**不要用「這頁段落很多」當理由**。裁決見 `docs/superpowers/specs/2026-08-27-b9-icon-first-progressive-disclosure-design.md` 第八節。
+
 **`badge-pill`** — 分類標籤。背景 `{colors.surface-card}`，`{typography.caption}`，圓角 `{rounded.pill}`。
 
 **`safety-note`** — 安全與限制說明的固定樣式。`{colors.muted}`、`{typography.caption}`、行高 1.6。
