@@ -22,9 +22,24 @@ vi.mock("../../app/injection", () => ({ useWebAppServices: vi.fn() }));
  * 同步的那兩條斷言原本在 `SyncSettingsPage.test.ts`，行為一行沒改，
  * 原樣搬過來——用途是證明合併沒有在搬家過程中弄丟同步功能。
  */
+/*
+ * 2026-08-30：`summary` 原本寫死成 null，於是「這台裝置儲存了什麼」那張
+ * 卡在所有測試裡都不渲染——要斷言卡片內容就得能餵資料進去。加成可選
+ * 參數而不是改預設值，既有測試的行為一行沒變。
+ */
+const SUMMARY_FIXTURE = {
+  productCount: 3,
+  hasActiveSession: true,
+  endedSessionCount: 12,
+  hasSetupDraft: false,
+  lastWeatherSnapshotAt: null,
+  lastClockCalibrationAt: null
+};
+
 function makeServices(
   authState: "signed_out" | "signed_in" = "signed_out",
-  phase: "idle" | "loading" = "idle"
+  phase: "idle" | "loading" = "idle",
+  summary: typeof SUMMARY_FIXTURE | null = null
 ) {
   const auth = {
     state: shallowReadonly(
@@ -58,7 +73,7 @@ function makeServices(
   };
   const localData = {
     phase: shallowReadonly(shallowRef(phase)),
-    summary: shallowReadonly(shallowRef(null)),
+    summary: shallowReadonly(shallowRef(summary)),
     notice: shallowReadonly(shallowRef(null)),
     error: shallowReadonly(shallowRef(null)),
     hasExportedThisVisit: shallowReadonly(shallowRef(false)),
@@ -75,9 +90,10 @@ function makeServices(
 
 function useServices(
   authState: "signed_out" | "signed_in" = "signed_out",
-  phase: "idle" | "loading" = "idle"
+  phase: "idle" | "loading" = "idle",
+  summary: typeof SUMMARY_FIXTURE | null = null
 ) {
-  const services = makeServices(authState, phase);
+  const services = makeServices(authState, phase, summary);
   vi.mocked(useWebAppServices).mockReturnValue(
     services as unknown as WebAppServices
   );
@@ -136,5 +152,23 @@ describe("DataSettingsPage 的合併結果", () => {
     useServices();
     const wrapper = shallowMount(DataSettingsPage);
     expect(wrapper.html()).toContain("/settings/account-data");
+  });
+
+  /*
+   * 2026-08-30：資料概況的範圍說明是常駐條件，不是可有可無的補充。
+   *
+   * 這些數字只數得到本機 IndexedDB；登入同步後雲端可能還有其他裝置上傳
+   * 的紀錄，這張卡看不到也數不到。少了這句，「防曬裝備 0 筆」會被讀成
+   * 「我的資料都不見了」——而這正是 2026-08-29 那次合併要解決的
+   * 「本機 vs 雲端」混淆。DESIGN.md 第五節把這類前提列為不可隱藏。
+   */
+  it("資料概況說明數字只涵蓋本機，不含雲端", () => {
+    useServices("signed_out", "idle", SUMMARY_FIXTURE);
+    const wrapper = shallowMount(DataSettingsPage);
+    const scope = wrapper.find(".summary-scope");
+
+    expect(scope.exists()).toBe(true);
+    expect(scope.text()).toContain("這台裝置");
+    expect(scope.text()).toContain("雲端");
   });
 });
