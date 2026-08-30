@@ -4,10 +4,20 @@ export type PushSubscriptionInput = {
   keys: { p256dh: string; auth: string };
 };
 
+export type PushScheduleRequest = {
+  dueAt: string;
+  operationId: string;
+};
+
+export type PushScheduleCancelRequest = {
+  operationId: string;
+};
+
 export type PushContractErrorReason =
   | "BODY_TOO_LARGE"
   | "CONTENT_TYPE_INVALID"
   | "INVALID_JSON"
+  | "SCHEDULE_INVALID"
   | "SUBSCRIPTION_INVALID";
 
 export class PushContractError extends Error {
@@ -27,6 +37,53 @@ export async function parsePushSubscriptionRequest(
   request: Request,
   options: { allowLocalHttp: boolean }
 ): Promise<PushSubscriptionInput> {
+  return validatePushSubscription(await readJsonBody(request), options);
+}
+
+export async function parsePushScheduleRequest(
+  request: Request,
+  now: Date
+): Promise<PushScheduleRequest> {
+  const value = await readJsonBody(request);
+  if (
+    !isPlainObject(value) ||
+    !hasExactKeys(value, ["dueAt", "operationId"]) ||
+    typeof value.dueAt !== "string" ||
+    !hasTimezone(value.dueAt) ||
+    !isUuid(value.operationId)
+  ) {
+    throw new PushContractError("SCHEDULE_INVALID");
+  }
+  const dueTime = Date.parse(value.dueAt);
+  if (!Number.isFinite(dueTime)) {
+    throw new PushContractError("SCHEDULE_INVALID");
+  }
+  const earliest = now.getTime() - 10 * 60 * 1000;
+  const latest = now.getTime() + 24 * 60 * 60 * 1000;
+  if (dueTime < earliest || dueTime > latest) {
+    throw new PushContractError("SCHEDULE_INVALID");
+  }
+  return {
+    dueAt: new Date(dueTime).toISOString(),
+    operationId: value.operationId.toLowerCase()
+  };
+}
+
+export async function parsePushScheduleCancelRequest(
+  request: Request
+): Promise<PushScheduleCancelRequest> {
+  const value = await readJsonBody(request);
+  if (
+    !isPlainObject(value) ||
+    !hasExactKeys(value, ["operationId"]) ||
+    !isUuid(value.operationId)
+  ) {
+    throw new PushContractError("SCHEDULE_INVALID");
+  }
+  return { operationId: value.operationId.toLowerCase() };
+}
+
+async function readJsonBody(request: Request): Promise<unknown> {
   if (!isJsonContentType(request.headers.get("Content-Type"))) {
     throw new PushContractError("CONTENT_TYPE_INVALID");
   }
@@ -46,7 +103,7 @@ export async function parsePushSubscriptionRequest(
   } catch {
     throw new PushContractError("INVALID_JSON");
   }
-  return validatePushSubscription(value, options);
+  return value;
 }
 
 function validatePushSubscription(
@@ -130,5 +187,18 @@ function isValidKey(
     value.length >= minimumLength &&
     value.length <= maximumLength &&
     base64UrlPattern.test(value)
+  );
+}
+
+function hasTimezone(value: string): boolean {
+  return /(?:Z|[+-]\d{2}:\d{2})$/u.test(value);
+}
+
+function isUuid(value: unknown): value is string {
+  return (
+    typeof value === "string" &&
+    /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/iu.test(
+      value
+    )
   );
 }

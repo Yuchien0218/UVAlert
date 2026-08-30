@@ -50,3 +50,6 @@ verify_jwt = false
 
 [functions.push-subscription]
 verify_jwt = false
+
+[functions.push-schedule]
+verify_jwt = false

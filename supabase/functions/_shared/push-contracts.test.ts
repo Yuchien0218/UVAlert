@@ -1,5 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
+  parsePushScheduleCancelRequest,
+  parsePushScheduleRequest,
   parsePushSubscriptionRequest,
   PushContractError
 } from "./push-contracts";
@@ -105,5 +107,55 @@ describe("push subscription request contract", () => {
         { allowLocalHttp: false }
       )
     ).rejects.toMatchObject({ reason: "BODY_TOO_LARGE" });
+  });
+});
+
+describe("push schedule request contract", () => {
+  const now = new Date("2026-08-30T10:00:00.000Z");
+  const operationId = "20000000-0000-4000-8000-000000000001";
+
+  it("accepts a timezone-aware due time inside the server window", async () => {
+    await expect(
+      parsePushScheduleRequest(
+        request({ dueAt: "2026-08-30T10:30:00+00:00", operationId }),
+        now
+      )
+    ).resolves.toEqual({
+      dueAt: "2026-08-30T10:30:00.000Z",
+      operationId
+    });
+  });
+
+  it.each(["2026-08-30T09:50:00.000Z", "2026-08-31T10:00:00.000Z"])(
+    "accepts the inclusive server-time boundary %s",
+    async (dueAt) => {
+      await expect(
+        parsePushScheduleRequest(request({ dueAt, operationId }), now)
+      ).resolves.toEqual({ dueAt, operationId });
+    }
+  );
+
+  it.each([
+    { dueAt: "2026-08-30T10:30:00", operationId },
+    { dueAt: "2026-08-30T09:49:59Z", operationId },
+    { dueAt: "2026-08-31T10:00:01Z", operationId },
+    { dueAt: "not-a-date", operationId },
+    { dueAt: "2026-08-30T10:30:00Z", operationId: "invalid" },
+    { dueAt: "2026-08-30T10:30:00Z", operationId, sessionId: "private" }
+  ])("rejects invalid schedule fields", async (body) => {
+    await expect(
+      parsePushScheduleRequest(request(body), now)
+    ).rejects.toBeInstanceOf(PushContractError);
+  });
+
+  it("accepts only an operation id for cancellation", async () => {
+    await expect(
+      parsePushScheduleCancelRequest(request({ operationId }))
+    ).resolves.toEqual({ operationId });
+    await expect(
+      parsePushScheduleCancelRequest(
+        request({ operationId, dueAt: "2026-08-30T10:30:00Z" })
+      )
+    ).rejects.toBeInstanceOf(PushContractError);
   });
 });
