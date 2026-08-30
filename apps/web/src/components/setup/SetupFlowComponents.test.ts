@@ -128,7 +128,16 @@ describe("QuickProtectionSummary", () => {
       }
     });
 
-    expect(wrapper.text()).toContain("快速提醒（推薦）");
+    /*
+     * 2026-08-30（B 批）：不再斷言「快速提醒（推薦）」這個 eyebrow——它已
+     * 隨去卡片化一起移除。這一區只在選好情境後才出現，本來就有脈絡，再標
+     * 一次等於把同件事宣告三次。
+     *
+     * 真正要守的是「尚未確認時要有明確的確認動作」，也就是下面那顆按鈕。
+     * 另外守住 preset 名稱仍然看得到——去掉外框之後它是唯一的標題。
+     */
+    expect(wrapper.text()).not.toContain("快速提醒（推薦）");
+    expect(wrapper.text()).toContain("通勤常見追蹤部位");
     expect(wrapper.text()).toContain("使用這組並繼續");
     await findButton(wrapper, "使用這組並繼續").trigger("click");
     expect(wrapper.emitted("accept")).toHaveLength(1);
