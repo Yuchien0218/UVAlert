@@ -24,7 +24,7 @@ docker --version
 pnpm install
 supabase start
 supabase db reset
-supabase functions serve
+supabase functions serve --env-file supabase/.env.local
 ```
 
 `db reset` 會依序套用 `supabase/migrations/` 與 `supabase/seed.sql`。seed 只有假的 UV 預報，不含真實使用者資料或 secrets。RLS／schema 的 pgTAP 檢查：
@@ -40,18 +40,19 @@ supabase test db
 ```dotenv
 VITE_SUPABASE_URL=http://127.0.0.1:54321
 VITE_SUPABASE_PUBLISHABLE_KEY=<local publishable/anon key>
-VITE_API_BASE_URL=/v1
+VITE_API_BASE_URL=http://127.0.0.1:54321/functions/v1
 ```
 
-Edge Function 的 CWA key、allowed origins 與 Google provider secret 不進前端：
+上面的 `VITE_API_BASE_URL` 讓瀏覽器直接呼叫本機 Supabase Edge Function。若開發環境已另設同源 proxy，也可保留 `VITE_API_BASE_URL=/v1`；此時 proxy 必須將產品路徑 `/v1/uv/forecast` 轉送到 Supabase 的 `/functions/v1/uv-forecast`。
 
-```bash
-supabase secrets set \
-  CWA_API_KEY=<cwa-key> \
-  ALLOWED_ORIGINS=http://localhost:5173,http://127.0.0.1:5173
+Edge Function 的 CWA key、allowed origins 與 Google provider secret 不進前端。複製 `supabase/.env.example` 為被 Git 忽略的 `supabase/.env.local`，只在本機填值：
+
+```dotenv
+CWA_API_KEY=<local-cwa-key>
+ALLOWED_ORIGINS=http://localhost:5173,http://127.0.0.1:5173
 ```
 
-本機 Supabase 會提供 `SUPABASE_URL`、`SUPABASE_ANON_KEY` 與 service-role secret 給 Edge Runtime；若使用自訂部署流程，請確認 `SUPABASE_SERVICE_ROLE_KEY` 已以 secret 注入。不要把這個值放在 `.env`、前端 bundle、錯誤訊息或 commit。
+本機 Supabase 會提供 `SUPABASE_URL`、`SUPABASE_ANON_KEY` 與 service-role secret 給 Edge Runtime；若使用自訂部署流程，請確認 `SUPABASE_SERVICE_ROLE_KEY` 已以 server secret 注入。不要把 service-role key 放在前端 `.env.local`、bundle、錯誤訊息或 commit。
 
 ## Google OAuth
 
@@ -74,7 +75,36 @@ Supabase CLI 直接 serve 時 function 原生路徑是：
 /functions/v1/account-delete
 ```
 
-`VITE_API_BASE_URL=/v1` 是產品路徑；開發 server 或正式 hosting 必須做 rewrite。若沒有 rewrite，請在本機暫時把 `VITE_API_BASE_URL` 指向 proxy，而不要把 service-role key 放給瀏覽器。
+本機直連 Edge Function 的 API base 是：
+
+```text
+http://127.0.0.1:54321/functions/v1
+```
+
+同源 proxy 的可選 base 才是 `/v1`。正式 Vercel 不代理 UV API，而是把 `VITE_API_BASE_URL` 設為 `https://your-project-ref.supabase.co/functions/v1`。公開的 `uv-forecast` 不需把 service-role key 或 CWA key 交給瀏覽器。
+
+## 正式 UV Function 部署順序
+
+先在安全 shell session 設定本計畫使用的環境變數，勿輸出或 commit 真值：
+
+```powershell
+$env:UVALERT_SUPABASE_PROJECT_REF = "已確認的 project ref"
+$env:UVALERT_CWA_API_KEY = "只存在目前 shell 的 CWA key"
+$env:UVALERT_ALLOWED_ORIGINS = "https://正式網域,https://已核准的預覽網域"
+```
+
+確認 project 與 migration 後再執行：
+
+```powershell
+supabase login
+supabase link --project-ref $env:UVALERT_SUPABASE_PROJECT_REF
+supabase db push --dry-run
+supabase db push
+supabase secrets set "CWA_API_KEY=$env:UVALERT_CWA_API_KEY" "ALLOWED_ORIGINS=$env:UVALERT_ALLOWED_ORIGINS" --project-ref $env:UVALERT_SUPABASE_PROJECT_REF
+supabase functions deploy uv-forecast --project-ref $env:UVALERT_SUPABASE_PROJECT_REF
+```
+
+`db push --dry-run` 若包含非本次預期的破壞性或無關變更，停止部署並先釐清，不直接套用。
 
 ## 檢查命令
 
