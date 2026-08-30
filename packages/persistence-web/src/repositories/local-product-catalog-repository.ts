@@ -67,6 +67,8 @@ export class LocalProductCatalogRepository implements ProductCatalogPort {
       purchaseMonth: input.purchaseMonth ?? null,
       expiryDate,
       note: input.note ?? null,
+      priceTwd: input.priceTwd ?? null,
+      usageRating: input.usageRating ?? null,
       archivedAt: existing?.archivedAt ?? null,
       createdAt: existing?.createdAt ?? input.now,
       updatedAt: input.now,

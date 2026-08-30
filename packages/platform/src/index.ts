@@ -166,6 +166,10 @@ export interface SaveProductInput {
   purchaseMonth?: string | null;
   expiryDate?: string | null;
   note?: string | null;
+  /** 2026-08-30：純紀錄，不進 reducer。 */
+  priceTwd?: number | null;
+  /** 2026-08-30：純紀錄，不進 reducer。 */
+  usageRating?: "good" | "ok" | "bad" | null;
   now: string;
 }
 

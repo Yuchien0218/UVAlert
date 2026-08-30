@@ -50,11 +50,34 @@ const { productSettings } = useWebAppServices();
 
 const isEdit = computed(() => props.productId !== null);
 
+/**
+ * 價格輸入轉成 schema 要的非負整數，轉不成就當成沒填。
+ *
+ * 刻意不用 `type="number"`：Vue 的 v-model 對 number input 會自動轉型，
+ * 空字串會變成 undefined 而不是 ""，後面的判斷就得多一層——SPF 那個欄位
+ * 2026-08-24 就踩過這個坑（見下方註解）。`text` ＋ `inputmode="numeric"`
+ * 一樣會跳數字鍵盤，也避開滾輪誤改值。
+ */
+function parsePriceTwd(raw: string): number | null {
+  const trimmed = raw.trim();
+  if (trimmed === "") return null;
+  const value = Number(trimmed);
+  if (!Number.isInteger(value) || value < 0) return null;
+  return value;
+}
+
 const gearCategory = shallowRef<GearCategory>("sunscreen");
 const displayName = ref("");
 const purchaseMonth = ref("");
 const expiryDate = ref("");
 const note = ref("");
+/*
+ * 2026-08-30 新增的兩個純紀錄欄位（規格見
+ * docs/superpowers/specs/2026-08-30-gear-simplification-design.md）。
+ * 兩者都不進 reducer——packages/domain 對它們零引用。
+ */
+const priceTwd = ref("");
+const usageRating = shallowRef<"good" | "ok" | "bad" | "">("");
 /**
  * SPF／PA 只用來辨識「這罐是哪一罐」，**不影響倒數**——
  * `packages/domain` 對這兩個欄位零引用，倒數長度由包裝標示裡的
@@ -115,6 +138,8 @@ onMounted(async () => {
   purchaseMonth.value = record.purchaseMonth ?? "";
   expiryDate.value = record.expiryDate ?? "";
   note.value = record.note ?? "";
+  priceTwd.value = record.priceTwd === null ? "" : String(record.priceTwd);
+  usageRating.value = record.usageRating ?? "";
   snapshotForm.value = productSnapshotToFormValue(record.currentSnapshot);
   spfInput.value =
     record.currentSnapshot.spf === null
@@ -190,6 +215,8 @@ async function save(): Promise<void> {
     purchaseMonth: purchaseMonth.value === "" ? null : purchaseMonth.value,
     expiryDate: expiryDate.value === "" ? null : expiryDate.value,
     note: note.value.trim() === "" ? null : note.value.trim(),
+    priceTwd: parsePriceTwd(priceTwd.value),
+    usageRating: usageRating.value === "" ? null : usageRating.value,
     productId: props.productId ?? undefined
   });
 
@@ -320,24 +347,24 @@ async function remove(): Promise<void> {
       "
     />
 
-    <section v-else class="app-card no-effect-note" role="status">
-      <strong>這件裝備不會建立補擦倒數</strong>
-      <p>
-        {{
-          GEAR_CATEGORY_LABELS[gearCategory]
-        }}沒有會進入計算的包裝標示，因此不需要填寫防曬乳標示欄位。
-      </p>
-    </section>
 
-    <section class="app-card">
+    <!--
+      2026-08-30：這一張從「散落的選填欄位」升級成有名字的區塊「我的紀錄」。
+      使用者裁決：「裝備區只是記錄買過的防曬乳（期限、價格、好不好用）」
+      ——那三件事在這裡，所以它值得一個標題，而不是躺在包裝標示後面。
+    -->
+    <section class="app-card" aria-labelledby="gear-record-title">
+      <h2 id="gear-record-title" data-typography-role="card-title">我的紀錄</h2>
+      <p class="field-helper">全部選填，只留在這台裝置上。</p>
+
       <div class="field-pair">
         <div>
-          <label for="gear-purchase">購買月份（選填）</label>
+          <label for="gear-purchase">購買月份</label>
           <input id="gear-purchase" v-model="purchaseMonth" type="month" />
         </div>
         <div>
           <label for="gear-expiry">
-            到期日（選填）
+            到期日
             <span v-if="affectsCountdown(gearCategory)" class="affects-badge">
               會影響倒數
             </span>
@@ -349,7 +376,34 @@ async function remove(): Promise<void> {
         到期日一過就不會再建立補擦倒數。
       </p>
 
-      <label for="gear-note">備註（選填）</label>
+      <div class="field-pair">
+        <div>
+          <label for="gear-price">買多少錢</label>
+          <!--
+            刻意不用 type="number"，理由同上方 SPF 欄位：v-model 對 number
+            input 會自動轉型，空字串會變成 undefined。
+          -->
+          <input
+            id="gear-price"
+            v-model="priceTwd"
+            type="text"
+            inputmode="numeric"
+            maxlength="7"
+            placeholder="690"
+          />
+        </div>
+        <div>
+          <label for="gear-rating">好不好用</label>
+          <select id="gear-rating" v-model="usageRating">
+            <option value="">未評價</option>
+            <option value="good">好用</option>
+            <option value="ok">普通</option>
+            <option value="bad">不好用</option>
+          </select>
+        </div>
+      </div>
+
+      <label for="gear-note">備註</label>
       <textarea id="gear-note" v-model="note" maxlength="500" rows="3" />
       <p class="field-helper">請不要輸入疾病、症狀、用藥或聯絡資料。</p>
     </section>
@@ -504,16 +558,19 @@ p {
   line-height: var(--line-height-body);
 }
 
-.no-effect-note {
-  color: var(--text-secondary);
-  line-height: var(--line-height-body);
-}
-
-.no-effect-note strong {
-  display: block;
-  color: var(--text-primary);
-  line-height: 1.4;
-}
+/*
+ * 2026-08-30：`.no-effect-note` 整張卡已移除，樣式跟著刪。
+ *
+ * 那張 124px 的卡只為了說「這件裝備不會建立補擦倒數」，而品類選擇格下方
+ * 的 `.category-effect` 已經在講同一件事（`GEAR_CATEGORY_REMINDER_EFFECT`
+ * 對 eyewear／other_gear 就是「只做紀錄，不會影響補擦倒數。」）。同一個
+ * 畫面、相距兩個區塊、講同一件事，其中一個還佔整張卡。
+ *
+ * `GearCategorySchema` 的註解要求「UI 必須明示這件事——使用者記錄一副
+ * 墨鏡時不得以為提醒行為會改變」。刪掉整張卡之後這個責任由
+ * `.category-effect` 單獨承擔——它貼著品類選擇，是做決定的當下會看的
+ * 位置。GearForm.test.ts 有守門測試釘住它。
+ */
 
 /*
  * inline-block + nowrap 缺一不可：欄位改成兩欄並排後寬度減半，
