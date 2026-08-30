@@ -294,7 +294,18 @@ describe("DESIGN.md ↔ styles.css token 一致性", () => {
 
         it(`${id} 對應 ${token}，值一致`, () => {
           expect(token, `${id} 沒有 token 對應規則`).not.toBeNull();
-          const cssValue = cssTokens[token!];
+          /*
+           * 2026-08-30：改用 resolveCssToken 解析別名再比對。
+           *
+           * token 用 var(--另一個 token) 引用是正當做法——它讓同一個顏色
+           * 只有一份來源（--color-saved 引用 --color-mauve，而不是兩處各
+           * 寫一份 #8c6f7a）。原本這裡直接讀原始值，於是別名會被判成與
+           * DESIGN.md 的 hex 不符。
+           *
+           * 這不是放寬守門：解析後仍然比對最終值，寫錯色碼一樣會紅。
+           * resolveCssToken 本來就在這個檔案裡，只是先前沒用在這一段。
+           */
+          const cssValue = resolveCssToken(token!);
           expect(
             cssValue,
             `styles.css :root 缺少 ${token}（DESIGN.md ${id} = ${designValue}）`

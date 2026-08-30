@@ -88,11 +88,17 @@
   /*
    * 「已儲存／這次記錄成功」的回饋色。**藕紫，不是綠色**——DESIGN.md 第二
    * 節：防曬沒有「完成」狀態，不用綠色暗示安全。2026-08-26 從綠色
-   * --color-success #147d64 改成藕紫（與 --color-mauve 同值），並改名
-   * --color-saved 對齊 DESIGN.md 的 status-saved。
+   * --color-success #147d64 改成藕紫，並改名 --color-saved 對齊
+   * DESIGN.md 的 status-saved。
+   *
+   * 2026-08-30：改成引用 --color-mauve 而不是複製它的色碼。原本兩處各寫
+   * 一份 #8c6f7a，改一處不會連動；而且 --color-mauve 因此在掃描裡顯示成
+   * 「定義了但沒人用」（見 2026-08-30-unused-declaration-audit.md 第二節
+   * C 類）。tokens.test.ts 的 resolveCssToken 會遞迴解析別名，所以與
+   * DESIGN.md 的一致性守門不受影響。
    */
-  --color-saved: #8c6f7a;
-  --color-saved-soft: color-mix(in srgb, #8c6f7a 12%, #faf5ec);
+  --color-saved: var(--color-mauve);
+  --color-saved-soft: color-mix(in srgb, var(--color-mauve) 12%, #faf5ec);
   --color-uvi-low: #507aa8;
   --color-uvi-moderate: #bd8500;
   --color-uvi-high: #d16627;
