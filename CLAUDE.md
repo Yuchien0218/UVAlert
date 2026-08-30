@@ -121,7 +121,14 @@ SessionEventStreamV1（事件）→ packages/domain reducer → SessionProjectio
 
 琥珀金 `#C1832E` 是圖示重點色，**不是**品牌主色；要填 primary token 時用 `#9F5E42`。
 
-目前 App icon／favicon 已套用新 Logo，但 `packages/ui/src/styles.css` 與 `manifest.webmanifest` 仍是舊的中性灰階——icon 換了不等於配色換了。文件裡若出現「配色尚未定案」「icon 尚未套用」，先確認日期與出處。
+**2026-08-30 更正：配色已經全部套用完畢，這段原本寫「仍是舊的中性灰階」，已不成立。** 逐項查證過：
+
+- `packages/ui/src/styles.css`：完整暖色票（canvas `#FAF5EC`、primary `#9F5E42`…），2026-08-22 就套用了
+- `manifest.webmanifest`：`theme_color`／`background_color` 都是 `#faf5ec`
+- App icon／favicon：2026-08-22 的 `8355d11` 已換成播報印記
+- `BrandHeader` 的橫式 lockup：2026-08-30 換成裁掉留白的新版
+
+文件裡若出現「配色尚未定案」「icon 尚未套用」「仍是灰階」，那是過期敘述，以程式碼為準。
 
 ## Session 衛生（這個 repo 的已知痛點）
 

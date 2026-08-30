@@ -224,6 +224,19 @@
   --font-weight-caption: 500;
   --line-height-caption: 1.5;
   --letter-spacing-caption: 0.01em;
+  /*
+   * 行內強調短語的字重（`<strong>`、標籤）。DESIGN.md 第三節：「內文段落
+   * 維持字重 400，標籤與強調短語 500」。
+   *
+   * **刻意不做成第八個 typography 角色。** 那七個角色各自帶完整的五欄
+   * （family／size／weight／line-height／letter-spacing），而強調短語只
+   * 改字重、其餘全部繼承上下文——硬湊成完整角色會逼出四個沒有意義的值，
+   * 也會撞到 tokens.test.ts 的「只公開核准的七個語意角色」守門。
+   *
+   * 也不要借用 --font-weight-caption：值雖然同為 500，但 caption 指的是
+   * 短註腳、時間戳、eyebrow、badge，不是行內強調，借名會誤導。
+   */
+  --font-weight-emphasis: 500;
   --font-family-nav-label: var(--font-sans);
   --font-size-nav-label: 0.75rem;
   --font-weight-nav-label: 500;

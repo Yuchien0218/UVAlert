@@ -220,15 +220,13 @@ small {
  * 已經自己寫 500 的 scoped 規則（`.entry strong` 等）特異性更高，不受
  * 影響；需要 600 的地方（`.status-card__label`）也一樣。
  *
- * **這裡是 DESIGN.md 的一個 token 缺口。** `--font-weight-*` 有 7 個角色
- * （page-title／section-title／card-title／body／supporting／caption／
- * nav-label），但沒有「強調短語」這個角色。值雖然跟 caption 一樣是 500，
- * 借用 caption 的名字會誤導——caption 指的是短註腳、時間戳、eyebrow、
- * badge，不是行內強調。先照全站其餘 29 處的既有做法寫字面值，缺口記在
- * 2026-08-30-pending-decisions.md 第 8.2 節，等 DESIGN.md 稽核時一起補。
+ * 2026-08-30 補上 `--font-weight-emphasis`。它刻意**不是**第八個 typography
+ * 角色——那七個角色各自帶完整五欄，而強調短語只改字重、其餘繼承上下文。
+ * 也沒有借用 `--font-weight-caption`：值同為 500，但 caption 指的是短註腳、
+ * 時間戳、eyebrow、badge，不是行內強調。
  */
 strong {
-  font-weight: 500;
+  font-weight: var(--font-weight-emphasis);
 }
 
 .page-heading {
