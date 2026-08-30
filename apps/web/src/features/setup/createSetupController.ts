@@ -479,6 +479,18 @@ export function createSetupController(
     });
   }
 
+  /**
+   * 丟棄草稿並清空所有狀態。
+   *
+   * **2026-08-30 起沒有 UI 呼叫者。** `/setup` 右上角原本的「取消設定」
+   * 改成了「回上一頁」，離開不再刪草稿（裁決見
+   * docs/decisions/2026-08-30-pending-decisions.md 第二節）；使用者要丟掉
+   * 草稿改走回復卡的「重新開始」，那條路徑用的是 `restartDraft()`。
+   *
+   * 保留這支 API 沒有問題，但**接上任何按鈕之前先確認那個按鈕的文案是
+   * 破壞性的**——「回上一頁」「返回」這類導航字眼配上刪除行為，正是這次
+   * 裁決要避免的。
+   */
   async function cancel(): Promise<void> {
     const draftId = draftState.value?.id;
     draftState.value = null;

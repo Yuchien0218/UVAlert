@@ -25,6 +25,8 @@
 | `2026-08-29-b9-pre-decision.md`                   | B9 icon-first 動工前的盤點與四個待裁決點：圖示尺寸級距要不要擴充、既有 5 個展開元件要不要先統一、哪些文字不可收、第一輪範圍 | **已裁決並已實作第一輪 2026-08-29**——四個裁決點都已定案；第八節記文案裁決與其維護代價，第九節記第一輪的實作結果與前後量測 |
 | `2026-08-29-b9-round2-disclosure-audit.md` | B9 第二輪的逐段分類：三頁設定共 41 段，只有 2 段可收而且都不划算——文字幾乎全是錯誤／狀態、貼著控制項的決策條件、安全邊界與不可逆後果 | **已裁決 2026-08-29**——不做第二輪，且不再有第三輪。結論已收進 B9 規格第八節（分類規則與互動契約保留，推行計畫收掉），DESIGN.md 也加註「這是契約不是待辦清單」 |
 | `2026-08-29-settings-data-sync-merge.md`         | 「更多」頁的「本機資料管理」與「跨裝置同步」合併回一張卡——實作把文件訂的一張拆成了兩張，而 DataSettingsPage 上那張「雲端資料請到另一頁管理」是拆分製造出來的純導覽補救 | **已裁決並已實作完成 2026-08-29**——「更多」頁 6 張渲染卡 → 5 張、入口清單省 73px、舊路由移除不留轉址；裁決見第九節、量測見第十節 |
+| `2026-08-30-ui-audit-findings.md`                 | 2026-08-30 介面稽核：token 紀律、字級量表外的值、icon-first 覆蓋率、`/setup` 標題列、部位狀態、裝備區——全部以 Browser pane 在 390×844 實測 | 稽核完成；§2／§3／§4 已修，§5／§6 已裁決待實作——狀態一律看 `2026-08-30-pending-decisions.md` |
+| `2026-08-30-pending-decisions.md`                 | **所有還沒定案事項的單一入口**——衛教首頁三套規格矛盾、`/setup` 叉叉語意、部位狀態 pill、裝備區簡化、殘留 worktree | **待裁決事項的權威清單**，決一項標一項。§1–§4 已全部裁決（2026-08-30），§1／§2 並已實作；§5 是 worktree 提醒 |
 
 `2026-08-22-mvp-flow-review.md` 原為待裁決的分析文件，2026-08-23 已逐項裁決完畢，轉為歷史參考。它指出的問題有一部分與實際程式碼不符（例如「三個並行的衛教入口」），採用前請先核對程式碼。
 
@@ -68,6 +70,14 @@
 | `--ease-out` 改成 easeOutQuad、`--duration-base` 240ms→320ms（原曲線的彈射感與「安靜」的定位相反） | `packages/ui/src/styles.css`、`DESIGN.md` frontmatter | 已完成（2026-08-29，commit `fafacfb`）——**全站手感改動，僅 AGENT 看過** |
 | 動畫規則重訂成五條（opacity 例外、時距分兩類、禁 `transition: all`、無限循環自己關、一次一個元素動） | `DESIGN.md` §12「動畫」、`stylelint.config.mjs` | 已完成（2026-08-29，commit `1cf0f02`） |
 | 載入動畫改用播報印記；按鈕 spinner 去掉 `transform: rotate` | `BroadcastLoader.vue`（新）、`InlineLoader.vue`（新）、`SunLoader.vue`（刪除）、`SetupPage.vue` | 已完成（2026-08-29，commit `a1d0dcf`） |
+| `<small>` 補上字級（量表外的 13px → supporting 14px，badge 用 caption 12px） | `apps/web/src/assets/app.css`、`ReapplicationZoneSelector.vue`、`ZoneProtectionForm.vue` | 已完成（2026-08-30，commit `bdcaa10`） |
+| 移除 `.stat-figure--inline`（`1.05em` 產生量表外的 16.8px；來自第一個 commit 的鷹架，DESIGN.md 從未規範） | `apps/web/src/assets/app.css` 與 6 處使用點 | 已完成（2026-08-30，commit `6957245`） |
+| 衛教分類卡接上 32px 圖示，補完 icon-first（B9 第一輪只做了「更多」頁） | `EducationIndexPage.vue`、`DESIGN.md` §5 `education-category-card` | 已完成（2026-08-30，commit `eba3332`） |
+| 衛教 6 個圖示由待確認板移到已確認板 | `tools/icon-system/generate-icons.mjs`、兩張預覽板、`docs/design/icon-system/README.md` | 已完成（2026-08-30，commit `0fe856a`） |
+| 首頁部位狀態：先修 `PRODUCT_IDENTITY_UNKNOWN` 逐部位重複的根因，再收合 pill | 待實作 | **已裁決 2026-08-30**，見 `2026-08-30-pending-decisions.md` §3 |
+| 裝備區退回純紀錄（期限、價格、好不好用），倒數相關欄位整批移除 | 待立規格 | **已裁決 2026-08-30**，見 `2026-08-30-pending-decisions.md` §4 |
+| 衛教首頁採裁決 A：「了解今天的 UV」hero 卡＋其餘五張分類卡（不做雜誌式不對稱網格） | `EducationIndexPage.vue`；`2026-08-28-education-editorial-redesign` plan／spec 的首頁部分已標記作廢 | 已完成（2026-08-30，commit `559a5ac`） |
+| `/setup` 右上叉叉改左上「回上一頁」，離開不再刪草稿（草稿由既有回復卡接手） | `SetupStepShell.vue`、`SetupPage.vue`、`createSetupController.ts`（`cancel()` 加註解未移除） | 已完成（2026-08-30，commit `b945902`） |
 
 視覺設計另見：
 

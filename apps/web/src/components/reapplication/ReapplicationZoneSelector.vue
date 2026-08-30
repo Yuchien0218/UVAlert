@@ -84,7 +84,12 @@ legend {
   inline-size: 1.35rem;
   block-size: 1.35rem;
 }
+/*
+ * 這個 `<small>` 是 badge（「建議」），不是說明文字，所以覆寫掉 app.css 給
+ * `small` 的 supporting 預設，改用 DESIGN.md 第五節指定給 badge 的 caption。
+ */
 .zone-choice small {
   color: var(--color-tracking);
+  font-size: var(--font-size-caption);
 }
 </style>

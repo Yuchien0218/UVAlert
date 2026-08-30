@@ -150,7 +150,7 @@ function getUnavailableMessage(error: UvForecastError): string {
         {{ forecast.sourceDisplayName }}・F-D0047-091・白日時段
         <span>
           更新時間
-          <span class="uv-forecast__updated-at stat-figure stat-figure--inline">
+          <span class="uv-forecast__updated-at stat-figure">
             {{ formatUpdatedAt(forecast.fetchedAt) }}
           </span>
         </span>

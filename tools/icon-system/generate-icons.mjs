@@ -352,7 +352,13 @@ const GROUP_TITLES = Object.freeze({
   feature: "功能型（雙色／單色混合）"
 });
 
-export const CONFIRMED_GROUPS = Object.freeze(["nav", "state", "more"]);
+// 2026-08-30：衛教 6 個由使用者確認，從待確認板移到已確認板。
+export const CONFIRMED_GROUPS = Object.freeze([
+  "nav",
+  "state",
+  "more",
+  "education"
+]);
 /** 新板依 group 排序，但成員由 board: "new" 決定，不是由 group 決定。 */
 export const NEW_BOARD_GROUPS = Object.freeze(["state", "tool", "feature"]);
 
@@ -360,7 +366,6 @@ export const PENDING_GROUPS = Object.freeze([
   "context",
   "event",
   "gear",
-  "education",
   "tool",
   "feature"
 ]);

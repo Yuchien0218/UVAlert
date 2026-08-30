@@ -189,6 +189,23 @@ body
   font-size: var(--font-size-nav-label);
 }
 
+/*
+ * 2026-08-30：`<small>` 補上字級，否則會落到瀏覽器預設的 `font-size: smaller`
+ * （≈0.8125em＝13px），而 13px 不在 12／14／16／18／20／28 的量表上。稽核
+ * 實測全站 8 處 `<small>` 有 7 處是 13px，見
+ * docs/decisions/2026-08-30-ui-audit-findings.md 第二節。
+ *
+ * 選 supporting（14px）而不是 caption：這些 `<small>` 幾乎都是卡片與選項的
+ * 說明文字，對應 DESIGN.md 第五節「欄位標籤、helper text、次要資訊與補充
+ * 文字」。真正的 badge 用途（caption）由元件自己覆寫。
+ *
+ * 用標籤選擇器而不是逐處加 class，是為了讓之後新寫的 `<small>` 也自動落在
+ * 量表上；`[data-typography-role]` 的特異性更高，顯式標角色時仍然贏。
+ */
+small {
+  font-size: var(--font-size-supporting);
+}
+
 .page-heading {
   display: grid;
   gap: var(--space-3);
@@ -308,9 +325,21 @@ body
   font-size: clamp(3rem, 15vw, 3.75rem);
 }
 
-.stat-figure--inline {
-  font-size: 1.05em;
-}
+/*
+ * 2026-08-30：移除 .stat-figure--inline。它只做一件事——font-size: 1.05em，
+ * 把行內讀數放大成父層的 1.05 倍，實測在 16px 的父層下渲染成 16.8px，
+ * 不在 12／14／16／18／20／28 的量表上（見 2026-08-30-ui-audit-findings.md
+ * 第二節）。
+ *
+ * 這個值來自第一個 commit 的鷹架（cefaa61），DESIGN.md 第 668 節描述
+ * .stat-figure 時只記載了 --display 變體，從未規範過 --inline——跟同日
+ * 移除的 max-width: 14ch 是同一類殘留。
+ *
+ * 而且六個使用點全都是「數字混在一句話裡」（「・1 個原因」、「更新時間
+ * 15:53」、「塗抹後 15 分鐘」），這種行內讀數本來就該跟同一行的文字同
+ * 字級；放大 5% 只會讓基線看起來浮動。改成直接套 .stat-figure，字級由
+ * 父層決定，等寬與 tabular-nums 不受影響。
+ */
 
 .app-card {
   border: 1px solid var(--border-subtle);

@@ -713,6 +713,10 @@ Noto Serif TC 是標題的唯一字型，沒有第二層自托管備援——載
 
 **`education-category-card`** — 其餘五個分類卡。背景 `{colors.surface-card}`，標題 `{typography.card-title}`，圓角 `{rounded.lg}`，內距 20px。分類文章列表使用兩欄卡片網格。
 
+**圖示 32px**（2026-08-30）。六個 `education-*` 圖示 2026-08-29 就已入註冊表、`label` 與分類 `title` 逐字相同，但一直沒接上畫面——2026-08-30 的介面稽核量到衛教首頁「0 個圖示」，B9 第一輪的 icon-first 只做了「更多」一頁。檔位沿用 B9 裁決 1 的 32px（卡片主視覺），不另立。
+
+**對齊用 `align-items: start`，與 `more-entry-card` 的 `center` 不同。** 這不是不一致，是兩種卡片結構不同：更多頁的卡有的只有標題、有的標題加雙行說明，高度不一，start 會讓純標題的卡看起來歪掉；六張分類卡的結構完全相同（篇數、標題、說明、審閱狀態四行，實測高度都是 175px），改用 center 反而會把圖示推到說明文字旁邊，讀起來不像標題的圖示。
+
 **`education-source-block`** — 文章底部的資料來源與審閱資訊。背景 `{colors.surface-soft}`，文字 `{colors.muted}`，`{typography.supporting}`，圓角 `{rounded.md}`。**來源與審閱狀態不能藏在互動之後**——這是健康內容可查證性的基礎。
 
 文章頁另包含麵包屑、可展開段落目錄、2 篇相關文章與回到分類的入口。PWA 內開啟時保留下排導覽與收藏操作；從搜尋或外部分享進入時使用獨立公開閱讀版面，不顯示收藏、Session、產品或位置等個人資料。

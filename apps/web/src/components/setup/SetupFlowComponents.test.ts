@@ -85,16 +85,45 @@ describe("SetupStepShell", () => {
     expect(wrapper.text()).toContain("開始防曬提醒");
     expect(wrapper.text()).toContain("測試說明");
     /*
-     * 2026-08-24：取消鈕改成只有圖示的叉叉（跟其他頁的右上角一致），
-     * 「取消」兩個字移到 aria-label，所以不再出現在 text() 裡。
+     * 2026-08-24：按鈕改成只有圖示，文字移到 aria-label，所以不再出現在
+     * text() 裡。
+     *
+     * 2026-08-30：語意由「取消設定」改成「回上一頁」，行為也跟著改成
+     * 不刪草稿。這條斷言守的是**文案與行為的一致性**——如果有人把
+     * aria-label 改回「取消設定」之類的破壞性字眼，卻沒有同步恢復刪除
+     * 草稿的行為，這裡會紅。裁決見
+     * docs/decisions/2026-08-30-pending-decisions.md 第二節。
      */
     expect(wrapper.get(".icon-button").attributes("aria-label")).toBe(
-      "取消設定"
+      "回上一頁"
     );
 
     expect(wrapper.text()).not.toContain("步驟");
     expect(wrapper.find('[role="progressbar"]').exists()).toBe(false);
     expect(wrapper.find("a").exists()).toBe(false);
+  });
+
+  /*
+   * 2026-08-30：守「按鈕發的是導航事件，不是取消事件」。
+   *
+   * 這條看起來瑣碎，但它守的是一件會靜默壞掉的事：`defineEmits` 換成
+   * `back` 之後，父層若還寫 `@cancel`，Vue 不會報錯也不會警告——按鈕
+   * 就只是沒反應。反過來，若有人為了「順便讓它也能取消」把 cancel 加
+   * 回來，這裡會提醒他先讀第二節的裁決。
+   */
+  it("返回鈕發出 back 而不是 cancel", async () => {
+    const wrapper = mount(SetupStepShell, {
+      props: {
+        title: "開始防曬提醒",
+        description: "測試說明",
+        saveStatus: "idle"
+      }
+    });
+
+    await wrapper.get(".icon-button").trigger("click");
+
+    expect(wrapper.emitted("back")).toHaveLength(1);
+    expect(wrapper.emitted("cancel")).toBeUndefined();
   });
 
   it("儲存狀態為 error 時提示草稿未儲存", () => {

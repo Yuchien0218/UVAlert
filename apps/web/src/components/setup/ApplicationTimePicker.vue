@@ -113,7 +113,7 @@ function applyAdjustment(): void {
         @click="selectDefault"
       >
         <span class="time-option__label">
-          <span class="stat-figure stat-figure--inline">1</span>
+          <span class="stat-figure">1</span>
           分鐘前
         </span>
       </button>

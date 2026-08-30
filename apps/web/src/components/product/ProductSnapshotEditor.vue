@@ -290,7 +290,7 @@ const summary = computed(() => {
             <span>
               耐水
               <span
-                class="stat-figure stat-figure--inline"
+                class="stat-figure"
                 data-water-resistance="40"
                 >40</span
               >
@@ -307,7 +307,7 @@ const summary = computed(() => {
             <span>
               耐水
               <span
-                class="stat-figure stat-figure--inline"
+                class="stat-figure"
                 data-water-resistance="80"
                 >80</span
               >

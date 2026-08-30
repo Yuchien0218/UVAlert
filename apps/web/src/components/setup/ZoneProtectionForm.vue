@@ -376,10 +376,14 @@ button.text-link {
   line-height: 1.4;
 }
 
+/*
+ * 2026-08-30：拿掉自己設的 caption(12px)，改吃 app.css 給 `small` 的
+ * supporting(14px)。這裡跟 ContextSelector 的 `.context-suboption small` 是
+ * 同一種角色（勾選項底下的說明），先前一個 12px 一個 13px，現在統一。
+ */
 .zone-group-choice small {
   margin-top: var(--space-1);
   color: var(--text-secondary);
-  font-size: var(--font-size-caption);
 }
 
 .field {
