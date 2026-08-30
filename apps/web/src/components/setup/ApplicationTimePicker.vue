@@ -165,6 +165,7 @@ function applyAdjustment(): void {
  * （legend 用 clamp(0.95rem, 4vw, 1.05rem) 魔術數字、靠負的 margin-bottom
  * 補間距、又重寫一次 app-card 已經提供的 border），跟正下方結構完全相同的
  * SunscreenClaimQuickQuestion 長得不一樣——那張用的是共用的 .question-card。
+ * （那個元件已於 2026-08-30 移除；共用類別的結論不變。）
  * 同一頁兩張同構的卡片標題大小與間距不同，就是「排版像舊實作」的來源。
  * 改用共用的 .question-card，這裡只留這張卡特有的東西。
  */

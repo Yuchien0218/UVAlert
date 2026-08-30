@@ -400,7 +400,8 @@ const summary = computed(() => {
 /*
  * .question-card／.question-card__helper／.choice-grid 已抽到
  * app.css（2026-08-24），跟 GearForm.vue、
- * SunscreenClaimQuickQuestion.vue 共用，這裡不再重複定義。
+ * 設定流程的同構卡片共用，這裡不再重複定義。（原本一起共用的
+ * SunscreenClaimQuickQuestion.vue 已於 2026-08-30 移除。）
  */
 
 .number-field {

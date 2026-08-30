@@ -273,18 +273,76 @@ describe("P0 reminder reducer fixed vectors", () => {
     ).toBe("tracking");
   });
 
+  /*
+   * 2026-08-30 規則改動：區分「不知道」與「知道有問題」。
+   *
+   * 改動前 identity_unconfirmed 與 no_sunscreen_claim 也不建立期限，等於
+   * 「沒填防曬乳資訊就完全沒有倒數」。但產品標示只會讓間隔變短
+   * （Math.min(120, 標示分鐘)），沒有標示時的保守值本來就是 120——擋住
+   * 倒數並沒有比較保守，只是什麼都不給。現行 UX 基準文件
+   * （2026-08-15 sitemap 第 116 行）本來也是訂「可使用 120 分鐘保守預設」。
+   *
+   * 過期／異常／不適維持封鎖：那是使用者主動回報「這瓶有狀況」，這時給
+   * 倒數等於忽略他的回報。
+   */
   it.each([
     {
-      name: "TV-005 身分未知",
+      name: "身分未知",
       snapshot: makeProductSnapshot({
         identityStatus: "identity_unconfirmed"
       }),
       reason: "PRODUCT_IDENTITY_UNKNOWN"
     },
     {
+      name: "無防曬宣稱",
+      snapshot: makeProductSnapshot({ sunscreenClaimStatus: "no_claim" }),
+      reason: "PRODUCT_NO_SUNSCREEN_CLAIM"
+    }
+  ])("$name 仍以 120 分鐘保守預設建立期限", ({ snapshot, reason }) => {
+    const zone = firstZone(makeStream({ snapshot }));
+    expect(zone.currentApplicationId).not.toBeNull();
+    expect(zone.generalDueAt).toBe("2026-07-29T12:00:00.000Z");
+    /*
+     * timingStatus 必須跟著一起是「有在計時」。
+     *
+     * 第一版只斷言 generalDueAt，結果漏掉 reducer 裡第二道 eligibility
+     * 閘門（invalidTopical）——期限算得出來，畫面卻顯示「需要補充資料」。
+     * 是瀏覽器實測才發現的，測試沒抓到。
+     */
+    expect(zone.timingStatus).toBe("tracking");
+    /*
+     * 主要動作也不能是 untimed_action_card。
+     *
+     * reducer 裡一共有三處用 eligibility 決定「有沒有倒數」：generalDueAt、
+     * timingStatus（invalidTopical）、derivePrimaryAction。三處必須一致，
+     * 否則會出現「提醒進行中但沒有倒數數字」——首頁的
+     * buildHomeReminderClockPresentation 看到 untimed_action_card 就整個
+     * 不渲染倒數。這是實測才發現的，前兩版測試都沒抓到。
+     */
+    expect(
+      projection(makeStream({ snapshot })).primaryAction.presentationType
+    ).not.toBe("untimed_action_card");
+    /* 原因仍然回報——它從「封鎖原因」變成「說明性原因」，不是消失。 */
+    expect(zone.reasonCodes).toContain(reason);
+    /* 耐水倒數維持需要 eligible：沒有抗水標示不是保守預設能補的。 */
+    expect(zone.activeWaterDeadline).toBeNull();
+  });
+
+  it.each([
+    {
       name: "TV-007 產品過期",
       snapshot: makeProductSnapshot({ expiryStatus: "expired" }),
       reason: "PRODUCT_EXPIRED"
+    },
+    {
+      name: "使用者回報異常",
+      snapshot: makeProductSnapshot({ conditionStatus: "abnormal_reported" }),
+      reason: "PRODUCT_ABNORMAL_REPORTED"
+    },
+    {
+      name: "使用者回報不適",
+      snapshot: makeProductSnapshot({ conditionStatus: "discomfort_reported" }),
+      reason: "PRODUCT_DISCOMFORT_REPORTED"
     }
   ])("$name 不建立期限", ({ snapshot, reason }) => {
     const zone = firstZone(makeStream({ snapshot }));
@@ -309,7 +367,15 @@ describe("P0 reminder reducer fixed vectors", () => {
     });
     const zone = firstZone(stream);
     expect(zone.currentApplicationId).toBe(newer.id);
-    expect(zone.generalDueAt).toBeNull();
+    /*
+     * 2026-08-30：斷言從「沒有期限」改成「期限來自較新的那筆」。
+     *
+     * 這條規則要守的是**不得回退到舊的合格 Application**，不是「不合格就
+     * 沒有期限」。舊的 09:00 合格 application 會給 11:00，新的 10:00
+     * identity_unconfirmed 給 12:00——拿到 12:00 正好證明沒有回退。
+     * 規則本身沒有變鬆，反而變得可以直接驗證。
+     */
+    expect(zone.generalDueAt).toBe("2026-07-29T12:00:00.000Z");
   });
 
   it("TV-008 效期未知仍可由其他欄位判為 eligible", () => {
@@ -891,8 +957,17 @@ describe("P0 reminder reducer fixed vectors", () => {
           zoneInstanceIds: ["ear"],
           sourceProductId: null,
           productSnapshotFingerprint: "unknown",
+          /*
+           * 2026-08-30：這裡原本用 identity_unconfirmed 當「無時間狀態」
+           * 的例子。規則改動後它會得到 120 分鐘保守倒數，不再是無時間，
+           * 這個情境就測不到原本要測的東西了。
+           *
+           * 改用 expired——它仍然是無時間狀態。**測的規則沒有變**：一個
+           * 部位處於無時間狀態時，主要動作要選它，而不是另一個部位的數字
+           * 期限。
+           */
           productLabelSnapshot: makeProductSnapshot({
-            identityStatus: "identity_unconfirmed"
+            expiryStatus: "expired"
           })
         }
       ]

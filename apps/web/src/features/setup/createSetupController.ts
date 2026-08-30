@@ -390,23 +390,37 @@ export function createSetupController(
     const trustedNow = dependencies.now();
     const appliedAtMs = Date.parse(input.appliedAt);
     const topicalZones = draft.zones.filter(hasTopicalMethod);
+    /*
+     * 2026-08-30：沒有任何產品資訊時也要建立 snapshot。
+     *
+     * 改動前這裡會落到 null，於是 `applications: []`——沒有 application 就
+     * 沒有 appliedAt 錨點，倒數算不出起點。那正是「不填防曬乳就完全沒有
+     * 倒數」的成因。
+     *
+     * 現在退到 claimAnswer: "unknown"，推導出的 eligibility 是
+     * identity_unconfirmed。reducer 從 2026-08-30 起把它視為「不知道」而
+     * 不是「有問題」，給 120 分鐘保守預設；「標示尚未確認」的原因碼仍然
+     * 回報，只是不再擋住倒數。
+     *
+     * 優先序不變：呼叫端傳入 > 草稿既有 > 使用者的產品設定 > 這個保守退路。
+     * 已經有真實產品 snapshot 的人不會走到這裡，他們的過期／異常狀態仍然
+     * 照常封鎖。
+     */
     const productLabelSnapshot =
       input.productLabelSnapshot ??
       draft.applications[0]?.productLabelSnapshot ??
       (await dependencies.productSettings?.getCurrentProductSnapshot()) ??
-      (input.sunscreenClaim === undefined
-        ? null
-        : makeSessionOnlyProductSnapshot(
-            {
-              claimAnswer: input.sunscreenClaim,
-              waitAnswer: "unknown",
-              waitMinutes: null,
-              intervalAnswer: "unknown",
-              intervalMinutes: null,
-              waterResistance: "unknown"
-            },
-            trustedNow.toISOString()
-          ));
+      makeSessionOnlyProductSnapshot(
+        {
+          claimAnswer: input.sunscreenClaim ?? "unknown",
+          waitAnswer: "unknown",
+          waitMinutes: null,
+          intervalAnswer: "unknown",
+          intervalMinutes: null,
+          waterResistance: "unknown"
+        },
+        trustedNow.toISOString()
+      );
 
     if (!Number.isFinite(appliedAtMs) || appliedAtMs > trustedNow.getTime()) {
       fieldErrors.appliedAt = ["塗抹時間不能晚於目前可信時間，請重新確認。"];
@@ -444,18 +458,20 @@ export function createSetupController(
     return persistDraft({
       ...draft,
       currentStep: "review",
-      applications:
-        productLabelSnapshot === null
-          ? []
-          : [
-              {
-                draftApplicationKey: dependencies.createId(),
-                draftZoneKeys: topicalZones.map((zone) => zone.draftZoneKey),
-                sourceProductId: null,
-                productSnapshotFingerprint: dependencies.createId(),
-                productLabelSnapshot
-              }
-            ],
+      /*
+       * 2026-08-30 起 productLabelSnapshot 一定有值（見上方的保守退路），
+       * 所以不再需要「沒有 snapshot 就不建立 application」的分支——留著
+       * 會讓人以為那條路徑還走得到。
+       */
+      applications: [
+        {
+          draftApplicationKey: dependencies.createId(),
+          draftZoneKeys: topicalZones.map((zone) => zone.draftZoneKey),
+          sourceProductId: null,
+          productSnapshotFingerprint: dependencies.createId(),
+          productLabelSnapshot
+        }
+      ],
       pendingTiming: {
         appliedAt: applicationTimeState.value,
         waterStart: waterStartState.value

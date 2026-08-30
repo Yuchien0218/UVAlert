@@ -200,7 +200,7 @@ describe("SetupDraft to StartSession transaction", () => {
     ).toEqual(snapshot);
   });
 
-  it("產品頁尚未設定時不暗中建立產品標示", async () => {
+  it("產品頁尚未設定時建立的 snapshot 不得宣稱任何標示內容", async () => {
     await controller.saveContext("outdoor_general");
     await controller.saveProtection({
       setupEntryMode: "quick_preset",
@@ -218,8 +218,19 @@ describe("SetupDraft to StartSession transaction", () => {
       ]
     });
 
-    // 沒有標示不再阻擋建立提醒，但也不得憑空捏造一份 snapshot：
-    // 沒有 application 就沒有 applicationGroup，reducer 會改走 untimed。
+    /*
+     * 2026-08-30：這條測試的斷言從「不建立 application」改成「建立的
+     * snapshot 不宣稱任何標示內容」。
+     *
+     * 原本的顧慮——不得憑空捏造使用者沒給的標示資料——完全保留，而且現在
+     * 守得比以前精確：以前只檢查「沒有 application」，現在逐欄檢查那份
+     * snapshot 確實每一項都是「不知道」。
+     *
+     * 改動的是另一半：以前沒有 application 就沒有 appliedAt 錨點，倒數
+     * 算不出起點，等於「不填防曬乳就完全沒有倒數」。現在會建立一份全部
+     * 未知的 snapshot，reducer 認得 identity_unconfirmed 是「不知道」而
+     * 不是「有問題」，給 120 分鐘保守預設。
+     */
     expect(
       await controller.saveTiming({
         appliedAt: "2026-07-29T10:45:00.000Z",
@@ -227,7 +238,20 @@ describe("SetupDraft to StartSession transaction", () => {
       })
     ).toBe(true);
     expect(controller.fieldErrors.value.product).toBeUndefined();
-    expect(controller.draft.value?.applications).toEqual([]);
+
+    const snapshot =
+      controller.draft.value?.applications[0]?.productLabelSnapshot;
+    expect(snapshot).toBeDefined();
+    expect(snapshot?.identityStatus).toBe("identity_unconfirmed");
+    expect(snapshot?.ruleEligibilityAtApplication).toBe("identity_unconfirmed");
+    /* 一項標示內容都不能被當成「已知」。 */
+    expect(snapshot?.sunscreenClaimStatus).toBe("unknown");
+    expect(snapshot?.expiryStatus).toBe("unknown");
+    expect(snapshot?.reapplicationIntervalMinutes).toBeNull();
+    expect(snapshot?.preExposureWaitMinutes).toBeNull();
+    expect(snapshot?.waterResistanceMinutes).toBeNull();
+    expect(snapshot?.spf).toBeNull();
+    expect(snapshot?.paGrade).toBeNull();
   });
 
   it("步驟 2 答「有防曬標示」時就地建立可產生倒數的標示", async () => {
