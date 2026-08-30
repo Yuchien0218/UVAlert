@@ -205,6 +205,12 @@ async function restartDraft(): Promise<void> {
   waterStart.value = null;
   sunscreenClaim.value = null;
   localError.value = null;
+  /*
+   * 「重新開始」產生的是全新草稿，跟第一次進這頁是同一種狀態，所以預設
+   * 情境也要跟著套用——不補這一行的話，走回復流程再重來的人會看到一個
+   * 什麼都沒選的格子，跟直接進來的人不一樣。
+   */
+  applyDefaultContext();
 }
 
 async function cancel(): Promise<void> {
@@ -221,11 +227,32 @@ function reload(): void {
   globalThis.location.reload();
 }
 
+/**
+ * 全新的草稿預設「一般戶外」（2026-08-30 裁決）。它是最常見的情境，預選
+ * 可以讓多數人少一次點擊。
+ *
+ * 三個條件缺一不可：
+ * - 草稿已載入成功（phase 不是 error）——否則 saveContext 會丟例外
+ * - 草稿還沒有情境（context 為 null）——**不能覆蓋使用者原本選過的**
+ * - 不在「繼續未完成的設定？」的回復流程裡——那時畫面顯示的是回復卡，
+ *   不是選擇器，先幫他選好會讓「重新開始」的語意變得不清楚
+ *
+ * 寫進 selectedContext 之後由既有的 watch 負責存檔與揭露後半段，這裡不
+ * 重複那段邏輯。選擇器上會顯示為已選取，使用者看得出系統代選了什麼。
+ */
+function applyDefaultContext(): void {
+  if (context.value !== null) return;
+  if (setup.phase.value === "error") return;
+  if (setup.recoveryPending.value) return;
+  selectedContext.value = "outdoor_general";
+}
+
 onMounted(async () => {
   await Promise.all([setup.ensureLoaded(), productSettings.ensureLoaded()]);
   if (context.value !== null) {
     await setup.ensureRecommendedProtection();
   }
+  applyDefaultContext();
   if (route.query.adjustProtection === "1") {
     await openProtectionAdjustment();
   }
@@ -235,7 +262,7 @@ onMounted(async () => {
 <template>
   <SetupStepShell
     title="開始防曬提醒"
-    description="選擇情境與實際塗抹時間，就能開始倒數。"
+    description="選擇情境與塗抹時間"
     :save-status="setup.saveStatus.value"
     :busy="setup.phase.value === 'loading'"
     @cancel="cancel"
@@ -489,5 +516,4 @@ button:disabled {
   cursor: not-allowed;
   opacity: 0.5;
 }
-
 </style>

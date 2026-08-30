@@ -47,7 +47,7 @@ const zoneLabels = computed(() =>
 </script>
 
 <template>
-  <section class="quick-protection app-card">
+  <section class="quick-protection">
     <button
       class="quick-protection__header"
       type="button"
@@ -55,13 +55,7 @@ const zoneLabels = computed(() =>
       :aria-controls="detailsId"
       @click="expanded = !expanded"
     >
-      <div class="quick-protection__mark">
-        <Icon name="feature-protection-summary" :size="24" />
-      </div>
-      <div class="quick-protection__header-content">
-        <p class="quick-protection__eyebrow">快速提醒（推薦）</p>
-        <h2 data-typography-role="card-title">{{ preset.label }}</h2>
-      </div>
+      <h2 data-typography-role="card-title">{{ preset.label }}</h2>
       <Icon
         :name="expanded ? 'tool-chevron-down' : 'tool-chevron-right'"
         :size="20"
@@ -109,17 +103,29 @@ const zoneLabels = computed(() =>
  * （「同一個顏色會讓使用者把該去完成設定跟該去補擦搞混」），這一處是當時
  * 漏掉的。改用共用的 .app-card，跟同頁其他區塊一致。
  */
+/*
+ * 2026-08-30（B 批）：從 .app-card 改為情境選擇器下方的一段文字。
+ *
+ * 它只在選好情境後才出現，本來就已經有「這是接著要看的東西」的脈絡；
+ * 再包一張卡、加一個圓形圖示、又標一次「快速提醒（推薦）」，等於把同一
+ * 件事宣告三次。同頁下方還有兩張真正的卡（SPF 標示題、塗抹時間），這一
+ * 區跟它們等重會讓人分不出哪個需要作答。
+ *
+ * 一併移除的：.app-card 外框、圓形圖示 .quick-protection__mark、eyebrow
+ * 「快速提醒（推薦）」。保留展開收合——details 裡有部位清單與兩個操作，
+ * 常駐會比原本的卡片更高。
+ */
 .quick-protection {
   display: grid;
-  gap: var(--space-4);
+  gap: var(--space-3);
 }
 
 .quick-protection__header {
   display: grid;
-  grid-template-columns: auto minmax(0, 1fr) auto;
-  gap: var(--space-4);
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: var(--space-3);
   align-items: center;
-  padding: var(--space-5);
+  padding: 0;
   border: none;
   background: transparent;
   cursor: pointer;
@@ -131,37 +137,14 @@ const zoneLabels = computed(() =>
   opacity: 0.8;
 }
 
-.quick-protection__mark {
-  display: grid;
-  width: 3rem;
-  height: 3rem;
-  place-content: center;
-  border-radius: 50%;
-  background: var(--surface-soft);
-  color: var(--color-primary);
-  flex-shrink: 0;
-}
-
-.quick-protection__header-content {
-  min-width: 0;
-}
-
-.quick-protection__eyebrow,
-.quick-protection__header-content h2,
+.quick-protection__header h2,
 .quick-protection__summary,
 .quick-protection__zones,
 .quick-protection__note {
   margin: 0;
 }
 
-.quick-protection__eyebrow {
-  color: var(--text-secondary);
-  font-size: var(--font-size-caption);
-  font-weight: 500;
-}
-
-.quick-protection__header-content h2 {
-  margin-top: var(--space-2);
+.quick-protection__header h2 {
   font-size: var(--font-size-card-title);
 }
 
@@ -173,8 +156,8 @@ const zoneLabels = computed(() =>
 
 .quick-protection__details {
   display: grid;
-  gap: var(--space-4);
-  padding: 0 var(--space-5) var(--space-5);
+  gap: var(--space-3);
+  padding: 0;
   animation: quickProtectionFadeIn var(--duration-base) var(--ease-out);
 }
 
