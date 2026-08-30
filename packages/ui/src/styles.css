@@ -262,7 +262,15 @@
    * 憑感覺判斷，沒有依據。數值完全沒變，只是給它們名字與適用場合。
    */
   --page-stack-gap-compact: var(--space-4);
-  --page-stack-gap: var(--space-6);
+  /*
+   * 2026-08-30：24px → 20px。使用者回饋「卡片與卡片間的距離、卡片跟文字
+   * 之間的距離可以再緊一點」，裁決調全域而不是只調單頁（選項乙），這樣
+   * 各頁節奏才會一致。
+   *
+   * 三檔位的相對關係不變（compact 16 < 預設 20 < prose 32），只是預設那
+   * 一檔往下收一級。18 個頁面吃這個值。
+   */
+  --page-stack-gap: var(--space-5);
   --page-stack-gap-prose: var(--space-8);
 
   --prose-paragraph-gap: var(--space-3);
