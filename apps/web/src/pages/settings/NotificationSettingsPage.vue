@@ -261,9 +261,13 @@ async function runTest(): Promise<void> {
 </template>
 
 <style scoped>
+/*
+ * 密集檔：區塊多、每塊短，用預設 24px 會讓整頁被拉得很長。
+ * 數值與改動前相同（16px），只是改用具名 token。
+ */
 .notification-settings-page {
   display: grid;
-  gap: var(--space-4);
+  gap: var(--page-stack-gap-compact);
 }
 
 /* 右上角的返回鈕靠右。 */

@@ -96,8 +96,12 @@ const robots = computed(() =>
 </template>
 
 <style scoped>
+/*
+ * 長文檔：閱讀為主、區塊少而長，需要較大的呼吸空間。
+ * 數值與改動前相同（32px），只是改用具名 token。
+ */
 .education-page {
-  gap: var(--space-8);
+  gap: var(--page-stack-gap-prose);
 }
 
 .education-hero {
