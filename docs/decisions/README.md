@@ -75,7 +75,7 @@
 | 衛教分類卡接上 32px 圖示，補完 icon-first（B9 第一輪只做了「更多」頁） | `EducationIndexPage.vue`、`DESIGN.md` §5 `education-category-card` | 已完成（2026-08-30，commit `eba3332`） |
 | 衛教 6 個圖示由待確認板移到已確認板 | `tools/icon-system/generate-icons.mjs`、兩張預覽板、`docs/design/icon-system/README.md` | 已完成（2026-08-30，commit `0fe856a`） |
 | 首頁部位狀態：先修 `PRODUCT_IDENTITY_UNKNOWN` 逐部位重複的根因，再收合 pill | 待實作 | **已裁決 2026-08-30**，見 `2026-08-30-pending-decisions.md` §3 |
-| 裝備區退回純紀錄（期限、價格、好不好用），倒數相關欄位整批移除 | 待立規格 | **已裁決 2026-08-30**，見 `2026-08-30-pending-decisions.md` §4 |
+| 裝備區退回純紀錄（期限、價格、好不好用），倒數相關欄位整批移除 | 規格草案：`docs/superpowers/specs/2026-08-30-gear-simplification-design.md` | **已裁決 2026-08-30，規格草案已寫、尚未動工**——草案第五節有三件要再裁決的事 |
 | 衛教首頁採裁決 A：「了解今天的 UV」hero 卡＋其餘五張分類卡（不做雜誌式不對稱網格） | `EducationIndexPage.vue`；`2026-08-28-education-editorial-redesign` plan／spec 的首頁部分已標記作廢 | 已完成（2026-08-30，commit `559a5ac`） |
 | `/setup` 右上叉叉改左上「回上一頁」，離開不再刪草稿（草稿由既有回復卡接手） | `SetupStepShell.vue`、`SetupPage.vue`、`createSetupController.ts`（`cancel()` 加註解未移除） | 已完成（2026-08-30，commit `b945902`） |
 
