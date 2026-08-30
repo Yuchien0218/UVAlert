@@ -44,8 +44,8 @@
 
 | 預覽板                                                     | 內容                                    | 狀態             |
 | ---------------------------------------------------------- | --------------------------------------- | ---------------- |
-| [`preview-confirmed.svg`](preview-confirmed.svg)           | 導覽 3、狀態 11、更多頁 6               | 已確認，不再變動 |
-| [`preview-pending-review.svg`](preview-pending-review.svg) | 情境 4、事件 4、裝備 6、衛教 6、工具 10 | 待確認           |
+| [`preview-confirmed.svg`](preview-confirmed.svg)           | 導覽 3、狀態 11、更多頁 6、衛教 6       | 已確認，不再變動 |
+| [`preview-pending-review.svg`](preview-pending-review.svg) | 情境 4、事件 4、裝備 6、工具 10         | 待確認           |
 | [`preview-new-icons.svg`](preview-new-icons.svg)           | 2026-08-29 新繪 11（跨 tool／feature）  | 待確認           |
 
 每個圖示同時呈現 96px、36px 與 18px，方便同時判斷造型與小尺寸辨識度。
