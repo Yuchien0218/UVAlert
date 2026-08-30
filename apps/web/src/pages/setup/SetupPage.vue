@@ -11,7 +11,6 @@ import ProductEligibilityNotice from "../../components/setup/ProductEligibilityN
 import ProtectionAdjustmentSheet from "../../components/setup/ProtectionAdjustmentSheet.vue";
 import QuickProtectionSummary from "../../components/setup/QuickProtectionSummary.vue";
 import SetupStepShell from "../../components/setup/SetupStepShell.vue";
-import SunscreenClaimQuickQuestion from "../../components/setup/SunscreenClaimQuickQuestion.vue";
 import WaterStartPicker from "../../components/setup/WaterStartPicker.vue";
 import { useSetup } from "../../composables/useSetup";
 import { useWebAppServices } from "../../app/injection";
@@ -19,7 +18,6 @@ import type {
   ProtectionDraftInput,
   WaterStartFormValue
 } from "../../features/setup/createSetupController";
-import type { ProductClaimAnswer } from "../../features/setup/productSnapshot";
 import { isFixedEvening } from "../../features/uv/uvForecastRules";
 import {
   makeQuickProtectionDraft,
@@ -56,10 +54,15 @@ const localError = shallowRef<string | null>(null);
 const protectionNotice = shallowRef<string | null>(null);
 const showProtectionAdjustment = shallowRef(false);
 const showGearForm = shallowRef(false);
-const sunscreenClaim = shallowRef<ProductClaimAnswer | null>(null);
 
-/** 已經在裝備頁確認過標示的人不必再被問一次。 */
-const needsSunscreenClaim = computed(
+/**
+ * 還沒有保存過產品標示的人，才顯示「填寫完整包裝標示」的次要入口。
+ *
+ * 2026-08-30：這個旗標原本還兼職控制「包裝上有明確的防曬或 SPF 標示嗎？」
+ * 那張卡。那題已經移除——reducer 改成「不知道」也給 120 分鐘保守預設之
+ * 後，三個答案在這個流程裡會得到完全相同的結果，它不再影響任何事。
+ */
+const hasNoSavedProductLabel = computed(
   () => productSettings.snapshot.value === null
 );
 
@@ -122,10 +125,7 @@ async function submit(): Promise<void> {
 
   const saved = await setup.saveTiming({
     appliedAt: applicationTime.value,
-    waterStart: needsWaterStart.value ? waterStart.value : null,
-    ...(needsSunscreenClaim.value && sunscreenClaim.value !== null
-      ? { sunscreenClaim: sunscreenClaim.value }
-      : {})
+    waterStart: needsWaterStart.value ? waterStart.value : null
   });
   if (!saved) return;
 
@@ -175,15 +175,11 @@ function openGearForm(): void {
 
 function handleGearFormSaved(): void {
   showGearForm.value = false;
-  sunscreenClaim.value = null;
 }
 
 function validateForm(): string | null {
   if (context.value === null) {
     return "請先選擇最符合目前狀況的情境。";
-  }
-  if (needsSunscreenClaim.value && sunscreenClaim.value === null) {
-    return "請先回答包裝上有沒有防曬或 SPF 標示。";
   }
   if (applicationTime.value === null) {
     return "請確認這次實際的塗抹時間。";
@@ -203,7 +199,6 @@ async function restartDraft(): Promise<void> {
   selectedContext.value = null;
   applicationTime.value = null;
   waterStart.value = null;
-  sunscreenClaim.value = null;
   localError.value = null;
   /*
    * 「重新開始」產生的是全新草稿，跟第一次進這頁是同一種狀態，所以預設
@@ -355,11 +350,6 @@ onMounted(async () => {
             現在是夜間，這個時段紫外線通常很低。仍然可以建立提醒——如果你正要夜間出發或想先設定好，直接繼續即可。
           </p>
 
-          <SunscreenClaimQuickQuestion
-            v-if="needsSunscreenClaim"
-            v-model="sunscreenClaim"
-          />
-
           <ApplicationTimePicker v-model="applicationTime" />
           <WaterStartPicker v-if="needsWaterStart" v-model="waterStart" />
 
@@ -371,7 +361,7 @@ onMounted(async () => {
             裝備頁不再是必經關卡，改為想填完整標示時使用的次要入口。
           -->
           <button
-            v-if="needsSunscreenClaim"
+            v-if="hasNoSavedProductLabel"
             class="text-link"
             type="button"
             @click="openGearForm"

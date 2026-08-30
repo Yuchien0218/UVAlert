@@ -68,6 +68,40 @@ function sameStringSet(left: string[], right: string[]): boolean {
   return left.every((value) => rightSet.has(value));
 }
 
+/**
+ * 會擋住一般期限的 eligibility。
+ *
+ * 2026-08-30 規則改動：只有「知道有問題」才擋，「不知道」改用 120 分鐘
+ * 保守預設。
+ *
+ * 改動前的條件是 `eligibility === "eligible"`，等於 identity_unconfirmed
+ * 與 no_sunscreen_claim 也一律不建立期限——「沒填防曬乳資訊就完全沒有
+ * 倒數」。但產品標示只會讓間隔變短（`Math.min(GENERAL_MAX_MINUTES, …)`），
+ * 沒有標示時的值本來就是 120，所以擋住倒數並沒有比較保守，只是什麼都不
+ * 給。現行 UX 基準（`docs/decisions/2026-08-15-redesign-sitemap-userflow-current.md`
+ * 第 116 行）本來也是訂「可使用 120 分鐘保守預設」；擋住的那條
+ * RR-P0-ELIGIBILITY-002 只存在於 docs/archive，不是現行依據。
+ *
+ * 過期／異常／不適維持封鎖：那是使用者主動回報「這瓶有狀況」，這時給倒
+ * 數等於忽略他的回報。
+ *
+ * **刻意用列舉而不是否定判斷**：之後新增 eligibility 值時，預設會落在
+ * 「不擋」以外——新值必須被明確加進這個集合才會擋，讓「忘記處理新值」
+ * 這件事在 code review 時看得見，而不是靜默放行。
+ *
+ * 耐水期限不走這裡，仍然要求 `eligible`——沒有抗水標示算不出耐水時間，
+ * 那不是保守預設能補的。
+ */
+const GENERAL_DEADLINE_BLOCKERS = new Set<ProductEligibility>([
+  "expired",
+  "abnormal_reported",
+  "discomfort_reported"
+]);
+
+function blocksGeneralDeadline(eligibility: ProductEligibility): boolean {
+  return GENERAL_DEADLINE_BLOCKERS.has(eligibility);
+}
+
 function eligibilityReason(eligibility: ProductEligibility): ReasonCode | null {
   switch (eligibility) {
     case "eligible":
@@ -362,10 +396,20 @@ function candidateForZone(zone: ZoneProjection): CandidateAction | null {
       actionAt: null
     };
   }
+  /*
+   * 2026-08-30：這是「不知道標示就沒有倒數」的第三道閘門——即使期限算得
+   * 出來、timingStatus 也是 tracking，主要動作仍會被推成
+   * untimed_action_card，於是首頁的倒數區塊整個不渲染
+   * （buildHomeReminderClockPresentation 看到 untimed_action_card 就回
+   * 傳 null）。
+   *
+   * 三處必須用同一個判斷。改動時只改前兩處，畫面上會看到「提醒進行中」
+   * 卻沒有倒數數字——那正是實測時遇到的狀況。
+   */
   if (
     zone.recordStatus === "none_reported" ||
     (zone.currentApplicationEligibility !== null &&
-      zone.currentApplicationEligibility !== "eligible")
+      blocksGeneralDeadline(zone.currentApplicationEligibility))
   ) {
     return {
       ...base,
@@ -640,7 +684,8 @@ export function reduceSession(input: {
     if (
       applicable &&
       currentApplication !== null &&
-      currentEligibility === "eligible" &&
+      currentEligibility !== null &&
+      !blocksGeneralDeadline(currentEligibility) &&
       !activeSafetyBlock
     ) {
       const snapshot = currentApplication.productLabelSnapshot;
@@ -808,9 +853,19 @@ export function reduceSession(input: {
     }
 
     let timingStatus: ZoneProjection["timingStatus"];
+    /*
+     * 2026-08-30：這裡原本也是 `!== "eligible"`，是「不知道標示就沒有倒
+     * 數」的第二道閘門——期限算得出來，但 timingStatus 仍被壓成
+     * untimed_action，畫面顯示「需要補充資料」而不是倒數。
+     *
+     * 兩處必須用同一個判斷，否則會出現「有 generalDueAt 卻顯示未計時」
+     * 這種前後不一致的狀態。
+     */
     const invalidTopical =
       isTopical(method.methodComponents) &&
-      (currentApplication === null || currentEligibility !== "eligible");
+      (currentApplication === null ||
+        currentEligibility === null ||
+        blocksGeneralDeadline(currentEligibility));
     if (ended || tracking.trackingStatus === "ended") {
       timingStatus = "not_applicable";
     } else if (method.skinExposureStatus === "clothing_covered") {

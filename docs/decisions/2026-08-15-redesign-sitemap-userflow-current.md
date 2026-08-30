@@ -114,6 +114,7 @@
   ／「記錄使用中」），見 `2026-08-23-wireframe-copy-fixes.md` §四點五。
 - 分享圖片預設只放產品／品牌名稱、照片與使用心得；價格、購買日期、尺寸由使用者選擇，私人備註預設不分享。
 - 標示資料尚未完整的防曬乳仍列在「目前使用」，顯示「標示尚未確認」；可使用 120 分鐘保守預設。
+  - **2026-08-30：實作已對齊這一條。** 在此之前 reducer 要求 `ruleEligibilityAtApplication === "eligible"` 才建立期限，等於「沒填防曬乳資訊就完全沒有倒數」——與本行不符。那個限制出自 `docs/archive` 的 `RR-P0-ELIGIBILITY-002`，不是現行依據。詳見 `2026-08-30-countdown-without-product-label.md`。
 
 ### 2.4 更多
 

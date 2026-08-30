@@ -13,26 +13,40 @@ import ProductEligibilityNotice from "./ProductEligibilityNotice.vue";
  */
 
 describe("ProductEligibilityNotice", () => {
-  it("產品不具資格時以 alert 顯眼呈現警示", () => {
+  it("產品過期時以 alert 顯眼呈現警示", () => {
     const wrapper = mount(ProductEligibilityNotice, {
       props: {
-        productSnapshot: makeProductSnapshot({
-          sunscreenClaimStatus: "no_claim",
-          ruleEligibilityAtApplication: "no_sunscreen_claim",
-          reapplicationIntervalStatus: "unknown",
-          reapplicationIntervalMinutes: null,
-          preExposureWaitStatus: "unknown",
-          preExposureWaitMinutes: null,
-          waterResistanceStatus: "unknown",
-          waterResistanceMinutes: null
-        })
+        productSnapshot: makeProductSnapshot({ expiryStatus: "expired" })
       }
     });
 
     const alert = wrapper.find('[role="alert"]');
     expect(alert.exists()).toBe(true);
-    expect(alert.text()).toContain("沒有明確防曬標示");
-    expect(alert.text()).toContain("不會產生 120、40 或 80 分鐘期限");
+    expect(alert.text()).toContain("已超過記錄的有效期限");
+  });
+
+  /*
+   * 2026-08-30：這條原本測 no_sunscreen_claim 會出現警示，斷言「不會產生
+   * 120、40 或 80 分鐘期限」。規則改動後那句話是假的——不確認標示現在會
+   * 用 120 分鐘保守預設建立倒數，所以警示本身被移除了。
+   *
+   * 改成守相反的性質：**這兩種狀態不得再顯示警示**。留著一則警告使用者
+   * 「不會有倒數」、實際上倒數照跑的提示，比沒有提示更糟。
+   */
+  it.each([
+    {
+      name: "沒有明確防曬標示",
+      snapshot: makeProductSnapshot({ sunscreenClaimStatus: "no_claim" })
+    },
+    {
+      name: "身分尚未確認",
+      snapshot: makeProductSnapshot({ identityStatus: "identity_unconfirmed" })
+    }
+  ])("$name 不再顯示警示（現在會建立 120 分鐘保守倒數）", ({ snapshot }) => {
+    const wrapper = mount(ProductEligibilityNotice, {
+      props: { productSnapshot: snapshot }
+    });
+    expect(wrapper.find('[role="alert"]').exists()).toBe(false);
   });
 
   it("回報過不適時要求停止使用並提到尋求醫療協助", () => {
