@@ -112,7 +112,7 @@ describe("CWA UV boundary", () => {
     ).toThrowError(CwaMappingError);
   });
 
-  it("不把授權碼放在錯誤訊息，並支援 ETag 條件請求", async () => {
+  it("支援 ETag 條件請求", async () => {
     const fetch = vi.fn(async (_url: string, init?: RequestInit) => {
       expect(init?.headers).toEqual({
         Accept: "application/json",
@@ -129,14 +129,47 @@ describe("CWA UV boundary", () => {
     expect(buildCwaRequestUrl({ apiKey: "secret-key" })).toContain(
       "format=JSON"
     );
+  });
 
-    const failedFetch = vi.fn(async () => new Response(null, { status: 429 }));
-    await expect(
-      fetchCwaDataset({ fetch: failedFetch, apiKey: "secret-key" })
-    ).rejects.toBeInstanceOf(CwaUpstreamError);
-    await expect(
-      fetchCwaDataset({ fetch: failedFetch, apiKey: "secret-key" })
-    ).rejects.not.toThrow("secret-key");
+  it.each([401, 429, 500, 503])(
+    "CWA HTTP %i 保留 status 且不洩漏授權碼",
+    async (status) => {
+      const apiKey = "cwa-secret-do-not-leak";
+      const failedFetch = vi.fn(async () => new Response(null, { status }));
+
+      await expect(
+        fetchCwaDataset({ fetch: failedFetch, apiKey })
+      ).rejects.toMatchObject({ status });
+
+      try {
+        await fetchCwaDataset({ fetch: failedFetch, apiKey });
+      } catch (error) {
+        expect(error).toBeInstanceOf(CwaUpstreamError);
+        expect(JSON.stringify(error)).not.toContain(apiKey);
+        expect(String(error)).not.toContain(apiKey);
+      }
+    }
+  );
+
+  it("CWA 回傳非 JSON 時拒絕資料且不洩漏授權碼", async () => {
+    const apiKey = "cwa-secret-do-not-leak";
+    const invalidJsonFetch = vi.fn(
+      async () =>
+        new Response("not-json", {
+          status: 200,
+          headers: { "Content-Type": "application/json" }
+        })
+    );
+
+    try {
+      await fetchCwaDataset({ fetch: invalidJsonFetch, apiKey });
+      expect.unreachable("非 JSON response 應拋出 CwaMappingError");
+    } catch (error) {
+      expect(error).toBeInstanceOf(CwaMappingError);
+      expect(error).toMatchObject({ reason: "INVALID_RESPONSE" });
+      expect(JSON.stringify(error)).not.toContain(apiKey);
+      expect(String(error)).not.toContain(apiKey);
+    }
   });
 
   it("拒絕不完整的 cache payload", () => {
