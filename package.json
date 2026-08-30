@@ -22,7 +22,8 @@
     "format:check": "prettier --check .",
     "lint": "eslint . && pnpm lint:css",
     "lint:css": "stylelint \"{packages,apps}/**/*.{css,vue}\"",
-    "check": "pnpm typecheck && pnpm test && pnpm lint"
+    "check": "pnpm typecheck && pnpm test && pnpm lint",
+    "audit:unused": "node tools/audit/unused-declarations.mjs"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
