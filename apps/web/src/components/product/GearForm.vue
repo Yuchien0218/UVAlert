@@ -254,7 +254,14 @@ async function remove(): Promise<void> {
 
 <template>
   <div class="gear-form">
-    <fieldset class="question-card app-card">
+    <!--
+      2026-08-30：拿掉 `app-card`，比照 `ContextSelector`（設定流程的「選擇
+      情境」）。原本是 `question-card app-card` 外框再包四個各自有邊框的
+      `.category-option`，等於**卡片包卡片**——tile 自己已經是可點的表面，
+      外面再加一層邊框只是多一圈線。ContextSelector 的 fieldset 是
+      `border: 0; padding: 0`，只有 tile 一層，這裡對齊它。
+    -->
+    <fieldset class="category-fieldset">
       <legend>這件裝備屬於哪一類？</legend>
       <p v-if="categoryLocked" class="question-card__helper">
         已使用過的防曬乳不可改為只做紀錄的裝備，否則已建立的倒數會失去依據。需要改類別請另建一筆新紀錄。
@@ -276,8 +283,16 @@ async function remove(): Promise<void> {
             :value="category"
             :disabled="categoryLocked && category !== 'sunscreen'"
           />
-          <Icon :name="GEAR_CATEGORY_ICONS[category]" :size="24" />
-          <span>{{ label }}</span>
+          <Icon :name="GEAR_CATEGORY_ICONS[category]" :size="32" />
+          <!--
+            2026-08-30：文字只在選取後顯示，未選取時走 `.screen-reader-only`。
+            **視覺上隱藏、無障礙上仍在**——螢幕閱讀器與語音控制都還讀得到
+            每個選項的名稱，鍵盤操作也不受影響。純粹拿掉文字會讓四個選項
+            對輔助技術變成無名的 radio。
+          -->
+          <span :class="{ 'screen-reader-only': gearCategory !== category }">
+            {{ label }}
+          </span>
         </label>
       </div>
       <p class="category-effect" role="status">
@@ -505,6 +520,38 @@ p {
  * 高保真稿用 3 欄是因為它的品類陣列有 6 個（多了帽子與陽傘），
  * 抄版面時要一併核對項目數量。
  */
+/*
+ * 2026-08-30：品類選擇不再是卡片，比照 ContextSelector 的 fieldset——
+ * 沒有邊框與內距，tile 自己就是那層表面。
+ */
+.category-fieldset {
+  display: grid;
+  gap: var(--space-3);
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+/*
+ * 用 canonical 的 card-title，不是 .question-card 那份複製過來的
+ * --font-size-title-sm——後者是 B8 遷移前的舊字級桶，typographyRoles
+ * 的守門測試會擋（app.css 裡的原版不在掃描範圍所以沒被抓到）。
+ */
+.category-fieldset legend {
+  float: left;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  font-size: var(--font-size-card-title);
+  font-weight: var(--font-weight-card-title);
+}
+
+.category-fieldset legend + * {
+  clear: both;
+  margin-top: var(--space-stack-title-body);
+}
+
 .category-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);

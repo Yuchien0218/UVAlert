@@ -47,10 +47,30 @@ const allowedComponentExceptions = new Set([
   "apps/web/src/pages/setup/SetupPage.vue:setup-recovery-headline"
 ]);
 
+/*
+ * 2026-08-30：掃描前先剝註解。
+ *
+ * 這條守門原本直接掃原始碼字串，於是**連註解都算數**——寫一句「不要用
+ * `--font-size-title-sm`，它是 B8 遷移前的舊字級桶」就會讓測試紅，等於
+ * 禁止在程式碼裡解釋為什麼不能用它。實際踩到了：`GearForm.vue` 的
+ * `.category-fieldset legend` 註解說明選 canonical token 的理由時提到
+ * 舊 token 名，測試就紅了。
+ *
+ * 剝掉註解之後守門強度不變——真正的 `font-size: var(--font-size-title-sm)`
+ * 仍然會被抓到，只是解釋文字不再誤判。
+ */
+const stripComments = (source: string): string =>
+  source
+    .replace(/<!--[\s\S]*?-->/g, "")
+    .replace(/\/\*[\s\S]*?\*\//g, "")
+    .replace(/^\s*\/\/.*$/gm, "");
+
 describe("B8 typography role migration", () => {
   for (const file of migratedFiles) {
     it(`${file} 不再使用舊字級桶`, () => {
-      expect(readFileSync(file, "utf8")).not.toMatch(legacyToken);
+      expect(stripComments(readFileSync(file, "utf8"))).not.toMatch(
+        legacyToken
+      );
     });
   }
 
