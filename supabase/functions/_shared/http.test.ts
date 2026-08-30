@@ -1,5 +1,5 @@
-import { describe, expect, it } from "vitest";
-import { errorResponse } from "./http";
+import { describe, expect, it, vi } from "vitest";
+import { corsHeaders, errorResponse } from "./http";
 
 describe("backend HTTP helpers", () => {
   it("maps a typed error to stable JSON without exposing stack details", () => {
@@ -31,5 +31,19 @@ describe("backend HTTP helpers", () => {
         requestId: "request-1"
       }
     });
+  });
+
+  it("allows the subscription methods and only required request headers", () => {
+    vi.stubGlobal("Deno", { env: { get: vi.fn(() => undefined) } });
+    const headers = corsHeaders(
+      new Request("https://api.test/push-subscription")
+    );
+
+    expect(headers["Access-Control-Allow-Methods"]).toBe(
+      "GET, POST, PUT, DELETE, OPTIONS"
+    );
+    expect(headers["Access-Control-Allow-Headers"]).toBe(
+      "authorization, content-type"
+    );
   });
 });
