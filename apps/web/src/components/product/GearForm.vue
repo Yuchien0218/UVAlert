@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onMounted, ref, shallowRef } from "vue";
+import { computed, onMounted, ref, shallowRef, watch } from "vue";
 import type { GearCategory } from "@sunshield/contracts";
 import { useWebAppServices } from "../../app/injection";
 import Icon from "../icons/Icon.vue";
@@ -66,8 +66,29 @@ function parsePriceTwd(raw: string): number | null {
   return value;
 }
 
+/**
+ * 暱稱的預設值。
+ *
+ * 2026-08-30 使用者要求「預設先輸入名字（例：未命名防曬乳）」。用實值而
+ * 不是 placeholder，因為 placeholder 不會被送出——暱稱是必填，空著就會
+ * 被 `validate()` 擋下來，而多數人根本不在意這罐叫什麼。
+ *
+ * 跟著品類走（未命名防曬乳／未命名防曬衣物／…），但**只在使用者還沒
+ * 自己命名時**才換：`isDefaultName()` 判斷目前的值是不是某個品類的預設
+ * 名，是才跟著改。手動改過的名字不會被品類切換蓋掉。
+ */
+function defaultDisplayName(category: GearCategory): string {
+  return `未命名${GEAR_CATEGORY_LABELS[category]}`;
+}
+
+function isDefaultDisplayName(name: string): boolean {
+  return Object.values(GEAR_CATEGORY_LABELS).some(
+    (label) => name === `未命名${label}`
+  );
+}
+
 const gearCategory = shallowRef<GearCategory>("sunscreen");
-const displayName = ref("");
+const displayName = ref(defaultDisplayName("sunscreen"));
 const purchaseMonth = ref("");
 const expiryDate = ref("");
 const note = ref("");
@@ -146,6 +167,18 @@ onMounted(async () => {
       ? ""
       : String(record.currentSnapshot.spf);
   paGradeInput.value = record.currentSnapshot.paGrade ?? "";
+});
+
+/*
+ * 品類換了就換預設名，但只在使用者還沒自己命名的時候。
+ *
+ * 編輯既有裝備時完全不動——那是使用者已經取好的名字，即使它剛好長得像
+ * 預設名（例如他真的把某罐取名叫「未命名防曬乳」）也一樣。
+ */
+watch(gearCategory, (next) => {
+  if (props.productId !== null) return;
+  if (!isDefaultDisplayName(displayName.value)) return;
+  displayName.value = defaultDisplayName(next);
 });
 
 function validate(): string | null {
@@ -309,8 +342,14 @@ async function remove(): Promise<void> {
         maxlength="80"
         placeholder="例如：通勤用防曬"
       />
+      <!--
+        2026-08-30：暱稱與 SPF／PA 的說明合併成一句。原本暱稱下方一句、
+        SPF／PA 下方再一句，兩句講的是同一件事——這張卡的欄位都只用來
+        「認出是哪一罐」。「不影響補擦倒數」保留，那是使用者填 SPF 時
+        最容易誤解的一點。
+      -->
       <p class="field-helper">
-        只用於這台裝置上的選擇，重複的暱稱不會被當成同一件裝備。
+        這些只用來認出是哪一罐，<strong>不影響補擦倒數</strong>；重複的暱稱不會被當成同一件裝備。
       </p>
 
       <div v-if="showSunscreenFields" class="field-pair">
@@ -343,7 +382,7 @@ async function remove(): Promise<void> {
         </div>
       </div>
       <p v-if="showSunscreenFields" class="field-helper">
-        只用來認出這罐是哪一罐，<strong>不影響補擦倒數</strong>；倒數長度由下方的包裝標示決定。
+        倒數長度由下方的包裝標示決定。
       </p>
     </section>
 
