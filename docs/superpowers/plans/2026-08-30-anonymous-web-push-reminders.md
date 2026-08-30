@@ -219,7 +219,7 @@ public.cleanup_push_data(p_now timestamptz)
 
 - Consumes: exact schema and states from the approved design spec.
 
-- [ ] **Step 1: Write failing pgTAP coverage**
+- [x] **Step 1: Write failing pgTAP coverage**
 
 Assert both push tables and required columns exist, `(status, next_attempt_at)` index exists, RLS is enabled, anon/authenticated have no direct table privileges, service_role has required privileges, and constraints reject unknown states or negative attempts.
 
@@ -235,7 +235,7 @@ select is(
 
 Call claim twice before lease expiry and assert the second call returns zero rows. Advance `p_now` beyond two minutes and assert the abandoned claim can be reclaimed. Test 7-day terminal cleanup and 90-day inactive subscription cleanup without deleting younger rows.
 
-- [ ] **Step 2: Run database tests and verify RED**
+- [x] **Step 2: Run database tests and verify RED**
 
 Run:
 
@@ -246,21 +246,21 @@ supabase test db
 
 Expected: `anonymous_push.sql` FAIL because the schema and functions do not exist.
 
-- [ ] **Step 3: Create tables and constraints**
+- [x] **Step 3: Create tables and constraints**
 
 Use `device_id uuid primary key`, endpoint uniqueness, status checks from the spec, `attempt_count >= 0`, `on delete cascade`, and `last_operation_id uuid not null`. Do not create any user/session/product/body-zone foreign keys.
 
-- [ ] **Step 4: Lock down access**
+- [x] **Step 4: Lock down access**
 
 Enable and force RLS on all three tables. Revoke all privileges from `anon` and `authenticated`; grant only the exact select/insert/update/delete and function execute permissions needed by `service_role`. Revoke function execute from `public` before granting service_role.
 
-- [ ] **Step 5: Implement atomic database functions**
+- [x] **Step 5: Implement atomic database functions**
 
 `claim_due_push_schedules` must use `FOR UPDATE SKIP LOCKED`, cap `p_limit` to `1..100`, expire rows older than ten minutes, set `status='claimed'`, `claimed_at=p_now`, and a fresh `claim_token` in one transaction.
 
 `settle_push_schedule` must update only the row matching both `device_id` and `claim_token`. A stale token returns no row and cannot settle a reclaimed job.
 
-- [ ] **Step 6: Run database verification**
+- [x] **Step 6: Run database verification**
 
 Run:
 
@@ -271,11 +271,11 @@ supabase test db
 
 Expected: all existing and new pgTAP tests PASS.
 
-- [ ] **Step 7: Independent review gate**
+- [x] **Step 7: Independent review gate**
 
 Reviewer checks RLS/grants, SQL injection boundaries, concurrent claim behavior, retention cutoffs, cascade behavior and migration reversibility assumptions.
 
-- [ ] **Step 8: Commit Task 2**
+- [x] **Step 8: Commit Task 2**
 
 ```powershell
 git add -- supabase/migrations/20260830000200_anonymous_push_foundation.sql supabase/tests/anonymous_push.sql
