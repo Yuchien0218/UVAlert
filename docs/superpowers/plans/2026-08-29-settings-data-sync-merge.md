@@ -1,5 +1,9 @@
 # 「跨裝置同步」併入「本機資料與隱私」 Implementation Plan
 
+> **狀態橫幅（2026-08-30 補）**：下面的 checkbox 一個都沒有勾，但**工作已經完成並合併**。這個 repo 的計畫檔一向是寫完就不再回來勾，光看 checkbox 會以為沒動工——CLAUDE.md 也記過同樣的陷阱（「三個『沒做』的頁面其實都做完了」）。以實際合併的 PR 為準。
+>
+> **已完成**，PR #10（`6448966`）。「跨裝置同步」併進「本機資料與隱私」，`/settings/sync` 移除且不留轉址，純導覽補救卡 `cloud-data-link` 刪除。「更多」頁 6 張渲染卡 → 5 張、入口清單 594px → 521px。量測見 `docs/decisions/2026-08-29-settings-data-sync-merge.md` 第十節。
+
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
 **Goal:** 把 `/settings/sync` 併進 `/settings/data` 的次要區塊，移除「更多」頁的一張入口卡與 `DataSettingsPage` 上那張純導覽用的補救卡，讓實作回到 `DESIGN.md` 第五節與 Sitemap §2.4 本來就訂好的「單頁分區、本機備份第一層、Google 同步次要區塊」。

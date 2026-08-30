@@ -1,5 +1,11 @@
 # B9 第一輪：「更多」頁 icon-first Implementation Plan
 
+> **狀態橫幅（2026-08-30 補）**：下面的 checkbox 一個都沒有勾，但**工作已經完成並合併**。這個 repo 的計畫檔一向是寫完就不再回來勾，光看 checkbox 會以為沒動工——CLAUDE.md 也記過同樣的陷阱（「三個『沒做』的頁面其實都做完了」）。以實際合併的 PR 為準。
+>
+> **B9 第一輪已完成**，PR #13（`f2d0a34`）。圖示 20px → 32px（佔卡片面積 1.2–1.5% → 3.0–4.6%）、說明文字依分類表處置（刪 1、縮短 2、常駐 4）、入口清單 521px → 484px、首屏可見卡數維持 5 張。四段不可隱藏的文字與「共六個主題」都有測試守著（`MorePage.test.ts`）。
+>
+> **B9 第二輪（progressive disclosure）已裁決不做**，PR #14（`93b7e9a`）。逐段分類 41 段只有 2 段可收且都不划算，規格第八節結案，不再有第三輪。
+
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
 **Goal:** 讓「更多」頁的圖示從文字附件變成掃讀入口——圖示 20px → 32px、修掉六張雙色卡與兩張單色卡混用造成的視覺不一致、依逐項分類處置說明文字，並用前後量測證明版面確實變清爽而不是只變短。

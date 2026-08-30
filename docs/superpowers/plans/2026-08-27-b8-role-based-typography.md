@@ -1,5 +1,11 @@
 # B8 Role-Based Typography Implementation Plan
 
+> **狀態橫幅（2026-08-30 補）**：下面的 checkbox 一個都沒有勾，但**工作已經完成並合併**。這個 repo 的計畫檔一向是寫完就不再回來勾，光看 checkbox 會以為沒動工——CLAUDE.md 也記過同樣的陷阱（「三個『沒做』的頁面其實都做完了」）。以實際合併的 PR 為準。
+>
+> **B8 已完成**——依本目錄 `README.md` 與 `../specs/2026-08-27-b8-role-based-typography-design.md` 的狀態列（實作、F5 視覺矩陣與獨立 scoped re-review 均通過）。**這條不是本次執行者的第一手驗證**，是轉述那兩份文件的結論。
+>
+> 當時記錄的唯一非阻擋 minor 是「`packages/ui/src/styles.css` 的過時註解」。行號早已位移、無法確認是否同一處；2026-08-30 修掉了該檔案裡一段**確實過時**的行高歷史註解（它宣稱 body 行高是 1.6、且文章正文「刻意維持 1.85」，兩者都已不成立）。
+
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
 **Goal:** Replace UVAlert's ambiguous typography buckets with the approved seven-role scale, migrate every consumer by meaning, add the approved article wave treatment, and verify the result across desktop, mobile, reflow, and zoom.
