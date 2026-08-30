@@ -95,10 +95,21 @@ const locationLine = computed(() => {
   font-weight: 500;
 }
 
+/*
+ * 2026-08-30：從 section-title(20px) 降到 supporting(14px)。
+ *
+ * 原本「無資料」是整個 UV 區塊裡最大的字，比下面的地區名（16px）還大
+ * ——**沒有資料的東西拿到了最大的視覺重量**。有 UV 值時那個位置放的是
+ * `--display` 的大讀數，那是有內容才配得上的份量；沒有值時應該讓位給
+ * 地區名，它是這個區塊裡唯一還有內容的東西。
+ *
+ * 用 supporting 而不是 body：這是「這裡沒有東西」的說明文字，對應
+ * DESIGN.md 第五節的「次要資訊與補充文字」。
+ */
 .uv-headline__empty {
   margin: 0;
   color: var(--text-secondary);
-  font-size: var(--font-size-section-title);
+  font-size: var(--font-size-supporting);
 }
 
 .uv-headline__meta {

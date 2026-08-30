@@ -312,17 +312,28 @@ function handleEndSession(): void {
         2026-08-24：白天也要能結束提醒。`/reminder` 併入本頁時漏掉了——
         那頁本來一直有結束控制，白天分支沒補上等於白天沒辦法結束。
       -->
-      <SessionEndControl
-        :phase="sessionControl.endPhase.value"
-        :error="sessionControl.endError.value"
-        @confirm="handleEndSession"
-        @reset-error="sessionControl.clearEndError"
-      />
+      <!--
+        2026-08-30：結束鈕與倒數併成同一列。原本它自成一列、`justify-self:
+        end`，於是首屏頂端 88px 只放了一個 44px 的按鈕（實測 390×844：
+        main 頂端 y=72、按鈕 y=96、倒數區塊 y=160）——那是首屏最貴的位置。
 
-      <HomeCountdown
-        v-if="clockPresentation !== null"
-        :presentation="clockPresentation"
-      />
+        用 grid 兩欄而不是 slot：倒數有 `v-if`，塞進 slot 的話 clockPresentation
+        為 null 時結束鈕會跟著消失。兩欄的寫法讓按鈕在任何情況下都還在，
+        而且 `align-items: start` 讓它與倒數的 eyebrow「補擦倒數」齊平。
+      -->
+      <div class="home__session-head">
+        <HomeCountdown
+          v-if="clockPresentation !== null"
+          :presentation="clockPresentation"
+        />
+
+        <SessionEndControl
+          :phase="sessionControl.endPhase.value"
+          :error="sessionControl.endError.value"
+          @confirm="handleEndSession"
+          @reset-error="sessionControl.clearEndError"
+        />
+      </div>
 
       <button
         v-if="reminderPresentation !== null"
@@ -515,6 +526,18 @@ function handleEndSession(): void {
  */
 .home {
   gap: var(--space-5);
+}
+
+/*
+ * 2026-08-30：倒數與結束鈕併列。`align-items: start` 讓 44px 的按鈕貼齊
+ * 倒數頂端（也就是「補擦倒數」那一行），而不是被拉到整塊的垂直中線。
+ * 第一欄用 minmax(0, 1fr)，倒數裡的大讀數才不會把按鈕擠出容器。
+ */
+.home__session-head {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: start;
+  gap: var(--space-3);
 }
 
 .home__cta {
