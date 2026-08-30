@@ -84,6 +84,51 @@ describe("CWA UV boundary", () => {
     });
   });
 
+  it("支援現行 CWA 的 Locations 與 Location 大寫容器", () => {
+    const legacy = makeCwaResponse();
+    const container = legacy.records.locations[0];
+    const current = {
+      records: {
+        Locations: [
+          {
+            DatasetInfo: container.datasetInfo,
+            Location: container.location
+          }
+        ]
+      }
+    };
+
+    const result = mapCwaForecast(current, {
+      regionCode,
+      fetchedAt: "2026-08-17T00:00:00.000Z",
+      now: "2026-08-17T00:00:00.000Z"
+    });
+
+    expect(result.region).toEqual({
+      regionCode,
+      displayName: "新北市萬里區"
+    });
+    expect(result.days).toHaveLength(5);
+    expect(result.days[0]).toMatchObject({
+      uvi: 8,
+      temperatureCelsius: 30
+    });
+  });
+
+  it("CWA 只有縣市 Geocode 時，以鄉鎮碼所屬縣市預報回應", () => {
+    const result = mapCwaForecast(makeCwaResponse({ regionCode: "63000000" }), {
+      regionCode: "63000010",
+      fetchedAt: "2026-08-17T00:00:00.000Z",
+      now: "2026-08-17T00:00:00.000Z"
+    });
+
+    expect(result.region).toEqual({
+      regionCode: "63000010",
+      displayName: "新北市萬里區"
+    });
+    expect(result.days).toHaveLength(5);
+  });
+
   it("找不到行政區、非法 UVI、全空值或已過期資料都不會產生預報", () => {
     expect(() =>
       mapCwaForecast(makeCwaResponse({ regionCode: "99999999" }), {
@@ -126,9 +171,10 @@ describe("CWA UV boundary", () => {
       etag: "etag-1"
     });
     expect(result).toEqual({ status: 304, etag: "etag-1", payload: null });
-    expect(buildCwaRequestUrl({ apiKey: "secret-key" })).toContain(
-      "format=JSON"
-    );
+    const url = new URL(buildCwaRequestUrl({ apiKey: "secret-key" }));
+    expect(url.searchParams.get("format")).toBe("JSON");
+    expect(url.searchParams.get("ElementName")).toBe("平均溫度,紫外線指數");
+    expect(url.searchParams.has("elementName")).toBe(false);
   });
 
   it.each([401, 429, 500, 503])(
