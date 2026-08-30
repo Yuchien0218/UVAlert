@@ -20,7 +20,7 @@
 
 .page-stack {
   display: grid;
-  gap: var(--space-6);
+  gap: var(--page-stack-gap);
   max-width: var(--content-max);
   margin-inline: auto;
 }

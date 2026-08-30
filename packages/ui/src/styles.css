@@ -235,6 +235,17 @@
    * 這三個是「長文段落的節奏」而不是新的字級，所以放在字級 token 之後
    * 而不是併進 typography 量表。要調整長文鬆緊改這裡，不要回頭改各頁。
    */
+  /*
+   * 頁面區塊間距（.page-stack 的 gap）三檔位。
+   *
+   * 2026-08-30 新增。原本 5 個頁面各自覆寫成 16／20／24／32 四種值，
+   * DESIGN.md 沒有任何規則說什麼時候該用哪個——「這頁太開」變成每次
+   * 憑感覺判斷，沒有依據。數值完全沒變，只是給它們名字與適用場合。
+   */
+  --page-stack-gap-compact: var(--space-4);
+  --page-stack-gap: var(--space-6);
+  --page-stack-gap-prose: var(--space-8);
+
   --prose-paragraph-gap: var(--space-3);
   --prose-heading-gap-before: var(--space-8);
   --prose-subheading-gap-before: var(--space-6);
