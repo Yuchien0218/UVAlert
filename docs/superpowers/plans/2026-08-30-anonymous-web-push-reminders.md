@@ -396,6 +396,8 @@ git commit -m "feat(push): register anonymous subscriptions"
 - Create: `supabase/functions/push-schedule/handler.ts`
 - Create: `supabase/functions/push-schedule/index.ts`
 - Create: `supabase/functions/push-schedule/index.test.ts`
+- Create: `supabase/migrations/20260830000300_push_schedule_operations.sql`
+- Create: `supabase/tests/push_schedule_operations.sql`
 - Modify: `supabase/functions/_shared/push-contracts.ts`
 - Modify: `supabase/functions/_shared/push-contracts.test.ts`
 - Modify: `supabase/config.toml`
@@ -415,7 +417,7 @@ type ScheduleRequest = {
 - Both require `Authorization: Device <deviceId>.<deviceSecret>`.
 - Produces `{ state: "scheduled", dueAt }` or `{ state: "cancelled" }`.
 
-- [ ] **Step 1: Write failing contract and handler tests**
+- [x] **Step 1: Write failing contract and handler tests**
 
 Cover valid due time, missing timezone, invalid UUID, earlier than server time minus 10 minutes, later than server time plus 24 hours, unknown fields, invalid credentials, revoked subscription, and rate limiting.
 
@@ -429,7 +431,7 @@ expect(dependencies.upsertSchedule).toHaveBeenCalledOnce();
 
 Then use a new operation id and assert the single row is overwritten. DELETE twice with the same operation id must remain successful.
 
-- [ ] **Step 2: Run focused tests and verify RED**
+- [x] **Step 2: Run focused tests and verify RED**
 
 ```powershell
 & '.\node_modules\.bin\vitest.CMD' run supabase/functions/_shared/push-contracts.test.ts supabase/functions/push-schedule/index.test.ts
@@ -437,22 +439,24 @@ Then use a new operation id and assert the single row is overwritten. DELETE twi
 
 Expected: FAIL because schedule parsing and handler do not exist.
 
-- [ ] **Step 3: Implement authenticated upsert/cancel**
+- [x] **Step 3: Implement authenticated upsert/cancel**
 
 Use server time, not client time, for range checks. PUT resets `status='pending'`, `attempt_count=0`, `next_attempt_at=due_at`, claim fields and terminal timestamps to null, and writes `last_operation_id`. DELETE marks the current row cancelled with its operation id; it must not delete the subscription.
 
-- [ ] **Step 4: Make operation ordering safe**
+- [x] **Step 4: Make operation ordering safe**
 
 The database gateway must serialize changes per `device_id`. Replaying the same operation id returns the stored result without rewriting. A response from an older frontend request cannot clear a newer local pending intent because Task 1 uses compare-and-clear.
 
-- [ ] **Step 5: Add explicit public Function configuration**
+Implementation evidence: `apply_push_schedule_operation` uses a device-keyed advisory transaction lock and rechecks `last_operation_id` inside the lock. A local two-session check held the same device lock and the second RPC waited 5.39 seconds before completing. Database verification ran `supabase db reset` and `supabase test db` with 4 files／117 tests passing.
+
+- [x] **Step 5: Add explicit public Function configuration**
 
 ```toml
 [functions.push-schedule]
 verify_jwt = false
 ```
 
-- [ ] **Step 6: Run focused verification**
+- [x] **Step 6: Run focused verification**
 
 ```powershell
 & '.\node_modules\.bin\vitest.CMD' run supabase/functions/_shared/push-auth.test.ts supabase/functions/_shared/push-contracts.test.ts supabase/functions/push-schedule/index.test.ts
@@ -460,14 +464,14 @@ verify_jwt = false
 
 Expected: all selected tests PASS.
 
-- [ ] **Step 7: Independent review gate**
+- [x] **Step 7: Independent review gate**
 
 Reviewer checks timestamp boundaries, one-row invariant, replay semantics, cancellation behavior and that no Session data reaches the API.
 
-- [ ] **Step 8: Commit Task 4**
+- [x] **Step 8: Commit Task 4**
 
 ```powershell
-git add -- supabase/functions/push-schedule/handler.ts supabase/functions/push-schedule/index.ts supabase/functions/push-schedule/index.test.ts supabase/functions/_shared/push-contracts.ts supabase/functions/_shared/push-contracts.test.ts supabase/config.toml
+git add -- supabase/functions/push-schedule/handler.ts supabase/functions/push-schedule/index.ts supabase/functions/push-schedule/index.test.ts supabase/functions/_shared/push-contracts.ts supabase/functions/_shared/push-contracts.test.ts supabase/migrations/20260830000300_push_schedule_operations.sql supabase/tests/push_schedule_operations.sql supabase/config.toml
 git diff --cached --check
 git commit -m "feat(push): schedule one anonymous reminder"
 ```
