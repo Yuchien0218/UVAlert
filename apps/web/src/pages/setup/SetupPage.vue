@@ -208,8 +208,24 @@ async function restartDraft(): Promise<void> {
   applyDefaultContext();
 }
 
-async function cancel(): Promise<void> {
-  await setup.cancel();
+/**
+ * 「回上一頁」**不刪草稿**——這是 2026-08-30 的裁決（見
+ * docs/decisions/2026-08-30-pending-decisions.md 第二節）。
+ *
+ * 原本這裡是 `cancel()`，會呼叫 `setup.cancel()` → `deleteDraft()`。按鈕
+ * 文案改成「回上一頁」之後還刪資料，等於用一個看起來安全的按鈕做破壞性
+ * 動作，比原本誠實標著「取消設定」的叉叉更糟。
+ *
+ * 保留草稿不需要新機制：`ensureLoaded()` 只要讀得到 active draft 就會把
+ * `recoveryPending` 設成 true，下次進來由既有的「繼續未完成的設定？」
+ * 回復卡接手（`continueDraft` ／ `restartDraft`）。這段機制本來就在，
+ * 只是先前被叉叉的刪除行為繞過了。
+ *
+ * 目的地明確寫成 home 而不是 `router.back()`，跟 EventCorrectionPage 的
+ * 返回一致——history 可能是空的（直接開網址、從通知進來），back 會把人
+ * 送出 App。用 replace 是為了不讓 /setup 堆進歷史。
+ */
+async function back(): Promise<void> {
   await router.replace({ name: "home" });
 }
 
@@ -260,7 +276,7 @@ onMounted(async () => {
     description="選擇情境與塗抹時間"
     :save-status="setup.saveStatus.value"
     :busy="setup.phase.value === 'loading'"
-    @cancel="cancel"
+    @back="back"
   >
     <!--
       載入草稿失敗時要明講。原本這裡直接顯示情境選擇器，但草稿沒載進來

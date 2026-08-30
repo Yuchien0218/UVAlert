@@ -22,14 +22,34 @@ withDefaults(defineProps<Props>(), {
 });
 
 defineEmits<{
-  cancel: [];
+  back: [];
 }>();
 </script>
 
 <template>
   <section class="setup-shell" :aria-busy="busy">
     <div class="setup-shell__toolbar">
-      <span />
+      <!--
+        2026-08-30：叉叉改成返回箭頭。原本是「取消設定」——按下去會刪掉
+        草稿——而使用者要的是「回上一頁」。語意換了，行為也跟著換：離開
+        不再刪草稿，回來由既有的「繼續未完成的設定？」回復卡接手。取消
+        草稿的能力沒有消失，它在回復卡的「重新開始」上，那裡語意明確。
+        裁決見 docs/decisions/2026-08-30-pending-decisions.md 第二節。
+
+        位置從右上移到左上：返回是導航，導航在左上是通用慣例；而且原本
+        右上只有一個孤立的叉叉獨佔一列，把標題往下推（實測 390×844：
+        按鈕 y=96、h1 y=95，幾乎同高卻各佔一列）。移到左邊之後工具列
+        兩端都有內容，不再讀成「一列空白加一個按鈕」。
+      -->
+      <button
+        class="icon-button setup-shell__back"
+        type="button"
+        aria-label="回上一頁"
+        :disabled="busy"
+        @click="$emit('back')"
+      >
+        <Icon name="tool-arrow-left" :size="24" />
+      </button>
 
       <span v-if="saveStatus === 'saved'" class="setup-shell__save-status">
         <Icon name="state-online" :size="20" />
@@ -44,20 +64,7 @@ defineEmits<{
         草稿未儲存
       </span>
 
-      <!--
-        2026-08-24：改成只有圖示的圓形叉叉，跟記錄補擦／記錄狀況／更正
-        紀錄三頁的右上角一致（那三頁本來就是 .icon-button）。文字標籤移到
-        aria-label，螢幕閱讀器仍讀得到「取消設定」。
-      -->
-      <button
-        class="icon-button"
-        type="button"
-        aria-label="取消設定"
-        :disabled="busy"
-        @click="$emit('cancel')"
-      >
-        <Icon name="tool-close" :size="24" />
-      </button>
+      <span />
     </div>
 
     <header class="setup-shell__heading">
@@ -93,7 +100,7 @@ defineEmits<{
 
 /* 取消鈕改用共用的 .icon-button，這裡只負責把它推到最右並處理停用態。 */
 .setup-shell__toolbar .icon-button {
-  justify-self: end;
+  justify-self: start;
 }
 
 .setup-shell__toolbar .icon-button:disabled {
