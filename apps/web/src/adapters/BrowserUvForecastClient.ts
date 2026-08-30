@@ -3,11 +3,23 @@ import {
   type FiveDayUvForecast
 } from "@sunshield/contracts";
 import type { UvForecastApiPort } from "@sunshield/platform";
+import { readConfiguredEnvironmentValue } from "./configuredEnvironment";
 
 type FetchPort = (
   input: RequestInfo | URL,
   init?: RequestInit
 ) => Promise<Response>;
+
+const DEFAULT_API_BASE_URL = "/v1";
+
+export function resolveUvForecastEndpoint(baseUrl?: string): string {
+  const configuredBaseUrl =
+    readConfiguredEnvironmentValue(baseUrl) ?? DEFAULT_API_BASE_URL;
+  const normalizedBaseUrl = configuredBaseUrl.replace(/\/+$/, "");
+  return /^https?:\/\//u.test(normalizedBaseUrl)
+    ? `${normalizedBaseUrl}/uv-forecast`
+    : `${normalizedBaseUrl}/uv/forecast`;
+}
 
 export class BrowserUvForecastClient implements UvForecastApiPort {
   readonly #fetch: FetchPort;
@@ -20,7 +32,9 @@ export class BrowserUvForecastClient implements UvForecastApiPort {
     } = {}
   ) {
     this.#fetch = options.fetch ?? globalThis.fetch.bind(globalThis);
-    this.#endpoint = options.endpoint ?? "/v1/uv/forecast";
+    this.#endpoint =
+      options.endpoint ??
+      resolveUvForecastEndpoint(import.meta.env.VITE_API_BASE_URL);
   }
 
   async getFiveDayForecast(regionCode: string): Promise<FiveDayUvForecast> {
