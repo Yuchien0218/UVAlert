@@ -326,17 +326,17 @@ export function createPushSubscriptionHandler(
 - POST success response: `{ deviceId, deviceSecret }`, returned once.
 - Consumes service-role database gateway, `DEVICE_CREDENTIAL_PEPPER`, and existing CORS/error helpers.
 
-- [ ] **Step 1: Add failing auth and contract tests**
+- [x] **Step 1: Add failing auth and contract tests**
 
 Use a fixed pepper and vectors to assert identical secrets hash identically, different secrets do not, malformed `Device` headers return one generic auth error, and constant-time comparison receives equal-length byte arrays.
 
 Subscription validation must reject non-HTTPS endpoints except `http://localhost`／`http://127.0.0.1` in local mode, keys outside documented length limits, extra-large bodies and missing keys.
 
-- [ ] **Step 2: Add failing handler matrix**
+- [x] **Step 2: Add failing handler matrix**
 
 Cover OPTIONS 204, POST create 201, PUT update 200, DELETE revoke 204, unsupported method 405, invalid JSON 422, invalid credential 401 with indistinguishable message, missing pepper 500, rate limit 429, database error 500, and response/log redaction.
 
-- [ ] **Step 3: Run focused tests and verify RED**
+- [x] **Step 3: Run focused tests and verify RED**
 
 ```powershell
 & '.\node_modules\.bin\vitest.CMD' run supabase/functions/_shared/push-auth.test.ts supabase/functions/_shared/push-contracts.test.ts supabase/functions/push-subscription/index.test.ts
@@ -344,19 +344,19 @@ Cover OPTIONS 204, POST create 201, PUT update 200, DELETE revoke 204, unsupport
 
 Expected: FAIL because the new modules do not exist.
 
-- [ ] **Step 4: Implement device credential hashing and parsing**
+- [x] **Step 4: Implement device credential hashing and parsing**
 
 Generate 32 random bytes for `deviceSecret`; encode URL-safe base64 without padding. Store `HMAC-SHA-256(DEVICE_CREDENTIAL_PEPPER, deviceSecret)`. Compare decoded digest bytes without early return on matching positions. Never log the authorization header.
 
-- [ ] **Step 5: Implement persistent registration rate limiting**
+- [x] **Step 5: Implement persistent registration rate limiting**
 
 Hash the trusted gateway client address with the pepper and call `consume_push_rate_limit("register", hash, 10, interval '1 hour', now)`. Device-authenticated PUT/DELETE use `device_id` as the rate-limit key with 60 operations per hour. Do not use the in-memory `SlidingWindowRateLimiter` as production enforcement.
 
-- [ ] **Step 6: Implement the dependency-injectable handler**
+- [x] **Step 6: Implement the dependency-injectable handler**
 
 POST creates a new device and returns the raw credentials once. PUT verifies credentials and rotates endpoint/keys without rotating device credentials. DELETE verifies credentials, deletes the subscription and relies on cascade for the schedule.
 
-- [ ] **Step 7: Expand CORS and function config explicitly**
+- [x] **Step 7: Expand CORS and function config explicitly**
 
 Allow `GET, POST, PUT, DELETE, OPTIONS` and headers `authorization, content-type`. Add:
 
@@ -367,7 +367,7 @@ verify_jwt = false
 
 No other Function's JWT setting changes.
 
-- [ ] **Step 8: Run focused verification**
+- [x] **Step 8: Run focused verification**
 
 ```powershell
 & '.\node_modules\.bin\vitest.CMD' run supabase/functions/_shared/http.test.ts supabase/functions/_shared/push-auth.test.ts supabase/functions/_shared/push-contracts.test.ts supabase/functions/push-subscription/index.test.ts
@@ -375,11 +375,11 @@ No other Function's JWT setting changes.
 
 Expected: all selected tests PASS.
 
-- [ ] **Step 9: Independent security review gate**
+- [x] **Step 9: Independent security review gate**
 
 Reviewer checks credential entropy, HMAC use, error indistinguishability, endpoint validation, durable rate limiting, redaction and least-privilege grants.
 
-- [ ] **Step 10: Commit Task 3**
+- [x] **Step 10: Commit Task 3**
 
 ```powershell
 git add -- supabase/functions/_shared/push-auth.ts supabase/functions/_shared/push-auth.test.ts supabase/functions/_shared/push-contracts.ts supabase/functions/_shared/push-contracts.test.ts supabase/functions/push-subscription/handler.ts supabase/functions/push-subscription/index.ts supabase/functions/push-subscription/index.test.ts supabase/functions/_shared/http.ts supabase/functions/_shared/http.test.ts supabase/config.toml
