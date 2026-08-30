@@ -1,5 +1,28 @@
 # UVAlert Vercel 部署狀態
 
+## 2026-08-30 Production 現況
+
+**驗證時間**：2026-08-30 16:14（Asia/Taipei）
+
+**程式 commit**：`f358a5a326d4ad1b9610ba0407b76c6c3192888e`
+
+**Vercel deployment**：`dpl_2Zmowvrz7hnt2qphR2exitW2xrSN`（`READY`）
+
+**正式網址**：`https://uv-alert-web.vercel.app`
+
+**Supabase Function**：`https://ykfdnltaqpdytmrszbbk.supabase.co/functions/v1/uv-forecast`
+
+- Vercel Production 與 Preview 的 `VITE_API_BASE_URL` 已設為 `https://ykfdnltaqpdytmrszbbk.supabase.co/functions/v1`，類型為公開 Config。
+- Supabase `uv-forecast` 為 `ACTIVE`、version 11、`verify_jwt=false`；只有這個公開 Function 關閉平台 JWT 檢查。
+- `Origin: https://uv-alert-web.vercel.app` 的 OPTIONS 與 GET CORS 已驗證；`regionCode=63000010` 實測 HTTP 200，回傳 5 日 UV 與溫度資料。
+- 同一區域後續回應保留第一次成功請求的 `fetchedAt=2026-08-30T07:55:57.744Z`；資料庫 migration 已授予 `service_role` 必要的 cache `select/insert/update` 權限。這是 cache 行為證據，但本次沒有額外取得 Function invocation log。
+- 正式 `/forecast` 與主 JS bundle HTTP 200；bundle 包含正確 Supabase Function base 與 `uv-forecast` slug，不含 `CWA_API_KEY` 或 CWA 授權碼格式。
+- `pnpm check` 通過：100 個測試檔、1057 項測試；typecheck、ESLint、Stylelint 全通過。`pnpm build` 亦通過。
+- build 仍有既有的大型 chunk 警告；本機未設定 `VITE_PUBLIC_SITE_URL` 時，教育靜態頁 canonical 會暫用 localhost。兩者未阻擋本次正式部署。
+- 尚未完成實體手機 UI smoke test；Auth、Sync 與 feedback 的完整正式環境驗證不屬於本次 UV Function 完成證據。
+
+以下 2026-08-27／08-29 內容保留為歷史紀錄；其中「正式網址尚未更新」等敘述已由本節取代。
+
 **紀錄日期**：2026-08-27（Asia/Taipei）；**2026-08-29 補註，見文末**
 **用途**：區分目前可供測試的 Vercel preview，與尚未更新的正式網址；本文件是部署現況，不代表正式後端已上線。
 
