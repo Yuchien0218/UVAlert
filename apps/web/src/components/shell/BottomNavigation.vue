@@ -58,7 +58,21 @@ function navigationLabel(to: string, label: string): string {
   bottom: 0;
   left: 0;
   display: grid;
-  width: min(100%, var(--content-max));
+  /*
+   * 2026-08-30：原本是 `width: min(100%, var(--content-max))`，在 320px
+   * （WCAG SC 1.4.10 reflow 的基準寬度）會撐出 16px 的橫向捲軸。
+   *
+   * 兩個原因疊在一起：
+   * 1. 這個元素同時設了 `left: 0; right: 0` 與 `width`，兩者衝突——LTR 下
+   *    left ＋ width 勝出，right 形同虛設。
+   * 2. `position: fixed` 的 100% 是 viewport 寬，**不扣除桌面瀏覽器佔位的
+   *    垂直捲軸**。實測 320px 視窗：clientWidth 320、捲軸 16、導覽列 336。
+   *    真實手機的捲軸是覆蓋式不佔寬，所以只在桌面窄視窗看得到。
+   *
+   * 改用 max-width：寬度交給 left/right 決定（那個是扣掉捲軸的），
+   * max-width 只負責限制上限，margin-inline: auto 維持置中。
+   */
+  max-width: var(--content-max);
   min-height: calc(var(--bottom-nav-height) + env(safe-area-inset-bottom));
   grid-template-columns: repeat(3, 1fr);
   margin-inline: auto;

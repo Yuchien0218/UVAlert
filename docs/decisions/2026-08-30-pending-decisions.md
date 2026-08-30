@@ -110,7 +110,24 @@
 
 ---
 
-## 五、殘留 worktree（不是設計裁決，但別漏掉）
+## 五、Logo 要調整（2026-08-30 使用者提出，方向待補）
+
+**狀態：待使用者補充方向。**
+
+使用者 2026-08-30 指出「Logo 要調整」，但還沒說要往哪個方向調。動手前需要知道的是：
+
+1. **要調的是哪一個？** 目前有三處在用：
+   - 首頁左上角 `brand-header` 的圖標＋「防曬晴報員」文字
+   - App icon／favicon（已套用新 Logo）
+   - `manifest.webmanifest`
+2. **是造型要改，還是套用範圍要改？** 依 `CLAUDE.md`：App icon／favicon 已經套用新 Logo，但 `packages/ui/src/styles.css` 與 `manifest.webmanifest` **仍是舊的中性灰階**——「icon 換了不等於配色換了」。如果指的是這個落差，那是套用範圍問題，不是造型問題。
+3. **幾何的真實來源是 Illustrator**（`docs/design/icon-system/README.md`），不要手改 SVG path。若是造型要改，得先有新的匯出檔。
+
+**提醒**：Logo 用的是圖示配色（墨咖 `#33291F` ＋ 琥珀金 `#C1832E`），與介面配色（暖象牙 ＋ 深杏桃 `#9F5E42`）是兩套，不要混用。
+
+---
+
+## 六、殘留 worktree（不是設計裁決，但別漏掉）
 
 `.worktrees/codex-supabase-uv-forecast` 是**已註冊**的 git worktree，在 `codex/supabase-uv-forecast` 分支（`bd1ea04`），不是被遺忘的資料夾。
 
@@ -129,5 +146,6 @@
 | 「了解今天的 UV」改為 hero 卡（本文件 §1） | — | 已完成，commit `559a5ac` |
 | `/setup` 叉叉改左上「回上一頁」，離開不刪草稿（本文件 §2） | §4 | 已完成，commit `b945902` |
 | 部位狀態：移除「N 個原因」改群組層級說明＋收合（本文件 §3） | §5 | 已完成，見 `claude/zone-status-reasons` |
+| 底部導覽在 320px 撐出 16px 橫向捲軸（WCAG SC 1.4.10 基準寬度） | — | 已完成，見 `claude/bottom-nav-overflow` |
 
 §1（token 紀律）稽核結論是「不需要再做一輪」。
