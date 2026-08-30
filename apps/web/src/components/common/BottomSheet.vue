@@ -105,7 +105,7 @@ const { closeFromBackdrop } = useOverlay({
   align-items: start;
   justify-content: space-between;
   gap: var(--space-4);
-  padding: var(--space-5);
+  padding: var(--card-padding);
   border-bottom: 1px solid var(--border-subtle);
 }
 
@@ -118,8 +118,8 @@ const { closeFromBackdrop } = useOverlay({
   min-height: 0;
   overflow-y: auto;
   overscroll-behavior: contain;
-  padding: var(--space-5) var(--space-5)
-    max(var(--space-5), env(safe-area-inset-bottom));
+  padding: var(--card-padding) var(--card-padding)
+    max(var(--card-padding), env(safe-area-inset-bottom));
 }
 
 .bottom-sheet__footer {

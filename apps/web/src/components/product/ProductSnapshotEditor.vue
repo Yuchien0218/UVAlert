@@ -357,7 +357,7 @@ const summary = computed(() => {
   display: grid;
   grid-template-columns: auto minmax(0, 1fr);
   gap: var(--space-4);
-  padding: var(--space-5);
+  padding: var(--card-padding);
 }
 
 .session-product__eyebrow {

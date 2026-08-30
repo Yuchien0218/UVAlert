@@ -331,7 +331,7 @@ button.text-link {
 .zone-groups {
   display: grid;
   gap: var(--space-4);
-  padding: var(--space-5);
+  padding: var(--card-padding);
 }
 
 .zone-groups__heading h2 {

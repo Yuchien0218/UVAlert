@@ -51,7 +51,7 @@ const emit = defineEmits<{
 
 <style scoped>
 .reapply-section {
-  padding: var(--space-5);
+  padding: var(--card-padding);
 }
 fieldset {
   margin: 0;

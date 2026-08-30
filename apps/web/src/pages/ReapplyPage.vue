@@ -237,7 +237,7 @@ function zoneNames(zoneIds: string[]): string {
   display: grid;
   justify-items: start;
   gap: var(--space-3);
-  padding: var(--space-5);
+  padding: var(--card-padding);
 }
 .submit-error p {
   margin: 0;

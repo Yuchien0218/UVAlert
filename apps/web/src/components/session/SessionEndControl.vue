@@ -154,6 +154,10 @@ const { closeFromBackdrop } = useOverlay({
   inset: 0;
   display: grid;
   place-items: center;
+  /*
+   * 這裡刻意**不是** --card-padding：它是 backdrop 與視窗邊緣的留白，
+   * 不是任何表面的內距。調整卡片鬆緊時不應該連帶動到它。
+   */
   padding: var(--space-5);
   background: var(--overlay-backdrop);
 }
@@ -162,7 +166,7 @@ const { closeFromBackdrop } = useOverlay({
   display: grid;
   gap: var(--space-3);
   width: min(100%, 24rem);
-  padding: var(--space-5);
+  padding: var(--card-padding);
   border: 1px solid var(--border-subtle);
   border-radius: var(--radius-lg);
   background: var(--surface-overlay);

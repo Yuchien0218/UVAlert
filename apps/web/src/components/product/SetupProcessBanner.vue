@@ -41,7 +41,7 @@ defineEmits<{
   display: grid;
   grid-template-columns: auto minmax(0, 1fr);
   gap: var(--space-3) var(--space-4);
-  padding: var(--space-5);
+  padding: var(--card-padding);
   border: 1px solid var(--color-primary);
   border-radius: var(--radius-lg);
   background: var(--color-surface-cream-strong);
