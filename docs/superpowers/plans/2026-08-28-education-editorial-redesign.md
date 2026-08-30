@@ -1,5 +1,7 @@
 # Education Editorial Redesign Implementation Plan
 
+> **2026-08-30：首頁部分已由裁決 A 取代，不要再照這份做首頁。** 衛教首頁改為「了解今天的 UV」hero 卡＋其餘五張分類卡（commit `559a5ac`），不是這份寫的「精選導讀＋四張主題卡＋兩個低強度連結」。理由見 `docs/decisions/2026-08-30-pending-decisions.md` 第一節——A 被 2026-08-09／08-14 裁決兩次並寫進現行 sitemap，而這份把健康邊界內容「特殊情況」降為低強度連結，與不可隱藏清單衝突。**文章頁的部分仍然有效**（takeaway block 與波浪已實作）。
+
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
 **Goal:** Redesign the education landing page and article pages into a lighter editorial experience with four primary topic cards, plain-text article titles, and a warm takeaway block with a short wave.
