@@ -189,6 +189,23 @@ body
   font-size: var(--font-size-nav-label);
 }
 
+/*
+ * 2026-08-30：`<small>` 補上字級，否則會落到瀏覽器預設的 `font-size: smaller`
+ * （≈0.8125em＝13px），而 13px 不在 12／14／16／18／20／28 的量表上。稽核
+ * 實測全站 8 處 `<small>` 有 7 處是 13px，見
+ * docs/decisions/2026-08-30-ui-audit-findings.md 第二節。
+ *
+ * 選 supporting（14px）而不是 caption：這些 `<small>` 幾乎都是卡片與選項的
+ * 說明文字，對應 DESIGN.md 第五節「欄位標籤、helper text、次要資訊與補充
+ * 文字」。真正的 badge 用途（caption）由元件自己覆寫。
+ *
+ * 用標籤選擇器而不是逐處加 class，是為了讓之後新寫的 `<small>` 也自動落在
+ * 量表上；`[data-typography-role]` 的特異性更高，顯式標角色時仍然贏。
+ */
+small {
+  font-size: var(--font-size-supporting);
+}
+
 .page-heading {
   display: grid;
   gap: var(--space-3);
