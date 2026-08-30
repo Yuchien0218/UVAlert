@@ -164,6 +164,32 @@ const reminderPresentation = computed(() => {
 });
 
 /**
+ * 「記錄狀況」改用提問式的提示卡，不再是深杏桃主 CTA。
+ *
+ * 2026-08-30 使用者裁決（見 docs/decisions/2026-08-30-pending-decisions.md
+ * 第六節）：「事件現在是深色按鈕，會一直注意到這個事件的存在」。
+ *
+ * 這與 domain 的語意是相符的——情境事件（流汗／擦毛巾／摩擦／洗手／下水）
+ * **本來就是條件觸發**，不是每次都要做。滿寬實心按鈕讀起來是「你現在該做
+ * 這件事」，跟「如果剛好發生了，才需要點」不是同一件事。
+ *
+ * 兩個條件缺一不可：
+ *
+ * 1. `actionKind === "report_context_event"`。那顆按鈕的文字跟著 actionKind
+ *    走，共 13 種；問句只對「記錄狀況」成立。「補上防護紀錄」「確認防護
+ *    方式」這些是真的要使用者去做的事，配上問句會變成明明要求動作卻寫得
+ *    像可有可無。
+ * 2. `tone !== "due"`。到了補擦時間時它是「記錄補擦」，那是當下最主要的
+ *    任務，降級反而有害——這也是為什麼不能一刀切。
+ */
+const showContextEventPrompt = computed(
+  () =>
+    reminderPresentation.value !== null &&
+    reminderPresentation.value.actionKind === "report_context_event" &&
+    reminderPresentation.value.tone !== "due"
+);
+
+/**
  * S-07 的動作分派。
  *
  * 2026-08-24：`/reminder` 併入本頁後改用 resolveActionDestination——
@@ -335,8 +361,34 @@ function handleEndSession(): void {
         />
       </div>
 
+      <!--
+        提問式的提示卡。文案涵蓋 ReportContextEventPage 實際提供的五個
+        選項（大量流汗／擦毛巾／明顯摩擦／洗手／游泳下水），不只講流汗
+        ——只講流汗會讓另外四種看起來不算數。
+
+        用「你」不用「您」：2026-08-23-wireframe-copy-fixes.md 第 2.3 節
+        有實測紀錄，apps/web/src/ 之中「您」0 次、「你」41 次。
+      -->
+      <section
+        v-if="showContextEventPrompt && reminderPresentation !== null"
+        class="home__prompt app-card"
+        aria-labelledby="context-event-prompt"
+      >
+        <p id="context-event-prompt" class="home__prompt-question">
+          剛才有流汗、碰水或擦拭嗎？
+        </p>
+        <p class="home__prompt-hint">記錄後會重新計算補擦時間。</p>
+        <button
+          class="button button--quiet"
+          type="button"
+          @click="handleAction(reminderPresentation.actionKind)"
+        >
+          {{ reminderPresentation.actionLabel }}
+        </button>
+      </section>
+
       <button
-        v-if="reminderPresentation !== null"
+        v-else-if="reminderPresentation !== null"
         class="button button--primary home__cta"
         type="button"
         @click="handleAction(reminderPresentation.actionKind)"
@@ -542,6 +594,33 @@ function handleEndSession(): void {
 
 .home__cta {
   width: 100%;
+}
+
+/*
+ * 2026-08-30：情境事件的提示卡。留在倒數正下方（使用者裁決的位置），
+ * 但份量從深杏桃實心滿寬按鈕降成一張卡片內的 quiet 按鈕。
+ *
+ * 按鈕**不設 width: 100%**：滿寬是主 CTA 的語彙，這裡要的是「如果剛好
+ * 發生了，才需要點」，按鈕貼齊左緣、只佔內容寬度即可。
+ */
+.home__prompt {
+  display: grid;
+  justify-items: start;
+  gap: var(--space-2);
+  padding: var(--space-4);
+}
+
+.home__prompt-question {
+  margin: 0;
+  font-weight: 500;
+  line-height: var(--line-height-body);
+}
+
+.home__prompt-hint {
+  margin: 0;
+  color: var(--text-secondary);
+  font-size: var(--font-size-supporting);
+  line-height: var(--line-height-body);
 }
 
 .home__spacer {

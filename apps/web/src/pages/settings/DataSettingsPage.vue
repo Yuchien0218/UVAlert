@@ -151,6 +151,18 @@ function writeSyncDisabled(value: boolean): void {
         <h2 id="data-summary-title" data-typography-role="card-title">
           這台裝置儲存了什麼
         </h2>
+        <!--
+          2026-08-30：補上範圍說明。這些數字只數得到本機 IndexedDB 裡的
+          東西——登入同步後雲端可能還有其他裝置上傳的紀錄，這張卡看不到
+          也數不到。不講清楚的話，使用者會把「防曬裝備 0 筆」讀成「我的
+          資料都不見了」。
+
+          這正是 2026-08-29 settings-data-sync-merge 那次合併要解決的
+          「本機 vs 雲端」混淆（見該裁決第九節），只是當時沒有訂這句。
+        -->
+        <p class="summary-scope">
+          以下數量只代表這台裝置上的本機紀錄，不包含其他裝置或尚未下載的雲端資料。
+        </p>
         <dl class="summary-grid">
           <div>
             <dt>防曬裝備</dt>
@@ -443,17 +455,40 @@ dd {
   font-size: var(--font-size-card-title);
 }
 
+/*
+ * 2026-08-30：數量的範圍說明。用 supporting ＋ --text-body 而不是
+ * --text-secondary——它是「讀這些數字之前必須知道的前提」，不是可有可無
+ * 的補充；DESIGN.md 第五節的不可隱藏清單把這類條件列為常駐。
+ */
+.summary-scope {
+  margin: 0;
+  color: var(--text-body);
+  font-size: var(--font-size-supporting);
+  line-height: var(--line-height-body);
+}
+
 .summary-grid {
   display: grid;
-  gap: var(--space-3);
   width: 100%;
   margin: 0;
 }
 
+/*
+ * 2026-08-30：改用分隔線而不是間距。六列 label／value 只靠 --space-3
+ * 分開時，掃讀要靠眼睛自己配對左右兩欄；hairline 把每一列框成一個單位，
+ * 配對就不用出力。gap 一併移除，改由各列自己的內距撐開，避免「間距 ＋
+ * 分隔線」兩套節奏疊在一起。
+ */
 .summary-grid > div {
   display: flex;
   justify-content: space-between;
   gap: var(--space-3);
+  padding-block: var(--space-3);
+  border-top: 1px solid var(--border-subtle);
+}
+
+.summary-grid > div:first-child {
+  border-top: 0;
 }
 
 .summary-grid dt {

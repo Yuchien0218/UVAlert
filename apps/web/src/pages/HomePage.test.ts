@@ -219,6 +219,113 @@ describe("HomePage", () => {
      * 這條守的是**兩者必須在同一個容器裡**。拆回兩列的話 CSS 不會報錯、
      * 測試也不會紅，就只是默默地把 60px 還回去。
      */
+    /*
+     * 2026-08-30 使用者裁決（pending-decisions §6）：「事件現在是深色按鈕，
+     * 會一直注意到這個事件的存在」——「記錄狀況」改成提問式的提示卡。
+     *
+     * 這與 domain 語意相符：情境事件（流汗／毛巾／摩擦／洗手／下水）本來
+     * 就是條件觸發，不是每次都要做。
+     */
+    it("倒數進行中時「記錄狀況」是提問式提示卡，不是主 CTA", async () => {
+      // 共用的 session fixture 其實已經到期（zoneDueAt 是 2026-08-01），
+      // 這裡要的是「還在倒數」，所以把 actionAt 推到未來。
+      mockServices({
+        session: {
+          ...session,
+          primaryAction: {
+            ...session.primaryAction,
+            actionAt: "2099-01-01T00:00:00.000Z"
+          }
+        },
+        region: { displayName: "臺北市 大安區" }
+      });
+
+      const wrapper = await mountHome();
+
+      const prompt = wrapper.find(".home__prompt");
+      expect(prompt.exists()).toBe(true);
+      expect(prompt.text()).toContain("流汗");
+      // 涵蓋五種狀況，不只流汗——只講流汗會讓另外四種看起來不算數。
+      expect(prompt.text()).toContain("碰水");
+      expect(prompt.get("button").classes()).toContain("button--quiet");
+      // 深杏桃滿寬主 CTA 不該同時存在。
+      expect(wrapper.find(".home__cta").exists()).toBe(false);
+      // 全站一致用「你」（wireframe-copy-fixes §2.3 的實測結論）。
+      expect(prompt.text()).not.toContain("您");
+    });
+
+    /*
+     * 反向：到了補擦時間時它就是當下最主要的任務，降級反而有害。
+     * 這是為什麼不能一刀切、必須看 tone。
+     */
+    it("到了補擦時間仍是主 CTA，不降級成提示卡", async () => {
+      mockServices({
+        session: {
+          ...session,
+          primaryAction: {
+            ...session.primaryAction,
+            actionKind: "record_reapplication",
+            presentationType: "due_card",
+            actionAt: "2020-01-01T00:00:00.000Z"
+          }
+        },
+        region: { displayName: "臺北市 大安區" }
+      });
+
+      const wrapper = await mountHome();
+
+      expect(wrapper.find(".home__prompt").exists()).toBe(false);
+      expect(wrapper.find(".home__cta").exists()).toBe(true);
+      expect(wrapper.get(".home__cta").classes()).toContain("button--primary");
+    });
+
+    /*
+     * 上面兩條各自只守住一個條件——它們的 actionKind 與 tone 剛好同時
+     * 變動，所以拿掉任一個條件都還是綠的（2026-08-30 實測確認過）。
+     * 下面兩條把兩個變因拆開，才真的守得住。
+     */
+
+    // 守 tone：同樣是「記錄狀況」，到期時就不該再降級。
+    it("記錄狀況到期時回到主 CTA", async () => {
+      mockServices({
+        session: {
+          ...session,
+          primaryAction: {
+            ...session.primaryAction,
+            actionKind: "report_context_event",
+            actionAt: "2020-01-01T00:00:00.000Z"
+          }
+        },
+        region: { displayName: "臺北市 大安區" }
+      });
+
+      const wrapper = await mountHome();
+
+      expect(wrapper.find(".home__prompt").exists()).toBe(false);
+      expect(wrapper.find(".home__cta").exists()).toBe(true);
+    });
+
+    // 守 actionKind：同樣未到期，但這是真的要使用者去做的事，
+    // 配上「剛才有流汗嗎？」會變成明明要求動作卻寫得像可有可無。
+    it("未到期的其他動作不套用提問式提示卡", async () => {
+      mockServices({
+        session: {
+          ...session,
+          primaryAction: {
+            ...session.primaryAction,
+            actionKind: "confirm_protection_method",
+            actionAt: "2099-01-01T00:00:00.000Z"
+          }
+        },
+        region: { displayName: "臺北市 大安區" }
+      });
+
+      const wrapper = await mountHome();
+
+      expect(wrapper.find(".home__prompt").exists()).toBe(false);
+      expect(wrapper.find(".home__cta").exists()).toBe(true);
+    });
+
     it("結束鈕與倒數在同一列，不各佔一列", async () => {
       mockServices({ session, region: { displayName: "臺北市 大安區" } });
 
