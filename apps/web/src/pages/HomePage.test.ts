@@ -209,6 +209,26 @@ describe("HomePage", () => {
       expect(wrapper.findComponent(HomeNightSession).exists()).toBe(false);
       expect(wrapper.findComponent(HomeCountdown).exists()).toBe(true);
     });
+
+    /*
+     * 2026-08-30：結束鈕與倒數併成同一列，把首屏頂端讓出來。
+     *
+     * 實測（390×844）改前後：倒數區塊 y=160 → 100、主行動 y=315 → 258、
+     * 部位狀態 y=489 → 422，「最近事件」從被底部導覽切掉變成完整可見。
+     *
+     * 這條守的是**兩者必須在同一個容器裡**。拆回兩列的話 CSS 不會報錯、
+     * 測試也不會紅，就只是默默地把 60px 還回去。
+     */
+    it("結束鈕與倒數在同一列，不各佔一列", async () => {
+      mockServices({ session, region: { displayName: "臺北市 大安區" } });
+
+      const wrapper = await mountHome();
+
+      const head = wrapper.find(".home__session-head");
+      expect(head.exists()).toBe(true);
+      expect(head.findComponent(HomeCountdown).exists()).toBe(true);
+      expect(head.findComponent(SessionEndControl).exists()).toBe(true);
+    });
   });
 
   describe("沒有提醒進行中", () => {

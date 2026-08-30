@@ -60,18 +60,12 @@ const stateIcon = computed(() => STATE_ICON[props.presentation.tone]);
       <span class="countdown__unit">分鐘</span>
     </div>
 
-    <p class="countdown__detail">
-      <Transition name="countdown-state" mode="out-in">
-        <Icon
-          :key="presentation.tone"
-          :name="stateIcon"
-          :size="20"
-          class="countdown__state-icon"
-        />
-      </Transition>
-      <span>{{ presentation.title }}・{{ presentation.timeLabel }}</span>
-    </p>
-
+    <!--
+      2026-08-30：進度條移到讀數正下方，排在說明文字之前。
+      原本順序是 讀數 → 說明 → 進度條 →（頁面的）主行動按鈕，進度條夾在
+      說明與按鈕之間，視覺上讀起來像按鈕的裝飾條。它描述的是倒數，貼著
+      它描述的數字才對。
+    -->
     <div
       v-if="hasProgress"
       class="countdown__track"
@@ -86,6 +80,18 @@ const stateIcon = computed(() => STATE_ICON[props.presentation.tone]);
         :style="{ width: `${presentation.progressPercent}%` }"
       />
     </div>
+
+    <p class="countdown__detail">
+      <Transition name="countdown-state" mode="out-in">
+        <Icon
+          :key="presentation.tone"
+          :name="stateIcon"
+          :size="20"
+          class="countdown__state-icon"
+        />
+      </Transition>
+      <span>{{ presentation.title }}・{{ presentation.timeLabel }}</span>
+    </p>
   </section>
 </template>
 
