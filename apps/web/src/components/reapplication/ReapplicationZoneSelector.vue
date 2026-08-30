@@ -57,10 +57,15 @@ fieldset {
   margin: 0;
   min-width: 0;
 }
+/*
+ * 2026-08-30：字重 700 → 500。這個 legend 用的是 section-title 字級，而
+ * DESIGN.md 第 581 行訂「section title 的字重 500」；700 既不在量表上，
+ * 字型也只載入 400／500／600。
+ */
 legend {
   padding: 0;
   font-size: var(--font-size-section-title);
-  font-weight: 700;
+  font-weight: var(--font-weight-section-title);
 }
 .section-help {
   color: var(--text-secondary);

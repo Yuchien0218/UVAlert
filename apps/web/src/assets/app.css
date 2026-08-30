@@ -206,6 +206,31 @@ small {
   font-size: var(--font-size-supporting);
 }
 
+/*
+ * 2026-08-30：`<strong>` 補上字重，跟上面的 `<small>` 是同一種問題。
+ *
+ * 沒有全域規則時 `<strong>` 落到瀏覽器預設的 `font-weight: bold`（700），
+ * 而 DESIGN.md 第三節訂的是「內文段落維持字重 400，**標籤與強調短語
+ * 500**」，字型也只載入 400／500／600 三個字重。實測 `/settings/data`：
+ * 8 個 `<strong>` 全部渲染成 700。
+ *
+ * 全站 19 個檔案用到 `<strong>`，其中 11 個完全沒有覆寫字重——那 11 個
+ * 就是 700。逐處補 class 只會漏掉下一個新寫的，所以補在標籤上。
+ *
+ * 已經自己寫 500 的 scoped 規則（`.entry strong` 等）特異性更高，不受
+ * 影響；需要 600 的地方（`.status-card__label`）也一樣。
+ *
+ * **這裡是 DESIGN.md 的一個 token 缺口。** `--font-weight-*` 有 7 個角色
+ * （page-title／section-title／card-title／body／supporting／caption／
+ * nav-label），但沒有「強調短語」這個角色。值雖然跟 caption 一樣是 500，
+ * 借用 caption 的名字會誤導——caption 指的是短註腳、時間戳、eyebrow、
+ * badge，不是行內強調。先照全站其餘 29 處的既有做法寫字面值，缺口記在
+ * 2026-08-30-pending-decisions.md 第 8.2 節，等 DESIGN.md 稽核時一起補。
+ */
+strong {
+  font-weight: 500;
+}
+
 .page-heading {
   display: grid;
   gap: var(--space-3);

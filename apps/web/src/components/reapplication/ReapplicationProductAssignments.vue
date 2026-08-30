@@ -232,8 +232,12 @@ p {
   width: 100%;
 }
 
+/*
+ * 2026-08-30：字重 700 → 500。DESIGN.md 第三節訂「標籤與強調短語 500」，
+ * 700 不在量表上，字型也只載入 400／500／600。
+ */
 .assignment-row label {
-  font-weight: 700;
+  font-weight: 500;
 }
 
 select {

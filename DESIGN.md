@@ -407,7 +407,7 @@ components:
 | `{colors.primary}` 深杏桃          | `#9F5E42` | `hsl(18, 41%, 44%)`  | 主要行動色。用於主 CTA 與品牌字標；每個決策情境只出現一次 |
 | `{colors.primary-active}`          | `#804536` | `hsl(12, 41%, 36%)`  | 按下狀態                                                  |
 | `{colors.primary-disabled}`        | `#E8D1C5` | `hsl(21, 43%, 84%)`  | 停用狀態，仍看得出與主色的血緣                            |
-| `{colors.accent-apricot}` 陽光杏桃 | `#E8A477` | `hsl(24, 71%, 69%)`  | 倒數進度環、插圖筆觸、小面積高光。此色上必須用深咖文字    |
+| `{colors.accent-apricot}` 陽光杏桃 | `#E8A477` | `hsl(24, 71%, 69%)`  | 插圖筆觸、小面積高光。此色上必須用深咖文字（2026-08-30：拿掉「倒數進度環」，進度條 2026-08-29 起改用狀態色 `{colors.status-tracking}`／`soon`／`due`） |
 | `{colors.accent-blush}` 腮紅       | `#D79A92` | `hsl(7, 46%, 71%)`   | 衛教引言與分類細節；永遠不作為行動色                      |
 | `{colors.accent-mauve}` 藕紫       | `#8C6F7A` | `hsl(337, 12%, 49%)` | 已完成、安心狀態。裝備勾選與閱讀進度                      |
 | `{colors.accent-amber}` 香檳金     | `#D9A35F` | `hsl(33, 62%, 61%)`  | 徽章、SPF 標記、陽光母題。不用於內文                      |
