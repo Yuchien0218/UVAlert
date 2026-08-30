@@ -113,7 +113,7 @@ export interface RemotePushPort {
 
 - Consumes: existing `SunshieldDatabase` and platform package export pattern.
 
-- [ ] **Step 1: Add failing persistence tests**
+- [x] **Step 1: Add failing persistence tests**
 
 Create tests that use a unique fake IndexedDB name and assert:
 
@@ -144,7 +144,7 @@ expect(await repository.readPendingIntent()).toEqual({
 
 Also assert `clearPendingIntent(oldOperationId)` does not erase a newer intent, while the matching operation id does.
 
-- [ ] **Step 2: Run the focused test and verify RED**
+- [x] **Step 2: Run the focused test and verify RED**
 
 Run:
 
@@ -154,7 +154,7 @@ Run:
 
 Expected: FAIL because `LocalPushStateRepository`, its table and platform types do not exist.
 
-- [ ] **Step 3: Add the platform contracts and Dexie v4 table**
+- [x] **Step 3: Add the platform contracts and Dexie v4 table**
 
 Add a `PushDeliveryState` table keyed by a constant `id = "current-device"`:
 
@@ -168,11 +168,11 @@ export type PushDeliveryStateRecord = {
 
 Add `this.version(4).stores({ PushDeliveryState: "&id" })`. Do not modify or clear any existing v1-v3 tables.
 
-- [ ] **Step 4: Implement compare-and-clear semantics**
+- [x] **Step 4: Implement compare-and-clear semantics**
 
 `replacePendingIntent` overwrites the single current intent. `clearPendingIntent(operationId)` runs in a Dexie read-write transaction and clears only when the stored intent has the same operation id.
 
-- [ ] **Step 5: Run focused tests and package typechecks**
+- [x] **Step 5: Run focused tests and package typechecks**
 
 Run:
 
@@ -184,11 +184,11 @@ pnpm --filter @sunshield/persistence-web typecheck
 
 Expected: all selected tests and typechecks PASS.
 
-- [ ] **Step 6: Independent review gate**
+- [x] **Step 6: Independent review gate**
 
 Reviewer checks that v4 is additive, credentials never enter backup/export payloads, and an older completed request cannot clear a newer pending intent.
 
-- [ ] **Step 7: Commit Task 1**
+- [x] **Step 7: Commit Task 1**
 
 ```powershell
 git add -- packages/platform/src/index.ts packages/persistence-web/src/db/database.ts packages/persistence-web/src/repositories/local-push-state-repository.ts packages/persistence-web/src/repositories/local-push-state-repository.test.ts packages/persistence-web/src/index.ts
