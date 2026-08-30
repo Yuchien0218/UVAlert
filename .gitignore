@@ -1,5 +1,6 @@
 node_modules/
 .vercel/
+supabase/.temp/
 .pnpm-store/
 .worktrees/
 dist/

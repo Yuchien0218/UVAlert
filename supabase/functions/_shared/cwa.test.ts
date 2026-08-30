@@ -84,6 +84,51 @@ describe("CWA UV boundary", () => {
     });
   });
 
+  it("支援現行 CWA 的 Locations 與 Location 大寫容器", () => {
+    const legacy = makeCwaResponse();
+    const container = legacy.records.locations[0];
+    const current = {
+      records: {
+        Locations: [
+          {
+            DatasetInfo: container.datasetInfo,
+            Location: container.location
+          }
+        ]
+      }
+    };
+
+    const result = mapCwaForecast(current, {
+      regionCode,
+      fetchedAt: "2026-08-17T00:00:00.000Z",
+      now: "2026-08-17T00:00:00.000Z"
+    });
+
+    expect(result.region).toEqual({
+      regionCode,
+      displayName: "新北市萬里區"
+    });
+    expect(result.days).toHaveLength(5);
+    expect(result.days[0]).toMatchObject({
+      uvi: 8,
+      temperatureCelsius: 30
+    });
+  });
+
+  it("CWA 只有縣市 Geocode 時，以鄉鎮碼所屬縣市預報回應", () => {
+    const result = mapCwaForecast(makeCwaResponse({ regionCode: "63000000" }), {
+      regionCode: "63000010",
+      fetchedAt: "2026-08-17T00:00:00.000Z",
+      now: "2026-08-17T00:00:00.000Z"
+    });
+
+    expect(result.region).toEqual({
+      regionCode: "63000010",
+      displayName: "新北市萬里區"
+    });
+    expect(result.days).toHaveLength(5);
+  });
+
   it("找不到行政區、非法 UVI、全空值或已過期資料都不會產生預報", () => {
     expect(() =>
       mapCwaForecast(makeCwaResponse({ regionCode: "99999999" }), {
@@ -112,7 +157,7 @@ describe("CWA UV boundary", () => {
     ).toThrowError(CwaMappingError);
   });
 
-  it("不把授權碼放在錯誤訊息，並支援 ETag 條件請求", async () => {
+  it("支援 ETag 條件請求", async () => {
     const fetch = vi.fn(async (_url: string, init?: RequestInit) => {
       expect(init?.headers).toEqual({
         Accept: "application/json",
@@ -126,17 +171,51 @@ describe("CWA UV boundary", () => {
       etag: "etag-1"
     });
     expect(result).toEqual({ status: 304, etag: "etag-1", payload: null });
-    expect(buildCwaRequestUrl({ apiKey: "secret-key" })).toContain(
-      "format=JSON"
+    const url = new URL(buildCwaRequestUrl({ apiKey: "secret-key" }));
+    expect(url.searchParams.get("format")).toBe("JSON");
+    expect(url.searchParams.get("ElementName")).toBe("平均溫度,紫外線指數");
+    expect(url.searchParams.has("elementName")).toBe(false);
+  });
+
+  it.each([401, 429, 500, 503])(
+    "CWA HTTP %i 保留 status 且不洩漏授權碼",
+    async (status) => {
+      const apiKey = "cwa-secret-do-not-leak";
+      const failedFetch = vi.fn(async () => new Response(null, { status }));
+
+      await expect(
+        fetchCwaDataset({ fetch: failedFetch, apiKey })
+      ).rejects.toMatchObject({ status });
+
+      try {
+        await fetchCwaDataset({ fetch: failedFetch, apiKey });
+      } catch (error) {
+        expect(error).toBeInstanceOf(CwaUpstreamError);
+        expect(JSON.stringify(error)).not.toContain(apiKey);
+        expect(String(error)).not.toContain(apiKey);
+      }
+    }
+  );
+
+  it("CWA 回傳非 JSON 時拒絕資料且不洩漏授權碼", async () => {
+    const apiKey = "cwa-secret-do-not-leak";
+    const invalidJsonFetch = vi.fn(
+      async () =>
+        new Response("not-json", {
+          status: 200,
+          headers: { "Content-Type": "application/json" }
+        })
     );
 
-    const failedFetch = vi.fn(async () => new Response(null, { status: 429 }));
-    await expect(
-      fetchCwaDataset({ fetch: failedFetch, apiKey: "secret-key" })
-    ).rejects.toBeInstanceOf(CwaUpstreamError);
-    await expect(
-      fetchCwaDataset({ fetch: failedFetch, apiKey: "secret-key" })
-    ).rejects.not.toThrow("secret-key");
+    try {
+      await fetchCwaDataset({ fetch: invalidJsonFetch, apiKey });
+      expect.unreachable("非 JSON response 應拋出 CwaMappingError");
+    } catch (error) {
+      expect(error).toBeInstanceOf(CwaMappingError);
+      expect(error).toMatchObject({ reason: "INVALID_RESPONSE" });
+      expect(JSON.stringify(error)).not.toContain(apiKey);
+      expect(String(error)).not.toContain(apiKey);
+    }
   });
 
   it("拒絕不完整的 cache payload", () => {

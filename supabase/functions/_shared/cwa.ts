@@ -78,7 +78,7 @@ export function buildCwaRequestUrl(options: {
   // Only request the two fields needed by UVAlert.  The region is selected
   // from the returned Geocode so a caller cannot make arbitrary location
   // names reach the upstream service.
-  url.searchParams.set("elementName", "UVIndex,T");
+  url.searchParams.set("ElementName", "平均溫度,紫外線指數");
   return url.toString();
 }
 
@@ -147,18 +147,29 @@ export function mapCwaForecast(
   const now = normalizeInstant(options.now ?? fetchedAt, "now");
   const root = asObject(input, "CWA response");
   const records = asObject(root.records, "CWA records");
-  const locations = asArray(records.locations, "CWA locations");
+  const locations = asArray(
+    records.Locations ?? records.locations,
+    "CWA locations"
+  );
   const container =
     locations[0] === undefined
       ? null
       : asObject(locations[0], "CWA locations[0]");
   const rawLocations =
-    container === null ? [] : asArray(container.location, "CWA location");
-  const location = rawLocations
-    .map((item) => asObject(item, "CWA location item"))
-    .find(
+    container === null
+      ? []
+      : asArray(container.Location ?? container.location, "CWA location");
+  const locationItems = rawLocations.map((item) =>
+    asObject(item, "CWA location item")
+  );
+  const countyRegionCode = `${options.regionCode.slice(0, 5)}000`;
+  const location =
+    locationItems.find(
       (item) =>
         String(item.Geocode ?? item.geocode ?? "") === options.regionCode
+    ) ??
+    locationItems.find(
+      (item) => String(item.Geocode ?? item.geocode ?? "") === countyRegionCode
     );
   if (location === undefined) {
     throw new CwaMappingError(

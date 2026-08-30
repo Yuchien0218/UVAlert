@@ -3,10 +3,12 @@
 UVAlert 的後端以 Supabase 為第一版實作，但核心仍是免登入、IndexedDB、本機可工作的防曬補擦倒數。
 
 - [本機開發](./local-development.md)：CLI、migration、Edge Functions、Google OAuth 與前端 env。
-- [部署檢查表](./deployment-checklist.md)：正式環境 secrets、RLS、rewrite 與刪除資料驗證。
+- [部署檢查表](./deployment-checklist.md)：正式環境 secrets、RLS、API 路徑、CORS 與刪除資料驗證。
 - [Vercel 部署狀態](./preview-deployment.md)：目前 preview 與正式網域的差異、已驗證項目與升級條件。
 - [後端設計](../superpowers/specs/2026-08-17-backend-foundation-design.md)：已確認的資料邊界與決策。
 - [實作計畫](../superpowers/plans/2026-08-17-backend-foundation.md)：任務與驗證紀錄。
+- [UV 預報串接規格](../superpowers/specs/2026-08-30-vercel-supabase-uv-forecast-integration-design.md)：Vercel 前端直連 Supabase `uv-forecast`、CWA secret、快取與分批部署契約。
+- [UV 預報串接計畫](../superpowers/plans/2026-08-30-vercel-supabase-uv-forecast-integration.md)：本機實作、Supabase 部署、Vercel env 與 production 驗證步驟。
 - 若是由 `docs/` 或新對話開始，先讀 [`../superpowers/specs/README.md`](../superpowers/specs/README.md) 與 [`../superpowers/plans/README.md`](../superpowers/plans/README.md)，確認規格和計畫的狀態，再回到本入口。
 
 ## 不變的產品邊界
@@ -16,3 +18,10 @@ UVAlert 的後端以 Supabase 為第一版實作，但核心仍是免登入、In
 3. 同步前先顯示摘要與選擇；衝突不自動覆蓋。
 4. UV cache、已結束 Session、精確位置、裝置識別碼、通知權限、草稿與照片不進第一版跨裝置同步。
 5. 清除 UVAlert 雲端資料不會刪除 Google 帳號；清除本機資料是另一個頁面與操作。
+
+## 現行 UV 預報拓撲
+
+- Vue／Vite／PWA 前端繼續由 Vercel 託管。
+- `uv-forecast`、CWA API key 與 `uv_forecast_cache` 由 Supabase 承接。
+- Vercel production 的 `VITE_API_BASE_URL` 指向 `https://your-project-ref.supabase.co/functions/v1`，前端直接呼叫 `uv-forecast`，不經 Vercel Function 或 rewrite。
+- Sync、feedback 與 account-delete 仍依各自部署狀態判斷；UV 串通不代表其他 `/v1/*` API 已上線。

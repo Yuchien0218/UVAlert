@@ -8,6 +8,18 @@
 
 **Tech Stack:** Vue 3、Vite 7、TypeScript 5.9、Vitest 4、Supabase Edge Functions（Deno）、Supabase PostgreSQL、Vercel
 
+## 2026-08-30 執行結果
+
+- [x] Batch 1–3 的前端 endpoint、可測 handler、公開 Function 設定、安全測試與部署文件已完成。
+- [x] Supabase migration、`CWA_API_KEY`、`ALLOWED_ORIGINS` 與 `uv-forecast` 已部署到 `ykfdnltaqpdytmrszbbk`。
+- [x] 已補上 Supabase 新式 secret key、`service_role` cache grant，以及 CWA 現行 `ElementName`、`Locations/Location` 與縣市級 Geocode 相容性。
+- [x] `regionCode=63000010` 正式 Function smoke test HTTP 200，CORS 與 5 日 payload 通過。
+- [x] Vercel Production／Preview `VITE_API_BASE_URL` 已設為 Supabase Functions base；deployment `dpl_2Zmowvrz7hnt2qphR2exitW2xrSN` 為 `READY` 並 alias 至 `https://uv-alert-web.vercel.app`。
+- [x] Production `/forecast` 與主 bundle HTTP 200；bundle 含正確 Function URL，未發現 CWA secret。
+- [x] `pnpm check` 通過（100 files／1057 tests），`pnpm build` 通過。
+- [ ] 實體手機 UI smoke test 尚未執行；不以 HTTP／bundle 驗證代替觸控裝置驗證。
+- [ ] 本次沒有 Function invocation log；cache 證據為重複請求沿用首次 `fetchedAt`，不得描述成已取得 log 證據。
+
 ## Global Constraints
 
 - Node.js 必須為 `>=24.0.0`，pnpm 必須為 `>=11.0.0`。

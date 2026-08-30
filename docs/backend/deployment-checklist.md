@@ -15,12 +15,15 @@
 - [ ] OAuth 取消、失敗、登出均確認本機 active session、產品與倒數仍可讀。
 - [ ] 清除 UVAlert 雲端資料後，確認 Google 帳號仍可在 Google 端使用；只刪除 UVAlert Auth user。
 
-## Web／PWA rewrite 與 CORS
+## Web／PWA API 路徑與 CORS
 
 - [ ] 將 `/v1/sync/manifest`、`/v1/sync/read`、`/v1/sync/commit`、`/v1/sync/delete` 對應到 Supabase functions。
-- [ ] 將 `/v1/uv/forecast`、`/v1/feedback`、`/v1/account/delete` 對應到 Supabase functions。
-- [ ] `ALLOWED_ORIGINS` 與實際網站 origin 完全一致；OPTIONS、Authorization、Content-Type 可通過。
+- [ ] 部署公開的 `uv-forecast`，並確認 `[functions.uv-forecast] verify_jwt = false` 已由 Supabase 套用。
+- [ ] 在 Vercel production 設定 `VITE_API_BASE_URL=https://your-project-ref.supabase.co/functions/v1`；不要把 `uv-forecast` 完整 endpoint 重複放進 base URL。
+- [ ] `ALLOWED_ORIGINS` 精確包含正式網站 origin 與明確核准的 preview origins；OPTIONS 與 GET 回傳相符的 `Access-Control-Allow-Origin`。
+- [ ] feedback、account-delete 與其餘同步 API 依各自部署方案設定；UV API 成功不代表這些 endpoint 已完成。
 - [ ] 不讓瀏覽器直接讀取 `uv_forecast_cache` 或 `feedback_submissions`。
+- [ ] 瀏覽器 request、HTML、source map、response 與 log 都不包含 CWA key 或 service-role key。
 
 ## 資料與錯誤行為
 
@@ -33,11 +36,14 @@
 
 ## 上線前命令與 smoke test
 
-```bash
+```powershell
 pnpm check
 pnpm build
 supabase db reset
 supabase test db
+supabase functions list --project-ref $env:UVALERT_SUPABASE_PROJECT_REF
 ```
+
+UV smoke test 先直接呼叫 `https://your-project-ref.supabase.co/functions/v1/uv-forecast?regionCode=63000010`，確認 HTTP 200、JSON contract 與 production CORS；再從 Vercel `/forecast` 驗證相同 request。第二次呼叫同一行政區時，使用 Function invocation／database evidence 確認有效 cache，不能只因 response 相同就推論 cache hit。
 
 使用兩個永久測試帳號逐項驗證：Google login → manifest preview → active session／product sync → 第二裝置 read → stale revision conflict → UV cache hit／miss → feedback 429／dedupe → account delete。每一步都確認免登入本機提醒仍能開始、倒數、補擦與結束。
