@@ -520,13 +520,25 @@ p {
  * 原本的 inline span 一換行邊框就從中間斷開（「會」留在框內、
  * 「影響倒數」跑到框外）。改成整塊不可分割，放不下就整顆換行。
  */
+/*
+ * 2026-08-30：套用 --color-amber。DESIGN.md 第二節指定它的用途是「徽章、
+ * SPF 標記、陽光母題」，但它先前是全站唯一從未被引用的 accent 之一（見
+ * 2026-08-30-unused-declaration-audit.md）。這顆徽章標的正是「這個欄位
+ * 會影響補擦倒數」，在 SPF／到期日旁邊，是那個用途最貼的落點。
+ *
+ * **底色而不是文字色**：amber 當文字放在畫布上只有 2.07:1，遠低於 AA 的
+ * 4.5；深咖文字放在 amber 底上是 6.41:1。這與 DESIGN.md 對同族的
+ * accent-apricot 寫的「此色上必須用深咖文字」是同一條規則。
+ *
+ * 邊框一併移除——有實底色之後再加深色邊框會變成兩層框。
+ */
 .affects-badge {
   display: inline-block;
   padding: 0 var(--space-2);
-  border: 1px solid var(--border-strong);
   border-radius: var(--radius-pill);
+  background: var(--color-amber);
+  color: var(--text-primary);
   font-size: var(--font-size-caption);
-  color: var(--text-secondary);
   white-space: nowrap;
 }
 
