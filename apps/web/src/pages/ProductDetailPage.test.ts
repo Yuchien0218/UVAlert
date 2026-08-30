@@ -44,6 +44,8 @@ function makeProduct(
     purchaseMonth: "2026-05",
     expiryDate: "2028-05-01",
     note: "清爽好推",
+    priceTwd: null,
+    usageRating: null,
     // paGrade 存照包裝抄的完整標示，顯示端不再自己加 PA 前綴。
     currentSnapshot: { ...snapshot, spf: 50, paGrade: "PA++++" },
     snapshotFingerprint: fingerprintProductLabelSnapshot(snapshot),

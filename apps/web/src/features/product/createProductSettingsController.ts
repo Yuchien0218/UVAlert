@@ -34,6 +34,10 @@ export interface SaveGearInput {
   purchaseMonth?: string | null | undefined;
   expiryDate?: string | null | undefined;
   note?: string | null | undefined;
+  /** 2026-08-30：純紀錄，不進 reducer。 */
+  priceTwd?: number | null | undefined;
+  /** 2026-08-30：純紀錄，不進 reducer。 */
+  usageRating?: "good" | "ok" | "bad" | null | undefined;
   productId?: string | undefined;
   /**
    * 只有 sunscreen 會成為「目前使用產品」。記錄一副墨鏡不該改變
@@ -98,6 +102,8 @@ export function createProductSettingsController(
         purchaseMonth: input.purchaseMonth ?? null,
         expiryDate: input.expiryDate ?? null,
         note: input.note ?? null,
+        priceTwd: input.priceTwd ?? null,
+        usageRating: input.usageRating ?? null,
         now
       });
       if (setAsCurrent) {

@@ -181,6 +181,25 @@ export const ExpiryDateSchema = z
   .string()
   .regex(/^\d{4}-\d{2}-\d{2}$/, "到期日格式須為 YYYY-MM-DD");
 
+/**
+ * 產品目錄紀錄的 schema 版本。
+ *
+ * **2026-08-30 新增 `priceTwd` 與 `usageRating` 時刻意「不」升版。**
+ * 規格草案原本推論「`schemaVersion` 是 `z.literal()`，不升版舊紀錄反而會
+ * 過不了」——實際查證後那個推論是反的，而且升版才是危險的那一邊：
+ *
+ * - **不升版**：兩個新欄位都有 `.default(null)`，1.1.0 的舊紀錄少了它們
+ *   仍然解析得過，Zod 會補上 null。
+ * - **升版**：`LocalProductCatalogRepository.#normalize()` 對「schemaVersion
+ *   不等於當前版本」的紀錄會套用一組寫死的預設值——`gearCategory` 強制
+ *   改成 `"sunscreen"`，`purchaseMonth`／`expiryDate`／`note`／`archivedAt`
+ *   全部清成 null。那段 migration 是為 1.0.0（沒有品類欄位）寫的，升到
+ *   1.2.0 會讓完整的 1.1.0 紀錄走進去，**使用者存的太陽眼鏡會變成防曬乳、
+ *   購買月份與備註會被清空**。
+ *
+ * 要升版必須先改 `#normalize` 成逐版遷移，那是另一件工作。
+ * `product-catalog.test.ts` 有守門測試釘住這個決定。
+ */
 export const PRODUCT_CATALOG_RECORD_VERSION = "1.1.0" as const;
 
 export const ProductCatalogRecordV1Schema = z.object({
@@ -201,6 +220,21 @@ export const ProductCatalogRecordV1Schema = z.object({
   expiryDate: ExpiryDateSchema.nullable().default(null),
   /** 備忘，不進 reducer。 */
   note: z.string().trim().max(500).nullable().default(null),
+  /**
+   * 買多少錢，新台幣整數。不進 reducer。
+   *
+   * 2026-08-30 裁決不記幣別——加幣別等於要處理匯率與顯示格式，與「附加
+   * 價值的小紀錄」不相稱。
+   */
+  priceTwd: z.number().int().nonnegative().nullable().default(null),
+  /**
+   * 好不好用，三檔。不進 reducer。
+   *
+   * 2026-08-30 裁決用三檔而不是自由文字：自由文字無法排序或篩選，等於
+   * 還是只有 `note`。刻意不做五星評分——這是「好不好用」的備忘，不是
+   * 評分網站。
+   */
+  usageRating: z.enum(["good", "ok", "bad"]).nullable().default(null),
   /** 「過去用過」的時間戳，不進 reducer。 */
   archivedAt: z.string().datetime({ offset: true }).nullable().default(null),
   createdAt: z.string().datetime({ offset: true }),
