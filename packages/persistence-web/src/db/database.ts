@@ -19,6 +19,10 @@ import type {
   ZoneProjection,
   ZoneTrackingEventV1
 } from "@sunshield/contracts";
+import type {
+  PendingPushIntent,
+  PushDeviceCredentials
+} from "@sunshield/platform";
 
 export const DEFAULT_DATABASE_NAME = "sunshield-advisor-p0";
 
@@ -77,6 +81,12 @@ export type SyncMetadataRecord = {
   deletedAt: string | null;
 };
 
+export type PushDeliveryStateRecord = {
+  id: "current-device";
+  credentials: PushDeviceCredentials | null;
+  pendingIntent: PendingPushIntent | null;
+};
+
 export class SunshieldDatabase extends Dexie {
   SunscreenProducts!: Table<ProductCatalogRecordV1, string>;
   ProtectionSessions!: Table<ProtectionSessionRecord, string>;
@@ -105,6 +115,7 @@ export class SunshieldDatabase extends Dexie {
   ZoneIdentityLocks!: Table<ZoneIdentityLockRecord, [string, string]>;
   ProjectionChecksums!: Table<ProjectionChecksumRecord, [string, number]>;
   SyncMetadata!: Table<SyncMetadataRecord, [SyncRecordKind, string]>;
+  PushDeliveryState!: Table<PushDeliveryStateRecord, "current-device">;
 
   constructor(databaseName = DEFAULT_DATABASE_NAME) {
     super(databaseName);
@@ -149,6 +160,10 @@ export class SunshieldDatabase extends Dexie {
     this.version(3).stores({
       SyncMetadata:
         "[recordKind+recordId], recordKind, recordId, cloudRevision, lastSyncedAt, tombstone"
+    });
+
+    this.version(4).stores({
+      PushDeliveryState: "&id"
     });
   }
 }

@@ -370,6 +370,44 @@ export interface NotificationPort {
   sendTest(): Promise<boolean>;
 }
 
+export type BackgroundPushState =
+  | "unsupported"
+  | "permission-required"
+  | "subscribing"
+  | "enabled"
+  | "scheduled"
+  | "pending-sync"
+  | "schedule-error";
+
+export type PushDeviceCredentials = {
+  deviceId: string;
+  deviceSecret: string;
+};
+
+export type PendingPushIntent =
+  | { kind: "schedule"; dueAt: string; operationId: string }
+  | { kind: "cancel"; operationId: string };
+
+/** 本機保存匿名推播憑證與尚未同步的唯一最新意圖。 */
+export interface PushStatePort {
+  readCredentials(): Promise<PushDeviceCredentials | null>;
+  writeCredentials(value: PushDeviceCredentials): Promise<void>;
+  clearCredentials(): Promise<void>;
+  readPendingIntent(): Promise<PendingPushIntent | null>;
+  replacePendingIntent(value: PendingPushIntent): Promise<void>;
+  clearPendingIntent(operationId: string): Promise<void>;
+}
+
+/** 背景 Web Push 的裝置訂閱與單一遠端排程邊界。 */
+export interface RemotePushPort {
+  isSupported(): boolean;
+  enable(): Promise<BackgroundPushState>;
+  schedule(dueAt: string, operationId: string): Promise<BackgroundPushState>;
+  cancel(operationId: string): Promise<BackgroundPushState>;
+  disable(): Promise<BackgroundPushState>;
+  flushPendingIntent(): Promise<BackgroundPushState>;
+}
+
 /**
  * 使用者的通知偏好（目前只有再次提醒頻率）。
  *

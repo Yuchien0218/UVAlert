@@ -9,3 +9,4 @@ export * from "./repositories/local-weather-forecast-repository";
 export * from "./repositories/local-data-repository";
 export * from "./repositories/local-sync-repository";
 export * from "./repositories/local-user-preferences-repository";
+export * from "./repositories/local-push-state-repository";
