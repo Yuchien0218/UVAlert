@@ -58,7 +58,7 @@ function toLocalInputValue(date: Date): string {
       <button type="button" @click="selectKnown(0)">剛剛入水</button>
       <button type="button" @click="selectKnown(15)">
         約
-        <span class="stat-figure stat-figure--inline">15</span>
+        <span class="stat-figure">15</span>
         分鐘前
       </button>
       <button

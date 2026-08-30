@@ -123,7 +123,7 @@ function getTimingTone(timingStatus: ZoneProjection["timingStatus"]): ZoneTone {
           <li v-for="chip in group.chips" :key="chip.id" class="zone-chip">
             {{ chip.label }}
             <span v-if="chip.reasons > 0" class="zone-chip__reason">
-              ・<span class="stat-figure stat-figure--inline">
+              ・<span class="stat-figure">
                 {{ chip.reasons }}
               </span>
               個原因
