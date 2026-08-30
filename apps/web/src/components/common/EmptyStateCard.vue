@@ -37,7 +37,7 @@ const titleTypographyRole = computed(() =>
   display: grid;
   justify-items: start;
   gap: var(--space-4);
-  padding: var(--space-5);
+  padding: var(--card-padding);
 }
 
 .empty-state p {

@@ -80,7 +80,7 @@ function isSelected(minutes: number): boolean {
 .time-section {
   display: grid;
   gap: var(--space-4);
-  padding: var(--space-5);
+  padding: var(--card-padding);
 }
 h2,
 p {

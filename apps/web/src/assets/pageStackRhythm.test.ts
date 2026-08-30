@@ -30,13 +30,12 @@ const allowedGaps = [
 ];
 
 /**
- * 唯一的例外：首頁 20px。
+ * 目前沒有例外。
  *
- * 首屏「不捲動就要看完倒數、狀態與下一步」是實測出來的約束（DESIGN.md
- * 第四節），收進 compact 或放大到預設都會動到核心畫面。要改是視覺決定，
- * 不是收斂決定。
+ * 首頁的 20px 原本是唯一的具名例外（當時預設是 24px）。2026-08-30 把預設
+ * 收緊到 20px 之後，首頁的值就等於預設，已改回 --page-stack-gap。
  */
-const documentedExceptions = new Set(["HomePage.vue"]);
+const documentedExceptions = new Set<string>();
 
 function discoverPages(directory: string): string[] {
   return readdirSync(directory, { withFileTypes: true }).flatMap((entry) => {
@@ -98,7 +97,7 @@ describe("page-stack 的區塊間距只用具名檔位", () => {
       expect(
         offenders,
         `${file} 的區塊間距沒有用具名檔位：${offenders.join("、")}。` +
-          `請改用 --page-stack-gap（預設 24px）、-compact（16px）或 -prose（32px）；` +
+          `請改用 --page-stack-gap（預設 20px）、-compact（16px）或 -prose（32px）；` +
           `真的需要別的值就是新增一個檔位，要先在 DESIGN.md 說明適用場合。`
       ).toEqual([]);
     });

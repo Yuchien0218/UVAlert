@@ -229,7 +229,7 @@ const robots = computed(() =>
   grid-template-columns: auto minmax(0, 1fr);
   align-items: start;
   gap: var(--space-4);
-  padding: var(--space-5);
+  padding: var(--card-padding);
   color: inherit;
   text-decoration: none;
 }

@@ -156,7 +156,7 @@ async function deleteCloudData(): Promise<void> {
   display: grid;
   gap: var(--space-3);
   justify-items: start;
-  padding: var(--space-5);
+  padding: var(--card-padding);
 }
 .account-card h2,
 .account-card p {

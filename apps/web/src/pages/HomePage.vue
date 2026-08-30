@@ -563,7 +563,7 @@ function handleEndSession(): void {
   display: grid;
   justify-items: start;
   gap: var(--space-3);
-  padding: var(--space-5);
+  padding: var(--card-padding);
 }
 
 /*
@@ -571,13 +571,12 @@ function handleEndSession(): void {
  * 「單一畫面要在不捲動的情況下顯示倒數、狀態與下一步」），所以整體間距
  * 比其他頁緊湊，並用 spacer 把安全提示壓到底部。
  *
- * 2026-08-30：這個 20px 不在 --page-stack-gap-* 的三檔位上（16／24／32），
- * 是唯一的例外。保留原值是因為首屏「不捲動就要看完」的約束是實測出來
- * 的；收進 compact(16) 或放大到預設(24) 都會動到核心畫面，那是視覺決定
- * 不是收斂決定，要另外裁決。pageStackRhythm 測試把它列為具名例外。
+ * 2026-08-30 後續：這個 20px 原本是三檔位之外的具名例外，因為當時的預設
+ * 是 24px。同日把預設收緊到 20px（選項乙）之後，首頁的值就跟預設一模
+ * 一樣，例外不再存在——改用 --page-stack-gap，算出來的數值沒有變。
  */
 .home {
-  gap: var(--space-5);
+  gap: var(--page-stack-gap);
 }
 
 /*

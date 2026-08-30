@@ -273,6 +273,21 @@
   --page-stack-gap: var(--space-5);
   --page-stack-gap-prose: var(--space-8);
 
+  /*
+   * 卡片／面板內距。
+   *
+   * 2026-08-30 新增。DESIGN.md 第四節早就訂了「卡片內距預設 20px」，但這條
+   * 規則在程式碼裡是 28 處各自寫 `padding: var(--space-5)`——想整批調鬆緊
+   * 就得改 28 個檔案，等於這條規則沒有真的收斂成 token。數值沒有變動，
+   * 只是給它一個可以一次調的名字。
+   *
+   * 只定義預設這一檔。DESIGN.md 另外提到的 24px（bottom sheet）與 16px
+   * （狀態卡、清單項目）目前沒有任何地方真的用 `--card-padding-*` 的形式
+   * 引用，先不預先造 token——2026-08-30 才因為「留著沒人用的 token 會讓人
+   * 以為某處正在用它」移除過 --space-stack-body-note 與 --space-stack-block。
+   */
+  --card-padding: var(--space-5);
+
   --prose-paragraph-gap: var(--space-3);
   --prose-heading-gap-before: var(--space-8);
   --prose-subheading-gap-before: var(--space-6);

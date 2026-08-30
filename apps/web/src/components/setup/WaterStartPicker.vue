@@ -90,7 +90,7 @@ function toLocalInputValue(date: Date): string {
   gap: var(--space-4);
   min-width: 0;
   margin: 0;
-  padding: var(--space-5);
+  padding: var(--card-padding);
   border: 1px solid var(--border-subtle);
 }
 

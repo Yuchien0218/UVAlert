@@ -374,7 +374,7 @@ strong {
 .success-panel {
   display: grid;
   gap: var(--space-4);
-  padding: var(--space-5);
+  padding: var(--card-padding);
   border-top: 0.35rem solid var(--color-saved);
 }
 
@@ -562,7 +562,7 @@ button.text-link {
   gap: 0;
   min-width: 0;
   margin: 0;
-  padding: var(--space-5);
+  padding: var(--card-padding);
   border: 1px solid var(--border-subtle);
 }
 

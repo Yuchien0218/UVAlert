@@ -128,7 +128,7 @@ const robots = computed(() =>
 .education-article-card {
   display: grid;
   gap: var(--space-2);
-  padding: var(--space-5);
+  padding: var(--card-padding);
   color: inherit;
   text-decoration: none;
 }

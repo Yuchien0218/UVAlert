@@ -200,7 +200,7 @@ p {
 .app-card {
   display: grid;
   gap: var(--space-4);
-  padding: var(--space-5);
+  padding: var(--card-padding);
 }
 
 .no-sunscreen-note {

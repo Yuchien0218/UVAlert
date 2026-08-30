@@ -13,7 +13,7 @@ defineProps<{ html: string }>();
   display: grid;
   gap: var(--space-4);
   max-width: 44rem;
-  padding: var(--space-5);
+  padding: var(--card-padding);
   border-radius: var(--radius-md);
   background: var(--color-surface-cream-strong);
 }

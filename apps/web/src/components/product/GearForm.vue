@@ -539,7 +539,7 @@ async function remove(): Promise<void> {
 .app-card {
   display: grid;
   gap: var(--space-3);
-  padding: var(--space-5);
+  padding: var(--card-padding);
 }
 
 h2,
