@@ -1,18 +1,40 @@
 <script setup lang="ts">
 import { computed } from "vue";
 import EducationSeoHead from "../../components/education/EducationSeoHead.vue";
+import Icon from "../../components/icons/Icon.vue";
+import type { IconName } from "../../generated/icons.generated";
 import {
   educationCategories,
   listArticlesForCategory,
   isEducationArticlePublishable,
-  educationCategoryPath
+  educationCategoryPath,
+  type EducationCategory
 } from "../../features/education/educationContent";
+
+/**
+ * 分類卡的圖示。這六個圖示 2026-08-29 就已經畫好並進了註冊表，`label`
+ * 與分類 `title` 逐字相同——它們本來就是為這六張卡畫的，只是一直沒接上。
+ *
+ * 寫成顯式對應表而不是 `education-${slug}` 拼字串，有兩個理由：
+ * 一是 `reapply-sunscreen` 對應的圖示叫 `education-reapply`，六個裡有一個
+ * 對不上；二是 `educationCategories` 是產生出來的，將來新增第七個分類時
+ * 拼字串會在執行期才炸，而 `satisfies` 會在 typecheck 就紅。
+ */
+const CATEGORY_ICONS = {
+  "uv-basics": "education-uv-basics",
+  "before-going-out": "education-before-going-out",
+  "reapply-sunscreen": "education-reapply",
+  "sweat-and-water": "education-sweat-and-water",
+  "after-sun-care": "education-after-sun-care",
+  "special-situations": "education-special-situations"
+} satisfies Record<EducationCategory["slug"], IconName>;
 
 const categoryCards = computed(() =>
   educationCategories.map((category) => {
     const articles = listArticlesForCategory(category.slug);
     return {
       ...category,
+      icon: CATEGORY_ICONS[category.slug],
       articleCount: articles.length,
       publishableCount: articles.filter(isEducationArticlePublishable).length
     };
@@ -77,18 +99,21 @@ const robots = computed(() =>
           class="app-card education-category-card"
           :to="educationCategoryPath(category.slug)"
         >
-          <span class="education-card-kicker"
-            >{{ category.articleCount }} 篇文章</span
-          >
-          <strong>{{ category.title }}</strong>
-          <small>{{ category.description }}</small>
-          <span
-            v-if="category.publishableCount > 0"
-            class="education-card-status"
-          >
-            {{ category.publishableCount }} 篇已發布
+          <Icon :name="category.icon" :size="32" />
+          <span class="education-category-card__body">
+            <span class="education-card-kicker"
+              >{{ category.articleCount }} 篇文章</span
+            >
+            <strong>{{ category.title }}</strong>
+            <small>{{ category.description }}</small>
+            <span
+              v-if="category.publishableCount > 0"
+              class="education-card-status"
+            >
+              {{ category.publishableCount }} 篇已發布
+            </span>
+            <span v-else class="education-card-status">內容審閱中</span>
           </span>
-          <span v-else class="education-card-status">內容審閱中</span>
         </RouterLink>
       </nav>
     </section>
@@ -141,12 +166,31 @@ const robots = computed(() =>
   gap: var(--space-3);
 }
 
+/*
+ * 2026-08-30：改成 icon-first 的左圖右文，版型與 `.entry`（更多頁）相同
+ * ——同樣是「功能入口卡」，B9 裁決 1 把 32px 定義為卡片主視覺的檔位，
+ * 這裡沿用，不另立一套。稽核第三節記錄的問題是 icon-first 只做了更多頁
+ * 一頁，衛教首頁一個圖示都沒有。
+ *
+ * 對齊方式與更多頁**刻意不同**：DESIGN.md 第五節 `more-entry-card` 寫的是
+ * `align-items: center`，理由是那七張卡有的只有標題、有的標題加雙行說明，
+ * 高度不一，start 對齊會讓純標題的卡看起來歪掉。這裡不適用——六張分類卡
+ * 的結構完全相同（篇數、標題、說明、審閱狀態四行），實測高度都是 175px，
+ * 而 center 會把圖示推到說明文字旁邊，讀起來不像標題的圖示。
+ */
 .education-category-card {
   display: grid;
-  gap: var(--space-2);
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: start;
+  gap: var(--space-4);
   padding: var(--space-5);
   color: inherit;
   text-decoration: none;
+}
+
+.education-category-card__body {
+  display: grid;
+  gap: var(--space-2);
 }
 
 .education-category-card strong {
