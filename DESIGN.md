@@ -408,7 +408,7 @@ components:
 | `{colors.primary-active}`          | `#804536` | `hsl(12, 41%, 36%)`  | 按下狀態                                                  |
 | `{colors.primary-disabled}`        | `#E8D1C5` | `hsl(21, 43%, 84%)`  | 停用狀態，仍看得出與主色的血緣                            |
 | `{colors.accent-apricot}` 陽光杏桃 | `#E8A477` | `hsl(24, 71%, 69%)`  | 插圖筆觸、小面積高光。此色上必須用深咖文字（2026-08-30：拿掉「倒數進度環」，進度條 2026-08-29 起改用狀態色 `{colors.status-tracking}`／`soon`／`due`） |
-| `{colors.accent-blush}` 腮紅       | `#D79A92` | `hsl(7, 46%, 71%)`   | 衛教引言與分類細節；永遠不作為行動色                      |
+| `{colors.accent-blush}` 腮紅       | `#D79A92` | `hsl(7, 46%, 71%)`   | **目前沒有落點**（2026-08-30 裁決）。原寫「衛教引言與分類細節」，但衛教引言底已裁決維持 `{colors.surface-cream-strong}`，「分類細節」也沒有對應元素。保留色票備用；要啟用時記得它**只能當底色**（當文字在畫布上只有 2.17:1，不到 AA），且永遠不作為行動色 |
 | `{colors.accent-mauve}` 藕紫       | `#8C6F7A` | `hsl(337, 12%, 49%)` | 已完成、安心狀態。裝備勾選與閱讀進度                      |
 | `{colors.accent-amber}` 香檳金     | `#D9A35F` | `hsl(33, 62%, 61%)`  | 徽章、SPF 標記、陽光母題。不用於內文                      |
 
@@ -417,9 +417,9 @@ components:
 | Token                            | Hex       | HSL                 | 用途                                                                      |
 | -------------------------------- | --------- | ------------------- | ------------------------------------------------------------------------- |
 | `{colors.canvas}`                | `#FAF5EC` | `hsl(39, 58%, 95%)` | 預設頁面地板                                                              |
-| `{colors.surface-soft}`          | `#F7EDE1` | `hsl(33, 58%, 93%)` | 區塊分隔、衛教引言底、來源區塊                                            |
+| `{colors.surface-soft}`          | `#F7EDE1` | `hsl(33, 58%, 93%)` | 區塊分隔、來源區塊（2026-08-30 拿掉「衛教引言底」——那與第 411 行的 accent-blush 指派衝突，已裁決引言底維持 `{colors.surface-cream-strong}`） |
 | `{colors.surface-card}`          | `#F0E2D1` | `hsl(33, 51%, 88%)` | 裝備卡、更多頁入口卡、衛教分類卡                                          |
-| `{colors.surface-cream-strong}`  | `#EFD0BC` | `hsl(24, 61%, 84%)` | 最強暖光變體：已選取的情境選項、衛教首頁大卡片                            |
+| `{colors.surface-cream-strong}`  | `#EFD0BC` | `hsl(24, 61%, 84%)` | 最強暖光變體：已選取的情境選項、衛教首頁大卡片、**衛教文章引言底**（2026-08-30 裁決維持現況，取代先前分別指派給 accent-blush 與 surface-soft 的兩處寫法） |
 | `{colors.surface-dark}`          | `#2E2925` | `hsl(27, 11%, 16%)` | 主要深色表面。2026-08-23 起不再用於首頁倒數，改用於設定流程外框與資料強調 |
 | `{colors.surface-dark-elevated}` | `#493732` | `hsl(13, 19%, 24%)` | 深色區塊內的控制項與進度環軌道                                            |
 | `{colors.surface-dark-soft}`     | `#241F1D` | `hsl(17, 11%, 13%)` | 深色卡片內的資料區塊                                                      |
