@@ -758,7 +758,14 @@ function issuesToFieldErrors(
   return fieldErrors;
 }
 
-class SetupValidationError extends Error {
+/**
+ * 設定流程的驗證錯誤。
+ *
+ * 2026-08-31 改為 export：`SetupPage.vue` 需要分辨「草稿不存在」與「其他
+ * 儲存失敗」，才能給出不同的下一步。在那之前它只能用同一句話涵蓋至少
+ * 三種完全不同的失敗，使用者問「為什麼」時答不出來。
+ */
+export class SetupValidationError extends Error {
   readonly fieldErrors: Record<string, string[]>;
 
   constructor(fieldErrors: Record<string, string[]>) {

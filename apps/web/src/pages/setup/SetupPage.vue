@@ -18,6 +18,7 @@ import type {
   ProtectionDraftInput,
   WaterStartFormValue
 } from "../../features/setup/createSetupController";
+import { describeSetupSaveFailure } from "../../features/setup/describeSetupSaveFailure";
 import { isFixedEvening } from "../../features/uv/uvForecastRules";
 import {
   makeQuickProtectionDraft,
@@ -112,10 +113,11 @@ watch(selectedContext, async (value, previous) => {
     if (await setup.saveContext(value)) {
       await setup.ensureRecommendedProtection();
     }
-  } catch {
-    localError.value = "設定內容目前無法儲存，請重新整理後再試一次。";
+  } catch (error) {
+    localError.value = describeSetupSaveFailure(error);
   }
 });
+
 
 async function submit(): Promise<void> {
   localError.value = validateForm();

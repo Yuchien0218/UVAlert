@@ -64,18 +64,14 @@ function getUnavailableMessage(error: UvForecastError): string {
   <section
     id="five-day-uv"
     class="uv-forecast"
-    aria-labelledby="five-day-uv-title"
+    aria-label="未來五日 UV 預報"
   >
+    <!--
+      2026-08-31：拿掉卡片自己的 h2。這張卡只用在 /forecast，而那一頁的
+      h1 已經是「五日 UV 預報」——兩個標題講同一件事，使用者回饋重複。
+      無障礙名稱改用 aria-label 掛在 section 上，語意不受影響。
+    -->
     <div class="uv-forecast__heading">
-      <div>
-        <h2
-          id="five-day-uv-title"
-          class="uv-forecast__title"
-          data-typography-role="section-title"
-        >
-          未來 5 天 UV 預報
-        </h2>
-      </div>
       <Icon name="feature-uv-forecast" :size="24" />
     </div>
 
@@ -154,10 +150,6 @@ function getUnavailableMessage(error: UvForecastError): string {
             {{ formatUpdatedAt(forecast.fetchedAt) }}
           </span>
         </span>
-      </p>
-      <p class="uv-forecast__note">
-        這是依地區提供的預報，不是即時測站觀測；UV
-        高低不會延長或縮短你的補擦計時。
       </p>
     </template>
   </section>
@@ -243,7 +235,6 @@ function getUnavailableMessage(error: UvForecastError): string {
 }
 
 .uv-day {
-  position: relative;
   display: grid;
   grid-template-rows: auto 1fr auto;
   justify-items: center;
@@ -283,10 +274,17 @@ function getUnavailableMessage(error: UvForecastError): string {
   border-color: var(--color-uvi-extreme);
 }
 
+/*
+ * 2026-08-31：日期改回正常流排，置中。
+ *
+ * 原本是 position: absolute 貼在右上角，於是三個元素讀起來不是一個由上
+ * 到下的層級（日期 → 數字 → 等級），而是「一個浮在角落的日期」加「兩個
+ * 置中的東西」——數字看起來也因此偏離卡片的視覺中心。使用者回饋「框框內
+ * 的日期／UV 指數／等級排版要調整」指的就是這個。
+ *
+ * 尺寸關係不變：日期最小、數字最大、等級居中。
+ */
 .uv-day__date {
-  position: absolute;
-  top: var(--space-2);
-  right: var(--space-2);
   color: var(--text-secondary);
   font-size: var(--font-size-caption);
   font-weight: 500;
@@ -363,8 +361,6 @@ function getUnavailableMessage(error: UvForecastError): string {
   }
 
   .uv-day__date {
-    top: var(--space-1);
-    right: var(--space-1);
     font-size: 0.7rem;
   }
 
