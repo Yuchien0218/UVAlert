@@ -507,11 +507,26 @@ function handleEndSession(): void {
         :note="headlineNote"
       />
 
-      <!-- 沒有地區就沒有 UV 可看，先解決這件事。 -->
+      <!--
+        沒有地區就沒有 UV 可看，先解決這件事——但**不擋開始提醒**。
+
+        2026-08-31 修正：原本這三塊是 v-if／v-else-if／v-else 一條鏈，
+        於是沒設定地區的人**看不到「開始防曬提醒」那顆按鈕**，等於地區
+        變成開始倒數的前置條件。那既違反 Sitemap §一「定位或網路不足時
+        仍不得阻擋本機倒數與手動操作」，也違反 HomeLocationPrompt 自己
+        docblock 寫的「刻意不阻擋任何其他操作」——實作跟兩份規格都相反。
+
+        地區只影響「看不看得到 UV」，不影響倒數：補擦間隔由包裝標示或
+        120 分鐘保守值決定，UV 高低從來不會延長或縮短它（/forecast 那頁
+        也是這樣寫的）。所以提示卡改成獨立顯示，CTA 照常出現。
+
+        夜間那一支維持替換 CTA——那是 2026-08-23 的裁決，而且它自己帶了
+        「還是要開始提醒」的逃生出口，沒有把人擋死。
+      -->
       <HomeLocationPrompt v-if="!hasRegion" />
 
       <!-- 夜間不放主 CTA，改用說明加逃生出口。 -->
-      <HomeNightNotice v-else-if="isNight" @start="handleStartSetup" />
+      <HomeNightNotice v-if="isNight" @start="handleStartSetup" />
 
       <button
         v-else

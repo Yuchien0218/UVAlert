@@ -365,13 +365,37 @@ describe("HomePage", () => {
       expect(wrapper.find(".button--primary").exists()).toBe(false);
     });
 
-    it("沒有地區時先要求設定地區", async () => {
+    /**
+     * 2026-08-31 反轉。這條原本斷言「沒有地區時**不該**出現主 CTA」，理由
+     * 寫「不該分散注意」——但那跟另外兩份規格相反：
+     *
+     * - Sitemap §一：定位或網路不足時「仍不得阻擋本機倒數與手動操作」
+     * - `HomeLocationPrompt` 自己的 docblock：「刻意不阻擋任何其他操作」
+     *
+     * 實際後果是沒設定地區的人根本看不到「開始防曬提醒」，地區變成開始
+     * 倒數的前置條件。地區只影響看不看得到 UV，不影響倒數長度。使用者
+     * 2026-08-31 裁決放行。
+     */
+    it("沒有地區時仍然可以開始提醒，提示卡與主 CTA 同時出現", async () => {
       mockServices({ region: null });
 
       const wrapper = await mountHome();
 
       expect(wrapper.findComponent(HomeLocationPrompt).exists()).toBe(true);
-      // 沒有地區就沒有 UV 可看，不該同時出現開始提醒的主 CTA 分散注意。
+      expect(wrapper.find(".button--primary").text()).toBe("開始防曬提醒");
+    });
+
+    /**
+     * 夜間那一支**仍然**替換主 CTA，即使同時沒有地區——把兩件事分開守，
+     * 否則「地區不擋」很容易連帶把夜間的裁決也一起拆掉。
+     */
+    it("沒有地區又是夜間時，維持夜間的說明與逃生出口", async () => {
+      mockServices({ region: null, isEvening: true });
+
+      const wrapper = await mountHome();
+
+      expect(wrapper.findComponent(HomeLocationPrompt).exists()).toBe(true);
+      expect(wrapper.findComponent(HomeNightNotice).exists()).toBe(true);
       expect(wrapper.find(".button--primary").exists()).toBe(false);
     });
   });
