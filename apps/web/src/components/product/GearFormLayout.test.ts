@@ -77,6 +77,33 @@ describe("GearForm 裝備區簡化", () => {
   });
 
   /*
+   * 2026-08-31（選項丙）：SPF／PA 搬進包裝標示卡的 identity slot。
+   *
+   * 兩件事都要守，而且要**分開**守——只斷言「SPF 在 slot 裡」的話，把它
+   * 複製一份留在暱稱卡也還是綠的；只斷言「暱稱卡沒有 SPF」的話，整個
+   * 刪掉也是綠的。
+   */
+  it("SPF／PA 放在包裝標示的 identity slot 裡", () => {
+    const slot = code.slice(code.indexOf("<template #identity>"));
+    expect(slot).toContain('id="gear-spf"');
+    expect(slot).toContain('id="gear-pa"');
+  });
+
+  it("SPF／PA 不再留在裝備暱稱卡", () => {
+    const beforeSlot = code.slice(0, code.indexOf("<template #identity>"));
+    expect(beforeSlot).not.toContain('id="gear-spf"');
+    expect(beforeSlot).not.toContain('id="gear-pa"');
+  });
+
+  /*
+   * 2026-08-31：select 要吃跟 input 同一組樣式。沒有它時「好不好用」是
+   * 瀏覽器原生外觀（白底、系統藍框），跟旁邊的米色欄位不同一套。
+   */
+  it("select 與 input 共用同一組欄位樣式", () => {
+    expect(code).toMatch(/input,\s*select,\s*textarea\s*\{/);
+  });
+
+  /*
    * 2026-08-31：品類名稱常駐。前一版讓文字只在選取後顯示，使用者回饋
    * 「很像消失」。守的是「沒有任何條件式把它藏起來」，不是只守文字存在
    * ——文字一直都在（只是被 .screen-reader-only 蓋掉），所以只斷言
