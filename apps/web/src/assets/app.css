@@ -874,3 +874,52 @@ p.prose-block {
   color: var(--text-secondary);
   font-size: var(--font-size-caption);
 }
+
+/*
+ * 時間快選與就地展開的調整欄（2026-08-31 從 ApplicationTimePicker 的
+ * scoped style 移出）。
+ *
+ * 入水時間選擇器改成與塗抹時間同一個形狀之後，這幾個 class 變成兩個元件
+ * 共用；留在 scoped style 裡的話 WaterStartPicker 會完全吃不到——那正是
+ * 這個 repo 反覆出現的漂移形態（欄位外觀抄了八份、圖示按鈕尺寸各自決定）。
+ */
+.time-option {
+  display: grid;
+  gap: var(--space-1);
+  padding: var(--space-3);
+  border-radius: var(--radius-sm);
+  color: var(--text-primary);
+  cursor: pointer;
+  text-align: left;
+  transition:
+    background-color var(--duration-fast) var(--ease-out),
+    border-color var(--duration-fast) var(--ease-out);
+}
+
+/* 理由同 .choice-grid label:hover——避免 hover 跟已選取同色。 */
+.time-option:hover {
+  background-color: var(--color-hairline-soft);
+}
+
+.time-option:active {
+  filter: brightness(0.92);
+}
+
+.time-option__label {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-2);
+  font-weight: 500;
+}
+
+.time-adjust {
+  display: grid;
+  gap: var(--space-3);
+  justify-items: start;
+}
+
+.time-adjust__field {
+  display: grid;
+  gap: var(--space-2);
+  width: 100%;
+}

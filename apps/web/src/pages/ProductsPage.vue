@@ -5,7 +5,6 @@ import EmptyStateCard from "../components/common/EmptyStateCard.vue";
 import { computed, onMounted } from "vue";
 import { useRouter } from "vue-router";
 import { useWebAppServices } from "../app/injection";
-import SetupProcessBanner from "../components/product/SetupProcessBanner.vue";
 import GearListItem from "../components/product/GearListItem.vue";
 import { GEAR_CATEGORY_LABELS } from "../features/product/gearPresentation";
 
@@ -16,15 +15,8 @@ import { GEAR_CATEGORY_LABELS } from "../features/product/gearPresentation";
  * 四個品類裡只有 sunscreen 會產生倒數，clothing 是 methodComponent，
  * eyewear 與 other_gear 純紀錄——清單必須把這件事講明白。
  */
-const { boot, productSettings, setup } = useWebAppServices();
+const { productSettings } = useWebAppServices();
 const router = useRouter();
-
-const hasActiveSetupDraft = computed(
-  () =>
-    boot.currentSession.value === null &&
-    setup.draft.value?.initialContext !== null &&
-    setup.draft.value?.initialContext !== undefined
-);
 
 const current = computed(() =>
   productSettings.products.value.filter(
@@ -51,8 +43,13 @@ const hasUsableSunscreen = computed(() =>
 
 const loadFailed = computed(() => productSettings.phase.value === "error");
 
+/*
+ * 2026-08-31：不再一併 setup.ensureLoaded()。那個呼叫的唯一消費者是
+ * SetupProcessBanner（已移除），留著等於載入沒有人讀的資料；/setup 自己
+ * 會在進入時載入草稿，回復流程不受影響。
+ */
 onMounted(() => {
-  void Promise.all([productSettings.ensureLoaded(), setup.ensureLoaded()]);
+  void productSettings.ensureLoaded();
 });
 
 function addGear(): void {
@@ -75,7 +72,6 @@ function openGear(productId: string): void {
       </p>
     </header>
 
-    <SetupProcessBanner v-if="hasActiveSetupDraft" />
 
     <BroadcastLoader
       v-if="productSettings.phase.value === 'loading'"
@@ -105,11 +101,6 @@ function openGear(productId: string): void {
       </EmptyStateCard>
 
       <template v-else>
-        <button class="button button--primary" type="button" @click="addGear">
-          <Icon name="tool-plus" :size="20" />
-          新增防曬裝備
-        </button>
-
         <!--
           實測發現：current.length === 0 時（使用中整個是空的，裝備全部
           收納），這段話原本仍會顯示，且清單插值變成空字串，讀起來像
@@ -149,6 +140,17 @@ function openGear(productId: string): void {
             </li>
           </ul>
         </section>
+
+        <!--
+          2026-08-31：新增鈕從清單上方移到「使用中」之後（使用者裁決）。
+          先看有什麼、再決定要不要加，比先看到一顆按鈕自然；而且原本它
+          夾在「沒有可倒數的防曬乳」那句提示與清單之間，把說明與它描述
+          的清單拆開了。
+        -->
+        <button class="button button--primary" type="button" @click="addGear">
+          <Icon name="tool-plus" :size="20" />
+          新增防曬裝備
+        </button>
 
         <!--
           「收納中」取代原本的「過去紀錄」（2026-08-23 裁決）。「過去紀錄」

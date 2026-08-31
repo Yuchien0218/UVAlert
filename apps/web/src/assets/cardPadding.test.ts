@@ -52,11 +52,21 @@ describe("卡片內距收斂成 --card-padding", () => {
     ).toMatch(/--card-padding:\s*var\(--space-5\);/);
   });
 
+  /*
+   * 門檻 2026-08-31 從 25 調到 20。
+   *
+   * 這條守的是「不是宣告了沒人用的 token」，不是「數量只能增加不能減少」
+   * ——同日兩次**正當的**減少讓它掉到 24：`SetupProcessBanner` 整個移除，
+   * 以及 `WaterStartPicker` 改用共用的 `.question-card app-card`（內距由
+   * app.css 提供，不必自己寫）。兩者都是收斂的結果，不是有人繞過 token。
+   *
+   * 留一點餘裕，但不要留太多——降到個位數就代表 token 真的沒人用了。
+   */
   it("實際有被大量使用，不是宣告了沒人用的 token", () => {
     const users = sourceFiles.filter((file) =>
       strip(readFileSync(file, "utf8")).includes("var(--card-padding)")
     );
-    expect(users.length).toBeGreaterThanOrEqual(25);
+    expect(users.length).toBeGreaterThanOrEqual(20);
   });
 
   for (const file of sourceFiles.filter(
