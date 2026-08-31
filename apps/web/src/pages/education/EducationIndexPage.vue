@@ -1,40 +1,21 @@
 <script setup lang="ts">
 import { computed } from "vue";
 import EducationSeoHead from "../../components/education/EducationSeoHead.vue";
-import Icon from "../../components/icons/Icon.vue";
-import type { IconName } from "../../generated/icons.generated";
+import IconLead from "../../components/common/IconLead.vue";
 import {
   educationCategories,
   listArticlesForCategory,
   isEducationArticlePublishable,
-  educationCategoryPath,
-  type EducationCategory
+  educationCategoryPath
 } from "../../features/education/educationContent";
-
-/**
- * 分類卡的圖示。這六個圖示 2026-08-29 就已經畫好並進了註冊表，`label`
- * 與分類 `title` 逐字相同——它們本來就是為這六張卡畫的，只是一直沒接上。
- *
- * 寫成顯式對應表而不是 `education-${slug}` 拼字串，有兩個理由：
- * 一是 `reapply-sunscreen` 對應的圖示叫 `education-reapply`，六個裡有一個
- * 對不上；二是 `educationCategories` 是產生出來的，將來新增第七個分類時
- * 拼字串會在執行期才炸，而 `satisfies` 會在 typecheck 就紅。
- */
-const CATEGORY_ICONS = {
-  "uv-basics": "education-uv-basics",
-  "before-going-out": "education-before-going-out",
-  "reapply-sunscreen": "education-reapply",
-  "sweat-and-water": "education-sweat-and-water",
-  "after-sun-care": "education-after-sun-care",
-  "special-situations": "education-special-situations"
-} satisfies Record<EducationCategory["slug"], IconName>;
+import { educationCategoryIcon } from "../../features/education/educationCategoryIcons";
 
 const categoryCards = computed(() =>
   educationCategories.map((category) => {
     const articles = listArticlesForCategory(category.slug);
     return {
       ...category,
-      icon: CATEGORY_ICONS[category.slug],
+      icon: educationCategoryIcon(category.slug),
       articleCount: articles.length,
       publishableCount: articles.filter(isEducationArticlePublishable).length
     };
@@ -124,19 +105,20 @@ const robots = computed(() =>
           class="app-card education-category-card education-hero-card"
           :to="educationCategoryPath(heroCard.slug)"
         >
-          <Icon :name="heroCard.icon" :size="32" />
-          <span class="education-category-card__body">
-            <span class="education-card-kicker">先從這裡開始</span>
-            <strong>{{ heroCard.title }}</strong>
-            <small>{{ heroCard.description }}</small>
-            <span
-              v-if="heroCard.publishableCount > 0"
-              class="education-card-status"
-            >
-              {{ heroCard.publishableCount }} 篇已發布
+          <IconLead :icon="heroCard.icon">
+            <span class="education-category-card__titles">
+              <span class="education-card-kicker">先從這裡開始</span>
+              <strong>{{ heroCard.title }}</strong>
             </span>
-            <span v-else class="education-card-status">內容審閱中</span>
+          </IconLead>
+          <small>{{ heroCard.description }}</small>
+          <span
+            v-if="heroCard.publishableCount > 0"
+            class="education-card-status"
+          >
+            {{ heroCard.publishableCount }} 篇已發布
           </span>
+          <span v-else class="education-card-status">內容審閱中</span>
         </RouterLink>
 
         <RouterLink
@@ -145,21 +127,22 @@ const robots = computed(() =>
           class="app-card education-category-card"
           :to="educationCategoryPath(category.slug)"
         >
-          <Icon :name="category.icon" :size="32" />
-          <span class="education-category-card__body">
-            <span class="education-card-kicker"
-              >{{ category.articleCount }} 篇文章</span
-            >
-            <strong>{{ category.title }}</strong>
-            <small>{{ category.description }}</small>
-            <span
-              v-if="category.publishableCount > 0"
-              class="education-card-status"
-            >
-              {{ category.publishableCount }} 篇已發布
+          <IconLead :icon="category.icon">
+            <span class="education-category-card__titles">
+              <span class="education-card-kicker"
+                >{{ category.articleCount }} 篇文章</span
+              >
+              <strong>{{ category.title }}</strong>
             </span>
-            <span v-else class="education-card-status">內容審閱中</span>
+          </IconLead>
+          <small>{{ category.description }}</small>
+          <span
+            v-if="category.publishableCount > 0"
+            class="education-card-status"
+          >
+            {{ category.publishableCount }} 篇已發布
           </span>
+          <span v-else class="education-card-status">內容審閱中</span>
         </RouterLink>
       </nav>
     </section>
@@ -224,19 +207,28 @@ const robots = computed(() =>
  * 的結構完全相同（篇數、標題、說明、審閱狀態四行），實測高度都是 175px，
  * 而 center 會把圖示推到說明文字旁邊，讀起來不像標題的圖示。
  */
+/*
+ * 2026-08-31：圖示從左側獨立欄搬進標題那一列，卡片改成單欄。
+ *
+ * 原本是 `grid-template-columns: auto minmax(0, 1fr)`，圖示 32px 靠上
+ * 對齊。實測（使用者回報「icon 下方空白太多」，我量了「流汗或碰水後」
+ * 那張卡）：卡高 175px、圖示 32px、**圖示下方是一根 122px 的空柱子**。
+ * 那根柱子沒有承載任何東西，卻在每一張卡上重複六次。
+ *
+ * 改成單欄之後：柱子整根消失、說明文字拿回約 40px 寬度、圖示與標題並排
+ * 因此可以放大到 40px（見 IconLead.vue）——同時處理掉使用者反映的另一件
+ * 事「圖示都太小了，很難注意到」。
+ *
+ * kicker（「8 篇文章」）跟標題疊在圖示右邊，不是自己佔一列：兩行文字
+ * 加起來 47px，正好把 40px 的圖示那一列填滿。中途試過讓 kicker 獨佔
+ * 一列，卡片反而從 175px 長到 189px——空柱子沒了，卻換來一整列空行。
+ */
 .education-category-card {
   display: grid;
-  grid-template-columns: auto minmax(0, 1fr);
-  align-items: start;
-  gap: var(--space-4);
+  gap: var(--space-2);
   padding: var(--card-padding);
   color: inherit;
   text-decoration: none;
-}
-
-.education-category-card__body {
-  display: grid;
-  gap: var(--space-2);
 }
 
 /*
@@ -258,6 +250,11 @@ const robots = computed(() =>
   font-size: var(--font-size-card-title);
   font-weight: 500;
   line-height: var(--line-height-card-title);
+}
+
+.education-category-card__titles {
+  display: grid;
+  gap: var(--space-1);
 }
 
 .education-category-card small {

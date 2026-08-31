@@ -7,6 +7,7 @@ import { afterEach, describe, expect, it } from "vitest";
 import EducationArticlePage from "./EducationArticlePage.vue";
 import EducationCategoryPage from "./EducationCategoryPage.vue";
 import EducationIndexPage from "./EducationIndexPage.vue";
+import { ICONS } from "../../generated/icons.generated";
 import { clearEducationSeo } from "../../features/education/educationSeo";
 
 function makeRouter(component: object, path: string): Router {
@@ -129,5 +130,79 @@ describe("衛教文章頁不重複摘要", () => {
     );
 
     expect(seo).toContain("description: article.summary");
+  });
+});
+
+/*
+ * 2026-08-31：分類卡從「左圖右文兩欄」改成「圖示併進標題列」的單欄。
+ *
+ * 起因是使用者回報「icon 下方空白太多」。實測那張卡：高 175px、圖示
+ * 32px、**圖示下方是一根 122px 的空柱子**，每張卡重複一次。
+ *
+ * 三件事分開守。合成一條的話彼此掩護：只守「圖示在標題列」→ 卡片可以
+ * 又變回兩欄；只守「單欄」→ 圖示可以整個消失；只守「主題頁有圖示」→
+ * 它可以跟首頁指到不同的圖示。
+ */
+describe("衛教分類的圖示版型", () => {
+  it("分類卡是單欄，沒有獨立的圖示欄", () => {
+    const source = readFileSync(
+      "apps/web/src/pages/education/EducationIndexPage.vue",
+      "utf8"
+    ).replace(/\/\*[\s\S]*?\*\//g, "");
+
+    expect(source).toContain(".education-category-card {");
+    expect(source, "不該再有圖示專用的第一欄").not.toContain(
+      "grid-template-columns: auto minmax(0, 1fr)"
+    );
+  });
+
+  it("分類卡的圖示與標題在同一列", async () => {
+    const router = makeRouter(EducationIndexPage, "/education");
+    await router.push("/education");
+    await router.isReady();
+    const wrapper = mount(EducationIndexPage, { global: { plugins: [router] } });
+
+    /*
+     * **六張卡全部檢查，不是只看第一張。** 第一張是 hero，走的是另一段
+     * 模板；只看它的話，另外五張的圖示被搬出標題列也不會被抓到（寫這條
+     * 時實測過：只驗第一張時，把 secondary 卡的標題移出 IconLead 仍然全綠）。
+     */
+    const cards = wrapper.findAll("a.education-category-card");
+    expect(cards).toHaveLength(6);
+
+    for (const card of cards) {
+      const lead = card.get(".icon-lead");
+      // 標題必須在 IconLead 裡面，不是它的兄弟節點——那才是「同一列」。
+      expect(lead.find("strong").exists()).toBe(true);
+      expect(lead.find("svg").exists()).toBe(true);
+    }
+  });
+
+  /*
+   * 主題頁的圖示必須跟首頁那張卡是**同一顆**。從卡片點進來之後圖示還在
+   * 原地，讀者才知道自己進了哪一個主題；兩邊各自維護一份對應表的話，
+   * 遲早會指到不同的圖示。
+   */
+  it("主題頁標題帶著跟分類卡同一顆圖示", async () => {
+    const router = makeRouter(EducationCategoryPage, "/education/:category");
+    await router.push("/education/sweat-and-water");
+    await router.isReady();
+    const wrapper = mount(EducationCategoryPage, {
+      global: { plugins: [router] }
+    });
+
+    const lead = wrapper.get(".page-heading .icon-lead");
+
+    expect(lead.get("h1").text()).toBe("流汗或碰水後");
+    /*
+     * 比對圖示幾何裡一段獨有的 path，不比整段 body——DOM parse 之後屬性
+     * 順序會變，比整段等於在比對瀏覽器的序列化細節而不是圖示本身。
+     */
+    const geometry = /d="([^"]+)"/.exec(
+      ICONS["education-sweat-and-water"].body
+    )?.[1];
+
+    expect(geometry).toBeDefined();
+    expect(lead.get("svg").html()).toContain(geometry!);
   });
 });

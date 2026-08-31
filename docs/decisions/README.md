@@ -79,6 +79,11 @@
 | 裝備區退回純紀錄（期限、價格、好不好用），倒數相關欄位整批移除                                                                                              | 規格草案：`docs/superpowers/specs/2026-08-30-gear-simplification-design.md`                                                                                                                                                                            | **已裁決 2026-08-30，規格草案已寫、尚未動工**——草案第五節有三件要再裁決的事                                        |
 | 衛教首頁採裁決 A：「了解今天的 UV」hero 卡＋其餘五張分類卡（不做雜誌式不對稱網格）                                                                          | `EducationIndexPage.vue`；`2026-08-28-education-editorial-redesign` plan／spec 的首頁部分已標記作廢                                                                                                                                                    | 已完成（2026-08-30，commit `559a5ac`）                                                                             |
 | `/setup` 右上叉叉改左上「回上一頁」，離開不再刪草稿（草稿由既有回復卡接手）                                                                                 | `SetupStepShell.vue`、`SetupPage.vue`、`createSetupController.ts`（`cancel()` 加註解未移除）                                                                                                                                                           | 已完成（2026-08-30，commit `b945902`）                                                                             |
+| 圖示量表補上 40／56 兩檔，領銜與空狀態圖示統一走 IconLead（避免尺寸散成字面量後漂移） | `DESIGN.md` §8 尺寸、`apps/web/src/components/common/IconLead.vue`、`Icon.vue` | 已完成（2026-08-31） |
+| 衛教分類卡改單欄、圖示併進標題列（原本圖示下方有 122px 空柱子）；主題頁標題帶同一顆圖示 | `EducationIndexPage.vue`、`EducationCategoryPage.vue`、`features/education/educationCategoryIcons.ts` | 已完成（2026-08-31） |
+| 提醒頁：倒數狀態圖示搬到讀數旁並放大到 32px；夜間空狀態加 56px 沙漏；拿掉頁首分隔線 | `HomeCountdown.vue`、`HomeNightNotice.vue`、`BrandHeader.vue` | 已完成（2026-08-31） |
+| UV 五級色低／中／高壓暗過 AA（兩種用法同時修好） | `DESIGN.md` §2、`packages/ui/src/styles.css`、`uvRiskContrast.test.ts` | 已完成（2026-08-31，PR #64） |
+| 波浪元素只用在水上活動進行中的倒數，不當通用裝飾 | 待裁決 | **待使用者裁決**，見 `2026-08-30-pending-decisions.md` §15.2 |
 
 視覺設計另見：
 

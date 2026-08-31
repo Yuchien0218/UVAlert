@@ -53,7 +53,25 @@ const stateIcon = computed(() => STATE_ICON[props.presentation.tone]);
   <section class="countdown" :class="toneClass" data-testid="home-countdown">
     <p class="countdown__eyebrow">補擦倒數</p>
 
+    <!--
+      2026-08-31：狀態圖示從說明那一行搬到讀數旁邊，並從 20px 放大到 32px。
+
+      使用者回報「提醒頁太空」「圖示都太小了」。20px 的圖示夾在 16px 的
+      說明文字裡，讀起來是標點符號而不是狀態——而狀態切換（時間跨過補擦
+      門檻）是這個 App 最重要的一刻。放在讀數旁邊，它才跟它描述的東西同一
+      個量級。
+
+      仍然只有一顆，不是兩個位置各放一顆：同一件事講兩次會稀釋掉它。
+    -->
     <div class="countdown__value">
+      <Transition name="countdown-state" mode="out-in">
+        <Icon
+          :key="presentation.tone"
+          :name="stateIcon"
+          :size="32"
+          class="countdown__state-icon"
+        />
+      </Transition>
       <span class="stat-figure stat-figure--display countdown__figure">
         {{ presentation.remainingMinutes }}
       </span>
@@ -82,14 +100,6 @@ const stateIcon = computed(() => STATE_ICON[props.presentation.tone]);
     </div>
 
     <p class="countdown__detail">
-      <Transition name="countdown-state" mode="out-in">
-        <Icon
-          :key="presentation.tone"
-          :name="stateIcon"
-          :size="20"
-          class="countdown__state-icon"
-        />
-      </Transition>
       <span>{{ presentation.title }}・{{ presentation.timeLabel }}</span>
     </p>
   </section>
@@ -133,6 +143,15 @@ const stateIcon = computed(() => STATE_ICON[props.presentation.tone]);
  */
 .countdown__state-icon {
   flex: none;
+  /*
+   * 讀數是 display 級的大字，字框比數字本身高出一截（上緣留給沒有出現的
+   * 注音與拉丁字母 ascender）。整列是 align-items: flex-end，圖示會貼齊
+   * 字框底部，看起來就偏低——往上推 8px 之後圖示中心對到數字的視覺中心。
+   *
+   * 實測（瀏覽器量的，不是估的）：圖示中心 155px、數字字框中心 150px、
+   * 數字本身的中心約 151px。
+   */
+  margin-bottom: 0.5rem;
   color: var(--tone-color, var(--color-tracking));
   transition: color var(--duration-slow) var(--ease-out);
 }
