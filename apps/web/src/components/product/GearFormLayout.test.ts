@@ -49,6 +49,19 @@ describe("GearForm 裝備區簡化", () => {
     expect(code).not.toContain("這件裝備不會建立補擦倒數");
   });
 
+  /*
+   * 2026-08-31（選項甲）：「我的紀錄」只在編輯時出現，新增流程不顯示。
+   *
+   * 守的是**那個 section 的開頭標籤**，不是「檔案裡某處有 v-if="isEdit"」
+   * ——`danger-zone` 也用同一個條件，只斷言字串存在的話，把這裡的 v-if
+   * 拿掉仍然會全綠。所以比對完整的開頭標籤。
+   */
+  it("我的紀錄只在編輯時出現，新增流程不顯示", () => {
+    expect(code).toContain(
+      '<section v-if="isEdit" class="app-card" aria-labelledby="gear-record-title">'
+    );
+  });
+
   it("我的紀錄區塊提供價格與好不好用", () => {
     expect(code).toContain("我的紀錄");
     expect(code).toContain('v-model="priceTwd"');

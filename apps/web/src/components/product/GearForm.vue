@@ -405,8 +405,18 @@ async function remove(): Promise<void> {
       2026-08-30：這一張從「散落的選填欄位」升級成有名字的區塊「我的紀錄」。
       使用者裁決：「裝備區只是記錄買過的防曬乳（期限、價格、好不好用）」
       ——那三件事在這裡，所以它值得一個標題，而不是躺在包裝標示後面。
+
+      2026-08-31（選項甲）：**只在編輯時出現**。新增流程砍掉這一整塊。
+      理由不是版面而是時序——新增一瓶防曬乳時，使用者知道的只有名字與
+      品類；購買月份、價格要翻收據，而「好不好用」在用之前**不可能**
+      知道，等於一個永遠只能選「未評價」的下拉。這些是回頭補的資料，
+      詳情頁的「編輯」才是它們的自然位置。
+
+      副作用（已知並接受）：到期日也一起移走了，它是這塊裡唯一會進
+      reducer 的欄位。新增當下如果那瓶已經過期，第一次仍會建立倒數，
+      要進編輯頁補到期日才會停。見 pending-decisions §11。
     -->
-    <section class="app-card" aria-labelledby="gear-record-title">
+    <section v-if="isEdit" class="app-card" aria-labelledby="gear-record-title">
       <h2 id="gear-record-title" data-typography-role="card-title">我的紀錄</h2>
       <p class="field-helper">全部選填，只留在這台裝置上。</p>
 
