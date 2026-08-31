@@ -50,15 +50,35 @@ describe("GearForm 裝備區簡化", () => {
   });
 
   /*
-   * 2026-08-31（選項甲）：「我的紀錄」只在編輯時出現，新增流程不顯示。
+   * 2026-08-31：「我的紀錄」在新增流程**收合**，不是消失。
    *
-   * 守的是**那個 section 的開頭標籤**，不是「檔案裡某處有 v-if="isEdit"」
-   * ——`danger-zone` 也用同一個條件，只斷言字串存在的話，把這裡的 v-if
-   * 拿掉仍然會全綠。所以比對完整的開頭標籤。
+   * 先前那一版（選項甲）整塊 `v-if="isEdit"` 藏掉，使用者實際用過後回報
+   * 「日期、價格、備註都不見了」——四個品類都受影響。所以這條守門守的是
+   * 「看得到但預設收合」，而不是「不顯示」。
+   *
+   * 三件事分開守：section 沒有被 isEdit 藏掉、觸發器有揭露契約需要的
+   * aria-controls、預設是關的（recordExpanded 初值 false）。合成一條的話
+   * 少掉任何一項都可能被另外兩項掩護。
    */
-  it("我的紀錄只在編輯時出現，新增流程不顯示", () => {
+  it("我的紀錄在新增流程仍然渲染，沒有被 isEdit 藏掉", () => {
     expect(code).toContain(
-      '<section v-if="isEdit" class="app-card" aria-labelledby="gear-record-title">'
+      '<section class="app-card" aria-labelledby="gear-record-title">'
+    );
+  });
+
+  it("我的紀錄的觸發器符合揭露契約", () => {
+    const toggle = code.slice(code.indexOf('aria-controls="gear-record-fields"'));
+    expect(code).toContain(':aria-expanded="recordOpen"');
+    expect(code).toContain('aria-controls="gear-record-fields"');
+    // chevron 換圖示 name，不是 transform: rotate
+    expect(toggle.slice(0, 400)).toContain("tool-chevron-right");
+    expect(code).not.toMatch(/\.record-toggle[^}]*transform:\s*rotate/);
+  });
+
+  it("我的紀錄在新增流程預設收合，編輯時展開", () => {
+    expect(code).toContain("const recordExpanded = shallowRef(false);");
+    expect(code).toContain(
+      "const recordOpen = computed(() => isEdit.value || recordExpanded.value);"
     );
   });
 
@@ -96,11 +116,14 @@ describe("GearForm 裝備區簡化", () => {
   });
 
   /*
-   * 2026-08-31：select 要吃跟 input 同一組樣式。沒有它時「好不好用」是
-   * 瀏覽器原生外觀（白底、系統藍框），跟旁邊的米色欄位不同一套。
+   * 2026-08-31：欄位外觀已收斂到 app.css，這裡只守「格線裡的欄位要撐滿
+   * 自己那一欄」——包含 select，否則「好不好用」會比左邊的價格欄短一截。
+   * 外觀本身由 apps/web/src/assets/fieldStyles.test.ts 守。
    */
-  it("select 與 input 共用同一組欄位樣式", () => {
-    expect(code).toMatch(/input,\s*select,\s*textarea\s*\{/);
+  it("格線裡的 input 與 select 都撐滿欄寬", () => {
+    expect(code).toMatch(
+      /\.field-pair input,\s*\.field-pair select \{\s*width: 100%;/
+    );
   });
 
   /*

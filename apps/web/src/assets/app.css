@@ -525,6 +525,71 @@ button.text-link {
 }
 
 /*
+ * 2026-08-31：視覺上小一號的圓圈，**命中區維持 44px**。
+ *
+ * 使用者回饋標題列的叉叉太大。直接把 width／height 改小會讓命中區跟著
+ * 縮到 44px 以下，違反 WCAG SC 2.5.5（也是 --tap-target 這個 token 存在
+ * 的理由）。所以按鈕本身尺寸不動，只把**看得見的圓圈**交給 ::before：
+ * 邊框畫在 2rem 的偽元素上，按鈕自己不畫邊框。
+ *
+ * 兩個子元素都放在同一個 grid cell，靠 .icon-button 既有的 place-items
+ * 置中，圖示因此仍在圓心。
+ */
+.icon-button--compact {
+  border-color: transparent;
+}
+
+.icon-button--compact::before {
+  content: "";
+  grid-area: 1 / 1;
+  width: 2rem;
+  height: 2rem;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-pill);
+}
+
+.icon-button--compact > * {
+  grid-area: 1 / 1;
+}
+
+/*
+ * 表單欄位的共用外觀（2026-08-31 收斂）。
+ *
+ * 收斂前是**四份各自的 scoped 拷貝**——QuickTimePicker、GearForm、
+ * ReapplicationProductAssignments、FeedbackPage——同樣的宣告抄四次，然後
+ * 各自漂移。分歧已經造成兩個實際問題：
+ *
+ * 1. GearForm 只寫了 `input, textarea` 漏掉 `select`，所以「好不好用」
+ *    下拉是瀏覽器原生外觀（白底、系統藍框），跟旁邊的米色欄位不同一套。
+ *    2026-08-31 已在該檔補上，這裡收斂後不會再有人漏掉。
+ * 2. FeedbackPage 沒有 `min-height`，欄位可能低於 44px（WCAG SC 2.5.5）。
+ *    收斂後自動補上。
+ *
+ * **排除 radio 與 checkbox**：那兩種走 `.choice-grid`（原生外觀 ＋
+ * accent-color）或被 `.category-option input` 藏起來，套上邊框與內距會
+ * 把它們變成奇怪的方塊。
+ *
+ * **不含 width**：四份拷貝裡只有兩份有 `width: 100%`，而 QuickTimePicker
+ * 的欄位是並排的。寬度是版面決定，留給各自的 scoped style。
+ */
+input:not([type="radio"], [type="checkbox"]),
+select,
+textarea {
+  min-height: var(--tap-target);
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-sm);
+  color: var(--text-primary);
+  background: var(--surface-primary);
+  font: inherit;
+}
+
+textarea {
+  min-height: calc(var(--tap-target) * 2);
+  resize: vertical;
+}
+
+/*
  * 選項卡片的「已選取」外觀——實心暖灰底 ＋ 低彩度的 muted 邊框。
  *
  * 2026-08-24 使用者指定，分三次調整到現在這組：底色從 cream-strong 改成

@@ -93,18 +93,10 @@ label {
 label span {
   font-weight: 500;
 }
+/* 只留寬度，其餘欄位外觀（含 44px 命中高度）用 app.css 的共用宣告。 */
 input,
 select,
 textarea {
   width: 100%;
-  padding: var(--space-3);
-  border: 1px solid var(--border-strong);
-  border-radius: var(--radius-sm);
-  background: var(--surface-primary);
-  color: var(--text-primary);
-  font: inherit;
-}
-textarea {
-  resize: vertical;
 }
 </style>
