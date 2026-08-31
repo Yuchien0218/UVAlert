@@ -2,11 +2,20 @@ import { describe, expect, it, vi } from "vitest";
 import { nextTick, shallowRef, type Ref } from "vue";
 import type { SessionProjection } from "@sunshield/contracts";
 import type {
+  BackgroundPushState,
+  ConnectivityStatus,
   NotificationPermissionState,
   NotificationPort,
-  UserPreferencesPort
+  RemotePushPort
 } from "@sunshield/platform";
 import { createNotificationController } from "./createNotificationController";
+
+type ProposedController = ReturnType<typeof createNotificationController> & {
+  readonly backgroundPushState: { readonly value: BackgroundPushState };
+  enableBackgroundPush(): Promise<void>;
+  disableBackgroundPush(): Promise<void>;
+  retryBackgroundSync(): Promise<void>;
+};
 
 function createNotificationsStub(
   permission: NotificationPermissionState = "granted"
@@ -29,17 +38,21 @@ function createNotificationsStub(
   } as never;
 }
 
-function createUserPreferencesStub(
-  reminderFrequencyMinutes: number | null = null
-): UserPreferencesPort & {
-  setReminderFrequencyMinutes: ReturnType<typeof vi.fn>;
+function createRemotePushStub(supported = true): RemotePushPort & {
+  enable: ReturnType<typeof vi.fn>;
+  schedule: ReturnType<typeof vi.fn>;
+  cancel: ReturnType<typeof vi.fn>;
+  disable: ReturnType<typeof vi.fn>;
+  flushPendingIntent: ReturnType<typeof vi.fn>;
 } {
   return {
-    getReminderFrequencyMinutes: vi
-      .fn()
-      .mockResolvedValue(reminderFrequencyMinutes),
-    setReminderFrequencyMinutes: vi.fn().mockResolvedValue(undefined)
-  } as never;
+    isSupported: () => supported,
+    enable: vi.fn().mockResolvedValue("enabled"),
+    schedule: vi.fn().mockResolvedValue("scheduled"),
+    cancel: vi.fn().mockResolvedValue("enabled"),
+    disable: vi.fn().mockResolvedValue("permission-required"),
+    flushPendingIntent: vi.fn().mockResolvedValue("scheduled")
+  };
 }
 
 function sessionWith(
@@ -58,107 +71,108 @@ function sessionWith(
   } as SessionProjection;
 }
 
-/** watch 的回呼呼叫 async sync()，需要讓 microtask 跑完才看得到結果。 */
 async function flush(): Promise<void> {
   await nextTick();
   await Promise.resolve();
+  await Promise.resolve();
+}
+
+function createController(
+  options: {
+    session?: SessionProjection | null;
+    supported?: boolean;
+    connectivity?: ConnectivityStatus;
+  } = {}
+) {
+  const notifications = createNotificationsStub();
+  const remotePush = createRemotePushStub(options.supported);
+  const currentSession: Ref<SessionProjection | null> = shallowRef(
+    options.session === undefined ? sessionWith() : options.session
+  );
+  const connectivity = shallowRef<ConnectivityStatus>(
+    options.connectivity ?? "online"
+  );
+  let operation = 0;
+  const controller = createNotificationController({
+    notifications,
+    remotePush,
+    currentSession,
+    connectivity,
+    createOperationId: () => `operation-${++operation}`
+  } as never) as ProposedController;
+  return {
+    controller,
+    notifications,
+    remotePush,
+    currentSession,
+    connectivity
+  };
 }
 
 describe("createNotificationController", () => {
-  it("有下一個到期時間時排一則提醒", async () => {
-    const notifications = createNotificationsStub();
-    const currentSession: Ref<SessionProjection | null> =
-      shallowRef(sessionWith());
-
-    createNotificationController({
-      notifications,
-      currentSession,
-      userPreferences: createUserPreferencesStub()
-    });
+  it("initial active Session uses the fixed single local notification and leaves remote untouched", async () => {
+    const { notifications, remotePush } = createController();
     await flush();
 
-    expect(notifications.schedule).toHaveBeenCalledOnce();
     expect(notifications.schedule).toHaveBeenCalledWith({
       id: "session-next-due",
       dueAt: "2026-08-23T12:00:00.000Z",
-      title: "該補擦了",
-      body: "打開查看要補哪些部位",
+      title: "該補擦防曬乳了",
+      body: "",
       repeatMinutes: null
     });
+    expect(remotePush.schedule).not.toHaveBeenCalled();
   });
 
-  it("只排一則，不替每個部位各排一則", async () => {
-    const notifications = createNotificationsStub();
-    const currentSession = shallowRef<SessionProjection | null>(
-      sessionWith({
-        zones: [{ zoneDueAt: "2026-08-23T12:00:00.000Z" }] as never
-      })
+  it("fails closed to permission-required until the user explicitly enables remote delivery", async () => {
+    const { controller } = createController();
+    await flush();
+    expect(controller.backgroundPushState.value).toBe("permission-required");
+  });
+
+  it("enables against the latest due time and sends only dueAt plus a fresh operation id", async () => {
+    const { controller, remotePush } = createController();
+    await controller.enableBackgroundPush();
+
+    expect(remotePush.enable).toHaveBeenCalledOnce();
+    expect(remotePush.schedule).toHaveBeenCalledWith(
+      "2026-08-23T12:00:00.000Z",
+      "operation-1"
     );
-
-    createNotificationController({
-      notifications,
-      currentSession,
-      userPreferences: createUserPreferencesStub()
-    });
-    await flush();
-
-    expect(notifications.schedule).toHaveBeenCalledOnce();
+    expect(remotePush.schedule.mock.calls[0]).toHaveLength(2);
   });
 
-  it.each([
-    ["沒有 Session", null],
-    ["Session 已結束", sessionWith({ overallStatus: "ended" })],
-    ["沒有下一個到期時間", sessionWith({ sessionNextDueAt: null })]
-  ])("%s 時清空排程", async (_label, session) => {
-    const notifications = createNotificationsStub();
-    const currentSession = shallowRef<SessionProjection | null>(
-      session as SessionProjection | null
-    );
+  it("keeps the local fallback when a remote schedule reports schedule-error", async () => {
+    const { controller, notifications, remotePush } = createController();
+    remotePush.schedule.mockResolvedValue("schedule-error");
+    await controller.enableBackgroundPush();
 
-    createNotificationController({
-      notifications,
-      currentSession,
-      userPreferences: createUserPreferencesStub()
-    });
-    await flush();
-
-    expect(notifications.cancelAll).toHaveBeenCalled();
-    expect(notifications.schedule).not.toHaveBeenCalled();
+    expect(notifications.schedule).toHaveBeenCalled();
+    expect(controller.backgroundPushState.value).toBe("schedule-error");
   });
 
-  it("到期時間變動時重排", async () => {
-    const notifications = createNotificationsStub();
-    const currentSession = shallowRef<SessionProjection | null>(sessionWith());
-
-    createNotificationController({
-      notifications,
-      currentSession,
-      userPreferences: createUserPreferencesStub()
-    });
-    await flush();
-
+  it("replaces local and remote schedules when the due time changes", async () => {
+    const { controller, notifications, remotePush, currentSession } =
+      createController();
+    await controller.enableBackgroundPush();
     currentSession.value = sessionWith({
       sessionNextDueAt: "2026-08-23T13:30:00.000Z"
     });
     await flush();
 
-    expect(notifications.schedule).toHaveBeenCalledTimes(2);
     expect(notifications.schedule).toHaveBeenLastCalledWith(
       expect.objectContaining({ dueAt: "2026-08-23T13:30:00.000Z" })
     );
+    expect(remotePush.schedule).toHaveBeenLastCalledWith(
+      "2026-08-23T13:30:00.000Z",
+      "operation-2"
+    );
   });
 
-  it("補擦後 Session 結束，殘留的排程會被清掉", async () => {
-    const notifications = createNotificationsStub();
-    const currentSession = shallowRef<SessionProjection | null>(sessionWith());
-
-    createNotificationController({
-      notifications,
-      currentSession,
-      userPreferences: createUserPreferencesStub()
-    });
-    await flush();
-
+  it("cancels local and enabled remote delivery when the Session ends", async () => {
+    const { controller, notifications, remotePush, currentSession } =
+      createController();
+    await controller.enableBackgroundPush();
     currentSession.value = sessionWith({
       overallStatus: "ended",
       sessionNextDueAt: null
@@ -166,149 +180,87 @@ describe("createNotificationController", () => {
     await flush();
 
     expect(notifications.cancelAll).toHaveBeenCalled();
+    expect(remotePush.cancel).toHaveBeenCalledWith("operation-2");
   });
 
-  describe("權限", () => {
-    it("剛取得權限後補排既有 Session 的提醒", async () => {
-      const notifications = createNotificationsStub("default");
-      const currentSession = shallowRef<SessionProjection | null>(
-        sessionWith()
-      );
-
-      const controller = createNotificationController({
-        notifications,
-        currentSession,
-        userPreferences: createUserPreferencesStub()
-      });
-      await flush();
-
-      const before = notifications.schedule.mock.calls.length;
-      await controller.requestPermission();
-
-      expect(controller.permission.value).toBe("granted");
-      expect(notifications.schedule.mock.calls.length).toBeGreaterThan(before);
+  it("flushes the retained remote intent once after reconnecting", async () => {
+    const { controller, remotePush, connectivity } = createController({
+      connectivity: "offline"
     });
-
-    it("被拒絕時不補排", async () => {
-      const notifications = createNotificationsStub("default");
-      notifications.requestPermission.mockResolvedValue("denied");
-      const currentSession = shallowRef<SessionProjection | null>(
-        sessionWith()
-      );
-
-      const controller = createNotificationController({
-        notifications,
-        currentSession,
-        userPreferences: createUserPreferencesStub()
-      });
-      await flush();
-      notifications.schedule.mockClear();
-
-      await controller.requestPermission();
-
-      expect(controller.permission.value).toBe("denied");
-      expect(notifications.schedule).not.toHaveBeenCalled();
-    });
-  });
-
-  it("dispose 後停止追蹤並清空排程", async () => {
-    const notifications = createNotificationsStub();
-    const currentSession = shallowRef<SessionProjection | null>(sessionWith());
-
-    const controller = createNotificationController({
-      notifications,
-      currentSession,
-      userPreferences: createUserPreferencesStub()
-    });
+    remotePush.schedule.mockResolvedValue("pending-sync");
+    await controller.enableBackgroundPush();
+    connectivity.value = "online";
     await flush();
-    controller.dispose();
-    notifications.schedule.mockClear();
 
+    expect(remotePush.flushPendingIntent).toHaveBeenCalledOnce();
+  });
+
+  it("only exposes enable again after a successful disable", async () => {
+    const { controller, remotePush } = createController();
+    await controller.enableBackgroundPush();
+    remotePush.disable.mockResolvedValueOnce("schedule-error");
+    await controller.disableBackgroundPush();
+
+    expect(controller.backgroundPushState.value).toBe("schedule-error");
+    expect(remotePush.enable).toHaveBeenCalledOnce();
+  });
+
+  it("allows a fresh enable only after disable fully succeeds", async () => {
+    const { controller, remotePush } = createController();
+    await controller.enableBackgroundPush();
+    await controller.disableBackgroundPush();
+    await controller.enableBackgroundPush();
+
+    expect(controller.backgroundPushState.value).toBe("scheduled");
+    expect(remotePush.disable).toHaveBeenCalledOnce();
+    expect(remotePush.enable).toHaveBeenCalledTimes(2);
+  });
+
+  it("ignores an older remote schedule result after a newer due time wins", async () => {
+    let resolveFirst!: (state: BackgroundPushState) => void;
+    const firstSchedule = new Promise<BackgroundPushState>((resolve) => {
+      resolveFirst = resolve;
+    });
+    const { controller, remotePush, currentSession } = createController();
+    remotePush.schedule
+      .mockReturnValueOnce(firstSchedule)
+      .mockResolvedValueOnce("scheduled");
+
+    const enabling = controller.enableBackgroundPush();
+    await flush();
     currentSession.value = sessionWith({
       sessionNextDueAt: "2026-08-23T14:00:00.000Z"
     });
     await flush();
+    resolveFirst("schedule-error");
+    await enabling;
+    await flush();
 
-    expect(notifications.schedule).not.toHaveBeenCalled();
+    expect(remotePush.schedule).toHaveBeenLastCalledWith(
+      "2026-08-23T14:00:00.000Z",
+      "operation-2"
+    );
+    expect(controller.backgroundPushState.value).toBe("scheduled");
   });
 
-  describe("再次提醒頻率", () => {
-    it("初始化時從 userPreferences 載入既有偏好，並套用到排程", async () => {
-      const notifications = createNotificationsStub();
-      const userPreferences = createUserPreferencesStub(5);
-      const currentSession = shallowRef<SessionProjection | null>(
-        sessionWith()
-      );
-
-      const controller = createNotificationController({
-        notifications,
-        currentSession,
-        userPreferences
-      });
-      await flush();
-
-      expect(controller.reminderFrequencyMinutes.value).toBe(5);
-      expect(notifications.schedule).toHaveBeenLastCalledWith(
-        expect.objectContaining({ repeatMinutes: 5 })
-      );
+  it("disposes watchers, local notices, and late remote state writes", async () => {
+    let resolveSchedule!: (state: BackgroundPushState) => void;
+    const pendingSchedule = new Promise<BackgroundPushState>((resolve) => {
+      resolveSchedule = resolve;
     });
-
-    it("setReminderFrequencyMinutes 會存偏好並立刻重排", async () => {
-      const notifications = createNotificationsStub();
-      const userPreferences = createUserPreferencesStub(null);
-      const currentSession = shallowRef<SessionProjection | null>(
-        sessionWith()
-      );
-
-      const controller = createNotificationController({
-        notifications,
-        currentSession,
-        userPreferences
-      });
-      await flush();
-
-      await controller.setReminderFrequencyMinutes(15);
-
-      expect(userPreferences.setReminderFrequencyMinutes).toHaveBeenCalledWith(
-        15
-      );
-      expect(controller.reminderFrequencyMinutes.value).toBe(15);
-      expect(notifications.schedule).toHaveBeenLastCalledWith(
-        expect.objectContaining({ repeatMinutes: 15 })
-      );
+    const { controller, notifications, remotePush, currentSession } =
+      createController();
+    remotePush.schedule.mockReturnValueOnce(pendingSchedule);
+    const enabling = controller.enableBackgroundPush();
+    controller.dispose();
+    currentSession.value = sessionWith({
+      sessionNextDueAt: "2026-08-23T14:00:00.000Z"
     });
-  });
+    resolveSchedule("scheduled");
+    await enabling;
+    await flush();
 
-  describe("裝置測試", () => {
-    it("sendTestNotification 直接委派給 NotificationPort", async () => {
-      const notifications = createNotificationsStub();
-      const currentSession = shallowRef<SessionProjection | null>(null);
-
-      const controller = createNotificationController({
-        notifications,
-        currentSession,
-        userPreferences: createUserPreferencesStub()
-      });
-
-      await expect(controller.sendTestNotification()).resolves.toBe(true);
-      expect(notifications.sendTest).toHaveBeenCalledOnce();
-    });
-  });
-
-  /**
-   * 這個斷言是刻意的：畫面必須據此告訴使用者「仍需自己回來查看」。
-   * 若哪天接上 Web Push 讓它變 true，文案也必須跟著改。
-   */
-  it("回報無法在背景送達", () => {
-    const notifications = createNotificationsStub();
-    const currentSession = shallowRef<SessionProjection | null>(null);
-
-    const controller = createNotificationController({
-      notifications,
-      currentSession,
-      userPreferences: createUserPreferencesStub()
-    });
-
-    expect(controller.canDeliverInBackground).toBe(false);
+    expect(notifications.cancelAll).toHaveBeenCalled();
+    expect(controller.backgroundPushState.value).not.toBe("scheduled");
   });
 });

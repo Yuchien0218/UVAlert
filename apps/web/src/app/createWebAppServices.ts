@@ -3,16 +3,20 @@ import {
   LocalDataRepository,
   LocalProductSettingsRepository,
   LocalProductCatalogRepository,
+  LocalPushStateRepository,
   LocalRegionPreferenceRepository,
   LocalSetupDraftRepository,
   LocalSessionRepository,
   LocalSyncRepository,
-  LocalUserPreferencesRepository,
   LocalWeatherForecastRepository,
   SunshieldDatabase
 } from "@sunshield/persistence-web";
 import { BrowserConnectivity } from "../adapters/BrowserConnectivity";
-import { BrowserNotifications } from "../adapters/BrowserNotifications";
+import {
+  BrowserNotifications,
+  createBrowserNotificationDeps
+} from "../adapters/BrowserNotifications";
+import { BrowserRemotePush } from "../adapters/BrowserRemotePush";
 import { BrowserLifecycle } from "../adapters/BrowserLifecycle";
 import { IndexedDbLocalIdentity } from "../adapters/IndexedDbLocalIdentity";
 import { BrowserUvForecastClient } from "../adapters/BrowserUvForecastClient";
@@ -82,6 +86,7 @@ import {
   type FeedbackController
 } from "../features/feedback/createFeedbackController";
 import type { CloudSyncPort } from "@sunshield/platform";
+import { readConfiguredEnvironmentValue } from "../adapters/configuredEnvironment";
 import {
   createNotificationController,
   type NotificationController
@@ -122,7 +127,8 @@ export function createWebAppServices(
   const notifier = new BroadcastChannelNotifier();
   const connectivity = new BrowserConnectivity();
   const lifecycle = new BrowserLifecycle();
-  const notificationPort = new BrowserNotifications();
+  const notificationDeps = createBrowserNotificationDeps();
+  const notificationPort = new BrowserNotifications(notificationDeps);
   const repository = new LocalSessionRepository({
     database,
     sourceContextId: contextId,
@@ -155,6 +161,24 @@ export function createWebAppServices(
     connectivity,
     lifecycle,
     crossContext: notifier
+  });
+  const remotePush = new BrowserRemotePush({
+    state: new LocalPushStateRepository(database),
+    apiBaseUrl:
+      readConfiguredEnvironmentValue(import.meta.env.VITE_API_BASE_URL) ??
+      "/v1",
+    publicVapidKey: import.meta.env.VITE_PUSH_PUBLIC_KEY,
+    isSecureContext: () => globalThis.isSecureContext,
+    hasServiceWorker: () => "serviceWorker" in globalThis.navigator,
+    hasPushManager: () => "PushManager" in globalThis,
+    hasNotification: () => "Notification" in globalThis,
+    getPermission: () => globalThis.Notification.permission,
+    requestPermission: () => globalThis.Notification.requestPermission(),
+    getRegistration: notificationDeps.getRegistration,
+    fetch: globalThis.fetch,
+    isOnline: () => boot.connectivity.value === "online",
+    createOperationId: createId,
+    now: () => new Date()
   });
   const productRepository = new LocalProductSettingsRepository(database);
   const productCatalog = new LocalProductCatalogRepository(database);
@@ -252,7 +276,9 @@ export function createWebAppServices(
   const notifications = createNotificationController({
     notifications: notificationPort,
     currentSession: boot.currentSession,
-    userPreferences: new LocalUserPreferencesRepository(database)
+    remotePush,
+    connectivity: boot.connectivity,
+    createOperationId: createId
   });
 
   return {

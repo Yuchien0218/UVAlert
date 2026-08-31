@@ -4,6 +4,7 @@ import { mount } from "@vue/test-utils";
 import { nextTick, shallowReadonly, shallowRef } from "vue";
 import { createMemoryHistory, createRouter } from "vue-router";
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import type { BackgroundPushState } from "@sunshield/platform";
 import type { WebAppServices } from "../../app/createWebAppServices";
 import { useWebAppServices } from "../../app/injection";
 import NotificationSettingsPage from "./NotificationSettingsPage.vue";
@@ -14,32 +15,25 @@ function makeServices(
   options: {
     permission?: "default" | "granted" | "denied";
     isSupported?: boolean;
-    canDeliverInBackground?: boolean;
-    reminderFrequencyMinutes?: number | null;
+    backgroundPushState?: BackgroundPushState;
   } = {}
 ) {
   const permissionState = shallowRef(options.permission ?? "default");
-  const requestPermission = vi.fn(async () => {
-    permissionState.value = "granted";
-    return "granted" as const;
-  });
-  const reminderFrequencyMinutesState = shallowRef(
-    options.reminderFrequencyMinutes ?? null
+  const backgroundPushState = shallowRef<BackgroundPushState>(
+    options.backgroundPushState ?? "permission-required"
   );
-  const setReminderFrequencyMinutes = vi.fn(async (minutes: number | null) => {
-    reminderFrequencyMinutesState.value = minutes;
-  });
-  const sendTestNotification = vi.fn(async () => true);
-
   return {
+    backgroundPushState,
     notifications: {
       permission: shallowReadonly(permissionState),
       isSupported: options.isSupported ?? true,
-      canDeliverInBackground: options.canDeliverInBackground ?? false,
-      reminderFrequencyMinutes: shallowReadonly(reminderFrequencyMinutesState),
-      requestPermission,
-      setReminderFrequencyMinutes,
-      sendTestNotification,
+      canDeliverInBackground: true,
+      backgroundPushState: shallowReadonly(backgroundPushState),
+      requestPermission: vi.fn(async () => "granted" as const),
+      enableBackgroundPush: vi.fn(async () => undefined),
+      disableBackgroundPush: vi.fn(async () => undefined),
+      retryBackgroundSync: vi.fn(async () => undefined),
+      sendTestNotification: vi.fn(async () => true),
       dispose: vi.fn()
     }
   };
@@ -57,175 +51,111 @@ describe("NotificationSettingsPage", () => {
           name: "settings-notifications",
           component: NotificationSettingsPage
         },
-        {
-          path: "/more",
-          name: "more",
-          component: { template: "<div />" }
-        }
+        { path: "/more", name: "more", component: { template: "<div />" } }
       ]
     });
   });
 
-  it("未開啟時顯示未開啟狀態與開啟按鈕，點擊觸發要求權限", async () => {
-    const services = makeServices({ permission: "default" });
+  it.each<readonly [BackgroundPushState, string]>([
+    ["unsupported", "無法使用背景推播"],
+    ["permission-required", "開啟背景推播"],
+    ["subscribing", "設定中"],
+    ["enabled", "已啟用背景推播"],
+    ["scheduled", "已同步下一個補擦提醒"],
+    ["pending-sync", "等待同步"],
+    ["schedule-error", "無法依賴背景推播"]
+  ])("renders the %s background-push state", (backgroundPushState, copy) => {
+    const services = makeServices({ backgroundPushState });
     vi.mocked(useWebAppServices).mockReturnValue(
       services as unknown as WebAppServices
     );
-
     const wrapper = mount(NotificationSettingsPage, {
-      global: {
-        plugins: [router],
-        stubs: { Icon: true }
-      }
+      global: { plugins: [router], stubs: { Icon: true } }
     });
-
-    expect(wrapper.text()).toContain("目前狀態：還沒開啟通知");
-    const button = wrapper.find("button.button--primary");
-    expect(button.exists()).toBe(true);
-
-    await button.trigger("click");
-    expect(services.notifications.requestPermission).toHaveBeenCalledTimes(1);
+    expect(wrapper.text()).toContain(copy);
   });
 
-  it("已授權時顯示已開啟狀態", () => {
-    const services = makeServices({ permission: "granted" });
-    vi.mocked(useWebAppServices).mockReturnValue(
-      services as unknown as WebAppServices
-    );
-
-    const wrapper = mount(NotificationSettingsPage, {
-      global: {
-        plugins: [router],
-        stubs: { Icon: true }
-      }
-    });
-
-    expect(wrapper.text()).toContain("目前狀態：通知已開啟");
-  });
-
-  it("已授權時顯示再次提醒頻率與裝置測試", async () => {
+  it("delegates background enable, retry, and successful recovery controls", async () => {
     const services = makeServices({
-      permission: "granted",
-      reminderFrequencyMinutes: 5
+      backgroundPushState: "permission-required"
     });
     vi.mocked(useWebAppServices).mockReturnValue(
       services as unknown as WebAppServices
     );
-
     const wrapper = mount(NotificationSettingsPage, {
-      global: {
-        plugins: [router],
-        stubs: { Icon: true }
-      }
+      global: { plugins: [router], stubs: { Icon: true } }
     });
 
-    expect(wrapper.text()).toContain("再次提醒頻率");
-    const options = wrapper.findAll('input[name="reminder-frequency"]');
-    expect(options).toHaveLength(3);
-    expect((options[1]!.element as HTMLInputElement).checked).toBe(true);
+    await wrapper
+      .get('[data-testid="enable-background-push"]')
+      .trigger("click");
+    expect(services.notifications.enableBackgroundPush).toHaveBeenCalledOnce();
 
-    await options[2]!.setValue(true);
-    expect(
-      services.notifications.setReminderFrequencyMinutes
-    ).toHaveBeenCalledWith(15);
-
-    expect(wrapper.text()).toContain("裝置測試");
-    await wrapper.get("button.button--quiet").trigger("click");
-    expect(services.notifications.sendTestNotification).toHaveBeenCalledOnce();
+    services.backgroundPushState.value = "schedule-error";
     await nextTick();
-    expect(wrapper.text()).toContain("已送出");
+    await wrapper
+      .get('[data-testid="disable-background-push"]')
+      .trigger("click");
+    expect(services.notifications.disableBackgroundPush).toHaveBeenCalledOnce();
   });
 
-  it("未授權時不顯示再次提醒頻率與裝置測試", () => {
-    const services = makeServices({ permission: "default" });
+  it("retains local permission requests and device-test feedback", async () => {
+    const pendingServices = makeServices({ permission: "default" });
+    vi.mocked(useWebAppServices).mockReturnValue(
+      pendingServices as unknown as WebAppServices
+    );
+    const pendingWrapper = mount(NotificationSettingsPage, {
+      global: { plugins: [router], stubs: { Icon: true } }
+    });
+
+    await pendingWrapper
+      .get('section[aria-labelledby="permission-heading"] button')
+      .trigger("click");
+    expect(
+      pendingServices.notifications.requestPermission
+    ).toHaveBeenCalledOnce();
+
+    const grantedServices = makeServices({ permission: "granted" });
+    vi.mocked(useWebAppServices).mockReturnValue(
+      grantedServices as unknown as WebAppServices
+    );
+    const grantedWrapper = mount(NotificationSettingsPage, {
+      global: { plugins: [router], stubs: { Icon: true } }
+    });
+
+    await grantedWrapper
+      .get('section[aria-labelledby="test-heading"] button')
+      .trigger("click");
+    await nextTick();
+    expect(
+      grantedServices.notifications.sendTestNotification
+    ).toHaveBeenCalledOnce();
+    expect(grantedWrapper.text()).toContain("已送出");
+  });
+
+  it("retains local permission, denied disclosure, device test, close icon, and truthful delivery caveats", async () => {
+    const services = makeServices({
+      permission: "denied",
+      backgroundPushState: "pending-sync"
+    });
     vi.mocked(useWebAppServices).mockReturnValue(
       services as unknown as WebAppServices
     );
-
     const wrapper = mount(NotificationSettingsPage, {
-      global: {
-        plugins: [router],
-        stubs: { Icon: true }
-      }
+      global: { plugins: [router], stubs: { Icon: true } }
     });
 
-    expect(wrapper.text()).not.toContain("再次提醒頻率");
-    expect(wrapper.text()).not.toContain("裝置測試");
-  });
-
-  it("被封鎖時顯示已被封鎖警示", () => {
-    const services = makeServices({ permission: "denied" });
-    vi.mocked(useWebAppServices).mockReturnValue(
-      services as unknown as WebAppServices
-    );
-
-    const wrapper = mount(NotificationSettingsPage, {
-      global: {
-        plugins: [router],
-        stubs: { Icon: true }
-      }
-    });
-
-    expect(wrapper.text()).toContain("目前狀態：通知已被拒絕");
+    expect(wrapper.find('icon-stub[name="tool-close"]').exists()).toBe(true);
     expect(wrapper.text()).toContain("通知權限已被瀏覽器封鎖");
-  });
-
-  it("被封鎖時可以展開「如何開啟」的步驟說明", async () => {
-    const services = makeServices({ permission: "denied" });
-    vi.mocked(useWebAppServices).mockReturnValue(
-      services as unknown as WebAppServices
-    );
-
-    const wrapper = mount(NotificationSettingsPage, {
-      global: {
-        plugins: [router],
-        stubs: { Icon: true }
-      }
-    });
-
-    expect(wrapper.find("#denied-steps").exists()).toBe(false);
     await wrapper.get("button.button--quiet").trigger("click");
     expect(wrapper.find("#denied-steps").exists()).toBe(true);
-    expect(wrapper.text()).toContain("網站設定");
-  });
-
-  it("裝置不支援時顯示不支援提示", () => {
-    const services = makeServices({ isSupported: false });
-    vi.mocked(useWebAppServices).mockReturnValue(
-      services as unknown as WebAppServices
-    );
-
-    const wrapper = mount(NotificationSettingsPage, {
-      global: {
-        plugins: [router],
-        stubs: { Icon: true }
-      }
-    });
-
-    expect(wrapper.text()).toContain("目前狀態：這個瀏覽器不支援通知");
-  });
-
-  /**
-   * 2026-08-23 校正：canDeliverInBackground 恆為 false，畫面必須明確告知
-   * 使用者仍需自己回來查看，不能只說「可能會延遲或無法發出」——那種措辭
-   * 讓「一定不會送達」聽起來像邊緣情況，跟 Sitemap §4.3 的規則衝突。
-   */
-  it("無法背景送達時明確告知使用者仍需自己回來查看", () => {
-    const services = makeServices({ canDeliverInBackground: false });
-    vi.mocked(useWebAppServices).mockReturnValue(
-      services as unknown as WebAppServices
-    );
-
-    const wrapper = mount(NotificationSettingsPage, {
-      global: {
-        plugins: [router],
-        stubs: { Icon: true }
-      }
-    });
-
-    expect(wrapper.text()).toContain("你仍需");
-    expect(wrapper.text()).toContain("自己回來查看");
-    expect(wrapper.text()).not.toContain("可能會延遲或無法發出");
-    expect(wrapper.text()).not.toContain("背景通知");
+    expect(wrapper.text()).toContain("輔助");
+    expect(wrapper.text()).toContain("iPhone/iPad");
+    expect(wrapper.text()).toContain("加入主畫面");
+    expect(wrapper.text()).toContain("網路");
+    expect(wrapper.text()).not.toContain("再次提醒頻率");
+    expect(wrapper.findAll('input[name="reminder-frequency"]')).toHaveLength(0);
+    expect(wrapper.text()).not.toContain("每 5 分鐘再提醒一次");
+    expect(wrapper.text()).not.toContain("每 15 分鐘再提醒一次");
   });
 });

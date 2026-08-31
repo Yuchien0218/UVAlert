@@ -9,6 +9,7 @@ import {
   makeStartSessionCommand
 } from "@sunshield/test-fixtures";
 import { afterEach, describe, expect, it } from "vitest";
+import { createNotificationController } from "../features/notification/createNotificationController";
 import { IndexedDbLocalIdentity } from "../adapters/IndexedDbLocalIdentity";
 import { createAppBootController } from "./createAppBootController";
 
@@ -22,6 +23,49 @@ afterEach(async () => {
 });
 
 describe("App Boot with real IndexedDB projection", () => {
+  it("passes boot connectivity into notification composition without Push API setup", () => {
+    const boot = createAppBootController({
+      contextId: "notification-wiring",
+      repository: {} as never,
+      identity: {} as never,
+      connectivity: {
+        getCurrentStatus: () => "offline",
+        subscribe: () => () => undefined
+      },
+      lifecycle: { subscribeForeground: () => () => undefined },
+      crossContext: { subscribe: () => () => undefined }
+    });
+    const notifications = createNotificationController({
+      notifications: {
+        isSupported: () => false,
+        ensureReady: async () => undefined,
+        getPermission: () => "unsupported",
+        requestPermission: async () => "unsupported",
+        schedule: async () => undefined,
+        cancel: async () => undefined,
+        cancelAll: async () => undefined,
+        canDeliverInBackground: () => false,
+        sendTest: async () => false
+      },
+      remotePush: {
+        isSupported: () => false,
+        enable: async () => "unsupported",
+        schedule: async () => "unsupported",
+        cancel: async () => "unsupported",
+        disable: async () => "unsupported",
+        flushPendingIntent: async () => "unsupported"
+      },
+      currentSession: boot.currentSession,
+      connectivity: boot.connectivity,
+      createOperationId: () => "operation-1"
+    });
+
+    expect(boot.connectivity.value).toBe("offline");
+    expect(notifications.backgroundPushState.value).toBe("unsupported");
+    notifications.dispose();
+    boot.dispose();
+  });
+
   it("restores the committed session projection for the local visitor", async () => {
     const database = new SunshieldDatabase(
       `web-boot-${Date.now()}-${Math.random()}`
