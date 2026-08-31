@@ -68,9 +68,17 @@ const relatedArticles = computed(() =>
       <h1 class="page-heading__title" data-typography-role="page-title">
         {{ article.title }}
       </h1>
-      <p class="education-article-summary prose-block">
-        {{ article.summary }}
-      </p>
+      <!--
+        2026-08-31：拿掉這裡的 summary。
+
+        它與下方的「先說結論」（takeawayHtml）講的是同一件事，只是換句話
+        說——使用者回報「文章內重複顯示摘要」。留下 takeaway 而不是 summary，
+        因為 takeaway 是**文章自己寫的結論段落**（產生器從 ## 先說結論 抽
+        出來的），summary 則是給清單卡片與 <meta description> 用的簡介。
+
+        summary 沒有被刪除，只是不在這一頁重複：educationSeo.ts 仍然用它當
+        meta description，分類頁與首頁的卡片也還在顯示。
+      -->
       <p class="education-article-meta">
         最後查閱：{{ article.lastReviewed }} ·
         {{ article.publishable ? "已發布" : "專業審閱中" }}
@@ -144,12 +152,6 @@ const relatedArticles = computed(() =>
   max-width: 24em;
 }
 
-.education-article-summary {
-  margin: 0;
-  color: var(--text-body);
-  font-size: var(--font-size-body);
-  line-height: var(--line-height-body);
-}
 
 .education-article-meta,
 .education-card-kicker {

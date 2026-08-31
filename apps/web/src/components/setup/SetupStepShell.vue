@@ -29,24 +29,31 @@ defineEmits<{
 
 <template>
   <section class="setup-shell" :aria-busy="busy">
-    <div class="setup-shell__toolbar">
-      <!--
-        2026-08-30：叉叉改成返回箭頭。原本是「取消設定」——按下去會刪掉
-        草稿——而使用者要的是「回上一頁」。語意換了，行為也跟著換：離開
-        不再刪草稿，回來由既有的「繼續未完成的設定？」回復卡接手。取消
-        草稿的能力沒有消失，它在回復卡的「重新開始」上，那裡語意明確。
-        裁決見 docs/decisions/2026-08-30-pending-decisions.md 第二節。
+    <!--
+      2026-08-31：返回鈕與標題合併成同一列。
 
-        2026-08-30 曾把它從右上移到左上，理由是「返回是導航，導航在左上
-        是通用慣例」。**2026-08-31 使用者裁決移回右上**：全 App 其他流程
-        的關閉鈕都在右上（GearFormPage、ReapplyPage、EventCorrectionPage
-        等七處），只有這一個在左上，反而變成唯一的例外。位置一致優先於
-        導航慣例——這是使用者的取捨，不是實作偏好。
+      原本工具列是**獨立的一列**（min-height 44px），底下再隔 --space-8
+      才是標題——在窄螢幕上儲存狀態是隱藏的，所以那一列幾乎全空，等於
+      標題上方憑空多出約 76px 的空白（使用者實測回報）。
 
-        圖示維持左箭頭不是叉叉：語意仍然是「回上一頁」（不刪草稿），
-        跟關閉／取消是兩回事，只有位置對齊。
-      -->
-      <span />
+      這跟 GearFormPage 的 form-heading 是同一個問題與同一個解法：標題與
+      按鈕同列、說明橫跨兩欄。草稿儲存狀態改放在說明下方，它是短暫的
+      回饋，不需要自己佔一列。
+    -->
+    <header class="setup-shell__heading">
+      <h1 class="setup-shell__title" data-typography-role="page-title">
+        {{ title }}
+      </h1>
+
+      <IconButton
+        class="setup-shell__back"
+        icon="tool-arrow-left"
+        label="回上一頁"
+        :disabled="busy"
+        @click="$emit('back')"
+      />
+
+      <p class="setup-shell__description">{{ description }}</p>
 
       <span v-if="saveStatus === 'saved'" class="setup-shell__save-status">
         <Icon name="state-online" :size="20" />
@@ -60,22 +67,6 @@ defineEmits<{
         <Icon name="state-offline" :size="20" />
         草稿未儲存
       </span>
-      <span v-else />
-
-      <IconButton
-        class="setup-shell__back"
-        icon="tool-arrow-left"
-        label="回上一頁"
-        :disabled="busy"
-        @click="$emit('back')"
-      />
-    </div>
-
-    <header class="setup-shell__heading">
-      <h1 class="setup-shell__title" data-typography-role="page-title">
-        {{ title }}
-      </h1>
-      <p class="setup-shell__description">{{ description }}</p>
     </header>
 
     <div class="setup-shell__content">
@@ -94,22 +85,24 @@ defineEmits<{
   gap: var(--space-8);
 }
 
-.setup-shell__toolbar {
+.setup-shell__heading {
   display: grid;
-  min-height: var(--tap-target);
-  grid-template-columns: 1fr auto 1fr;
+  grid-template-columns: minmax(0, 1fr) auto;
+  /* 返回鈕的中心對齊標題那一列的中線，不是整塊的頂端。 */
   align-items: center;
-  gap: var(--space-3);
+  column-gap: var(--space-4);
+  row-gap: var(--space-3);
 }
 
-/* 返回鈕改用共用的 .icon-button，這裡只負責把它推到最右並處理停用態。 */
-.setup-shell__toolbar .icon-button {
-  justify-self: end;
-}
-
-.setup-shell__toolbar .icon-button:disabled {
+.setup-shell__back:disabled {
   cursor: wait;
   opacity: 0.55;
+}
+
+/* 說明與儲存狀態橫跨兩欄，拿回被按鈕吃掉的那一段寬度。 */
+.setup-shell__description,
+.setup-shell__save-status {
+  grid-column: 1 / -1;
 }
 
 .setup-shell__save-status {
@@ -123,11 +116,6 @@ defineEmits<{
 
 .setup-shell__save-status--error {
   color: var(--color-due);
-}
-
-.setup-shell__heading {
-  display: grid;
-  gap: var(--space-3);
 }
 
 .setup-shell__title {
@@ -163,14 +151,6 @@ defineEmits<{
 }
 
 @media (max-width: 31rem) {
-  .setup-shell__toolbar {
-    grid-template-columns: 1fr auto;
-  }
-
-  .setup-shell__save-status {
-    display: none;
-  }
-
   .setup-shell__actions {
     display: grid;
   }

@@ -99,19 +99,25 @@ describe("SetupStepShell", () => {
     );
 
     /*
-     * 2026-08-31：位置移回右上（使用者裁決），尺寸統一成 compact。
+     * 2026-08-31：返回鈕與標題**同一列**（使用者回報標題上方空掉一大塊）。
      *
-     * 位置守的是「工具列的最後一個子元素是它」——只斷言 CSS 有
-     * `justify-self: end` 的話，把按鈕留在 DOM 第一個位置仍然會綠，而
-     * DOM 順序決定鍵盤 Tab 的先後，那是真的會被使用者感覺到的差別。
+     * 先前它在一個獨立的工具列 div 裡，那個 div 在窄螢幕上幾乎全空卻仍佔
+     * 44px，加上 --space-8 的間距，等於標題上方憑空多出約 76px。
+     *
+     * 守三件事：舊的工具列不得復活、按鈕在標題區裡、按鈕排在標題之後。
+     * DOM 順序同時決定鍵盤 Tab 的先後。
      */
-    const toolbarChildren = wrapper.get(".setup-shell__toolbar").element
-      .children;
+    expect(wrapper.find(".setup-shell__toolbar").exists()).toBe(false);
+
+    const heading = wrapper.get(".setup-shell__heading");
+    expect(heading.find(".icon-button").exists()).toBe(true);
+
+    const children = [...heading.element.children];
     expect(
-      toolbarChildren[toolbarChildren.length - 1]?.classList.contains(
-        "icon-button"
-      )
-    ).toBe(true);
+      children.findIndex((node) => node.classList.contains("icon-button"))
+    ).toBeGreaterThan(
+      children.findIndex((node) => node.tagName.toLowerCase() === "h1")
+    );
     expect(
       wrapper.get(".icon-button").classes("icon-button--compact")
     ).toBe(true);
