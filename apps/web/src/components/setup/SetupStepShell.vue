@@ -36,20 +36,16 @@ defineEmits<{
         草稿的能力沒有消失，它在回復卡的「重新開始」上，那裡語意明確。
         裁決見 docs/decisions/2026-08-30-pending-decisions.md 第二節。
 
-        位置從右上移到左上：返回是導航，導航在左上是通用慣例；而且原本
-        右上只有一個孤立的叉叉獨佔一列，把標題往下推（實測 390×844：
-        按鈕 y=96、h1 y=95，幾乎同高卻各佔一列）。移到左邊之後工具列
-        兩端都有內容，不再讀成「一列空白加一個按鈕」。
+        2026-08-30 曾把它從右上移到左上，理由是「返回是導航，導航在左上
+        是通用慣例」。**2026-08-31 使用者裁決移回右上**：全 App 其他流程
+        的關閉鈕都在右上（GearFormPage、ReapplyPage、EventCorrectionPage
+        等七處），只有這一個在左上，反而變成唯一的例外。位置一致優先於
+        導航慣例——這是使用者的取捨，不是實作偏好。
+
+        圖示維持左箭頭不是叉叉：語意仍然是「回上一頁」（不刪草稿），
+        跟關閉／取消是兩回事，只有位置對齊。
       -->
-      <button
-        class="icon-button setup-shell__back"
-        type="button"
-        aria-label="回上一頁"
-        :disabled="busy"
-        @click="$emit('back')"
-      >
-        <Icon name="tool-arrow-left" :size="24" />
-      </button>
+      <span />
 
       <span v-if="saveStatus === 'saved'" class="setup-shell__save-status">
         <Icon name="state-online" :size="20" />
@@ -63,8 +59,17 @@ defineEmits<{
         <Icon name="state-offline" :size="20" />
         草稿未儲存
       </span>
+      <span v-else />
 
-      <span />
+      <button
+        class="icon-button icon-button--compact setup-shell__back"
+        type="button"
+        aria-label="回上一頁"
+        :disabled="busy"
+        @click="$emit('back')"
+      >
+        <Icon name="tool-arrow-left" :size="20" />
+      </button>
     </div>
 
     <header class="setup-shell__heading">
@@ -98,9 +103,9 @@ defineEmits<{
   gap: var(--space-3);
 }
 
-/* 取消鈕改用共用的 .icon-button，這裡只負責把它推到最右並處理停用態。 */
+/* 返回鈕改用共用的 .icon-button，這裡只負責把它推到最右並處理停用態。 */
 .setup-shell__toolbar .icon-button {
-  justify-self: start;
+  justify-self: end;
 }
 
 .setup-shell__toolbar .icon-button:disabled {
