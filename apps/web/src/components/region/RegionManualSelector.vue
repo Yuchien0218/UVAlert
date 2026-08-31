@@ -190,16 +190,10 @@ async function save(): Promise<void> {
   font-weight: 500;
 }
 
+/* 只留寬度，其餘欄位外觀用 app.css 的共用宣告。 */
 .manual-region__field select,
 .manual-region__field input {
   width: 100%;
-  min-height: var(--tap-target);
-  padding: var(--space-3);
-  border: 1px solid var(--border-subtle);
-  border-radius: var(--radius-sm);
-  background: var(--surface-primary);
-  color: var(--text-primary);
-  font: inherit;
 }
 
 .manual-region__field select[aria-invalid="true"] {

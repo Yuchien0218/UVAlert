@@ -423,14 +423,9 @@ const summary = computed(() => {
   font-size: var(--font-size-supporting);
 }
 
+/* 只留寬度上限，其餘欄位外觀用 app.css 的共用宣告。 */
 .number-field input {
-  min-height: var(--tap-target);
   max-width: 12rem;
-  padding: var(--space-3);
-  border: 1px solid var(--border-subtle);
-  border-radius: var(--radius-sm);
-  background: var(--page-background);
-  color: var(--text-primary);
 }
 
 .identity-warning {

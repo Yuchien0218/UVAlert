@@ -1,4 +1,5 @@
-import { readFileSync } from "node:fs";
+import { readFileSync, readdirSync } from "node:fs";
+import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 
 /**
@@ -16,13 +17,32 @@ import { describe, expect, it } from "vitest";
 
 const APP_CSS = "apps/web/src/assets/app.css";
 
-/** 收斂前各自抄過一份的四個檔案。 */
-const FORMERLY_DUPLICATED = [
-  "apps/web/src/components/common/QuickTimePicker.vue",
-  "apps/web/src/components/product/GearForm.vue",
-  "apps/web/src/components/reapplication/ReapplicationProductAssignments.vue",
-  "apps/web/src/pages/FeedbackPage.vue"
-];
+/*
+ * 2026-08-31 補強：原本只掃「四個具名檔案的 bare element 選擇器」，
+ * 於是漏掉三份用 descendant selector 寫的拷貝——`.water-start input`、
+ * `.number-field input`、`.field input`（設定流程）。它們的值還跟共用宣告
+ * 不一樣（`--border-subtle` 而非 `--border-strong`、`--page-background`
+ * 而非 `--surface-primary`、`padding: --space-3`），所以整個設定流程的欄位
+ * 長得跟 App 其他地方不同——**守門全綠但收斂根本沒完成**。
+ *
+ * 現在改成掃全部 `.vue`，並認得 `.foo input {` 這種寫法。
+ */
+const sourceRoot = "apps/web/src";
+
+/** 允許保留的宣告：寬度是版面決定，不是外觀。 */
+const LAYOUT_ONLY = new Set(["width", "max-width", "min-width"]);
+
+/** 會被判定成「自己宣告欄位外觀」的屬性。 */
+const APPEARANCE_PROPERTIES = new Set([
+  "min-height",
+  "padding",
+  "border",
+  "border-radius",
+  "background",
+  "color",
+  "font",
+  "color-scheme"
+]);
 
 const strip = (source: string): string =>
   source
@@ -31,6 +51,14 @@ const strip = (source: string): string =>
     .replace(/^\s*\/\/.*$/gm, "");
 
 const appCss = strip(readFileSync(APP_CSS, "utf8"));
+
+function discoverVueFiles(directory: string): string[] {
+  return readdirSync(directory, { withFileTypes: true }).flatMap((entry) => {
+    const entryPath = join(directory, entry.name);
+    if (entry.isDirectory()) return discoverVueFiles(entryPath);
+    return entry.name.endsWith(".vue") ? [entryPath] : [];
+  });
+}
 
 /** 共用宣告那條規則的內容。 */
 const sharedRule =
@@ -72,22 +100,40 @@ describe("表單欄位外觀收斂到 app.css", () => {
   });
 
   /*
-   * 收斂的重點是「只有一份」。四個檔案任何一個把 border 抄回去，就代表
-   * 又開始漂移了。比對完整宣告而不是 border 這個字——後者會被
-   * `.category-option` 之類的其他用途誤判（GearForm 真的有一個）。
+   * 收斂的重點是「只有一份」。任何 `.vue` 把外觀宣告抄回去就代表又開始
+   * 漂移了。
+   *
+   * 只看**選擇器最後一段**是 input／select／textarea 的規則——`.foo input`
+   * 算、`.foo input + label` 不算（那是相鄰元素）。radio／checkbox 的規則
+   * 排除在外：它們走 .choice-grid，本來就有自己的外觀。
    */
-  for (const file of FORMERLY_DUPLICATED) {
+  for (const file of discoverVueFiles(sourceRoot).sort()) {
     it(`${file} 不再自己宣告欄位外觀`, () => {
       const source = strip(readFileSync(file, "utf8"));
-      const fieldRule = source.match(
-        /^(?:input|select|textarea)[^{]*\{([^}]*)\}/m
-      );
-      // 只留 width 是允許的（寬度是版面決定，不是外觀）。
-      const declarations = (fieldRule?.[1] ?? "")
-        .split(";")
-        .map((line) => line.trim().split(":")[0]?.trim())
-        .filter((name) => name !== undefined && name !== "");
-      expect(declarations.filter((name) => name !== "width")).toEqual([]);
+      const offenders: string[] = [];
+
+      for (const match of source.matchAll(
+        /(^|\n)\s*([^{}\n]*?(?:input|select|textarea))\s*\{([^}]*)\}/g
+      )) {
+        const selector = match[2]!.trim();
+        // radio／checkbox 與被藏起來的原生控制項不在收斂範圍。
+        if (/\[type=|checkbox|radio|choice-grid|category-option/.test(selector))
+          continue;
+        for (const declaration of (match[3] ?? "").split(";")) {
+          const property = declaration.split(":")[0]?.trim();
+          if (property === undefined || property === "") continue;
+          if (LAYOUT_ONLY.has(property)) continue;
+          if (APPEARANCE_PROPERTIES.has(property)) {
+            offenders.push(`${selector} → ${property}`);
+          }
+        }
+      }
+
+      expect(
+        offenders,
+        `${file} 自己宣告了欄位外觀：${offenders.join("、")}。` +
+          `請改用 app.css 的共用宣告；只有寬度可以留在 scoped style。`
+      ).toEqual([]);
     });
   }
 });

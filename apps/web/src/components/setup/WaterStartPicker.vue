@@ -139,13 +139,7 @@ function toLocalInputValue(date: Date): string {
   font-size: var(--font-size-supporting);
 }
 
-.water-start input {
-  min-height: var(--tap-target);
-  padding: var(--space-3);
-  border: 1px solid var(--border-subtle);
-  border-radius: var(--radius-sm);
-  background: var(--page-background);
-  color: var(--text-primary);
-  color-scheme: light dark;
-}
+/* 欄位外觀用 app.css 的共用宣告。color-scheme 也拿掉了——原本寫 light dark，
+   會讓原生日期選單跟著系統切成深色，而這個 App 是單一亮色主題
+   （styles.css 的 color-scheme: light 與 index.html 的 meta 都是 light）。 */
 </style>
