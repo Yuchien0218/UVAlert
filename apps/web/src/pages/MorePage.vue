@@ -65,7 +65,7 @@ const allEntries: readonly MoreEntry[] = [
     to: "/install",
     icon: "more-install",
     label: "安裝到手機桌面",
-    description: "安裝後資料較不易遺失；不安裝也可正常使用。"
+    description: "可將此頁面安裝至手機主畫面，亦可直接於瀏覽器正常使用。"
   },
   {
     to: "/settings/data",
@@ -78,13 +78,13 @@ const allEntries: readonly MoreEntry[] = [
      * 見 docs/decisions/2026-08-29-settings-data-sync-merge.md 第九節。
      */
     description:
-      "資料留在這台裝置；要跨裝置同步才需登入，同步前會先讓你確認內容。"
+      "資料預設儲存於本機，登入即可跨裝置同步。"
   },
   {
     to: "/feedback",
     icon: "more-feedback",
     label: "問題回報與意見回饋",
-    description: "不用登入也可以回報錯誤或提供建議。"
+    description: "免登入即可回報錯誤或提供建議。"
   }
 ];
 
@@ -114,7 +114,7 @@ const entries = computed(() =>
         更多
       </h1>
       <p class="page-heading__body">
-        說明內容、問題回報與這台裝置上的設定都在這裡。
+        系統設定、衛教資訊與問題回報。
       </p>
     </header>
 

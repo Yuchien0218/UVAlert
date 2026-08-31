@@ -50,7 +50,7 @@ function returnToCaller(): Promise<unknown> {
         地區設定
       </h1>
       <p class="page-heading__body">
-        地區設定只用來顯示 UV 資訊；不會延長或縮短你的本機補擦提醒。
+        僅用於提供 UV 資訊，不影響補擦倒數。
       </p>
     </header>
 
@@ -99,7 +99,7 @@ function returnToCaller(): Promise<unknown> {
     </div>
 
     <p class="region-alternatives__note">
-      略過後提醒頁暫不顯示紫外線指數，但補擦提醒仍可正常使用；之後可以隨時回來設定。
+      略過將不顯示紫外線指數，提醒功能仍可正常運作。
     </p>
 
     <RegionManualSelector

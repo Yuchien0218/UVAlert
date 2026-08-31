@@ -362,7 +362,7 @@ async function remove(): Promise<void> {
         2026-08-31（選項丙）：SPF／PA 搬進包裝標示之後，這句只講暱稱。
         原本它同時罩著暱稱與 SPF／PA，所以寫成「這些」。
       -->
-      <p class="field-helper">重複的暱稱不會被當成同一件裝備。</p>
+      <p class="field-helper">即使同名，系統會視為不同裝備。</p>
     </section>
 
     <ProductSnapshotEditor
@@ -375,7 +375,7 @@ async function remove(): Promise<void> {
       title="確認這瓶防曬乳"
       :description="
         showSunscreenFields
-          ? '請只依包裝上看得到的內容填寫。'
+          ? '請依包裝標示填寫。'
           : '衣物只需要確認身分；沒有會影響倒數的標示欄位。'
       "
     >
@@ -448,7 +448,7 @@ async function remove(): Promise<void> {
     -->
     <section class="app-card" aria-labelledby="gear-record-title">
       <h2 id="gear-record-title" data-typography-role="card-title">我的紀錄</h2>
-      <p class="field-helper">全部選填，只留在這台裝置上。</p>
+      <p class="field-helper">選填項目，僅儲存於本機。</p>
 
       <!--
         揭露契約（DESIGN.md 第五節）：真的 <button>、aria-expanded ＋

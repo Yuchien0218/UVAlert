@@ -17,7 +17,7 @@ export const GEAR_CATEGORY_LABELS: Record<GearCategory, string> = {
  * 不得讓人以為提醒行為會因此改變（S-11）。
  */
 export const GEAR_CATEGORY_REMINDER_EFFECT: Record<GearCategory, string> = {
-  sunscreen: "會建立補擦倒數；到期、耐水、補擦間隔與擦上後等待時間會納入計算。",
+  sunscreen: "防曬乳會依據資料，建立倒數提醒。",
   clothing: "被衣物遮住時不倒數，也不會自己產生補擦時間。",
   eyewear: "只做紀錄，不會影響補擦倒數。",
   other_gear: "只做紀錄，不會影響補擦倒數。"

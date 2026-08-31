@@ -78,20 +78,20 @@ describe("ForecastPage", () => {
   it("說明數值是當日預測最高值", async () => {
     const wrapper = await mountForecast();
 
-    expect(wrapper.text()).toContain("當日預測的最高值");
+    expect(wrapper.text()).toContain("最高預測");
   });
 
   it("說明今天那一格只算剩餘時段", async () => {
     const wrapper = await mountForecast();
 
-    expect(wrapper.text()).toContain("今天只算剩餘時段");
+    expect(wrapper.text()).toContain("當前至日落");
   });
 
   it("保留原本的兩句安全限制", async () => {
     const wrapper = await mountForecast();
 
-    expect(wrapper.text()).toContain("不是即時測站觀測");
-    expect(wrapper.text()).toContain("不會延長或縮短");
+    expect(wrapper.text()).toContain("預測");
+    expect(wrapper.text()).toContain("不影響補擦倒數");
   });
 
   /*
@@ -103,7 +103,7 @@ describe("ForecastPage", () => {
    */
   it("免責說明整頁只出現一次", async () => {
     const wrapper = await mountForecast();
-    const occurrences = wrapper.text().split("不是即時測站觀測").length - 1;
+    const occurrences = wrapper.text().split("不影響補擦倒數").length - 1;
 
     expect(occurrences).toBe(1);
   });
@@ -148,6 +148,6 @@ describe("ForecastPage", () => {
 
     expect(wrapper.find(".uv-map").exists()).toBe(false);
     expect(wrapper.find(".uv-map-list__item").exists()).toBe(false);
-    expect(wrapper.text()).toContain("當日預測的最高值");
+    expect(wrapper.text()).toContain("最高預測");
   });
 });

@@ -48,7 +48,7 @@ describe("FiveDayUvCard", () => {
      *
      * 這裡改守「卡片裡不再有第二份」，方向與那邊互補。
      */
-    expect(wrapper.text()).not.toContain("不是即時測站觀測");
+    expect(wrapper.text()).not.toContain("不影響補擦倒數");
   });
 
   it("沒有地區時不顯示任何 UV 數字", () => {

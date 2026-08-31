@@ -29,9 +29,10 @@ defineProps<Props>();
         </template>
         <template v-else>尚未設定地區</template>
       </p>
-      <p class="region-summary__note">
-        地區只用於顯示 UV 資訊，不會改變本機補擦計時。
-      </p>
+      <!--
+        2026-08-31：刪掉這句（使用者裁決）。頁面標題下方已經寫了「僅用於
+        提供 UV 資訊，不影響補擦倒數」，同一頁講兩次同一件事。
+      -->
     </div>
   </section>
 </template>
@@ -46,8 +47,7 @@ defineProps<Props>();
 }
 
 .region-summary__title,
-.region-summary__value,
-.region-summary__note {
+.region-summary__value {
   margin: 0;
 }
 
@@ -62,9 +62,4 @@ defineProps<Props>();
   font-weight: 600;
 }
 
-.region-summary__note {
-  margin-top: var(--space-2);
-  color: var(--text-secondary);
-  line-height: var(--line-height-body);
-}
 </style>

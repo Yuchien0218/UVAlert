@@ -63,7 +63,7 @@ const errorMessage = computed(() => {
     </div>
 
     <p class="location-panel__body">
-      按下按鈕後，系統會短暫取得位置，用來配對所在行政區。位置不會被儲存或用於分析；你也可以手動選擇或略過。
+      僅短暫定位以配對行政區，不儲存或分析位置資訊，可手動選擇或略過設定。
     </p>
 
     <button
