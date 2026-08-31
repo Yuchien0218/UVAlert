@@ -218,6 +218,7 @@ describe("createNotificationController", () => {
     await flush();
 
     expect(remotePush.flushPendingIntent).toHaveBeenCalledOnce();
+    expect(controller.backgroundPushState.value).toBe("scheduled");
   });
 
   it("retries a retained remote intent without changing the local schedule", async () => {
@@ -394,5 +395,64 @@ describe("createNotificationController", () => {
     await flush();
 
     expect(notifications.cancelAll).toHaveBeenCalledTimes(2);
+  });
+
+  it("keeps an in-flight local schedule after disabling background push", async () => {
+    let resolveLocalSchedule!: (value: undefined) => void;
+    const pendingLocalSchedule = new Promise<undefined>((resolve) => {
+      resolveLocalSchedule = resolve;
+    });
+    const { controller, currentSession, notifications } = createController();
+    await controller.enableBackgroundPush();
+    notifications.schedule.mockClear();
+    notifications.cancelAll.mockClear();
+    notifications.schedule.mockReturnValueOnce(pendingLocalSchedule);
+
+    currentSession.value = sessionWith({
+      sessionNextDueAt: "2026-08-23T19:00:00.000Z"
+    });
+    await vi.waitFor(() =>
+      expect(notifications.schedule).toHaveBeenCalledOnce()
+    );
+    await controller.disableBackgroundPush();
+    resolveLocalSchedule(undefined);
+    await flush();
+
+    expect(notifications.cancelAll).not.toHaveBeenCalled();
+  });
+
+  it("keeps an in-flight local schedule while a reconnect flushes remote state", async () => {
+    let resolveLocalSchedule!: (value: undefined) => void;
+    const pendingLocalSchedule = new Promise<undefined>((resolve) => {
+      resolveLocalSchedule = resolve;
+    });
+    const {
+      controller,
+      connectivity,
+      currentSession,
+      notifications,
+      remotePush
+    } = createController({ connectivity: "offline" });
+    remotePush.schedule.mockResolvedValueOnce("pending-sync");
+    await controller.enableBackgroundPush();
+    notifications.schedule.mockClear();
+    notifications.cancelAll.mockClear();
+    notifications.schedule.mockReturnValueOnce(pendingLocalSchedule);
+
+    currentSession.value = sessionWith({
+      sessionNextDueAt: "2026-08-23T20:00:00.000Z"
+    });
+    await vi.waitFor(() =>
+      expect(notifications.schedule).toHaveBeenCalledOnce()
+    );
+    connectivity.value = "online";
+    await vi.waitFor(() =>
+      expect(remotePush.flushPendingIntent).toHaveBeenCalledOnce()
+    );
+    resolveLocalSchedule(undefined);
+    await flush();
+
+    expect(notifications.cancelAll).not.toHaveBeenCalled();
+    expect(controller.backgroundPushState.value).toBe("scheduled");
   });
 });

@@ -52,7 +52,8 @@ export function createNotificationController(
   let requiresDisable = false;
   let disposed = false;
   let lifecycleGeneration = 0;
-  let sessionIntentGeneration = 0;
+  let localIntentGeneration = 0;
+  let remoteSessionIntentGeneration = 0;
   let localReconciliation: Promise<void> = Promise.resolve();
 
   function nextLifecycleGeneration(): number {
@@ -60,17 +61,26 @@ export function createNotificationController(
     return lifecycleGeneration;
   }
 
-  function nextSessionIntentGeneration(): number {
-    sessionIntentGeneration += 1;
-    return sessionIntentGeneration;
+  function nextLocalIntentGeneration(): number {
+    localIntentGeneration += 1;
+    return localIntentGeneration;
+  }
+
+  function nextRemoteSessionIntentGeneration(): number {
+    remoteSessionIntentGeneration += 1;
+    return remoteSessionIntentGeneration;
   }
 
   function isCurrentLifecycle(token: number): boolean {
     return !disposed && token === lifecycleGeneration;
   }
 
-  function isCurrentSessionIntent(token: number): boolean {
-    return !disposed && token === sessionIntentGeneration;
+  function isCurrentLocalIntent(token: number): boolean {
+    return !disposed && token === localIntentGeneration;
+  }
+
+  function isCurrentRemoteSessionIntent(token: number): boolean {
+    return !disposed && token === remoteSessionIntentGeneration;
   }
 
   function activeDueAt(): string | null {
@@ -86,11 +96,11 @@ export function createNotificationController(
     token: number,
     state: BackgroundPushState
   ): void {
-    if (isCurrentSessionIntent(token)) backgroundPushState.value = state;
+    if (isCurrentRemoteSessionIntent(token)) backgroundPushState.value = state;
   }
 
   async function reconcileRemoteSessionIntent(token: number): Promise<void> {
-    if (!backgroundEnabled || !isCurrentSessionIntent(token)) return;
+    if (!backgroundEnabled || !isCurrentRemoteSessionIntent(token)) return;
 
     try {
       const dueAt = activeDueAt();
@@ -104,8 +114,11 @@ export function createNotificationController(
     }
   }
 
-  async function reconcileSessionIntent(token: number): Promise<void> {
-    if (!isCurrentSessionIntent(token)) return;
+  async function reconcileSessionIntent(
+    localToken: number,
+    remoteToken: number
+  ): Promise<void> {
+    if (!isCurrentLocalIntent(localToken)) return;
 
     const dueAt = activeDueAt();
     if (dueAt === null) {
@@ -124,25 +137,26 @@ export function createNotificationController(
       await notifications.cancelAll();
       return;
     }
-    if (!isCurrentSessionIntent(token)) {
+    if (!isCurrentLocalIntent(localToken)) {
       await notifications.cancelAll();
       return;
     }
-    await reconcileRemoteSessionIntent(token);
+    await reconcileRemoteSessionIntent(remoteToken);
   }
 
   function reconcileCurrentSession(): Promise<void> {
-    const token = nextSessionIntentGeneration();
+    const localToken = nextLocalIntentGeneration();
+    const remoteToken = nextRemoteSessionIntentGeneration();
     localReconciliation = localReconciliation.then(
-      () => reconcileSessionIntent(token),
-      () => reconcileSessionIntent(token)
+      () => reconcileSessionIntent(localToken, remoteToken),
+      () => reconcileSessionIntent(localToken, remoteToken)
     );
     return localReconciliation;
   }
 
   async function flushPendingIntent(): Promise<void> {
     if (!backgroundEnabled || disposed) return;
-    const token = nextSessionIntentGeneration();
+    const token = nextRemoteSessionIntentGeneration();
     try {
       const result = await remotePush.flushPendingIntent();
       setSessionBackgroundState(token, result);
@@ -154,7 +168,7 @@ export function createNotificationController(
   async function performDisable(): Promise<void> {
     if (disposed || !remoteSupported) return;
     const lifecycleToken = nextLifecycleGeneration();
-    nextSessionIntentGeneration();
+    nextRemoteSessionIntentGeneration();
     backgroundEnabled = false;
     requiresDisable = true;
     let result: BackgroundPushState;
@@ -257,7 +271,8 @@ export function createNotificationController(
       if (disposed) return;
       disposed = true;
       nextLifecycleGeneration();
-      nextSessionIntentGeneration();
+      nextLocalIntentGeneration();
+      nextRemoteSessionIntentGeneration();
       stopSessionWatch();
       stopConnectivityWatch();
       void notifications.cancelAll();

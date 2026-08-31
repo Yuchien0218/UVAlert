@@ -16,7 +16,10 @@ import {
   BrowserNotifications,
   createBrowserNotificationDeps
 } from "../adapters/BrowserNotifications";
-import { BrowserRemotePush } from "../adapters/BrowserRemotePush";
+import {
+  BrowserRemotePush,
+  type BrowserRemotePushDependencies
+} from "../adapters/BrowserRemotePush";
 import { BrowserLifecycle } from "../adapters/BrowserLifecycle";
 import { IndexedDbLocalIdentity } from "../adapters/IndexedDbLocalIdentity";
 import { BrowserUvForecastClient } from "../adapters/BrowserUvForecastClient";
@@ -162,9 +165,9 @@ export function createWebAppServices(
     lifecycle,
     crossContext: notifier
   });
-  const remotePush = new BrowserRemotePush({
+  const remotePush = createConfiguredBrowserRemotePush({
     state: new LocalPushStateRepository(database),
-    apiBaseUrl: resolvePushApiBaseUrl(import.meta.env.VITE_API_BASE_URL),
+    configuredApiBaseUrl: import.meta.env.VITE_API_BASE_URL,
     publicVapidKey: import.meta.env.VITE_PUSH_PUBLIC_KEY,
     isSecureContext: () => globalThis.isSecureContext,
     hasServiceWorker: () => "serviceWorker" in globalThis.navigator,
@@ -320,6 +323,23 @@ export function createWebAppServices(
 
 export function resolvePushApiBaseUrl(value: string | undefined): string {
   return readConfiguredEnvironmentValue(value) ?? "/v1";
+}
+
+export type ConfiguredBrowserRemotePushDependencies = Omit<
+  BrowserRemotePushDependencies,
+  "apiBaseUrl"
+> & {
+  configuredApiBaseUrl: string | undefined;
+};
+
+export function createConfiguredBrowserRemotePush(
+  dependencies: ConfiguredBrowserRemotePushDependencies
+): BrowserRemotePush {
+  const { configuredApiBaseUrl, ...browserDependencies } = dependencies;
+  return new BrowserRemotePush({
+    ...browserDependencies,
+    apiBaseUrl: resolvePushApiBaseUrl(configuredApiBaseUrl)
+  });
 }
 
 function createRandomId(): string {

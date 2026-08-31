@@ -8,11 +8,14 @@ import {
   makeProductSnapshot,
   makeStartSessionCommand
 } from "@sunshield/test-fixtures";
-import { afterEach, describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import { createNotificationController } from "../features/notification/createNotificationController";
 import { IndexedDbLocalIdentity } from "../adapters/IndexedDbLocalIdentity";
 import { createAppBootController } from "./createAppBootController";
-import { resolvePushApiBaseUrl } from "./createWebAppServices";
+import {
+  createConfiguredBrowserRemotePush,
+  resolvePushApiBaseUrl
+} from "./createWebAppServices";
 
 const databases: SunshieldDatabase[] = [];
 
@@ -29,6 +32,55 @@ describe("App Boot with real IndexedDB projection", () => {
     expect(resolvePushApiBaseUrl(" \t ")).toBe("/v1");
     expect(resolvePushApiBaseUrl(" https://api.example.test/v1/ ")).toBe(
       "https://api.example.test/v1/"
+    );
+  });
+
+  it("constructs BrowserRemotePush with the shared registration seam and normalized API base", async () => {
+    const getRegistration = vi.fn(async () => {
+      return {
+        pushManager: {
+          getSubscription: async () => ({
+            toJSON: () => ({
+              endpoint: "https://push.example.test/subscription",
+              keys: { p256dh: "p256dh", auth: "auth" }
+            })
+          })
+        }
+      } as unknown as ServiceWorkerRegistration;
+    });
+    const fetch = vi.fn(async () => new Response(null, { status: 204 }));
+    const remotePush = createConfiguredBrowserRemotePush({
+      state: {
+        readCredentials: async () => ({
+          deviceId: "device-1",
+          deviceSecret: "secret-1"
+        }),
+        writeCredentials: async () => undefined,
+        clearCredentials: async () => undefined,
+        readPendingIntent: async () => null,
+        replacePendingIntent: async () => undefined,
+        clearPendingIntent: async () => undefined
+      },
+      configuredApiBaseUrl: " https://api.example.test/v1/ ",
+      publicVapidKey: "AQ",
+      isSecureContext: () => true,
+      hasServiceWorker: () => true,
+      hasPushManager: () => true,
+      hasNotification: () => true,
+      getPermission: () => "granted",
+      requestPermission: async () => "granted",
+      getRegistration,
+      fetch,
+      isOnline: () => true,
+      createOperationId: () => "operation-1",
+      now: () => new Date("2026-08-23T00:00:00.000Z")
+    });
+
+    await expect(remotePush.enable()).resolves.toBe("enabled");
+    expect(getRegistration).toHaveBeenCalledOnce();
+    expect(fetch).toHaveBeenCalledWith(
+      "https://api.example.test/v1/push-subscription",
+      expect.objectContaining({ method: "PUT" })
     );
   });
 
