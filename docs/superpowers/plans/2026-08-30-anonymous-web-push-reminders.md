@@ -715,21 +715,21 @@ retryBackgroundSync(): Promise<void>;
 
 - Existing local `NotificationPort` remains available for foreground/tab-alive fallback.
 
-- [ ] **Step 1: Replace repeat-frequency expectations with single-send tests**
+- [x] **Step 1: Replace repeat-frequency expectations with single-send tests**
 
 Delete controller/UI expectations for 5／15 minute repeat scheduling. Every local `ScheduledNotification` now uses `repeatMinutes: null`, title `該補擦防曬乳了`, and empty body.
 
-- [ ] **Step 2: Add failing controller tests**
+- [x] **Step 2: Add failing controller tests**
 
 Cover initial active Session schedule, due-time replacement, reapplication new schedule, ended/null Session cancel, remote failure not affecting local schedule, offline `pending-sync`, reconnect flush, enable, disable and dispose behavior.
 
 Use deferred promises to prove an older schedule response cannot overwrite the status of a newer operation.
 
-- [ ] **Step 3: Add failing settings-page tests**
+- [x] **Step 3: Add failing settings-page tests**
 
 Assert the page shows the seven states from the spec, offers enable/disable/retry actions where applicable, contains the iPhone/iPad main-screen limitation, and no longer renders repeat-frequency radio buttons or claims that closing the tab always prevents notification.
 
-- [ ] **Step 4: Run focused tests and verify RED**
+- [x] **Step 4: Run focused tests and verify RED**
 
 ```powershell
 & '.\node_modules\.bin\vitest.CMD' run apps/web/src/features/notification/createNotificationController.test.ts apps/web/src/pages/settings/NotificationSettingsPage.test.ts apps/web/src/app/appBoot.integration.test.ts
@@ -737,19 +737,19 @@ Assert the page shows the seven states from the spec, offers enable/disable/retr
 
 Expected: FAIL because remote push is not wired and the old repeat UI remains.
 
-- [ ] **Step 5: Integrate local and remote channels**
+- [x] **Step 5: Integrate local and remote channels**
 
 One watcher derives `sessionNextDueAt`. It always maintains the local fallback and, only after remote push is enabled, sends the latest remote schedule/cancel intent. Do not send Session id, product, zone or UV data.
 
-- [ ] **Step 6: Wire production services**
+- [x] **Step 6: Wire production services**
 
 Instantiate `LocalPushStateRepository(database)` and `BrowserRemotePush` in `createWebAppServices`; reuse the normalized `VITE_API_BASE_URL` base resolution pattern. Pass boot connectivity and the existing `createId` source.
 
-- [ ] **Step 7: Update the settings page without overwriting unrelated UI work**
+- [x] **Step 7: Update the settings page without overwriting unrelated UI work**
 
 Remove repeat-frequency controls. Add state-driven enable, disable and retry actions using existing cards/buttons/tokens. Preserve the latest `main` typography, icon and layout decisions. Copy must say background push is auxiliary and may be delayed by network, power saving or OS settings.
 
-- [ ] **Step 8: Run focused and web verification**
+- [x] **Step 8: Run focused and web verification**
 
 ```powershell
 & '.\node_modules\.bin\vitest.CMD' run apps/web/src/features/notification/createNotificationController.test.ts apps/web/src/pages/settings/NotificationSettingsPage.test.ts apps/web/src/app/appBoot.integration.test.ts apps/web/src/adapters/BrowserNotifications.test.ts
@@ -758,15 +758,15 @@ pnpm --filter @sunshield/web typecheck
 
 Expected: all selected tests and typecheck PASS.
 
-- [ ] **Step 9: Browser review gate**
+- [x] **Step 9: Browser review gate**
 
 In a local HTTPS-capable environment, inspect permission-required, enabled, pending-sync, schedule-error and unsupported states. Verify natural text wrapping and keyboard focus; do not manually insert `<br>`, nowrap, clipping or ellipsis.
 
-- [ ] **Step 10: Independent integration review gate**
+- [x] **Step 10: Independent integration review gate**
 
 Reviewer checks local truth remains authoritative, no remote failure escapes into Session commands, current UI work is preserved, and single-send behavior is consistent across adapter/controller/page.
 
-- [ ] **Step 11: Commit Task 7**
+- [x] **Step 11: Commit Task 7**
 
 ```powershell
 git add -- apps/web/src/features/notification/createNotificationController.ts apps/web/src/features/notification/createNotificationController.test.ts apps/web/src/app/createWebAppServices.ts apps/web/src/app/appBoot.integration.test.ts apps/web/src/pages/settings/NotificationSettingsPage.vue apps/web/src/pages/settings/NotificationSettingsPage.test.ts
