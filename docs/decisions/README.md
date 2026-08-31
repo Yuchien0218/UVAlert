@@ -84,6 +84,10 @@
 | 提醒頁：倒數狀態圖示搬到讀數旁並放大到 32px；夜間空狀態加 56px 沙漏；拿掉頁首分隔線 | `HomeCountdown.vue`、`HomeNightNotice.vue`、`BrandHeader.vue` | 已完成（2026-08-31） |
 | UV 五級色低／中／高壓暗過 AA（兩種用法同時修好） | `DESIGN.md` §2、`packages/ui/src/styles.css`、`uvRiskContrast.test.ts` | 已完成（2026-08-31，PR #64） |
 | 波浪元素只用在水上活動進行中的倒數，不當通用裝飾 | 待裁決 | **待使用者裁決**，見 `2026-08-30-pending-decisions.md` §15.2 |
+| 衛教審閱狀態的可見文字整批抽掉（報告用）；noindex 與各篇「文章限制」保留 | 三個衛教頁、48 篇 `docs/education/articles/*.md`、`tools/education/generate-public-site.mjs` | 已完成（2026-08-31，PR #66） |
+| 波浪分隔線只用在衛教長文；延伸閱讀的 1px 直線一併換成波浪 | `apps/web/src/assets/app.css` 的 `.wave-divider`、`EducationArticlePage.vue`、靜態產生器 | 已完成（2026-08-31） |
+| 衛教 hero 卡的標題份量（甲乙丙丁四案，建議乙；丁是橫幅式版型） | 待裁決 | **待使用者裁決**，見 `2026-08-30-pending-decisions.md` §16.1 |
+| `event-*` 四顆圖示：先查「記錄狀況」選單再補齊（建議乙） | 待裁決 | **待使用者裁決**，見 §16.2 |
 
 視覺設計另見：
 

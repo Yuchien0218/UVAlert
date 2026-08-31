@@ -40,14 +40,17 @@ h3 { margin: 1.75rem 0 .5rem; font-size: 1.05rem; }
 .article-body ul, .article-body ol { margin: 0 0 1.25rem; padding-left: 1.5rem; }
 .article-body li + li { margin-top: .5rem; }
 .article-body blockquote { margin: 1.25rem 0; padding-left: 1rem; border-left: .2rem solid #e3e3e3; color: #5a5a5a; }
-.article-body hr { margin: 2rem 0; border: 0; border-top: 1px solid #e3e3e3; }
+/* 波浪分隔線：與 app 的 .wave-divider 同一個遮罩與同一組數值（app.css）。 */
+.article-body hr, .related hr { width: 7.5rem; height: .5rem; border: 0; background-color: #5a5a5a; opacity: .55; mask-image: url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 8'%3E%3Cpath d='M1 4C11 0 19 8 29 4S47 0 57 4s18 4 28 0 18-4 34 0' fill='none' stroke='%23000' stroke-linecap='round' stroke-width='2'/%3E%3C/svg%3E\"); mask-position: center; mask-repeat: no-repeat; mask-size: 100% 100%; }
+.article-body hr { margin: 2.5rem auto; }
 .article-body code { padding: .1rem .3rem; border-radius: .5rem; background: #e3e3e3; font-size: .9em; }
 .education-table-wrap { overflow-x: auto; margin: 1.25rem 0; }
 table { width: 100%; min-width: 32rem; border-collapse: collapse; font-size: .9rem; }
 th, td { padding: .75rem; border: 1px solid #e3e3e3; text-align: left; vertical-align: top; }
 th { background: #fff; }
 .back-link { display: inline-block; margin-bottom: 1.5rem; }
-.related { margin-top: 2.5rem; padding-top: 1.5rem; border-top: 1px solid #e3e3e3; }
+.related { margin-top: 2.5rem; }
+.related hr { margin: 0 auto 1.5rem; }
 footer { padding: 0 clamp(1rem, 5vw, 2.75rem) 2.5rem; color: #5a5a5a; font-size: .8rem; }
 `;
 
@@ -224,7 +227,7 @@ function renderArticlePage(article, content, baseUrl) {
   const relatedSection =
     related === ""
       ? ""
-      : `<section class="related"><h2>同主題延伸閱讀</h2><ul>${related}</ul></section>`;
+      : `<section class="related"><hr /><h2>同主題延伸閱讀</h2><ul>${related}</ul></section>`;
   const body = `<a class="back-link" href="${category === undefined ? "/education" : `/education/${category.slug}`}">← ${escapeHtml(category?.title ?? "防曬衛教")}</a><p class="eyebrow">${escapeHtml(article.primaryQuestion)}</p><h1>${escapeHtml(article.title)}</h1><p class="summary">${escapeHtml(article.summary)}</p><p class="meta">最後查閱：${escapeHtml(article.lastReviewed)}</p><div class="article-takeaway">${article.takeawayHtml}</div><div class="article-body">${article.bodyHtml}</div>${relatedSection}`;
   return renderDocument({
     title: article.title,

@@ -13,6 +13,40 @@
   --mask-wave-divider: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 8'%3E%3Cpath d='M1 4C11 0 19 8 29 4S47 0 57 4s18 4 28 0 18-4 34 0' fill='none' stroke='%23000' stroke-linecap='round' stroke-width='2'/%3E%3C/svg%3E");
 }
 
+/*
+ * 波浪分隔線。
+ *
+ * **2026-08-31 從 EducationArticlePage 的 :deep(hr) 抽成全域規則。**
+ * 原本波浪只用在內文那條 hr，同一頁的「同主題延伸閱讀」卻是 1px 直線
+ * ——同一篇文章裡兩種分隔語言，讀起來像其中一條是別人加的。
+ *
+ * 波浪承載的不是「換一段」，是**語氣的轉折**：從「教你怎麼做」轉到
+ * 「這篇文章不負責什麼」（文章限制／資料來源），以及從文章正文轉到延伸
+ * 閱讀。直線做不到這件事，所以不是把兩者都改成直線，是都改成波浪。
+ *
+ * **只用在衛教長文裡，不當通用分隔元素。** 一旦到處撒就退回裝飾了；而且
+ * 波浪在這個 App 的其他地方已經有語意（水：入水時間、耐水時間、水上
+ * 活動），拿去當通用裝飾會稀釋掉那個意義。
+ *
+ * 兩個選擇器共用同一份宣告，不是各寫一次：`.education-article-body hr`
+ * 是 markdown 產生器輸出的，掛不上 class；`.wave-divider` 給模板自己
+ * 放的那一條。外距各自不同，所以留在各自的地方。
+ *
+ * 用遮罩不用 SVG 內嵌顏色，顏色才能吃 token（見上面 --mask-wave-divider）。
+ */
+.wave-divider,
+.education-article-body hr {
+  width: 7.5rem;
+  height: 0.5rem;
+  border: 0;
+  background-color: var(--text-secondary);
+  opacity: 0.55;
+  mask-image: var(--mask-wave-divider);
+  mask-position: center;
+  mask-repeat: no-repeat;
+  mask-size: 100% 100%;
+}
+
 #app {
   min-height: 100vh;
   min-height: 100svh;
