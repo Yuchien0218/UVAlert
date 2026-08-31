@@ -30,7 +30,7 @@
 | # | 事項 | 章節 |
 | - | ---- | ---- |
 | 1 | ~~首頁主 CTA 依狀態切換份量~~ ✅ 複查發現程式碼與守門早已完成（`showContextEventPrompt`）；2026-08-31 補上 sitemap 第 199 行那句過期的「主 CTA」 | §6 |
-| 2 | **`/region`**：「使用目前位置」常駐；「手動選擇」與「暫不提供地區」收成文字連結 | §12.4 |
+| 2 | ~~`/region` 收斂~~ ✅ 已完成：定位常駐，手動與略過收成文字連結，實測 1428px → 991px | §12.4 |
 | 3 | ~~`--color-apricot` 降級為保留備用~~ ✅ 已完成。**實際對比是 1.07 不是 1.53**——1.53 是對圖示琥珀金 `#C1832E`，但 styles.css 的 `--color-amber` 是 `#D9A35F`，兩者幾乎同色 | §12.5 |
 | 4 | ~~五日 UV 文案~~ ✅ 已完成（PR #53）：免責改成一句話同時講「當日最高值」與「今天只算剩餘時段」 | §10 |
 | 5 | **UV 地圖放 `/forecast` 五日卡下方**，不可點，`aria-hidden` ＋沿用現有縣市數字當等價物 | §13 |
@@ -40,8 +40,8 @@
 | 9 | 塗抹時間調整鈕限 120 分鐘以內 | §10 |
 | 10 | ~~裝備清單收合前只顯示名稱~~ ✅ 已完成：圖示 32px，規格／購買月份／到期日／附註移到詳情頁，安全狀態保留 | §10 |
 | 11 | ~~五日 UV 預報：刪重複文案、卡片內排版~~ ✅ 已完成（PR #53）：標題與免責各刪一份、日期改回正常流排 | §10 |
-| 12 | app icon 標記往右移、favicon 放大（含 maskable 單獨檢查） | §5.2／5.3 |
-| 13 | 丙的後續：SPF 在兩張卡的語意差別已解，但 `.field-pair` 之外還沒複查 | §11 |
+| 12 | **部分完成**：`favicon.svg` 已放大並視覺置中（填充率 66.4%）；**PNG 與 .ico 在這個環境無法重新產生**，見 §5.2 | §5.2／5.3 |
+| 13 | ~~丙的後續複查~~ ✅ 已完成，並抓到一個實際的 bug：SPF／PA 的驗證不分品類 | §11 |
 | 14 | ~~設定流程欄位跑版與深色日期選單~~ ✅ 已完成（PR #50） | §14.1 |
 | 15 | **入水時間選擇器**改成「1 分鐘前／調整時間」，上限 80 分鐘，超過就建議立刻補擦；保留「不確定」 | §14.2 |
 | 16 | ~~/setup 已完成的步驟收成一行摘要~~ ✅ 已完成：情境選擇器收成「情境 一般戶外・更改」，實測省 200px | §14.3 |
@@ -197,6 +197,22 @@
 - `docs/design/logo/` 只有**橫式 lockup**（`.ai` ＋ `.svg`），沒有 app icon 的來源。使用者 2026-08-30 修正的是這一份，所以它**沒有涵蓋到** app icon 與 favicon——這很可能就是 5.2／5.3 的成因。
 - App icon／favicon 的產線是 `tools/logo-concepts/generate-logo-concepts.mjs`，畫布是 `viewBox="0 0 64 64"`，標記透過 `transform` 放進去。5.2（往右移）與 5.3（放大）都是改那個 transform 的位移與 scale，**不動 path 幾何**。
 - 產出物：`apps/web/public/` 的 `favicon.svg`／`favicon.ico`／`apple-touch-icon.png`／`icon-192.png`／`icon-512.png`／`icon-512-maskable.png`。
+
+**2026-08-31 實作結果：只有 `favicon.svg` 做得到。**
+
+先前記在這裡的「產線是 `tools/logo-concepts/generate-logo-concepts.mjs`」**不完全正確**——那支腳本輸出到 `docs/design/logo-concepts/`（概念板與各種變體 SVG），**不會產生 `apps/web/public/` 底下的任何檔案**。public 那幾個是人工從概念稿匯出的，repo 裡沒有任何腳本或 rasteriser 能重做。
+
+| 檔案 | 狀態 |
+| ---- | ---- |
+| `favicon.svg` | ✅ 已改：`scale(1.25)` ＋ 往右 1.5px 做視覺置中。填充率 53% → **66.4%**，瀏覽器實測中心 (33.5, 32.01)、上下留白各 12.66 |
+| `favicon.ico`／`apple-touch-icon.png`／`icon-192`／`icon-512`／`icon-512-maskable` | ❌ **做不到**：點陣檔，這個 repo 沒有 sharp／resvg／puppeteer 之類的 rasteriser |
+
+要完成 PNG 的部分，需要**其中一條**：
+
+1. 由使用者用設計工具依 `favicon.svg` 的新幾何重新匯出（transform 的數字已寫在該檔的註解裡，可直接照抄）
+2. 或在 repo 加一個 rasteriser 與對應的 `pnpm` 指令，把 public 的圖示納入產生器管理
+
+**第 2 條其實是這次問題的根因**：2026-08-30 更新 logo 時，橫式 lockup 改了但 app icon／favicon 沒跟上，正是因為兩者之間沒有任何自動化連結。
 
 **maskable 那一張要單獨檢查**：Android 會把它裁成圓角方形，放大標記會壓縮安全邊界。5.3 的放大**不應該無差別套到 maskable**。
 

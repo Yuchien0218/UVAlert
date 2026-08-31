@@ -109,6 +109,27 @@ describe("GearForm 裝備區簡化", () => {
     expect(slot).toContain('id="gear-pa"');
   });
 
+  /*
+   * 2026-08-31 複查（丙的後續）：SPF／PA 的驗證要跟著品類走。
+   *
+   * 這兩個欄位只對 sunscreen 渲染，save() 也只在 showSunscreenFields 時
+   * 寫入；但驗證原本不分品類——「先填了 SPF、再把品類改成太陽眼鏡」會被
+   * 一個畫面上根本不存在的欄位擋住存檔。
+   *
+   * 兩個欄位分開守：只守其中一個的話，另一個把條件拿掉仍然會綠。
+   */
+  it("SPF 的驗證只在防曬乳品類生效", () => {
+    expect(code).toContain(
+      'if (showSunscreenFields.value && spfInput.value.trim() !== "") {'
+    );
+  });
+
+  it("PA 的驗證只在防曬乳品類生效", () => {
+    expect(code).toContain(
+      "if (showSunscreenFields.value && paGradeInput.value.trim().length > 20) {"
+    );
+  });
+
   it("SPF／PA 不再留在裝備暱稱卡", () => {
     const beforeSlot = code.slice(0, code.indexOf("<template #identity>"));
     expect(beforeSlot).not.toContain('id="gear-spf"');

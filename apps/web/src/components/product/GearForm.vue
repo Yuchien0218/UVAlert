@@ -207,15 +207,22 @@ function validate(): string | null {
   ) {
     return "到期日格式須為 YYYY-MM-DD。";
   }
-  // schema 要求 spf 為正數、paGrade 長度 1–20；先擋住再 parse，
-  // 否則 Zod 會丟例外而不是回到表單上的錯誤訊息。
-  if (spfInput.value.trim() !== "") {
+  /*
+   * schema 要求 spf 為正數、paGrade 長度 1–20；先擋住再 parse，否則 Zod 會
+   * 丟例外而不是回到表單上的錯誤訊息。
+   *
+   * **只在防曬乳品類才驗證**（2026-08-31 複查補上）。這兩個欄位只對
+   * sunscreen 渲染，save() 也只在 showSunscreenFields 時寫入；但驗證原本
+   * 不分品類，所以「先填了 SPF、再把品類改成太陽眼鏡」會被一個**畫面上
+   * 根本不存在的欄位**擋住存檔，錯誤訊息還指著看不到的東西。
+   */
+  if (showSunscreenFields.value && spfInput.value.trim() !== "") {
     const parsed = Number(spfInput.value);
     if (!Number.isFinite(parsed) || parsed <= 0) {
       return "SPF 請填寫大於 0 的數字，例如 50。";
     }
   }
-  if (paGradeInput.value.trim().length > 20) {
+  if (showSunscreenFields.value && paGradeInput.value.trim().length > 20) {
     return "PA 標示請控制在 20 個字以內。";
   }
   return null;
