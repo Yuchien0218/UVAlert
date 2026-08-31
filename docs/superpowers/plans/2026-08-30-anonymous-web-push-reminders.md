@@ -41,8 +41,8 @@
 | `apps/web/src/features/notification/createNotificationController.ts`       | 協調本機通知與遠端單次排程                                     |
 | `apps/web/public/sw.js`                                                    | 接收 push event、顯示固定通知、點擊開啟首頁                    |
 | `apps/web/src/pages/settings/NotificationSettingsPage.vue`                 | 背景推播狀態、啟用／停用／重試；移除重複頻率選項               |
-| `supabase/migrations/20260830000200_anonymous_push_foundation.sql`         | tables、RLS、grants、rate limit、claim、settle、cleanup       |
-| `supabase/migrations/20260830000400_push_dispatch.sql`                    | endpoint/key ownership、claim renewal、Cron 與 cleanup jobs   |
+| `supabase/migrations/20260830000200_anonymous_push_foundation.sql`         | tables、RLS、grants、rate limit、claim、settle、cleanup        |
+| `supabase/migrations/20260830000400_push_dispatch.sql`                     | endpoint/key ownership、claim renewal、Cron 與 cleanup jobs    |
 | `supabase/tests/anonymous_push.sql`                                        | pgTAP 驗證 schema、安全、claim 與清理                          |
 | `supabase/functions/_shared/push-auth.ts`                                  | device credential HMAC、固定時間比較、dispatcher auth          |
 | `supabase/functions/_shared/push-contracts.ts`                             | request parsing、大小與時間範圍 validation、受控錯誤碼         |
@@ -794,11 +794,11 @@ git commit -m "feat(web): coordinate background push delivery"
 - Documents public setting: `VITE_PUSH_PUBLIC_KEY`.
 - Documents Vault names: `uvalert_project_url`, `uvalert_push_dispatch_secret`.
 
-- [ ] **Step 1: Update examples with names only**
+- [x] **Step 1: Update examples with names only**
 
 Use placeholders such as `https://example.invalid` and `replace-in-secure-shell`. Do not insert the production project ref into generic examples unless the existing file is explicitly a dated deployment record.
 
-- [ ] **Step 2: Add exact secure setup sequence**
+- [x] **Step 2: Add exact secure setup sequence**
 
 Document generating one VAPID pair, setting Function secrets from a secure shell, storing dispatcher URL/secret in Vault, applying migration, deploying three Functions, configuring `VITE_PUSH_PUBLIC_KEY` in Vercel and redeploying.
 
@@ -808,15 +808,15 @@ Commands must reference environment variables rather than literal secrets, for e
 supabase secrets set "VAPID_SUBJECT=$env:UVALERT_VAPID_SUBJECT" "VAPID_PUBLIC_KEY=$env:UVALERT_VAPID_PUBLIC_KEY" "VAPID_PRIVATE_KEY=$env:UVALERT_VAPID_PRIVATE_KEY" "DEVICE_CREDENTIAL_PEPPER=$env:UVALERT_DEVICE_CREDENTIAL_PEPPER" "PUSH_DISPATCH_SECRET=$env:UVALERT_PUSH_DISPATCH_SECRET" --project-ref $env:UVALERT_SUPABASE_PROJECT_REF
 ```
 
-- [ ] **Step 3: Correct historical notification documentation**
+- [x] **Step 3: Correct historical notification documentation**
 
 Mark the old local-only `canDeliverInBackground=false` decision as historical once remote push is enabled. Preserve the distinction between local fallback and Web Push; do not rewrite history as if backend push always existed.
 
-- [ ] **Step 4: Add checkboxes and evidence fields to this plan index**
+- [x] **Step 4: Add checkboxes and evidence fields to this plan index**
 
-Index status must say implementation is local until Task 9 production evidence exists. Add fields for migration version, Function versions, Cron run id, Vercel deployment, commit, timestamp and device/browser smoke results.
+Index status must say implementation is local after Task 9 verification, until Task 10 production deployment and Task 11 device evidence exist. Add fields for migration version, Function versions, Cron run id, Vercel deployment, commit, timestamp and device/browser smoke results.
 
-- [ ] **Step 5: Verify documentation and secret scan**
+- [x] **Step 5: Verify documentation and secret scan**
 
 ```powershell
 rg -n "VAPID_PRIVATE_KEY=.+[^>]$|DEVICE_CREDENTIAL_PEPPER=.+[^>]$|PUSH_DISPATCH_SECRET=.+[^>]$|SUPABASE_SERVICE_ROLE_KEY=.+[^>]$" apps/web docs/backend supabase
@@ -826,11 +826,11 @@ git diff --check
 
 Expected: no real secret values; Prettier and diff checks PASS.
 
-- [ ] **Step 6: Independent documentation review gate**
+- [x] **Step 6: Independent documentation review gate**
 
 Reviewer checks commands do not echo secrets, local vs production paths are distinct, iOS installation limits are explicit, and no unchecked deployment claim is presented as complete.
 
-- [ ] **Step 7: Commit Task 8**
+- [x] **Step 7: Commit Task 8**
 
 ```powershell
 git add -- supabase/.env.example apps/web/.env.example docs/backend/README.md docs/backend/local-development.md docs/backend/deployment-checklist.md docs/superpowers/plans/README.md docs/decisions/2026-08-23-notification-decision.md
