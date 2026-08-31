@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import Icon from "../icons/Icon.vue";
 import type { SetupSaveStatus } from "../../features/setup/createSetupController";
+import IconButton from "../common/IconButton.vue";
 
 /**
  * 設定流程的外框：工具列（儲存狀態＋取消）、標題、內容、底部行動區。
@@ -61,15 +62,13 @@ defineEmits<{
       </span>
       <span v-else />
 
-      <button
-        class="icon-button icon-button--compact setup-shell__back"
-        type="button"
-        aria-label="回上一頁"
+      <IconButton
+        class="setup-shell__back"
+        icon="tool-arrow-left"
+        label="回上一頁"
         :disabled="busy"
         @click="$emit('back')"
-      >
-        <Icon name="tool-arrow-left" :size="20" />
-      </button>
+      />
     </div>
 
     <header class="setup-shell__heading">

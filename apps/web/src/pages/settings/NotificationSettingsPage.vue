@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { computed, shallowRef } from "vue";
 import { useRouter } from "vue-router";
-import Icon from "../../components/icons/Icon.vue";
 import { useWebAppServices } from "../../app/injection";
+import IconButton from "../../components/common/IconButton.vue";
 
 /**
  * 通知設定頁（Wireframe 10–11 / Sitemap §2.4）。
@@ -78,14 +78,11 @@ async function runTest(): Promise<void> {
   <div class="page-stack notification-settings-page">
     <!-- 2026-08-24：返回改成右上角只有圖示的叉叉，跟其他頁一致。 -->
     <header class="detail-header">
-      <button
-        class="icon-button"
-        type="button"
-        aria-label="返回更多"
+      <IconButton
+        icon="tool-close"
+        label="返回更多"
         @click="goBack"
-      >
-        <Icon name="tool-close" :size="24" />
-      </button>
+      />
     </header>
 
     <header class="page-heading">

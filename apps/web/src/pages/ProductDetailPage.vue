@@ -1,10 +1,10 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from "vue";
 import { useRoute, useRouter } from "vue-router";
-import Icon from "../components/icons/Icon.vue";
 import BroadcastLoader from "../components/feedback/BroadcastLoader.vue";
 import EmptyStateCard from "../components/common/EmptyStateCard.vue";
 import { useWebAppServices } from "../app/injection";
+import IconButton from "../components/common/IconButton.vue";
 import {
   affectsCountdown,
   formatPurchaseMonth,
@@ -148,14 +148,11 @@ async function handleDelete(): Promise<void> {
       移到下方的行動區——右上角保留給單一的離開動作。
     -->
     <header class="detail-header">
-      <button
-        class="icon-button"
-        type="button"
-        aria-label="返回裝備清單"
+      <IconButton
+        icon="tool-close"
+        label="返回裝備清單"
         @click="goBack"
-      >
-        <Icon name="tool-close" :size="24" />
-      </button>
+      />
     </header>
 
     <BroadcastLoader
