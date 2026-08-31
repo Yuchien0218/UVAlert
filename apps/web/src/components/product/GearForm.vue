@@ -342,47 +342,10 @@ async function remove(): Promise<void> {
         placeholder="例如：通勤用防曬"
       />
       <!--
-        2026-08-30：暱稱與 SPF／PA 的說明合併成一句。原本暱稱下方一句、
-        SPF／PA 下方再一句，兩句講的是同一件事——這張卡的欄位都只用來
-        「認出是哪一罐」。「不影響補擦倒數」保留，那是使用者填 SPF 時
-        最容易誤解的一點。
+        2026-08-31（選項丙）：SPF／PA 搬進包裝標示之後，這句只講暱稱。
+        原本它同時罩著暱稱與 SPF／PA，所以寫成「這些」。
       -->
-      <p class="field-helper">
-        這些只用來認出是哪一罐，<strong>不影響補擦倒數</strong>；重複的暱稱不會被當成同一件裝備。
-      </p>
-
-      <div v-if="showSunscreenFields" class="field-pair">
-        <div>
-          <label for="gear-spf">SPF（選填）</label>
-          <!--
-            刻意不用 type="number"：Vue 的 v-model 對 number input 會
-            自動轉型成 number，spfInput 就不再是字串，後面的 .trim()
-            會直接丟 TypeError 讓儲存靜默失敗（2026-08-24 實測抓到）。
-            text + inputmode 同樣會跳數字鍵盤，也避開滾輪誤改值。
-          -->
-          <input
-            id="gear-spf"
-            v-model="spfInput"
-            type="text"
-            inputmode="numeric"
-            maxlength="4"
-            placeholder="50"
-          />
-        </div>
-        <div>
-          <label for="gear-pa">PA（選填）</label>
-          <input
-            id="gear-pa"
-            v-model="paGradeInput"
-            type="text"
-            maxlength="20"
-            placeholder="PA++++"
-          />
-        </div>
-      </div>
-      <p v-if="showSunscreenFields" class="field-helper">
-        倒數長度由下方的包裝標示決定。
-      </p>
+      <p class="field-helper">重複的暱稱不會被當成同一件裝備。</p>
     </section>
 
     <ProductSnapshotEditor
@@ -395,10 +358,56 @@ async function remove(): Promise<void> {
       title="確認這瓶防曬乳"
       :description="
         showSunscreenFields
-          ? '以下欄位會影響補擦倒數，請只依包裝上看得到的內容填寫。'
+          ? '請只依包裝上看得到的內容填寫。'
           : '衣物只需要確認身分；沒有會影響倒數的標示欄位。'
       "
-    />
+    >
+      <!--
+        2026-08-31（選項丙）：SPF／PA 從「裝備暱稱」卡搬到這裡。
+        SPF 這個字原本在兩張卡各出現一次——這裡問「有沒有防曬標示」、
+        暱稱卡填「SPF 數字是多少」，畫面上看不出兩者的差別（2026-08-30
+        稽核記過）。搬進來之後所有跟包裝有關的事都在同一張卡裡。
+
+        描述文案跟著改：原本寫「以下欄位會影響補擦倒數」，現在這張卡裡
+        多了兩個**不影響**倒數的欄位，那句話會變成錯的。改成只講「依包裝
+        填寫」，「不影響倒數」由這一組自己標明。
+      -->
+      <template #identity>
+        <div v-if="showSunscreenFields" class="app-card identity-fields">
+          <p class="field-helper">
+            下面兩欄只用來認出是哪一罐，<strong>不影響補擦倒數</strong>。
+          </p>
+          <div class="field-pair">
+            <div>
+              <label for="gear-spf">SPF（選填）</label>
+              <!--
+                刻意不用 type="number"：Vue 的 v-model 對 number input 會
+                自動轉型成 number，spfInput 就不再是字串，後面的 .trim()
+                會直接丟 TypeError 讓儲存靜默失敗（2026-08-24 實測抓到）。
+                text + inputmode 同樣會跳數字鍵盤，也避開滾輪誤改值。
+              -->
+              <input
+                id="gear-spf"
+                v-model="spfInput"
+                type="text"
+                inputmode="numeric"
+                maxlength="4"
+              />
+            </div>
+            <div>
+              <label for="gear-pa">PA（選填）</label>
+              <input
+                id="gear-pa"
+                v-model="paGradeInput"
+                type="text"
+                maxlength="20"
+                placeholder="PA++++"
+              />
+            </div>
+          </div>
+        </div>
+      </template>
+    </ProductSnapshotEditor>
 
 
     <!--
@@ -728,7 +737,14 @@ p {
   width: 100%;
 }
 
+/*
+ * 2026-08-31 補上 select。原本只有 input／textarea 吃這組樣式，於是
+ * 「好不好用」那個下拉是**瀏覽器原生外觀**——白底、系統藍框，跟旁邊
+ * 的米色欄位明顯不同一套。同一個表單裡兩種欄位長相，是這次使用者問
+ * 「輸入框樣式有共用嗎」時才浮出來的。
+ */
 input,
+select,
 textarea {
   min-height: var(--tap-target);
   padding: var(--space-2) var(--space-3);
@@ -737,6 +753,17 @@ textarea {
   color: var(--text-primary);
   background: var(--surface-primary);
   font: inherit;
+}
+
+/*
+ * 2026-08-31（選項丙）：SPF／PA 搬進包裝標示卡之後，需要一層自己的
+ * 表面把「純辨識」跟上面「會影響倒數」的問題分開，否則它們會讀成
+ * 同一組。
+ */
+.identity-fields {
+  display: grid;
+  gap: var(--space-3);
+  padding: var(--card-padding);
 }
 
 textarea {
