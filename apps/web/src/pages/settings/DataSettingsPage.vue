@@ -491,7 +491,11 @@ dd {
   border-top: 0;
 }
 
+/* 2026-08-31：標籤不得被值壓縮。這一列也是 flex + space-between，跟
+   ProductDetailPage 的 .spec-row 同一個形狀——那裡的 dt 就是因為少了
+   flex-shrink 被擠成一行一個字。目前的值都很短所以還沒發生，先擋住。 */
 .summary-grid dt {
+  flex: 0 0 auto;
   color: var(--text-secondary);
 }
 

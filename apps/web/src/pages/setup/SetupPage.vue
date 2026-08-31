@@ -21,6 +21,7 @@ import type {
 import { describeSetupSaveFailure } from "../../features/setup/describeSetupSaveFailure";
 import { isFixedEvening } from "../../features/uv/uvForecastRules";
 import {
+  CONTEXT_LABELS,
   makeQuickProtectionDraft,
   type QuickProtectionDraft
 } from "../../features/setup/setupCatalog";
@@ -86,6 +87,22 @@ const needsWaterStart = computed(() => context.value === "water_active");
 /** 選好情境後才顯示後半段，避免一次攤開整頁。 */
 const contextSettled = computed(() => context.value !== null);
 
+/**
+ * 已選好的情境收成一行摘要 ＋「更改」（2026-08-31 使用者裁決）。
+ *
+ * 這一頁已經有兩層漸進揭露，所以「太長」不是沒收合，是**收合之後仍然長**
+ * ——選完的東西沒有收起來。四格情境選擇器在選好之後仍然全部常駐，那四格
+ * 佔掉的高度此刻只剩「想改」這一個用途。
+ *
+ * 收起來之後**回頭修改的路徑必須夠明顯**，否則就是把已完成的決定藏起來。
+ * 摘要那一行本身就寫著目前選了什麼，旁邊直接是「更改」，不需要先想起
+ * 「這個要去哪裡改」。
+ */
+const editingContext = shallowRef(false);
+const showContextSelector = computed(
+  () => !contextSettled.value || editingContext.value
+);
+
 watch(
   () => setup.draft.value?.initialContext ?? null,
   (value) => {
@@ -108,6 +125,7 @@ watch(selectedContext, async (value, previous) => {
   if (value === null || value === previous) return;
   if (value === context.value) return;
   localError.value = null;
+  editingContext.value = false;
   try {
     await setup.ensureLoaded();
     if (await setup.saveContext(value)) {
@@ -333,7 +351,21 @@ onMounted(async () => {
     </section>
 
     <template v-else>
-      <ContextSelector v-model="selectedContext" />
+      <ContextSelector v-if="showContextSelector" v-model="selectedContext" />
+
+      <div v-else class="setup-step-summary">
+        <p class="setup-step-summary__value">
+          <span class="setup-step-summary__label">情境</span>
+          {{ context === null ? "" : CONTEXT_LABELS[context] }}
+        </p>
+        <button
+          class="text-link"
+          type="button"
+          @click="editingContext = true"
+        >
+          更改
+        </button>
+      </div>
 
       <p
         v-if="setup.saveStatus.value === 'error'"
@@ -458,6 +490,34 @@ onMounted(async () => {
 </template>
 
 <style scoped>
+/*
+ * 已完成步驟的一行摘要。刻意不做成卡片——它是「已經決定好的事」，不需要
+ * 跟還要操作的區塊搶視覺份量；一條 hairline 就足以把它跟下方分開。
+ */
+.setup-step-summary {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding-bottom: var(--space-3);
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.setup-step-summary__value {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-3);
+  margin: 0;
+  min-width: 0;
+}
+
+/* dt 型的標籤不得被值壓縮——ProductDetailPage 的 .spec-row 就是這樣被
+   擠成一行一個字的（2026-08-31 修過一次，同一個坑不重踩）。 */
+.setup-step-summary__label {
+  flex: 0 0 auto;
+  color: var(--text-secondary);
+  font-size: var(--font-size-caption);
+}
 .recovery-card,
 .load-error {
   display: grid;
