@@ -12,6 +12,7 @@ import { afterEach, describe, expect, it } from "vitest";
 import { createNotificationController } from "../features/notification/createNotificationController";
 import { IndexedDbLocalIdentity } from "../adapters/IndexedDbLocalIdentity";
 import { createAppBootController } from "./createAppBootController";
+import { resolvePushApiBaseUrl } from "./createWebAppServices";
 
 const databases: SunshieldDatabase[] = [];
 
@@ -23,17 +24,37 @@ afterEach(async () => {
 });
 
 describe("App Boot with real IndexedDB projection", () => {
+  it("normalizes the configured remote-push API base without making boot depend on Push API", () => {
+    expect(resolvePushApiBaseUrl(undefined)).toBe("/v1");
+    expect(resolvePushApiBaseUrl(" \t ")).toBe("/v1");
+    expect(resolvePushApiBaseUrl(" https://api.example.test/v1/ ")).toBe(
+      "https://api.example.test/v1/"
+    );
+  });
+
   it("passes boot connectivity into notification composition without Push API setup", () => {
+    const database = new SunshieldDatabase(
+      `web-notification-wiring-${Date.now()}-${Math.random()}`
+    );
+    databases.push(database);
+    const notifier = new NoopCrossContextNotifier();
     const boot = createAppBootController({
       contextId: "notification-wiring",
-      repository: {} as never,
-      identity: {} as never,
+      repository: new LocalSessionRepository({
+        database,
+        sourceContextId: "notification-wiring",
+        notifier
+      }),
+      identity: new IndexedDbLocalIdentity({
+        database,
+        createId: () => "notification-visitor"
+      }),
       connectivity: {
         getCurrentStatus: () => "offline",
         subscribe: () => () => undefined
       },
       lifecycle: { subscribeForeground: () => () => undefined },
-      crossContext: { subscribe: () => () => undefined }
+      crossContext: notifier
     });
     const notifications = createNotificationController({
       notifications: {

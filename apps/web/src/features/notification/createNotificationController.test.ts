@@ -1,4 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
+import { flushPromises } from "@vue/test-utils";
 import { nextTick, shallowRef, type Ref } from "vue";
 import type { SessionProjection } from "@sunshield/contracts";
 import type {
@@ -9,13 +10,6 @@ import type {
   RemotePushPort
 } from "@sunshield/platform";
 import { createNotificationController } from "./createNotificationController";
-
-type ProposedController = ReturnType<typeof createNotificationController> & {
-  readonly backgroundPushState: { readonly value: BackgroundPushState };
-  enableBackgroundPush(): Promise<void>;
-  disableBackgroundPush(): Promise<void>;
-  retryBackgroundSync(): Promise<void>;
-};
 
 function createNotificationsStub(
   permission: NotificationPermissionState = "granted"
@@ -35,7 +29,7 @@ function createNotificationsStub(
     cancelAll: vi.fn().mockResolvedValue(undefined),
     canDeliverInBackground: () => false,
     sendTest: vi.fn().mockResolvedValue(true)
-  } as never;
+  };
 }
 
 function createRemotePushStub(supported = true): RemotePushPort & {
@@ -65,7 +59,7 @@ function sessionWith(
     overallStatus: "tracking",
     sessionNextDueAt: "2026-08-23T12:00:00.000Z",
     zones: [],
-    primaryAction: {} as never,
+    primaryAction: {} as SessionProjection["primaryAction"],
     derivedFromEventRefs: [],
     ...overrides
   } as SessionProjection;
@@ -73,8 +67,7 @@ function sessionWith(
 
 async function flush(): Promise<void> {
   await nextTick();
-  await Promise.resolve();
-  await Promise.resolve();
+  await flushPromises();
 }
 
 function createController(
@@ -99,7 +92,7 @@ function createController(
     currentSession,
     connectivity,
     createOperationId: () => `operation-${++operation}`
-  } as never) as ProposedController;
+  });
   return {
     controller,
     notifications,
@@ -130,6 +123,30 @@ describe("createNotificationController", () => {
     expect(controller.backgroundPushState.value).toBe("permission-required");
   });
 
+  it("keeps the local fallback and makes no remote call when unsupported", async () => {
+    const { controller, notifications, remotePush } = createController({
+      supported: false
+    });
+    await flush();
+
+    expect(controller.backgroundPushState.value).toBe("unsupported");
+    expect(notifications.schedule).toHaveBeenCalledOnce();
+    expect(remotePush.enable).not.toHaveBeenCalled();
+    await controller.enableBackgroundPush();
+    expect(remotePush.enable).not.toHaveBeenCalled();
+  });
+
+  it.each([null, sessionWith({ sessionNextDueAt: null })])(
+    "cancels local notices without remote traffic when there is no active due time",
+    async (session) => {
+      const { notifications, remotePush } = createController({ session });
+      await flush();
+
+      expect(notifications.cancelAll).toHaveBeenCalled();
+      expect(remotePush.cancel).not.toHaveBeenCalled();
+    }
+  );
+
   it("enables against the latest due time and sends only dueAt plus a fresh operation id", async () => {
     const { controller, remotePush } = createController();
     await controller.enableBackgroundPush();
@@ -140,6 +157,14 @@ describe("createNotificationController", () => {
       "operation-1"
     );
     expect(remotePush.schedule.mock.calls[0]).toHaveLength(2);
+  });
+
+  it("enables without scheduling when there is no active Session due time", async () => {
+    const { controller, remotePush } = createController({ session: null });
+    await controller.enableBackgroundPush();
+
+    expect(controller.backgroundPushState.value).toBe("enabled");
+    expect(remotePush.schedule).not.toHaveBeenCalled();
   });
 
   it("keeps the local fallback when a remote schedule reports schedule-error", async () => {
@@ -195,6 +220,20 @@ describe("createNotificationController", () => {
     expect(remotePush.flushPendingIntent).toHaveBeenCalledOnce();
   });
 
+  it("retries a retained remote intent without changing the local schedule", async () => {
+    const { controller, notifications, remotePush } = createController();
+    remotePush.schedule.mockResolvedValueOnce("pending-sync");
+    remotePush.flushPendingIntent.mockResolvedValueOnce("scheduled");
+    await controller.enableBackgroundPush();
+    const localSchedules = notifications.schedule.mock.calls.length;
+
+    await controller.retryBackgroundSync();
+
+    expect(remotePush.flushPendingIntent).toHaveBeenCalledOnce();
+    expect(controller.backgroundPushState.value).toBe("scheduled");
+    expect(notifications.schedule).toHaveBeenCalledTimes(localSchedules);
+  });
+
   it("only exposes enable again after a successful disable", async () => {
     const { controller, remotePush } = createController();
     await controller.enableBackgroundPush();
@@ -216,6 +255,21 @@ describe("createNotificationController", () => {
     expect(remotePush.enable).toHaveBeenCalledTimes(2);
   });
 
+  it("does not send new remote Session intents after a successful disable", async () => {
+    const { controller, currentSession, remotePush } = createController();
+    await controller.enableBackgroundPush();
+    await controller.disableBackgroundPush();
+    remotePush.schedule.mockClear();
+    remotePush.cancel.mockClear();
+    currentSession.value = sessionWith({
+      sessionNextDueAt: "2026-08-23T18:00:00.000Z"
+    });
+    await flush();
+
+    expect(remotePush.schedule).not.toHaveBeenCalled();
+    expect(remotePush.cancel).not.toHaveBeenCalled();
+  });
+
   it("ignores an older remote schedule result after a newer due time wins", async () => {
     let resolveFirst!: (state: BackgroundPushState) => void;
     const firstSchedule = new Promise<BackgroundPushState>((resolve) => {
@@ -227,14 +281,20 @@ describe("createNotificationController", () => {
       .mockResolvedValueOnce("scheduled");
 
     const enabling = controller.enableBackgroundPush();
-    await flush();
+    await vi.waitFor(() =>
+      expect(remotePush.schedule).toHaveBeenCalledWith(
+        "2026-08-23T12:00:00.000Z",
+        "operation-1"
+      )
+    );
     currentSession.value = sessionWith({
       sessionNextDueAt: "2026-08-23T14:00:00.000Z"
     });
-    await flush();
     resolveFirst("schedule-error");
     await enabling;
-    await flush();
+    await vi.waitFor(() =>
+      expect(remotePush.schedule).toHaveBeenCalledTimes(2)
+    );
 
     expect(remotePush.schedule).toHaveBeenLastCalledWith(
       "2026-08-23T14:00:00.000Z",
@@ -262,5 +322,77 @@ describe("createNotificationController", () => {
 
     expect(notifications.cancelAll).toHaveBeenCalled();
     expect(controller.backgroundPushState.value).not.toBe("scheduled");
+  });
+
+  it("reconciles the newest Session after enable settles during a Session change", async () => {
+    let resolveEnable!: (state: BackgroundPushState) => void;
+    const pendingEnable = new Promise<BackgroundPushState>((resolve) => {
+      resolveEnable = resolve;
+    });
+    const { controller, currentSession, remotePush } = createController();
+    remotePush.enable.mockReturnValueOnce(pendingEnable);
+
+    const enabling = controller.enableBackgroundPush();
+    currentSession.value = sessionWith({
+      sessionNextDueAt: "2026-08-23T16:00:00.000Z"
+    });
+    await flush();
+    resolveEnable("enabled");
+    await enabling;
+
+    expect(controller.backgroundPushState.value).toBe("scheduled");
+    expect(remotePush.schedule).toHaveBeenCalledWith(
+      "2026-08-23T16:00:00.000Z",
+      "operation-1"
+    );
+  });
+
+  it("commits successful disable despite an interleaved Session change", async () => {
+    let resolveDisable!: (state: BackgroundPushState) => void;
+    const pendingDisable = new Promise<BackgroundPushState>((resolve) => {
+      resolveDisable = resolve;
+    });
+    const { controller, currentSession, remotePush } = createController();
+    await controller.enableBackgroundPush();
+    remotePush.disable.mockReturnValueOnce(pendingDisable);
+
+    const disabling = controller.disableBackgroundPush();
+    currentSession.value = sessionWith({
+      sessionNextDueAt: "2026-08-23T17:00:00.000Z"
+    });
+    await flush();
+    resolveDisable("permission-required");
+    await disabling;
+
+    expect(controller.backgroundPushState.value).toBe("permission-required");
+  });
+
+  it("requires a successful disable after enable setup fails", async () => {
+    const { controller, remotePush } = createController();
+    remotePush.enable.mockResolvedValueOnce("schedule-error");
+
+    await controller.enableBackgroundPush();
+    await controller.enableBackgroundPush();
+    await controller.retryBackgroundSync();
+
+    expect(remotePush.enable).toHaveBeenCalledOnce();
+    expect(remotePush.disable).toHaveBeenCalledOnce();
+    expect(controller.backgroundPushState.value).toBe("permission-required");
+  });
+
+  it("cancels again after a local schedule settles following dispose", async () => {
+    let resolveLocalSchedule!: () => void;
+    const pendingLocalSchedule = new Promise<void>((resolve) => {
+      resolveLocalSchedule = resolve;
+    });
+    const { controller, notifications } = createController();
+    notifications.schedule.mockReturnValueOnce(pendingLocalSchedule);
+
+    await flush();
+    controller.dispose();
+    resolveLocalSchedule();
+    await flush();
+
+    expect(notifications.cancelAll).toHaveBeenCalledTimes(2);
   });
 });

@@ -37,10 +37,6 @@ interface Dependencies {
   createOperationId(): string;
 }
 
-/**
- * Reconciles the authoritative Session projection with two independent paths:
- * the tab-alive local notice and an explicitly opted-in remote push channel.
- */
 export function createNotificationController(
   dependencies: Dependencies
 ): NotificationController {
@@ -53,21 +49,28 @@ export function createNotificationController(
     remoteSupported ? "permission-required" : "unsupported"
   );
   let backgroundEnabled = false;
-  let disablePending = false;
+  let requiresDisable = false;
   let disposed = false;
-  let generation = 0;
+  let lifecycleGeneration = 0;
+  let sessionIntentGeneration = 0;
+  let localReconciliation: Promise<void> = Promise.resolve();
 
-  function nextGeneration(): number {
-    generation += 1;
-    return generation;
+  function nextLifecycleGeneration(): number {
+    lifecycleGeneration += 1;
+    return lifecycleGeneration;
   }
 
-  function isCurrent(token: number): boolean {
-    return !disposed && token === generation;
+  function nextSessionIntentGeneration(): number {
+    sessionIntentGeneration += 1;
+    return sessionIntentGeneration;
   }
 
-  function setBackgroundState(token: number, state: BackgroundPushState): void {
-    if (isCurrent(token)) backgroundPushState.value = state;
+  function isCurrentLifecycle(token: number): boolean {
+    return !disposed && token === lifecycleGeneration;
+  }
+
+  function isCurrentSessionIntent(token: number): boolean {
+    return !disposed && token === sessionIntentGeneration;
   }
 
   function activeDueAt(): string | null {
@@ -79,8 +82,15 @@ export function createNotificationController(
       : session.sessionNextDueAt;
   }
 
-  async function reconcileRemote(token: number): Promise<void> {
-    if (!backgroundEnabled || !isCurrent(token)) return;
+  function setSessionBackgroundState(
+    token: number,
+    state: BackgroundPushState
+  ): void {
+    if (isCurrentSessionIntent(token)) backgroundPushState.value = state;
+  }
+
+  async function reconcileRemoteSessionIntent(token: number): Promise<void> {
+    if (!backgroundEnabled || !isCurrentSessionIntent(token)) return;
 
     try {
       const dueAt = activeDueAt();
@@ -88,16 +98,16 @@ export function createNotificationController(
         dueAt === null
           ? await remotePush.cancel(dependencies.createOperationId())
           : await remotePush.schedule(dueAt, dependencies.createOperationId());
-      setBackgroundState(token, result);
+      setSessionBackgroundState(token, result);
     } catch {
-      setBackgroundState(token, "schedule-error");
+      setSessionBackgroundState(token, "schedule-error");
     }
   }
 
-  async function reconcileSession(): Promise<void> {
-    const token = nextGeneration();
-    const dueAt = activeDueAt();
+  async function reconcileSessionIntent(token: number): Promise<void> {
+    if (!isCurrentSessionIntent(token)) return;
 
+    const dueAt = activeDueAt();
     if (dueAt === null) {
       await notifications.cancelAll();
     } else {
@@ -110,16 +120,53 @@ export function createNotificationController(
       });
     }
 
-    await reconcileRemote(token);
+    if (disposed) {
+      await notifications.cancelAll();
+      return;
+    }
+    if (!isCurrentSessionIntent(token)) {
+      await notifications.cancelAll();
+      return;
+    }
+    await reconcileRemoteSessionIntent(token);
   }
 
-  async function flushRemote(token: number): Promise<void> {
-    if (!backgroundEnabled || !isCurrent(token)) return;
+  function reconcileCurrentSession(): Promise<void> {
+    const token = nextSessionIntentGeneration();
+    localReconciliation = localReconciliation.then(
+      () => reconcileSessionIntent(token),
+      () => reconcileSessionIntent(token)
+    );
+    return localReconciliation;
+  }
+
+  async function flushPendingIntent(): Promise<void> {
+    if (!backgroundEnabled || disposed) return;
+    const token = nextSessionIntentGeneration();
     try {
-      setBackgroundState(token, await remotePush.flushPendingIntent());
+      const result = await remotePush.flushPendingIntent();
+      setSessionBackgroundState(token, result);
     } catch {
-      setBackgroundState(token, "schedule-error");
+      setSessionBackgroundState(token, "schedule-error");
     }
+  }
+
+  async function performDisable(): Promise<void> {
+    if (disposed || !remoteSupported) return;
+    const lifecycleToken = nextLifecycleGeneration();
+    nextSessionIntentGeneration();
+    backgroundEnabled = false;
+    requiresDisable = true;
+    let result: BackgroundPushState;
+    try {
+      result = await remotePush.disable();
+    } catch {
+      result = "schedule-error";
+    }
+    if (!isCurrentLifecycle(lifecycleToken)) return;
+
+    backgroundPushState.value = result;
+    if (result === "permission-required") requiresDisable = false;
   }
 
   void notifications.ensureReady();
@@ -130,7 +177,7 @@ export function createNotificationController(
       status: dependencies.currentSession.value?.overallStatus ?? null
     }),
     () => {
-      void reconcileSession();
+      void reconcileCurrentSession();
     },
     { immediate: true }
   );
@@ -143,7 +190,7 @@ export function createNotificationController(
         backgroundEnabled &&
         backgroundPushState.value === "pending-sync"
       ) {
-        void flushRemote(nextGeneration());
+        void flushPendingIntent();
       }
     }
   );
@@ -158,64 +205,48 @@ export function createNotificationController(
       const result = await notifications.requestPermission();
       if (disposed) return result;
       permission.value = result;
-      if (result === "granted") await reconcileSession();
+      if (result === "granted") await reconcileCurrentSession();
       return result;
     },
 
     async enableBackgroundPush(): Promise<void> {
-      if (disposed || !remoteSupported || disablePending || backgroundEnabled) {
+      if (
+        disposed ||
+        !remoteSupported ||
+        backgroundPushState.value !== "permission-required" ||
+        requiresDisable
+      ) {
         return;
       }
-      const token = nextGeneration();
-      setBackgroundState(token, "subscribing");
+      const lifecycleToken = nextLifecycleGeneration();
+      backgroundPushState.value = "subscribing";
       let result: BackgroundPushState;
       try {
         result = await remotePush.enable();
       } catch {
         result = "schedule-error";
       }
-      if (!isCurrent(token)) return;
-      setBackgroundState(token, result);
+      if (!isCurrentLifecycle(lifecycleToken)) return;
+
+      backgroundPushState.value = result;
       backgroundEnabled =
         result === "enabled" ||
         result === "scheduled" ||
         result === "pending-sync";
-      if (backgroundEnabled) await reconcileRemote(token);
+      requiresDisable = result === "schedule-error";
+      if (backgroundEnabled) await reconcileCurrentSession();
     },
 
-    async disableBackgroundPush(): Promise<void> {
-      if (disposed || !remoteSupported) return;
-      const token = nextGeneration();
-      backgroundEnabled = false;
-      disablePending = true;
-      let result: BackgroundPushState;
-      try {
-        result = await remotePush.disable();
-      } catch {
-        result = "schedule-error";
-      }
-      if (!isCurrent(token)) return;
-      setBackgroundState(token, result);
-      if (result === "permission-required") disablePending = false;
+    disableBackgroundPush(): Promise<void> {
+      return performDisable();
     },
 
     async retryBackgroundSync(): Promise<void> {
-      if (disposed || !remoteSupported) return;
-      const token = nextGeneration();
-      if (disablePending) {
-        backgroundEnabled = false;
-        let result: BackgroundPushState;
-        try {
-          result = await remotePush.disable();
-        } catch {
-          result = "schedule-error";
-        }
-        if (!isCurrent(token)) return;
-        setBackgroundState(token, result);
-        if (result === "permission-required") disablePending = false;
+      if (requiresDisable) {
+        await performDisable();
         return;
       }
-      await flushRemote(token);
+      await flushPendingIntent();
     },
 
     sendTestNotification(): Promise<boolean> {
@@ -225,7 +256,8 @@ export function createNotificationController(
     dispose(): void {
       if (disposed) return;
       disposed = true;
-      nextGeneration();
+      nextLifecycleGeneration();
+      nextSessionIntentGeneration();
       stopSessionWatch();
       stopConnectivityWatch();
       void notifications.cancelAll();

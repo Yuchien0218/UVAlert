@@ -18,6 +18,69 @@ const backgroundPushState = computed(
 const showDeniedSteps = shallowRef(false);
 const isBackgroundActionPending = shallowRef(false);
 
+type BackgroundPushDescriptor = {
+  title: string;
+  body: string;
+  canEnable: boolean;
+  canDisable: boolean;
+  canRetry: boolean;
+};
+
+const BACKGROUND_PUSH_DESCRIPTORS: Record<
+  BackgroundPushState,
+  BackgroundPushDescriptor
+> = {
+  unsupported: {
+    title: "無法使用背景推播",
+    body: "此瀏覽器或環境無法使用背景推播；本機倒數與分頁仍開啟時的提醒仍可使用。",
+    canEnable: false,
+    canDisable: false,
+    canRetry: false
+  },
+  "permission-required": {
+    title: "開啟背景推播",
+    body: "背景推播尚未啟用。這是選用的輔助送達方式。",
+    canEnable: true,
+    canDisable: false,
+    canRetry: false
+  },
+  subscribing: {
+    title: "設定中",
+    body: "背景推播設定中，請稍候。",
+    canEnable: false,
+    canDisable: false,
+    canRetry: false
+  },
+  enabled: {
+    title: "已啟用背景推播",
+    body: "已啟用背景推播，但目前沒有已確認同步的下一個提醒。",
+    canEnable: false,
+    canDisable: true,
+    canRetry: false
+  },
+  scheduled: {
+    title: "已同步下一個補擦提醒",
+    body: "已同步下一個補擦提醒，可嘗試在背景送達。",
+    canEnable: false,
+    canDisable: true,
+    canRetry: false
+  },
+  "pending-sync": {
+    title: "等待同步",
+    body: "最新變更正在等待同步，恢復連線後會再傳送。",
+    canEnable: false,
+    canDisable: true,
+    canRetry: true
+  },
+  "schedule-error": {
+    title: "無法依賴背景推播",
+    body: "背景推播同步失敗，無法依賴背景推播；本機倒數仍是依據。",
+    canEnable: false,
+    canDisable: true,
+    canRetry: true
+  }
+};
+
 const statusLabel = computed(() => {
   if (!isSupported.value) return "這個瀏覽器不支援通知";
   if (isGranted.value) return "通知已開啟";
@@ -25,31 +88,8 @@ const statusLabel = computed(() => {
   return "還沒開啟通知";
 });
 
-const backgroundStatus = computed<Record<BackgroundPushState, string>>(() => ({
-  unsupported:
-    "此瀏覽器或環境無法使用背景推播；本機倒數與分頁仍開啟時的提醒仍可使用。",
-  "permission-required": "背景推播尚未啟用。這是選用的輔助送達方式。",
-  subscribing: "背景推播設定中，請稍候。",
-  enabled: "已啟用背景推播，但目前沒有已確認同步的下一個提醒。",
-  scheduled: "已同步下一個補擦提醒，可嘗試在背景送達。",
-  "pending-sync": "最新變更正在等待同步，恢復連線後會再傳送。",
-  "schedule-error": "背景推播同步失敗，無法依賴背景推播；本機倒數仍是依據。"
-}));
-
-const canEnableBackgroundPush = computed(
-  () => backgroundPushState.value === "permission-required"
-);
-const canDisableBackgroundPush = computed(
-  () =>
-    backgroundPushState.value === "enabled" ||
-    backgroundPushState.value === "scheduled" ||
-    backgroundPushState.value === "pending-sync" ||
-    backgroundPushState.value === "schedule-error"
-);
-const canRetryBackgroundSync = computed(
-  () =>
-    backgroundPushState.value === "pending-sync" ||
-    backgroundPushState.value === "schedule-error"
+const backgroundPushDescriptor = computed(
+  () => BACKGROUND_PUSH_DESCRIPTORS[backgroundPushState.value]
 );
 
 async function requestPermission(): Promise<void> {
@@ -184,34 +224,20 @@ async function runTest(): Promise<void> {
         role="status"
       >
         <p class="delivery-emphasis__title">
-          {{
-            backgroundPushState === "unsupported"
-              ? "無法使用背景推播"
-              : backgroundPushState === "subscribing"
-                ? "設定中"
-                : backgroundPushState === "enabled"
-                  ? "已啟用背景推播"
-                  : backgroundPushState === "scheduled"
-                    ? "已同步下一個補擦提醒"
-                    : backgroundPushState === "pending-sync"
-                      ? "等待同步"
-                      : backgroundPushState === "schedule-error"
-                        ? "無法依賴背景推播"
-                        : "開啟背景推播"
-          }}
+          {{ backgroundPushDescriptor.title }}
         </p>
-        <p>{{ backgroundStatus[backgroundPushState] }}</p>
+        <p>{{ backgroundPushDescriptor.body }}</p>
       </div>
       <div
         v-if="
-          canEnableBackgroundPush ||
-          canDisableBackgroundPush ||
-          canRetryBackgroundSync
+          backgroundPushDescriptor.canEnable ||
+          backgroundPushDescriptor.canDisable ||
+          backgroundPushDescriptor.canRetry
         "
         class="action-row"
       >
         <button
-          v-if="canEnableBackgroundPush"
+          v-if="backgroundPushDescriptor.canEnable"
           data-testid="enable-background-push"
           class="button button--primary"
           type="button"
@@ -221,7 +247,7 @@ async function runTest(): Promise<void> {
           開啟背景推播
         </button>
         <button
-          v-if="canRetryBackgroundSync"
+          v-if="backgroundPushDescriptor.canRetry"
           data-testid="retry-background-push"
           class="button button--quiet"
           type="button"
@@ -231,7 +257,7 @@ async function runTest(): Promise<void> {
           重試同步
         </button>
         <button
-          v-if="canDisableBackgroundPush"
+          v-if="backgroundPushDescriptor.canDisable"
           data-testid="disable-background-push"
           class="button button--quiet"
           type="button"

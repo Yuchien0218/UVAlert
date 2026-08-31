@@ -56,24 +56,36 @@ describe("NotificationSettingsPage", () => {
     });
   });
 
-  it.each<readonly [BackgroundPushState, string]>([
-    ["unsupported", "無法使用背景推播"],
-    ["permission-required", "開啟背景推播"],
-    ["subscribing", "設定中"],
-    ["enabled", "已啟用背景推播"],
-    ["scheduled", "已同步下一個補擦提醒"],
-    ["pending-sync", "等待同步"],
-    ["schedule-error", "無法依賴背景推播"]
-  ])("renders the %s background-push state", (backgroundPushState, copy) => {
-    const services = makeServices({ backgroundPushState });
-    vi.mocked(useWebAppServices).mockReturnValue(
-      services as unknown as WebAppServices
-    );
-    const wrapper = mount(NotificationSettingsPage, {
-      global: { plugins: [router], stubs: { Icon: true } }
-    });
-    expect(wrapper.text()).toContain(copy);
-  });
+  it.each<readonly [BackgroundPushState, string, boolean, boolean, boolean]>([
+    ["unsupported", "無法使用背景推播", false, false, false],
+    ["permission-required", "開啟背景推播", true, false, false],
+    ["subscribing", "設定中", false, false, false],
+    ["enabled", "已啟用背景推播", false, true, false],
+    ["scheduled", "已同步下一個補擦提醒", false, true, false],
+    ["pending-sync", "等待同步", false, true, true],
+    ["schedule-error", "無法依賴背景推播", false, true, true]
+  ])(
+    "renders the %s state with its exact action matrix",
+    (backgroundPushState, copy, canEnable, canDisable, canRetry) => {
+      const services = makeServices({ backgroundPushState });
+      vi.mocked(useWebAppServices).mockReturnValue(
+        services as unknown as WebAppServices
+      );
+      const wrapper = mount(NotificationSettingsPage, {
+        global: { plugins: [router], stubs: { Icon: true } }
+      });
+      expect(wrapper.text()).toContain(copy);
+      expect(
+        wrapper.find('[data-testid="enable-background-push"]').exists()
+      ).toBe(canEnable);
+      expect(
+        wrapper.find('[data-testid="disable-background-push"]').exists()
+      ).toBe(canDisable);
+      expect(
+        wrapper.find('[data-testid="retry-background-push"]').exists()
+      ).toBe(canRetry);
+    }
+  );
 
   it("delegates background enable, retry, and successful recovery controls", async () => {
     const services = makeServices({
@@ -97,6 +109,33 @@ describe("NotificationSettingsPage", () => {
       .get('[data-testid="disable-background-push"]')
       .trigger("click");
     expect(services.notifications.disableBackgroundPush).toHaveBeenCalledOnce();
+  });
+
+  it("delegates retry and disables all background actions while it is pending", async () => {
+    let resolveRetry!: (value: undefined) => void;
+    const pendingRetry = new Promise<undefined>((resolve) => {
+      resolveRetry = resolve;
+    });
+    const services = makeServices({ backgroundPushState: "pending-sync" });
+    services.notifications.retryBackgroundSync.mockReturnValueOnce(
+      pendingRetry
+    );
+    vi.mocked(useWebAppServices).mockReturnValue(
+      services as unknown as WebAppServices
+    );
+    const wrapper = mount(NotificationSettingsPage, {
+      global: { plugins: [router], stubs: { Icon: true } }
+    });
+
+    const retry = wrapper.get('[data-testid="retry-background-push"]');
+    const disable = wrapper.get('[data-testid="disable-background-push"]');
+    const clicking = retry.trigger("click");
+    await nextTick();
+    expect(retry.attributes("disabled")).toBeDefined();
+    expect(disable.attributes("disabled")).toBeDefined();
+    resolveRetry(undefined);
+    await clicking;
+    expect(services.notifications.retryBackgroundSync).toHaveBeenCalledOnce();
   });
 
   it("retains local permission requests and device-test feedback", async () => {

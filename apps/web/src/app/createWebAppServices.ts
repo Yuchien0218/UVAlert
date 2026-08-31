@@ -164,9 +164,7 @@ export function createWebAppServices(
   });
   const remotePush = new BrowserRemotePush({
     state: new LocalPushStateRepository(database),
-    apiBaseUrl:
-      readConfiguredEnvironmentValue(import.meta.env.VITE_API_BASE_URL) ??
-      "/v1",
+    apiBaseUrl: resolvePushApiBaseUrl(import.meta.env.VITE_API_BASE_URL),
     publicVapidKey: import.meta.env.VITE_PUSH_PUBLIC_KEY,
     isSecureContext: () => globalThis.isSecureContext,
     hasServiceWorker: () => "serviceWorker" in globalThis.navigator,
@@ -318,6 +316,10 @@ export function createWebAppServices(
       database.close();
     }
   };
+}
+
+export function resolvePushApiBaseUrl(value: string | undefined): string {
+  return readConfiguredEnvironmentValue(value) ?? "/v1";
 }
 
 function createRandomId(): string {
