@@ -240,14 +240,9 @@ p {
   font-weight: 500;
 }
 
+/* 只留寬度，其餘欄位外觀用 app.css 的共用宣告。 */
 select {
   width: 100%;
-  min-height: var(--tap-target);
-  padding-inline: var(--space-3);
-  border: 1px solid var(--border-strong);
-  border-radius: var(--radius-sm);
-  color: var(--text-primary);
-  background: var(--surface-primary);
 }
 
 .restriction-note {

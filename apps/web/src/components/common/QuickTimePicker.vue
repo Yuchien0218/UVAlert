@@ -94,14 +94,7 @@ p {
   flex-wrap: wrap;
   gap: var(--space-2);
 }
-input {
-  min-height: var(--tap-target);
-  padding-inline: var(--space-3);
-  border: 1px solid var(--border-strong);
-  border-radius: var(--radius-sm);
-  color: var(--text-primary);
-  background: var(--surface-primary);
-}
+/* 欄位外觀改用 app.css 的共用宣告，這裡不再抄一份。 */
 .time-summary {
   color: var(--text-secondary);
 }

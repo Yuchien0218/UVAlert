@@ -768,28 +768,12 @@ p {
 
 /* 欄位在格線裡要撐滿自己那一欄，否則 date/month 這類原生控制項
    會用瀏覽器預設寬度，兩欄看起來一長一短。 */
-.field-pair input {
+.field-pair input,
+.field-pair select {
   width: 100%;
 }
 
-/*
- * 2026-08-31 補上 select。原本只有 input／textarea 吃這組樣式，於是
- * 「好不好用」那個下拉是**瀏覽器原生外觀**——白底、系統藍框，跟旁邊
- * 的米色欄位明顯不同一套。同一個表單裡兩種欄位長相，是這次使用者問
- * 「輸入框樣式有共用嗎」時才浮出來的。
- */
-input,
-select,
-textarea {
-  min-height: var(--tap-target);
-  padding: var(--space-2) var(--space-3);
-  border: 1px solid var(--border-strong);
-  border-radius: var(--radius-sm);
-  color: var(--text-primary);
-  background: var(--surface-primary);
-  font: inherit;
-}
-
+/* 欄位外觀改用 app.css 的共用宣告，這裡不再抄一份。 */
 /*
  * 2026-08-31（選項丙）：SPF／PA 搬進包裝標示卡之後，需要一層自己的
  * 表面把「純辨識」跟上面「會影響倒數」的問題分開，否則它們會讀成
@@ -812,10 +796,6 @@ textarea {
 .record-fields {
   display: grid;
   gap: var(--space-3);
-}
-
-textarea {
-  min-height: calc(var(--tap-target) * 2);
 }
 
 .danger-zone {

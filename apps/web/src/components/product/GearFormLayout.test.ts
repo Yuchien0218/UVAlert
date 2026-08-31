@@ -116,11 +116,14 @@ describe("GearForm 裝備區簡化", () => {
   });
 
   /*
-   * 2026-08-31：select 要吃跟 input 同一組樣式。沒有它時「好不好用」是
-   * 瀏覽器原生外觀（白底、系統藍框），跟旁邊的米色欄位不同一套。
+   * 2026-08-31：欄位外觀已收斂到 app.css，這裡只守「格線裡的欄位要撐滿
+   * 自己那一欄」——包含 select，否則「好不好用」會比左邊的價格欄短一截。
+   * 外觀本身由 apps/web/src/assets/fieldStyles.test.ts 守。
    */
-  it("select 與 input 共用同一組欄位樣式", () => {
-    expect(code).toMatch(/input,\s*select,\s*textarea\s*\{/);
+  it("格線裡的 input 與 select 都撐滿欄寬", () => {
+    expect(code).toMatch(
+      /\.field-pair input,\s*\.field-pair select \{\s*width: 100%;/
+    );
   });
 
   /*
