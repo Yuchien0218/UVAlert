@@ -1,4 +1,5 @@
-import { readFileSync } from "node:fs";
+import { readdirSync, readFileSync, statSync } from "node:fs";
+import { join } from "node:path";
 // @vitest-environment happy-dom
 
 import { mount } from "@vue/test-utils";
@@ -26,6 +27,19 @@ afterEach(() => {
   clearEducationSeo();
   document.body.innerHTML = "";
 });
+
+/** 掃描 apps/web/src 底下所有 .vue，用來確認某個樣式沒有外流。 */
+function educationScanTargets(dir = "apps/web/src", out: string[] = []): string[] {
+  for (const entry of readdirSync(dir)) {
+    const path = join(dir, entry);
+    if (statSync(path).isDirectory()) {
+      if (entry !== "generated") educationScanTargets(path, out);
+    } else if (entry.endsWith(".vue")) {
+      out.push(path);
+    }
+  }
+  return out;
+}
 
 describe("公開衛教頁", () => {
   it("首頁呈現六個使用流程分類", () => {
@@ -284,5 +298,65 @@ describe("衛教頁不顯示審閱狀態", () => {
     expect(
       document.querySelector<HTMLMetaElement>('meta[name="robots"]')?.content
     ).toBe("noindex,follow");
+  });
+});
+
+/*
+ * 2026-08-31：文章頁的兩條分隔線統一成波浪。
+ *
+ * 原本內文那條 hr 是波浪、「同主題延伸閱讀」是橫跨整段的 1px 直線——同一
+ * 篇文章裡兩種分隔語言。波浪承載的是**語氣的轉折**（從「教你怎麼做」轉到
+ * 「這篇文章不負責什麼」、從正文轉到延伸閱讀），直線做不到，所以是把直線
+ * 改成波浪，不是反過來。
+ *
+ * 三件事分開守，因為它們可以互相掩護：只守「延伸閱讀有波浪」→ 直線可以
+ * 留著並存；只守「沒有 border-top」→ 波浪可以整個不見；只守「不外流」→
+ * 衛教頁自己可以先變回直線。
+ */
+describe("衛教長文的波浪分隔線", () => {
+  const articleSource = readFileSync(
+    "apps/web/src/pages/education/EducationArticlePage.vue",
+    "utf8"
+  ).replace(/<!--[\s\S]*?-->/g, "").replace(/\/\*[\s\S]*?\*\//g, "");
+
+  it("延伸閱讀用波浪，不是直線", async () => {
+    const router = makeRouter(
+      EducationArticlePage,
+      "/education/articles/:slug"
+    );
+    await router.push("/education/articles/what-is-uv-index");
+    await router.isReady();
+    const wrapper = mount(EducationArticlePage, {
+      global: { plugins: [router] }
+    });
+
+    expect(
+      wrapper.get(".education-related").find("hr.wave-divider").exists()
+    ).toBe(true);
+  });
+
+  it("延伸閱讀不再有 border-top", () => {
+    // 比對完整宣告而不是 "border-top" 片段——理由見 CLAUDE.md「坑二」。
+    expect(articleSource).not.toContain(
+      "border-top: 1px solid var(--border-subtle);"
+    );
+  });
+
+  /*
+   * 波浪只用在衛教長文。它一旦變成通用分隔元素就退回裝飾了，而且波浪在
+   * 這個 App 的其他地方已經有語意（水：入水時間、耐水時間、水上活動），
+   * 拿去當通用裝飾會稀釋掉那個意義。
+   */
+  it("wave-divider 不外流到衛教以外的頁面", () => {
+    const offenders: string[] = [];
+    for (const path of educationScanTargets()) {
+      if (path.includes("education")) continue;
+      const code = readFileSync(path, "utf8")
+        .replace(/<!--[\s\S]*?-->/g, "")
+        .replace(/\/\*[\s\S]*?\*\//g, "");
+      if (code.includes("wave-divider")) offenders.push(path);
+    }
+
+    expect(offenders, "波浪只用在衛教長文").toEqual([]);
   });
 });

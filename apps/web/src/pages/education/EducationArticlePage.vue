@@ -104,6 +104,8 @@ const relatedArticles = computed(() =>
       class="education-related"
       aria-labelledby="related-title"
     >
+      <hr class="wave-divider education-related__divider" />
+
       <h2 id="related-title" data-typography-role="section-title">
         同主題延伸閱讀
       </h2>
@@ -205,17 +207,9 @@ const relatedArticles = computed(() =>
   color: var(--text-secondary);
 }
 
+/* 波浪本體在 app.css 的 .wave-divider；這裡只補內文那條自己的外距。 */
 .education-article-body :deep(hr) {
-  width: 7.5rem;
-  height: 0.5rem;
   margin: var(--space-10) auto;
-  border: 0;
-  background-color: var(--text-secondary);
-  opacity: 0.55;
-  mask-image: var(--mask-wave-divider);
-  mask-position: center;
-  mask-repeat: no-repeat;
-  mask-size: 100% 100%;
 }
 
 .education-article-body :deep(hr + p) {
@@ -260,8 +254,15 @@ const relatedArticles = computed(() =>
 
 .education-related {
   max-width: 44rem;
-  padding-top: var(--space-6);
-  border-top: 1px solid var(--border-subtle);
+}
+
+/*
+ * 2026-08-31：橫跨整段的 1px 直線換成置中的波浪，跟內文那條同一種語言。
+ * 用真的 <hr class="wave-divider"> 而不是 ::before——共用類別才吃得到，
+ * 而且它在語意上確實是一條分隔線。
+ */
+.education-related__divider {
+  margin: 0 auto var(--space-6);
 }
 
 .education-related h2 {
