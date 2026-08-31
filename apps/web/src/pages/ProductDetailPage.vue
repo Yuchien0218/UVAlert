@@ -192,7 +192,7 @@ async function handleDelete(): Promise<void> {
             <dt>規格</dt>
             <dd>{{ specLine }}</dd>
           </div>
-          <div class="spec-row">
+          <div class="spec-row spec-row--full">
             <dt>補擦提醒</dt>
             <dd>
               {{
@@ -357,7 +357,17 @@ async function handleDelete(): Promise<void> {
   gap: var(--space-1);
 }
 
+/*
+ * 2026-08-31：dt 不得被壓縮。
+ *
+ * .spec-row 是 flex + space-between，dt 原本沒有 flex-shrink: 0，
+ * dd 的文字一長就把 dt 壓到最小內容寬度——「補擦提醒」被擠成一行
+ * 一個字。長標籤配長內容本來就不該並排，所以那一列同時改成
+ * .spec-row--full（上下堆疊）；這條 flex-shrink 則是防止其他列
+ * 在內容變長時重蹈覆轍。
+ */
 .spec-row dt {
+  flex: 0 0 auto;
   color: var(--text-secondary);
   font-size: var(--font-size-caption);
 }
