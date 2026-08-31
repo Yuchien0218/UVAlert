@@ -8,6 +8,54 @@
 - [ ] 設定 `CWA_API_KEY`、`ALLOWED_ORIGINS` 與 Google provider secrets；不要把值寫進 git。
 - [ ] 確認 service-role key 只存在 Edge Functions／部署 secret，不出現在 `VITE_*`、HTML、source map、response 或 log。
 
+## 匿名 Web Push（尚無 production 部署證據）
+
+以下全部是 Task 10–11 的 production checklist；本機實作或 Task 9 的本機可部署證據都不能把其中任何一項視為已完成。
+
+- [ ] **Read-only preflight**：以 `supabase projects list`、`supabase migration list --project-ref $env:UVALERT_SUPABASE_PROJECT_REF`、`supabase functions list --project-ref $env:UVALERT_SUPABASE_PROJECT_REF`、`vercel whoami` 與 `vercel project ls` 確認目標；只確認五個 secure-shell 變數非空，不列印其值。
+- [ ] **Dry run**：`supabase link --project-ref $env:UVALERT_SUPABASE_PROJECT_REF` 後執行 `supabase db push --dry-run`；若看到破壞性或不相關 migration，立即停止。
+- [ ] **VAPID pair**：用已核對的工具或團隊程序產生一組 VAPID pair；瀏覽器只使用 public key，private key 不得進 Git、Vercel、bundle、response 或 log。
+- [ ] **Function secrets**：在安全 shell 以環境變數設定 `VAPID_SUBJECT`、`VAPID_PUBLIC_KEY`、`VAPID_PRIVATE_KEY`、`DEVICE_CREDENTIAL_PEPPER` 與 `PUSH_DISPATCH_SECRET`；可使用已驗證的命令：
+
+  ```powershell
+  supabase secrets set "VAPID_SUBJECT=$env:UVALERT_VAPID_SUBJECT" "VAPID_PUBLIC_KEY=$env:UVALERT_VAPID_PUBLIC_KEY" "VAPID_PRIVATE_KEY=$env:UVALERT_VAPID_PRIVATE_KEY" "DEVICE_CREDENTIAL_PEPPER=$env:UVALERT_DEVICE_CREDENTIAL_PEPPER" "PUSH_DISPATCH_SECRET=$env:UVALERT_PUSH_DISPATCH_SECRET" --project-ref $env:UVALERT_SUPABASE_PROJECT_REF
+  ```
+
+- [ ] **Vault pair**：以經核准的 Dashboard secret entry 或已驗證的 parameterized SQL 流程，寫入 `uvalert_project_url` 與 `uvalert_push_dispatch_secret`；不在 SQL、終端輸出或文件中列出真值。未取得專案核准的 write 流程前，不杜撰 Vault CLI。
+- [ ] **Migration**：以 `supabase db push` 套用所有尚未套用的 migration 序列，包括 `20260830000200_anonymous_push_foundation.sql`、`20260830000300_push_schedule_operations.sql`、`20260830000400_push_dispatch.sql`；不要只手動套最後一份。
+- [ ] **Functions**：依序部署 `push-subscription`、`push-schedule`、`push-dispatch`，再用 `supabase functions list --project-ref $env:UVALERT_SUPABASE_PROJECT_REF` 確認三者 ACTIVE。三者的 `verify_jwt=false` 只關閉平台 JWT 驗證：前兩者仍要求 `Authorization: Device …`，dispatcher 仍要求 `X-Dispatch-Secret`。
+
+  ```powershell
+  supabase db push
+  supabase functions deploy push-subscription --project-ref $env:UVALERT_SUPABASE_PROJECT_REF
+  supabase functions deploy push-schedule --project-ref $env:UVALERT_SUPABASE_PROJECT_REF
+  supabase functions deploy push-dispatch --project-ref $env:UVALERT_SUPABASE_PROJECT_REF
+  ```
+
+- [ ] **Cron**：確認 `uvalert-push-dispatch`（每分鐘）與 `uvalert-push-cleanup`（每日 03:17 UTC）各只存在一次；在空 due queue 驗證 dispatcher 回 HTTP 200、零筆 claim、沒有 secret log，並記錄成功的 `cron.job_run_details`。
+- [ ] **Vercel public config 與 redeploy**：在 Vercel UI 把 `VITE_PUSH_PUBLIC_KEY` 設為公開 Config，僅設定 Production 與明確核准的 Preview；從 monorepo root 部署 intended commit（project root 為 `apps/web`）。不得設定任何 private VAPID key、pepper、dispatcher secret 或其他 server secret 為 `VITE_*`。若要採用 CLI mutation，先以本機已安裝版本的 help 驗證語法。
+- [ ] **Browser／device smoke**：進行 Task 11 的 Android Chrome、desktop、iPhone/iPad Home Screen、取消／替換、offline recovery 與本機 fallback 實測。iPhone/iPad 必須先把網站加入主畫面、從主畫面 Web App 開啟並允許通知，才可能使用背景推播；仍受網路、省電、OS／瀏覽器能力影響，不保證準時，不能只憑 user agent 或 simulator 推論支援。
+
+### 匿名 Web Push evidence ledger（Task 10–11 回填）
+
+- [ ] Supabase project ref：
+- [ ] migration version(s)：
+- [ ] `push-subscription` version／ACTIVE：
+- [ ] `push-schedule` version／ACTIVE：
+- [ ] `push-dispatch` version／ACTIVE：
+- [ ] `uvalert-push-dispatch` latest Cron run id／result：
+- [ ] `uvalert-push-cleanup` latest Cron run id／result：
+- [ ] Vercel deployment ID：
+- [ ] commit：
+- [ ] production URL：
+- [ ] timestamp：
+- [ ] Android Chrome：
+- [ ] desktop：
+- [ ] iPhone/iPad Home Screen：
+- [ ] cancellation／replacement：
+- [ ] offline recovery：
+- [ ] local fallback：
+
 ## Google OAuth
 
 - [ ] Google Cloud Authorized redirect URI 使用正式 Supabase Auth callback。

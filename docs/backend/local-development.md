@@ -41,18 +41,30 @@ supabase test db
 VITE_SUPABASE_URL=http://127.0.0.1:54321
 VITE_SUPABASE_PUBLISHABLE_KEY=<local publishable/anon key>
 VITE_API_BASE_URL=http://127.0.0.1:54321/functions/v1
+VITE_PUSH_PUBLIC_KEY=replace-with-local-vapid-public-key
 ```
 
-上面的 `VITE_API_BASE_URL` 讓瀏覽器直接呼叫本機 Supabase Edge Function。若開發環境已另設同源 proxy，也可保留 `VITE_API_BASE_URL=/v1`；此時 proxy 必須將產品路徑 `/v1/uv/forecast` 轉送到 Supabase 的 `/functions/v1/uv-forecast`。
+`VITE_PUSH_PUBLIC_KEY` 是公開值，必須與下方 dispatcher 使用的 `VAPID_PUBLIC_KEY` 屬於同一組本機、非 production VAPID pair；它可進 bundle。上面的 `VITE_API_BASE_URL` 讓瀏覽器直接呼叫本機 Supabase Edge Function。若開發環境已另設同源 proxy，也可保留 `VITE_API_BASE_URL=/v1`；此時 proxy 必須將產品路徑 `/v1/uv/forecast` 轉送到 Supabase 的 `/functions/v1/uv-forecast`。
 
 Edge Function 的 CWA key、allowed origins 與 Google provider secret 不進前端。複製 `supabase/.env.example` 為被 Git 忽略的 `supabase/.env.local`，只在本機填值：
 
 ```dotenv
 CWA_API_KEY=<local-cwa-key>
 ALLOWED_ORIGINS=http://localhost:5173,http://127.0.0.1:5173
+VAPID_SUBJECT=mailto:ops@example.invalid
+VAPID_PUBLIC_KEY=replace-in-secure-shell
+VAPID_PRIVATE_KEY=replace-in-secure-shell
+DEVICE_CREDENTIAL_PEPPER=replace-in-secure-shell
+PUSH_DISPATCH_SECRET=replace-in-secure-shell
 ```
 
+先以專案已核對的工具或團隊程序產生**一組**本機、非 production 的 VAPID key pair，再把它填入安全位置；不要猜用未驗證的產生指令。`VAPID_PRIVATE_KEY`、`DEVICE_CREDENTIAL_PEPPER` 與 `PUSH_DISPATCH_SECRET` 都是 server secret，絕不可放入前端 `.env.local`、`VITE_*`、bundle、錯誤訊息或 commit。
+
 本機 Supabase 會提供 `SUPABASE_URL`、`SUPABASE_ANON_KEY` 與 service-role secret 給 Edge Runtime；若使用自訂部署流程，請確認 `SUPABASE_SERVICE_ROLE_KEY` 已以 server secret 注入。不要把 service-role key 放在前端 `.env.local`、bundle、錯誤訊息或 commit。
+
+複製 examples、在安全 shell 以 local 非 production 值填入 `supabase/.env.local` 後，執行 `supabase start`、`supabase db reset` 與既有的 `supabase functions serve --env-file supabase/.env.local` 流程。三個 push Function 與其他 Function 使用相同的 serve 模式；不要把 production secret 交給前端。
+
+`supabase db reset` 套用 migration 後會建立兩筆 local Cron rows：`uvalert-push-dispatch` 和 `uvalert-push-cleanup`。dispatcher Cron 若要在本機實際送達，仍必須先用經核准的 Dashboard secret entry 或已驗證的 parameterized SQL 流程，安全供應 Vault 的 `uvalert_project_url` 與 `uvalert_push_dispatch_secret`；本 repo 沒有可供照抄的 Vault write CLI，未完成前不得宣稱 local Cron 可送達。
 
 ## Google OAuth
 
@@ -73,6 +85,9 @@ Supabase CLI 直接 serve 時 function 原生路徑是：
 /functions/v1/uv-forecast
 /functions/v1/feedback
 /functions/v1/account-delete
+/functions/v1/push-subscription
+/functions/v1/push-schedule
+/functions/v1/push-dispatch
 ```
 
 本機直連 Edge Function 的 API base 是：

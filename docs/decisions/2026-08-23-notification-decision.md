@@ -5,6 +5,8 @@
 **裁決**：**做 service worker ＋ 本機通知。**
 **影響範圍**：產品核心價值、wireframe 可畫的狀態、`/help/how-it-works` 內容能否發布。
 
+> **2026-08-31 歷史註記與現行裁決**：下方 `canDeliverInBackground=false` 與「不含後端 Web Push」是 2026-08-23 的歷史事實，必須保留，不能倒寫為當時已有後端能力。後續 remote Web Push 已完成 local scope 的實作；Task 9 只提供本機可部署證據，production enablement 仍需 Task 10 的 current evidence，裝置 smoke 仍需 Task 11 的 dated evidence。現行裁決是：本機通知保留為 fallback；只有在支援、設定與裝置條件都成立時，remote Web Push 才提供背景提醒。它仍不保證瀏覽器完全關閉、系統休眠或平台限制下的送達；iPhone/iPad 必須把網站加入主畫面、從主畫面 Web App 開啟並允許通知，詳見目前[通知設定文案](../../apps/web/src/pages/settings/NotificationSettingsPage.vue)。
+
 ## 摘要
 
 盤點時發現：**這個 App 目前沒有任何通知能力，一行相關程式碼都沒有。**
