@@ -318,14 +318,13 @@ async function remove(): Promise<void> {
           />
           <Icon :name="GEAR_CATEGORY_ICONS[category]" :size="32" />
           <!--
-            2026-08-30：文字只在選取後顯示，未選取時走 `.screen-reader-only`。
-            **視覺上隱藏、無障礙上仍在**——螢幕閱讀器與語音控制都還讀得到
-            每個選項的名稱，鍵盤操作也不受影響。純粹拿掉文字會讓四個選項
-            對輔助技術變成無名的 radio。
+            2026-08-31 改回常駐。前一版讓文字只在選取後顯示（未選取時走
+            `.screen-reader-only`），使用者回饋「很像消失」——四個只有圖示
+            的方塊要靠猜，而「太陽眼鏡」與「帽子」的圖示辨識度本來就沒有
+            高到可以不標名字。選取狀態已經有底色與外框在表達，不需要再用
+            「只有我有文字」當第二個訊號。
           -->
-          <span :class="{ 'screen-reader-only': gearCategory !== category }">
-            {{ label }}
-          </span>
+          <span>{{ label }}</span>
         </label>
       </div>
       <p class="category-effect" role="status">
@@ -443,7 +442,6 @@ async function remove(): Promise<void> {
             type="text"
             inputmode="numeric"
             maxlength="7"
-            placeholder="690"
           />
         </div>
         <div>
