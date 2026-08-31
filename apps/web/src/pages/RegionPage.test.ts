@@ -80,7 +80,7 @@ describe("RegionPage", () => {
 
     expect(region.ensureLoaded).toHaveBeenCalledOnce();
     expect(region.useCurrentPosition).not.toHaveBeenCalled();
-    expect(wrapper.text()).toContain("位置不會被儲存或用於分析");
+    expect(wrapper.text()).toContain("不儲存或分析位置資訊");
   });
 
   it("requests location only after the explicit button press", async () => {
@@ -152,7 +152,7 @@ describe("RegionPage", () => {
     } as unknown as WebAppServices);
     const { wrapper } = await mountPage();
 
-    expect(wrapper.text()).toContain("補擦提醒仍可正常使用");
+    expect(wrapper.text()).toContain("提醒功能仍可正常運作");
   });
 
   it("saves an explicit skip", async () => {

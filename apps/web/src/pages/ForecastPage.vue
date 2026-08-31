@@ -35,7 +35,7 @@ onMounted(() => {
       <h1 class="page-heading__title" data-typography-role="page-title">
         五日 UV 預報
       </h1>
-      <p class="page-heading__body">依你設定的地區顯示。</p>
+      <p class="page-heading__body">顯示設定地區預報。</p>
     </header>
 
     <FiveDayUvCard
@@ -114,8 +114,7 @@ onMounted(() => {
       回饋「重複性文字太多」。
     -->
     <p class="safety-note">
-      每一格是當日預測的最高值（今天只算剩餘時段），不是即時測站觀測；UV
-      高低不會延長或縮短你的補擦計時。
+      今日數值為當前至日落最高預測，UV 高低不影響補擦倒數。
     </p>
   </div>
 </template>
