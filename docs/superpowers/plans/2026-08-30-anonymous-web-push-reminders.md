@@ -619,7 +619,7 @@ git commit -m "feat(push): dispatch due reminders"
 - Constructor dependencies include `PushStatePort`, API base URL, public VAPID key, service-worker registration provider, fetch, online state and `createOperationId()`.
 - Uses endpoints `${apiBase}/push-subscription` and `${apiBase}/push-schedule`.
 
-- [ ] **Step 1: Write failing browser adapter tests**
+- [x] **Step 1: Write failing browser adapter tests**
 
 Cover unsupported APIs, permission denied, initial subscribe/register, reuse of existing subscription and credentials, subscription rotation PUT, schedule PUT, cancel DELETE, disable remote then browser unsubscribe, offline latest-intent replacement, reconnect flush, compare-and-clear race and secret-free errors.
 
@@ -632,7 +632,7 @@ Assert `pushManager.subscribe` receives:
 }
 ```
 
-- [ ] **Step 2: Write failing Service Worker contract tests**
+- [x] **Step 2: Write failing Service Worker contract tests**
 
 Load `sw.js` in a minimal worker harness. Dispatch `{ type: "reminder-due" }` and assert:
 
@@ -645,7 +645,7 @@ self.registration.showNotification("該補擦防曬乳了", {
 
 Invalid JSON, unknown type and payload with attacker-supplied title/URL must not display arbitrary content.
 
-- [ ] **Step 3: Run focused tests and verify RED**
+- [x] **Step 3: Run focused tests and verify RED**
 
 ```powershell
 & '.\node_modules\.bin\vitest.CMD' run apps/web/src/adapters/BrowserRemotePush.test.ts apps/web/src/service-worker-push.test.ts
@@ -653,21 +653,21 @@ Invalid JSON, unknown type and payload with attacker-supplied title/URL must not
 
 Expected: FAIL because the adapter and push listener do not exist.
 
-- [ ] **Step 4: Implement capability checks and subscription lifecycle**
+- [x] **Step 4: Implement capability checks and subscription lifecycle**
 
 Support requires secure context, `serviceWorker`, `PushManager` and `Notification`. iOS without an available PushManager reports `unsupported`; do not infer installation state from user agent strings.
 
 Read `VITE_PUSH_PUBLIC_KEY` through `readConfiguredEnvironmentValue`. Missing/blank key keeps remote push disabled without affecting local notifications.
 
-- [ ] **Step 5: Implement API and offline intent handling**
+- [x] **Step 5: Implement API and offline intent handling**
 
 Send credentials only in `Authorization: Device ...`; never put them in URL/query. Persist schedule/cancel intent before fetch. Clear it only after a successful matching operation id. Network errors return `pending-sync`; validation/auth errors return `schedule-error` and retain enough local state for explicit recovery.
 
-- [ ] **Step 6: Add the fixed Service Worker push handler**
+- [x] **Step 6: Add the fixed Service Worker push handler**
 
 Parse only `{ type: "reminder-due" }`. The worker, not the payload, supplies notification text, tag and `/` path. Preserve current install, activate and notificationclick behavior.
 
-- [ ] **Step 7: Run focused tests and web typecheck**
+- [x] **Step 7: Run focused tests and web typecheck**
 
 ```powershell
 & '.\node_modules\.bin\vitest.CMD' run apps/web/src/adapters/BrowserRemotePush.test.ts apps/web/src/service-worker-push.test.ts apps/web/src/adapters/BrowserNotifications.test.ts
@@ -676,11 +676,11 @@ pnpm --filter @sunshield/web typecheck
 
 Expected: all selected tests and typecheck PASS.
 
-- [ ] **Step 8: Independent privacy and browser review gate**
+- [x] **Step 8: Independent privacy and browser review gate**
 
 Reviewer checks no user-agent branching, no credentials in URLs/logs, no attacker-controlled notification content, proper unsubscribe order and safe offline races.
 
-- [ ] **Step 9: Commit Task 6**
+- [x] **Step 9: Commit Task 6**
 
 ```powershell
 git add -- apps/web/src/adapters/BrowserRemotePush.ts apps/web/src/adapters/BrowserRemotePush.test.ts apps/web/public/sw.js apps/web/src/service-worker-push.test.ts apps/web/src/env.d.ts apps/web/.env.example
