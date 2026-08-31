@@ -117,6 +117,16 @@ const snapshotForm = ref<ProductSnapshotFormValue>({
 const localError = shallowRef<string | null>(null);
 const confirmingDelete = shallowRef(false);
 
+/**
+ * 「我的紀錄」的收合狀態。
+ *
+ * 新增時預設收合——那五個欄位在建檔當下多半還不知道（價格要翻收據、
+ * 「好不好用」在用之前根本不可能知道）。編輯時一律展開，因為那時通常
+ * 已經有值，把既有資料藏起來沒有道理。
+ */
+const recordExpanded = shallowRef(false);
+const recordOpen = computed(() => isEdit.value || recordExpanded.value);
+
 const existing = computed(() =>
   props.productId === null
     ? null
@@ -421,14 +431,38 @@ async function remove(): Promise<void> {
       知道，等於一個永遠只能選「未評價」的下拉。這些是回頭補的資料，
       詳情頁的「編輯」才是它們的自然位置。
 
-      副作用（已知並接受）：到期日也一起移走了，它是這塊裡唯一會進
-      reducer 的欄位。新增當下如果那瓶已經過期，第一次仍會建立倒數，
-      要進編輯頁補到期日才會停。見 pending-decisions §11。
+      2026-08-31 修正：**整塊藏掉做過頭了**。使用者實際用過之後回報「日期、
+      價格、備註都不見了」——不只防曬乳，四個品類都受影響。改成新增流程
+      仍然看得到這張卡，只是**預設收合**：東西沒有消失，想填就展開，高度
+      節省也留住大部分。編輯時直接展開，因為那時通常已經有值。
+
+      這同時解掉前一版的副作用：到期日是這塊裡唯一會進 reducer 的欄位，
+      現在新增當下就填得到，不必先存檔再進編輯頁。
     -->
-    <section v-if="isEdit" class="app-card" aria-labelledby="gear-record-title">
+    <section class="app-card" aria-labelledby="gear-record-title">
       <h2 id="gear-record-title" data-typography-role="card-title">我的紀錄</h2>
       <p class="field-helper">全部選填，只留在這台裝置上。</p>
 
+      <!--
+        揭露契約（DESIGN.md 第五節）：真的 <button>、aria-expanded ＋
+        aria-controls 齊備，chevron 換圖示 name 而不是 transform: rotate。
+      -->
+      <button
+        v-if="!isEdit"
+        class="button button--quiet record-toggle"
+        type="button"
+        :aria-expanded="recordOpen"
+        aria-controls="gear-record-fields"
+        @click="recordExpanded = !recordExpanded"
+      >
+        <Icon
+          :name="recordOpen ? 'tool-chevron-down' : 'tool-chevron-right'"
+          :size="20"
+        />
+        {{ recordOpen ? "收合購買紀錄" : "補上購買紀錄（選填）" }}
+      </button>
+
+      <div v-show="recordOpen" id="gear-record-fields" class="record-fields">
       <div class="field-pair">
         <div>
           <label for="gear-purchase">購買月份</label>
@@ -477,6 +511,7 @@ async function remove(): Promise<void> {
       <label for="gear-note">備註</label>
       <textarea id="gear-note" v-model="note" maxlength="500" rows="3" />
       <p class="field-helper">請不要輸入疾病、症狀、用藥或聯絡資料。</p>
+      </div>
     </section>
 
     <p v-if="localError" class="form-error" role="alert">{{ localError }}</p>
@@ -764,6 +799,19 @@ textarea {
   display: grid;
   gap: var(--space-3);
   padding: var(--card-padding);
+}
+
+/*
+ * 2026-08-31：「我的紀錄」在新增流程改成收合。觸發器沿用包裝標示那顆
+ * quiet 按鈕的形狀，兩處揭露看起來是同一種東西。
+ */
+.record-toggle {
+  justify-self: start;
+}
+
+.record-fields {
+  display: grid;
+  gap: var(--space-3);
 }
 
 textarea {
