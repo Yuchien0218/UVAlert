@@ -1,5 +1,10 @@
 <script setup lang="ts">
 import { computed, shallowRef, useId } from "vue";
+import {
+  APPLICATION_MAX_MINUTES_AGO,
+  describeTooLongAgo,
+  minutesAgo as minutesBetween
+} from "../../features/setup/timeEntryCaps";
 
 /**
  * 塗抹時間：一個預設快選加一個手動調整入口。
@@ -63,6 +68,29 @@ const usingDefault = computed(() => {
   if (at === null) return false;
   return Math.abs(at.getTime() - (referenceNow.getTime() - 60_000)) < 30_000;
 });
+
+/**
+ * 超過上限時的提示（2026-08-31 裁決 #9）。
+ *
+ * **不擋輸入**：超過 120 分鐘時真正的下一步是重新塗抹，不是把一個已經
+ * 失效的時間記進去。硬擋會讓使用者卡在表單裡填不出任何值。datetime-local
+ * 的 min 只是讓瀏覽器的選擇器先收窄，手動打字繞過時由這句話接住。
+ */
+const tooLongAgoNotice = computed(() => {
+  const at = selectedAt.value;
+  if (at === null) return null;
+  return describeTooLongAgo(
+    minutesBetween(at, referenceNow),
+    APPLICATION_MAX_MINUTES_AGO,
+    "application"
+  );
+});
+
+const earliestLocalValue = computed(() =>
+  toLocalInputValue(
+    new Date(referenceNow.getTime() - APPLICATION_MAX_MINUTES_AGO * 60_000)
+  )
+);
 
 const adjustedLabel = computed(() => {
   const minutes = minutesAgo.value;
@@ -136,6 +164,7 @@ function applyAdjustment(): void {
         <input
           v-model="draftLocalValue"
           type="datetime-local"
+          :min="earliestLocalValue"
           :max="toLocalInputValue(referenceNow)"
         />
       </label>
@@ -147,6 +176,10 @@ function applyAdjustment(): void {
         套用
       </button>
     </div>
+
+    <p v-if="tooLongAgoNotice !== null" class="time-picker__cap" role="alert">
+      {{ tooLongAgoNotice }}
+    </p>
 
     <!-- 調整後要看得出目前選了什麼，否則按鈕上只寫「調整時間」等於沒有回饋。 -->
     <p
@@ -169,56 +202,26 @@ function applyAdjustment(): void {
  * 同一頁兩張同構的卡片標題大小與間距不同，就是「排版像舊實作」的來源。
  * 改用共用的 .question-card，這裡只留這張卡特有的東西。
  */
+.time-picker__cap {
+  margin: 0;
+  color: var(--color-due);
+  font-size: var(--font-size-supporting);
+  line-height: var(--line-height-body);
+}
+
 .time-picker__quick {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: var(--space-2);
 }
 
-.time-option {
-  display: grid;
-  gap: var(--space-1);
-  padding: var(--space-3);
-  border-radius: var(--radius-sm);
-  color: var(--text-primary);
-  cursor: pointer;
-  text-align: left;
-  transition:
-    background-color var(--duration-fast) var(--ease-out),
-    border-color var(--duration-fast) var(--ease-out);
-}
-
-/* 理由同 app.css 的 .choice-grid label:hover——避免 hover 跟已選取同色。 */
-.time-option:hover {
-  background-color: var(--color-hairline-soft);
-}
-
-.time-option:active {
-  filter: brightness(0.92);
-}
-
-.time-option__label {
-  display: flex;
-  align-items: baseline;
-  gap: var(--space-2);
-  font-weight: 500;
-}
+/* .time-option／.time-adjust 2026-08-31 移到 app.css——入水時間選擇器
+   改成同一個形狀之後它們變成兩個元件共用，留在 scoped style 裡的話
+   WaterStartPicker 會完全吃不到。 */
 
 .time-picker__result {
   margin: 0;
   color: var(--text-secondary);
   line-height: var(--line-height-body);
-}
-
-.time-adjust {
-  display: grid;
-  gap: var(--space-3);
-  justify-items: start;
-}
-
-.time-adjust__field {
-  display: grid;
-  gap: var(--space-2);
-  width: 100%;
 }
 </style>

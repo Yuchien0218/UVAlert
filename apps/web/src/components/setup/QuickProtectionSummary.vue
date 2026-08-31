@@ -99,7 +99,7 @@ const zoneLabels = computed(() =>
  * 但 --color-soon 的語意是「即將到期」，這區講的是「這是推薦的部位組合」，
  * 完全不同的事——DESIGN.md 第二節明訂狀態色不得與裝飾用法混淆。
  *
- * SetupProcessBanner 2026-08-23 已經因為同一個理由把 --color-soon 換掉
+ * SetupProcessBanner（2026-08-31 已移除）當時也因為同一個理由把 --color-soon 換掉
  * （「同一個顏色會讓使用者把該去完成設定跟該去補擦搞混」），這一處是當時
  * 漏掉的。改用共用的 .app-card，跟同頁其他區塊一致。
  */

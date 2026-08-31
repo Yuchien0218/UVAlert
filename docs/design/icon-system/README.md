@@ -137,7 +137,7 @@
 | `feature-uv-forecast`        | 五日 UV 預報 | `CloudSun`      | 雙色 | `FiveDayUvCard` 標題                            |
 | `feature-region`             | 地區         | `MapPin`        | 雙色 | `RegionPreferenceSummary`                       |
 | `feature-protection-summary` | 快速防護摘要 | `Sparkles`      | 雙色 | `QuickProtectionSummary` / `ZoneProtectionForm` |
-| `feature-setup-steps`        | 設定流程     | `ClipboardList` | 雙色 | `SetupProcessBanner`                            |
+| `feature-setup-steps`        | 設定流程     | `ClipboardList` | 雙色 | **目前沒有消費者**（`SetupProcessBanner` 2026-08-31 移除） |
 | `feature-locate`             | 取得目前位置 | `LocateFixed`   | 單色 | `RegionLocationPanel` 卡片標題                  |
 
 `SlidersHorizontal`（調整要提醒的部位）**沒有畫新圖示**，改用既有的 `tool-edit`，理由見第十節。
