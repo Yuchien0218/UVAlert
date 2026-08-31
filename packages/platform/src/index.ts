@@ -386,7 +386,13 @@ export type PushDeviceCredentials = {
 
 export type PendingPushIntent =
   | { kind: "schedule"; dueAt: string; operationId: string }
-  | { kind: "cancel"; operationId: string };
+  | { kind: "cancel"; operationId: string }
+  | { kind: "revoke"; operationId: string; remoteRevoked: boolean };
+
+export type RemotePushHydration = {
+  state: BackgroundPushState;
+  isEnabled: boolean;
+};
 
 /** 本機保存匿名推播憑證與尚未同步的唯一最新意圖。 */
 export interface PushStatePort {
@@ -401,6 +407,7 @@ export interface PushStatePort {
 /** 背景 Web Push 的裝置訂閱與單一遠端排程邊界。 */
 export interface RemotePushPort {
   isSupported(): boolean;
+  hydrate(): Promise<RemotePushHydration>;
   enable(): Promise<BackgroundPushState>;
   schedule(dueAt: string, operationId: string): Promise<BackgroundPushState>;
   cancel(operationId: string): Promise<BackgroundPushState>;

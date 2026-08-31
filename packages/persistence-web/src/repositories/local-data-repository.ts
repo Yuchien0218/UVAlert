@@ -191,7 +191,15 @@ export class LocalDataRepository implements LocalDataPort {
   }
 
   async clearAll(): Promise<void> {
-    await Promise.all(this.#database.tables.map((table) => table.clear()));
+    const pushDeliveryState = await this.#database.PushDeliveryState.get(
+      "current-device"
+    );
+    const tables = this.#database.tables.filter(
+      (table) =>
+        table.name !== this.#database.PushDeliveryState.name ||
+        pushDeliveryState?.pendingIntent?.kind !== "revoke"
+    );
+    await Promise.all(tables.map((table) => table.clear()));
     // 清完必須留下乾淨可用的必要 metadata，否則下一次啟動會處在
     // 半初始化狀態（S-19）。
     await this.#database.AppMetadata.bulkPut([

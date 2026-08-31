@@ -41,7 +41,11 @@ function createState(initial?: {
       }
     })
   };
-  return { state, readIntent: () => pendingIntent };
+  return {
+    state,
+    readIntent: () => pendingIntent,
+    readCredentials: () => storedCredentials
+  };
 }
 
 function createSubscription() {
@@ -196,14 +200,17 @@ describe("BrowserRemotePush", () => {
     expect(String(url)).not.toContain(credentials.deviceSecret);
   });
 
-  it("does not take over an existing subscription when local credentials are lost", async () => {
-    const { adapter, fetchMock } = createHarness({
+  it("replaces an existing browser subscription before registering a new device when local credentials are lost", async () => {
+    const existingSubscription = createSubscription();
+    const { adapter, fetchMock, subscribe } = createHarness({
       credentials: null,
-      subscription: createSubscription()
+      subscription: existingSubscription
     });
 
-    await expect(adapter.enable()).resolves.toBe("schedule-error");
-    expect(fetchMock).not.toHaveBeenCalled();
+    await expect(adapter.enable()).resolves.toBe("enabled");
+    expect(existingSubscription.unsubscribe).toHaveBeenCalledOnce();
+    expect(subscribe).toHaveBeenCalledOnce();
+    expect(vi.mocked(fetchMock).mock.calls[0]?.[1]?.method).toBe("POST");
   });
 
   it("persists then schedules one remote due time", async () => {
@@ -400,6 +407,45 @@ describe("BrowserRemotePush", () => {
     await expect(adapter.disable()).resolves.toBe("pending-sync");
     expect(subscription.unsubscribe).not.toHaveBeenCalled();
     expect(local.state.clearCredentials).not.toHaveBeenCalled();
+  });
+
+  it("persists a revoke teardown while offline then completes it after reload", async () => {
+    let online = false;
+    const local = createState({ credentials });
+    const subscription = createSubscription();
+    const { dependencies, fetchMock } = createHarness({
+      credentials,
+      subscription,
+      online
+    });
+    const offlineAdapter = new BrowserRemotePush({
+      ...dependencies,
+      state: local.state,
+      isOnline: () => online
+    });
+
+    await expect(offlineAdapter.disable()).resolves.toBe("pending-sync");
+    expect(local.readIntent()).toEqual({
+      kind: "revoke",
+      operationId,
+      remoteRevoked: false
+    });
+    expect(local.readCredentials()).toEqual(credentials);
+
+    online = true;
+    const reloadedAdapter = new BrowserRemotePush({
+      ...dependencies,
+      state: local.state,
+      isOnline: () => online
+    });
+    await expect(reloadedAdapter.hydrate()).resolves.toEqual({
+      state: "permission-required",
+      isEnabled: false
+    });
+    expect(vi.mocked(fetchMock).mock.calls[0]?.[1]?.method).toBe("DELETE");
+    expect(subscription.unsubscribe).toHaveBeenCalledOnce();
+    expect(local.readCredentials()).toBeNull();
+    expect(local.readIntent()).toBeNull();
   });
 
   it("serializes enable and disable so a late registration is revoked", async () => {

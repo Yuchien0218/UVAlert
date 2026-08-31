@@ -34,6 +34,8 @@ interface Dependencies {
   now(): Date;
   /** 由呼叫端提供，方便測試時不觸碰真實下載。 */
   saveFile(fileName: string, contents: string): void;
+  /** 清除前先持久化必要的跨網路 teardown。 */
+  beforeClearAll?(): Promise<void>;
 }
 
 function fileNameFor(now: Date): string {
@@ -127,7 +129,11 @@ export function createLocalDataController(
       runClear("history", () =>
         dependencies.repository.clearProductsAndHistory()
       ),
-    clearAll: () => runClear("all", () => dependencies.repository.clearAll()),
+    clearAll: () =>
+      runClear("all", async () => {
+        await dependencies.beforeClearAll?.();
+        await dependencies.repository.clearAll();
+      }),
     dismissNotice(): void {
       notice.value = null;
     },

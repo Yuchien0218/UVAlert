@@ -184,4 +184,29 @@ describe("LocalDataRepository 摘要與清除", () => {
     // 舊的識別碼不得殘留。
     expect(visitor?.value).not.toBe("old-visitor");
   });
+
+  it("清除全部時保留尚待完成的背景推播撤銷憑證", async () => {
+    const { database, repository } = makeRepository();
+    await database.PushDeliveryState.put({
+      id: "current-device",
+      credentials: { deviceId: "device-a", deviceSecret: "secret-a" },
+      pendingIntent: {
+        kind: "revoke",
+        operationId: "11111111-1111-4111-8111-111111111111",
+        remoteRevoked: false
+      }
+    });
+
+    await repository.clearAll();
+
+    await expect(database.PushDeliveryState.get("current-device")).resolves.toEqual({
+      id: "current-device",
+      credentials: { deviceId: "device-a", deviceSecret: "secret-a" },
+      pendingIntent: {
+        kind: "revoke",
+        operationId: "11111111-1111-4111-8111-111111111111",
+        remoteRevoked: false
+      }
+    });
+  });
 });

@@ -32,8 +32,12 @@ function createNotificationsStub(
   };
 }
 
-function createRemotePushStub(supported = true): RemotePushPort & {
+function createRemotePushStub(
+  supported = true,
+  hydration = { state: "permission-required", isEnabled: false }
+): RemotePushPort & {
   enable: ReturnType<typeof vi.fn>;
+  hydrate: ReturnType<typeof vi.fn>;
   schedule: ReturnType<typeof vi.fn>;
   cancel: ReturnType<typeof vi.fn>;
   disable: ReturnType<typeof vi.fn>;
@@ -42,6 +46,7 @@ function createRemotePushStub(supported = true): RemotePushPort & {
   return {
     isSupported: () => supported,
     enable: vi.fn().mockResolvedValue("enabled"),
+    hydrate: vi.fn().mockResolvedValue(hydration),
     schedule: vi.fn().mockResolvedValue("scheduled"),
     cancel: vi.fn().mockResolvedValue("enabled"),
     disable: vi.fn().mockResolvedValue("permission-required"),
@@ -75,10 +80,11 @@ function createController(
     session?: SessionProjection | null;
     supported?: boolean;
     connectivity?: ConnectivityStatus;
+    hydration?: { state: BackgroundPushState; isEnabled: boolean };
   } = {}
 ) {
   const notifications = createNotificationsStub();
-  const remotePush = createRemotePushStub(options.supported);
+  const remotePush = createRemotePushStub(options.supported, options.hydration);
   const currentSession: Ref<SessionProjection | null> = shallowRef(
     options.session === undefined ? sessionWith() : options.session
   );
@@ -121,6 +127,36 @@ describe("createNotificationController", () => {
     const { controller } = createController();
     await flush();
     expect(controller.backgroundPushState.value).toBe("permission-required");
+  });
+
+  it("hydrates an enabled device after reload then replaces and cancels its remote schedule from the latest Session", async () => {
+    const { controller, currentSession, remotePush } = createController({
+      hydration: { state: "enabled", isEnabled: true }
+    });
+    await flush();
+
+    expect(remotePush.hydrate).toHaveBeenCalledOnce();
+    expect(controller.backgroundPushState.value).toBe("scheduled");
+    expect(remotePush.schedule).toHaveBeenCalledWith(
+      "2026-08-23T12:00:00.000Z",
+      "operation-1"
+    );
+
+    currentSession.value = sessionWith({
+      sessionNextDueAt: "2026-08-23T13:30:00.000Z"
+    });
+    await flush();
+    expect(remotePush.schedule).toHaveBeenLastCalledWith(
+      "2026-08-23T13:30:00.000Z",
+      "operation-2"
+    );
+
+    currentSession.value = sessionWith({
+      overallStatus: "ended",
+      sessionNextDueAt: null
+    });
+    await flush();
+    expect(remotePush.cancel).toHaveBeenCalledWith("operation-3");
   });
 
   it("keeps the local fallback and makes no remote call when unsupported", async () => {
@@ -243,6 +279,22 @@ describe("createNotificationController", () => {
 
     expect(controller.backgroundPushState.value).toBe("schedule-error");
     expect(remotePush.enable).toHaveBeenCalledOnce();
+  });
+
+  it("automatically resumes a pending disable teardown after reconnecting", async () => {
+    const { controller, connectivity, remotePush } = createController();
+    await controller.enableBackgroundPush();
+    remotePush.disable.mockResolvedValueOnce("pending-sync");
+    remotePush.flushPendingIntent.mockResolvedValueOnce("permission-required");
+
+    await controller.disableBackgroundPush();
+    connectivity.value = "offline";
+    await flush();
+    connectivity.value = "online";
+    await flush();
+
+    expect(remotePush.flushPendingIntent).toHaveBeenCalledOnce();
+    expect(controller.backgroundPushState.value).toBe("permission-required");
   });
 
   it("allows a fresh enable only after disable fully succeeds", async () => {

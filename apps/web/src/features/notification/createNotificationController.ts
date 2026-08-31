@@ -155,13 +155,32 @@ export function createNotificationController(
   }
 
   async function flushPendingIntent(): Promise<void> {
-    if (!backgroundEnabled || disposed) return;
+    if ((!backgroundEnabled && !requiresDisable) || disposed) return;
     const token = nextRemoteSessionIntentGeneration();
     try {
       const result = await remotePush.flushPendingIntent();
       setSessionBackgroundState(token, result);
+      if (result === "permission-required") requiresDisable = false;
     } catch {
       setSessionBackgroundState(token, "schedule-error");
+    }
+  }
+
+  async function hydrateBackgroundPush(): Promise<void> {
+    if (!remoteSupported || disposed) return;
+    const token = nextRemoteSessionIntentGeneration();
+    try {
+      const hydration = await remotePush.hydrate();
+      if (!isCurrentRemoteSessionIntent(token)) return;
+      backgroundPushState.value = hydration.state;
+      backgroundEnabled = hydration.isEnabled;
+      requiresDisable = hydration.state === "schedule-error";
+      if (backgroundEnabled) await reconcileCurrentSession();
+    } catch {
+      if (isCurrentRemoteSessionIntent(token)) {
+        backgroundPushState.value = "schedule-error";
+        requiresDisable = true;
+      }
     }
   }
 
@@ -201,13 +220,14 @@ export function createNotificationController(
       if (
         previousStatus === "offline" &&
         status === "online" &&
-        backgroundEnabled &&
+        (backgroundEnabled || requiresDisable) &&
         backgroundPushState.value === "pending-sync"
       ) {
         void flushPendingIntent();
       }
     }
   );
+  void hydrateBackgroundPush();
 
   return {
     permission: shallowReadonly(permission),

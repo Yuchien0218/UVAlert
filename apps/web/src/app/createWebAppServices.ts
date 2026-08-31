@@ -227,7 +227,10 @@ export function createWebAppServices(
     repository: new LocalDataRepository({ database, createId }),
     boot,
     now: () => new Date(),
-    saveFile: downloadTextFile
+    saveFile: downloadTextFile,
+    beforeClearAll: async () => {
+      await remotePush.disable();
+    }
   });
   const contextEvent = createContextEventController({
     repository,

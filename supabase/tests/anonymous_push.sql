@@ -1,6 +1,6 @@
 begin;
 
-select plan(88);
+select plan(92);
 
 select has_table('public', 'push_subscriptions', 'push subscriptions table exists');
 select has_table('public', 'push_schedules', 'push schedules table exists');
@@ -308,8 +308,52 @@ select is(
 );
 select is(
   (select status from public.push_schedules where device_id = '10000000-0000-0000-0000-000000000012'),
-  'expired',
-  'stale due schedule is expired atomically'
+  'pending',
+  'dispatcher leaves stale due schedule cleanup to the independent cleanup job'
+);
+
+insert into public.push_subscriptions (
+  device_id, device_secret_hash, endpoint, p256dh, auth, status,
+  created_at, updated_at, last_active_at
+)
+select
+  format('40000000-0000-4000-8000-%s', lpad(value::text, 12, '0'))::uuid,
+  format('stale-hash-%s', value),
+  format('https://push.example/stale-%s', value),
+  format('stale-key-%s', value),
+  format('stale-auth-%s', value),
+  'active', '2026-08-30 08:00Z', '2026-08-30 08:00Z', '2026-08-30 08:00Z'
+from generate_series(1, 1000) as value;
+insert into public.push_schedules (
+  device_id, due_at, status, attempt_count, next_attempt_at, last_operation_id,
+  created_at, updated_at
+)
+select
+  format('40000000-0000-4000-8000-%s', lpad(value::text, 12, '0'))::uuid,
+  '2026-08-30 08:59Z', 'pending', 0, '2026-08-30 08:59Z',
+  format('50000000-0000-4000-8000-%s', lpad(value::text, 12, '0'))::uuid,
+  '2026-08-30 08:00Z', '2026-08-30 08:00Z'
+from generate_series(1, 1000) as value;
+select is(
+  (select count(*) from public.claim_due_push_schedules(100, '2026-08-30 09:10:01Z', interval '2 minutes')),
+  0::bigint,
+  'claim ignores a large stale set without returning it'
+);
+select is(
+  (select count(*) from public.push_schedules
+   where device_id::text like '40000000-0000-4000-8000-%' and status = 'expired'),
+  0::bigint,
+  'claim does not turn a large stale set into an unbounded expiry update'
+);
+select lives_ok(
+  $$select public.cleanup_push_data('2026-08-30 09:10:01Z')$$,
+  'independent cleanup expires stale schedules outside the dispatcher'
+);
+select is(
+  (select count(*) from public.push_schedules
+   where device_id::text like '40000000-0000-4000-8000-%' and status = 'expired'),
+  1000::bigint,
+  'cleanup, rather than claim, expires the large stale set'
 );
 
 select has_function(

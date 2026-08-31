@@ -3,6 +3,7 @@ import type {
   PendingPushIntent,
   PushDeviceCredentials,
   PushStatePort,
+  RemotePushHydration,
   RemotePushPort
 } from "@sunshield/platform";
 import { readConfiguredEnvironmentValue } from "./configuredEnvironment";
@@ -58,6 +59,36 @@ export class BrowserRemotePush implements RemotePushPort {
     return this.#enqueue(() => this.#enable());
   }
 
+  async hydrate(): Promise<RemotePushHydration> {
+    return this.#enqueue(async () => {
+      if (!this.isSupported()) {
+        return { state: "unsupported", isEnabled: false };
+      }
+      const pending = await this.#deps.state.readPendingIntent();
+      if (pending?.kind === "revoke") {
+        return {
+          state: await this.#sendIntent(pending),
+          isEnabled: false
+        };
+      }
+      const credentials = await this.#deps.state.readCredentials();
+      if (credentials === null) {
+        return { state: "permission-required", isEnabled: false };
+      }
+      const registration = await this.#deps.getRegistration();
+      const subscription = await registration?.pushManager.getSubscription();
+      if (subscription === null || subscription === undefined) {
+        return { state: "schedule-error", isEnabled: false };
+      }
+      if (pending === null) return { state: "enabled", isEnabled: true };
+      const state = await this.#sendIntent(pending);
+      return {
+        state,
+        isEnabled: state === "enabled" || state === "scheduled" || state === "pending-sync"
+      };
+    });
+  }
+
   async #enable(): Promise<BackgroundPushState> {
     if (!this.isSupported()) return "unsupported";
     let permission = this.#deps.getPermission();
@@ -79,16 +110,26 @@ export class BrowserRemotePush implements RemotePushPort {
           )
         });
       }
-      const payload = subscriptionPayload(subscription);
       const existing = await this.#deps.state.readCredentials();
       if (hadExistingSubscription && existing === null) {
-        return "schedule-error";
+        const unsubscribed = await subscription.unsubscribe();
+        if (!unsubscribed) return "schedule-error";
+        subscription = await registration.pushManager.subscribe({
+          userVisibleOnly: true,
+          applicationServerKey: urlBase64ToUint8Array(
+            this.#publicVapidKey as string
+          )
+        });
       }
       const response = await this.#deps.fetch(
         `${this.#apiBase}/push-subscription`,
         existing === null
-          ? jsonRequest("POST", payload)
-          : authenticatedJsonRequest("PUT", payload, existing)
+          ? jsonRequest("POST", subscriptionPayload(subscription))
+          : authenticatedJsonRequest(
+              "PUT",
+              subscriptionPayload(subscription),
+              existing
+            )
       );
       if (!response.ok) return "schedule-error";
       if (existing === null) {
@@ -117,36 +158,17 @@ export class BrowserRemotePush implements RemotePushPort {
   }
 
   async disable(): Promise<BackgroundPushState> {
-    return this.#enqueue(async () => {
-      if (!this.#deps.isOnline()) return "pending-sync";
-      const credentials = await this.#deps.state.readCredentials();
-      const registration = await this.#deps.getRegistration();
-      const subscription = await registration?.pushManager.getSubscription();
-      if (credentials !== null) {
-        let response: Response;
-        try {
-          response = await this.#deps.fetch(
-            `${this.#apiBase}/push-subscription`,
-            authenticatedRequest("DELETE", credentials)
-          );
-        } catch {
-          return "pending-sync";
-        }
-        if (!response.ok)
-          return retryable(response) ? "pending-sync" : "schedule-error";
-      }
-      try {
-        await subscription?.unsubscribe();
-      } catch {
-        return "schedule-error";
-      }
-      await this.#deps.state.clearCredentials();
-      const pending = await this.#deps.state.readPendingIntent();
-      if (pending !== null) {
-        await this.#deps.state.clearPendingIntent(pending.operationId);
-      }
-      return "permission-required";
-    });
+    const pending = await this.#deps.state.readPendingIntent();
+    if (pending?.kind === "revoke") {
+      return this.#enqueue(() => this.#sendIntent(pending));
+    }
+    const intent: PendingPushIntent = {
+      kind: "revoke",
+      operationId: this.#deps.createOperationId(),
+      remoteRevoked: false
+    };
+    await this.#deps.state.replacePendingIntent(intent);
+    return this.#enqueue(() => this.#sendIntent(intent));
   }
 
   async flushPendingIntent(): Promise<BackgroundPushState> {
@@ -158,6 +180,7 @@ export class BrowserRemotePush implements RemotePushPort {
 
   async #sendIntent(intent: PendingPushIntent): Promise<BackgroundPushState> {
     if (!this.#deps.isOnline()) return "pending-sync";
+    if (intent.kind === "revoke") return this.#sendRevoke(intent);
     if (
       intent.kind === "schedule" &&
       new Date(intent.dueAt).getTime() <= this.#deps.now().getTime()
@@ -190,9 +213,46 @@ export class BrowserRemotePush implements RemotePushPort {
     return intent.kind === "schedule" ? "scheduled" : "enabled";
   }
 
-  #enqueue(
-    operation: () => Promise<BackgroundPushState>
+  async #sendRevoke(
+    intent: Extract<PendingPushIntent, { kind: "revoke" }>
   ): Promise<BackgroundPushState> {
+    if (!intent.remoteRevoked) {
+      const credentials = await this.#deps.state.readCredentials();
+      if (credentials !== null) {
+        let response: Response;
+        try {
+          response = await this.#deps.fetch(
+            `${this.#apiBase}/push-subscription`,
+            authenticatedRequest("DELETE", credentials)
+          );
+        } catch {
+          return "pending-sync";
+        }
+        if (!response.ok)
+          return retryable(response) ? "pending-sync" : "schedule-error";
+        await this.#deps.state.replacePendingIntent({
+          ...intent,
+          remoteRevoked: true
+        });
+      }
+    }
+
+    try {
+      const registration = await this.#deps.getRegistration();
+      const subscription = await registration?.pushManager.getSubscription();
+      if (subscription !== null && subscription !== undefined) {
+        const unsubscribed = await subscription.unsubscribe();
+        if (!unsubscribed) return "schedule-error";
+      }
+    } catch {
+      return "schedule-error";
+    }
+    await this.#deps.state.clearCredentials();
+    await this.#deps.state.clearPendingIntent(intent.operationId);
+    return "permission-required";
+  }
+
+  #enqueue<Result>(operation: () => Promise<Result>): Promise<Result> {
     const result = this.#transport.then(operation, operation);
     this.#transport = result.then(
       () => undefined,
