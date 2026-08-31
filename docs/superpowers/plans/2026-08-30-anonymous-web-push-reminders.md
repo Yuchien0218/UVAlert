@@ -41,7 +41,8 @@
 | `apps/web/src/features/notification/createNotificationController.ts`       | 協調本機通知與遠端單次排程                                     |
 | `apps/web/public/sw.js`                                                    | 接收 push event、顯示固定通知、點擊開啟首頁                    |
 | `apps/web/src/pages/settings/NotificationSettingsPage.vue`                 | 背景推播狀態、啟用／停用／重試；移除重複頻率選項               |
-| `supabase/migrations/20260830000200_anonymous_push_foundation.sql`         | tables、RLS、grants、rate limit、claim、settle、cleanup、Cron  |
+| `supabase/migrations/20260830000200_anonymous_push_foundation.sql`         | tables、RLS、grants、rate limit、claim、settle、cleanup       |
+| `supabase/migrations/20260830000400_push_dispatch.sql`                    | endpoint/key ownership、claim renewal、Cron 與 cleanup jobs   |
 | `supabase/tests/anonymous_push.sql`                                        | pgTAP 驗證 schema、安全、claim 與清理                          |
 | `supabase/functions/_shared/push-auth.ts`                                  | device credential HMAC、固定時間比較、dispatcher auth          |
 | `supabase/functions/_shared/push-contracts.ts`                             | request parsing、大小與時間範圍 validation、受控錯誤碼         |
@@ -488,7 +489,7 @@ git commit -m "feat(push): schedule one anonymous reminder"
 - Create: `supabase/functions/push-dispatch/handler.ts`
 - Create: `supabase/functions/push-dispatch/index.ts`
 - Create: `supabase/functions/push-dispatch/index.test.ts`
-- Modify: `supabase/migrations/20260830000200_anonymous_push_foundation.sql`
+- Create: `supabase/migrations/20260830000400_push_dispatch.sql`
 - Modify: `supabase/tests/anonymous_push.sql`
 - Modify: `supabase/config.toml`
 
@@ -525,7 +526,7 @@ export function createPushDispatcher(
 - Payload is exactly `JSON.stringify({ type: "reminder-due" })`.
 - Web Push options: `TTL: 600`, `urgency: "high"`, `topic: "uvalert-reminder-due"`.
 
-- [ ] **Step 1: Prove pinned dependency loads in the local Edge Runtime**
+- [x] **Step 1: Prove pinned dependency loads in the local Edge Runtime**
 
 Run:
 
@@ -535,15 +536,15 @@ supabase functions serve push-dispatch --no-verify-jwt
 
 Expected: function bundle starts without missing Node built-ins or unsupported runtime APIs. If it fails, leave this Step and Task unchecked, record the exact compatibility error, and stop before implementing against an unverified sender dependency.
 
-- [ ] **Step 2: Write failing sender tests**
+- [x] **Step 2: Write failing sender tests**
 
 Inject the library call and assert the wrapper passes only the stored endpoint/keys, fixed payload, TTL, urgency, topic and VAPID details. Map resolved responses to `sent`; map thrown errors with `statusCode` 404/410, 429/5xx and other 4xx to the exact union above. Error messages must not include endpoint or keys.
 
-- [ ] **Step 3: Write failing dispatcher tests**
+- [x] **Step 3: Write failing dispatcher tests**
 
 Cover invalid dispatcher secret 401, missing server secrets 500, empty batch 200, success settlement, gone cleanup, transient retry, third failure terminal state, ten-minute expiry, one-row failure isolation, and max batch 100.
 
-- [ ] **Step 4: Run tests and verify RED**
+- [x] **Step 4: Run tests and verify RED**
 
 ```powershell
 & '.\node_modules\.bin\vitest.CMD' run supabase/functions/push-dispatch/pushSender.test.ts supabase/functions/push-dispatch/index.test.ts
@@ -551,15 +552,15 @@ Cover invalid dispatcher secret 401, missing server secrets 500, empty batch 200
 
 Expected: FAIL because sender and dispatcher do not exist.
 
-- [ ] **Step 5: Implement the pinned Web Push adapter**
+- [x] **Step 5: Implement the pinned Web Push adapter**
 
 Use `VAPID_SUBJECT`, `VAPID_PUBLIC_KEY`, `VAPID_PRIVATE_KEY`. Validate subject begins with `mailto:` or `https://` and is not an `https://localhost` subject. Do not call global `setVapidDetails`; pass details per send so tests and concurrent invocations remain isolated.
 
-- [ ] **Step 6: Implement dispatcher authentication and orchestration**
+- [x] **Step 6: Implement dispatcher authentication and orchestration**
 
 Require `X-Dispatch-Secret` and compare its digest in fixed time against `PUSH_DISPATCH_SECRET`. Claim with `p_limit=100`, `p_lease='2 minutes'`. Settle each row with its claim token. Use attempt count and the fixed 1／3 minute backoff; cap retry time at `due_at + 10 minutes`.
 
-- [ ] **Step 7: Add Cron and cleanup jobs**
+- [x] **Step 7: Add Cron and cleanup jobs**
 
 Enable `pg_cron` and `pg_net`. Migration creates:
 
@@ -568,7 +569,7 @@ Enable `pg_cron` and `pg_net`. Migration creates:
 
 Use stable job names so rerunning the migration replaces rather than duplicates jobs. Do not embed real URL or secret values in SQL.
 
-- [ ] **Step 8: Configure dispatcher Function explicitly**
+- [x] **Step 8: Configure dispatcher Function explicitly**
 
 ```toml
 [functions.push-dispatch]
@@ -577,7 +578,7 @@ verify_jwt = false
 
 The custom dispatch secret remains mandatory; `verify_jwt=false` does not make the handler anonymously executable.
 
-- [ ] **Step 9: Run Edge and database verification**
+- [x] **Step 9: Run Edge and database verification**
 
 ```powershell
 & '.\node_modules\.bin\vitest.CMD' run supabase/functions/push-dispatch/pushSender.test.ts supabase/functions/push-dispatch/index.test.ts
@@ -587,14 +588,14 @@ supabase test db
 
 Expected: all selected tests PASS; local Cron rows exist once each; no real secret appears in migration or logs.
 
-- [ ] **Step 10: Independent review gate**
+- [x] **Step 10: Independent review gate**
 
 Reviewer checks package pinning, Edge Runtime compatibility evidence, dispatch auth, secret redaction, claim-token settlement, retry math, 404/410 deletion and Cron uniqueness.
 
 - [ ] **Step 11: Commit Task 5**
 
 ```powershell
-git add -- supabase/functions/push-dispatch/deno.json supabase/functions/push-dispatch/pushSender.ts supabase/functions/push-dispatch/pushSender.test.ts supabase/functions/push-dispatch/handler.ts supabase/functions/push-dispatch/index.ts supabase/functions/push-dispatch/index.test.ts supabase/migrations/20260830000200_anonymous_push_foundation.sql supabase/tests/anonymous_push.sql supabase/config.toml
+git add -- supabase/functions/push-dispatch/deno.json supabase/functions/push-dispatch/pushSender.ts supabase/functions/push-dispatch/pushSender.test.ts supabase/functions/push-dispatch/handler.ts supabase/functions/push-dispatch/index.ts supabase/functions/push-dispatch/index.test.ts supabase/migrations/20260830000400_push_dispatch.sql supabase/tests/anonymous_push.sql supabase/config.toml
 git diff --cached --check
 git commit -m "feat(push): dispatch due reminders"
 ```
