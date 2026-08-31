@@ -111,9 +111,14 @@
    */
   --color-saved: var(--color-mauve);
   --color-saved-soft: color-mix(in srgb, var(--color-mauve) 12%, #faf5ec);
-  --color-uvi-low: #507aa8;
-  --color-uvi-moderate: #bd8500;
-  --color-uvi-high: #d16627;
+  /*
+   * 低／中／高三級在 2026-08-31 壓暗（色相不動），讓風險色同時能當畫布上的
+   * 文字與白字的底色，兩種用法都過 WCAG AA 4.5:1。理由與代價見 DESIGN.md
+   * 第二節「UV 五級風險色」；對比度由 uvRiskContrast.test.ts 守著。
+   */
+  --color-uvi-low: #4b739e;
+  --color-uvi-moderate: #946800;
+  --color-uvi-high: #b25721;
   --color-uvi-very-high: #c43d3d;
   --color-uvi-extreme: #7d4bb3;
 

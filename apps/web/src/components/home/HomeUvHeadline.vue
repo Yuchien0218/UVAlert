@@ -96,80 +96,42 @@ const locationLine = computed(() => {
 /*
  * 2026-08-31：UV 讀數與等級套上風險色（使用者要求）。
  *
- * **兩者用不同的手法，因為對比度門檻不同。**
+ * 讀數是 48–60px 的大字（WCAG 大字門檻 3:1），等級標籤是 20px 的一般
+ * 字級（門檻 4.5:1）——**兩者都直接上色**。
  *
- * 讀數是 48–60px 的大字，適用 WCAG 大字門檻 3:1，直接上色即可。
- *
- * 等級標籤是一般字級，門檻 4.5:1——而 UV 五色在暖象牙底上全部過不了
- * （low 4.12、moderate 2.97、high 3.43、very-high 4.74、extreme 5.48，
- * 只有後兩個及格）。所以標籤改成**淡色底＋深咖文字**的藥丸：顏色仍然
- * 讀得到，文字對比卻回到 9:1 以上。
- *
- * 淡色底用 color-mix 現算，跟 --color-untimed-soft 同一個做法，不另外
- * 為五個等級各造一個 token。
- *
- * **已知落差**：moderate 對畫布是 2.97，離大字門檻 3:1 差 0.03。它是
- * 既有色票、不是這次引入的，也同時影響五日卡的白字徽章（3.06）。要真的
- * 修就是調 DESIGN.md 的色票，那是另一個裁決，已記進待辦。
+ * 這一版標籤原本是「淡色底＋深咖文字」的藥丸，為的是繞過對比度：當時
+ * UV 五色在暖象牙底上有三個過不了 4.5:1。色票在同一天壓暗之後五級全部
+ * 及格（見 DESIGN.md 第二節與 packages/ui/src/uvRiskContrast.test.ts），
+ * 繞道就沒必要了，讀數與標籤回到同一種表現方式。
  */
 .uv-headline__level {
-  padding: var(--space-1) var(--space-3);
-  border-radius: var(--radius-pill);
-  color: var(--text-primary);
   font-size: var(--font-size-section-title);
   font-weight: 500;
 }
 
-.uv-headline__value--low .uv-headline__figure {
+.uv-headline__value--low .uv-headline__figure,
+.uv-headline__value--low .uv-headline__level {
   color: var(--color-uvi-low);
 }
 
-.uv-headline__value--low .uv-headline__level {
-  background: color-mix(in srgb, var(--color-uvi-low) 18%, var(--color-canvas));
-}
-
-.uv-headline__value--moderate .uv-headline__figure {
+.uv-headline__value--moderate .uv-headline__figure,
+.uv-headline__value--moderate .uv-headline__level {
   color: var(--color-uvi-moderate);
 }
 
-.uv-headline__value--moderate .uv-headline__level {
-  background: color-mix(
-    in srgb,
-    var(--color-uvi-moderate) 18%,
-    var(--color-canvas)
-  );
-}
-
-.uv-headline__value--high .uv-headline__figure {
+.uv-headline__value--high .uv-headline__figure,
+.uv-headline__value--high .uv-headline__level {
   color: var(--color-uvi-high);
 }
 
-.uv-headline__value--high .uv-headline__level {
-  background: color-mix(in srgb, var(--color-uvi-high) 18%, var(--color-canvas));
-}
-
-.uv-headline__value--very_high .uv-headline__figure {
+.uv-headline__value--very_high .uv-headline__figure,
+.uv-headline__value--very_high .uv-headline__level {
   color: var(--color-uvi-very-high);
 }
 
-.uv-headline__value--very_high .uv-headline__level {
-  background: color-mix(
-    in srgb,
-    var(--color-uvi-very-high) 18%,
-    var(--color-canvas)
-  );
-}
-
-.uv-headline__value--extreme .uv-headline__figure {
-  color: var(--color-uvi-extreme);
-}
-
+.uv-headline__value--extreme .uv-headline__figure,
 .uv-headline__value--extreme .uv-headline__level {
-  background: color-mix(
-    in srgb,
-    var(--color-uvi-extreme) 18%,
-    var(--color-canvas)
-  );
+  color: var(--color-uvi-extreme);
 }
 
 /*
