@@ -53,7 +53,8 @@
 | 15 | ~~裝備詳情 `dt` 直排跑版~~ ✅ 已完成：那一列改上下堆疊 ＋ `dt` 加 `flex: 0 0 auto` | §10 |
 | 16 | ~~/setup 儲存失敗~~ ✅ 已補診斷（PR #53）：console.error 留原始例外，草稿遺失與其他失敗分開文案 | §10 |
 | 17 | `reminderPresentation.ts` 的 `PRODUCT_IDENTITY_UNKNOWN` 文案與保守倒數規則矛盾（目前不會顯示） | §3 |
-| 18 | 殘留 worktree `.worktrees/codex-supabase-uv-forecast` | §9 |
+| 18 | **icon-512.png 與 icon-512-maskable.png 是同一個檔**（MD5 相同）——maskable 沒有安全邊界，圓形 launcher 會裁到標記 | §5.2 |
+| 19 | 殘留 worktree `.worktrees/codex-supabase-uv-forecast` | §9 |
 
 ---
 
@@ -206,6 +207,32 @@
 | ---- | ---- |
 | `favicon.svg` | ✅ 已改：`scale(1.25)` ＋ 往右 1.5px 做視覺置中。填充率 53% → **66.4%**，瀏覽器實測中心 (33.5, 32.01)、上下留白各 12.66 |
 | `favicon.ico`／`apple-touch-icon.png`／`icon-192`／`icon-512`／`icon-512-maskable` | ❌ **做不到**：點陣檔，這個 repo 沒有 sharp／resvg／puppeteer 之類的 rasteriser |
+
+### 重新匯出時要交出哪些檔案（2026-08-31 查證）
+
+**兩種格式都要，不是二選一。**
+
+| 檔案 | 格式 | 尺寸 | 誰在用 |
+| ---- | ---- | ---- | ------ |
+| `favicon.svg` | **SVG** | viewBox 64×64 | 現代瀏覽器的分頁圖示（`index.html` 的 `rel="icon" type="image/svg+xml"`）。**已於 2026-08-31 更新**，重畫時沿用同一個 viewBox |
+| `favicon.ico` | **ICO** | 內含 32×32 | 舊瀏覽器的後備（`rel="icon" sizes="32x32"`）。不能用 PNG 副檔名替代，那條 link 指名 `.ico` |
+| `apple-touch-icon.png` | **PNG** | 180×180 | iOS 主畫面。**iOS 不讀 manifest 也不吃 SVG**，只認這一個檔 |
+| `icon-192.png` | **PNG** | 192×192 | manifest，`purpose: any` |
+| `icon-512.png` | **PNG** | 512×512 | manifest，`purpose: any` |
+| `icon-512-maskable.png` | **PNG** | 512×512 | manifest，`purpose: maskable` |
+
+manifest 明寫 `"type": "image/png"`，所以那四個**必須是 PNG**，換成 SVG 會被忽略。
+
+#### ⚠️ 目前 `icon-512.png` 與 `icon-512-maskable.png` 是同一個檔
+
+2026-08-31 實測兩者的 MD5 完全相同（`d91b8c26…`）。**maskable 沒有自己的安全邊界。**
+
+maskable 的用途是讓 Android 依各家 launcher 的形狀（圓形、圓角方形、水滴）自行裁切，所以規範要求**重要內容全部落在畫布正中央、直徑 80% 的圓內**——等於四邊各留至少 10% 的餘裕。兩個檔案一樣就表示 `any` 那版的構圖被直接當成 maskable 用，在圓形 launcher 上邊緣會被切掉。
+
+所以重新匯出時，**512 要出兩個不同的檔**：
+
+- `icon-512.png`：構圖可以貼滿一點（`any` 不會被裁）
+- `icon-512-maskable.png`：同一個標記再縮小一級，確保落在中央 80% 圓內
 
 要完成 PNG 的部分，需要**其中一條**：
 
