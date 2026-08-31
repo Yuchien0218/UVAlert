@@ -28,7 +28,7 @@ onMounted(() => {
       <h1 class="page-heading__title" data-typography-role="page-title">
         五日 UV 預報
       </h1>
-      <p class="page-heading__body">依你設定的地區顯示未來五天的紫外線指數。</p>
+      <p class="page-heading__body">依你設定的地區顯示。</p>
     </header>
 
     <FiveDayUvCard
@@ -55,9 +55,19 @@ onMounted(() => {
       這段不可省略。資料是地區預報不是即時測站觀測，而且 UV 高低不會改變
       補擦間隔——那是由產品標示決定的。使用者很容易把「今天 UV 低」推論成
       「可以晚一點補」，這裡先擋住那個誤解（copy-audit.md 的既有寫法）。
+
+      2026-08-31 補上「每一格是當日最高值」與那個例外。查證 cwa.ts：對同一
+      日的多個時段取 max（candidate.uvi > existing.uvi），所以確實是最高值；
+      但它同時跳過已經結束的時段（validTo <= now 就 continue），**所以今天
+      那一格是「剩餘時段的最高」，下午打開時可能比上午實際發生過的值低**。
+      不寫出這個例外，這句話對今天那一格就是錯的。
+
+      同一段先前在 FiveDayUvCard 裡還有一份幾乎一樣的，已經移除——使用者
+      回饋「重複性文字太多」。
     -->
     <p class="safety-note">
-      這是地區預報，不是即時測站觀測；UV 高低不會延長或縮短你的補擦計時。
+      每一格是當日預測的最高值（今天只算剩餘時段），不是即時測站觀測；UV
+      高低不會延長或縮短你的補擦計時。
     </p>
   </div>
 </template>
