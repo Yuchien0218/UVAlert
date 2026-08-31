@@ -108,7 +108,15 @@ const uvLabel = computed(() =>
   justify-content: space-between;
   gap: var(--space-4);
   padding: 0 clamp(1rem, 4vw, 2.25rem);
-  border-bottom: 1px solid var(--border-subtle);
+  /*
+   * 2026-08-31：拿掉底部的分隔線（使用者要求）。
+   *
+   * 頁首與內容是同一片暖象牙，沒有色差要交代；那條線唯一的作用是宣告
+   * 「這裡有個邊界」，但邊界本來就靠 Logo 與 4.5rem 的留白讀得出來。
+   * 少一條線之後整頁只剩底部導覽那一條分隔線，層次更乾淨。
+   *
+   * 這是全域頁首，所以每一頁都會少掉這條線——那是刻意的，不是只有提醒頁。
+   */
 }
 
 .brand-header__brand {

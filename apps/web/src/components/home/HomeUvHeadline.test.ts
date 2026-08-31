@@ -40,45 +40,56 @@ describe("HomeUvHeadline 風險色", () => {
     expect(wrapper.text()).not.toContain("0");
   });
 
-  /*
-   * **等級標籤不能直接用 UV 色當文字色。**
+  /**
+   * 抓「這個等級的這個元素」實際拿到的宣告。
    *
-   * UV 五色在暖象牙底上的對比：low 4.12、moderate 2.97、high 3.43、
-   * very-high 4.74、extreme 5.48——一般字級要 4.5:1，只有後兩個及格。
-   * 所以標籤走「淡色底 ＋ 深咖文字」，讀數（大字，門檻 3:1）才直接上色。
-   *
-   * 這條守的是那個區分不被「順手統一」掉。
+   * 兩個元素現在共用同一條規則（選擇器逗號並列），所以只比對整段規則
+   * 文字會讓讀數與標籤互相掩護——拿掉任何一邊都還是綠的。因此逐一確認
+   * **各自**出現在選擇器清單裡。
    */
-  it("等級標籤用淡色底而不是彩色文字", () => {
-    for (const level of ["low", "moderate", "high", "very_high", "extreme"]) {
-      const rule = source.match(
-        new RegExp(
-          `\\.uv-headline__value--${level} \\.uv-headline__level \\{([^}]*)\\}`
-        )
-      );
-      expect(rule, level).not.toBeNull();
-      expect(rule![1], level).toContain("color-mix");
-      expect(rule![1], `${level} 不該自己指定文字色`).not.toMatch(
-        /(^|\s)color:/
-      );
+  function declaredColor(level: string, element: string): string | null {
+    const selector = `.uv-headline__value--${level} .uv-headline__${element}`;
+    for (const match of source.matchAll(/([^{}]+){([^}]*)}/g)) {
+      const selectors = match[1]!.split(",").map((part) => part.trim());
+      if (selectors.includes(selector)) return match[2]!;
     }
-  });
+    return null;
+  }
 
-  it("讀數直接上色", () => {
-    for (const [level, token] of [
+  /*
+   * 2026-08-31：讀數與等級標籤都直接上 UV 風險色。
+   *
+   * 這條之前是反過來的——標籤必須用 color-mix 的淡色底，因為 UV 五色在
+   * 暖象牙底上有三個過不了一般字級的 4.5:1。同日色票壓暗後五級全部及格
+   * （對比度由 packages/ui/src/uvRiskContrast.test.ts 守著），繞道的理由
+   * 消失，兩者統一。
+   *
+   * 讀數與標籤分成兩條測試，不合併：合併的話少上色任何一邊都會被另一邊
+   * 掩護。
+   */
+  const LEVEL_TOKENS = [
       ["low", "--color-uvi-low"],
       ["moderate", "--color-uvi-moderate"],
       ["high", "--color-uvi-high"],
       ["very_high", "--color-uvi-very-high"],
       ["extreme", "--color-uvi-extreme"]
-    ]) {
-      const rule = source.match(
-        new RegExp(
-          `\\.uv-headline__value--${level} \\.uv-headline__figure \\{([^}]*)\\}`
-        )
+  ] as const;
+
+  it("讀數直接上風險色", () => {
+    for (const [level, token] of LEVEL_TOKENS) {
+      expect(declaredColor(level, "figure"), level).toContain(
+        `color: var(${token});`
       );
-      expect(rule, level).not.toBeNull();
-      expect(rule![1], level).toContain(`color: var(${token})`);
+    }
+  });
+
+  it("等級標籤直接上風險色，不再用 color-mix 淡色底繞道", () => {
+    for (const [level, token] of LEVEL_TOKENS) {
+      const declarations = declaredColor(level, "level");
+      expect(declarations, level).toContain(`color: var(${token});`);
+      expect(declarations, `${level} 不該還留著淡色底`).not.toContain(
+        "color-mix"
+      );
     }
   });
 });
