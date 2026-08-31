@@ -122,3 +122,52 @@ export type RegionSelection = z.infer<typeof RegionSelectionSchema>;
 export type RegionPreferenceV1 = z.infer<typeof RegionPreferenceV1Schema>;
 export type DaytimeUvForecast = z.infer<typeof DaytimeUvForecastSchema>;
 export type FiveDayUvForecast = z.infer<typeof FiveDayUvForecastSchema>;
+
+/**
+ * 全臺各縣市「今日」的 UV，供 `/forecast` 的分布地圖使用。
+ *
+ * **與五日預報共用同一次上游抓取。** edge function 的 `fetchCwaDataset()`
+ * 本來就抓整份 F-D0047-091（沒有地點參數），22 個縣市的值一直都在同一個
+ * 回應裡；`scope=nationwide` 只是不把它們濾掉。所以這個端點**不增加 CWA
+ * 的用量**。
+ *
+ * **「今日」的定義與五日卡完全一致**：同一天有多個 12 小時時段時取最大值，
+ * 而且跳過已經結束的時段——下午打開時，今天的數字是「剩餘時段的最高」。
+ * 這件事必須在畫面上講出來，不要在這裡另立第二套規則。
+ */
+export const NationwideUvCountySchema = z.object({
+  /** 五碼縣市代碼，與 `region-index.generated.json` 的 `countyCode` 同一組。 */
+  countyCode: z.string().regex(/^\d{5}$/u),
+  displayName: z.string().trim().min(1).max(60),
+  uvi: z.number().int().nonnegative().max(20),
+  riskLevel: UvRiskLevelSchema
+});
+
+export const NationwideUvForecastSchema = z
+  .object({
+    schemaVersion: z.literal("nationwide-uv-v1"),
+    sourceKind: z.literal("forecast"),
+    sourceDataset: z.literal("F-D0047-091"),
+    sourceDisplayName: z.string().trim().min(1).max(120),
+    issuedAt: UtcInstantSchema,
+    fetchedAt: UtcInstantSchema,
+    usableUntil: UtcInstantSchema,
+    localDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/u),
+    counties: z.array(NationwideUvCountySchema).min(1).max(30)
+  })
+  .superRefine((value, context) => {
+    const seen = new Set<string>();
+    value.counties.forEach((county, index) => {
+      if (seen.has(county.countyCode)) {
+        context.addIssue({
+          code: "custom",
+          path: ["counties", index, "countyCode"],
+          message: "同一個縣市不得重複"
+        });
+      }
+      seen.add(county.countyCode);
+    });
+  });
+
+export type NationwideUvCounty = z.infer<typeof NationwideUvCountySchema>;
+export type NationwideUvForecast = z.infer<typeof NationwideUvForecastSchema>;

@@ -1,6 +1,8 @@
 import {
   FiveDayUvForecastSchema,
-  type FiveDayUvForecast
+  NationwideUvForecastSchema,
+  type FiveDayUvForecast,
+  type NationwideUvForecast
 } from "@sunshield/contracts";
 import type { UvForecastApiPort } from "@sunshield/platform";
 import { readConfiguredEnvironmentValue } from "./configuredEnvironment";
@@ -55,5 +57,25 @@ export class BrowserUvForecastClient implements UvForecastApiPort {
     }
 
     return FiveDayUvForecastSchema.parse(await response.json());
+  }
+
+  /**
+   * 全臺各縣市今日的 UV。
+   *
+   * 走同一個端點的 scope=nationwide，因為它與五日預報共用同一次上游抓取
+   * ——分成兩個 function 會變成抓兩次同一份資料集。
+   */
+  async getNationwideForecast(): Promise<NationwideUvForecast> {
+    const response = await this.#fetch(`${this.#endpoint}?scope=nationwide`, {
+      method: "GET",
+      headers: { Accept: "application/json" },
+      cache: "no-store"
+    });
+
+    if (!response.ok) {
+      throw new Error(`UV_NATIONWIDE_HTTP_${response.status}`);
+    }
+
+    return NationwideUvForecastSchema.parse(await response.json());
   }
 }

@@ -453,3 +453,199 @@ function asArray(value: unknown, field: string): unknown[] {
 function isObject(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
 }
+
+/**
+ * 全臺各縣市「今日」的 UV 值，供 /forecast 的分布地圖使用。
+ *
+ * **不會增加 CWA 的用量。** `fetchCwaDataset()` 本來就抓整份 F-D0047-091
+ * （沒有地點參數，靠 ETag 快取），22 個縣市的值一直都在同一個回應裡，只是
+ * `mapCwaForecast()` 濾掉了其餘的。這個函式只是把它們留下來。
+ *
+ * **「今日」的定義與五日卡完全一致**：同一天有多個 12 小時時段時取最大值，
+ * 而且**跳過已經結束的時段**——所以下午打開時，今天的數字是「剩餘時段的
+ * 最高」。這件事必須在 UI 上講出來（ForecastPage 的免責已經寫了），這裡
+ * 沿用同一條規則，不另立第二套。
+ */
+export type UvNationwidePayload = {
+  schemaVersion: "nationwide-uv-v1";
+  sourceKind: "forecast";
+  sourceDataset: typeof CWA_DATASET;
+  sourceDisplayName: string;
+  issuedAt: string;
+  fetchedAt: string;
+  usableUntil: string;
+  localDate: string;
+  counties: Array<{
+    countyCode: string;
+    displayName: string;
+    uvi: number;
+    riskLevel: "low" | "moderate" | "high" | "very_high" | "extreme";
+  }>;
+};
+
+/**
+ * 全臺灣的快取鍵。
+ *
+ * 用全 0 是刻意的：`parseRegionCode()` 明文拒絕 `/^0{8}$/`，所以這個鍵
+ * **永遠不可能**跟任何真實行政區碰撞，也不可能被一般查詢路徑產生出來。
+ */
+export const NATIONWIDE_CACHE_KEY = "00000000";
+
+export function mapCwaNationwideForecast(
+  input: unknown,
+  options: { fetchedAt: string; now?: string; usableUntil?: string }
+): UvNationwidePayload {
+  const fetchedAt = normalizeInstant(options.fetchedAt, "fetchedAt");
+  const now = normalizeInstant(options.now ?? fetchedAt, "now");
+  const root = asObject(input, "CWA response");
+  const records = asObject(root.records, "CWA records");
+  const locations = asArray(
+    records.Locations ?? records.locations,
+    "CWA locations"
+  );
+  const container =
+    locations[0] === undefined
+      ? null
+      : asObject(locations[0], "CWA locations[0]");
+  const rawLocations =
+    container === null
+      ? []
+      : asArray(container.Location ?? container.location, "CWA location");
+
+  const counties: UvNationwidePayload["counties"] = [];
+  let earliestDate: string | null = null;
+
+  for (const raw of rawLocations) {
+    const item = asObject(raw, "CWA location item");
+    const geocode = String(item.Geocode ?? item.geocode ?? "");
+    // 縣市層級的 Geocode 以 000 結尾；鄉鎮那些在這張圖上沒有落點。
+    if (!/^\d{5}000$/.test(geocode)) continue;
+
+    const displayName = readString(item.LocationName ?? item.locationName);
+    if (displayName === null) continue;
+
+    const elements = asArray(
+      item.WeatherElement ?? item.weatherElement,
+      "CWA weatherElement"
+    ).map((element) => asObject(element, "CWA weatherElement item"));
+    const uvElement = elements.find((element) =>
+      ["紫外線指數", "UVIndex", "uvIndex"].includes(
+        String(element.ElementName ?? element.elementName ?? "")
+      )
+    );
+    if (uvElement === undefined) continue;
+
+    let best: { localDate: string; uvi: number } | null = null;
+    for (const rawTime of asArray(
+      uvElement.Time ?? uvElement.time,
+      "CWA UV times"
+    )) {
+      const time = asObject(rawTime, "CWA UV time");
+      const startSource = readString(time.StartTime ?? time.startTime);
+      const endSource = readString(time.EndTime ?? time.endTime);
+      if (startSource === null || endSource === null) continue;
+      // 與五日卡同一條規則：已經結束的時段不算。
+      if (Date.parse(normalizeInstant(endSource, "endTime")) <= Date.parse(now))
+        continue;
+      const uvi = parseUvi(
+        readElementValue(time, ["UVIndex", "uvIndex", "value", "Value"])
+      );
+      if (uvi === null) continue;
+      const localDate = startSource.slice(0, 10);
+      if (!/^\d{4}-\d{2}-\d{2}$/.test(localDate)) continue;
+      // 只要最早那一天（＝今日或今日剩餘時段）的最大值。
+      if (best === null || localDate < best.localDate) {
+        best = { localDate, uvi };
+      } else if (localDate === best.localDate && uvi > best.uvi) {
+        best = { localDate, uvi };
+      }
+    }
+    if (best === null) continue;
+
+    if (earliestDate === null || best.localDate < earliestDate) {
+      earliestDate = best.localDate;
+    }
+    counties.push({
+      countyCode: geocode.slice(0, 5),
+      displayName,
+      uvi: best.uvi,
+      riskLevel: riskLevelFor(best.uvi)
+    });
+  }
+
+  if (counties.length === 0 || earliestDate === null) {
+    throw new CwaMappingError("UV_DATA_MISSING", "CWA 回應沒有任何縣市的 UV");
+  }
+
+  const datasetInfo = asObject(
+    records.datasetInfo ?? records.DatasetInfo ?? {},
+    "CWA datasetInfo"
+  );
+  const issuedAtSource = readString(
+    datasetInfo.IssueTime ??
+      datasetInfo.issueTime ??
+      datasetInfo.Update ??
+      datasetInfo.update
+  );
+  const usableUntil = normalizeInstant(
+    options.usableUntil ??
+      new Date(Date.parse(fetchedAt) + DEFAULT_CACHE_TTL_MS).toISOString(),
+    "usableUntil"
+  );
+  if (Date.parse(usableUntil) <= Date.parse(fetchedAt)) {
+    throw new CwaMappingError("INVALID_TIME");
+  }
+
+  return {
+    schemaVersion: "nationwide-uv-v1",
+    sourceKind: "forecast",
+    sourceDataset: CWA_DATASET,
+    sourceDisplayName: "中央氣象署區域預報",
+    issuedAt:
+      issuedAtSource === null
+        ? fetchedAt
+        : normalizeInstant(issuedAtSource, "issuedAt"),
+    fetchedAt,
+    usableUntil,
+    localDate: earliestDate,
+    counties: counties.sort((left, right) =>
+      left.countyCode.localeCompare(right.countyCode)
+    )
+  };
+}
+
+/** 快取回來的全臺 payload 的最小驗證，形狀對不上就當作沒有快取。 */
+export function parseCachedNationwide(input: unknown): UvNationwidePayload {
+  const value = asObject(input, "cached nationwide forecast");
+  if (value.schemaVersion !== "nationwide-uv-v1") {
+    throw new CwaMappingError("INVALID_RESPONSE", "快取的全臺預報版本不符");
+  }
+  const counties = asArray(value.counties, "cached counties").map((raw) => {
+    const county = asObject(raw, "cached county");
+    const countyCode = readString(county.countyCode);
+    const displayName = readString(county.displayName);
+    const uvi = parseUvi(county.uvi);
+    if (countyCode === null || displayName === null || uvi === null) {
+      throw new CwaMappingError("INVALID_RESPONSE", "快取的縣市資料不完整");
+    }
+    return { countyCode, displayName, uvi, riskLevel: riskLevelFor(uvi) };
+  });
+  if (counties.length === 0) {
+    throw new CwaMappingError("UV_DATA_MISSING", "快取沒有任何縣市");
+  }
+  const localDate = readString(value.localDate);
+  if (localDate === null) {
+    throw new CwaMappingError("INVALID_TIME", "快取缺少日期");
+  }
+  return {
+    schemaVersion: "nationwide-uv-v1",
+    sourceKind: "forecast",
+    sourceDataset: CWA_DATASET,
+    sourceDisplayName: "中央氣象署區域預報",
+    issuedAt: normalizeInstant(value.issuedAt, "issuedAt"),
+    fetchedAt: normalizeInstant(value.fetchedAt, "fetchedAt"),
+    usableUntil: normalizeInstant(value.usableUntil, "usableUntil"),
+    localDate,
+    counties
+  };
+}
