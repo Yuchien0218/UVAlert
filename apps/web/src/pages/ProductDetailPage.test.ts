@@ -1,4 +1,5 @@
 // @vitest-environment happy-dom
+import { readFileSync } from "node:fs";
 
 import type { ProductCatalogRecordV1 } from "@sunshield/contracts";
 import { flushPromises, mount } from "@vue/test-utils";
@@ -129,6 +130,37 @@ describe("ProductDetailPage", () => {
     expect(wrapper.text()).not.toContain("PAPA");
     expect(wrapper.text()).toContain("2028-05-01");
     expect(wrapper.text()).toContain("清爽好推");
+  });
+
+  /**
+   * 2026-08-31：`dt` 被壓成一行一個字的回歸守門。
+   *
+   * `.spec-row` 是 flex ＋ space-between，`dt` 原本沒有 `flex-shrink: 0`，
+   * `dd` 的文字一長就把 `dt` 壓到最小內容寬度——使用者實際看到「補擦提醒」
+   * 四個字直排。
+   *
+   * 兩件事分開守：**那一列改成上下堆疊**（它的 `dd` 是一整句話），以及
+   * **`dt` 一律不得被壓縮**（防止其他列在內容變長時重蹈覆轍）。合成一條的
+   * 話，拿掉任一個修法都還是綠的。
+   */
+  it("補擦提醒那一列上下堆疊，不與長句並排", async () => {
+    const { wrapper } = await mountDetail(makeProduct());
+
+    const row = wrapper
+      .findAll(".spec-row")
+      .find((candidate) => candidate.text().includes("補擦提醒"));
+
+    expect(row).toBeDefined();
+    expect(row?.classes()).toContain("spec-row--full");
+  });
+
+  it("dt 宣告了 flex: 0 0 auto，不會被長內容壓縮", () => {
+    const source = readFileSync(
+      "apps/web/src/pages/ProductDetailPage.vue",
+      "utf8"
+    ).replace(/\/\*[\s\S]*?\*\//g, "");
+
+    expect(source).toMatch(/\.spec-row dt \{[^}]*flex: 0 0 auto;/);
   });
 
   /**
