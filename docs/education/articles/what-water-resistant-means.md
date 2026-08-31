@@ -44,5 +44,3 @@ lastReviewed: 2026-08-16
 - [FDA：Sunscreen: How to Help Protect Your Skin from the Sun](https://www.fda.gov/drugs/understanding-over-counter-medicines/sunscreen-how-help-protect-your-skin-sun)（抗水不是防水、依標籤補擦；查閱 2026-08-16）
 - [FDA：Labeling and Effectiveness Testing: Sunscreen Drug Products](https://www.fda.gov/regulatory-information/search-fda-guidance-documents/labeling-and-effectiveness-testing-sunscreen-drug-products-over-counter-human-use-small-entity)（40／80 分鐘測試與標示脈絡；查閱 2026-08-16）
 - [AAD：How to decode a sunscreen label](https://www.aad.org/public/everyday-care/sun-protection/shade-clothing-sunscreen/understand-sunscreen-labels)（抗水標示與事件後補擦；查閱 2026-08-16）
-
-本文為一般衛教草稿，尚未完成 UVAlert 專業審閱。

@@ -33,5 +33,3 @@ lastReviewed: 2026-08-16
 
 - [AAD：How to decode a sunscreen label](https://www.aad.org/public/everyday-care/sun-protection/shade-clothing-sunscreen/understand-sunscreen-labels)（氧化鐵、潤色防曬與太陽可見光；查閱 2026-08-16）
 - [WHO：Ultraviolet radiation](https://www.who.int/news-room/fact-sheets/detail/ultraviolet-radiation)（紫外線範圍與健康影響；查閱 2026-08-16）
-
-本文為一般衛教草稿，尚未完成 UVAlert 專業審閱。

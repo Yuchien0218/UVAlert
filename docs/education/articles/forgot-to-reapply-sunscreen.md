@@ -39,5 +39,3 @@ lastReviewed: 2026-08-16
 - [FDA：Sunscreen quiz](https://www.accessdata.fda.gov/cder/sunscreen/index.html)（重新塗抹不會把已發生的曝曬重置；查閱 2026-08-16）
 - [AAD：How to apply sunscreen](https://www.aad.org/public/everyday-care/sun-protection/shade-clothing-sunscreen/how-to-apply-sunscreen)（兩小時與事件後補擦；查閱 2026-08-16）
 - [AAD：How to treat a sunburn](https://www.aad.org/public/everyday-care/injured-skin/burns/treat-sunburn)（曬紅後的基本照護與求助警訊；查閱 2026-08-16）
-
-本文為一般衛教草稿，尚未完成 UVAlert 專業審閱。

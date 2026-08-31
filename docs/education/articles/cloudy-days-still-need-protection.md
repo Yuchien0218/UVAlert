@@ -39,5 +39,3 @@ lastReviewed: 2026-08-16
 - [衛生福利部食品藥物管理署：食藥好文網／防曬化粧品](https://www.fda.gov.tw/TC/siteListContent.aspx?id=51160&sid=13694)（陰天、冬天、靠窗與日常防曬；查閱 2026-08-16）
 - [FDA：Tips to Stay Safe in the Sun](https://www.fda.gov/consumers/consumer-updates/tips-stay-safe-sun-sunscreen-sunglasses)（雲層、反射、遮蔭與防護；查閱 2026-08-16）
 - [WHO：Ultraviolet radiation](https://www.who.int/news-room/fact-sheets/detail/ultraviolet-radiation)（雲量、反射與 UV 防護；查閱 2026-08-16）
-
-本文為一般衛教草稿，尚未完成 UVAlert 專業審閱。

@@ -42,5 +42,3 @@ lastReviewed: 2026-08-16
 - [臺灣皮膚科醫學會：夏日必收！皮膚科醫師教你正確兒童防曬避免做錯反傷身](https://www.derma.org.tw/news/content.php?continue=Y&id=566&pageno=1&t=10)（一般、潤色與防水產品的清潔方向；查閱 2026-08-16）
 - [衛生福利部食品藥物管理署：正確使用化粧品須知（PDF）](https://www.fda.gov.tw/tc/includes/GetFile.ashx?id=f637608154367822493)（不適時停止、清洗與避免摩擦；查閱 2026-08-16）
 - [衛生福利部食品藥物管理署：我覺得皮膚異常，懷疑是化粧品造成，該怎麼辦？](https://www.fda.gov.tw/tc/siteListContent.aspx?id=22059&sid=9096)（化粧品造成不適時的處理方向；查閱 2026-08-16）
-
-本文為一般衛教草稿，尚未完成 UVAlert 專業審閱。

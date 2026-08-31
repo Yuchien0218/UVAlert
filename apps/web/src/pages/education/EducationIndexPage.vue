@@ -79,14 +79,6 @@ const robots = computed(() =>
       </p>
     </header>
 
-    <aside
-      v-if="publishableCount === 0"
-      class="education-review-note"
-      role="note"
-    >
-      文章目前正在進行專業審閱，暫不列入搜尋索引。你仍可先閱讀整理中的內容，正式發布後這裡會同步更新。
-    </aside>
-
     <section aria-labelledby="education-categories-title">
       <div class="education-section-heading">
         <h2
@@ -112,13 +104,6 @@ const robots = computed(() =>
             </span>
           </IconLead>
           <small>{{ heroCard.description }}</small>
-          <span
-            v-if="heroCard.publishableCount > 0"
-            class="education-card-status"
-          >
-            {{ heroCard.publishableCount }} 篇已發布
-          </span>
-          <span v-else class="education-card-status">內容審閱中</span>
         </RouterLink>
 
         <RouterLink
@@ -136,13 +121,6 @@ const robots = computed(() =>
             </span>
           </IconLead>
           <small>{{ category.description }}</small>
-          <span
-            v-if="category.publishableCount > 0"
-            class="education-card-status"
-          >
-            {{ category.publishableCount }} 篇已發布
-          </span>
-          <span v-else class="education-card-status">內容審閱中</span>
         </RouterLink>
       </nav>
     </section>
@@ -162,15 +140,6 @@ const robots = computed(() =>
   max-width: 42rem;
 }
 
-.education-review-note {
-  padding: var(--space-4) var(--space-5);
-  border: 1px solid var(--border-subtle);
-  border-radius: var(--radius-md);
-  background: var(--surface-primary);
-  color: var(--text-secondary);
-  line-height: var(--line-height-body);
-}
-
 .education-section-heading {
   display: flex;
   align-items: baseline;
@@ -184,8 +153,24 @@ const robots = computed(() =>
   font-size: var(--font-size-section-title);
 }
 
-.education-section-heading span,
+.education-section-heading span {
+  color: var(--text-secondary);
+  font-size: var(--font-size-caption);
+}
+
+/*
+ * 2026-08-31：kicker 改成膠囊（使用者要求「8 篇文章套用內容審閱中的樣式」）。
+ *
+ * 同一天把審閱狀態徽章整批抽掉之後，卡片上就沒有任何帶底色的元素了；
+ * kicker 接手那個角色剛好——它本來就是「這張卡的一個量化屬性」，跟原本
+ * 那顆徽章是同一種東西。直接沿用 .education-card-status，不另造一套：
+ * 那個 class 的樣式在 app.css，兩邊指同一份就不會漂移。
+ */
 .education-card-kicker {
+  justify-self: start;
+  padding: 0.15rem 0.5rem;
+  border-radius: var(--radius-pill);
+  background: var(--border-subtle);
   color: var(--text-secondary);
   font-size: var(--font-size-caption);
 }

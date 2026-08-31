@@ -47,5 +47,3 @@ lastReviewed: 2026-08-16
 - [AAD：How to decode a sunscreen label](https://www.aad.org/public/everyday-care/sun-protection/shade-clothing-sunscreen/understand-sunscreen-labels)（抗水與毛巾擦乾後補擦；查閱 2026-08-16）
 - [FDA：Sunscreen: How to Help Protect Your Skin from the Sun](https://www.fda.gov/drugs/understanding-over-counter-medicines/sunscreen-how-help-protect-your-skin-sun)（依產品標籤與活動補擦；查閱 2026-08-16）
 - [國民健康署：防曬5裝備學起來 一起遠離熱傷害！](https://www.hpa.gov.tw/Pages/Detail.aspx?nodeid=4576&pid=15862)（流汗、補水、休息與降溫；查閱 2026-08-16）
-
-本文為一般衛教草稿，尚未完成 UVAlert 專業審閱。

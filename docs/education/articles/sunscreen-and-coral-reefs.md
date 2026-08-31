@@ -34,5 +34,3 @@ lastReviewed: 2026-08-16
 
 - [EPA：UV Filters in Sunscreens and Aquatic Environmental Health](https://www.epa.gov/water-research/uv-filters-sunscreens-and-aquatic-environmental-health)（環境研究與不確定性；查閱 2026-08-16）
 - [NOAA：Skincare Chemicals and Coral Reefs](https://oceanservice.noaa.gov/news/sunscreen-corals.html)（防曬成分與水生生物研究概況；查閱 2026-08-16）
-
-本文為一般衛教草稿，尚未完成 UVAlert 專業審閱。

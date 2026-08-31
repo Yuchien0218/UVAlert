@@ -43,5 +43,3 @@ lastReviewed: 2026-08-16
 - [AAD：How to treat sunburn](https://www.aad.org/public/everyday-care/injured-skin/burns/treat-sunburn)（離開陽光、降溫、保濕、補水與水泡照護；查閱 2026-08-16）
 - [CDC：Preventing Sunburn](https://www.cdc.gov/skin-cancer/prevention/sunburn.html)（曬傷後避免再次曝曬與警示症狀；查閱 2026-08-16）
 - [NHS：Sunburn](https://www.nhs.uk/conditions/sunburn/)（曬傷後避免事項與求助警訊；查閱 2026-08-16）
-
-本文為一般衛教草稿，尚未完成 UVAlert 專業審閱。

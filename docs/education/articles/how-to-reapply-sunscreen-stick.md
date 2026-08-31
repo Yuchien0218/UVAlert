@@ -35,5 +35,3 @@ lastReviewed: 2026-08-16
 
 - [AAD：How to use stick and spray sunscreens](https://www.aad.org/public/everyday-care/sun-protection/shade-clothing-sunscreen/how-to-use-stick-spray-sunscreens)（棒狀防曬四遍並抹勻；查閱 2026-08-16）
 - [FDA：Sunscreen: How to Help Protect Your Skin from the Sun](https://www.fda.gov/drugs/understanding-over-counter-medicines/sunscreen-how-help-protect-your-skin-sun)（依標示使用與補擦；查閱 2026-08-16）
-
-本文為一般衛教草稿，尚未完成 UVAlert 專業審閱。

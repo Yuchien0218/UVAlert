@@ -35,5 +35,3 @@ UVAlert 不會用固定天數替你判定已恢復。紅、熱、痛、脫皮、
 - [NHS：Sunburn](https://www.nhs.uk/conditions/sunburn/)（避免直射陽光直到癒合；查閱 2026-08-16）
 - [AAD：How to treat a sunburn](https://www.aad.org/public/everyday-care/injured-skin/burns/treat-sunburn)（離開陽光、照護與水泡警示；查閱 2026-08-16）
 - [WHO：Ultraviolet radiation](https://www.who.int/news-room/fact-sheets/detail/ultraviolet-radiation)（衣物、帽子、遮蔭與防曬的整合防護；查閱 2026-08-16）
-
-本文為一般衛教草稿，尚未完成 UVAlert 專業審閱。

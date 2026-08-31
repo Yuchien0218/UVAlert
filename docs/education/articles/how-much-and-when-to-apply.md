@@ -49,5 +49,3 @@ UVAlert 的倒數只協助你記得一般補擦節奏；它不會驗證你是否
 - [AAD：How to apply sunscreen](https://www.aad.org/public/everyday-care/sun-protection/shade-clothing-sunscreen/how-to-apply-sunscreen)（出門前、足量、裸露部位與補擦；查閱 2026-08-16）
 - [衛生福利部食品藥物管理署：食藥好文網／防曬化粧品](https://www.fda.gov.tw/TC/siteListContent.aspx?id=51160&sid=13694)（足量與日常補擦；查閱 2026-08-16）
 - [FDA：Sunscreen labeling and effectiveness testing guide](https://www.fda.gov/regulatory-information/search-fda-guidance-documents/labeling-and-effectiveness-testing-sunscreen-drug-products-over-counter-human-use-small-entity)（2 mg/cm² 測試用量概念；查閱 2026-08-16）
-
-本文為一般衛教草稿，尚未完成 UVAlert 專業審閱。

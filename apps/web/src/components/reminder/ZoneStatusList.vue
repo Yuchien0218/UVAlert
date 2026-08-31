@@ -250,11 +250,17 @@ function getTimingTone(timingStatus: ZoneProjection["timingStatus"]): ZoneTone {
 </template>
 
 <style scoped>
+/*
+ * 2026-08-31：拿掉區塊分隔線（使用者要求，與頁首那條同一批）。
+ *
+ * 區塊之間本來就靠標題與留白分開；線是第二套分隔機制，兩套同時存在會
+ * 讓頁面看起來比實際更破碎。padding-top 留著——那是區塊之間的呼吸，
+ * 不是線的附屬品。
+ */
 .zone-list {
   display: grid;
   gap: var(--space-5);
   padding-top: var(--space-5);
-  border-top: 1px solid var(--border-subtle);
   scroll-margin-top: var(--space-8);
 }
 

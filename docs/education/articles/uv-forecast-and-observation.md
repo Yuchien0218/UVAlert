@@ -40,5 +40,3 @@ lastReviewed: 2026-08-16
 - [中央氣象署：紫外線指數預報服務](https://www.cwa.gov.tw/Data/knowledge/announce/service13.pdf)（預報服務與臺灣分級；查閱 2026-08-16）
 - [中央氣象署：每日紫外線指數最大值產品說明](https://www.cwa.gov.tw/Data/data_catalog/2-1-5.pdf)（觀測資料、更新時間與缺值說明；查閱 2026-08-16）
 - [中央氣象署開放資料：紫外線指數－每日紫外線指數最大值](https://opendata.cwa.gov.tw/dataset/observation/O-A0005-001)（觀測資料入口；查閱 2026-08-16）
-
-本文為一般衛教草稿，尚未完成 UVAlert 專業審閱。

@@ -36,5 +36,3 @@ lastReviewed: 2026-08-16
 
 - [AAD：How to treat sunburn](https://www.aad.org/public/everyday-care/injured-skin/burns/treat-sunburn)（涼水、保濕、補水與水泡照護；查閱 2026-08-16）
 - [NHS：Sunburn](https://www.nhs.uk/conditions/sunburn/)（避免冰塊直接接觸及求助警訊；查閱 2026-08-16）
-
-本文為一般衛教草稿，尚未完成 UVAlert 專業審閱。

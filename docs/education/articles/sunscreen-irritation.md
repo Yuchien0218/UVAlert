@@ -40,5 +40,3 @@ lastReviewed: 2026-08-16
 - [衛生福利部食品藥物管理署：我覺得皮膚異常，懷疑是化粧品造成，該怎麼辦？](https://www.fda.gov.tw/tc/siteListContent.aspx?id=22059&sid=9096)（停用與就醫方向；查閱 2026-08-16）
 - [衛生福利部食品藥物管理署：正確使用化粧品須知（PDF）](https://www.fda.gov.tw/tc/includes/GetFile.ashx?id=f637608154367822493)（清洗、避免摩擦、保留產品資訊；查閱 2026-08-16）
 - [AAD：How to decode a sunscreen label](https://www.aad.org/public/everyday-care/sun-protection/shade-clothing-sunscreen/understand-sunscreen-labels)（敏感肌與標示的限制；查閱 2026-08-16）
-
-本文為一般衛教草稿，尚未完成 UVAlert 專業審閱。
