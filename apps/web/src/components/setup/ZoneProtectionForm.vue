@@ -397,12 +397,5 @@ button.text-link {
   font-size: var(--font-size-supporting);
 }
 
-.field input {
-  min-height: var(--tap-target);
-  padding: var(--space-3);
-  border: 1px solid var(--border-subtle);
-  border-radius: var(--radius-sm);
-  background: var(--page-background);
-  color: var(--text-primary);
-}
+/* 欄位外觀用 app.css 的共用宣告，這裡不再抄一份。 */
 </style>
