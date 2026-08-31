@@ -37,5 +37,3 @@ lastReviewed: 2026-08-16
 - [AAD：How to decode a sunscreen label](https://www.aad.org/public/everyday-care/sun-protection/shade-clothing-sunscreen/understand-sunscreen-labels)（reef-safe 尚無 FDA 定義；查閱 2026-08-16）
 - [Hawaii DLNR：Avoid sunscreens with oxybenzone](https://dlnr.hawaii.gov/dar/announcements/dlnr-asks-ocean-users-to-avoid-sunscreens-with-oxybenzone/)（標語、成分閱讀與衣物防護；查閱 2026-08-16）
 - [EPA：UV Filters in Sunscreens and Aquatic Environmental Health](https://www.epa.gov/water-research/uv-filters-sunscreens-and-aquatic-environmental-health)（水域研究現況與不確定性；查閱 2026-08-16）
-
-本文為一般衛教草稿，尚未完成 UVAlert 專業審閱。

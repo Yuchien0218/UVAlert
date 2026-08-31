@@ -45,5 +45,3 @@ lastReviewed: 2026-08-16
 - [AAD：How to apply sunscreen](https://www.aad.org/public/everyday-care/sun-protection/shade-clothing-sunscreen/how-to-apply-sunscreen)（足量、均勻與補擦原則；查閱 2026-08-16）
 - [FDA：Sunscreen: How to Help Protect Your Skin from the Sun](https://www.fda.gov/drugs/understanding-over-counter-medicines/sunscreen-how-help-protect-your-skin-sun?linkId=100000002918349)（產品形式、噴霧與標示；查閱 2026-08-16）
 - [衛生福利部食品藥物管理署：食藥好文網／防曬化粧品](https://www.fda.gov.tw/TC/siteListContent.aspx?id=51160&sid=13694)（化妝後補擦與用量提醒；查閱 2026-08-16）
-
-本文為一般衛教草稿，尚未完成 UVAlert 專業審閱。

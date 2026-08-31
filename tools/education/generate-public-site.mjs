@@ -23,12 +23,12 @@ h1 { max-width: 25em; margin: 0 0 1rem; font-size: clamp(1.8rem, 7vw, 2.5rem); l
 h2 { margin: 2rem 0 .75rem; font-size: 1.25rem; line-height: 1.35; }
 h3 { margin: 1.75rem 0 .5rem; font-size: 1.05rem; }
 .lead, .summary { color: #5a5a5a; }
-.review-note { margin: 1.5rem 0; padding: 1rem 1.25rem; border: 1px solid #e3e3e3; border-radius: .875rem; background: #fff; color: #5a5a5a; }
 .card-list { display: grid; gap: .75rem; margin: 1.25rem 0 0; }
 .card { display: grid; gap: .35rem; padding: 1.25rem; border: 1px solid #e3e3e3; border-radius: 1.25rem; background: #fff; color: inherit; text-decoration: none; }
 .card strong { font-size: 1.05rem; font-weight: 600; }
-.card small, .kicker, .meta { color: #5a5a5a; font-size: .8rem; }
-.status { justify-self: start; padding: .1rem .5rem; border-radius: 999px; background: #e3e3e3; color: #5a5a5a; font-size: .75rem; }
+.card small, .meta { color: #5a5a5a; font-size: .8rem; }
+/* kicker 是膠囊（與 app 一致）：審閱徽章拿掉之後，卡片上帶底色的元素換它接手。 */
+.kicker { justify-self: start; padding: .1rem .5rem; border-radius: 999px; background: #e3e3e3; color: #5a5a5a; font-size: .75rem; }
 /* 文章的「先說結論」段落。產生器把它從 bodyHtml 抽走放進 takeawayHtml，
    所以要單獨渲染，否則整篇文章會少掉結論。 */
 .article-takeaway { max-width: 44rem; margin: 0 0 1.5rem; padding: 1rem 1.25rem; border-radius: .5rem; background: #f4ece2; }
@@ -163,13 +163,10 @@ function renderEducationIndex(content, baseUrl, indexable, lastmod) {
       const published = articles.filter(
         (article) => article.publishable
       ).length;
-      return `<a class="card" href="/education/${category.slug}"><span class="kicker">${articles.length} 篇文章</span><strong>${escapeHtml(category.title)}</strong><small>${escapeHtml(category.description)}</small><span class="status">${published > 0 ? `${published} 篇已發布` : "專業審閱中"}</span></a>`;
+      return `<a class="card" href="/education/${category.slug}"><span class="kicker">${articles.length} 篇文章</span><strong>${escapeHtml(category.title)}</strong><small>${escapeHtml(category.description)}</small></a>`;
     })
     .join("\n");
-  const notice = indexable
-    ? ""
-    : `<aside class="review-note">文章目前正在進行專業審閱，暫不列入搜尋索引。你仍可先閱讀整理中的內容，正式發布後這裡會同步更新。</aside>`;
-  const body = `<p class="eyebrow">防曬生活編輯部</p><h1>防曬衛教</h1><p class="lead">先回答你正在搜尋的問題，再補上適用情境、限制與官方來源。這裡是一般衛教，不取代診斷或個人醫療建議。</p>${notice}<h2>依一天中的使用流程找答案</h2><div class="card-list">${categories}</div>`;
+  const body = `<p class="eyebrow">防曬生活編輯部</p><h1>防曬衛教</h1><p class="lead">先回答你正在搜尋的問題，再補上適用情境、限制與官方來源。這裡是一般衛教，不取代診斷或個人醫療建議。</p><h2>依一天中的使用流程找答案</h2><div class="card-list">${categories}</div>`;
   return renderDocument({
     title: "防曬衛教",
     description:
@@ -188,13 +185,10 @@ function renderCategoryPage(category, articles, baseUrl, indexable, lastmod) {
   const cards = articles
     .map(
       (article) =>
-        `<a class="card" href="/education/articles/${article.slug}"><span class="kicker">${escapeHtml(article.primaryQuestion)}</span><strong>${escapeHtml(article.title)}</strong><small>${escapeHtml(article.summary)}</small><span class="status">${article.publishable ? "已發布" : "專業審閱中"}</span></a>`
+        `<a class="card" href="/education/articles/${article.slug}"><span class="kicker">${escapeHtml(article.primaryQuestion)}</span><strong>${escapeHtml(article.title)}</strong><small>${escapeHtml(article.summary)}</small></a>`
     )
     .join("\n");
-  const notice = indexable
-    ? ""
-    : `<aside class="review-note">這個主題的文章正在進行專業審閱，暫不列入搜尋索引；你可以先閱讀整理中的版本。</aside>`;
-  const body = `<a class="back-link" href="/education">← 防曬衛教</a><p class="eyebrow">衛教分類</p><h1>${escapeHtml(category.title)}</h1><p class="lead">${escapeHtml(category.description)}</p>${notice}<h2>文章</h2><div class="card-list">${cards}</div>`;
+  const body = `<a class="back-link" href="/education">← 防曬衛教</a><p class="eyebrow">衛教分類</p><h1>${escapeHtml(category.title)}</h1><p class="lead">${escapeHtml(category.description)}</p><h2>文章</h2><div class="card-list">${cards}</div>`;
   return renderDocument({
     title: category.title,
     description: category.description,
@@ -227,14 +221,11 @@ function renderArticlePage(article, content, baseUrl) {
         `<li><a href="/education/articles/${candidate.slug}">${escapeHtml(candidate.title)}</a></li>`
     )
     .join("");
-  const notice = article.publishable
-    ? ""
-    : `<aside class="review-note">這篇文章目前是整理中的衛教草稿，尚未完成 UVAlert 專業審閱；內容僅供閱讀，不代表個人化醫療建議。</aside>`;
   const relatedSection =
     related === ""
       ? ""
       : `<section class="related"><h2>同主題延伸閱讀</h2><ul>${related}</ul></section>`;
-  const body = `<a class="back-link" href="${category === undefined ? "/education" : `/education/${category.slug}`}">← ${escapeHtml(category?.title ?? "防曬衛教")}</a><p class="eyebrow">${escapeHtml(article.primaryQuestion)}</p><h1>${escapeHtml(article.title)}</h1><p class="summary">${escapeHtml(article.summary)}</p><p class="meta">最後查閱：${escapeHtml(article.lastReviewed)} · ${article.publishable ? "已發布" : "專業審閱中"}</p>${notice}<div class="article-takeaway">${article.takeawayHtml}</div><div class="article-body">${article.bodyHtml}</div>${relatedSection}`;
+  const body = `<a class="back-link" href="${category === undefined ? "/education" : `/education/${category.slug}`}">← ${escapeHtml(category?.title ?? "防曬衛教")}</a><p class="eyebrow">${escapeHtml(article.primaryQuestion)}</p><h1>${escapeHtml(article.title)}</h1><p class="summary">${escapeHtml(article.summary)}</p><p class="meta">最後查閱：${escapeHtml(article.lastReviewed)}</p><div class="article-takeaway">${article.takeawayHtml}</div><div class="article-body">${article.bodyHtml}</div>${relatedSection}`;
   return renderDocument({
     title: article.title,
     description: article.summary,

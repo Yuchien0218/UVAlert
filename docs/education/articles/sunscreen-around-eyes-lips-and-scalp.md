@@ -39,5 +39,3 @@ lastReviewed: 2026-08-16
 - [FDA：Tips to Stay Safe in the Sun](https://www.fda.gov/consumers/consumer-updates/tips-stay-safe-sun-sunscreen-sunglasses)（耳朵、鼻子、嘴唇、頸部、手腳等容易漏擦部位；查閱 2026-08-16）
 - [AAD：How to apply sunscreen](https://www.aad.org/public/everyday-care/sun-protection/shade-clothing-sunscreen/how-to-apply-sunscreen)（臉、耳朵、頸部、腳背、嘴唇與頭皮防護；查閱 2026-08-16）
 - [AAD：How do I know if I’m using the right sunscreen?](https://www.aad.org/public/everyday-care/sun-protection/shade-clothing-sunscreen/choosing-right-sunscreen)（眼周、嘴唇與不同膚況的產品選擇方向；查閱 2026-08-16）
-
-本文為一般衛教草稿，尚未完成 UVAlert 專業審閱。

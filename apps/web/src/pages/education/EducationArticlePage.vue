@@ -80,19 +80,9 @@ const relatedArticles = computed(() =>
         meta description，分類頁與首頁的卡片也還在顯示。
       -->
       <p class="education-article-meta">
-        最後查閱：{{ article.lastReviewed }} ·
-        {{ article.publishable ? "已發布" : "專業審閱中" }}
+        最後查閱：{{ article.lastReviewed }}
       </p>
     </header>
-
-    <aside
-      v-if="!article.publishable"
-      class="education-review-note"
-      role="note"
-    >
-      這篇文章目前是整理中的衛教草稿，尚未完成 UVAlert
-      專業審閱；內容僅供閱讀，不代表個人化醫療建議。
-    </aside>
 
     <!--
       文章的「先說結論」段落。

@@ -28,7 +28,7 @@ afterEach(() => {
 });
 
 describe("公開衛教頁", () => {
-  it("首頁呈現六個使用流程分類與草稿審閱提示", () => {
+  it("首頁呈現六個使用流程分類", () => {
     const wrapper = mount(EducationIndexPage, {
       global: { stubs: { RouterLink: { template: "<a><slot /></a>" } } }
     });
@@ -40,13 +40,18 @@ describe("公開衛教頁", () => {
     expect(wrapper.text()).toContain("流汗或碰水後");
     expect(wrapper.text()).toContain("回家後與皮膚照顧");
     expect(wrapper.text()).toContain("特殊情況");
-    expect(wrapper.text()).toContain("暫不列入搜尋索引");
+    /*
+     * 2026-08-31：審閱狀態的**可見文字**整批抽掉（使用者要報告，內容還
+     * 沒審完）。robots 的 noindex **刻意保留**——那是給搜尋引擎看的，
+     * 不是給讀者看的；把未審閱的健康內容送進索引是另一回事。
+     */
+    expect(wrapper.text()).not.toContain("審閱");
     expect(
       document.querySelector<HTMLMetaElement>('meta[name="robots"]')?.content
     ).toBe("noindex,follow");
   });
 
-  it("文章頁以可見摘要、審閱狀態與 canonical/Schema 呈現", async () => {
+  it("文章頁以可見摘要與 canonical/Schema 呈現", async () => {
     const router = makeRouter(
       EducationArticlePage,
       "/education/articles/:slug"
@@ -58,8 +63,7 @@ describe("公開衛教頁", () => {
     });
 
     expect(wrapper.find("h1").text()).toContain("UV 指數怎麼看");
-    expect(wrapper.text()).toContain("專業審閱中");
-    expect(wrapper.text()).toContain("本文為一般衛教草稿");
+    expect(wrapper.text(), "審閱狀態的可見文字已抽掉").not.toContain("審閱");
     const divider = wrapper.find(".education-article-body hr");
     expect(divider.exists()).toBe(true);
     /*
@@ -204,5 +208,81 @@ describe("衛教分類的圖示版型", () => {
 
     expect(geometry).toBeDefined();
     expect(lead.get("svg").html()).toContain(geometry!);
+  });
+});
+
+/*
+ * 2026-08-31：審閱狀態的可見文字整批抽掉（使用者「我要報告了，內容還沒
+ * 做完」）。
+ *
+ * **三頁分開守。** 只守一頁的話，另外兩頁的徽章或提示可以留著——三頁各自
+ * 有一套（首頁的分類卡徽章、主題頁的文章卡徽章、文章頁的 meta 與提示），
+ * 是三份獨立的實作。
+ *
+ * 掃 wrapper.text() 而不是原始碼：原始碼裡的註解本來就會提到「審閱」，
+ * 而這裡要守的正是「讀者看不到」，text() 才是讀者看到的東西。
+ */
+describe("衛教頁不顯示審閱狀態", () => {
+  it("首頁沒有審閱字樣", () => {
+    const wrapper = mount(EducationIndexPage, {
+      global: { stubs: { RouterLink: { template: "<a><slot /></a>" } } }
+    });
+
+    expect(wrapper.text()).not.toContain("審閱");
+    expect(wrapper.text()).not.toContain("已發布");
+  });
+
+  it("主題頁沒有審閱字樣", async () => {
+    const router = makeRouter(EducationCategoryPage, "/education/:category");
+    await router.push("/education/sweat-and-water");
+    await router.isReady();
+    const wrapper = mount(EducationCategoryPage, {
+      global: { plugins: [router] }
+    });
+
+    expect(wrapper.text()).not.toContain("審閱");
+    expect(wrapper.text()).not.toContain("已發布");
+  });
+
+  it("文章頁沒有審閱字樣，連內文結尾那句也不再出現", async () => {
+    const router = makeRouter(
+      EducationArticlePage,
+      "/education/articles/:slug"
+    );
+    await router.push("/education/articles/what-is-uv-index");
+    await router.isReady();
+    const wrapper = mount(EducationArticlePage, {
+      global: { plugins: [router] }
+    });
+
+    expect(wrapper.text()).not.toContain("審閱");
+    expect(wrapper.text()).not.toContain("已發布");
+  });
+
+  /*
+   * 內文那句是 48 篇 markdown 各自帶的一行，不是元件渲染的——所以要往
+   * 產生出來的內容裡查，元件層的斷言看不到它有沒有回來。
+   */
+  it("48 篇文章的內文都不含審閱狀態那句", () => {
+    const generated = readFileSync(
+      "apps/web/src/features/education/education-content.generated.ts",
+      "utf8"
+    );
+
+    expect(generated).not.toContain("尚未完成 UVAlert 專業審閱");
+  });
+
+  /*
+   * **noindex 必須留著。** 抽掉的是給讀者看的文字，不是給搜尋引擎看的
+   * 狀態；未完成審閱的健康內容不該進索引。這條擋住「順手一起清掉」。
+   */
+  it("robots 仍然是 noindex", () => {
+    mount(EducationIndexPage, {
+      global: { stubs: { RouterLink: { template: "<a><slot /></a>" } } }
+    });
+
+    expect(
+      document.querySelector<HTMLMetaElement>('meta[name="robots"]')?.content
+    ).toBe("noindex,follow");
   });
 });

@@ -53,5 +53,3 @@ UVAlert 的倒數是協助記住補擦的工具；它不會把 UV 指數轉換�
 - [中央氣象署：紫外線指數預報服務](https://www.cwa.gov.tw/Data/knowledge/announce/service13.pdf)（台灣分級與預報說明；查閱 2026-08-16）
 - [WHO：Radiation: The ultraviolet (UV) index](https://www.who.int/news-room/questions-and-answers/item/radiation-the-ultraviolet-%28uv%29-index)（UVI 意義與依指數採取防護；查閱 2026-08-16）
 - [WHO：Ultraviolet radiation](https://www.who.int/news-room/fact-sheets/detail/ultraviolet-radiation)（UV 健康影響與整合防護；查閱 2026-08-16）
-
-本文為一般衛教草稿，尚未完成 UVAlert 專業審閱。

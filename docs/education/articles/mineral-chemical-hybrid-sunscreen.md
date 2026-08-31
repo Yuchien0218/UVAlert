@@ -38,5 +38,3 @@ lastReviewed: 2026-08-16
 
 - [衛生福利部食品藥物管理署：物理性與化學性防曬](https://www.fda.gov.tw/Tc/PublishOtherEpaperContent.aspx?id=1519&r=2101262437&tid=4827)（成分類型與作用；查閱 2026-08-16）
 - [AAD：How to decode a sunscreen label](https://www.aad.org/public/everyday-care/sun-protection/shade-clothing-sunscreen/understand-sunscreen-labels)（礦物、化學與混合型說明；查閱 2026-08-16）
-
-本文為一般衛教草稿，尚未完成 UVAlert 專業審閱。

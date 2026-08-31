@@ -58,14 +58,6 @@ const robots = computed(() =>
       <p class="page-heading__body">{{ category.description }}</p>
     </header>
 
-    <aside
-      v-if="publishableCount === 0"
-      class="education-review-note"
-      role="note"
-    >
-      這個主題的文章正在進行專業審閱，暫不列入搜尋索引；你可以先閱讀整理中的版本。
-    </aside>
-
     <section aria-labelledby="category-articles-title">
       <div class="education-section-heading">
         <h2 id="category-articles-title" data-typography-role="section-title">
@@ -85,9 +77,6 @@ const robots = computed(() =>
           }}</span>
           <strong>{{ article.title }}</strong>
           <small>{{ article.summary }}</small>
-          <span class="education-card-status">
-            {{ article.publishable ? "已發布" : "專業審閱中" }}
-          </span>
         </RouterLink>
       </div>
     </section>

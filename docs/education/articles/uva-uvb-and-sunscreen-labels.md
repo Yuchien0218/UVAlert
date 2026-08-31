@@ -52,5 +52,3 @@ PA 的標示方式與產品法規可能依市場不同；購買台灣產品時�
 - [衛生福利部食品藥物管理署：防曬乳的 PA 值是不是表示抗 UVB？](https://www.fda.gov.tw/tc/newsContent.aspx?cid=5049&id=25128)（UVA／UVB、SPF／PA；查閱 2026-08-16）
 - [衛生福利部食品藥物管理署：食藥好文網／防曬化粧品](https://www.fda.gov.tw/TC/siteListContent.aspx?id=51160&sid=13694)（產品標示與使用情境；查閱 2026-08-16）
 - [FDA：Sunscreen: How to Help Protect Your Skin from the Sun](https://www.fda.gov/drugs/understanding-over-counter-medicines/sunscreen-how-help-protect-your-skin-sun?linkId=100000002918349)（SPF、廣效與不可用時間倍數理解；查閱 2026-08-16）
-
-本文為一般衛教草稿，尚未完成 UVAlert 專業審閱。

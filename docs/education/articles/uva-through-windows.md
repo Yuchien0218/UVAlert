@@ -35,5 +35,3 @@ lastReviewed: 2026-08-16
 
 - [CDC：The Surgeon General’s Call to Action to Prevent Skin Cancer](https://stacks.cdc.gov/view/cdc/24419/cdc_24419_DS1.pdf)（UVA 可穿透玻璃及累積曝曬；查閱 2026-08-16）
 - [WHO：Ultraviolet radiation](https://www.who.int/news-room/fact-sheets/detail/ultraviolet-radiation)（UVA／UVB 健康影響與整合防護；查閱 2026-08-16）
-
-本文為一般衛教草稿，尚未完成 UVAlert 專業審閱。

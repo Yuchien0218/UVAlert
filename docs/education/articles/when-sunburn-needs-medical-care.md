@@ -51,5 +51,3 @@ lastReviewed: 2026-08-16
 - [AAD：How to treat a sunburn](https://www.aad.org/news/how-to-treat-a-sunburn)（發燒、發冷、噁心、惡化等求助訊號；查閱 2026-08-16）
 - [NHS：Sunburn](https://www.nhs.uk/conditions/sunburn/)（水泡、全身症狀與急切求助；查閱 2026-08-16）
 - [MedlinePlus：Sunburn](https://medlineplus.gov/ency/article/003227.htm)（脫水與眼睛症狀等警訊；查閱 2026-08-16）
-
-本文為一般衛教草稿，尚未完成 UVAlert 專業審閱。

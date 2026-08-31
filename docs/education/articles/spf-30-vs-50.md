@@ -34,5 +34,3 @@ SPF 50 的測試防護高於 SPF 30，但不是「多 20 就能多曬 20 分鐘�
 - [FDA：Sunscreen: How to Help Protect Your Skin from the Sun](https://www.fda.gov/drugs/understanding-over-counter-medicines/sunscreen-how-help-protect-your-skin-sun)（SPF、廣效、抗水與補擦；查閱 2026-08-16）
 - [AAD：How to decode a sunscreen label](https://www.aad.org/public/everyday-care/sun-protection/shade-clothing-sunscreen/understand-sunscreen-labels)（SPF 30 以上及標示判讀；查閱 2026-08-16）
 - [衛生福利部食品藥物管理署：防曬乳的 PA 值是不是表示抗 UVB？](https://www.fda.gov.tw/tc/newsContent.aspx?cid=5049&id=25128)（SPF／PA 與 UVA／UVB；查閱 2026-08-16）
-
-本文為一般衛教草稿，尚未完成 UVAlert 專業審閱。

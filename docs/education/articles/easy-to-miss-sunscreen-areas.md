@@ -54,5 +54,3 @@ UVAlert 的提醒部位分成七區，你可以把它當成補擦時的檢查順
 - [AAD：How to apply sunscreen](https://www.aad.org/public/everyday-care/sun-protection/shade-clothing-sunscreen/how-to-apply-sunscreen)（臉、耳朵、頸部、手、腳與頭皮等裸露部位；查閱 2026-08-16）
 - [FDA：Tips to Stay Safe in the Sun](https://www.fda.gov/consumers/consumer-updates/tips-stay-safe-sun-sunscreen-sunglasses)（耳朵、頸部、手、腳與唇部的防護提醒；查閱 2026-08-16）
 - [WHO：Ultraviolet radiation](https://www.who.int/news-room/fact-sheets/detail/ultraviolet-radiation)（衣物與遮蔽優先的整合防護；查閱 2026-08-16）
-
-本文為一般衛教草稿，尚未完成 UVAlert 專業審閱。

@@ -44,5 +44,3 @@ lastReviewed: 2026-08-16
 - [WHO：Ultraviolet radiation](https://www.who.int/news-room/fact-sheets/detail/ultraviolet-radiation)（遮蔭、衣物、帽子、眼鏡與防曬乳的整合防護；查閱 2026-08-16）
 - [AAD：What to wear to protect your skin from the sun](https://www.aad.org/public/everyday-care/sun-protection/shade-clothing-sunscreen/what-to-wear-protect-skin-from-sun)（衣物、UPF、帽子、眼鏡與腳部；查閱 2026-08-16）
 - [FDA：Tips to Stay Safe in the Sun](https://www.fda.gov/consumers/consumer-updates/tips-stay-safe-sun-sunscreen-sunglasses)（遮蔭、衣物、眼鏡與反射；查閱 2026-08-16）
-
-本文為一般衛教草稿，尚未完成 UVAlert 專業審閱。

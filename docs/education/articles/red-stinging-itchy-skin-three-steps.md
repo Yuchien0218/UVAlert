@@ -45,5 +45,3 @@ lastReviewed: 2026-08-16
 - [衛生福利部食品藥物管理署：正確使用化粧品須知（PDF）](https://www.fda.gov.tw/tc/includes/GetFile.ashx?id=f637608154367822493)（清洗、避免摩擦與保留產品資訊；查閱 2026-08-16）
 - [AAD：How to treat sunburn](https://www.aad.org/public/everyday-care/injured-skin/burns/treat-sunburn)（曬傷的一般降溫與照護；查閱 2026-08-16）
 - [國民健康署：防曬5裝備學起來 一起遠離熱傷害！](https://www.hpa.gov.tw/Pages/Detail.aspx?nodeid=4576&pid=15862)（高溫下的補水、休息與求助提醒；查閱 2026-08-16）
-
-本文為一般衛教草稿，尚未完成 UVAlert 專業審閱。

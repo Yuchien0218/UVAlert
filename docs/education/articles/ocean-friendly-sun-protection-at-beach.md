@@ -37,5 +37,3 @@ lastReviewed: 2026-08-16
 - [EPA：What You Can Do to Help Protect Coral Reefs](https://www.epa.gov/coral-reefs/what-you-can-do-help-protect-coral-reefs)（衣物、遮蔽與珊瑚保護行動；查閱 2026-08-16）
 - [NOAA：Skincare Chemicals and Coral Reefs](https://oceanservice.noaa.gov/news/sunscreen-corals.html)（衣物與防曬產品的整合做法；查閱 2026-08-16）
 - [FDA：Sunscreen: How to Help Protect Your Skin from the Sun](https://www.fda.gov/drugs/understanding-over-counter-medicines/sunscreen-how-help-protect-your-skin-sun)（廣效、SPF、抗水與補擦；查閱 2026-08-16）
-
-本文為一般衛教草稿，尚未完成 UVAlert 專業審閱。

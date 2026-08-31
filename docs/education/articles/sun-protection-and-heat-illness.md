@@ -38,5 +38,3 @@ UV 傷害和熱傷害可能同時發生，但原因、預防方法與求助方�
 - [衛生福利部國民健康署：防曬5裝備學起來 一起遠離熱傷害！](https://www.hpa.gov.tw/Pages/Detail.aspx?nodeid=4576&pid=15862)（防曬與補水、休息、降溫的區分；查閱 2026-08-16）
 - [衛生福利部國民健康署：炎夏防止熱傷害 必備三招「涼、補、心」](https://www.hpa.gov.tw/Pages/Detail.aspx?nodeid=4878&pid=19157)（熱傷害警訊與處理方向；查閱 2026-08-16）
 - [衛生福利部國民健康署：熱傷害知多少？（PDF）](https://health99.hpa.gov.tw/storage/pdf/materials/21968.pdf)（防曬乳不能預防熱傷害；查閱 2026-08-16）
-
-本文為一般衛教草稿，尚未完成 UVAlert 專業審閱。

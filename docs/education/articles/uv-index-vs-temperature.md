@@ -37,5 +37,3 @@ UV 指數是地區性的環境指標，不是個人的安全曝曬倒數。膚�
 
 - [WHO：Radiation: The ultraviolet (UV) index](https://www.who.int/news-room/questions-and-answers/item/radiation-the-ultraviolet-%28uv%29-index)（UV 指數與防護門檻；查閱 2026-08-16）
 - [中央氣象署：紫外線指數預報服務](https://www.cwa.gov.tw/Data/knowledge/announce/service13.pdf)（台灣 UV 分級與預報；查閱 2026-08-16）
-
-本文為一般衛教草稿，尚未完成 UVAlert 專業審閱。
