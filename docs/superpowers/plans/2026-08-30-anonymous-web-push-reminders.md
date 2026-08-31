@@ -592,7 +592,7 @@ Expected: all selected tests PASS; local Cron rows exist once each; no real secr
 
 Reviewer checks package pinning, Edge Runtime compatibility evidence, dispatch auth, secret redaction, claim-token settlement, retry math, 404/410 deletion and Cron uniqueness.
 
-- [ ] **Step 11: Commit Task 5**
+- [x] **Step 11: Commit Task 5**
 
 ```powershell
 git add -- supabase/functions/push-dispatch/deno.json supabase/functions/push-dispatch/pushSender.ts supabase/functions/push-dispatch/pushSender.test.ts supabase/functions/push-dispatch/handler.ts supabase/functions/push-dispatch/index.ts supabase/functions/push-dispatch/index.test.ts supabase/migrations/20260830000400_push_dispatch.sql supabase/tests/anonymous_push.sql supabase/config.toml
