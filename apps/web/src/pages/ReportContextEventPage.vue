@@ -2,12 +2,12 @@
 import { nextTick, onMounted, watch } from "vue";
 import { useRouter } from "vue-router";
 import { useWebAppServices } from "../app/injection";
-import Icon from "../components/icons/Icon.vue";
 import QuickTimePicker from "../components/common/QuickTimePicker.vue";
 import BroadcastLoader from "../components/feedback/BroadcastLoader.vue";
 import ZoneSelectorGrid from "../components/reminder/ZoneSelectorGrid.vue";
 import { getZoneLabel } from "../features/reminder/reminderPresentation";
 import { formatDateTime } from "../helpers/datetime";
+import IconButton from "../components/common/IconButton.vue";
 
 const { contextEvent } = useWebAppServices();
 const router = useRouter();
@@ -58,14 +58,11 @@ function zoneNames(zoneIds: string[]): string {
         <h1 data-typography-role="page-title">記錄這次狀況</h1>
         <p>記下這次狀況後，相關部位的提醒會更新；確認前不會改變提醒。</p>
       </div>
-      <button
-        class="icon-button"
-        type="button"
-        aria-label="返回提醒"
+      <IconButton
+        icon="tool-close"
+        label="返回提醒"
         @click="cancel"
-      >
-        <Icon name="tool-close" :size="24" />
-      </button>
+      />
     </header>
 
     <BroadcastLoader

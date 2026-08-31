@@ -2,12 +2,12 @@
 import { computed, nextTick, onMounted, shallowRef, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { useWebAppServices } from "../app/injection";
-import Icon from "../components/icons/Icon.vue";
 import QuickTimePicker from "../components/common/QuickTimePicker.vue";
 import BroadcastLoader from "../components/feedback/BroadcastLoader.vue";
 import ZoneSelectorGrid from "../components/reminder/ZoneSelectorGrid.vue";
 import { getZoneLabel } from "../features/reminder/reminderPresentation";
 import { formatDateTime } from "../helpers/datetime";
+import IconButton from "../components/common/IconButton.vue";
 
 /**
  * S-10 更正最近事件。
@@ -81,14 +81,11 @@ async function runVoid(): Promise<void> {
           原本的紀錄會保留下來，你會在後面新增一筆更正。送出前不會改變目前提醒。
         </p>
       </div>
-      <button
-        class="icon-button"
-        type="button"
-        aria-label="返回提醒"
+      <IconButton
+        icon="tool-close"
+        label="返回提醒"
         @click="back"
-      >
-        <Icon name="tool-close" :size="24" />
-      </button>
+      />
     </header>
 
     <BroadcastLoader

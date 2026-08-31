@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { useTemplateRef } from "vue";
 import { useOverlay } from "../../composables/useOverlay";
-import Icon from "../icons/Icon.vue";
+import IconButton from "./IconButton.vue";
 
 interface Props {
   open: boolean;
@@ -54,14 +54,11 @@ const { closeFromBackdrop } = useOverlay({
             >
               {{ title }}
             </h2>
-            <button
-              class="icon-button"
-              type="button"
-              aria-label="關閉"
+            <IconButton
+              icon="tool-close"
+              label="關閉"
               @click="close"
-            >
-              <Icon name="tool-close" :size="24" />
-            </button>
+            />
           </header>
 
           <div class="bottom-sheet__body">

@@ -2,13 +2,13 @@
 import { nextTick, onMounted, watch } from "vue";
 import { useRouter } from "vue-router";
 import { useWebAppServices } from "../app/injection";
-import Icon from "../components/icons/Icon.vue";
 import ReapplicationZoneSelector from "../components/reapplication/ReapplicationZoneSelector.vue";
 import ReapplicationProductAssignments from "../components/reapplication/ReapplicationProductAssignments.vue";
 import QuickTimePicker from "../components/common/QuickTimePicker.vue";
 import ReapplicationReview from "../components/reapplication/ReapplicationReview.vue";
 import { getZoneLabel } from "../features/reminder/reminderPresentation";
 import { formatDateTime } from "../helpers/datetime";
+import IconButton from "../components/common/IconButton.vue";
 
 const { reapplication } = useWebAppServices();
 const router = useRouter();
@@ -60,14 +60,11 @@ function zoneNames(zoneIds: string[]): string {
         <h1 data-typography-role="page-title">記錄補擦</h1>
         <p>請確認要記錄的部位、防曬乳與時間；儲存前不會更新提醒。</p>
       </div>
-      <button
-        class="icon-button"
-        type="button"
-        aria-label="返回提醒"
+      <IconButton
+        icon="tool-close"
+        label="返回提醒"
         @click="cancel"
-      >
-        <Icon name="tool-close" :size="24" />
-      </button>
+      />
     </header>
 
     <p v-if="reapplication.phase.value === 'loading'" role="status">
