@@ -1,3 +1,4 @@
+import { readFileSync } from "node:fs";
 // @vitest-environment happy-dom
 
 import { mount } from "@vue/test-utils";
@@ -95,5 +96,38 @@ describe("公開衛教頁", () => {
     expect(
       document.querySelector<HTMLMetaElement>('meta[name="robots"]')?.content
     ).toBe("noindex,follow");
+  });
+});
+/*
+ * 2026-08-31：文章頁不重複顯示摘要。
+ *
+ * summary 與 takeawayHtml 講的是同一件事，只是換句話說——使用者回報
+ * 「文章內重複顯示摘要」。留下 takeaway（文章自己寫的「先說結論」段落），
+ * summary 改成只用在清單卡片與 meta description。
+ */
+describe("衛教文章頁不重複摘要", () => {
+  it("文章頁不再渲染 summary 段落", () => {
+    const source = readFileSync(
+      "apps/web/src/pages/education/EducationArticlePage.vue",
+      "utf8"
+    ).replace(/<!--[sS]*?-->/g, "");
+
+    /*
+     * 守的是**可見的插值**，不是「檔案裡不准出現 article.summary」——
+     * EducationSeoHead 的 :description 仍然要用它，那不是畫面上的文字。
+     */
+    expect(source).not.toContain("{{ article.summary }}");
+    // takeaway 必須還在——它才是文章的結論段落。
+    expect(source).toContain("article.takeawayHtml");
+  });
+
+  /* summary 沒有被刪除，SEO 仍然要用它當 meta description。 */
+  it("summary 仍然用於 meta description", () => {
+    const seo = readFileSync(
+      "apps/web/src/features/education/educationSeo.ts",
+      "utf8"
+    );
+
+    expect(seo).toContain("description: article.summary");
   });
 });
