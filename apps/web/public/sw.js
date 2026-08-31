@@ -20,6 +20,25 @@ self.addEventListener("activate", (event) => {
   event.waitUntil(self.clients.claim());
 });
 
+self.addEventListener("push", (event) => {
+  let payload;
+  try {
+    payload = event.data?.json();
+  } catch {
+    return;
+  }
+  if (payload?.type !== "reminder-due") return;
+
+  event.waitUntil(
+    self.registration
+      .showNotification("該補擦防曬乳了", {
+        tag: "uvalert-reminder-due",
+        data: { path: "/" }
+      })
+      .catch(() => undefined)
+  );
+});
+
 /**
  * 點擊通知後回到提醒頁。
  *
@@ -29,7 +48,7 @@ self.addEventListener("activate", (event) => {
 self.addEventListener("notificationclick", (event) => {
   event.notification.close();
 
-  const targetPath = event.notification.data?.path ?? "/reminder";
+  const targetPath = event.notification.data?.path ?? "/";
   const targetUrl = new URL(targetPath, self.location.origin).href;
 
   event.waitUntil(
