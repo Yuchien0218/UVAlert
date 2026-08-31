@@ -62,4 +62,26 @@ describe("GearForm 裝備區簡化", () => {
   it("包裝標示維持可收合，不擋在必填欄位前面", () => {
     expect(code).toContain("collapsible");
   });
+
+  /*
+   * 2026-08-31：品類名稱常駐。前一版讓文字只在選取後顯示，使用者回饋
+   * 「很像消失」。守的是「沒有任何條件式把它藏起來」，不是只守文字存在
+   * ——文字一直都在（只是被 .screen-reader-only 蓋掉），所以只斷言
+   * `{{ label }}` 出現的話，改回隱藏版也會全綠。
+   */
+  it("品類名稱常駐，不隨選取狀態隱藏", () => {
+    expect(code).toContain("<span>{{ label }}</span>");
+    expect(code).not.toContain("screen-reader-only");
+  });
+
+  /*
+   * 2026-08-31：價格欄不預寫數字。placeholder 的灰字在數字欄位裡會被讀成
+   * 「已經填好的值」，而價格沒有需要提示的格式（不像 PA++++）。
+   */
+  it("價格欄不放範例數字當 placeholder", () => {
+    const priceField = code.slice(code.indexOf('id="gear-price"'));
+    expect(priceField.slice(0, priceField.indexOf("/>"))).not.toContain(
+      "placeholder"
+    );
+  });
 });
