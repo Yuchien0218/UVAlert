@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { shallowRef, useTemplateRef } from "vue";
-import Icon from "../icons/Icon.vue";
 import { useOverlay } from "../../composables/useOverlay";
+import IconButton from "../common/IconButton.vue";
 import type {
   SessionEndError,
   SessionEndPhase
@@ -69,14 +69,11 @@ const { closeFromBackdrop } = useOverlay({
     畫面份量，確認改用彈窗呈現。
   -->
   <div class="session-end">
-    <button
-      class="icon-button"
-      type="button"
-      aria-label="結束這次提醒"
+    <IconButton
+      icon="tool-close"
+      label="結束這次提醒"
       @click="openConfirmation"
-    >
-      <Icon name="tool-close" :size="24" />
-    </button>
+    />
 
     <Teleport to="body">
       <div

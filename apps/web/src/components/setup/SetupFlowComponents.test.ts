@@ -98,6 +98,24 @@ describe("SetupStepShell", () => {
       "回上一頁"
     );
 
+    /*
+     * 2026-08-31：位置移回右上（使用者裁決），尺寸統一成 compact。
+     *
+     * 位置守的是「工具列的最後一個子元素是它」——只斷言 CSS 有
+     * `justify-self: end` 的話，把按鈕留在 DOM 第一個位置仍然會綠，而
+     * DOM 順序決定鍵盤 Tab 的先後，那是真的會被使用者感覺到的差別。
+     */
+    const toolbarChildren = wrapper.get(".setup-shell__toolbar").element
+      .children;
+    expect(
+      toolbarChildren[toolbarChildren.length - 1]?.classList.contains(
+        "icon-button"
+      )
+    ).toBe(true);
+    expect(
+      wrapper.get(".icon-button").classes("icon-button--compact")
+    ).toBe(true);
+
     expect(wrapper.text()).not.toContain("步驟");
     expect(wrapper.find('[role="progressbar"]').exists()).toBe(false);
     expect(wrapper.find("a").exists()).toBe(false);

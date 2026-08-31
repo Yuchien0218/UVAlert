@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { computed } from "vue";
 import { useRoute, useRouter } from "vue-router";
-import Icon from "../components/icons/Icon.vue";
 import GearForm from "../components/product/GearForm.vue";
+import IconButton from "../components/common/IconButton.vue";
 
 /**
  * S-12 新增防曬裝備／S-13 編輯防曬裝備的獨立頁殼。
@@ -54,14 +54,11 @@ function handleCancel(): void {
       <h1 class="page-heading__title" data-typography-role="page-title">
         {{ isEdit ? "編輯防曬裝備" : "新增防曬裝備" }}
       </h1>
-      <button
-        class="icon-button icon-button--compact"
-        type="button"
-        aria-label="取消"
+      <IconButton
+        icon="tool-close"
+        label="取消"
         @click="handleCancel"
-      >
-        <Icon name="tool-close" :size="20" />
-      </button>
+      />
       <p>資料會先儲存在這台裝置；若已開啟同步，之後也可以同步到雲端。</p>
     </header>
 
