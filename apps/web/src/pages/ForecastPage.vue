@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { onMounted } from "vue";
 import FiveDayUvCard from "../components/uv/FiveDayUvCard.vue";
+import TaiwanUvMap from "../components/uv/TaiwanUvMap.vue";
 import { useWebAppServices } from "../app/injection";
 
 /**
@@ -19,6 +20,12 @@ const { uvForecast } = useWebAppServices();
 
 onMounted(() => {
   void uvForecast.ensureLoaded();
+  /*
+   * 地圖資料只在這一頁載入。首頁不顯示地圖，一進 App 就抓等於為多數不會
+   * 看地圖的人多付一次請求——而它與五日預報共用同一次上游抓取，晚一點抓
+   * 不會讓 CWA 那邊多做事。
+   */
+  void uvForecast.ensureNationwideLoaded();
 });
 </script>
 
@@ -37,6 +44,47 @@ onMounted(() => {
       :forecast="uvForecast.forecast.value"
       @refresh="uvForecast.refresh"
     />
+
+    <!--
+      全臺 UV 分布地圖（2026-08-31）。
+
+      **不可點**，而且整張 aria-hidden——色塊地圖對色覺障礙與螢幕閱讀器都
+      傳達不了東西。等價內容是下方那份縣市 UV 清單：同樣的資料、可讀可
+      選取、可以被搜尋。刻意不做「只給輔助技術的隱藏文字」，那種東西一旦
+      跟畫面脫節就沒有人會發現。
+
+      沒有資料時整塊不渲染。地圖是附加的視覺化，五日預報才是這頁的主體，
+      它的失敗不該在畫面上留下一個壞掉的空位。
+    -->
+    <section
+      v-if="uvForecast.nationwide.value !== null"
+      class="uv-map-section"
+      aria-labelledby="uv-map-title"
+    >
+      <h2 id="uv-map-title" data-typography-role="section-title">
+        今日全臺分布
+      </h2>
+
+      <TaiwanUvMap
+        :forecast="uvForecast.nationwide.value"
+        :highlight-county-code="
+          uvForecast.region.value === null
+            ? null
+            : uvForecast.region.value.regionCode.slice(0, 5)
+        "
+      />
+
+      <ul class="uv-map-list">
+        <li
+          v-for="county in uvForecast.nationwide.value.counties"
+          :key="county.countyCode"
+          class="uv-map-list__item"
+        >
+          <span>{{ county.displayName }}</span>
+          <span class="stat-figure">{{ county.uvi }}</span>
+        </li>
+      </ul>
+    </section>
 
     <section class="forecast-region">
       <p class="forecast-region__label">
@@ -73,6 +121,40 @@ onMounted(() => {
 </template>
 
 <style scoped>
+.uv-map-section {
+  display: grid;
+  gap: var(--space-4);
+}
+
+/*
+ * 清單是地圖的等價內容，不是附屬裝飾——所以它常駐、可選取，並且用一般
+ * 內文字級而不是縮到最小。窄螢幕兩欄、寬一點三欄。
+ */
+.uv-map-list {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-1) var(--space-4);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+@media (min-width: 30rem) {
+  .uv-map-list {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+.uv-map-list__item {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--space-2);
+  padding-block: var(--space-1);
+  border-bottom: 1px solid var(--border-subtle);
+  color: var(--text-body);
+  font-size: var(--font-size-supporting);
+}
+
 .forecast-region {
   display: flex;
   justify-content: space-between;

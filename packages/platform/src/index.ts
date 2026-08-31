@@ -3,6 +3,7 @@ import type {
   ApplicationEventV1,
   EndSessionCommandV1,
   FiveDayUvForecast,
+  NationwideUvForecast,
   ProductLabelSnapshotV1,
   GearCategory,
   ProductCatalogRecordV1,
@@ -272,6 +273,13 @@ export interface DeviceGeolocationPort {
 
 export interface UvForecastApiPort {
   getFiveDayForecast(regionCode: string): Promise<FiveDayUvForecast>;
+  /**
+   * 全臺各縣市今日的 UV，供分布地圖使用。
+   *
+   * 與五日預報共用同一次上游抓取（見 contracts 的 NationwideUvForecast），
+   * 所以呼叫它不會增加 CWA 的用量。
+   */
+  getNationwideForecast(): Promise<NationwideUvForecast>;
 }
 
 export interface UvForecastSnapshotPort {

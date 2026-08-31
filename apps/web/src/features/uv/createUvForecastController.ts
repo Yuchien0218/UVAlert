@@ -1,4 +1,8 @@
-import type { FiveDayUvForecast, RegionSelection } from "@sunshield/contracts";
+import type {
+  FiveDayUvForecast,
+  NationwideUvForecast,
+  RegionSelection
+} from "@sunshield/contracts";
 import type {
   ConnectivityStatus,
   LifecyclePort,
@@ -45,9 +49,18 @@ export interface UvForecastController {
   readonly error: Readonly<ShallowRef<UvForecastError>>;
   readonly region: Readonly<ShallowRef<RegionSelection | null>>;
   readonly forecast: Readonly<ShallowRef<FiveDayUvForecast | null>>;
+  /**
+   * 全臺各縣市今日的 UV（分布地圖用）。
+   *
+   * 與五日預報**分開載入**：地圖只出現在 /forecast，首頁不需要它，
+   * 一進 App 就抓等於為多數不會看地圖的人多付一次請求。
+   */
+  readonly nationwide: Readonly<ShallowRef<NationwideUvForecast | null>>;
   readonly isEvening: ComputedRef<boolean>;
   readonly showEveningPrompt: ComputedRef<boolean>;
   ensureLoaded(): Promise<void>;
+  /** 只有真的要顯示地圖時才呼叫；已載入過就不再打。 */
+  ensureNationwideLoaded(): Promise<void>;
   refresh(): Promise<void>;
   dismissEveningPrompt(): void;
   dispose(): void;
@@ -72,6 +85,8 @@ export function createUvForecastController(
   const scheduler = dependencies.scheduler ?? createBrowserIntervalScheduler();
 
   const phaseState = shallowRef<UvForecastPhase>("idle");
+  const nationwideState = shallowRef<NationwideUvForecast | null>(null);
+  let nationwideInFlight: Promise<void> | null = null;
   const errorState = shallowRef<UvForecastError>(null);
   const regionState = shallowRef<RegionSelection | null>(null);
   const forecastState = shallowRef<FiveDayUvForecast | null>(null);
@@ -239,14 +254,38 @@ export function createUvForecastController(
     stopForeground();
   }
 
+  /**
+   * 地圖資料失敗時**不改變 phase**，也不顯示錯誤。
+   *
+   * 五日預報是這一頁的主體；地圖是附加的視覺化。讓地圖的失敗把整頁推進
+   * unavailable，等於用次要內容的問題蓋掉還能用的主要內容。地圖自己在沒有
+   * 資料時不渲染即可。
+   */
+  async function ensureNationwideLoaded(): Promise<void> {
+    if (nationwideState.value !== null) return;
+    if (nationwideInFlight !== null) return nationwideInFlight;
+    nationwideInFlight = (async () => {
+      try {
+        nationwideState.value = await dependencies.api.getNationwideForecast();
+      } catch {
+        nationwideState.value = null;
+      } finally {
+        nationwideInFlight = null;
+      }
+    })();
+    return nationwideInFlight;
+  }
+
   return {
     phase: shallowReadonly(phaseState),
     error: shallowReadonly(errorState),
     region: shallowReadonly(regionState),
     forecast: shallowReadonly(forecastState),
+    nationwide: shallowReadonly(nationwideState),
     isEvening,
     showEveningPrompt,
     ensureLoaded,
+    ensureNationwideLoaded,
     refresh,
     dismissEveningPrompt,
     dispose
