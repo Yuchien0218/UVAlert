@@ -56,3 +56,47 @@ describe("HomeCountdown", () => {
     expect(wrapper.find(".countdown__detail").exists()).toBe(true);
   });
 });
+
+/*
+ * 2026-08-31：狀態圖示搬到讀數旁邊，並從 20px 放大到 32px。
+ *
+ * 使用者回報「提醒頁太空」「圖示都太小了」。20px 的圖示夾在 16px 的說明
+ * 文字裡讀起來是標點符號，而狀態切換（時間跨過補擦門檻）是這個 App 最
+ * 重要的一刻。
+ *
+ * 三件事分開守，因為它們可以互相掩護：只守尺寸 → 圖示可以留在說明那行
+ * 變大；只守位置 → 可以搬過去卻還是 20px；只守「說明沒有圖示」→ 讀數
+ * 那邊也可以沒有，變成整個消失。
+ */
+describe("HomeCountdown 的狀態圖示", () => {
+  function mountCountdown() {
+    return mount(HomeCountdown, {
+      props: { presentation: basePresentation },
+      global: { stubs: { Transition: false } }
+    });
+  }
+
+  it("圖示在讀數那一列", () => {
+    const wrapper = mountCountdown();
+
+    expect(wrapper.get(".countdown__value").find("svg").exists()).toBe(true);
+  });
+
+  it("圖示是 32px", () => {
+    const wrapper = mountCountdown();
+
+    expect(
+      wrapper.get(".countdown__value svg").attributes("width")
+    ).toBe("32");
+  });
+
+  /*
+   * 同一件事只講一次。原本說明那一行也有一顆，兩個位置各放一顆會稀釋掉
+   * 狀態的份量——而且兩顆的尺寸遲早會各走各的。
+   */
+  it("說明那一行不再重複放一顆", () => {
+    const wrapper = mountCountdown();
+
+    expect(wrapper.get(".countdown__detail").find("svg").exists()).toBe(false);
+  });
+});

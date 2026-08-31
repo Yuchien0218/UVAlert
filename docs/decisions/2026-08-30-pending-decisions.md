@@ -33,7 +33,7 @@
 | 2 | ~~`/region` 收斂~~ ✅ 已完成：定位常駐，手動與略過收成文字連結，實測 1428px → 991px | §12.4 |
 | 3 | ~~`--color-apricot` 降級為保留備用~~ ✅ 已完成。**實際對比是 1.07 不是 1.53**——1.53 是對圖示琥珀金 `#C1832E`，但 styles.css 的 `--color-amber` 是 `#D9A35F`，兩者幾乎同色 | §12.5 |
 | 4 | ~~五日 UV 文案~~ ✅ 已完成（PR #53）：免責改成一句話同時講「當日最高值」與「今天只算剩餘時段」 | §10 |
-| 5 | **UV 地圖放 `/forecast` 五日卡下方**，不可點，`aria-hidden` ＋沿用現有縣市數字當等價物 | §13 |
+| 5 | ~~UV 地圖~~ ✅ 已完成（PR #59／#60）**UV 地圖放 `/forecast` 五日卡下方**，不可點，`aria-hidden` ＋沿用現有縣市數字當等價物 | §13 |
 | 6 | ~~`/settings/data` 說明句 ＋ 分隔線~~ ✅ 複查發現兩者 2026-08-30 就已完成；本次只補上 `dt` 的 `flex-shrink` 硬化 | §7 |
 | 7 | ~~衛教 B 版 plan／spec 標記部分作廢~~ ✅ 複查發現 2026-08-30 就已標記；本次補上 spec 的狀態行 | §1 |
 | 8 | ~~圖示按鈕做成共用元件~~ ✅ 已完成（PR #49：新增 IconButton.vue，九處全換） | §12.1 |
@@ -55,6 +55,9 @@
 | 17 | `reminderPresentation.ts` 的 `PRODUCT_IDENTITY_UNKNOWN` 文案與保守倒數規則矛盾（目前不會顯示） | §3 |
 | 18 | **icon-512.png 與 icon-512-maskable.png 是同一個檔**（MD5 相同）——maskable 沒有安全邊界，圓形 launcher 會裁到標記 | §5.2 |
 | 19 | 殘留 worktree `.worktrees/codex-supabase-uv-forecast` | §9 |
+| 20 | **17 顆圖示畫了但沒有任何使用點**，其中 `event-*` 四顆對應「記錄情境事件」——那是流程弱，不是圖示問題 | §15.3 |
+| 21 | 衛教頁 `<title>` 重複：實際輸出「防曬衛教｜防曬衛教｜UVAlert」 | §15.4 |
+| 22 | 提醒頁還有兩條區塊分隔線（`ZoneStatusList`／`RecentEventsList` 的 `border-top`），使用者只指名要拿掉頁首那條，這兩條**待確認** | §15.5 |
 
 ---
 
@@ -748,3 +751,66 @@ maskable 的用途是讓 Android 依各家 launcher 的形狀（圓形、圓角�
 | 底部導覽在 320px 撐出 16px 橫向捲軸（WCAG SC 1.4.10 基準寬度） | —        | 已完成，見 `claude/bottom-nav-overflow` |
 
 §1（token 紀律）稽核結論是「不需要再做一輪」。
+
+---
+
+## 十五、圖示尺寸量表與提醒頁「太空」（2026-08-31 第四批）
+
+使用者五件事：提醒頁的橫線、要不要加波浪元素、提醒頁要不要加圖示、「畫了很多圖示卻沒用上或太小」、衛教頁圖示下方空白太多。另外問了倒數的 `status-soon`。
+
+### 15.1 ✅ 已完成
+
+| 事項 | 做法 |
+| ---- | ---- |
+| 提醒頁的橫線 | 拿掉 `BrandHeader` 的 `border-bottom`（全域頁首，每頁都少一條） |
+| 衛教分類卡圖示下方空白 | 圖示併進標題列、卡片改單欄、圖示 32 → 40px |
+| 衛教主題頁加圖示 | 標題帶同一顆 `category.icon`，對應表抽到 `educationCategoryIcons.ts` |
+| 提醒頁加圖示 | 倒數狀態圖示搬到讀數旁並放大到 32px；夜間空狀態加 56px 沙漏 |
+| 圖示尺寸量表 | 新增 40／56 兩檔（`DESIGN.md` 第八節），統一走 `IconLead.vue` |
+
+### 15.2 ❌ 波浪元素：建議不做（使用者尚未裁決）
+
+提醒頁空的原因是**沒有倒數在跑**，不是缺分隔——剛拿掉一條線再加一個波浪回去是換個花樣解同一件事。
+
+而且波浪在這個 App 裡**已經有語意**：水。`event-water`、入水時間、耐水時間都在講水，拿它當純裝飾會稀釋掉它在水上活動那條線裡的意義。
+
+**唯一建議使用的位置：水上活動進行中的倒數。** 那時它不是裝飾，是「你現在在水裡，計時規則不一樣」的提示。這一項待裁決。
+
+### 15.3 17 顆沒有使用點的圖示（清點結果）
+
+圖示總數 **61**，實際被引用 **44**。
+
+| 類別 | 沒用到的 |
+| ---- | -------- |
+| 狀態 | `state-untimed`（**2026-08-31 起有了**，見下）、`state-notification-off`、`state-notification-pending`、`state-success`、`state-unverified` |
+| 事件 | `event-heavy-sweat`、`event-towel`、`event-friction`、`event-hand-wash` |
+| 裝備 | `gear-hat`、`gear-umbrella` |
+| 工具 | `tool-arrow-down`、`tool-loading`、`tool-delete`、`tool-share`、`tool-favorite`、`feature-setup-steps` |
+
+**裝備那兩顆是裁決造成的**（#10 裝備清單只留名稱），合理，不需要處理。
+
+**事件那四顆才是訊號。** 它們正好是「記錄情境事件」的四種情況，畫好了卻沒有進到任何流程——代表**記錄情境事件在畫面上很弱**，那是功能問題不是圖示問題。列為 #20。
+
+`state-untimed` 這次試著用在夜間空狀態，**畫出來看之後否決**：它是四狀態計量表的一員，幾何是為 20px 行內位置收斂的橫向膠囊，放到 56px 讀起來像刪除記號。改用 `nav-reminder`。
+
+### 15.4 衛教頁 `<title>` 重複
+
+實際輸出是「防曬衛教｜防曬衛教｜UVAlert」。分類名被串了兩次。列為 #21，這批沒動。
+
+### 15.5 提醒頁另外兩條分隔線（待確認）
+
+`ZoneStatusList` 與 `RecentEventsList` 各有一條 `border-top`。使用者說的「一條橫線」在無 session 的夜間畫面上只可能是頁首那條（已拿掉），但有 session 時這兩條也會出現。**要不要一起拿掉，待確認**——它們是有標題的區塊分隔，性質跟頁首那條不同。
+
+### 15.6 `--color-soon`（`#BB6820`）的回答：已經在用，就是 30 分鐘
+
+使用者問「沒有看到 status-soon，建議倒數 30 分鐘顯示 `#BB6820` 嗎？」
+
+**已經是這樣了，而且門檻正好就是 30 分鐘**：
+
+- `packages/domain/src/reducer.ts:34`：`const SOON_WINDOW_MS = 30 * 60_000`
+- `reducer.ts:891`：期限減現在 `<= SOON_WINDOW_MS` 時 `timingStatus = "reapply_soon"`
+- `HomeCountdown.vue`：`.countdown--soon { --tone-color: var(--color-soon); }`，進度條與狀態圖示都跟著變
+
+沒看到只是因為手上的 session 還沒進到最後 30 分鐘。
+
+**對比度上也站得住**，因為它只用在非文字圖形：`#BB6820` 對畫布是 **3.78**——一般字級的 4.5:1 過不了，但 WCAG SC 1.4.11（非文字對比）要求 3:1，而它承載的是進度條填色與狀態圖示，**不是文字**。文字部分永遠是 `--text-primary` 的「即將到期」字樣。所以不用改，也**不要**把它拿去當文字色。

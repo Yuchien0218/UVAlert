@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import { computed } from "vue";
 import { useRoute } from "vue-router";
+import IconLead from "../../components/common/IconLead.vue";
+import { educationCategoryIcon } from "../../features/education/educationCategoryIcons";
 import EducationSeoHead from "../../components/education/EducationSeoHead.vue";
 import EducationNotFoundPage from "./EducationNotFoundPage.vue";
 import {
@@ -41,9 +43,18 @@ const robots = computed(() =>
     <header class="page-heading">
       <RouterLink class="text-link" to="/education">← 防曬衛教</RouterLink>
       <p class="page-heading__eyebrow">衛教分類</p>
-      <h1 class="page-heading__title" data-typography-role="page-title">
-        {{ category.title }}
-      </h1>
+      <!--
+        2026-08-31：主題頁標題也帶上分類圖示（使用者要求）。
+
+        用的是**同一個 category.icon**，跟衛教首頁那張分類卡一樣——從卡片
+        點進來之後，圖示還在原地，讀者知道自己進了哪一個主題。首頁與這裡
+        都走 IconLead，所以尺寸只有一個地方在管。
+      -->
+      <IconLead :icon="educationCategoryIcon(category.slug)">
+        <h1 class="page-heading__title" data-typography-role="page-title">
+          {{ category.title }}
+        </h1>
+      </IconLead>
       <p class="page-heading__body">{{ category.description }}</p>
     </header>
 
