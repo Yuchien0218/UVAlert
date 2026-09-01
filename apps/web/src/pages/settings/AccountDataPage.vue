@@ -72,8 +72,7 @@ async function deleteCloudData(): Promise<void> {
         登入與雲端資料
       </h1>
       <p class="page-heading__body">
-        這裡只管理 UVAlert 的雲端資料；清除不會刪除你的 Google
-        帳號，也不會清除這台裝置的本機提醒。
+        此處僅管理雲端同步資料，清除不會影響 Google 帳號與本機現有提醒。
       </p>
     </header>
 

@@ -75,7 +75,7 @@ const robots = computed(() =>
         防曬衛教
       </h1>
       <p class="page-heading__body">
-        先回答你正在搜尋的問題，再補上適用情境、限制與官方來源。這裡是一般衛教，不取代診斷或個人醫療建議。
+        提供實用情境與官方指引。本專區為一般衛教資訊，不能取代專業醫療診斷。
       </p>
     </header>
 
@@ -116,7 +116,7 @@ const robots = computed(() =>
           id="education-categories-title"
           data-typography-role="section-title"
         >
-          依一天中的使用流程找答案
+          依一天的使用流程找答案
         </h2>
         <span>{{ secondaryCards.length }} 個主題</span>
       </div>

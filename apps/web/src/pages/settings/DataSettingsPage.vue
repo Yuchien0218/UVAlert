@@ -130,7 +130,7 @@ function writeSyncDisabled(value: boolean): void {
         本機資料與隱私
       </h1>
       <p>
-        不用登入也能使用；未同步的資料只儲存在這台裝置上。匯出的檔案由你的裝置直接產生，不會上傳、不經後端、不進分析。
+        免登入即可使用，未同步的資料只留於本機。匯出檔案由裝置直接產生，絕不上傳或用於分析。
       </p>
     </header>
 
@@ -169,19 +169,19 @@ function writeSyncDisabled(value: boolean): void {
             <dd>{{ summary.productCount }} 筆</dd>
           </div>
           <div>
-            <dt>進行中的提醒</dt>
-            <dd>{{ summary.hasActiveSession ? "有一個進行中" : "沒有" }}</dd>
+            <dt>進行中提醒</dt>
+            <dd>{{ summary.hasActiveSession ? "有" : "無" }}</dd>
           </div>
           <div>
             <dt>已結束的提醒</dt>
             <dd>{{ summary.endedSessionCount }} 次</dd>
           </div>
           <div>
-            <dt>未完成的設定草稿</dt>
-            <dd>{{ summary.hasSetupDraft ? "有" : "沒有" }}</dd>
+            <dt>未儲存草稿</dt>
+            <dd>{{ summary.hasSetupDraft ? "有" : "無" }}</dd>
           </div>
           <div>
-            <dt>最後一次氣象快照</dt>
+            <dt>氣象資料最後更新</dt>
             <dd>{{ formatTime(summary.lastWeatherSnapshotAt) }}</dd>
           </div>
           <div>
@@ -196,11 +196,10 @@ function writeSyncDisabled(value: boolean): void {
           匯出本機資料
         </h2>
         <p>
-          產生一個 JSON
-          檔案，包含你的防曬裝備、提醒紀錄、事件與偏好。檔案會儲存到你選的位置，不會傳到任何伺服器。
+          匯出包含裝備、提醒與偏好的 JSON 檔案（<strong>不含</strong>定位與裝置識別碼）。
         </p>
         <p class="caution">
-          匯出檔案<strong>不包含</strong>裝置識別碼、精確座標與任何金鑰。目前版本<strong>只能匯出，不能匯入還原</strong>；還原能力會與帳號遷移政策一起在之後設計。
+          目前<strong>僅支援匯出備份</strong>，匯入還原功能將於後續版本更新。
         </p>
         <button
           class="button button--primary"
@@ -229,7 +228,7 @@ function writeSyncDisabled(value: boolean): void {
           清除本機資料
         </h2>
         <p class="caution">
-          清除無法復原。如果想留下紀錄，<strong>請先在上方匯出</strong>。
+          清除後<strong>無法還原</strong>，如需備份請先匯出資料。
         </p>
 
         <AppNotice v-if="localData.notice.value?.kind === 'cleared'" kind="ok">
@@ -293,7 +292,7 @@ function writeSyncDisabled(value: boolean): void {
         <div class="clear-row clear-row--danger">
           <div>
             <strong>清除全部本機資料</strong>
-            <p>把這台裝置恢復成剛安裝的狀態。</p>
+            <p>清除本機資料，重置為初始狀態。</p>
           </div>
           <ConfirmAction
             :confirming="confirming === 'all'"
@@ -343,7 +342,7 @@ function writeSyncDisabled(value: boolean): void {
         跨裝置同步
       </h2>
       <p class="sync-group__lead">
-        使用防曬提醒不需要帳號。只有你選擇同步時才需要登入，用來同步進行中的提醒、裝備、地區與偏好。
+        登入 Google 帳號可跨裝置同步提醒、裝備與設定。
       </p>
 
       <div v-if="!signedIn" class="sync-block">

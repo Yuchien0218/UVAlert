@@ -33,7 +33,7 @@ const statusLabel = computed(() => {
   if (!isSupported.value) return "這個瀏覽器不支援通知";
   if (isGranted.value) return "通知已開啟";
   if (isDenied.value) return "通知已被拒絕";
-  return "還沒開啟通知";
+  return "未開啟";
 });
 
 /**
@@ -92,7 +92,7 @@ async function runTest(): Promise<void> {
           通知設定
         </h1>
         <p>
-          在防曬即將失效或該補擦時接收提醒。提醒由這台裝置本機發出，不經由外部伺服器。
+          通知皆於本機發出，不經外部伺服器。
         </p>
       </div>
       <IconButton
@@ -139,7 +139,7 @@ async function runTest(): Promise<void> {
       </div>
 
       <div v-else-if="!isGranted" class="action-box">
-        <p>開啟通知後，App 會在下一個補擦時間點前發送提醒。</p>
+        <p>開啟後將於下次補擦前發送提醒。</p>
         <button
           class="button button--primary"
           type="button"
@@ -180,10 +180,9 @@ async function runTest(): Promise<void> {
         <p>支援關閉分頁後送達。</p>
       </div>
       <div v-else class="delivery-emphasis delivery-emphasis--limited">
-        <p class="delivery-emphasis__title">送達範圍有限制</p>
+        <p class="delivery-emphasis__title">通知限制</p>
         <p>
-          只在分頁還活著時送達——切到其他分頁或 App 仍會收到，但關掉瀏覽器
-          或分頁被系統回收後就不會送達。你仍需自己回來查看目前的補擦狀態。
+          需保持瀏覽器分頁開啟；若關閉或遭系統清理將無法送達，請適時確認補擦狀態。
         </p>
       </div>
     </section>
