@@ -1114,7 +1114,19 @@ export class LocalSessionRepository {
       // 既有事件流已經不合法時不再往下推導，讓頁面只顯示一般原因事件。
       openWaterInterval = null;
     }
-    return { session, openWaterInterval };
+    /*
+     * 每一種情境事件最後一次選的部位（使用者裁決乙，2026-08-31）。
+     *
+     * 事件流是時間排序的，所以直接覆寫就會留下最後一筆。stream 已經解析
+     * 過更正鏈，被更正掉的事件不會出現在這裡。
+     */
+    const lastZoneIdsByKind: Record<string, string[]> = {};
+    for (const event of stream.contextEvents) {
+      if (!("zoneInstanceIds" in event)) continue;
+      lastZoneIdsByKind[event.contextType] = [...event.zoneInstanceIds];
+    }
+
+    return { session, openWaterInterval, lastZoneIdsByKind };
   }
 
   /**
