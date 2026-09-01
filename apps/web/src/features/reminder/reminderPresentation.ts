@@ -321,14 +321,30 @@ function buildUntimedPresentation(options: {
       secondaryActions: secondary("update_protection_record")
     };
   }
+  /*
+   * 2026-08-31 修文案。
+   *
+   * 原本寫「無法計算可信時間」「防曬乳的標示尚未確認，暫時無法建立補擦
+   * 倒數」——那在 2026-08-30 之後是**錯的**。那天的規則改動把
+   * `identity_unconfirmed` 從「擋住一般期限」改成「用 120 分鐘保守預設」
+   * （reducer.ts 的 GENERAL_DEADLINE_BLOCKERS），理由是產品標示只會讓間隔
+   * 變短，沒有標示時的值本來就是 120，擋住並沒有比較保守、只是什麼都不給。
+   *
+   * 所以「標示未確認」**不會是**倒數不存在的原因。這一段只在該部位因為
+   * 別的緣故本來就沒有時間型提醒時才走到（這個函式整段的 tone 是
+   * untimed），文案不能把標示講成罪魁禍首。
+   *
+   * 改成只講一件真的事：補上標示會讓間隔改依標示計算。不提「無法倒數」，
+   * 也不在這裡重複 120 分鐘——那是別的部位正在跑的事，這裡沒在跑。
+   */
   if (reasons.has("PRODUCT_IDENTITY_UNKNOWN")) {
     return {
       ...base,
-      eyebrow: "無法計算可信時間",
-      title: `${zoneLabel}使用的防曬乳身分尚未確認`,
-      body: "防曬乳的標示尚未確認，暫時無法建立補擦倒數。",
+      eyebrow: "需要補上防曬乳標示",
+      title: `${zoneLabel}使用的防曬乳標示尚未確認`,
+      body: "補上包裝標示後，這個部位的補擦間隔會改依標示計算。",
       timeLabel: "未計時",
-      ariaLabel: `${zoneLabel}使用的防曬乳身分尚未確認。`,
+      ariaLabel: `${zoneLabel}使用的防曬乳標示尚未確認。`,
       secondaryActions: secondary("update_protection_record")
     };
   }

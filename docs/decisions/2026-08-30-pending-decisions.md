@@ -52,7 +52,7 @@
 | - | ---- | ---- |
 | 15 | ~~裝備詳情 `dt` 直排跑版~~ ✅ 已完成：那一列改上下堆疊 ＋ `dt` 加 `flex: 0 0 auto` | §10 |
 | 16 | ~~/setup 儲存失敗~~ ✅ 已補診斷（PR #53）：console.error 留原始例外，草稿遺失與其他失敗分開文案 | §10 |
-| 17 | `reminderPresentation.ts` 的 `PRODUCT_IDENTITY_UNKNOWN` 文案與保守倒數規則矛盾（目前不會顯示） | §3 |
+| 17 | ~~`PRODUCT_IDENTITY_UNKNOWN` 文案矛盾~~ ✅ 2026-08-31 已修：拿掉「暫時無法建立補擦倒數」的假因果，改講「補上標示後會改依標示計算」；另加一條守門釘住 reducer 的前提 | §3 |
 | 18 | **icon-512.png 與 icon-512-maskable.png 是同一個檔**（MD5 相同）——maskable 沒有安全邊界，圓形 launcher 會裁到標記 | §5.2 |
 | 19 | 殘留 worktree `.worktrees/codex-supabase-uv-forecast` | §9 |
 | 20 | ~~`event-*` 四顆~~ ✅ 2026-08-31 已完成：查證後四種情境**選單裡本來就都有**，缺的只是圖示；已接上並改 icon-first。圖示使用率 44/61 → **48/61**。其餘 13 顆維持現狀 | §15.3／§16.2 |
@@ -140,7 +140,11 @@
 3. **收合只給 `tracking` 與 `not_applicable`**（「現在不用做事」的狀態），且部位數 > 1 才做。需要行動的狀態常駐——把「建議現在補擦」藏進 disclosure 正是 `DESIGN.md` 第五節展開收合契約要避免的事。
 4. 觸發器用契約允許的「標籤化按鈕」，`aria-expanded` ＋ `aria-controls` 齊備，chevron 換圖示 name 不用 `transform: rotate`。
 
-**已知未做**：`reminderPresentation.ts` 裡 `PRODUCT_IDENTITY_UNKNOWN` 的文案仍寫「暫時無法建立補擦倒數」「未計時」，與 2026-08-30 的保守倒數規則矛盾。目前**不會顯示**（那段只在真的沒有倒數時走到），所以不是活躍 bug，但是個陷阱。
+**✅ 2026-08-31 已修。** `PRODUCT_IDENTITY_UNKNOWN` 的文案原本寫「無法計算可信時間」「暫時無法建立補擦倒數」，與 2026-08-30 的保守倒數規則矛盾——那天起 `identity_unconfirmed` 不再擋住一般期限，改用 120 分鐘保守預設，所以「標示未確認」**不會是**沒有倒數的原因。
+
+改法是拿掉那個假因果，只留真的事：「補上包裝標示後，這個部位的補擦間隔會改依標示計算。」沒有刪掉整段——「補上標示」那個入口（`update_protection_record`）要留著。
+
+`productIdentityCopy.test.ts` 守三件事，其中一條**釘住前提本身**：只要 reducer 的 `GENERAL_DEADLINE_BLOCKERS` 仍然不含 `identity_unconfirmed`，文案就必須是這一版。哪天規則改回去，那條會紅，提醒把文案一起改回來——而不是讓兩邊再次悄悄不一致。
 
 ---
 
