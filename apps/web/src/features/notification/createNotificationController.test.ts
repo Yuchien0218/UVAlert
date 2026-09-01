@@ -456,6 +456,30 @@ describe("createNotificationController", () => {
     expect(controller.backgroundPushState.value).toBe("scheduled");
   });
 
+  it("atomically exposes recovered credential loss when an older remote schedule loses to a newer Session", async () => {
+    let resolveFirst!: (state: BackgroundPushState) => void;
+    const firstSchedule = new Promise<BackgroundPushState>((resolve) => {
+      resolveFirst = resolve;
+    });
+    const { controller, remotePush, currentSession } = createController();
+    remotePush.schedule.mockReturnValueOnce(firstSchedule);
+
+    const enabling = controller.enableBackgroundPush();
+    await vi.waitFor(() => expect(remotePush.schedule).toHaveBeenCalledOnce());
+    currentSession.value = sessionWith({
+      sessionNextDueAt: "2026-08-23T14:00:00.000Z"
+    });
+    await nextTick();
+    resolveFirst("permission-required");
+    await enabling;
+    await flush();
+
+    expect(remotePush.schedule).toHaveBeenCalledOnce();
+    expect(controller.backgroundPushState.value).toBe("permission-required");
+    await controller.enableBackgroundPush();
+    expect(remotePush.enable).toHaveBeenCalledTimes(2);
+  });
+
   it("disposes watchers, local notices, and late remote state writes", async () => {
     let resolveSchedule!: (state: BackgroundPushState) => void;
     const pendingSchedule = new Promise<BackgroundPushState>((resolve) => {

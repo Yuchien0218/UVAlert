@@ -99,8 +99,17 @@ export function createNotificationController(
     if (isCurrentRemoteSessionIntent(token)) backgroundPushState.value = state;
   }
 
+  function settlePermanentRemoteOwnershipLoss(lifecycleToken: number): void {
+    if (!isCurrentLifecycle(lifecycleToken)) return;
+    nextRemoteSessionIntentGeneration();
+    backgroundEnabled = false;
+    requiresDisable = false;
+    backgroundPushState.value = "permission-required";
+  }
+
   async function reconcileRemoteSessionIntent(token: number): Promise<void> {
     if (!backgroundEnabled || !isCurrentRemoteSessionIntent(token)) return;
+    const lifecycleToken = lifecycleGeneration;
 
     try {
       const dueAt = activeDueAt();
@@ -110,8 +119,7 @@ export function createNotificationController(
           : await remotePush.schedule(dueAt, dependencies.createOperationId());
       setSessionBackgroundState(token, result);
       if (result === "permission-required") {
-        backgroundEnabled = false;
-        requiresDisable = false;
+        settlePermanentRemoteOwnershipLoss(lifecycleToken);
       }
     } catch {
       setSessionBackgroundState(token, "schedule-error");
@@ -161,12 +169,12 @@ export function createNotificationController(
   async function flushPendingIntent(): Promise<void> {
     if ((!backgroundEnabled && !requiresDisable) || disposed) return;
     const token = nextRemoteSessionIntentGeneration();
+    const lifecycleToken = lifecycleGeneration;
     try {
       const result = await remotePush.flushPendingIntent();
       setSessionBackgroundState(token, result);
       if (result === "permission-required") {
-        backgroundEnabled = false;
-        requiresDisable = false;
+        settlePermanentRemoteOwnershipLoss(lifecycleToken);
       }
     } catch {
       setSessionBackgroundState(token, "schedule-error");
