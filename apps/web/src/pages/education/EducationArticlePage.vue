@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed } from "vue";
-import { useRoute } from "vue-router";
+import { useRoute, useRouter } from "vue-router";
+import IconButton from "../../components/common/IconButton.vue";
 import EducationArticleSummary from "../../components/education/EducationArticleSummary.vue";
 import EducationSeoHead from "../../components/education/EducationSeoHead.vue";
 import EducationNotFoundPage from "./EducationNotFoundPage.vue";
@@ -13,6 +14,7 @@ import {
 } from "../../features/education/educationContent";
 
 const route = useRoute();
+const router = useRouter();
 const slug = computed(() => String(route.params.slug ?? ""));
 const article = computed(() => findEducationArticle(slug.value));
 const category = computed(() =>
@@ -53,21 +55,36 @@ const relatedArticles = computed(() =>
       ]"
     />
 
+    <!--
+      2026-09-01：返回從左上角的文字連結改成右上角的圖示鈕（使用者要求，
+      與衛教分類頁同一批）。
+
+      「← 了解今天的 UV」原本自己佔一列，右邊什麼都沒有——跟 2026-08-31
+      那三個「叉叉獨佔一列」是同一個版型問題。返回目的地不變（回到這篇
+      文章所屬的分類），只是換成圖示並跟標題同列。
+
+      可及名稱帶上分類名（「返回了解今天的 UV」），不是泛用的「返回」——
+      螢幕閱讀器讀到時要知道會回到哪裡。
+    -->
     <header class="education-article-header">
-      <RouterLink
-        class="text-link"
-        :to="
-          category === undefined
-            ? '/education'
-            : educationCategoryPath(category.slug)
+      <div class="education-article-header__main">
+        <p class="page-heading__eyebrow">{{ article.primaryQuestion }}</p>
+        <h1 class="page-heading__title" data-typography-role="page-title">
+          {{ article.title }}
+        </h1>
+      </div>
+
+      <IconButton
+        icon="tool-arrow-left"
+        :label="`返回${category?.title ?? '防曬衛教'}`"
+        @click="
+          router.push(
+            category === undefined
+              ? '/education'
+              : educationCategoryPath(category.slug)
+          )
         "
-      >
-        ← {{ category?.title ?? "防曬衛教" }}
-      </RouterLink>
-      <p class="page-heading__eyebrow">{{ article.primaryQuestion }}</p>
-      <h1 class="page-heading__title" data-typography-role="page-title">
-        {{ article.title }}
-      </h1>
+      />
       <!--
         2026-08-31：拿掉這裡的 summary。
 
@@ -132,10 +149,18 @@ const relatedArticles = computed(() =>
   gap: var(--page-stack-gap-prose);
 }
 
+/* 標題群組在左、返回鈕在右上角同一列；下方兩列橫跨兩欄。 */
 .education-article-header {
   display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: start;
   gap: var(--space-3);
   max-width: 44rem;
+}
+
+.education-article-header__main {
+  display: grid;
+  gap: var(--space-3);
 }
 
 .education-article-header .page-heading__title {
@@ -144,6 +169,18 @@ const relatedArticles = computed(() =>
   max-width: 24em;
 }
 
+/*
+ * 2026-09-01：「最後查閱」靠右（使用者要求）。
+ *
+ * 它是**這篇文章的後設資料**，不是內文的第一句話。靠左時它緊接在標題
+ * 下面，讀起來像副標；靠右之後它退到頁面邊緣，跟返回鈕同一側，讀者的
+ * 視線不會把它算進正文。
+ */
+.education-article-meta {
+  grid-column: 1 / -1;
+  justify-self: end;
+  text-align: end;
+}
 
 .education-article-meta,
 .education-card-kicker {
@@ -173,6 +210,19 @@ const relatedArticles = computed(() =>
   margin: var(--prose-heading-gap-before) 0 var(--prose-heading-gap-after);
   font-size: var(--font-size-section-title);
   line-height: var(--line-height-section-title);
+}
+
+/*
+ * 2026-09-01：正文第一個標題不要再自己加上距（使用者回報「間距距離很奇怪」）。
+ *
+ * `--prose-heading-gap-before` 是**段落之間**要的呼吸——它假設上面有一段
+ * 內文。但正文的第一個元素上面是「先說結論」那張卡，而卡片與正文之間
+ * `.page-stack` 已經給了一次間距，兩個疊起來就是實測畫面上那一大塊空白。
+ *
+ * 同理處理任何「第一個子元素」：段落、清單也一樣不該自己撐開頂端。
+ */
+.education-article-body :deep(> :first-child) {
+  margin-top: 0;
 }
 
 .education-article-body :deep(h3) {

@@ -152,8 +152,20 @@ describe("B8 typography role migration", () => {
   it("讓每個 runtime raw heading 明確宣告合法的 typography role", () => {
     const discoveredExceptions = new Set<string>();
 
+    /*
+     * 2026-09-01：這一段也要剝註解。
+     *
+     * 上面的舊字級掃描早就剝了（見那段註解），但**這個 heading 掃描沒有**
+     * ——於是註解裡提到一個標籤就會被當成真的標題。實際踩到：
+     * `DataSettingsPage.vue` 的一段 CSS 註解寫「從 <strong> 改成 <h3>，
+     * 字級跟著 card-title 對齊」，測試立刻紅，訊息是「<h3>: expected
+     * undefined to be defined」——等於禁止在程式碼裡說明自己做了什麼。
+     *
+     * 這正是 CLAUDE.md「守門測試：坑一」的第二種方向（假失敗）。剝掉之後
+     * 守門強度不變：真正的 `<h3 …>` 在 template 裡，仍然全部掃得到。
+     */
     for (const file of migratedFiles.filter((path) => path.endsWith(".vue"))) {
-      const source = readFileSync(file, "utf8");
+      const source = stripComments(readFileSync(file, "utf8"));
       for (const match of source.matchAll(/<(h[1-3])\b[^>]*>/g)) {
         const tagName = match[1] as keyof typeof allowedHeadingRolesByTag;
         const openingTag = match[0];
