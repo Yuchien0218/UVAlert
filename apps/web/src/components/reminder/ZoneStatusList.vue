@@ -281,6 +281,13 @@ function getTimingTone(timingStatus: ZoneProjection["timingStatus"]): ZoneTone {
   --tone: var(--text-secondary);
   --tone-soft: var(--surface-primary);
   display: grid;
+
+  /*
+   * 2026-08-31：改成 minmax(0, 1fr) 讓子項填滿整欄，ChevronLink 的
+   * margin-inline-start: auto 才有東西可以推。預設的 grid 欄寬是 auto
+   * （縮到內容寬），auto margin 在那種欄裡沒有作用。
+   */
+  grid-template-columns: minmax(0, 1fr);
   gap: var(--space-2);
 }
 
@@ -341,11 +348,17 @@ function getTimingTone(timingStatus: ZoneProjection["timingStatus"]): ZoneTone {
  *
  * class 保留是刻意的：既有樣式與測試都以它為錨點。
  */
-.zone-group__toggle {
-  justify-self: start;
-}
+/* 定位交給 ChevronLink 自己的 margin-inline-start: auto。 */
 
+/*
+ * 2026-08-31：間距改由這裡給。
+ *
+ * 原本靠 ChevronLink 的 flex gap，但底線那一版把插槽內容包進一個 span，
+ * 兩個子項不再是 flex 項目——實測就是「提醒進行中6 個部位」黏在一起。
+ * 底線刻意連續跨過這個間距：它們是同一段可點的文字。
+ */
 .zone-group__count {
+  margin-inline-start: var(--space-2);
   color: var(--text-secondary);
   font-size: var(--font-size-caption);
   font-weight: 400;
