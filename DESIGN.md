@@ -564,6 +564,14 @@ runtime 堆疊：標題走 `"Noto Serif TC Subset", "Noto Serif TC", "Noto Serif
 | Caption       | 12px |      1.5 | 0.01em  | 短註腳、eyebrow、badge；不承載長段說明              |
 | Nav label     | 12px |      1.4 | 0.01em  | 主要底部導覽標籤                                    |
 
+> **2026-08-31：`.safety-note` 是「重要指示不可降到 caption」的唯一例外**（使用者裁決）。
+>
+> 那句「這是協助你記得補擦的提醒，不是安全曝曬時間或防護效果保證」出現在每一頁的底部，每次捲到底都會再讀一次；14px 兩行的份量與它的資訊量不成比例。降到 caption 之後首頁省下約 14px，而更重要的是它不再跟正文搶注意力。
+>
+> **顏色刻意維持 `--text-secondary`。** 原始提案是「降字級並降低對比」，只採用前半：實測 5.92:1，12px 仍然過 WCAG AA 的 4.5:1；再壓暗就會掉到門檻以下。**免責文字可以小，不可以看不清楚**——這是這個例外的邊界。
+>
+> 例外只有這一條。其他跨行的說明（`field-helper`、`note-box`、`delivery-note`）維持 supporting，`typographyRoles.test.ts` 仍然守著。
+
 中文衛教段落使用 `max-width: 38em` 避免行長過長。使用 `text-align: start`、`line-break: strict`、`word-break: normal`、`text-wrap: pretty`。不使用 `word-break: break-all` 或全文對齊。
 
 ### 倒數與數字規則

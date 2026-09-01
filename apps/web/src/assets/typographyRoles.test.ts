@@ -74,9 +74,31 @@ describe("B8 typography role migration", () => {
     });
   }
 
-  it("將可換行的安全說明維持在 supporting role", () => {
+  /*
+   * 2026-08-31：`.safety-note` 改守 caption（使用者裁決，DESIGN.md 第五節
+   * 已記錄這個例外）。
+   *
+   * 它原本跟下面三條一樣守 supporting——規則是「可跨行閱讀的次要資訊；
+   * 重要指示不可降到 caption」。這一條被開了例外，因為那句免責出現在每一頁
+   * 底部、每次捲到底都會再讀一次，14px 兩行的份量與資訊量不成比例。
+   *
+   * **這條測試沒有被刪掉，是改了斷言。** 刪掉的話字級之後可以自由漂移；
+   * 開例外與不設限是兩件事。
+   */
+  it("安全說明是 caption role（DESIGN.md 第五節記錄的唯一例外）", () => {
     expect(readFileSync("apps/web/src/assets/app.css", "utf8")).toMatch(
-      /\.safety-note\s*\{[^}]*font-size:\s*var\(--font-size-supporting\);/
+      /\.safety-note\s*\{[^}]*font-size:\s*var\(--font-size-caption\);/
+    );
+  });
+
+  /*
+   * **例外只換字級，不換顏色。** 原始提案是「降字級並降低對比」，只採用
+   * 前半：--text-secondary 在畫布上是 5.92:1，12px 仍然過 AA 的 4.5:1；
+   * 再壓暗就會掉到門檻以下。免責文字可以小，不可以看不清楚。
+   */
+  it("安全說明的顏色維持 text-secondary，不再壓暗", () => {
+    expect(readFileSync("apps/web/src/assets/app.css", "utf8")).toMatch(
+      /\.safety-note\s*\{[^}]*color:\s*var\(--text-secondary\);/
     );
   });
 

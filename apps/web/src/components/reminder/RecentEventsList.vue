@@ -144,13 +144,24 @@ function formatEventTime(date: Date): string {
   return formatTime(date);
 }
 
+/**
+ * 事件影響的部位，顯示在每一列的右欄。
+ *
+ * **涵蓋全部追蹤中的部位時寫「全部位」**（2026-08-31 使用者要求）。原本
+ * 寫「8 個部位」——但「開始提醒」本來就是全部位，報一個數字沒有告訴讀者
+ * 任何事；而部分部位的事件顯示的是實際名稱（「手臂、耳朵」），兩者放在
+ * 同一欄卻一個是數量一個是名稱，讀起來也不一致。
+ *
+ * 「全部位」兩者都解決：它是一個範圍描述，跟名稱清單是同一種東西。
+ */
 function getZoneNames(zoneIds: string[], zones: ZoneProjection[]): string {
   if (zoneIds.length === 0) return "";
-  if (
-    zoneIds.length === zones.filter((z) => z.trackingStatus === "active").length
-  ) {
-    return `${zones.filter((z) => z.trackingStatus === "active").length} 個部位`;
-  }
+
+  const activeCount = zones.filter(
+    (zone) => zone.trackingStatus === "active"
+  ).length;
+  if (zoneIds.length === activeCount) return "全部位";
+
   return zoneIds
     .map((id) => {
       const zone = zones.find((z) => z.zoneInstanceId === id);

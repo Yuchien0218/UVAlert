@@ -37,7 +37,23 @@ const hasValue = computed(() => props.uvi !== null && props.riskLevel !== null);
 </script>
 
 <template>
-  <section class="uv-headline" aria-labelledby="uv-headline-title">
+  <!--
+    2026-08-31：沒有 UV 值時整塊縮成一行。
+
+    有值時是「eyebrow ／ 大讀數＋等級＋入口 ／ 註記」三段，值得上下兩條
+    分隔線圍出來的一個帶狀區。**沒有值時它只剩「今日 UV / 無資料」，卻
+    照樣佔著同一塊空間**——首頁實測 89px，而那 89px 沒有告訴使用者任何
+    可以行動的事。
+
+    **縮成一行而不是整塊隱藏**：取不到預報有兩種原因，沒設定地區（另有
+    提示卡負責）與抓取失敗。整塊藏起來的話，第二種情況畫面上不會有任何
+    痕跡，使用者會以為這個 App 沒有 UV 功能。留一行是誠實的下限。
+  -->
+  <section
+    class="uv-headline"
+    :class="{ 'uv-headline--empty': !hasValue }"
+    aria-labelledby="uv-headline-title"
+  >
     <p id="uv-headline-title" class="uv-headline__eyebrow">
       {{ eyebrow }}
     </p>
@@ -107,6 +123,14 @@ const hasValue = computed(() => props.uvi !== null && props.riskLevel !== null);
   gap: var(--space-2);
   padding-block: var(--space-5);
   border-block: 1px solid var(--border-subtle);
+}
+
+/* 沒有值時排成一行：eyebrow 與「無資料」並排，內距也收掉一半。 */
+.uv-headline--empty {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-3);
+  padding-block: var(--space-3);
 }
 
 .uv-headline__eyebrow {
