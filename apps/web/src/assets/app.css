@@ -803,10 +803,20 @@ p.prose-block {
   text-align: justify;
 }
 
+/*
+ * 2026-08-31：從 supporting(14px) 降到 caption(12px)（使用者裁決）。
+ *
+ * 它的任務是「有寫」，不是「被讀」——每一次捲到底都會遇到同一句話，
+ * 14px 兩行的份量跟它的資訊量不成比例。
+ *
+ * **顏色刻意不動。** --text-secondary 在畫布上是 5.56:1，字級降到 12px
+ * 之後仍然過 WCAG AA 的 4.5:1；再壓暗才會有問題。動手前確認過這一點：
+ * 這是免責文字，縮小可以，看不清楚不行。
+ */
 .safety-note {
   margin: 0;
   color: var(--text-secondary);
-  font-size: var(--font-size-supporting);
+  font-size: var(--font-size-caption);
   line-height: var(--line-height-body);
 }
 

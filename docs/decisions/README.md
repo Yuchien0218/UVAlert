@@ -104,6 +104,9 @@
 | 首頁 UV 讀數右側加「五日預報 ›」入口（**推翻 2026-08-24 的「不再重複一個入口」**——頁首那個看起來像狀態不像連結） | `HomeUvHeadline.vue` | 已完成（2026-08-31） |
 | 「最近事件」與「各部位狀態」標題統一（前者原本是 --text-secondary）；展開鈕從滿寬 quiet 按鈕改成文字＋箭頭，數值照抄 zone-group__toggle | `RecentEventsList.vue` | 已完成（2026-08-31） |
 | 五日卡「更新時間」不再斷成兩行：`.uv-forecast__source span` 改成直接子代選擇器（原本連內層 stat-figure 也被設成 block） | `FiveDayUvCard.vue` | 已完成（2026-08-31） |
+| 首頁密度：沒有 UV 值時縮成一行（89→47px）、拿掉 home__spacer、安全註記降到 caption（42→36px）；總高 1029→945px | `HomeUvHeadline.vue`、`HomePage.vue`、`app.css` | 已完成（2026-08-31） |
+| `.safety-note` 成為「重要指示不可降到 caption」的**唯一例外**（字級降、顏色不降，實測 5.92:1 仍過 AA） | `DESIGN.md` 第五節、`typographyRoles.test.ts` 兩條守門 | **使用者裁決 2026-08-31** |
+| 最近事件涵蓋全部追蹤部位時寫「全部位」，不再報「8 個部位」 | `RecentEventsList.vue`、`recentEventZoneNames.test.ts` | 已完成（2026-08-31） |
 
 視覺設計另見：
 

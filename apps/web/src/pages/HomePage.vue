@@ -561,8 +561,6 @@ function handleEndSession(): void {
       -->
     </template>
 
-    <div class="home__spacer" />
-
     <p class="safety-note">
       這是協助你記得補擦的提醒，不是安全曝曬時間或防護效果保證。
     </p>
@@ -650,10 +648,6 @@ function handleEndSession(): void {
   color: var(--text-secondary);
   font-size: var(--font-size-supporting);
   line-height: var(--line-height-body);
-}
-
-.home__spacer {
-  min-height: var(--space-4);
 }
 
 .home-state {
