@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import type { PrimaryAction, ZoneProjection } from "@sunshield/contracts";
 import { computed, ref } from "vue";
-import Icon from "../icons/Icon.vue";
+import ChevronLink from "../common/ChevronLink.vue";
 import { useCurrentTime } from "../../composables/useCurrentTime";
 import {
   getZoneLabel,
@@ -212,24 +212,20 @@ function getTimingTone(timingStatus: ZoneProjection["timingStatus"]): ZoneTone {
           但 textContent 會連成「建議現在補擦8 個部位」，螢幕閱讀器讀起來
           沒有停頓。
         -->
-        <button
+        <ChevronLink
           v-else
           class="zone-group__toggle"
-          type="button"
-          :aria-expanded="isExpanded(group)"
-          :aria-controls="`zone-group-${group.status}`"
-          :aria-label="`${group.statusLabel}，${group.chips.length} 個部位`"
+          :expanded="isExpanded(group)"
+          :controls="`zone-group-${group.status}`"
+          :label="`${group.statusLabel}，${group.chips.length} 個部位`"
+          tone="var(--tone)"
           @click="toggle(group)"
         >
           <span class="zone-group__status">{{ group.statusLabel }}</span>
           <span class="zone-group__count"
             >{{ group.chips.length }} 個部位</span
           >
-          <Icon
-            :name="isExpanded(group) ? 'tool-chevron-down' : 'tool-chevron-right'"
-            :size="20"
-          />
-        </button>
+        </ChevronLink>
 
         <p v-if="group.sharedNotice !== null" class="zone-group__notice">
           {{ group.sharedNotice }}
@@ -339,18 +335,14 @@ function getTimingTone(timingStatus: ZoneProjection["timingStatus"]): ZoneTone {
  * 就說明會展開什麼——「提醒進行中 8 個部位」。chevron 換圖示 name，不用
  * transform: rotate，也不加淡入。
  */
+/*
+ * 2026-08-31：外觀改由 ChevronLink 提供（使用者要求「所有類似五日預報 ›
+ * 的按鈕都要同一個大小樣式」），這裡只剩定位用的東西。
+ *
+ * class 保留是刻意的：既有樣式與測試都以它為錨點。
+ */
 .zone-group__toggle {
-  display: flex;
-  align-items: center;
-  gap: var(--space-2);
-  min-height: var(--tap-target);
-  padding: 0;
-  border: 0;
-  background: none;
-  color: var(--tone);
-  cursor: pointer;
-  font: inherit;
-  text-align: start;
+  justify-self: start;
 }
 
 .zone-group__count {
