@@ -498,18 +498,6 @@ const waterHasClaim = computed<string>({
             <p class="question-card__helper">
               只依照包裝標示選擇，不從產品名稱或使用感推測。
             </p>
-            <div class="choice-grid choice-grid--row">
-              <label>
-                <input
-                  v-model="waterHasClaim"
-                  type="radio"
-                  :name="groupNames.waterResistance"
-                  value="yes"
-                />
-                <span>有耐水標示</span>
-              </label>
-            </div>
-
             <!--
               **第二層緊接在「有耐水標示」下面，不是排在四個選項之後。**
 
@@ -520,39 +508,72 @@ const waterHasClaim = computed<string>({
 
               radio group 被拆成兩個 `<div>`，但 `name` 相同，所以單選行為
               不受影響。
+
+              **2026-09-01 第二次調整（使用者要求「旁邊有一條顏色怪怪的，
+              字也分兩行」）：改成與母選項接成同一張卡。**
+
+              前一版靠「縮排＋左側一條連接線」表示層級。那條線在畫面上是一
+              段沒有來由的色塊——它不圍住任何東西，只是浮在旁邊；而縮排又把
+              兩個選項擠窄，「耐水 40 分鐘」因此折成兩行。
+
+              現在改成**用包含關係取代連接線**：母選項的下緣拿掉圓角與框線，
+              分鐘那一排直接續在下面、共用同一組邊框與底色，讀起來就是同一
+              張卡的第二段。層級不需要另一個圖形來說明。
+
+              文字也一起縮短成「40 分鐘」——母選項已經寫了「有耐水標示」，
+              再重複一次「耐水」正是把字擠到第二行的原因。
             -->
-            <div
-              v-if="waterHasClaim === 'yes'"
-              class="choice-grid label-question__minutes"
-            >
-              <label>
+            <div class="choice-grid choice-grid--row">
+              <label
+                class="water-claim-option"
+                :class="{
+                  'water-claim-option--joined': waterHasClaim === 'yes'
+                }"
+              >
                 <input
-                  v-model="value.waterResistance"
+                  v-model="waterHasClaim"
                   type="radio"
-                  :name="`${groupNames.waterResistance}-minutes`"
-                  value="40"
-                  @change="markTouched('water')"
+                  :name="groupNames.waterResistance"
+                  value="yes"
                 />
-                <span>
-                  耐水
-                  <span class="stat-figure" data-water-resistance="40">40</span>
-                  分鐘
-                </span>
+                <span>有耐水標示</span>
               </label>
-              <label>
-                <input
-                  v-model="value.waterResistance"
-                  type="radio"
-                  :name="`${groupNames.waterResistance}-minutes`"
-                  value="80"
-                  @change="markTouched('water')"
-                />
-                <span>
-                  耐水
-                  <span class="stat-figure" data-water-resistance="80">80</span>
-                  分鐘
-                </span>
-              </label>
+
+              <div
+                v-if="waterHasClaim === 'yes'"
+                class="choice-grid label-question__minutes"
+              >
+                <label>
+                  <input
+                    v-model="value.waterResistance"
+                    type="radio"
+                    :name="`${groupNames.waterResistance}-minutes`"
+                    value="40"
+                    @change="markTouched('water')"
+                  />
+                  <span>
+                    <span class="stat-figure" data-water-resistance="40"
+                      >40</span
+                    >
+                    分鐘
+                  </span>
+                </label>
+                <label>
+                  <input
+                    v-model="value.waterResistance"
+                    type="radio"
+                    :name="`${groupNames.waterResistance}-minutes`"
+                    value="80"
+                    @change="markTouched('water')"
+                  />
+                  <span>
+                    <span class="stat-figure" data-water-resistance="80"
+                      >80</span
+                    >
+                    分鐘
+                  </span>
+                </label>
+              </div>
             </div>
 
             <div class="choice-grid choice-grid--row">
@@ -735,15 +756,38 @@ const waterHasClaim = computed<string>({
  * 而 40／80 本來就是一組二選一。
  */
 /*
- * 沿用 `.choice-grid`（選項外框與自訂 radio 外觀來自那裡），只覆寫欄數與
- * 縮排。**第一版自己刻了一份 label 樣式，畫出來看之後發現 radio 變回瀏覽器
- * 預設的藍點**——同一個面板裡兩種 radio 外觀。共用比重刻安全。
+ * 母選項被選中時，下緣接到分鐘那一排——所以拿掉下方圓角。
+ * 邊框留著：兩段共用同一條線，看起來就是一張卡被橫線分成兩段。
+ */
+.water-claim-option--joined {
+  border-end-start-radius: 0;
+  border-end-end-radius: 0;
+}
+
+/*
+ * 分鐘那一排：續在母選項下面，共用邊框與底色。
+ *
+ * **不用連接線表示層級，用包含關係。** 前一版是「縮排＋左側一條 2px 的
+ * 線」，那條線在畫面上是一段沒有來由的色塊（它不圍住任何東西），而縮排
+ * 把選項擠窄到讓「耐水 40 分鐘」折成兩行。使用者的原話是「旁邊有一條顏色
+ * 怪怪的，字也分兩行了」。
+ *
+ * `margin-top` 取負的 gap 是為了跟母選項貼齊——`.choice-grid` 的 gap 是
+ * space-2，不扣掉的話兩段之間會有一條縫，就不像同一張卡了。
+ *
+ * 沿用 `.choice-grid`（選項外框與自訂 radio 外觀來自那裡），只覆寫欄數。
+ * **更早一版自己刻了一份 label 樣式，畫出來之後 radio 變回瀏覽器預設的
+ * 藍點**——同一個面板裡兩種 radio 外觀。共用比重刻安全。
  */
 .label-question__minutes {
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  margin-inline-start: var(--space-4);
-  padding-inline-start: var(--space-4);
-  border-inline-start: 2px solid var(--border-subtle);
+  margin-top: calc(var(--space-2) * -1);
+  padding: var(--space-3);
+  border: 1px solid var(--color-muted);
+  border-top: 0;
+  border-end-start-radius: var(--radius-sm);
+  border-end-end-radius: var(--radius-sm);
+  background: var(--color-hairline);
 }
 
 /*
