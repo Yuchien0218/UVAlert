@@ -140,3 +140,47 @@ describe("ChevronLink", () => {
     expect(offenders, "文字＋尾端 chevron 一律用 ChevronLink").toEqual([]);
   });
 });
+
+/*
+ * 2026-08-31（第三輪，也是定案）：**只統一大小，外觀其餘保持原樣**。
+ *
+ * 中間有一版把三處統一成「都靠右、都有底線、都 caption」，被使用者退回
+ * ——「只要統一大小就好，有沒有底線都保持原樣」。
+ *
+ * 所以這個元件刻意**不寫 text-decoration**：渲染成 <a> 時保有瀏覽器預設的
+ * 底線（五日預報），渲染成 <button> 時沒有（兩個展開控制）。那正好是收斂
+ * 之前三個使用點各自的樣子。
+ */
+describe("ChevronLink 只統一大小", () => {
+  const SOURCE = readFileSync(
+    "apps/web/src/components/common/ChevronLink.vue",
+    "utf8"
+  ).replace(/\/\*[\s\S]*?\*\//g, "");
+
+  /*
+   * 大小是**統一的那一項**：字級沿用容器（font: inherit），命中區與 gap
+   * 由元件決定。三個使用點實測都是 16px／8px／44px。
+   */
+  it("命中區與間距由元件統一決定", () => {
+    expect(SOURCE).toMatch(/\.chevron-link\s*\{[\s\S]*?gap: var\(--space-2\);/);
+    expect(SOURCE).toMatch(
+      /\.chevron-link\s*\{[\s\S]*?min-height: var\(--tap-target\);/
+    );
+  });
+
+  /*
+   * **不准再寫 text-decoration。** 寫 none 會拿掉五日預報的底線，寫
+   * underline 會替兩個按鈕加上原本沒有的底線——兩個方向都被使用者退回過。
+   */
+  it("不碰 text-decoration，讓 a 與 button 各自保持原樣", () => {
+    expect(SOURCE).not.toContain("text-decoration");
+  });
+
+  /*
+   * 對齊也不統一：五日預報靠右是它容器的事（uv-headline__more 的
+   * margin-inline-start: auto），另外兩個靠左。元件本身不決定位置。
+   */
+  it("元件不決定水平位置", () => {
+    expect(SOURCE).not.toContain("margin-inline-start");
+  });
+});

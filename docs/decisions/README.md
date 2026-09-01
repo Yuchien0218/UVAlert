@@ -107,7 +107,7 @@
 | 首頁密度：沒有 UV 值時縮成一行（89→47px）、拿掉 home__spacer、安全註記降到 caption（42→36px）；總高 1029→945px | `HomeUvHeadline.vue`、`HomePage.vue`、`app.css` | 已完成（2026-08-31） |
 | `.safety-note` 成為「重要指示不可降到 caption」的**唯一例外**（字級降、顏色不降，實測 5.92:1 仍過 AA） | `DESIGN.md` 第五節、`typographyRoles.test.ts` 兩條守門 | **使用者裁決 2026-08-31** |
 | 最近事件涵蓋全部追蹤部位時寫「全部位」，不再報「8 個部位」 | `RecentEventsList.vue`、`recentEventZoneNames.test.ts` | 已完成（2026-08-31） |
-| 「文字 ＋ 右側箭頭」收斂成 `ChevronLink`（原本三處各一份：12px/16px、gap space-1/space-2、有無 44px 命中區） | `components/common/ChevronLink.vue`、`chevronLink.test.ts`（含白名單擋第四種） | 已完成（2026-08-31） |
+| 「文字 ＋ 右側箭頭」收斂成 `ChevronLink`——**只統一大小**（gap、44px 命中區、箭頭尺寸），底線與對齊各自保持原樣。中途有一版連底線與靠右也統一，被使用者退回 | `components/common/ChevronLink.vue`、`chevronLink.test.ts`（10 條，含「不准碰 text-decoration」） | 已完成（2026-08-31） |
 | 「最近事件」上緣加分隔線（使用者指定位置）；全站現在只有三條線：UV 帶狀區上下緣 ＋ 這一條 | `RecentEventsList.vue` | 已完成（2026-08-31） |
 | 最近事件的「全部位」改成膠囊（範圍描述是分類，用膠囊；實際名稱是資料，用純文字） | `RecentEventsList.vue` | 已完成（2026-08-31） |
 

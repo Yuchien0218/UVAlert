@@ -99,7 +99,18 @@ const iconName = computed(() =>
   font: inherit;
   font-weight: 500;
   text-align: start;
-  text-decoration: none;
+
+  /*
+   * 2026-08-31：**刻意不寫 `text-decoration: none`**（使用者要求「有沒有
+   * 底線都保持原樣」）。
+   *
+   * 這個元件會渲染成 `<a>`（導覽）或 `<button>`（展開）。不碰
+   * text-decoration 的話，兩者各自保持它們原本的樣子：連結有瀏覽器預設的
+   * 底線，按鈕沒有。那正好就是收斂之前三個使用點的狀態。
+   *
+   * 中間有一版把三處統一成「都有底線」，被使用者退回——統一的是**大小**，
+   * 不是外觀的每一項。
+   */
 }
 
 .chevron-link__chevron {
