@@ -248,6 +248,23 @@ function renderArticlePage(article, content, baseUrl) {
   });
 }
 
+/**
+ * 組 <title>，並且**不重複相鄰的同名區段**。
+ *
+ * 2026-08-31 修：衛教首頁自己的標題就叫「防曬衛教」，套進
+ * `${title}｜防曬衛教｜UVAlert` 之後實際輸出是
+ * 「防曬衛教｜防曬衛教｜UVAlert」。
+ *
+ * 與 apps/web/src/features/education/educationSeo.ts 的 buildEducationTitle
+ * 是同一條規則——SPA 與這裡產的靜態頁必須輸出同一個標題，否則同一個網址
+ * 在有無 JS 兩種情況下標題會不一樣。
+ */
+function buildTitle(pageTitle) {
+  return [pageTitle, "防曬衛教", "UVAlert"]
+    .filter((segment, index, all) => segment !== all[index - 1])
+    .join("｜");
+}
+
 function renderDocument({
   title,
   description,
@@ -307,7 +324,7 @@ function renderDocument({
     lastmod === undefined
       ? ""
       : `<meta name="last-modified" content="${escapeHtml(lastmod)}">`;
-  return `<!doctype html><html lang="zh-Hant"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>${escapeHtml(title)}｜防曬衛教｜UVAlert</title><meta name="description" content="${escapeHtml(description)}"><meta name="robots" content="${robots}"><link rel="canonical" href="${escapeHtml(canonicalUrl)}"><meta property="og:title" content="${escapeHtml(title)}"><meta property="og:description" content="${escapeHtml(description)}"><meta property="og:type" content="${article === undefined ? "website" : "article"}"><meta property="og:url" content="${escapeHtml(canonicalUrl)}"><meta property="og:site_name" content="UVAlert 防曬晴報員">${lastmodMeta}<style>${PUBLIC_STYLE}</style>${schemaScripts}</head><body><header class="site-header"><a href="/">UVAlert 防曬晴報員</a><small>防曬生活編輯部</small></header><main>${body}</main><footer>一般衛教內容；若有持續或加重的不適，請尋求醫療專業協助。</footer></body></html>`;
+  return `<!doctype html><html lang="zh-Hant"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>${escapeHtml(buildTitle(title))}</title><meta name="description" content="${escapeHtml(description)}"><meta name="robots" content="${robots}"><link rel="canonical" href="${escapeHtml(canonicalUrl)}"><meta property="og:title" content="${escapeHtml(title)}"><meta property="og:description" content="${escapeHtml(description)}"><meta property="og:type" content="${article === undefined ? "website" : "article"}"><meta property="og:url" content="${escapeHtml(canonicalUrl)}"><meta property="og:site_name" content="UVAlert 防曬晴報員">${lastmodMeta}<style>${PUBLIC_STYLE}</style>${schemaScripts}</head><body><header class="site-header"><a href="/">UVAlert 防曬晴報員</a><small>防曬生活編輯部</small></header><main>${body}</main><footer>一般衛教內容；若有持續或加重的不適，請尋求醫療專業協助。</footer></body></html>`;
 }
 
 function renderSitemap(baseUrl, urls) {

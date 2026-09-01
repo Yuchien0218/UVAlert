@@ -9,7 +9,10 @@ import EducationArticlePage from "./EducationArticlePage.vue";
 import EducationCategoryPage from "./EducationCategoryPage.vue";
 import EducationIndexPage from "./EducationIndexPage.vue";
 import { ICONS } from "../../generated/icons.generated";
-import { clearEducationSeo } from "../../features/education/educationSeo";
+import {
+  buildEducationTitle,
+  clearEducationSeo
+} from "../../features/education/educationSeo";
 
 function makeRouter(component: object, path: string): Router {
   return createRouter({
@@ -361,6 +364,56 @@ describe("衛教長文的波浪分隔線", () => {
     }
 
     expect(offenders, "波浪只用在衛教長文").toEqual([]);
+  });
+});
+
+/*
+ * 2026-08-31：<title> 不重複相鄰的同名區段。
+ *
+ * 衛教首頁自己的標題就叫「防曬衛教」，套進 `${title}｜防曬衛教｜UVAlert`
+ * 之後實際輸出是「防曬衛教｜防曬衛教｜UVAlert」——同一個詞連著出現兩次。
+ *
+ * 修法是「去掉與前一段相同的段落」而不是特判首頁：將來若有別的頁面剛好
+ * 叫「防曬衛教」，或區段名改了，都不必再改一次。
+ */
+describe("衛教頁的 <title>", () => {
+  /*
+   * 兩件事分開守：首頁是**會**去重的那一個，主題頁是**不該**被去重誤傷的
+   * 那一個。只守首頁的話，把整個尾綴拿掉也會過。
+   */
+  it("首頁不重複「防曬衛教」", () => {
+    expect(buildEducationTitle("防曬衛教")).toBe("防曬衛教｜UVAlert");
+  });
+
+  it("一般頁面仍然保留完整的三段", () => {
+    expect(buildEducationTitle("流汗或碰水後")).toBe(
+      "流汗或碰水後｜防曬衛教｜UVAlert"
+    );
+  });
+
+  it("實際掛載首頁時 document.title 沒有重複", () => {
+    mount(EducationIndexPage, {
+      global: { stubs: { RouterLink: { template: "<a><slot /></a>" } } }
+    });
+
+    expect(document.title).toBe("防曬衛教｜UVAlert");
+  });
+
+  /*
+   * SPA 與靜態產生器必須輸出同一個標題，否則同一個網址在有無 JS 兩種情況
+   * 下標題不一樣。這條掃產生器的原始碼，確認它也走了同一條規則。
+   */
+  it("靜態產生器用同一條規則", () => {
+    const generator = readFileSync(
+      "tools/education/generate-public-site.mjs",
+      "utf8"
+    ).replace(/\/\*[\s\S]*?\*\//g, "");
+
+    expect(generator).toContain("function buildTitle(pageTitle)");
+    expect(
+      generator,
+      "不該再有寫死的三段尾綴"
+    ).not.toContain("｜防曬衛教｜UVAlert</title>");
   });
 });
 

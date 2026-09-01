@@ -20,6 +20,26 @@ export interface EducationSeoInput {
 const SEO_MARKER = "data-uvalert-education-seo";
 const BRAND_NAME = "UVAlert 防曬晴報員";
 
+/** `<title>` 的區段名與品牌尾綴。與 BRAND_NAME 不同：那個是給 schema 用的全名。 */
+const TITLE_SECTION = "防曬衛教";
+const TITLE_SUFFIX = "UVAlert";
+
+/**
+ * 組 `<title>`，並且**不重複相鄰的同名區段**。
+ *
+ * 2026-08-31 修：衛教首頁自己的標題就叫「防曬衛教」，套進
+ * `${title}｜防曬衛教｜UVAlert` 之後實際輸出是
+ * 「防曬衛教｜防曬衛教｜UVAlert」——同一個詞連著出現兩次。
+ *
+ * 用「去掉與前一段相同的段落」而不是特判首頁：將來若有別的頁面剛好叫
+ * 「防曬衛教」，或區段名改了，都不必再改一次這裡。
+ */
+export function buildEducationTitle(pageTitle: string): string {
+  return [pageTitle, TITLE_SECTION, TITLE_SUFFIX]
+    .filter((segment, index, all) => segment !== all[index - 1])
+    .join("｜");
+}
+
 export function getEducationPublicSiteUrl(): string {
   const configured = import.meta.env.VITE_PUBLIC_SITE_URL?.trim();
   return (configured || "http://localhost:4173").replace(/\/+$/, "");
@@ -35,7 +55,7 @@ export function applyEducationSeo(input: EducationSeoInput): void {
   if (typeof document === "undefined") return;
 
   const canonicalUrl = toEducationAbsoluteUrl(input.canonicalPath);
-  document.title = `${input.title}｜防曬衛教｜UVAlert`;
+  document.title = buildEducationTitle(input.title);
   setMeta("description", input.description);
   setMeta("robots", input.robots);
   setMeta("og:title", input.title, "property");
@@ -68,7 +88,7 @@ export function applyEducationSeo(input: EducationSeoInput): void {
   });
   setJsonLd(
     "breadcrumbs",
-    createBreadcrumbSchema(input.breadcrumbs, canonicalUrl)
+    createBreadcrumbSchema(input.breadcrumbs, canonicalUrl, input.title)
   );
 
   if (input.article === undefined) {
@@ -109,7 +129,8 @@ function createArticleSchema(article: EducationArticle, canonicalUrl: string) {
 
 function createBreadcrumbSchema(
   breadcrumbs: EducationBreadcrumb[],
-  currentUrl: string
+  currentUrl: string,
+  pageTitle: string
 ) {
   const items = breadcrumbs.map((breadcrumb, index) => ({
     "@type": "ListItem",
@@ -121,7 +142,7 @@ function createBreadcrumbSchema(
     items.push({
       "@type": "ListItem",
       position: items.length + 1,
-      name: document.title.replace(/｜防曬衛教｜UVAlert$/, ""),
+      name: pageTitle,
       item: currentUrl
     });
   }
