@@ -59,7 +59,7 @@ function handleCancel(): void {
         label="取消"
         @click="handleCancel"
       />
-      <p>資料會先儲存在這台裝置；若已開啟同步，之後也可以同步到雲端。</p>
+      <p>資料預設儲存於本機，且支援雲端同步功能。</p>
     </header>
 
     <GearForm :product-id="productId" @saved="handleSaved" />

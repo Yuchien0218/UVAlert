@@ -28,7 +28,7 @@ import {
  * 三、**主 CTA 依狀態切換，不是固定的「記錄使用中」**。wireframe 把
  * 「記錄使用中」畫成使用中裝備的主要按鈕，但這件裝備已經在使用中，按鈕
  * 沒有實質意義。改成：
- *   - 使用中 → 主 CTA 是「換新的一瓶」（`archiveProduct`，移入收納）。
+ *   - 使用中 → 主 CTA 是「移至收納」（`archiveProduct`，移入收納）。
  *   - 收納中 → 主 CTA 是「記錄使用中」（`restoreProduct`，恢復使用）。
  * 這兩個動作已經在 `GearFormPage.vue` 的編輯頁用同一套判斷邏輯
  * （`isArchived`／`canRestore`）驗證過，這裡沿用而不是另外發明狀態機。
@@ -260,7 +260,7 @@ async function handleDelete(): Promise<void> {
           :disabled="isBusy"
           @click="handleArchive"
         >
-          {{ isSunscreen ? "換新的一瓶" : "移至收納" }}
+          移至收納
         </button>
         <p
           v-else-if="safety !== null && safety.kind === 'blocked'"

@@ -45,7 +45,7 @@ describe("ProductsPage", () => {
     const currentSection = productsPage.indexOf(
       'aria-labelledby="gear-current-title"'
     );
-    const addButton = productsPage.indexOf("新增防曬裝備", currentSection);
+    const addButton = productsPage.indexOf("新增裝備", currentSection);
     const pastSection = productsPage.indexOf(
       'aria-labelledby="gear-past-title"'
     );

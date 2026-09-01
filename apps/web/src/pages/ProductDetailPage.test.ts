@@ -183,12 +183,12 @@ describe("ProductDetailPage", () => {
   });
 
   describe("主要行動依狀態切換", () => {
-    it("使用中的防曬乳，主 CTA 是換新的一瓶，呼叫 archiveProduct", async () => {
+    it("使用中的裝備，主 CTA 是移至收納，呼叫 archiveProduct", async () => {
       const { wrapper, archiveProduct } = await mountDetail(makeProduct());
 
       const button = wrapper
         .findAll("button")
-        .find((b) => b.text() === "換新的一瓶");
+        .find((b) => b.text() === "移至收納");
       expect(button).toBeDefined();
       expect(wrapper.text()).not.toContain("記錄使用中");
 
@@ -196,7 +196,7 @@ describe("ProductDetailPage", () => {
       expect(archiveProduct).toHaveBeenCalledWith("prod-1");
     });
 
-    it("使用中的非防曬乳，主 CTA 文字改為移至收納", async () => {
+    it("使用中的非防曬乳，主 CTA 同樣是移至收納", async () => {
       const { wrapper } = await mountDetail(
         makeProduct({ gearCategory: "eyewear", displayName: "太陽眼鏡" })
       );
@@ -204,7 +204,6 @@ describe("ProductDetailPage", () => {
       expect(
         wrapper.findAll("button").some((b) => b.text() === "移至收納")
       ).toBe(true);
-      expect(wrapper.text()).not.toContain("換新的一瓶");
     });
 
     it("收納中的裝備，主 CTA 是記錄使用中，呼叫 restoreProduct", async () => {
@@ -216,7 +215,7 @@ describe("ProductDetailPage", () => {
         .findAll("button")
         .find((b) => b.text() === "記錄使用中");
       expect(button).toBeDefined();
-      expect(wrapper.text()).not.toContain("換新的一瓶");
+      expect(wrapper.text()).not.toContain("移至收納");
 
       await button!.trigger("click");
       expect(restoreProduct).toHaveBeenCalledWith("prod-1");
