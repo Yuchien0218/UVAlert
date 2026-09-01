@@ -13,14 +13,25 @@ interface Props {
    */
   sunscreenFields?: boolean;
   /**
-   * 預設收合成摘要，展開才顯示四個問答（2026-08-24）。
+   * 四題全部預設收起來（2026-09-01 之前是「整組藏在一顆按鈕後面」）。
    *
    * 這四題**全部可以跳過**——預設值就是保守值（有防曬標示／沒有等待
-   * 說明／沒有明確間隔→120 分鐘／耐水不確定），所以收合不會讓使用者
-   * 漏填任何必要資料。攤開時它們佔掉 1690px（整頁的 55%），收合後
-   * 約 210px。`/setup` 流程的即時記錄不套用，維持攤開。
+   * 說明／沒有明確間隔→120 分鐘／耐水不確定），所以收起來不會讓使用者
+   * 漏填任何必要資料。
+   *
+   * `/setup` 的即時記錄傳 false：那條流程正在建立倒數，第一題（有沒有
+   * 防曬標示）直接決定這次能不能建立補擦倒數，不該要多按一下才看得到。
+   * 其餘三題仍然收著。
    */
   collapsible?: boolean;
+  /**
+   * 值是不是來自已儲存的紀錄。
+   *
+   * **這個元件無法自己分辨「沒填過」與「填了、剛好等於預設值」**——兩者
+   * 的資料完全一樣。編輯既有裝備時每一列都有真正的答案（那份 snapshot
+   * 存過），所以由呼叫端告知；新增時則是 false，沒動過的列寫「尚未填寫」。
+   */
+  prefilled?: boolean;
   eyebrow?: string;
   title?: string;
   description?: string;
@@ -30,6 +41,7 @@ const props = withDefaults(defineProps<Props>(), {
   otherTopicalOnly: false,
   sunscreenFields: true,
   collapsible: false,
+  prefilled: false,
   eyebrow: "本次使用",
   title: "只用在這次提醒",
   description: "只會記錄這次提醒需要的包裝標示，不會新增到你的防曬乳清單。"
@@ -47,39 +59,123 @@ const groupNames = {
   waterResistance: `${groupPrefix}-water-resistance`
 };
 
-const expanded = shallowRef(false);
-const showQuestions = computed(() => !props.collapsible || expanded.value);
+/**
+ * 2026-09-01（使用者裁決：甲＋丙）：四題改成「一列一題，點開才作答」。
+ *
+ * **為什麼改。** 使用者回報「太長了要滑很久」。實測 375px 下攤開後整頁
+ * 2803px，四張問題卡佔 1368px——**整頁的 49%**。而這四題全部可以跳過，
+ * 多數人不會逐題回答，卻要為它們捲過半頁。
+ *
+ * 收合時每一列是「問題 → 目前答案 ›」，資訊沒有藏起來（答案就寫在列上），
+ * 只有**選項**收起來了。這跟舊版那顆「填寫包裝標示」按鈕的差別是：舊版
+ * 一次攤開全部四題，要改第四題就得捲過前三題。
+ *
+ * 一次只開一題（accordion）：這樣展開後的高度有上限，不會回到原本那種
+ * 四題同時攤開的長度。
+ */
+type QuestionKey = "claim" | "wait" | "interval" | "water";
 
 /**
- * 收合時的摘要，只講真正會進倒數的兩件事：間隔與耐水。
- * 不寫 SPF／PA——那兩個不影響倒數，寫在這裡會誤導。
+ * `/setup` 的即時記錄預設開著第一題——那題直接決定這次能不能建立倒數。
+ * 裝備表單（collapsible）四題全收。
  */
-const summary = computed(() => {
-  const parts: string[] = [];
+const openQuestion = shallowRef<QuestionKey | null>(
+  props.collapsible ? null : "claim"
+);
 
-  if (
-    value.value.intervalAnswer === "explicit" &&
-    value.value.intervalMinutes !== null
-  ) {
-    parts.push(`包裝間隔 ${value.value.intervalMinutes} 分鐘`);
-  } else {
-    parts.push("一般間隔 120 分鐘");
-  }
+function toggleQuestion(key: QuestionKey): void {
+  openQuestion.value = openQuestion.value === key ? null : key;
+}
 
-  if (props.sunscreenFields) {
-    const water = value.value.waterResistance;
-    parts.push(
-      water === "40" || water === "80"
-        ? `耐水 ${water} 分鐘`
-        : water === "not_water_resistant"
-          ? "標示不耐水"
-          : water === "no_claim"
+/**
+ * 使用者動過哪幾題。
+ *
+ * 沒動過而且不是既有紀錄時，那一列寫「尚未填寫」而不是預設值的文字
+ * （2026-09-01 使用者裁決）。理由是預設值雖然保守且安全，但把它寫成
+ * 一個答案會讓人以為自己回答過了——「尚未填寫」才看得出還可以補。
+ */
+const touched = shallowRef(new Set<QuestionKey>());
+
+function markTouched(key: QuestionKey): void {
+  if (touched.value.has(key)) return;
+  touched.value = new Set(touched.value).add(key);
+}
+
+function isAnswered(key: QuestionKey): boolean {
+  return props.prefilled || touched.value.has(key);
+}
+
+const NUMERIC_ANSWER_LABELS = {
+  none: "沒有這項說明",
+  unknown: "不確定",
+  explicit: "有明確分鐘數"
+} as const;
+
+/** 每一列右側顯示的目前答案；null 代表「尚未填寫」。 */
+const answers = computed<Record<QuestionKey, string | null>>(() => {
+  const form = value.value;
+
+  const numeric = (
+    key: "wait" | "interval",
+    answer: typeof form.waitAnswer,
+    minutes: number | null
+  ): string | null => {
+    if (!isAnswered(key)) return null;
+    if (answer === "explicit") {
+      return minutes === null ? "有明確分鐘數" : `${minutes} 分鐘`;
+    }
+    return NUMERIC_ANSWER_LABELS[answer];
+  };
+
+  return {
+    claim: !isAnswered("claim")
+      ? null
+      : form.claimAnswer === "yes"
+        ? "有"
+        : form.claimAnswer === "no"
+          ? "沒有"
+          : "不確定或看不清楚",
+    wait: numeric("wait", form.waitAnswer, form.waitMinutes),
+    interval: numeric("interval", form.intervalAnswer, form.intervalMinutes),
+    water: !isAnswered("water")
+      ? null
+      : form.waterResistance === "40" || form.waterResistance === "80"
+        ? `耐水 ${form.waterResistance} 分鐘`
+        : form.waterResistance === "not_water_resistant"
+          ? "明確標示不耐水"
+          : form.waterResistance === "no_claim"
             ? "沒有耐水標示"
-            : "耐水未確認"
-    );
-  }
+            : "不確定或看不清楚"
+  };
+});
 
-  return parts.join("・");
+/**
+ * 耐水改成兩層（使用者裁決：丙）。
+ *
+ * 原本五個選項直式堆疊，實測 423px，是四張卡裡最高的一張。其中「耐水 40
+ * 分鐘」與「耐水 80 分鐘」其實是同一個答案的兩種程度——先問「有沒有耐水
+ * 標示」，答有才出現 40／80。
+ *
+ * **另外三個沒有合併**：「沒有耐水標示」（包裝沒寫）與「明確標示不耐水」
+ * （包裝寫了不耐水）在 reducer 裡走同一條路徑，但它們記錄的是不同的事實。
+ * 為了幾十像素把兩者合併會弄丟「使用者看到了什麼」，不划算。
+ */
+const waterHasClaim = computed<string>({
+  get: () => {
+    const water = value.value.waterResistance;
+    return water === "40" || water === "80" ? "yes" : water;
+  },
+  set: (next) => {
+    markTouched("water");
+    if (next === "yes") {
+      const water = value.value.waterResistance;
+      // 已經是 40／80 就不要覆寫使用者選過的分鐘數。
+      if (water !== "40" && water !== "80") value.value.waterResistance = "40";
+      return;
+    }
+    value.value.waterResistance =
+      next as ProductSnapshotFormValue["waterResistance"];
+  }
 });
 </script>
 
@@ -108,72 +204,390 @@ const summary = computed(() => {
         <p>
           {{ description }}
         </p>
-
-        <template v-if="collapsible">
-          <p class="session-product__summary">{{ summary }}</p>
-          <button
-            class="button button--quiet session-product__toggle"
-            type="button"
-            :aria-expanded="expanded"
-            :aria-controls="`${groupPrefix}-questions`"
-            @click="expanded = !expanded"
-          >
-            <Icon
-              :name="expanded ? 'tool-chevron-down' : 'tool-chevron-right'"
-              :size="20"
-            />
-            {{ expanded ? "收合包裝標示" : "填寫包裝標示（選填）" }}
-          </button>
-        </template>
       </div>
     </section>
 
-    <fieldset
-      v-if="showQuestions"
-      :id="`${groupPrefix}-questions`"
-      class="question-card app-card"
-    >
-      <legend>
-        {{
-          otherTopicalOnly
-            ? "這瓶防曬乳有明確的防曬或 SPF 標示嗎？"
-            : "包裝有明確的防曬或 SPF 標示嗎？"
-        }}
-      </legend>
-      <p class="question-card__helper">
-        請確認包裝上是否有 SPF、PA
-        等防曬標示；僅有品牌、成分或「天然」宣稱，無法確認這是防曬乳。
-      </p>
-      <div class="choice-grid choice-grid--row">
-        <label>
-          <input
-            v-model="value.claimAnswer"
-            type="radio"
-            :name="groupNames.claim"
-            value="yes"
+    <!--
+      2026-09-01（使用者裁決：甲）：四題各佔一列，點開才作答。
+
+      收合時每一列都寫著目前的答案，所以資訊沒有被藏起來——收起來的只有
+      「選項」。沒動過的列寫「尚未填寫」（使用者裁決）：預設值雖然保守
+      且安全，但把它印成一個答案會讓人以為自己回答過了。
+
+      每一列是 `aria-expanded` ＋ `aria-controls` 的展開控制，chevron 換
+      圖示 name 而不是 rotate（DESIGN.md 第五節的展開收合契約）。
+    -->
+    <div class="label-questions app-card">
+      <div class="label-question">
+        <button
+          class="label-question__row"
+          type="button"
+          :aria-expanded="openQuestion === 'claim'"
+          :aria-controls="`${groupPrefix}-claim-panel`"
+          @click="toggleQuestion('claim')"
+        >
+          <span class="label-question__name">防曬標示</span>
+          <span class="label-question__answer">{{
+            answers.claim ?? "尚未填寫"
+          }}</span>
+          <Icon
+            class="label-question__chevron"
+            :name="
+              openQuestion === 'claim'
+                ? 'tool-chevron-down'
+                : 'tool-chevron-right'
+            "
+            :size="20"
           />
-          <span>有</span>
-        </label>
-        <label>
-          <input
-            v-model="value.claimAnswer"
-            type="radio"
-            :name="groupNames.claim"
-            value="no"
-          />
-          <span>沒有</span>
-        </label>
-        <label>
-          <input
-            v-model="value.claimAnswer"
-            type="radio"
-            :name="groupNames.claim"
-            value="unknown"
-          />
-          <span>不確定或看不清楚</span>
-        </label>
+        </button>
+
+        <fieldset
+          v-if="openQuestion === 'claim'"
+          :id="`${groupPrefix}-claim-panel`"
+          class="label-question__panel"
+        >
+          <legend>
+            {{
+              otherTopicalOnly
+                ? "這瓶防曬乳有明確的防曬或 SPF 標示嗎？"
+                : "包裝有明確的防曬或 SPF 標示嗎？"
+            }}
+          </legend>
+          <p class="question-card__helper">
+            請確認包裝上是否有 SPF、PA
+            等防曬標示；僅有品牌、成分或「天然」宣稱，無法確認這是防曬乳。
+          </p>
+          <div class="choice-grid choice-grid--row">
+            <label>
+              <input
+                v-model="value.claimAnswer"
+                type="radio"
+                :name="groupNames.claim"
+                value="yes"
+                @change="markTouched('claim')"
+              />
+              <span>有</span>
+            </label>
+            <label>
+              <input
+                v-model="value.claimAnswer"
+                type="radio"
+                :name="groupNames.claim"
+                value="no"
+                @change="markTouched('claim')"
+              />
+              <span>沒有</span>
+            </label>
+            <label>
+              <input
+                v-model="value.claimAnswer"
+                type="radio"
+                :name="groupNames.claim"
+                value="unknown"
+                @change="markTouched('claim')"
+              />
+              <span>不確定或看不清楚</span>
+            </label>
+          </div>
+        </fieldset>
       </div>
-    </fieldset>
+
+      <!--
+        剩下三題只有「這是防曬乳」時才有意義。`claimAnswer !== 'yes'` 時
+        它們整組不出現——這不是為了省空間，是因為那時根本不會建立倒數，
+        問「包裝寫幾分鐘」沒有答案可用。
+      -->
+      <template v-if="sunscreenFields && value.claimAnswer === 'yes'">
+        <div class="label-question">
+          <button
+            class="label-question__row"
+            type="button"
+            :aria-expanded="openQuestion === 'wait'"
+            :aria-controls="`${groupPrefix}-wait-panel`"
+            @click="toggleQuestion('wait')"
+          >
+            <span class="label-question__name">擦上後等待</span>
+            <span class="label-question__answer">{{
+              answers.wait ?? "尚未填寫"
+            }}</span>
+            <Icon
+              class="label-question__chevron"
+              :name="
+                openQuestion === 'wait'
+                  ? 'tool-chevron-down'
+                  : 'tool-chevron-right'
+              "
+              :size="20"
+            />
+          </button>
+
+          <fieldset
+            v-if="openQuestion === 'wait'"
+            :id="`${groupPrefix}-wait-panel`"
+            class="label-question__panel"
+          >
+            <legend>包裝怎麼寫擦上後的等待時間？</legend>
+            <p class="question-card__helper">
+              只填包裝上可確認的內容；看不清楚時請選擇「不確定」。
+            </p>
+            <div class="choice-grid choice-grid--row">
+              <label>
+                <input
+                  v-model="value.waitAnswer"
+                  type="radio"
+                  :name="groupNames.wait"
+                  value="none"
+                  @change="markTouched('wait')"
+                />
+                <span>沒有這項說明</span>
+              </label>
+              <label>
+                <input
+                  v-model="value.waitAnswer"
+                  type="radio"
+                  :name="groupNames.wait"
+                  value="explicit"
+                  @change="markTouched('wait')"
+                />
+                <span>有明確分鐘數</span>
+              </label>
+              <label>
+                <input
+                  v-model="value.waitAnswer"
+                  type="radio"
+                  :name="groupNames.wait"
+                  value="unknown"
+                  @change="markTouched('wait')"
+                />
+                <span>不確定</span>
+              </label>
+            </div>
+            <label v-if="value.waitAnswer === 'explicit'" class="number-field">
+              <span>等待分鐘數</span>
+              <input
+                v-model.number="value.waitMinutes"
+                class="stat-figure"
+                type="number"
+                min="1"
+                max="240"
+                inputmode="numeric"
+                @input="markTouched('wait')"
+              />
+            </label>
+          </fieldset>
+        </div>
+
+        <div class="label-question">
+          <button
+            class="label-question__row"
+            type="button"
+            :aria-expanded="openQuestion === 'interval'"
+            :aria-controls="`${groupPrefix}-interval-panel`"
+            @click="toggleQuestion('interval')"
+          >
+            <span class="label-question__name">補擦間隔</span>
+            <span class="label-question__answer">{{
+              answers.interval ?? "尚未填寫"
+            }}</span>
+            <Icon
+              class="label-question__chevron"
+              :name="
+                openQuestion === 'interval'
+                  ? 'tool-chevron-down'
+                  : 'tool-chevron-right'
+              "
+              :size="20"
+            />
+          </button>
+
+          <fieldset
+            v-if="openQuestion === 'interval'"
+            :id="`${groupPrefix}-interval-panel`"
+            class="label-question__panel"
+          >
+            <legend>包裝有寫較短的補擦間隔嗎？</legend>
+            <p class="question-card__helper">
+              如果包裝有明確分鐘數，提醒會採用這個較短的間隔。
+            </p>
+            <div class="choice-grid choice-grid--row">
+              <label>
+                <input
+                  v-model="value.intervalAnswer"
+                  type="radio"
+                  :name="groupNames.interval"
+                  value="none"
+                  @change="markTouched('interval')"
+                />
+                <span>沒有明確分鐘數</span>
+              </label>
+              <label>
+                <input
+                  v-model="value.intervalAnswer"
+                  type="radio"
+                  :name="groupNames.interval"
+                  value="explicit"
+                  @change="markTouched('interval')"
+                />
+                <span>有明確分鐘數</span>
+              </label>
+              <label>
+                <input
+                  v-model="value.intervalAnswer"
+                  type="radio"
+                  :name="groupNames.interval"
+                  value="unknown"
+                  @change="markTouched('interval')"
+                />
+                <span>不確定</span>
+              </label>
+            </div>
+            <label
+              v-if="value.intervalAnswer === 'explicit'"
+              class="number-field"
+            >
+              <span>補擦分鐘數</span>
+              <input
+                v-model.number="value.intervalMinutes"
+                class="stat-figure"
+                type="number"
+                min="1"
+                max="1440"
+                inputmode="numeric"
+                @input="markTouched('interval')"
+              />
+            </label>
+          </fieldset>
+        </div>
+
+        <div v-if="waterContext" class="label-question">
+          <button
+            class="label-question__row"
+            type="button"
+            :aria-expanded="openQuestion === 'water'"
+            :aria-controls="`${groupPrefix}-water-panel`"
+            @click="toggleQuestion('water')"
+          >
+            <span class="label-question__name">耐水標示</span>
+            <span class="label-question__answer">{{
+              answers.water ?? "尚未填寫"
+            }}</span>
+            <Icon
+              class="label-question__chevron"
+              :name="
+                openQuestion === 'water'
+                  ? 'tool-chevron-down'
+                  : 'tool-chevron-right'
+              "
+              :size="20"
+            />
+          </button>
+
+          <!--
+            2026-09-01（使用者裁決：丙）：拆成兩層。
+
+            原本五個選項直式堆疊，實測 423px，是四張卡裡最高的一張。
+            「耐水 40 分鐘」與「耐水 80 分鐘」其實是同一個答案的兩種程度，
+            所以先問有沒有標示，答有才出現分鐘數。
+          -->
+          <fieldset
+            v-if="openQuestion === 'water'"
+            :id="`${groupPrefix}-water-panel`"
+            class="label-question__panel"
+          >
+            <legend>包裝上的耐水標示</legend>
+            <p class="question-card__helper">
+              只依照包裝標示選擇，不從產品名稱或使用感推測。
+            </p>
+            <div class="choice-grid choice-grid--row">
+              <label>
+                <input
+                  v-model="waterHasClaim"
+                  type="radio"
+                  :name="groupNames.waterResistance"
+                  value="yes"
+                />
+                <span>有耐水標示</span>
+              </label>
+            </div>
+
+            <!--
+              **第二層緊接在「有耐水標示」下面，不是排在四個選項之後。**
+
+              第一版把 40／80 放在整組選項的最後，畫出來看之後發現讀成了
+              「六個並列的選項」——縮排根本救不了，因為中間隔著三個同層級
+              的選項。任何 DOM 或數值斷言對這件事都是綠的（CLAUDE.md
+              「有些問題只有畫出來看才找得到」）。
+
+              radio group 被拆成兩個 `<div>`，但 `name` 相同，所以單選行為
+              不受影響。
+            -->
+            <div
+              v-if="waterHasClaim === 'yes'"
+              class="choice-grid label-question__minutes"
+            >
+              <label>
+                <input
+                  v-model="value.waterResistance"
+                  type="radio"
+                  :name="`${groupNames.waterResistance}-minutes`"
+                  value="40"
+                  @change="markTouched('water')"
+                />
+                <span>
+                  耐水
+                  <span class="stat-figure" data-water-resistance="40">40</span>
+                  分鐘
+                </span>
+              </label>
+              <label>
+                <input
+                  v-model="value.waterResistance"
+                  type="radio"
+                  :name="`${groupNames.waterResistance}-minutes`"
+                  value="80"
+                  @change="markTouched('water')"
+                />
+                <span>
+                  耐水
+                  <span class="stat-figure" data-water-resistance="80">80</span>
+                  分鐘
+                </span>
+              </label>
+            </div>
+
+            <div class="choice-grid choice-grid--row">
+              <label>
+                <input
+                  v-model="waterHasClaim"
+                  type="radio"
+                  :name="groupNames.waterResistance"
+                  value="no_claim"
+                />
+                <span>沒有耐水標示</span>
+              </label>
+              <label>
+                <input
+                  v-model="waterHasClaim"
+                  type="radio"
+                  :name="groupNames.waterResistance"
+                  value="not_water_resistant"
+                />
+                <span>明確標示不耐水</span>
+              </label>
+              <label>
+                <input
+                  v-model="waterHasClaim"
+                  type="radio"
+                  :name="groupNames.waterResistance"
+                  value="unknown"
+                />
+                <span>不確定或看不清楚</span>
+              </label>
+            </div>
+          </fieldset>
+        </div>
+      </template>
+    </div>
 
     <aside
       v-if="sunscreenFields && value.claimAnswer !== 'yes'"
@@ -193,182 +607,17 @@ const summary = computed(() => {
       </div>
     </aside>
 
-    <template
-      v-if="showQuestions && sunscreenFields && value.claimAnswer === 'yes'"
-    >
-      <fieldset class="question-card app-card">
-        <legend>包裝怎麼寫擦上後的等待時間？</legend>
-        <p class="question-card__helper">
-          只填包裝上可確認的內容；看不清楚時請選擇「不確定」。
-        </p>
-        <div class="choice-grid choice-grid--row">
-          <label>
-            <input
-              v-model="value.waitAnswer"
-              type="radio"
-              :name="groupNames.wait"
-              value="none"
-            />
-            <span>沒有這項說明</span>
-          </label>
-          <label>
-            <input
-              v-model="value.waitAnswer"
-              type="radio"
-              :name="groupNames.wait"
-              value="explicit"
-            />
-            <span>有明確分鐘數</span>
-          </label>
-          <label>
-            <input
-              v-model="value.waitAnswer"
-              type="radio"
-              :name="groupNames.wait"
-              value="unknown"
-            />
-            <span>不確定</span>
-          </label>
-        </div>
-        <label v-if="value.waitAnswer === 'explicit'" class="number-field">
-          <span>等待分鐘數</span>
-          <input
-            v-model.number="value.waitMinutes"
-            class="stat-figure"
-            type="number"
-            min="1"
-            max="240"
-            inputmode="numeric"
-          />
-        </label>
-      </fieldset>
-
-      <fieldset class="question-card app-card">
-        <legend>包裝有寫較短的補擦間隔嗎？</legend>
-        <p class="question-card__helper">
-          如果包裝有明確分鐘數，提醒會採用這個較短的間隔。
-        </p>
-        <div class="choice-grid choice-grid--row">
-          <label>
-            <input
-              v-model="value.intervalAnswer"
-              type="radio"
-              :name="groupNames.interval"
-              value="none"
-            />
-            <span>沒有明確分鐘數</span>
-          </label>
-          <label>
-            <input
-              v-model="value.intervalAnswer"
-              type="radio"
-              :name="groupNames.interval"
-              value="explicit"
-            />
-            <span>有明確分鐘數</span>
-          </label>
-          <label>
-            <input
-              v-model="value.intervalAnswer"
-              type="radio"
-              :name="groupNames.interval"
-              value="unknown"
-            />
-            <span>不確定</span>
-          </label>
-        </div>
-        <label v-if="value.intervalAnswer === 'explicit'" class="number-field">
-          <span>補擦分鐘數</span>
-          <input
-            v-model.number="value.intervalMinutes"
-            class="stat-figure"
-            type="number"
-            min="1"
-            max="1440"
-            inputmode="numeric"
-          />
-        </label>
-      </fieldset>
-
-      <fieldset v-if="waterContext" class="question-card app-card">
-        <legend>包裝上的耐水標示</legend>
-        <p class="question-card__helper">
-          只依照包裝標示選擇，不從產品名稱或使用感推測。
-        </p>
-        <div class="choice-grid choice-grid--compact">
-          <label>
-            <input
-              v-model="value.waterResistance"
-              type="radio"
-              :name="groupNames.waterResistance"
-              value="40"
-            />
-            <span>
-              耐水
-              <span
-                class="stat-figure"
-                data-water-resistance="40"
-                >40</span
-              >
-              分鐘
-            </span>
-          </label>
-          <label>
-            <input
-              v-model="value.waterResistance"
-              type="radio"
-              :name="groupNames.waterResistance"
-              value="80"
-            />
-            <span>
-              耐水
-              <span
-                class="stat-figure"
-                data-water-resistance="80"
-                >80</span
-              >
-              分鐘
-            </span>
-          </label>
-          <label>
-            <input
-              v-model="value.waterResistance"
-              type="radio"
-              :name="groupNames.waterResistance"
-              value="not_water_resistant"
-            />
-            <span>明確標示不耐水</span>
-          </label>
-          <label>
-            <input
-              v-model="value.waterResistance"
-              type="radio"
-              :name="groupNames.waterResistance"
-              value="no_claim"
-            />
-            <span>沒有耐水標示</span>
-          </label>
-          <label>
-            <input
-              v-model="value.waterResistance"
-              type="radio"
-              :name="groupNames.waterResistance"
-              value="unknown"
-            />
-            <span>不確定或看不清楚</span>
-          </label>
-        </div>
-      </fieldset>
-    </template>
-
     <!--
       2026-08-31（選項丙）：純辨識用的欄位（SPF／PA 數值）由呼叫端塞進來。
-      它們跟著這張卡一起收合，但**不是**「會影響倒數」的那一組——所以放
-      在所有問題之後，由呼叫端自己標明不影響倒數。收在這裡的理由是：
-      SPF 這個字原本在兩張卡各出現一次（這裡問「有沒有標示」、暱稱卡填
-      「數字是多少」），畫面上看不出差別。
+      它們**不是**「會影響倒數」的那一組——所以放在所有問題之後，由呼叫端
+      自己標明不影響倒數。收在這裡的理由是：SPF 這個字原本在兩張卡各出現
+      一次（這裡問「有沒有標示」、暱稱卡填「數字是多少」），畫面上看不出
+      差別。
+
+      2026-09-01：不再跟著收合。四題改成逐題展開之後沒有「整組收合」這個
+      狀態了，而這兩欄是兩個輸入框、常駐的成本很小。
     -->
-    <slot v-if="showQuestions" name="identity" />
+    <slot name="identity" />
   </div>
 </template>
 
@@ -415,19 +664,86 @@ const summary = computed(() => {
   line-height: var(--line-height-body);
 }
 
-/* 特異性要壓過上面的 `.session-product p:not(.session-product__eyebrow)`，
-   否則摘要會被套成次要文字色。 */
-.session-product p.session-product__summary {
-  margin-top: var(--space-3);
+/*
+ * 2026-09-01：四題改成逐題展開的清單。
+ *
+ * 一張卡、每題一列。列與列之間用 hairline 分開而不是各自成卡——四張卡
+ * 疊在一起會讓「這是四件事」變成「這是四個區塊」，而它們其實是同一份
+ * 包裝標示的四個欄位。
+ */
+.label-questions {
+  display: grid;
+  padding: 0;
+}
+
+.label-question + .label-question {
+  border-top: 1px solid var(--border-subtle);
+}
+
+.label-question__row {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: var(--space-3);
+  width: 100%;
+  min-height: var(--tap-target);
+  padding: var(--space-3) var(--card-padding);
+  border: 0;
+  background: none;
   color: var(--text-primary);
+  cursor: pointer;
+  font: inherit;
+  text-align: start;
+}
+
+.label-question__name {
   font-weight: 500;
 }
 
-.session-product__toggle {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--space-2);
-  margin-top: var(--space-3);
+/* 答案靠右、緊鄰 chevron——那一欄是「目前是什麼」，跟左邊的題目分開讀。 */
+.label-question__answer {
+  color: var(--text-secondary);
+  text-align: end;
+}
+
+.label-question__chevron {
+  flex: none;
+  color: var(--text-secondary);
+}
+
+.label-question__panel {
+  display: grid;
+  gap: var(--space-3);
+  margin: 0;
+  padding: 0 var(--card-padding) var(--space-4);
+  border: 0;
+}
+
+.label-question__panel legend {
+  padding: 0;
+  font-weight: 500;
+  line-height: var(--line-height-body);
+}
+
+/*
+ * 40／80 是「有耐水標示」的細分，不是第五、第六個並列選項。
+ *
+ * 三件事一起才讀得出層次（只做縮排不夠——第一版就是只有縮排，畫出來看
+ * 之後仍然讀成六個並列選項）：緊接在母選項下面、縮排、左側一條連接線。
+ *
+ * 兩欄並排而不是直式堆疊：這兩個選項各只有五個字，直式會多佔一整列，
+ * 而 40／80 本來就是一組二選一。
+ */
+/*
+ * 沿用 `.choice-grid`（選項外框與自訂 radio 外觀來自那裡），只覆寫欄數與
+ * 縮排。**第一版自己刻了一份 label 樣式，畫出來看之後發現 radio 變回瀏覽器
+ * 預設的藍點**——同一個面板裡兩種 radio 外觀。共用比重刻安全。
+ */
+.label-question__minutes {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  margin-inline-start: var(--space-4);
+  padding-inline-start: var(--space-4);
+  border-inline-start: 2px solid var(--border-subtle);
 }
 
 /*

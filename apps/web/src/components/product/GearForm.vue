@@ -363,6 +363,7 @@ async function remove(): Promise<void> {
       :water-context="showSunscreenFields"
       :sunscreen-fields="showSunscreenFields"
       collapsible
+      :prefilled="isEdit"
       eyebrow="包裝標示"
       title="防曬乳規格確認"
       :description="
