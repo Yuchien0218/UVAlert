@@ -223,15 +223,6 @@ export function createWebAppServices(
     now: () => new Date(),
     getConnectivity: () => boot.connectivity.value
   });
-  const localData = createLocalDataController({
-    repository: new LocalDataRepository({ database, createId }),
-    boot,
-    now: () => new Date(),
-    saveFile: downloadTextFile,
-    beforeClearAll: async () => {
-      await remotePush.disable();
-    }
-  });
   const contextEvent = createContextEventController({
     repository,
     identity,
@@ -283,6 +274,13 @@ export function createWebAppServices(
     remotePush,
     connectivity: boot.connectivity,
     createOperationId: createId
+  });
+  const localData = createLocalDataController({
+    repository: new LocalDataRepository({ database, createId }),
+    boot,
+    now: () => new Date(),
+    saveFile: downloadTextFile,
+    beforeClearAll: () => notifications.disableBackgroundPush()
   });
 
   return {

@@ -84,7 +84,10 @@ export class BrowserRemotePush implements RemotePushPort {
       const state = await this.#sendIntent(pending);
       return {
         state,
-        isEnabled: state === "enabled" || state === "scheduled" || state === "pending-sync"
+        isEnabled:
+          state === "enabled" ||
+          state === "scheduled" ||
+          state === "pending-sync"
       };
     });
   }
@@ -147,28 +150,26 @@ export class BrowserRemotePush implements RemotePushPort {
     operationId: string
   ): Promise<BackgroundPushState> {
     const intent: PendingPushIntent = { kind: "schedule", dueAt, operationId };
-    await this.#deps.state.replacePendingIntent(intent);
-    return this.#enqueue(() => this.#sendIntent(intent));
+    return this.#enqueue(() => this.#persistSessionIntent(intent));
   }
 
   async cancel(operationId: string): Promise<BackgroundPushState> {
     const intent: PendingPushIntent = { kind: "cancel", operationId };
-    await this.#deps.state.replacePendingIntent(intent);
-    return this.#enqueue(() => this.#sendIntent(intent));
+    return this.#enqueue(() => this.#persistSessionIntent(intent));
   }
 
   async disable(): Promise<BackgroundPushState> {
-    const pending = await this.#deps.state.readPendingIntent();
-    if (pending?.kind === "revoke") {
-      return this.#enqueue(() => this.#sendIntent(pending));
-    }
-    const intent: PendingPushIntent = {
-      kind: "revoke",
-      operationId: this.#deps.createOperationId(),
-      remoteRevoked: false
-    };
-    await this.#deps.state.replacePendingIntent(intent);
-    return this.#enqueue(() => this.#sendIntent(intent));
+    return this.#enqueue(async () => {
+      const pending = await this.#deps.state.readPendingIntent();
+      if (pending?.kind === "revoke") return this.#sendIntent(pending);
+      const intent: PendingPushIntent = {
+        kind: "revoke",
+        operationId: this.#deps.createOperationId(),
+        remoteRevoked: false
+      };
+      await this.#deps.state.replacePendingIntent(intent);
+      return this.#sendIntent(intent);
+    });
   }
 
   async flushPendingIntent(): Promise<BackgroundPushState> {
@@ -211,6 +212,15 @@ export class BrowserRemotePush implements RemotePushPort {
     }
     await this.#deps.state.clearPendingIntent(intent.operationId);
     return intent.kind === "schedule" ? "scheduled" : "enabled";
+  }
+
+  async #persistSessionIntent(
+    intent: Exclude<PendingPushIntent, { kind: "revoke" }>
+  ): Promise<BackgroundPushState> {
+    const pending = await this.#deps.state.readPendingIntent();
+    if (pending?.kind === "revoke") return this.#sendIntent(pending);
+    await this.#deps.state.replacePendingIntent(intent);
+    return this.#sendIntent(intent);
   }
 
   async #sendRevoke(

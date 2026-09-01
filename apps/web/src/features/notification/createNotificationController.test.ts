@@ -34,7 +34,12 @@ function createNotificationsStub(
 
 function createRemotePushStub(
   supported = true,
-  hydration = { state: "permission-required", isEnabled: false }
+  hydration:
+    | { state: BackgroundPushState; isEnabled: boolean }
+    | Promise<{ state: BackgroundPushState; isEnabled: boolean }> = {
+    state: "permission-required",
+    isEnabled: false
+  }
 ): RemotePushPort & {
   enable: ReturnType<typeof vi.fn>;
   hydrate: ReturnType<typeof vi.fn>;
@@ -80,7 +85,9 @@ function createController(
     session?: SessionProjection | null;
     supported?: boolean;
     connectivity?: ConnectivityStatus;
-    hydration?: { state: BackgroundPushState; isEnabled: boolean };
+    hydration?:
+      | { state: BackgroundPushState; isEnabled: boolean }
+      | Promise<{ state: BackgroundPushState; isEnabled: boolean }>;
   } = {}
 ) {
   const notifications = createNotificationsStub();
@@ -157,6 +164,37 @@ describe("createNotificationController", () => {
     });
     await flush();
     expect(remotePush.cancel).toHaveBeenCalledWith("operation-3");
+  });
+
+  it("keeps hydrated ownership when boot restores the latest Session while hydration is pending", async () => {
+    let resolveHydration!: (value: {
+      state: BackgroundPushState;
+      isEnabled: boolean;
+    }) => void;
+    const hydration = new Promise<{
+      state: BackgroundPushState;
+      isEnabled: boolean;
+    }>((resolve) => {
+      resolveHydration = resolve;
+    });
+    const { controller, currentSession, remotePush } = createController({
+      session: null,
+      hydration
+    });
+
+    currentSession.value = sessionWith({
+      sessionNextDueAt: "2026-08-23T15:00:00.000Z"
+    });
+    await nextTick();
+    resolveHydration({ state: "enabled", isEnabled: true });
+    await flush();
+
+    expect(controller.backgroundPushState.value).toBe("scheduled");
+    expect(remotePush.schedule).toHaveBeenCalledOnce();
+    expect(remotePush.schedule).toHaveBeenCalledWith(
+      "2026-08-23T15:00:00.000Z",
+      "operation-1"
+    );
   });
 
   it("keeps the local fallback and makes no remote call when unsupported", async () => {

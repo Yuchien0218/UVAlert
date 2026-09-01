@@ -160,7 +160,10 @@ export function createNotificationController(
     try {
       const result = await remotePush.flushPendingIntent();
       setSessionBackgroundState(token, result);
-      if (result === "permission-required") requiresDisable = false;
+      if (result === "permission-required") {
+        backgroundEnabled = false;
+        requiresDisable = false;
+      }
     } catch {
       setSessionBackgroundState(token, "schedule-error");
     }
@@ -168,16 +171,16 @@ export function createNotificationController(
 
   async function hydrateBackgroundPush(): Promise<void> {
     if (!remoteSupported || disposed) return;
-    const token = nextRemoteSessionIntentGeneration();
+    const lifecycleToken = lifecycleGeneration;
     try {
       const hydration = await remotePush.hydrate();
-      if (!isCurrentRemoteSessionIntent(token)) return;
+      if (!isCurrentLifecycle(lifecycleToken)) return;
       backgroundPushState.value = hydration.state;
       backgroundEnabled = hydration.isEnabled;
       requiresDisable = hydration.state === "schedule-error";
       if (backgroundEnabled) await reconcileCurrentSession();
     } catch {
-      if (isCurrentRemoteSessionIntent(token)) {
+      if (isCurrentLifecycle(lifecycleToken)) {
         backgroundPushState.value = "schedule-error";
         requiresDisable = true;
       }
