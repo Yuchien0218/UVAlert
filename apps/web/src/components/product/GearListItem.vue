@@ -1,27 +1,16 @@
 <script setup lang="ts">
 import { computed } from "vue";
 import Icon from "../icons/Icon.vue";
-import type {
-  GearCategory,
-  ProductCatalogRecordV1
-} from "@sunshield/contracts";
+import type { ProductCatalogRecordV1 } from "@sunshield/contracts";
 import {
   affectsCountdown,
+  GEAR_CATEGORY_ICONS,
   GEAR_CATEGORY_LABELS,
   gearSafetyState
 } from "../../features/product/gearPresentation";
-import type { IconName } from "../../generated/icons.generated";
 
 const props = defineProps<{ product: ProductCatalogRecordV1 }>();
 defineEmits<{ open: [] }>();
-
-/** 每個品類對應的圖示色塊圖示（依 Claude Design 元件庫，2026-08-23 同步）。 */
-const GEAR_CATEGORY_ICONS: Record<GearCategory, IconName> = {
-  sunscreen: "gear-sunscreen",
-  clothing: "gear-clothing",
-  eyewear: "gear-sunglasses",
-  other_gear: "gear-other"
-};
 
 const safety = computed(() => gearSafetyState(props.product));
 /**
