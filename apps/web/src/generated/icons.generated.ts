@@ -94,6 +94,12 @@ export const ICONS = {
     body: `<title>標示尚未確認</title>
   <circle cx="12" cy="12" r="8.5" fill="none" stroke="currentColor" stroke-width="2.5"/><path d="M9.6 9.8A2.4 2.4 0 1 1 12 12.2V13.5" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/><circle cx="12" cy="16.4" r="1.25" fill="currentColor"/>`
   },
+  "state-night": {
+    viewBox: "0 0 24 24",
+    title: "夜間",
+    body: `<title>夜間</title>
+  <path stroke="#C1832E" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M17.7,4.3v4.2M15.6,6.4h4.2"/> <path fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" stroke="currentColor" d="M8.9,4.7c-4.4,1.6-6.6,6.4-5,10.8,1.6,4.4,6.4,6.6,10.8,5,2.3-.9,4.1-2.7,5-5-4.4,1.6-9.2-.6-10.8-5-.7-1.9-.7-3.9,0-5.8Z"/>`
+  },
   "more-notifications": {
     viewBox: "0 0 24 24",
     title: "通知設定",

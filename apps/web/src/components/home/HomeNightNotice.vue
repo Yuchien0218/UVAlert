@@ -16,15 +16,18 @@ import IconLead from "../common/IconLead.vue";
  * 狀態下整頁只有一句話加一條底線連結，看起來像載入失敗而不是「本來就
  * 沒事做」。這正是空狀態需要一個視覺主體的情形。
  *
- * 用 `nav-reminder`（沙漏）而不是月亮：要說的不是「現在是晚上」，是
- * 「還沒有倒數在跑」。它同時是這個分頁自己的圖示——放大版出現在該分頁的
- * 空狀態裡是連貫的，不是另一件事。
+ * **2026-08-31 第二次：改用月亮 `state-night`（使用者裁決）。**
  *
- * **先試過 `state-untimed`（未計時），畫出來看之後否決。** 語意其實更準，
- * 但那顆是四狀態剩餘量計量表的一員，造型是橫向的膠囊加斜線——為 20px
- * 的行內位置收斂的幾何，放到 56px 變成一塊寬扁的刪除記號，讀起來像
- * 「功能被停用」而不是「現在沒事做」。任何數值斷言對這件事都是綠的
- * （見 CLAUDE.md「有些問題只有畫出來看才找得到」）。
+ * 這推翻了同一天稍早的選擇。當時選 `nav-reminder`（沙漏）的理由是「要說
+ * 的不是現在是晚上，是還沒有倒數在跑」，並且試過 `state-untimed` 後畫出
+ * 來否決（那顆是為 20px 收斂的幾何，放到 56px 變成一塊寬扁的刪除記號，
+ * 讀起來像「功能被停用」）。
+ *
+ * 使用者看過畫面後指定用月亮，等於裁決**這一段要說的就是「現在是晚上」**
+ * ——那是「不需要防曬」的原因，而沙漏只說得出結果。原因比結果好懂。
+ *
+ * 幾何與 `education-after-sun-care` 相同，但登記成獨立的 id，理由見
+ * `tools/icon-system/generate-icons.mjs` 裡那顆的註解。
  */
 
 defineEmits<{ start: [] }>();
@@ -32,7 +35,7 @@ defineEmits<{ start: [] }>();
 
 <template>
   <div class="night-notice">
-    <IconLead class="night-notice__lead" icon="nav-reminder" size="hero">
+    <IconLead class="night-notice__lead" icon="state-night" size="hero">
       <p class="night-notice__body">現在不需要防曬，明早出門前再開始提醒。</p>
     </IconLead>
 
@@ -53,11 +56,21 @@ defineEmits<{ start: [] }>();
 </template>
 
 <style scoped>
+/*
+ * 2026-08-31：靠左、收緊（使用者回報「行距有點大，加上是置中的，跟其他頁
+ * 有點不太像」）。
+ *
+ * 三項一起改才有效：`justify-items: center` 是全站唯一一處置中的內容區塊；
+ * gap 從 space-5 降一級；上下 padding 從 space-6 降一級。原本鬆到讓這一段
+ * 看起來像載入失敗的空白頁，而不是「本來就沒事做」。
+ */
 .night-notice {
   display: grid;
-  gap: var(--space-5);
-  justify-items: center;
-  padding: var(--space-6) 0;
+  gap: var(--space-4);
+  justify-items: start;
+  /* padding-block 而不是 `padding: … 0`——後者會被 cardPadding 守門判成
+     卡片內距的原始值（那條守的是 `padding: var(--space-5)` 開頭的宣告）。 */
+  padding-block: var(--space-5);
 }
 
 /*
@@ -76,7 +89,7 @@ defineEmits<{ start: [] }>();
 }
 
 .night-notice__escape {
-  justify-self: center;
+  justify-self: start;
   padding: var(--space-2) 0;
   border: 0;
   background: none;

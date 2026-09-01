@@ -63,14 +63,24 @@ const zoneLabels = computed(() =>
       />
     </button>
 
+    <!--
+      2026-08-31：三段收成一段（使用者要求「精簡文字，現在文字量太多」）。
+
+      展開後原本是：
+
+        1. `preset.summary`   臉部、耳朵、頸部、手臂、手背
+        2. 這次會套用到：…    額頭、鼻部與雙頰、臉部下半部、耳朵、前頸…
+        3. 確認實際塗抹時間後，才會建立正式提醒。
+
+      **1 與 2 是同一份資訊的兩種寫法**（預設組合的簡稱 vs 實際會建立的
+      部位全名）。留全名那一份：簡稱好讀，但讀者在這裡要判斷的是「等一下
+      真的會被提醒的是哪些」，那只有全名答得出來。
+
+      3 刪掉——下方主要 CTA 就寫著「開始防曬提醒」，而塗抹時間卡本身也在
+      同一個畫面上。它在重述畫面上已經看得到的流程。
+    -->
     <div v-if="expanded" :id="detailsId" class="quick-protection__details">
-      <p class="quick-protection__summary">{{ preset.summary }}</p>
-      <p class="quick-protection__zones">
-        這次會套用到：{{ zoneLabels.join("、") }}
-      </p>
-      <p class="quick-protection__note">
-        確認實際塗抹時間後，才會建立正式提醒。
-      </p>
+      <p class="quick-protection__zones">{{ zoneLabels.join("、") }}</p>
       <div class="quick-protection__actions">
         <button
           v-if="pending"
@@ -138,9 +148,7 @@ const zoneLabels = computed(() =>
 }
 
 .quick-protection__header h2,
-.quick-protection__summary,
-.quick-protection__zones,
-.quick-protection__note {
+.quick-protection__zones {
   margin: 0;
 }
 
@@ -161,25 +169,10 @@ const zoneLabels = computed(() =>
   animation: quickProtectionFadeIn var(--duration-base) var(--ease-out);
 }
 
-.quick-protection__summary {
-  color: var(--text-secondary);
-  font-size: var(--font-size-supporting);
-  line-height: var(--line-height-body);
-}
-
 .quick-protection__zones {
   font-size: var(--font-size-supporting);
   color: var(--text-secondary);
   line-height: var(--line-height-body);
-}
-
-/*
- * 2026-08-25：這是說明／標籤角色，DESIGN.md 對應的 CJK 行高是 1.5。
- */
-.quick-protection__note {
-  color: var(--text-secondary);
-  font-size: var(--font-size-supporting);
-  line-height: var(--line-height-caption);
 }
 
 .quick-protection__actions {

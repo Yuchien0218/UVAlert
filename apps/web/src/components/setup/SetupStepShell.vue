@@ -55,12 +55,20 @@ defineEmits<{
 
       <p class="setup-shell__description">{{ description }}</p>
 
-      <span v-if="saveStatus === 'saved'" class="setup-shell__save-status">
-        <Icon name="state-online" :size="20" />
-        草稿已儲存
-      </span>
+      <!--
+        2026-08-31：儲存成功不再顯示（使用者裁決）。
+
+        使用者回報「草稿已儲存位置怪怪的」。位置確實怪——它夾在頁面說明與
+        第一個操作區塊之間，是一條誰也不屬於的狀態行。但搬去哪裡都還是怪，
+        因為根本問題是**它在報告一件預期會發生的事**：草稿本來就會存，
+        存成功不是消息。常駐一條綠字的代價是每個使用者、每一次進這頁都要
+        先讀一行與決策無關的字。
+
+        **失敗仍然常駐。** 那是使用者需要知道、而且會改變行為的事（可能要
+        重試或換網路）。不對稱是刻意的：預期內的結果安靜，意外要出聲。
+      -->
       <span
-        v-else-if="saveStatus === 'error'"
+        v-if="saveStatus === 'error'"
         class="setup-shell__save-status setup-shell__save-status--error"
         role="status"
       >

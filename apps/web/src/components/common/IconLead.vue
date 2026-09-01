@@ -64,13 +64,19 @@ withDefaults(
 }
 
 /*
- * hero 沒有並排的對象，所以改成堆疊置中——圖示在上、文字在下。
- * 這時 gap 也要大一些，圖示與文字是兩個層級而不是同一列的兩半。
+ * hero 沒有並排的對象，所以改成堆疊——圖示在上、文字在下。
+ *
+ * **2026-08-31：改成靠左，不再置中**（使用者回報夜間頁「置中，跟其他頁
+ * 有點不太像」）。確實：這是全站唯一置中的內容區塊，其他頁一律靠左，
+ * 置中＋大留白讓它讀起來像錯誤頁，而不是「本來就沒事做」。
+ *
+ * 堆疊保留（那是 hero 與 lead 真正的差別：一個是唯一的視覺主體，一個是
+ * 與標題平起平坐），只把水平對齊拉回全站的基準線。
  */
 .icon-lead--hero {
   flex-direction: column;
-  align-items: center;
+  align-items: flex-start;
   gap: var(--space-4);
-  text-align: center;
+  text-align: start;
 }
 </style>

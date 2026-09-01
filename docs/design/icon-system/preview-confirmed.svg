@@ -103,6 +103,13 @@
     <text x="104" y="118" fill="#6F5A54" font-family="'Noto Sans TC', sans-serif" font-size="13" lang="zh-Hant-TW">36px / 18px</text>
     <text x="0" y="130" fill="#2E2925" font-family="'Noto Sans TC', sans-serif" font-size="17" lang="zh-Hant-TW">標示尚未確認</text>
   </g>
+  <g data-icon-cell="state-night" transform="translate(814 858)">
+    <g transform="scale(4)"><path stroke="#C1832E" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M17.7,4.3v4.2M15.6,6.4h4.2"/> <path fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" stroke="#33291F" d="M8.9,4.7c-4.4,1.6-6.6,6.4-5,10.8,1.6,4.4,6.4,6.6,10.8,5,2.3-.9,4.1-2.7,5-5-4.4,1.6-9.2-.6-10.8-5-.7-1.9-.7-3.9,0-5.8Z"/></g>
+    <g transform="translate(104 62) scale(1.5)"><path stroke="#C1832E" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M17.7,4.3v4.2M15.6,6.4h4.2"/> <path fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" stroke="#33291F" d="M8.9,4.7c-4.4,1.6-6.6,6.4-5,10.8,1.6,4.4,6.4,6.6,10.8,5,2.3-.9,4.1-2.7,5-5-4.4,1.6-9.2-.6-10.8-5-.7-1.9-.7-3.9,0-5.8Z"/></g>
+    <g transform="translate(150 74) scale(0.75)"><path stroke="#C1832E" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M17.7,4.3v4.2M15.6,6.4h4.2"/> <path fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" stroke="#33291F" d="M8.9,4.7c-4.4,1.6-6.6,6.4-5,10.8,1.6,4.4,6.4,6.6,10.8,5,2.3-.9,4.1-2.7,5-5-4.4,1.6-9.2-.6-10.8-5-.7-1.9-.7-3.9,0-5.8Z"/></g>
+    <text x="104" y="118" fill="#6F5A54" font-family="'Noto Sans TC', sans-serif" font-size="13" lang="zh-Hant-TW">36px / 18px</text>
+    <text x="0" y="130" fill="#2E2925" font-family="'Noto Sans TC', sans-serif" font-size="17" lang="zh-Hant-TW">夜間</text>
+  </g>
   <text x="64" y="1096" fill="#2E2925" font-family="'Noto Sans TC', sans-serif" font-size="25" font-weight="500" lang="zh-Hant-TW">更多頁卡片（雙色）</text>
   <g data-icon-cell="more-notifications" transform="translate(64 1142)">
     <g transform="scale(4)"><g transform="translate(0 -0.2)"><path d="M6.6 15.8V10.2A5.4 5.4 0 0 1 17.4 10.2V15.8Z" fill="none" stroke="#33291F" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M4.8 15.8H19.2" fill="none" stroke="#33291F" stroke-width="2.5" stroke-linecap="round"/><circle cx="12" cy="19" r="1.8" fill="#C1832E"/></g></g>

@@ -68,6 +68,19 @@ export const ICONS = Object.freeze([
   { id: "state-success", group: "state", label: "已儲存" },
   { id: "state-warning", group: "state", label: "警告" },
   { id: "state-unverified", group: "state", label: "標示尚未確認" },
+  /*
+   * 2026-08-31：夜間。**幾何刻意與 `education-after-sun-care` 相同**
+   * （使用者指定「用這個」）。
+   *
+   * 沒有直接引用那顆的 id，而是登記成獨立的一顆，理由是語意不同：在衛教頁
+   * 它是「回家後與皮膚照顧」這個分類，在首頁它是「現在是夜間」這個狀態。
+   * 共用同一個 id 的話，之後任何一邊要調整幾何都會連動到另一邊——而它們
+   * 沒有理由永遠長一樣。名字分開、圖形暫時相同，是可以分岔的狀態。
+   *
+   * twoTone：琥珀金那一下是月亮旁的星芒，不是重點色裝飾——夜間圖示少了它
+   * 就只剩一個彎鉤。
+   */
+  { id: "state-night", group: "state", label: "夜間", twoTone: true },
 
   // ---- 更多頁卡片（雙色）----
   { id: "more-notifications", group: "more", label: "通知設定", twoTone: true },
