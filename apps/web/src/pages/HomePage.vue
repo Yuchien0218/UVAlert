@@ -312,14 +312,28 @@ function handleEndSession(): void {
       分支，維持「夜間是收工版面」的設計。
     -->
     <template v-else-if="hasSession && isNight">
-      <SessionEndControl
-        :phase="sessionControl.endPhase.value"
-        :error="sessionControl.endError.value"
-        @confirm="handleEndSession"
-        @reset-error="sessionControl.clearEndError"
-      />
+      <!--
+        2026-08-31：結束鈕與夜間摘要併成同一列。
 
-      <HomeNightSession :session="session!" />
+        原本結束鈕自己佔 page-stack 的一列，下面才是「提醒仍在進行」——
+        實測內容上方憑空多出 64px（44px 的按鈕 ＋ 20px 的 page-stack
+        gap），而那一列左邊什麼都沒有。使用者回報「右上角叉叉還是會跑版」
+        並附了這一頁的截圖。
+
+        白天那一支（下面的 home__session-head）2026-08-30 就已經是兩欄，
+        夜間這一支漏掉了——同一個版型分兩處寫，只改了一處。現在共用同一
+        個 class，align-items: start 讓叉叉與「提醒仍在進行」那行齊平。
+      -->
+      <div class="home__session-head">
+        <HomeNightSession :session="session!" />
+
+        <SessionEndControl
+          :phase="sessionControl.endPhase.value"
+          :error="sessionControl.endError.value"
+          @confirm="handleEndSession"
+          @reset-error="sessionControl.clearEndError"
+        />
+      </div>
 
       <!-- 夜間也看得到最近紀錄（S-10 事件更正的唯一入口）。 -->
       <RecentEventsList

@@ -246,7 +246,7 @@ components:
     typography: "{typography.card-title}"
     rounded: "{rounded.lg}"
     padding: 20px
-  education-hero-card:
+  education-hero-banner:
     backgroundColor: "{colors.surface-cream-strong}"
     textColor: "{colors.ink}"
     typography: "{typography.page-title}"
@@ -721,7 +721,17 @@ Noto Serif TC 是標題的唯一字型，沒有第二層自托管備援——載
 
 ### 衛教
 
-**`education-hero-card`** — 衛教首頁的「了解今天的 UV」大卡片，標示「先從這裡開始」。背景 `{colors.surface-cream-strong}`，標題 `{typography.page-title}`（襯線），圓角 `{rounded.lg}`，內距 24px。這是六個分類中唯一放大的一張。
+**`education-hero-banner`** — 衛教首頁的「了解今天的 UV」入口，標示「先從這裡開始」。背景 `{colors.surface-cream-strong}`，標題 `{typography.page-title}`（襯線），圓角 `{rounded.lg}`，內距 24px。
+
+> **2026-08-31：從卡片列表裡搬出來，改成區塊標題上方的滿寬橫幅**（原名 `education-hero-card`）。
+>
+> 起因是使用者反映「兩個標題字體大小不同，覺得怪怪的」。實測 hero 標題 28px 襯線、其餘五張 18px 無襯線，差 1.56 倍且換了字體——但兩者的**結構完全相同**（膠囊、圖示＋標題、說明、圓角卡片）。**形式在說「我們是同一類」，字級在說「我比你們高一階」**，彆扭來自這個矛盾而不是數字本身。調字級只能縮小矛盾；把 hero 移出列表才是解掉它——不在同一個列表裡，就沒有可比性。
+>
+> 連帶：區塊計數從「6 個主題」變成「5 個主題」，那更誠實。
+>
+> **刻意不加 CTA 按鈕**（使用者裁決）：整個橫幅本來就可點，多一顆「開始閱讀 →」是重複的可點區域與多餘的鍵盤焦點，而且會把橫幅撐到約 200px、吃掉第一屏。實測目前 150px，與一般卡的 145px 幾乎齊平。
+>
+> kicker 膠囊在橫幅裡改用 `{colors.canvas}` 當底：一般卡的 `border-subtle` 疊在更深的 cream-strong 上幾乎看不出來。
 
 **`education-category-card`** — 其餘五個分類卡。背景 `{colors.surface-card}`，標題 `{typography.card-title}`，圓角 `{rounded.lg}`，內距 20px。分類文章列表使用兩欄卡片網格。
 
