@@ -9,6 +9,12 @@ const source = readFileSync(
   "utf8"
 ).replace(/\/\*[\s\S]*?\*\//g, "");
 
+/*
+ * 2026-08-31：讀數右側多了前往五日預報的 RouterLink，所以掛載時要 stub
+ * 掉它——這個元件本身不需要 router，只是借用連結。
+ */
+const GLOBAL = { stubs: { RouterLink: { template: "<a><slot /></a>" } } };
+
 function mountHeadline(riskLevel: string | null, uvi: number | null) {
   return mount(HomeUvHeadline, {
     props: {
@@ -16,7 +22,8 @@ function mountHeadline(riskLevel: string | null, uvi: number | null) {
       uvi,
       riskLevel,
       note: null
-    } as never
+    } as never,
+    global: GLOBAL
   });
 }
 
@@ -124,7 +131,8 @@ describe("HomeUvHeadline 的精簡與分隔線", () => {
    */
   it("沒有 note 時不留空的一列", () => {
     const wrapper = mount(HomeUvHeadline, {
-      props: { eyebrow: "今日 UV", uvi: 4, riskLevel: "moderate", note: null }
+      props: { eyebrow: "今日 UV", uvi: 4, riskLevel: "moderate", note: null },
+      global: GLOBAL
     });
 
     expect(wrapper.find(".uv-headline__note").exists()).toBe(false);
@@ -137,9 +145,46 @@ describe("HomeUvHeadline 的精簡與分隔線", () => {
         uvi: 5,
         riskLevel: "moderate",
         note: "明天比今天高 1"
-      }
+      },
+      global: GLOBAL
     });
 
     expect(wrapper.get(".uv-headline__note").text()).toBe("明天比今天高 1");
+  });
+});
+
+/*
+ * 2026-08-31：讀數右側加上前往五日預報的入口（使用者要求）。
+ *
+ * 這推翻了 2026-08-24 的「這裡不再重複一個入口」——當時的顧慮是重複，但
+ * 頁首那個入口看起來像狀態顯示而不是連結，實際可點卻沒人知道可點。
+ */
+describe("HomeUvHeadline 的五日預報入口", () => {
+  it("有 UV 值時顯示前往 /forecast 的連結", () => {
+    const wrapper = mount(HomeUvHeadline, {
+      props: { eyebrow: "今日 UV", uvi: 4, riskLevel: "moderate", note: null },
+      global: {
+        stubs: {
+          RouterLink: {
+            props: ["to"],
+            template: '<a :href="to"><slot /></a>'
+          }
+        }
+      }
+    });
+
+    const link = wrapper.get(".uv-headline__more");
+    expect(link.attributes("href")).toBe("/forecast");
+    expect(link.text()).toContain("五日預報");
+  });
+
+  /*
+   * 沒有 UV 值時整個 value 區塊都不渲染，入口自然也不在——那是對的：
+   * 沒有資料可看時，「看更多」沒有意義。
+   */
+  it("沒有 UV 值時不顯示入口", () => {
+    const wrapper = mountHeadline(null, null);
+
+    expect(wrapper.find(".uv-headline__more").exists()).toBe(false);
   });
 });

@@ -142,13 +142,20 @@ function getUnavailableMessage(error: UvForecastError): string {
         </li>
       </ol>
 
+      <!--
+        2026-08-31：更新時間不再換行（使用者要求）。
+
+        原本「更新時間」與時間值是兩個巢狀的 span，時間那層用 stat-figure
+        （等寬數字），兩者之間有換行機會，實測就是斷成兩行。改成同一個
+        span 並禁止在中間斷行——「更新時間 9/1 14:23」是一個詞組。
+      -->
       <p class="uv-forecast__source">
         {{ forecast.sourceDisplayName }}・F-D0047-091・白日時段
-        <span>
+        <span class="uv-forecast__updated">
           更新時間
-          <span class="uv-forecast__updated-at stat-figure">
-            {{ formatUpdatedAt(forecast.fetchedAt) }}
-          </span>
+          <span class="uv-forecast__updated-at stat-figure">{{
+            formatUpdatedAt(forecast.fetchedAt)
+          }}</span>
         </span>
       </p>
     </template>
@@ -346,8 +353,16 @@ function getUnavailableMessage(error: UvForecastError): string {
   line-height: var(--line-height-caption);
 }
 
-.uv-forecast__source span {
+/*
+ * 2026-08-31：改成 `> span`（直接子代）。
+ *
+ * 原本是後代選擇器，所以「更新時間」外層與裡面那層 stat-figure **兩個都
+ * 變成 block**——時間值因此被推到下一行，畫面上就是使用者截圖裡的兩行。
+ * 外層要 block（它本來就自成一行），裡面那層必須留在行內。
+ */
+.uv-forecast__source > span {
   display: block;
+  white-space: nowrap;
 }
 
 @media (max-width: 24rem) {

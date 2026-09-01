@@ -4,6 +4,7 @@ import type { ZoneProjection } from "@sunshield/contracts";
 import type { SessionEventStreamV1 } from "@sunshield/contracts";
 import { getZoneLabel } from "../../features/reminder/reminderPresentation";
 import { formatMonthDayTime, formatTime } from "../../helpers/datetime";
+import Icon from "../icons/Icon.vue";
 
 interface Props {
   zones: ZoneProjection[];
@@ -197,18 +198,30 @@ function getZoneNames(zoneIds: string[], zones: ZoneProjection[]): string {
       </template>
     </div>
 
-    <!-- 展開／收合控制 -->
+    <!--
+      2026-08-31：展開鈕從滿寬的 quiet 按鈕改成文字＋箭頭（使用者要求：
+      「想變得跟提醒進行中類似」）。
+
+      那顆滿寬按鈕在畫面上比它要展開的內容還醒目——一筆事件的收合控制，
+      份量不該大過事件本身。改成跟 ZoneStatusList 的 `.zone-group__toggle`
+      同一種樣子：文字在左、箭頭在右，箭頭換圖示 name 而不是 rotate
+      （DESIGN.md 第五節的展開收合契約）。
+    -->
     <div v-if="displayEvents.length > 1" class="expand-control">
       <button
-        class="button button--quiet"
+        class="events-toggle"
         type="button"
         :aria-expanded="isExpanded"
         aria-controls="recent-events-list"
         @click="isExpanded = !isExpanded"
       >
-        {{
+        <span>{{
           isExpanded ? "收合" : `查看其他 ${displayEvents.length - 1} 筆事件`
-        }}
+        }}</span>
+        <Icon
+          :name="isExpanded ? 'tool-chevron-down' : 'tool-chevron-right'"
+          :size="20"
+        />
       </button>
     </div>
   </section>
@@ -233,9 +246,15 @@ function getZoneNames(zoneIds: string[], zones: ZoneProjection[]): string {
   gap: var(--space-2);
 }
 
+/*
+ * 2026-08-31：拿掉 --text-secondary（使用者要求統一）。
+ *
+ * 「最近事件」與「各部位狀態」是首頁下半部兩個平行的區塊標題，但一個是
+ * 深咖、一個是次要灰——同一個層級用兩種顏色，讀起來像其中一個比較不重要。
+ * 兩者現在都走 section-title 的預設顏色。
+ */
 #events-title {
   margin: 0;
-  color: var(--text-secondary);
 }
 
 /*
@@ -303,6 +322,24 @@ button.event-row:hover .event-label {
   color: var(--text-secondary);
   text-align: right;
   white-space: nowrap;
+}
+
+/*
+ * 與 ZoneStatusList 的 .zone-group__toggle 同一組宣告——使用者要求兩者
+ * 「看起來類似」，所以數值也照抄，不要各憑印象調到「差不多」。
+ */
+.events-toggle {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: var(--tap-target);
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--color-tracking);
+  cursor: pointer;
+  font: inherit;
+  text-align: start;
 }
 
 .expand-control {

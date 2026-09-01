@@ -101,6 +101,9 @@
 | 記錄狀況的「取消」從等寬按鈕降成文字連結（裁決乙） | `ReportContextEventPage.vue`、`ReportContextEventPage.test.ts` | 已完成（2026-08-31） |
 | 記錄狀況的部位不預設全選；流汗／擦毛巾／摩擦改成**沿用上一次同類事件選的部位**（裁決乙），洗手／下水／離水維持 S-09 規格 | `createContextEventController.ts` 的 `resolvePresetZoneIds`、`ContextEventContext.lastZoneIdsByKind` | 已完成（2026-08-31） |
 | 記錄狀況的送出按鈕改成跟著事件走（「記錄流汗」）；**明確不用「確認補擦」**——那會讓人以為已經補過了 | `createContextEventController.ts` 的 `submitLabel`、`ReportContextEventPage.test.ts` 有安全守門 | 已完成（2026-08-31） |
+| 首頁 UV 讀數右側加「五日預報 ›」入口（**推翻 2026-08-24 的「不再重複一個入口」**——頁首那個看起來像狀態不像連結） | `HomeUvHeadline.vue` | 已完成（2026-08-31） |
+| 「最近事件」與「各部位狀態」標題統一（前者原本是 --text-secondary）；展開鈕從滿寬 quiet 按鈕改成文字＋箭頭，數值照抄 zone-group__toggle | `RecentEventsList.vue` | 已完成（2026-08-31） |
+| 五日卡「更新時間」不再斷成兩行：`.uv-forecast__source span` 改成直接子代選擇器（原本連內層 stat-figure 也被設成 block） | `FiveDayUvCard.vue` | 已完成（2026-08-31） |
 
 視覺設計另見：
 
