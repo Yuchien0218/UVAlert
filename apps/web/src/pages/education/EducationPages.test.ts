@@ -184,12 +184,15 @@ describe("衛教分類的圖示版型", () => {
     const wrapper = mount(EducationIndexPage, { global: { plugins: [router] } });
 
     /*
-     * **六張卡全部檢查，不是只看第一張。** 第一張是 hero，走的是另一段
-     * 模板；只看它的話，另外五張的圖示被搬出標題列也不會被抓到（寫這條
-     * 時實測過：只驗第一張時，把 secondary 卡的標題移出 IconLead 仍然全綠）。
+     * **五張卡全部檢查，不是只看第一張。** 只看第一張的話，其餘四張的
+     * 圖示被搬出標題列也不會被抓到（寫這條時實測過：只驗第一張時，把
+     * secondary 卡的標題移出 IconLead 仍然全綠）。
+     *
+     * 2026-08-31 從六張變五張：hero 搬出卡片列表改成橫幅，不再是
+     * `.education-category-card`。橫幅另有自己的守門（見下方）。
      */
     const cards = wrapper.findAll("a.education-category-card");
-    expect(cards).toHaveLength(6);
+    expect(cards).toHaveLength(5);
 
     for (const card of cards) {
       const lead = card.get(".icon-lead");
@@ -411,5 +414,70 @@ describe("衛教頁的 <title>", () => {
       generator,
       "不該再有寫死的三段尾綴"
     ).not.toContain("｜防曬衛教｜UVAlert</title>");
+  });
+});
+
+/*
+ * 2026-08-31：hero 從卡片列表搬出來，改成區塊標題上方的滿寬橫幅
+ * （使用者裁決「丁，不加 CTA」）。
+ *
+ * 四件事分開守，因為它們可以互相掩護：只守「有橫幅」→ 它可以同時還留在
+ * 列表裡；只守「不在列表裡」→ 橫幅可以整個消失；只守計數 → 數字可以對但
+ * hero 還在列表；只守「沒有 CTA」→ 其他三件都可以壞掉。
+ */
+describe("衛教 hero 橫幅", () => {
+  function mountIndex() {
+    return mount(EducationIndexPage, {
+      global: { stubs: { RouterLink: { template: "<a><slot /></a>" } } }
+    });
+  }
+
+  it("hero 是橫幅，不是分類卡", () => {
+    const wrapper = mountIndex();
+    const banner = wrapper.get(".education-hero-banner");
+
+    expect(banner.text()).toContain("了解今天的 UV");
+    expect(banner.text()).toContain("先從這裡開始");
+  });
+
+  /*
+   * **這條才是「丁」的本體。** hero 之所以讀起來彆扭，是因為它跟其餘五張
+   * 結構相同卻份量不同；只要它還在 .education-category-grid 裡，矛盾就還在。
+   */
+  it("hero 不在分類卡的列表裡", () => {
+    const wrapper = mountIndex();
+
+    expect(
+      wrapper.get(".education-category-grid").find(".education-hero-banner")
+        .exists(),
+      "hero 必須在分類列表之外"
+    ).toBe(false);
+    expect(wrapper.get(".education-hero-banner").classes()).not.toContain(
+      "education-category-card"
+    );
+  });
+
+  /*
+   * hero 搬出去之後，區塊裡真的只剩五個主題。計數跟著改是誠實的一部分
+   * ——不然就變成「說有六個，列出五個」。
+   */
+  it("區塊計數是五個主題，不是六個", () => {
+    const wrapper = mountIndex();
+
+    expect(wrapper.get(".education-section-heading").text()).toContain(
+      "5 個主題"
+    );
+  });
+
+  /*
+   * 使用者明確要求不加 CTA：整個橫幅本來就可點，多一顆按鈕是重複的可點
+   * 區域與多餘的鍵盤焦點，而且會把橫幅撐高、吃掉第一屏。
+   */
+  it("橫幅裡沒有另外一顆按鈕或連結", () => {
+    const wrapper = mountIndex();
+    const banner = wrapper.get(".education-hero-banner");
+
+    expect(banner.findAll("button")).toHaveLength(0);
+    expect(banner.findAll("a")).toHaveLength(0);
   });
 });
