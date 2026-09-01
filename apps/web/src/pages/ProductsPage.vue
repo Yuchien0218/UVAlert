@@ -153,6 +153,17 @@ function openGear(productId: string): void {
         </button>
 
         <!--
+          2026-09-01：「使用中」與「收納中」之間補一條分隔線（使用者指定
+          位置）。
+
+          這兩段是**兩種不同的東西**——會用於新提醒的，與不會的。中間隔著
+          一顆主要 CTA，沒有線的時候「新增裝備」看起來像屬於下面那一段。
+          線的用法跟首頁 UV 帶狀區、衛教分類頁一致：只在真正的轉折處畫，
+          不是每個區塊各畫一條。
+        -->
+        <hr v-if="past.length > 0" class="gear-section-rule" />
+
+        <!--
           「收納中」取代原本的「過去紀錄」（2026-08-23 裁決）。「過去紀錄」
           語氣像是被淘汰，容易讓人以為裝備被刪除了；「收納中」中性得多，
           也符合這些裝備仍可從編輯頁恢復使用的事實。
@@ -216,6 +227,15 @@ p {
 section {
   display: grid;
   gap: var(--space-3);
+}
+
+/* 值與衛教分類頁那條一致——全站的分隔線只有一種粗細與顏色。 */
+.gear-section-rule {
+  width: 100%;
+  height: 0;
+  margin: 0;
+  border: 0;
+  border-top: 1px solid var(--border-subtle);
 }
 
 .gear-section-heading {

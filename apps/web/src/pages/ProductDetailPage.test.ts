@@ -143,8 +143,18 @@ describe("ProductDetailPage", () => {
    * **`dt` 一律不得被壓縮**（防止其他列在內容變長時重蹈覆轍）。合成一條的
    * 話，拿掉任一個修法都還是綠的。
    */
+  /*
+   * 2026-09-01：改用防曬衣物來掛載。
+   *
+   * 「補擦提醒」那一列現在只在**不會倒數**時出現（防曬乳那句講的是品類
+   * 通則，不是這一瓶的資料）。原本這條掛的是防曬乳，改動後那一列不存在，
+   * 測試就紅了——**斷言本身沒有問題，是取樣的產品類別要換**。版型守門的
+   * 意圖不變：那一列的 `dd` 是一整句話，必須上下堆疊。
+   */
   it("補擦提醒那一列上下堆疊，不與長句並排", async () => {
-    const { wrapper } = await mountDetail(makeProduct());
+    const { wrapper } = await mountDetail(
+      makeProduct({ gearCategory: "clothing" })
+    );
 
     const row = wrapper
       .findAll(".spec-row")
