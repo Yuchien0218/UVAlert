@@ -1,8 +1,7 @@
 <script setup lang="ts">
 import type { UvRiskLevel } from "@sunshield/contracts";
 import { computed } from "vue";
-import { RouterLink } from "vue-router";
-import Icon from "../icons/Icon.vue";
+import ChevronLink from "../common/ChevronLink.vue";
 import { getUvRiskLevelLabel } from "../../features/uv/uvForecastRules";
 
 /**
@@ -80,10 +79,9 @@ const hasValue = computed(() => props.uvi !== null && props.riskLevel !== null);
       <span class="uv-headline__level">
         {{ getUvRiskLevelLabel(riskLevel!) }}
       </span>
-      <RouterLink class="text-link uv-headline__more" to="/forecast">
+      <ChevronLink class="uv-headline__more" to="/forecast">
         五日預報
-        <Icon name="tool-chevron-right" :size="16" />
-      </RouterLink>
+      </ChevronLink>
     </div>
 
     <!--
@@ -145,14 +143,9 @@ const hasValue = computed(() => props.uvi !== null && props.riskLevel !== null);
   gap: var(--space-2);
 }
 
-/* 推到最右端，並對齊等級標籤那一行而不是讀數的底部。 */
+/* 推到最右端。大小與間距由 ChevronLink 決定，這裡只管位置。 */
 .uv-headline__more {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--space-1);
   margin-inline-start: auto;
-  padding-bottom: 0.35rem;
-  font-size: var(--font-size-caption);
   white-space: nowrap;
 }
 

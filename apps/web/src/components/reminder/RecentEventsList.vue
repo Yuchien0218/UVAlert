@@ -4,7 +4,7 @@ import type { ZoneProjection } from "@sunshield/contracts";
 import type { SessionEventStreamV1 } from "@sunshield/contracts";
 import { getZoneLabel } from "../../features/reminder/reminderPresentation";
 import { formatMonthDayTime, formatTime } from "../../helpers/datetime";
-import Icon from "../icons/Icon.vue";
+import ChevronLink from "../common/ChevronLink.vue";
 
 interface Props {
   zones: ZoneProjection[];
@@ -154,13 +154,18 @@ function formatEventTime(date: Date): string {
  *
  * 「全部位」兩者都解決：它是一個範圍描述，跟名稱清單是同一種東西。
  */
+/** 這次事件是不是涵蓋了全部追蹤中的部位。 */
+function isAllZones(zoneIds: string[], zones: ZoneProjection[]): boolean {
+  if (zoneIds.length === 0) return false;
+  return (
+    zoneIds.length ===
+    zones.filter((zone) => zone.trackingStatus === "active").length
+  );
+}
+
 function getZoneNames(zoneIds: string[], zones: ZoneProjection[]): string {
   if (zoneIds.length === 0) return "";
-
-  const activeCount = zones.filter(
-    (zone) => zone.trackingStatus === "active"
-  ).length;
-  if (zoneIds.length === activeCount) return "全部位";
+  if (isAllZones(zoneIds, zones)) return "全部位";
 
   return zoneIds
     .map((id) => {
@@ -202,9 +207,18 @@ function getZoneNames(zoneIds: string[], zones: ZoneProjection[]): string {
         >
           <span class="event-time">{{ formatEventTime(event.time) }}</span>
           <span class="event-label">{{ event.label }}</span>
-          <span class="event-zones">{{
-            getZoneNames(event.zoneIds, zones)
-          }}</span>
+          <!--
+            2026-08-31：涵蓋全部位時改用膠囊（使用者要求）。
+
+            那一欄有兩種內容：實際部位名稱（「手臂、耳朵」）與範圍描述
+            （「全部位」）。名稱是資料，範圍是分類——分類用膠囊，跟衛教
+            卡的 kicker 與各部位狀態的 chip 是同一套語彙。
+          -->
+          <span
+            class="event-zones"
+            :class="{ 'event-zones--all': isAllZones(event.zoneIds, zones) }"
+            >{{ getZoneNames(event.zoneIds, zones) }}</span
+          >
         </component>
       </template>
     </div>
@@ -219,21 +233,15 @@ function getZoneNames(zoneIds: string[], zones: ZoneProjection[]): string {
       （DESIGN.md 第五節的展開收合契約）。
     -->
     <div v-if="displayEvents.length > 1" class="expand-control">
-      <button
-        class="events-toggle"
-        type="button"
-        :aria-expanded="isExpanded"
-        aria-controls="recent-events-list"
+      <ChevronLink
+        :expanded="isExpanded"
+        controls="recent-events-list"
         @click="isExpanded = !isExpanded"
       >
-        <span>{{
+        {{
           isExpanded ? "收合" : `查看其他 ${displayEvents.length - 1} 筆事件`
-        }}</span>
-        <Icon
-          :name="isExpanded ? 'tool-chevron-down' : 'tool-chevron-right'"
-          :size="20"
-        />
-      </button>
+        }}
+      </ChevronLink>
     </div>
   </section>
 </template>
@@ -246,10 +254,19 @@ function getZoneNames(zoneIds: string[], zones: ZoneProjection[]): string {
  * 讓頁面看起來比實際更破碎。padding-top 留著——那是區塊之間的呼吸，
  * 不是線的附屬品。
  */
+/*
+ * 2026-08-31：上緣加回分隔線（使用者指定位置）。
+ *
+ * 這跟同一天把提醒頁分隔線全部拿掉不衝突，理由與 UV 區塊那兩條相同：
+ * 拿掉的是「每個區塊各自在上緣畫一條」的零散做法；現在只有兩個位置有線
+ * ——UV 帶狀區的上下緣，以及這裡。它分開的是「你現在的狀態」與「你做過
+ * 什麼」，那是首頁最大的一個轉折。
+ */
 .events-section {
   display: grid;
   gap: var(--space-4);
-  padding-top: var(--space-4);
+  padding-top: var(--space-5);
+  border-top: 1px solid var(--border-subtle);
 }
 
 .section-header {
@@ -336,21 +353,15 @@ button.event-row:hover .event-label {
 }
 
 /*
- * 與 ZoneStatusList 的 .zone-group__toggle 同一組宣告——使用者要求兩者
- * 「看起來類似」，所以數值也照抄，不要各憑印象調到「差不多」。
+ * 膠囊的數值與衛教卡的 kicker 一致（app.css 的 .education-card-status）。
+ * 那裡是全域類別、這裡是 scoped，沒有直接共用——但值刻意對齊，兩種膠囊
+ * 在同一個 App 裡不該長得不一樣。
  */
-.events-toggle {
-  display: flex;
-  align-items: center;
-  gap: var(--space-2);
-  min-height: var(--tap-target);
-  padding: 0;
-  border: 0;
-  background: none;
-  color: var(--color-tracking);
-  cursor: pointer;
-  font: inherit;
-  text-align: start;
+.event-zones--all {
+  padding: 0.15rem 0.5rem;
+  border-radius: var(--radius-pill);
+  background: var(--border-subtle);
+  font-size: var(--font-size-caption);
 }
 
 .expand-control {
