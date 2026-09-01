@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed } from "vue";
-import { useRoute } from "vue-router";
+import { useRoute, useRouter } from "vue-router";
+import IconButton from "../../components/common/IconButton.vue";
 import IconLead from "../../components/common/IconLead.vue";
 import { educationCategoryIcon } from "../../features/education/educationCategoryIcons";
 import EducationSeoHead from "../../components/education/EducationSeoHead.vue";
@@ -13,6 +14,7 @@ import {
 } from "../../features/education/educationContent";
 
 const route = useRoute();
+const router = useRouter();
 const categorySlug = computed(() => String(route.params.category ?? ""));
 const category = computed(() => findEducationCategory(categorySlug.value));
 const articles = computed(() => listArticlesForCategory(categorySlug.value));
@@ -40,23 +42,51 @@ const robots = computed(() =>
       page-type="CollectionPage"
     />
 
-    <header class="page-heading">
-      <RouterLink class="text-link" to="/education">← 防曬衛教</RouterLink>
-      <p class="page-heading__eyebrow">衛教分類</p>
-      <!--
-        2026-08-31：主題頁標題也帶上分類圖示（使用者要求）。
+    <!--
+      2026-09-01：返回從左上角的文字連結改成右上角的圖示鈕（使用者要求）。
 
-        用的是**同一個 category.icon**，跟衛教首頁那張分類卡一樣——從卡片
-        點進來之後，圖示還在原地，讀者知道自己進了哪一個主題。首頁與這裡
-        都走 IconLead，所以尺寸只有一個地方在管。
-      -->
-      <IconLead :icon="educationCategoryIcon(category.slug)">
-        <h1 class="page-heading__title" data-typography-role="page-title">
-          {{ category.title }}
-        </h1>
-      </IconLead>
+      「← 防曬衛教」原本自己佔一列，而那一列**右邊什麼都沒有**——跟
+      2026-08-31 那三個「叉叉獨佔一列」的案例是同一個版型問題，只是方向
+      相反。改成跟裝備詳情、設定流程一致的形狀：標題群組在左、離開的
+      出口在右上角同一列。
+
+      圖示用 `tool-arrow-left`（返回）而不是 `tool-close`（關閉）：這裡是
+      往上一層走，不是關掉一個流程。
+    -->
+    <header class="page-heading education-heading">
+      <div class="education-heading__main">
+        <p class="page-heading__eyebrow">衛教分類</p>
+        <!--
+          2026-08-31：主題頁標題也帶上分類圖示（使用者要求）。
+
+          用的是**同一個 category.icon**，跟衛教首頁那張分類卡一樣——從卡片
+          點進來之後，圖示還在原地，讀者知道自己進了哪一個主題。首頁與這裡
+          都走 IconLead，所以尺寸只有一個地方在管。
+        -->
+        <IconLead :icon="educationCategoryIcon(category.slug)">
+          <h1 class="page-heading__title" data-typography-role="page-title">
+            {{ category.title }}
+          </h1>
+        </IconLead>
+      </div>
+
+      <IconButton
+        icon="tool-arrow-left"
+        label="返回防曬衛教"
+        @click="router.push('/education')"
+      />
+
       <p class="page-heading__body">{{ category.description }}</p>
     </header>
+
+    <!--
+      2026-09-01：標題區與文章清單之間補一條分隔線（使用者指定位置）。
+
+      這一頁上半是「你在哪一個主題」、下半是「這個主題有哪些文章」，中間
+      沒有任何分界，讀起來像同一段。線的用法跟首頁 UV 帶狀區一致：不是每個
+      區塊各自畫一條，而是只在真正的轉折處畫。
+    -->
+    <hr class="education-heading__rule" />
 
     <section aria-labelledby="category-articles-title">
       <div class="education-section-heading">
@@ -90,6 +120,38 @@ const robots = computed(() =>
  */
 .education-page {
   gap: var(--page-stack-gap-prose);
+}
+
+/*
+ * 標題群組在左、返回鈕在右上角同一列，說明橫跨兩欄拿回整頁的寬度。
+ * 與 `.flow-heading`（裝備詳情、三個流程頁）同一套版型，只是這裡的左欄
+ * 是 eyebrow ＋ IconLead 兩層，所以自己包一個 div。
+ */
+.education-heading {
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: start;
+}
+
+.education-heading__main {
+  display: grid;
+  gap: var(--space-3);
+}
+
+.education-heading__body,
+.education-heading .page-heading__body {
+  grid-column: 1 / -1;
+}
+
+/*
+ * 分隔線沿用全站唯一的線色與粗細。`.page-stack` 已經在區塊之間給了間距，
+ * 所以這裡不再加 margin——加了會變成「線的上下比其他區塊更空」。
+ */
+.education-heading__rule {
+  width: 100%;
+  height: 0;
+  margin: 0;
+  border: 0;
+  border-top: 1px solid var(--border-subtle);
 }
 
 .education-review-note {

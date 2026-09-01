@@ -3,6 +3,7 @@ import Icon from "../../components/icons/Icon.vue";
 import { computed, onMounted, shallowRef } from "vue";
 import { useWebAppServices } from "../../app/injection";
 import AppNotice from "../../components/common/AppNotice.vue";
+import ChevronLink from "../../components/common/ChevronLink.vue";
 import ConfirmAction from "../../components/common/ConfirmAction.vue";
 import EmptyStateCard from "../../components/common/EmptyStateCard.vue";
 import BroadcastLoader from "../../components/feedback/BroadcastLoader.vue";
@@ -244,11 +245,27 @@ function writeSyncDisabled(value: boolean): void {
           清除沒有完成，資料維持原狀。請稍後再試。
         </AppNotice>
 
-        <!-- 清除草稿 -->
+        <!--
+          2026-09-01：說明為什麼按鈕是淡的（使用者回報「這頁上面有個按鈕
+          顏色比較淡」）。
+
+          查證結果**不是 bug**：「清除草稿」在沒有草稿時是 `disabled`，
+          淡色來自 `.button:disabled` 的 opacity 0.55，行為正確。
+
+          但一顆變淡的按鈕如果沒說原因，看起來就像壞掉。上面那張概況卡雖然
+          已經寫著「未儲存草稿：無」，那是**另一張卡**的一列，讀者不會自己
+          把兩件事連起來。所以在按鈕旁邊直接講。
+        -->
         <div class="clear-row">
           <div>
             <strong>清除設定草稿</strong>
-            <p>只刪除還沒建立提醒的設定進度。</p>
+            <p>
+              {{
+                summary.hasSetupDraft
+                  ? "只刪除還沒建立提醒的設定進度。"
+                  : "目前沒有草稿可以清除。"
+              }}
+            </p>
           </div>
           <ConfirmAction
             :confirming="confirming === 'drafts'"
@@ -346,7 +363,9 @@ function writeSyncDisabled(value: boolean): void {
       </p>
 
       <div v-if="!signedIn" class="sync-block">
-        <strong>目前使用免登入模式</strong>
+        <h3 class="sync-block__title" data-typography-role="card-title">
+          目前使用免登入模式
+        </h3>
         <p>本機倒數與資料不會因為沒有登入而受影響。</p>
         <button class="button button--quiet" type="button" @click="signIn">
           使用 Google 登入同步
@@ -359,7 +378,9 @@ function writeSyncDisabled(value: boolean): void {
       </div>
 
       <div v-else-if="syncDisabled" class="sync-block">
-        <strong>同步已停止</strong>
+        <h3 class="sync-block__title" data-typography-role="card-title">
+          同步已停止
+        </h3>
         <p>雲端資料仍保留；重新開啟同步前，不會再讀取或上傳雲端資料。</p>
         <button class="button button--quiet" type="button" @click="enableSync">
           重新開啟同步
@@ -367,7 +388,9 @@ function writeSyncDisabled(value: boolean): void {
       </div>
 
       <div v-else class="sync-block">
-        <strong>先看同步內容</strong>
+        <h3 class="sync-block__title" data-typography-role="card-title">
+          先看同步內容
+        </h3>
         <p>確認後才會上傳或下載；遇到版本不同時，系統不會自動覆蓋任何一邊。</p>
         <button
           v-if="preview === null"
@@ -417,9 +440,18 @@ function writeSyncDisabled(value: boolean): void {
         </AppNotice>
       </div>
 
-      <RouterLink class="text-link" to="/settings/account-data"
-        >管理登入與雲端資料</RouterLink
-      >
+      <!--
+        2026-09-01：改用 ChevronLink 並靠右（使用者要求：加箭頭、有底線、
+        靠右）。
+
+        它是這一段的**出口**——往更深一層的帳號與雲端資料頁。靠右、帶箭頭
+        之後跟五日預報那顆是同一種東西：「這裡還有別的可以看」。底線來自
+        `<a>` 的瀏覽器預設，ChevronLink 刻意不碰 text-decoration
+        （2026-08-31 的裁決）。
+      -->
+      <ChevronLink class="sync-group__more" to="/settings/account-data">
+        管理登入與雲端資料
+      </ChevronLink>
     </section>
   </div>
 </template>
@@ -560,9 +592,27 @@ dd {
   width: 100%;
 }
 
-.sync-block > strong {
-  display: block;
-  line-height: 1.4;
+/*
+ * 2026-09-01：從 <strong> 改成 <h3>，字級跟著 card-title 對齊「跨裝置同步」
+ * （使用者要求「綠色區字體大小要統一」）。
+ *
+ * 實測改動前是 18px vs 16px——差一階，剛好落在「看得出不一樣、但看不出
+ * 為什麼」的區間。
+ *
+ * 換成 h3 不只是換字級：這三塊（免登入／同步已停止／先看同步內容）本來
+ * 就是「跨裝置同步」底下的狀態小節，用 <strong> 當標題對螢幕閱讀器來說
+ * 是沒有標題。h2 → h3 的層級也是對的。
+ *
+ * 階層不再靠字級表達，改靠位置與那一段 lead 文字——這是刻意的取捨。
+ */
+/* 出口靠右，與其他區塊「這裡還有別的可以看」的入口一致。 */
+.sync-group__more {
+  justify-self: end;
+}
+
+.sync-block__title {
+  margin: 0;
+  line-height: var(--line-height-card-title);
 }
 
 .sync-block p {

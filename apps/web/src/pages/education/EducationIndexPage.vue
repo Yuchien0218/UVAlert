@@ -266,9 +266,22 @@ const robots = computed(() =>
   gap: var(--space-1);
 }
 
+/*
+ * 2026-09-01：`text-wrap: balance`（使用者回報「右邊間距比較空」）。
+ *
+ * 實測後左右內距其實是對稱的 20／20——「右邊比較空」的來源是**斷行**：
+ * 「挑選防曬乳、衣物與配件，出門前一次準備」擠滿第一行（寬 269，離右緣
+ * 還差 25px），只把「好。」兩個字丟到第二行。一長一極短的兩行讓右側看起來
+ * 空了一大塊。
+ *
+ * balance 讓瀏覽器把兩行的長度平均，右緣因此齊得多，也不會再有兩個字的
+ * 孤行。只用在這種兩三行的短說明——長文正文用 balance 會拖慢排版，那裡
+ * 維持預設。
+ */
 .education-category-card small {
   color: var(--text-secondary);
   line-height: var(--line-height-body);
+  text-wrap: balance;
 }
 /*
  * 2026-08-31：搬出列表之後就沒有特異性相爭的問題了（`.education-hero-banner`
