@@ -11,7 +11,7 @@ const vapidPublicKey =
 const vapidPrivateKey = "wqsR-4h_C_dNtQ-uDHWIaNL1roYcY-2XKXdARxOwnjE";
 const claimed: ClaimedPushSchedule = {
   deviceId: "10000000-0000-4000-8000-000000000001",
-  endpoint: "https://push.example.test/subscription/abc",
+  endpoint: "https://fcm.googleapis.com/fcm/send/subscription-abc",
   p256dh: "public-key-material",
   auth: "auth-key-material",
   dueAt: "2026-08-30T09:59:30.000Z",
@@ -211,6 +211,26 @@ describe("push dispatcher", () => {
 
     expect(dependencies.send).not.toHaveBeenCalled();
     expect(dependencies.settle).not.toHaveBeenCalled();
+  });
+
+  it("does not send a malicious endpoint retained in an older database row", async () => {
+    const dependencies = makeDependencies({
+      claimDue: vi.fn(async () => [
+        { ...claimed, endpoint: "https://attacker.example.test/push" }
+      ])
+    });
+
+    await createPushDispatcher(dependencies)(request());
+
+    expect(dependencies.send).not.toHaveBeenCalled();
+    expect(dependencies.renewClaim).not.toHaveBeenCalled();
+    expect(dependencies.settle).toHaveBeenCalledWith(
+      expect.objectContaining({
+        outcome: "failed",
+        errorCode: "PUSH_ENDPOINT_INVALID",
+        retryAt: null
+      })
+    );
   });
 
   it("rejects invalid VAPID configuration before claiming", async () => {

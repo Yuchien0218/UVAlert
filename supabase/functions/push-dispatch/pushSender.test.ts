@@ -2,7 +2,7 @@ import { describe, expect, it, vi } from "vitest";
 import { createPushSender } from "./pushSender";
 
 const subscription = {
-  endpoint: "https://push.example.test/subscription/abc",
+  endpoint: "https://fcm.googleapis.com/fcm/send/subscription-abc",
   keys: { p256dh: "public-key-material", auth: "auth-key-material" }
 };
 const vapidPublicKey =
@@ -34,6 +34,18 @@ describe("Web Push sender", () => {
         vapidDetails: vapid
       }
     );
+  });
+
+  it("rejects an untrusted stored endpoint before it can be sent", async () => {
+    const sendNotification = vi.fn(async () => ({ statusCode: 201 }));
+
+    await expect(
+      createPushSender({ sendNotification })(
+        { ...subscription, endpoint: "https://attacker.example.test/push" },
+        vapid
+      )
+    ).resolves.toEqual({ kind: "permanent-failure", status: 400 });
+    expect(sendNotification).not.toHaveBeenCalled();
   });
 
   it.each([

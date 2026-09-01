@@ -144,9 +144,9 @@ function validatePushSubscription(
     endpoint.protocol === "http:" &&
     ["localhost", "127.0.0.1"].includes(endpoint.hostname);
   if (
-    (endpoint.protocol !== "https:" && !localHttp) ||
     endpoint.username !== "" ||
-    endpoint.password !== ""
+    endpoint.password !== "" ||
+    (!localHttp && !isTrustedPushServiceEndpoint(endpoint))
   ) {
     throw new PushContractError("SUBSCRIPTION_INVALID");
   }
@@ -156,6 +156,55 @@ function validatePushSubscription(
     expirationTime: value.expirationTime,
     keys: { p256dh: value.keys.p256dh, auth: value.keys.auth }
   };
+}
+
+/**
+ * Accept only the documented Web Push service endpoints supported by UVAlert.
+ * This is a trust boundary, not a DNS or IP-address policy: requests are only
+ * ever sent to a fixed HTTPS origin and provider-specific endpoint path.
+ */
+export function isTrustedPushServiceEndpoint(endpoint: URL): boolean {
+  if (
+    endpoint.protocol !== "https:" ||
+    endpoint.port !== "" ||
+    endpoint.username !== "" ||
+    endpoint.password !== "" ||
+    endpoint.search !== "" ||
+    endpoint.hash !== ""
+  ) {
+    return false;
+  }
+
+  if (
+    endpoint.hostname === "fcm.googleapis.com" &&
+    hasRequiredPathSegment(endpoint.pathname, "/fcm/send/")
+  ) {
+    return true;
+  }
+  if (
+    endpoint.hostname === "updates.push.services.mozilla.com" &&
+    hasRequiredPathSegment(endpoint.pathname, "/wpush/v2/")
+  ) {
+    return true;
+  }
+  return (
+    endpoint.hostname.endsWith(".push.apple.com") &&
+    endpoint.hostname.length > ".push.apple.com".length &&
+    hasRequiredPathSegment(endpoint.pathname, "/")
+  );
+}
+
+export function isTrustedPushServiceEndpointString(value: string): boolean {
+  try {
+    return isTrustedPushServiceEndpoint(new URL(value));
+  } catch {
+    return false;
+  }
+}
+
+function hasRequiredPathSegment(pathname: string, prefix: string): boolean {
+  const remaining = pathname.slice(prefix.length);
+  return pathname.startsWith(prefix) && remaining.length > 0;
 }
 
 function isJsonContentType(value: string | null): boolean {

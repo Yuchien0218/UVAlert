@@ -1,3 +1,5 @@
+import { isTrustedPushServiceEndpointString } from "../_shared/push-contracts.ts";
+
 export type PushSubscriptionRecord = {
   endpoint: string;
   keys: { p256dh: string; auth: string };
@@ -43,6 +45,9 @@ export function createPushSender(dependencies: PushSenderDependencies) {
     subscription: PushSubscriptionRecord,
     vapid: VapidDetails
   ): Promise<PushSendResult> => {
+    if (!isTrustedPushServiceEndpointString(subscription.endpoint)) {
+      return { kind: "permanent-failure", status: 400 };
+    }
     await validateVapidDetails(vapid);
     try {
       await dependencies.sendNotification(

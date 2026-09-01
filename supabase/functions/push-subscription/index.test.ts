@@ -9,7 +9,7 @@ const deviceSecret = "AAECAwQFBgcICQoLDA0ODxAREhMUFRYXGBkaGxwdHh8";
 const secretHash =
   "cc06735f40144811abf8ec62fe7d63a7426aaba80da5dff6a4c5583d4c23af7d";
 const subscription = {
-  endpoint: "https://push.example.test/subscription/abc",
+  endpoint: "https://fcm.googleapis.com/fcm/send/subscription-abc",
   expirationTime: null,
   keys: {
     p256dh: "BEl62iUYgUivxIkv69yViEuiBIa40HI0FCXjV2qfL-FiLJ7x",
@@ -94,6 +94,22 @@ describe("anonymous push subscription handler", () => {
       subscription,
       now: "2026-08-30T10:00:00.000Z"
     });
+  });
+
+  it("POST rejects an untrusted HTTPS endpoint before creating a device", async () => {
+    const dependencies = makeDependencies();
+    const response = await createPushSubscriptionHandler(dependencies)(
+      request("POST", {
+        body: {
+          ...subscription,
+          endpoint: "https://attacker.example.test/subscription/abc"
+        }
+      })
+    );
+
+    expect(response.status).toBe(422);
+    expect(dependencies.consumeRateLimit).not.toHaveBeenCalled();
+    expect(dependencies.createSubscription).not.toHaveBeenCalled();
   });
 
   it("PUT authenticates and rotates endpoint and keys without credentials", async () => {

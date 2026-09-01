@@ -1,4 +1,5 @@
 import { errorResponse, jsonResponse, toResponse } from "../_shared/http.ts";
+import { isTrustedPushServiceEndpointString } from "../_shared/push-contracts.ts";
 import { validateVapidDetails } from "./pushSender.ts";
 import type {
   PushSendResult,
@@ -160,6 +161,22 @@ async function dispatchRow(
   if (!Number.isFinite(cutoff) || now.getTime() >= cutoff) {
     if (await settle(dependencies, row, "expired", now, "PUSH_EXPIRED", null)) {
       summary.expired += 1;
+    }
+    return;
+  }
+
+  if (!isTrustedPushServiceEndpointString(row.endpoint)) {
+    if (
+      await settle(
+        dependencies,
+        row,
+        "failed",
+        now,
+        "PUSH_ENDPOINT_INVALID",
+        null
+      )
+    ) {
+      summary.failed += 1;
     }
     return;
   }

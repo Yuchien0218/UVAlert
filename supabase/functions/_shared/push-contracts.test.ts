@@ -7,7 +7,7 @@ import {
 } from "./push-contracts";
 
 const validSubscription = {
-  endpoint: "https://push.example.test/subscription/abc",
+  endpoint: "https://fcm.googleapis.com/fcm/send/subscription-abc",
   expirationTime: null,
   keys: {
     p256dh: "BEl62iUYgUivxIkv69yViEuiBIa40HI0FCXjV2qfL-FiLJ7x",
@@ -37,7 +37,8 @@ describe("push subscription request contract", () => {
   it.each([
     "http://push.example.test/subscription/abc",
     "ftp://push.example.test/subscription/abc",
-    "https://user:password@push.example.test/subscription/abc"
+    "https://user:password@push.example.test/subscription/abc",
+    "https://attacker.example.test/subscription/abc"
   ])("rejects unsafe endpoint %s", async (endpoint) => {
     await expect(
       parsePushSubscriptionRequest(
