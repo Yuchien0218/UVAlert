@@ -211,6 +211,7 @@ function zoneNames(zoneIds: string[]): string {
         <QuickTimePicker
           heading="實際什麼時候發生？"
           id-prefix="report-time"
+          default-label="剛剛"
           :applied-at="contextEvent.occurredAt.value"
           :reference-now="contextEvent.referenceNow.value"
           :error="contextEvent.fieldErrors.value.occurredAt?.[0]"
@@ -236,6 +237,13 @@ function zoneNames(zoneIds: string[]): string {
         }}
       </p>
 
+      <!--
+        2026-08-31：「取消」從等寬按鈕降成文字連結（使用者裁決乙）。
+
+        原本兩顆都是 336×45 上下堆疊——次要動作拿到跟主要動作一樣的視覺
+        份量。跟夜間頁的「還是要開始提醒」同一種處理：離開的出口必須在，
+        但不需要跟送出平起平坐。
+      -->
       <div class="submit-actions">
         <button
           class="button button--primary"
@@ -248,7 +256,8 @@ function zoneNames(zoneIds: string[]): string {
           }}
         </button>
         <button
-          class="button button--quiet"
+          class="text-link submit-actions__cancel"
+          data-typography-role="body"
           type="button"
           :disabled="contextEvent.phase.value === 'submitting'"
           @click="cancel"
@@ -328,5 +337,14 @@ p {
 .correction-note {
   color: var(--text-secondary);
   line-height: var(--line-height-body);
+}
+
+.submit-actions__cancel {
+  justify-self: center;
+  padding: var(--space-2) 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  cursor: pointer;
 }
 </style>
