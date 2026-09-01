@@ -88,8 +88,8 @@
 | 波浪分隔線只用在衛教長文；延伸閱讀的 1px 直線一併換成波浪 | `apps/web/src/assets/app.css` 的 `.wave-divider`、`EducationArticlePage.vue`、靜態產生器 | 已完成（2026-08-31） |
 | 衛教 hero 卡的標題份量（甲乙丙丁四案，建議乙；丁是橫幅式版型） | 待裁決 | **待使用者裁決**，見 `2026-08-30-pending-decisions.md` §16.1 |
 | `event-*` 四顆圖示：先查「記錄狀況」選單再補齊（建議乙） | 待裁決 | **待使用者裁決**，見 §16.2 |
-| 衛教 hero 卡改橫幅式（丁，**不加 CTA**）：離開卡片列表，放在區塊標題上方 | `EducationIndexPage.vue`、`DESIGN.md` §5 `education-hero-banner` | 已完成（2026-08-31） |
-| `event-*` 四顆圖示走乙案：先查「記錄狀況」選單，補齊四種情境並各配 32px icon-first 卡 | 待實作：記錄狀況流程 | **已裁決 2026-08-31**，見 §16.2 |
+| 衛教 hero 卡改橫幅式（丁，**不加 CTA**）：離開卡片列表，放在區塊標題上方 | `EducationIndexPage.vue`、`DESIGN.md` §5 `education-hero-banner` | 已完成（2026-08-31，PR #70） |
+| `event-*` 四顆圖示接上「記錄狀況」選單，選項改 icon-first（圖示放在選項物件上，不放元件裡的對照表） | `createContextEventController.ts`、`ReportContextEventPage.vue`、`contextEventIcons.test.ts` | 已完成（2026-08-31） |
 | 右上角叉叉版型：兩處 `.detail-header` 改用 `.flow-heading`（class 已刪），首頁夜間併進 `home__session-head` | `ProductDetailPage.vue`、`NotificationSettingsPage.vue`、`HomePage.vue`、`closeButtonLayout.test.ts` | 已完成（2026-08-31，PR #69） |
 
 視覺設計另見：

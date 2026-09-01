@@ -8,6 +8,7 @@ import ZoneSelectorGrid from "../components/reminder/ZoneSelectorGrid.vue";
 import { getZoneLabel } from "../features/reminder/reminderPresentation";
 import { formatDateTime } from "../helpers/datetime";
 import IconButton from "../components/common/IconButton.vue";
+import Icon from "../components/icons/Icon.vue";
 
 const { contextEvent } = useWebAppServices();
 const router = useRouter();
@@ -125,6 +126,7 @@ function zoneNames(zoneIds: string[]): string {
             :aria-pressed="contextEvent.selectedKind.value === choice.kind"
             @click="contextEvent.selectKind(choice.kind)"
           >
+            <Icon :name="choice.icon" :size="32" />
             <strong>{{ choice.label }}</strong>
             <span>{{ choice.description }}</span>
           </button>
@@ -290,15 +292,33 @@ p {
  * DESIGN.md 第十節也記過一次（min-height 那次）。
  * 邊框與底色改由共用的 .app-card 提供，這裡只留版面。
  */
+/*
+ * 2026-08-31：改成 icon-first（使用者裁決乙）。
+ *
+ * 圖示在左、標題與說明在右，跟 /setup 的情境選擇器同一種讀法。32px 是
+ * DESIGN.md 第八節的「卡片主視覺」檔位，不另立。
+ *
+ * 圖示跨兩列（grid-row: 1 / 3）而不是只佔標題那一列——說明有兩行時，
+ * 圖示靠上會在下方留一根空柱子，那正是同一天在衛教分類卡上量到 122px
+ * 的那個問題。這裡讓它跨滿並置中。
+ */
 .kind-option {
   display: grid;
-  gap: var(--space-1);
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  column-gap: var(--space-4);
+  row-gap: var(--space-1);
   padding: var(--space-4);
   border-radius: var(--radius-sm);
   color: var(--text-primary);
   text-align: start;
   cursor: pointer;
   min-height: var(--tap-target);
+}
+
+.kind-option svg {
+  grid-row: 1 / 3;
+  flex: none;
 }
 
 .kind-option span {

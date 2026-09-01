@@ -1,3 +1,4 @@
+import type { IconName } from "../../generated/icons.generated";
 import {
   COMMAND_SCHEMA_VERSION,
   ReportContextEventCommandV1Schema,
@@ -44,6 +45,16 @@ export interface ContextEventChoice {
   kind: ContextEventKind;
   label: string;
   description: string;
+  /**
+   * 2026-08-31 新增。四顆 `event-*` 圖示 2026-08-29 就畫好進了註冊表，
+   * label 與這裡的選項逐字相同——它們本來就是為這個選單畫的，只是一直
+   * 沒接上（2026-08-31 的圖示清點量到「61 顆裡 17 顆沒有任何使用點」，
+   * 這四顆就在其中）。
+   *
+   * 放在選項物件上而不是元件裡的對照表：`GEAR_CATEGORY_ICONS` 就是被
+   * 複製到 GearForm 與 GearListItem 兩個檔案的前例，兩份遲早會漂移。
+   */
+  icon: IconName;
 }
 
 export interface ContextEventSuccess {
@@ -94,35 +105,47 @@ const ORDINARY_CHOICES: ContextEventChoice[] = [
   {
     kind: "heavy_sweat",
     label: "大量流汗",
-    description: "流汗可能讓防曬提前失效。"
+    description: "流汗可能讓防曬提前失效。",
+    icon: "event-heavy-sweat"
   },
   {
     kind: "towel",
     label: "擦毛巾",
-    description: "擦拭會直接帶走防曬。"
+    description: "擦拭會直接帶走防曬。",
+    icon: "event-towel"
   },
   {
     kind: "friction",
     label: "明顯摩擦",
-    description: "背帶、衣物或裝備的摩擦。"
+    description: "背帶、衣物或裝備的摩擦。",
+    icon: "event-friction"
   },
   {
     kind: "hand_wash",
     label: "洗手",
-    description: "只影響手部，其他部位不受影響。"
+    description: "只影響手部，其他部位不受影響。",
+    icon: "event-hand-wash"
   }
 ];
 
+/*
+ * 下水與離水共用 `context-water`。看起來像偷懶，但它們**永遠不會同時
+ * 出現**——有進行中的水上區間就只給離水，沒有就只給下水（見下方
+ * availableChoices 的組法）。同一個主題的兩個時刻，用同一顆圖示是準的；
+ * 為「離水」另畫一顆只會多一顆幾乎一樣的幾何。
+ */
 const WATER_START_CHOICE: ContextEventChoice = {
   kind: "water_start",
   label: "游泳／下水",
-  description: "開始一段水上活動。"
+  description: "開始一段水上活動。",
+  icon: "context-water"
 };
 
 const WATER_END_CHOICE: ContextEventChoice = {
   kind: "water_end",
   label: "離水",
-  description: "結束目前這段水上活動。"
+  description: "結束目前這段水上活動。",
+  icon: "context-water"
 };
 
 const LABEL_BY_KIND: Record<ContextEventKind, string> = {
