@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import type { UvRiskLevel } from "@sunshield/contracts";
 import { computed } from "vue";
+import { RouterLink } from "vue-router";
+import Icon from "../icons/Icon.vue";
 import { getUvRiskLevelLabel } from "../../features/uv/uvForecastRules";
 
 /**
@@ -40,6 +42,17 @@ const hasValue = computed(() => props.uvi !== null && props.riskLevel !== null);
       {{ eyebrow }}
     </p>
 
+    <!--
+      2026-08-31：讀數右側補上前往五日預報的入口（使用者要求）。
+
+      **這推翻了 2026-08-24 的一句註解**（「五日 UV 預報入口移到頁首右上角
+      的 UV 指數，這裡不再重複一個入口」）。當時的顧慮是重複，但頁首那個
+      入口是「臺中市西區 中量級」，看起來像狀態顯示而不是連結——沒有箭頭、
+      沒有底線、也不在使用者正在讀的位置。實際可點卻沒人知道可點，等於
+      沒有入口。
+
+      放在讀數同一列的右端：它描述的正是這個數字「還有沒有別的可以看」。
+    -->
     <div
       v-if="hasValue"
       class="uv-headline__value"
@@ -51,6 +64,10 @@ const hasValue = computed(() => props.uvi !== null && props.riskLevel !== null);
       <span class="uv-headline__level">
         {{ getUvRiskLevelLabel(riskLevel!) }}
       </span>
+      <RouterLink class="text-link uv-headline__more" to="/forecast">
+        五日預報
+        <Icon name="tool-chevron-right" :size="16" />
+      </RouterLink>
     </div>
 
     <!--
@@ -102,6 +119,17 @@ const hasValue = computed(() => props.uvi !== null && props.riskLevel !== null);
   display: flex;
   align-items: flex-end;
   gap: var(--space-2);
+}
+
+/* 推到最右端，並對齊等級標籤那一行而不是讀數的底部。 */
+.uv-headline__more {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  margin-inline-start: auto;
+  padding-bottom: 0.35rem;
+  font-size: var(--font-size-caption);
+  white-space: nowrap;
 }
 
 /*
