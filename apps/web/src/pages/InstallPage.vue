@@ -58,7 +58,7 @@ async function install(): Promise<void> {
         安裝到手機
       </h1>
       <p class="page-heading__body">
-        安裝後資料較不容易因關閉瀏覽器分頁而遺失。<strong>不安裝也可以正常使用</strong>。
+        本站採用 PWA 技術，可建立手機主畫面捷徑隨開即用。
       </p>
     </header>
 
@@ -103,9 +103,9 @@ async function install(): Promise<void> {
     <section class="limits app-card">
       <h2 data-typography-role="section-title">需要知道的限制</h2>
       <ul>
-        <li>不安裝仍可使用全部核心功能。</li>
-        <li>安裝不會讓系統在關閉頁面後保證送出通知。</li>
-        <li>清除網站資料或解除安裝，可能一併移除這台裝置上的本機資料。</li>
+        <li>不安裝仍可使用核心功能。</li>
+        <li>關閉頁面後仍受系統通知限制。</li>
+        <li>清除快取或解除安裝，可能一併移除本機紀錄。</li>
       </ul>
     </section>
 

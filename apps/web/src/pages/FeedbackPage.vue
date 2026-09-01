@@ -31,7 +31,7 @@ async function submit(): Promise<void> {
         問題回報與意見回饋
       </h1>
       <p class="page-heading__body">
-        不用登入。請描述你遇到的情況，我們只會收到這個表單中的內容。
+        免登入即可回報，僅會收到此表單的內容。
       </p>
     </header>
 
@@ -51,7 +51,7 @@ async function submit(): Promise<void> {
           rows="6"
           maxlength="4000"
           required
-          placeholder="請描述發生了什麼事，以及你原本想做什麼"
+          placeholder="請描述遇到的狀況與原本操作步驟"
         ></textarea>
       </label>
       <label>
@@ -60,7 +60,7 @@ async function submit(): Promise<void> {
           v-model="contactEmail"
           type="email"
           maxlength="320"
-          placeholder="不填也可以回報"
+          placeholder="選填，可聯繫你目前處理進度"
         />
       </label>
       <button class="button button--primary" type="submit" :disabled="busy">

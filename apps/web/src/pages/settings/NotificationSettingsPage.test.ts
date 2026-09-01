@@ -79,7 +79,7 @@ describe("NotificationSettingsPage", () => {
       }
     });
 
-    expect(wrapper.text()).toContain("目前狀態：還沒開啟通知");
+    expect(wrapper.text()).toContain("目前狀態：未開啟");
     const button = wrapper.find("button.button--primary");
     expect(button.exists()).toBe(true);
 
@@ -210,7 +210,7 @@ describe("NotificationSettingsPage", () => {
    * 使用者仍需自己回來查看，不能只說「可能會延遲或無法發出」——那種措辭
    * 讓「一定不會送達」聽起來像邊緣情況，跟 Sitemap §4.3 的規則衝突。
    */
-  it("無法背景送達時明確告知使用者仍需自己回來查看", () => {
+  it("無法背景送達時明確告知不會送達、要自己回來查看", () => {
     const services = makeServices({ canDeliverInBackground: false });
     vi.mocked(useWebAppServices).mockReturnValue(
       services as unknown as WebAppServices
@@ -223,8 +223,19 @@ describe("NotificationSettingsPage", () => {
       }
     });
 
-    expect(wrapper.text()).toContain("你仍需");
-    expect(wrapper.text()).toContain("自己回來查看");
+    /*
+     * 2026-08-31 文案潤飾（使用者提供）：「你仍需自己回來查看目前的補擦
+     * 狀態」改成「若關閉或遭系統清理將無法送達，請適時確認補擦狀態」。
+     *
+     * **守的是語意不是字面**，兩件事都必須在：
+     *   1. 明說「無法送達」（不是「可能延遲」）
+     *   2. 明說要自己確認補擦狀態
+     *
+     * 下面兩條 not.toContain 一併保留——2026-08-23 校正的重點就是不准把
+     * 「一定不會送達」寫成聽起來像邊緣情況（Sitemap §4.3）。
+     */
+    expect(wrapper.text()).toContain("將無法送達");
+    expect(wrapper.text()).toContain("確認補擦狀態");
     expect(wrapper.text()).not.toContain("可能會延遲或無法發出");
     expect(wrapper.text()).not.toContain("背景通知");
   });

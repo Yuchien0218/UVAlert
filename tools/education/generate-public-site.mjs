@@ -169,7 +169,7 @@ function renderEducationIndex(content, baseUrl, indexable, lastmod) {
       return `<a class="card" href="/education/${category.slug}"><span class="kicker">${articles.length} 篇文章</span><strong>${escapeHtml(category.title)}</strong><small>${escapeHtml(category.description)}</small></a>`;
     })
     .join("\n");
-  const body = `<p class="eyebrow">防曬生活編輯部</p><h1>防曬衛教</h1><p class="lead">先回答你正在搜尋的問題，再補上適用情境、限制與官方來源。這裡是一般衛教，不取代診斷或個人醫療建議。</p><h2>依一天中的使用流程找答案</h2><div class="card-list">${categories}</div>`;
+  const body = `<p class="eyebrow">防曬生活編輯部</p><h1>防曬衛教</h1><p class="lead">提供實用情境與官方指引。本專區為一般衛教資訊，不能取代專業醫療診斷。</p><h2>依一天的使用流程找答案</h2><div class="card-list">${categories}</div>`;
   return renderDocument({
     title: "防曬衛教",
     description:
