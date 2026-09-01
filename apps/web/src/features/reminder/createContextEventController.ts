@@ -55,6 +55,18 @@ export interface ContextEventChoice {
    * 複製到 GearForm 與 GearListItem 兩個檔案的前例，兩份遲早會漂移。
    */
   icon: IconName;
+  /**
+   * 送出按鈕的文字，例如「記錄流汗」。
+   *
+   * 2026-08-31（使用者要求）：原本固定是「確認記錄」。捲到頁面底部按下去
+   * 時，畫面上已經看不到自己選了哪一項——泛用的「確認記錄」不提供任何
+   * 再確認的機會。
+   *
+   * **刻意不寫「確認補擦」。** 記錄狀況與記錄補擦是兩件不同的事：補擦讓
+   * 倒數重新開始，記錄狀況只是縮短它或改用耐水規則。按鈕上寫「補擦」會
+   * 讓人以為自己已經補過了——這是這個 App 最不能出錯的地方。
+   */
+  submitLabel: string;
 }
 
 export interface ContextEventSuccess {
@@ -106,25 +118,29 @@ const ORDINARY_CHOICES: ContextEventChoice[] = [
     kind: "heavy_sweat",
     label: "大量流汗",
     description: "流汗可能讓防曬提前失效。",
-    icon: "event-heavy-sweat"
+    icon: "event-heavy-sweat",
+    submitLabel: "記錄流汗"
   },
   {
     kind: "towel",
     label: "擦毛巾",
     description: "擦拭會直接帶走防曬。",
-    icon: "event-towel"
+    icon: "event-towel",
+    submitLabel: "記錄擦毛巾"
   },
   {
     kind: "friction",
     label: "明顯摩擦",
     description: "背帶、衣物或裝備的摩擦。",
-    icon: "event-friction"
+    icon: "event-friction",
+    submitLabel: "記錄摩擦"
   },
   {
     kind: "hand_wash",
     label: "洗手",
     description: "只影響手部，其他部位不受影響。",
-    icon: "event-hand-wash"
+    icon: "event-hand-wash",
+    submitLabel: "記錄洗手"
   }
 ];
 
@@ -138,14 +154,16 @@ const WATER_START_CHOICE: ContextEventChoice = {
   kind: "water_start",
   label: "游泳／下水",
   description: "開始一段水上活動。",
-  icon: "context-water"
+  icon: "context-water",
+  submitLabel: "記錄下水"
 };
 
 const WATER_END_CHOICE: ContextEventChoice = {
   kind: "water_end",
   label: "離水",
   description: "結束目前這段水上活動。",
-  icon: "context-water"
+  icon: "context-water",
+  submitLabel: "記錄離水"
 };
 
 const LABEL_BY_KIND: Record<ContextEventKind, string> = {
@@ -163,6 +181,53 @@ function isExposedActive(zone: ZoneProjection): boolean {
   );
 }
 
+/**
+ * 選好事件之後，預設要勾哪些部位。
+ *
+ * **抽成純函式**（2026-08-31）：它是這一頁唯一有分支的規則，而 controller
+ * 本身要一整組 port 才掛得起來。純函式才測得動每一條分支。
+ *
+ * 前三種來自 S-09 規格（洗手預選手背、下水預選外露部位、離水沿用起點集合
+ * 且鎖定），不動。
+ *
+ * **流汗／擦毛巾／明顯摩擦改成沿用上一次的選擇**（使用者裁決乙）。原本一律
+ * 回傳空陣列，註解寫「規格要求使用者自行確認實際受影響部位」——但那個要求
+ * 的效果是**每記錄一次就要重新勾八個部位一遍**，而使用者每次勾的都差不多。
+ *
+ * 沿用歷史仍然滿足「自行確認」：勾選狀態明確畫在畫面上，看得到也改得動；
+ * 它是預設值不是規則。第一次記錄（沒有歷史）維持空的，那時確實沒有東西可以
+ * 沿用。
+ */
+export function resolvePresetZoneIds(input: {
+  kind: ContextEventKind;
+  selectableZones: ZoneProjection[];
+  openWaterInterval: OpenWaterInterval | null;
+  lastZoneIdsByKind: Record<string, string[]>;
+}): string[] {
+  const { kind, selectableZones, openWaterInterval, lastZoneIdsByKind } = input;
+
+  if (kind === "water_end") {
+    return [...(openWaterInterval?.zoneInstanceIds ?? [])];
+  }
+  if (kind === "hand_wash") {
+    return selectableZones
+      .filter((zone) => zone.bodyZoneCode === "hand_backs")
+      .map((zone) => zone.zoneInstanceId);
+  }
+  if (kind === "water_start") {
+    return selectableZones.map((zone) => zone.zoneInstanceId);
+  }
+
+  /*
+   * 過濾掉現在已經不能選的部位——上次記錄之後可能有部位被停止追蹤或被
+   * 衣物遮住了。留著會送出一個現在無效的 zoneInstanceId。
+   */
+  const selectable = new Set(
+    selectableZones.map((zone) => zone.zoneInstanceId)
+  );
+  return (lastZoneIdsByKind[kind] ?? []).filter((id) => selectable.has(id));
+}
+
 export function createContextEventController(
   dependencies: Dependencies
 ): ContextEventController {
@@ -174,6 +239,8 @@ export function createContextEventController(
   const selectedZoneIds = shallowRef<string[]>([]);
   const zoneSelectionLocked = shallowRef(false);
   const openWaterInterval = shallowRef<OpenWaterInterval | null>(null);
+  /** 每一種事件上次選了哪些部位（見 presetZoneIds）。 */
+  let lastZoneIdsByKind: Record<string, string[]> = {};
   const waterStartConfidence = shallowRef<"confirmed" | "unknown">("confirmed");
   const occurredAt = shallowRef("");
   const referenceNow = shallowRef("");
@@ -216,6 +283,7 @@ export function createContextEventController(
         ? [WATER_START_CHOICE]
         : [WATER_END_CHOICE])
     ];
+    lastZoneIdsByKind = context.lastZoneIdsByKind;
     selectableZones.value = context.session.zones.filter(isExposedActive);
     selectedKind.value = null;
     selectedZoneIds.value = [];
@@ -227,21 +295,13 @@ export function createContextEventController(
     phase.value = "ready";
   }
 
-  /** 預選規則見 P0_SCREEN_INVENTORY S-09。 */
   function presetZoneIds(kind: ContextEventKind): string[] {
-    if (kind === "water_end") {
-      return [...(openWaterInterval.value?.zoneInstanceIds ?? [])];
-    }
-    if (kind === "hand_wash") {
-      return selectableZones.value
-        .filter((zone) => zone.bodyZoneCode === "hand_backs")
-        .map((zone) => zone.zoneInstanceId);
-    }
-    if (kind === "water_start") {
-      return selectableZones.value.map((zone) => zone.zoneInstanceId);
-    }
-    // 擦拭／摩擦／流汗：規格要求使用者自行確認實際受影響部位。
-    return [];
+    return resolvePresetZoneIds({
+      kind,
+      selectableZones: selectableZones.value,
+      openWaterInterval: openWaterInterval.value,
+      lastZoneIdsByKind
+    });
   }
 
   function selectKind(kind: ContextEventKind): void {

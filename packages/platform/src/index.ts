@@ -102,6 +102,20 @@ export interface ContextEventContext {
   session: SessionProjection;
   /** null 代表沒有可關閉的水上區間，此時不得顯示離水事件。 */
   openWaterInterval: OpenWaterInterval | null;
+  /**
+   * 這個 Session 裡，每一種情境事件**最後一次**記錄時選了哪些部位。
+   *
+   * 2026-08-31 新增（使用者裁決乙）。流汗／擦毛巾／明顯摩擦三種原本一律
+   * 不預選——每記錄一次就要重新勾八個部位一遍。有了這份歷史之後，第二次
+   * 以後可以沿用上次的選擇。
+   *
+   * **是「預設值」不是「規則」**：使用者仍然可以改，畫面上勾選狀態也看得
+   * 見。所以用歷史當預設是安全的——它不會替使用者宣告任何他沒看到的事。
+   *
+   * 從事件流推導，不另外存一份：已經解析過更正鏈（resolveEventCorrectionLeaves），
+   * 所以被更正掉的事件不會被拿來當預設。
+   */
+  lastZoneIdsByKind: Record<string, string[]>;
 }
 
 /** S-10 更正表單需要的 target 描述。 */

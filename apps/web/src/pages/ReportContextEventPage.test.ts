@@ -64,3 +64,56 @@ describe("記錄狀況的送出區", () => {
     expect(cancelButton).toContain("取消");
   });
 });
+
+/*
+ * 2026-08-31：送出按鈕跟著已選事件走（使用者要求），例如「記錄流汗」。
+ *
+ * 泛用的「確認記錄」在捲到頁面底部時不提供任何再確認的機會——那時畫面上
+ * 已經看不到自己選了哪一項。
+ */
+describe("送出按鈕的文字", () => {
+  const CONTROLLER = readFileSync(
+    "apps/web/src/features/reminder/createContextEventController.ts",
+    "utf8"
+  ).replace(/\/\*[\s\S]*?\*\//g, "");
+
+  it("六種事件各有自己的送出文字", () => {
+    for (const label of [
+      "記錄流汗",
+      "記錄擦毛巾",
+      "記錄摩擦",
+      "記錄洗手",
+      "記錄下水",
+      "記錄離水"
+    ]) {
+      expect(CONTROLLER, label).toContain(`submitLabel: "${label}"`);
+    }
+  });
+
+  it("按鈕綁的是 submitLabel，不是寫死的字串", () => {
+    expect(SOURCE).toContain(
+      '{{ contextEvent.phase.value === "submitting" ? "記錄中…" : submitLabel }}'
+    );
+  });
+
+  /*
+   * **這條是安全守門，不是文案守門。**
+   *
+   * 記錄狀況與記錄補擦是兩件不同的事：補擦讓倒數重新開始，記錄狀況只是
+   * 縮短它或改用耐水規則。按鈕上出現「補擦」會讓人以為自己已經補過了，
+   * 然後不再補——這是這個 App 最不能出錯的地方。
+   *
+   * 使用者 2026-08-31 問過「要不要改成確認補擦」，結論是不行。這條把那個
+   * 結論釘住。
+   */
+  it("送出按鈕的文字裡不准出現「補擦」", () => {
+    const labels = [...CONTROLLER.matchAll(/submitLabel: "([^"]+)"/g)].map(
+      (match) => match[1]!
+    );
+
+    expect(labels.length).toBeGreaterThan(0);
+    for (const label of labels) {
+      expect(label, `${label} 不該提到補擦`).not.toContain("補擦");
+    }
+  });
+});

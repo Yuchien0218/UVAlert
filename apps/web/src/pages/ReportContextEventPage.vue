@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { nextTick, onMounted, watch } from "vue";
+import { computed, nextTick, onMounted, watch } from "vue";
 import { useRouter } from "vue-router";
 import { useWebAppServices } from "../app/injection";
 import QuickTimePicker from "../components/common/QuickTimePicker.vue";
@@ -38,6 +38,20 @@ watch(
 function cancel(): void {
   void router.push({ name: "home" });
 }
+
+/**
+ * 送出按鈕的文字。跟著已選事件走，例如「記錄流汗」。
+ *
+ * 還沒選事件時退回「確認記錄」——那時沒有東西可以具體化。
+ */
+const submitLabel = computed(() => {
+  const kind = contextEvent.selectedKind.value;
+  if (kind === null) return "確認記錄";
+  return (
+    contextEvent.availableChoices.value.find((choice) => choice.kind === kind)
+      ?.submitLabel ?? "確認記錄"
+  );
+});
 
 function zoneNames(zoneIds: string[]): string {
   return zoneIds
@@ -251,9 +265,7 @@ function zoneNames(zoneIds: string[]): string {
           :disabled="contextEvent.phase.value === 'submitting'"
           @click="contextEvent.submit"
         >
-          {{
-            contextEvent.phase.value === "submitting" ? "記錄中…" : "確認記錄"
-          }}
+          {{ contextEvent.phase.value === "submitting" ? "記錄中…" : submitLabel }}
         </button>
         <button
           class="text-link submit-actions__cancel"
