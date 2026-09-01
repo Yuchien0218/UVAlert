@@ -1,5 +1,6 @@
 // @vitest-environment happy-dom
 
+import { readFileSync } from "node:fs";
 import { mount } from "@vue/test-utils";
 import { describe, expect, it } from "vitest";
 import type { ProductSnapshotFormValue } from "../../features/setup/productSnapshot";
@@ -197,6 +198,60 @@ describe("耐水拆成兩層（裁決丙）", () => {
 
     expect(outer).toBeDefined();
     expect(inner).not.toBe(outer);
+  });
+
+  /*
+   * 2026-09-01 第二次調整（使用者：「旁邊有一條顏色怪怪的，字也分兩行」）。
+   *
+   * 前一版靠「縮排＋左側 2px 連接線」表示層級——那條線不圍住任何東西，
+   * 在畫面上是一段沒有來由的色塊；縮排又把選項擠窄到讓「耐水 40 分鐘」
+   * 折成兩行。改成**用包含關係取代連接線**：母選項與分鐘那一排接成同一
+   * 張卡。
+   *
+   * 兩件事分開守：沒有連接線、而且真的接在一起。只守前者的話，把整段拆
+   * 開變成兩張獨立的卡也會過，那時層級又不見了。
+   */
+  it("不用連接線表示層級", () => {
+    const source = readFileSync(
+      "apps/web/src/components/product/ProductSnapshotEditor.vue",
+      "utf8"
+    ).replace(/\/\*[\s\S]*?\*\//g, "");
+
+    const rule = /\.label-question__minutes \{[^}]*\}/.exec(source)?.[0];
+    expect(rule, "找不到 .label-question__minutes 規則").toBeDefined();
+    expect(rule).not.toContain("border-inline-start");
+  });
+
+  it("分鐘那一排與母選項接成同一張卡", async () => {
+    const wrapper = mountEditor();
+    await openWater(wrapper);
+    await wrapper.get('input[value="yes"]').setValue(true);
+
+    // 母選項下緣去圓角，分鐘那一排去上框線——兩者一起才接得起來。
+    expect(wrapper.get(".water-claim-option").classes()).toContain(
+      "water-claim-option--joined"
+    );
+
+    const source = readFileSync(
+      "apps/web/src/components/product/ProductSnapshotEditor.vue",
+      "utf8"
+    ).replace(/\/\*[\s\S]*?\*\//g, "");
+    const rule = /\.label-question__minutes \{[^}]*\}/.exec(source)![0];
+    expect(rule).toContain("border-top: 0;");
+  });
+
+  /*
+   * 母選項已經寫了「有耐水標示」，分鐘那一排再重複一次「耐水」正是把字
+   * 擠到第二行的原因。
+   */
+  it("分鐘的文字不重複「耐水」", async () => {
+    const wrapper = mountEditor();
+    await openWater(wrapper);
+    await wrapper.get('input[value="yes"]').setValue(true);
+
+    const text = wrapper.get(".label-question__minutes").text();
+    expect(text).toContain("40 分鐘");
+    expect(text).not.toContain("耐水");
   });
 
   /*

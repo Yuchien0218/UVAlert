@@ -664,9 +664,26 @@ p {
   cursor: pointer;
 }
 
+/*
+ * 2026-09-01：改用共用的「已選取」外觀（使用者要求統一）。
+ *
+ * 這裡原本是 `--color-primary` 邊框 ＋ `--color-surface-cream-strong` 底，
+ * 是全站**唯一**自己刻選取樣式的地方——其餘九個使用點與所有 `.choice-grid`
+ * 都走 app.css 的 `.option-selected`（`--color-muted` 邊框 ＋
+ * `--color-hairline` 底）。同一個表單裡因此有兩種「被選中」的長相。
+ *
+ * **選共用那組而不是把共用那組改成這組**，兩個理由：
+ *
+ *   1. 一比九。
+ *   2. `--color-primary` 是**行動色**（按鈕、連結）。拿它當選取狀態的邊框，
+ *      等於讓「這裡可以按」跟「這個已經選了」共用一個訊號。
+ *
+ * 視覺強度幾乎沒有損失：兩種底色對卡片的對比是 1.20 與 1.26，差別在色相
+ * 不在明度；邊框反而更清楚（muted 5.56 vs primary 4.37，SC 1.4.11 門檻 3:1）。
+ */
 .category-option:has(input:checked) {
-  border-color: var(--color-primary);
-  background: var(--color-surface-cream-strong);
+  border-color: var(--color-muted);
+  background: var(--color-hairline);
 }
 
 .category-option--disabled {
