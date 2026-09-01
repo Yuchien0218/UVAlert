@@ -2,9 +2,10 @@
 import Icon from "../components/icons/Icon.vue";
 import BroadcastLoader from "../components/feedback/BroadcastLoader.vue";
 import EmptyStateCard from "../components/common/EmptyStateCard.vue";
-import { computed, onMounted } from "vue";
+import { computed, onMounted, shallowRef } from "vue";
 import { useRouter } from "vue-router";
 import { useWebAppServices } from "../app/injection";
+import GearDetailSheet from "../components/product/GearDetailSheet.vue";
 import GearListItem from "../components/product/GearListItem.vue";
 import { GEAR_CATEGORY_LABELS } from "../features/product/gearPresentation";
 
@@ -56,8 +57,37 @@ function addGear(): void {
   void router.push({ name: "product-new" });
 }
 
+/**
+ * 2026-09-01：詳情從整頁改成就地升起的抽屜（使用者裁決）。
+ *
+ * 舊的 `/products/:id` 幾乎是編輯頁的子集——`GearForm` 底部本來就有
+ * 「移至收納／恢復使用／刪除」。成本與頻率因此是反的：最常做的「看一眼」
+ * 要跳一頁，要改東西得跳兩頁。抽屜讓看變成 0 次跳轉。
+ *
+ * **存的是 id 不是整筆紀錄。** 抽屜裡的動作（收納、恢復）會改寫這筆資料，
+ * 存快照的話畫面會停在舊值；用 id 去 `products` 裡查，狀態永遠是最新的。
+ * 資料被刪掉時查不到 → `openProduct` 變成 null → 抽屜自己關上。
+ */
+const openProductId = shallowRef<string | null>(null);
+
+const openProduct = computed(
+  () =>
+    productSettings.products.value.find(
+      (product) => product.productId === openProductId.value
+    ) ?? null
+);
+
 function openGear(productId: string): void {
-  void router.push({ name: "product-detail", params: { id: productId } });
+  openProductId.value = productId;
+}
+
+function closeGear(): void {
+  openProductId.value = null;
+}
+
+function editGear(productId: string): void {
+  openProductId.value = null;
+  void router.push({ name: "product-edit", params: { id: productId } });
 }
 </script>
 
@@ -175,8 +205,9 @@ function openGear(productId: string): void {
             </h2>
             <span class="gear-section-count">{{ past.length }} 件</span>
           </div>
+          <!-- 2026-09-01：詳情頁已改成抽屜，這句不能再指向一個不存在的頁。 -->
           <p class="section-empty">
-            這些裝備不會用於新的提醒；需要時可以在裝備詳情頁恢復。
+            這些裝備不會用於新的提醒；點一下可以恢復使用。
           </p>
           <ul class="gear-list">
             <li v-for="product in past" :key="product.productId">
@@ -189,6 +220,12 @@ function openGear(productId: string): void {
         </section>
       </template>
     </template>
+
+    <GearDetailSheet
+      :product="openProduct"
+      @close="closeGear"
+      @edit="editGear"
+    />
   </div>
 </template>
 

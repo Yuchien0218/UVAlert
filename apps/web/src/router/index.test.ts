@@ -39,7 +39,6 @@ describe("route name 完整性", () => {
     "reminder-event-correct",
     "product-new",
     "product-edit",
-    "product-detail",
     "settings-data",
     "settings-notifications",
     "install",

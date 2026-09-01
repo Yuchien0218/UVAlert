@@ -1,7 +1,68 @@
 // @vitest-environment happy-dom
 import { readFileSync, readdirSync } from "node:fs";
 import { join } from "node:path";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
+import type { ProductCatalogRecordV1 } from "@sunshield/contracts";
+import {
+  fingerprintProductLabelSnapshot,
+  PRODUCT_CATALOG_RECORD_VERSION
+} from "@sunshield/contracts";
+import { makeProductSnapshot } from "@sunshield/test-fixtures";
+import { flushPromises, mount } from "@vue/test-utils";
+import { shallowReadonly, shallowRef } from "vue";
+import { createMemoryHistory, createRouter } from "vue-router";
+import type { WebAppServices } from "../app/createWebAppServices";
+import { useWebAppServices } from "../app/injection";
+import ProductsPage from "./ProductsPage.vue";
+
+vi.mock("../app/injection", () => ({
+  useWebAppServices: vi.fn()
+}));
+
+/** 這一頁會 push 到 product-new／product-edit，路由表要有落點。 */
+function productsRouter() {
+  return createRouter({
+    history: createMemoryHistory(),
+    routes: [
+      { path: "/products", name: "products", component: ProductsPage },
+      {
+        path: "/products/new",
+        name: "product-new",
+        component: { template: "<div />" }
+      },
+      {
+        path: "/products/:id/edit",
+        name: "product-edit",
+        component: { template: "<div />" }
+      }
+    ]
+  });
+}
+
+const listSnapshot = makeProductSnapshot();
+
+function listProduct(
+  overrides: Partial<ProductCatalogRecordV1> = {}
+): ProductCatalogRecordV1 {
+  return {
+    schemaVersion: PRODUCT_CATALOG_RECORD_VERSION,
+    productId: "prod-1",
+    displayName: "日常保濕防曬乳",
+    gearCategory: "sunscreen",
+    archivedAt: null,
+    status: "active",
+    purchaseMonth: null,
+    expiryDate: null,
+    note: null,
+    priceTwd: null,
+    usageRating: null,
+    currentSnapshot: listSnapshot,
+    snapshotFingerprint: fingerprintProductLabelSnapshot(listSnapshot),
+    createdAt: "2026-08-01T08:00:00.000Z",
+    updatedAt: "2026-08-01T08:00:00.000Z",
+    ...overrides
+  };
+}
 
 /**
  * 2026-08-31。這一頁先前沒有任何測試。
@@ -131,4 +192,99 @@ describe("元件 emit 有人接", () => {
       ).toEqual([]);
     });
   }
+});
+
+/**
+ * 2026-09-01：裝備詳情改成清單上的抽屜（`/products/:id` 整頁已刪除）。
+ *
+ * **這一段是掛載測試，不是掃原始碼**——要守的正是掃描看不到的東西：點清單
+ * 會不會真的把抽屜打開、關閉會不會真的收回去。上面那條 emit 掃描只能確認
+ * `@close` 這個字有寫，不能確認它接到的 handler 做了對的事。
+ *
+ * 實測時還踩到一個假象值得記著：在 preview 工具裡（分頁 `visibilityState`
+ * 是 hidden）`requestAnimationFrame` 被節流，Vue `<Transition>` 的 class
+ * 換不到下一步，抽屜看起來「關不掉」。那是環境造成的，不是這裡的邏輯——
+ * 所以這條測試改用掛載驗證，不依賴動畫。
+ */
+describe("裝備詳情抽屜的開關", () => {
+  function mountPage(products: ProductCatalogRecordV1[]) {
+    vi.mocked(useWebAppServices).mockReturnValue({
+      productSettings: {
+        phase: shallowReadonly(shallowRef("ready")),
+        products: shallowReadonly(shallowRef(products)),
+        ensureLoaded: vi.fn(async () => undefined),
+        archiveProduct: vi.fn(async () => true),
+        restoreProduct: vi.fn(async () => true),
+        deleteProduct: vi.fn(async () => true)
+      }
+    } as unknown as WebAppServices);
+
+    return mount(ProductsPage, {
+      global: {
+        plugins: [productsRouter()],
+        stubs: { Icon: true, GearDetailSheet: true }
+      }
+    });
+  }
+
+  it("點清單項目會把那件裝備交給抽屜", async () => {
+    const wrapper = mountPage([listProduct()]);
+    await flushPromises();
+
+    const sheet = wrapper.findComponent({ name: "GearDetailSheet" });
+    expect(sheet.props("product")).toBeNull();
+
+    await wrapper.get(".gear-list button").trigger("click");
+    expect(
+      (sheet.props("product") as ProductCatalogRecordV1).productId
+    ).toBe("prod-1");
+  });
+
+  it("抽屜 emit close 之後真的收回去", async () => {
+    const wrapper = mountPage([listProduct()]);
+    await flushPromises();
+    await wrapper.get(".gear-list button").trigger("click");
+
+    const sheet = wrapper.findComponent({ name: "GearDetailSheet" });
+    sheet.vm.$emit("close");
+    await flushPromises();
+
+    expect(sheet.props("product")).toBeNull();
+  });
+
+  /*
+   * 裝備被刪掉之後，`openProduct` 在清單裡查不到就變成 null，抽屜自己關上
+   * ——這是「存 id 不存整筆紀錄」的用意。存快照的話畫面會停在一筆已經不存在
+   * 的資料上。
+   */
+  it("裝備從清單消失時抽屜自動關上", async () => {
+    const products = shallowRef<ProductCatalogRecordV1[]>([listProduct()]);
+    vi.mocked(useWebAppServices).mockReturnValue({
+      productSettings: {
+        phase: shallowReadonly(shallowRef("ready")),
+        products: shallowReadonly(products),
+        ensureLoaded: vi.fn(async () => undefined),
+        archiveProduct: vi.fn(async () => true),
+        restoreProduct: vi.fn(async () => true),
+        deleteProduct: vi.fn(async () => true)
+      }
+    } as unknown as WebAppServices);
+
+    const wrapper = mount(ProductsPage, {
+      global: {
+        plugins: [productsRouter()],
+        stubs: { Icon: true, GearDetailSheet: true }
+      }
+    });
+    await flushPromises();
+    await wrapper.get(".gear-list button").trigger("click");
+
+    const sheet = wrapper.findComponent({ name: "GearDetailSheet" });
+    expect(sheet.props("product")).not.toBeNull();
+
+    products.value = [];
+    await flushPromises();
+
+    expect(sheet.props("product")).toBeNull();
+  });
 });

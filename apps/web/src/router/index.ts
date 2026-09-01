@@ -58,11 +58,21 @@ export function createAppRouter(
         component: () => import("../pages/GearFormPage.vue"),
         meta: { title: "編輯防曬裝備", hideNavigation: true }
       },
+      /*
+       * 2026-09-01：裝備詳情從整頁改成清單上的抽屜（使用者裁決），
+       * `ProductDetailPage.vue` 已刪除。
+       *
+       * **舊網址導回清單而不是留一個 404。** 這個路徑沒有任何內部連結指過
+       * 來（改動前唯一的入口是 `ProductsPage.openGear`），但可能還躺在某人
+       * 的瀏覽記錄或已安裝 PWA 的分頁裡；把他們丟到「找不到頁面」比直接
+       * 帶回清單糟。
+       *
+       * 不做「導回清單並自動打開那件裝備」：那需要把抽屜狀態接進網址，等於
+       * 把剛拿掉的那一層路由再加回來，而這件事沒有人會分享連結。
+       */
       {
         path: "/products/:id",
-        name: "product-detail",
-        component: () => import("../pages/ProductDetailPage.vue"),
-        meta: { title: "防曬裝備詳情", hideNavigation: true }
+        redirect: { name: "products" }
       },
       {
         path: "/products",
