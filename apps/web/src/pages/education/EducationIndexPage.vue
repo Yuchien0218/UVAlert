@@ -79,6 +79,37 @@ const robots = computed(() =>
       </p>
     </header>
 
+    <!--
+      2026-08-31：hero 從卡片列表裡搬出來，改成標題上方的滿寬橫幅
+      （使用者裁決「丁，不加 CTA」）。
+
+      **原因不是字級，是形式與份量互相矛盾。** 實測 hero 標題 28px 襯線、
+      其餘五張 18px 無襯線，差 1.56 倍且換了字體——但兩者的**結構完全
+      相同**（膠囊、圖示＋標題、說明、圓角卡片）。形式在說「我們是同一
+      類」，字級在說「我比你們高一階」。甲乙丙（調字級）是把矛盾縮小，
+      丁是把它解掉：hero 不再是列表的成員，就沒有可比性。
+
+      連帶「6 個主題」變成「5 個主題」——那更誠實，hero 本來就不該一邊
+      佔著列表一格、一邊聲稱自己不一樣。
+
+      **刻意不加「開始閱讀 →」CTA**（使用者裁決）：整張橫幅本來就可點，
+      多一顆按鈕是重複的可點區域，也多一個沒必要的鍵盤焦點；而且會把
+      橫幅撐到約 200px，比原本的卡片還高，吃掉第一屏。
+
+      **仍然刻意不做雜誌式不對稱網格**，理由見下方 HERO_CATEGORY_SLUG。
+    -->
+    <RouterLink
+      v-if="heroCard !== null"
+      class="app-card education-hero-banner"
+      :to="educationCategoryPath(heroCard.slug)"
+    >
+      <span class="education-card-kicker">先從這裡開始</span>
+      <IconLead :icon="heroCard.icon">
+        <strong>{{ heroCard.title }}</strong>
+      </IconLead>
+      <small>{{ heroCard.description }}</small>
+    </RouterLink>
+
     <section aria-labelledby="education-categories-title">
       <div class="education-section-heading">
         <h2
@@ -87,25 +118,10 @@ const robots = computed(() =>
         >
           依一天中的使用流程找答案
         </h2>
-        <span>{{ categoryCards.length }} 個主題</span>
+        <span>{{ secondaryCards.length }} 個主題</span>
       </div>
 
       <nav class="education-category-grid" aria-label="衛教分類">
-        <RouterLink
-          v-if="heroCard !== null"
-          :key="heroCard.slug"
-          class="app-card education-category-card education-hero-card"
-          :to="educationCategoryPath(heroCard.slug)"
-        >
-          <IconLead :icon="heroCard.icon">
-            <span class="education-category-card__titles">
-              <span class="education-card-kicker">先從這裡開始</span>
-              <strong>{{ heroCard.title }}</strong>
-            </span>
-          </IconLead>
-          <small>{{ heroCard.description }}</small>
-        </RouterLink>
-
         <RouterLink
           v-for="category in secondaryCards"
           :key="category.slug"
@@ -225,10 +241,18 @@ const robots = computed(() =>
  * 不是報告內容量；同一格塞兩種資訊會讓引導標籤失去引導作用。
  *
  * 沒有做雜誌式不對稱網格——理由見 script 區塊 HERO_CATEGORY_SLUG 的註解。
+ *
+ * 2026-08-31：class 從 .education-hero-card 改名成 .education-hero-banner，
+ * 因為它不再是卡片列表的成員（見模板的註解）。名字要跟著角色走，否則
+ * 下一個人會以為它還在 .education-category-grid 裡。
  */
-.education-hero-card {
+.education-hero-banner {
+  display: grid;
+  gap: var(--space-2);
   padding: var(--space-6);
   background: var(--color-surface-cream-strong);
+  color: inherit;
+  text-decoration: none;
 }
 
 .education-category-card strong {
@@ -247,11 +271,12 @@ const robots = computed(() =>
   line-height: var(--line-height-body);
 }
 /*
- * 放在 .education-category-card strong 之後，不是跟其他 hero 規則放一起：
- * 兩者特異性相同（0,1,1），後出現的贏。放在前面的話 hero 標題會被一般
- * 卡的 card-title 蓋掉——實測就是 28px 變成 18px。
+ * 2026-08-31：搬出列表之後就沒有特異性相爭的問題了（`.education-hero-banner`
+ * 與 `.education-category-card` 不再套在同一個元素上），但規則留在原地
+ * ——移動它沒有好處，而 2026-08-30 那次「放在前面 28px 會變 18px」的
+ * 實測仍然是這個檔案裡值得記住的一課。
  */
-.education-hero-card strong {
+.education-hero-banner strong {
   font-family: var(--font-family-page-title);
   font-size: var(--font-size-page-title);
   line-height: var(--line-height-page-title);
@@ -271,8 +296,17 @@ const robots = computed(() =>
  *
  * 標題與狀態徽章不用改：標題 9.88:1、狀態徽章有自己的底色 4.63:1。
  */
-.education-hero-card .education-card-kicker,
-.education-hero-card small {
+.education-hero-banner .education-card-kicker,
+.education-hero-banner small {
   color: var(--text-body);
+}
+
+/*
+ * 橫幅的 kicker 保持膠囊（跟五張卡一致），但底色要換：一般卡的膠囊底是
+ * --border-subtle，疊在更深的 cream-strong 上幾乎看不出來。用畫布色當底，
+ * 在深底上反而是最清楚的做法。
+ */
+.education-hero-banner .education-card-kicker {
+  background: var(--color-canvas);
 }
 </style>
