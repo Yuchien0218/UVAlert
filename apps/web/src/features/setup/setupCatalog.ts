@@ -4,6 +4,7 @@ import type {
   SetupDraftV1,
   SetupDraftZoneV1
 } from "@sunshield/contracts";
+import type { IconName } from "../../generated/icons.generated";
 
 export const SETUP_PRESET_VERSION = "BODY_ZONE_PRESET_V3@1";
 
@@ -140,6 +141,29 @@ export const CONTEXT_LABELS: Record<SessionContext, string> = {
   outdoor_exercise: "戶外運動",
   water_preparing: "水上活動・準備下水",
   water_active: "水上活動・已在水中"
+};
+
+/**
+ * 每個情境對應的圖示。
+ *
+ * 圖示只有四顆（戶外／運動／室內／水上），但情境有六個——室內與水上各有
+ * 兩個子選項，它們共用所屬群組的圖示。這是刻意的：`ContextSelector` 的
+ * 版面就是「四個磚，其中兩個展開後有子選項」，子選項本來就不是獨立的
+ * 視覺層級，各給一顆圖示反而會讓群組關係讀不出來。
+ *
+ * **2026-08-31 抽到這裡。** 原本這份對應只存在於 `ContextSelector.vue`
+ * 的 `DIRECT_OPTIONS` 與 `groups` 裡，而且**只涵蓋得到四個磚**；
+ * `/setup` 收合後的摘要要顯示已選情境的圖示，需要的是六個情境都查得到
+ * 的表。放在 `CONTEXT_LABELS` 旁邊——同一種東西（情境 → 呈現用的常數），
+ * 跟 `GEAR_CATEGORY_ICONS` 收斂到 `gearPresentation.ts` 是同一個判斷。
+ */
+export const CONTEXT_ICONS: Record<SessionContext, IconName> = {
+  indoor_away: "context-indoor",
+  indoor_window: "context-indoor",
+  outdoor_general: "context-outdoor",
+  outdoor_exercise: "context-exercise",
+  water_preparing: "context-water",
+  water_active: "context-water"
 };
 
 export const BODY_ZONE_LABELS: Record<BodyZoneCode, string> = {

@@ -22,24 +22,16 @@ const props = defineProps<{
   /** null 代表沒有可用資料（未設定地區或取不到預報）。 */
   uvi: number | null;
   riskLevel: UvRiskLevel | null;
-  /** 地區顯示名稱；未設定時傳 null，會顯示「臺灣」。 */
-  regionName: string | null;
-  /** 日間平均溫度。資料可能缺，缺時整段不顯示而不是顯示 0。 */
-  temperatureCelsius: number | null;
-  /** 右側註記，例如「地區預報」或「明天比今天高 1」。 */
+  /**
+   * 註記，例如夜間的「明天比今天高 1」。白天是 null。
+   *
+   * 2026-08-31：白天原本固定送「地區預報」，已在 HomePage 拿掉——那四個字
+   * 沒有資訊量，這個 App 的 UV 本來就只有地區預報一種來源。
+   */
   note: string | null;
 }>();
 
 const hasValue = computed(() => props.uvi !== null && props.riskLevel !== null);
-
-const locationLine = computed(() => {
-  const region = props.regionName ?? "臺灣";
-  if (props.temperatureCelsius === null) {
-    return region;
-  }
-  // 資料是日間平均溫度，不是即時觀測，也不是高低範圍——所以寫「約」。
-  return `${region}・約 ${Math.round(props.temperatureCelsius)}°C`;
-});
 </script>
 
 <template>
@@ -67,18 +59,37 @@ const locationLine = computed(() => {
     -->
     <p v-else class="uv-headline__empty">無資料</p>
 
-    <div class="uv-headline__meta">
-      <span class="uv-headline__location">{{ locationLine }}</span>
-      <span v-if="note !== null" class="uv-headline__note">{{ note }}</span>
-      <span v-else class="uv-headline__note" aria-hidden="true">—</span>
-    </div>
+    <!--
+      2026-08-31：拿掉「臺中市西區・約 28°C」那一行（使用者要求）。
+
+      地區已經常駐在頁首右上角（「臺中市西區 中量級」），同一頁重複兩次；
+      溫度不是這個 App 的主題，它跟著地區一起被帶進來，但沒有任何一個
+      決策會用到它。
+
+      note 只在真的有話說時才佔位——白天沒有註記，就不留一列空的。原本
+      用一個 aria-hidden 的「—」佔位，那是為了讓地區與註記兩端對齊；地區
+      拿掉之後沒有東西要對齊了。
+    -->
+    <p v-if="note !== null" class="uv-headline__note">{{ note }}</p>
   </section>
 </template>
 
 <style scoped>
+/*
+ * 2026-08-31：上下各一條分隔線（使用者要求，位置由截圖指定）。
+ *
+ * 這跟同一天把提醒頁的分隔線全部拿掉**不衝突**：那時拿掉的是「區塊各自
+ * 在自己上緣畫一條」，線在畫面上是零散的；這裡是把 UV 這一段**框成一個
+ * 帶狀區**——它是首頁唯一一段「不是你的倒數、是環境資料」的內容，值得
+ * 跟前後分開。
+ *
+ * 用 border-block 一次寫上下兩條，值沿用其他頁面的 border-subtle。
+ */
 .uv-headline {
   display: grid;
   gap: var(--space-2);
+  padding-block: var(--space-5);
+  border-block: 1px solid var(--border-subtle);
 }
 
 .uv-headline__eyebrow {
@@ -137,10 +148,12 @@ const locationLine = computed(() => {
 /*
  * 2026-08-30：從 section-title(20px) 降到 supporting(14px)。
  *
- * 原本「無資料」是整個 UV 區塊裡最大的字，比下面的地區名（16px）還大
- * ——**沒有資料的東西拿到了最大的視覺重量**。有 UV 值時那個位置放的是
- * `--display` 的大讀數，那是有內容才配得上的份量；沒有值時應該讓位給
- * 地區名，它是這個區塊裡唯一還有內容的東西。
+ * 原本「無資料」是整個 UV 區塊裡最大的字——**沒有資料的東西拿到了最大的
+ * 視覺重量**。有 UV 值時那個位置放的是 `--display` 的大讀數，那是有內容
+ * 才配得上的份量。
+ *
+ * （2026-08-31 更新：當時「應該讓位給地區名」，而地區那一行已經拿掉了；
+ * 降字級的理由本身不變。）
  *
  * 用 supporting 而不是 body：這是「這裡沒有東西」的說明文字，對應
  * DESIGN.md 第五節的「次要資訊與補充文字」。
@@ -151,15 +164,8 @@ const locationLine = computed(() => {
   font-size: var(--font-size-supporting);
 }
 
-.uv-headline__meta {
-  display: flex;
-  justify-content: space-between;
-  align-items: baseline;
-  gap: var(--space-3);
-  font-size: var(--font-size-body);
-}
-
 .uv-headline__note {
+  margin: 0;
   color: var(--text-secondary);
   font-size: var(--font-size-caption);
 }

@@ -15,7 +15,6 @@ function mountHeadline(riskLevel: string | null, uvi: number | null) {
       eyebrow: "今日 UV",
       uvi,
       riskLevel,
-      locationLine: "臺中市西區",
       note: null
     } as never
   });
@@ -91,5 +90,56 @@ describe("HomeUvHeadline 風險色", () => {
         "color-mix"
       );
     }
+  });
+});
+
+/*
+ * 2026-08-31：拿掉地區與溫度那一行，並把 UV 區塊上下框上分隔線
+ * （使用者要求，位置由截圖指定）。
+ *
+ * 三件事分開守，因為它們可以互相掩護：只守「沒有地區」→ 溫度可以留著；
+ * 只守「有分隔線」→ 地區可以回來；只守「note 有條件」→ 白天可以又固定
+ * 顯示「地區預報」。
+ */
+describe("HomeUvHeadline 的精簡與分隔線", () => {
+  const source = readFileSync(
+    "apps/web/src/components/home/HomeUvHeadline.vue",
+    "utf8"
+  )
+    .replace(/<!--[\s\S]*?-->/g, "")
+    .replace(/\/\*[\s\S]*?\*\//g, "");
+
+  it("不再接收地區與溫度", () => {
+    expect(source).not.toContain("regionName");
+    expect(source).not.toContain("temperatureCelsius");
+  });
+
+  it("UV 區塊上下都有分隔線", () => {
+    expect(source).toContain("border-block: 1px solid var(--border-subtle);");
+  });
+
+  /*
+   * note 只在真的有話說時才佔位。原本白天固定送「地區預報」，那四個字
+   * 沒有資訊量——這個 App 的 UV 本來就只有地區預報一種來源。
+   */
+  it("沒有 note 時不留空的一列", () => {
+    const wrapper = mount(HomeUvHeadline, {
+      props: { eyebrow: "今日 UV", uvi: 4, riskLevel: "moderate", note: null }
+    });
+
+    expect(wrapper.find(".uv-headline__note").exists()).toBe(false);
+  });
+
+  it("有 note 時照常顯示（夜間的今明對比）", () => {
+    const wrapper = mount(HomeUvHeadline, {
+      props: {
+        eyebrow: "明日 UV 預報",
+        uvi: 5,
+        riskLevel: "moderate",
+        note: "明天比今天高 1"
+      }
+    });
+
+    expect(wrapper.get(".uv-headline__note").text()).toBe("明天比今天高 1");
   });
 });
