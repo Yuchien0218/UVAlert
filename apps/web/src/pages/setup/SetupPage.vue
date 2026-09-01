@@ -21,6 +21,7 @@ import type {
 import { describeSetupSaveFailure } from "../../features/setup/describeSetupSaveFailure";
 import { isFixedEvening } from "../../features/uv/uvForecastRules";
 import {
+  CONTEXT_ICONS,
   CONTEXT_LABELS,
   makeQuickProtectionDraft,
   type QuickProtectionDraft
@@ -353,8 +354,24 @@ onMounted(async () => {
     <template v-else>
       <ContextSelector v-if="showContextSelector" v-model="selectedContext" />
 
+      <!--
+        2026-08-31：摘要列補上情境圖示（使用者要求）。
+
+        收合之後這一行是整個情境步驟僅剩的視覺，只有兩段文字；補上圖示
+        之後它跟展開時的 ContextSelector 用同一顆幾何，讀者知道收起來的
+        是哪一個選項，而不只是讀到一個詞。
+
+        24px 而不是選擇器裡的 32px：那裡圖示是卡片主視覺，這裡是一行摘要
+        的行內記號（DESIGN.md 第八節的檔位）。
+      -->
       <div v-else class="setup-step-summary">
         <p class="setup-step-summary__value">
+          <Icon
+            v-if="context !== null"
+            class="setup-step-summary__icon"
+            :name="CONTEXT_ICONS[context]"
+            :size="24"
+          />
           <span class="setup-step-summary__label">情境</span>
           {{ context === null ? "" : CONTEXT_LABELS[context] }}
         </p>
@@ -505,7 +522,7 @@ onMounted(async () => {
 
 .setup-step-summary__value {
   display: flex;
-  align-items: baseline;
+  align-items: center;
   gap: var(--space-3);
   margin: 0;
   min-width: 0;

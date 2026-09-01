@@ -2,6 +2,7 @@
 import type { SessionContext } from "@sunshield/contracts";
 import { computed, shallowRef, watch } from "vue";
 import Icon from "../icons/Icon.vue";
+import { CONTEXT_ICONS } from "../../features/setup/setupCatalog";
 
 /**
  * 情境選擇：四格 icon-first，說明與子選項在格子下方展開。
@@ -31,13 +32,13 @@ const directOptions = [
     value: "outdoor_general",
     label: "一般戶外",
     description: "通勤、散步或一般外出。",
-    icon: "context-outdoor"
+    icon: CONTEXT_ICONS.outdoor_general
   },
   {
     value: "outdoor_exercise",
     label: "戶外運動",
     description: "跑步、騎車或其他較大量活動。",
-    icon: "context-exercise"
+    icon: CONTEXT_ICONS.outdoor_exercise
   }
 ] as const;
 
@@ -45,7 +46,7 @@ const groups = [
   {
     key: "indoor" as GroupKey,
     label: "室內活動",
-    icon: "context-indoor",
+    icon: CONTEXT_ICONS.indoor_away,
     options: [
       {
         value: "indoor_window",
@@ -62,7 +63,7 @@ const groups = [
   {
     key: "water" as GroupKey,
     label: "水上活動",
-    icon: "context-water",
+    icon: CONTEXT_ICONS.water_preparing,
     options: [
       {
         value: "water_preparing",

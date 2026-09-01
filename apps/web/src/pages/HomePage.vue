@@ -135,9 +135,14 @@ const headlineEyebrow = computed(() =>
  * 夜間改成今明對比，這個可以由兩天的 uvi 實際算出來。
  */
 const headlineNote = computed<string | null>(() => {
-  if (!isNight.value) {
-    return headlineDay.value === null ? null : "地區預報";
-  }
+  /*
+   * 2026-08-31：白天不再顯示「地區預報」（使用者要求）。
+   *
+   * 那四個字沒有資訊量——這個 App 顯示的 UV 本來就只有地區預報一種來源，
+   * 標註它等於在說「這是資料」。夜間那一支留著：「明天比今天高 1」是
+   * 實際算出來的比較，不是標籤。
+   */
+  if (!isNight.value) return null;
 
   const todayUvi = today.value?.uvi;
   const tomorrowUvi = tomorrow.value?.uvi;
@@ -480,8 +485,6 @@ function handleEndSession(): void {
         :eyebrow="headlineEyebrow"
         :uvi="headlineDay?.uvi ?? null"
         :risk-level="headlineDay?.riskLevel ?? null"
-        :region-name="uvForecast.region.value?.displayName ?? null"
-        :temperature-celsius="headlineDay?.temperatureCelsius ?? null"
         :note="headlineNote"
       />
 
@@ -516,8 +519,6 @@ function handleEndSession(): void {
         :eyebrow="headlineEyebrow"
         :uvi="headlineDay?.uvi ?? null"
         :risk-level="headlineDay?.riskLevel ?? null"
-        :region-name="uvForecast.region.value?.displayName ?? null"
-        :temperature-celsius="headlineDay?.temperatureCelsius ?? null"
         :note="headlineNote"
       />
 

@@ -95,6 +95,8 @@
 | 水上活動進行中的倒數加一道波浪＋一句說明（波浪在 App 裡唯一的非衛教用途） | `homeReminderClockPresentation.ts` 的 `inWater`、`HomeCountdown.vue`；守門白名單在 `EducationPages.test.ts` | 已完成（2026-08-31） |
 | `PRODUCT_IDENTITY_UNKNOWN` 文案拿掉「無法建立倒數」的假因果（2026-08-30 起改用 120 分鐘保守預設） | `reminderPresentation.ts`、`productIdentityCopy.test.ts` | 已完成（2026-08-31） |
 | `GEAR_CATEGORY_ICONS` 收斂成一份（原本逐字複製在 GearForm 與 GearListItem 兩處） | `features/product/gearPresentation.ts`、`gearCategoryIcons.test.ts` | 已完成（2026-08-31） |
+| `/setup` 收合後的情境摘要補上圖示；`CONTEXT_ICONS` 抽到 setupCatalog（原本只涵蓋四個磚，查不到子選項） | `setupCatalog.ts`、`SetupPage.vue`、`ContextSelector.vue`、`contextIcons.test.ts` | 已完成（2026-08-31） |
+| 首頁 UV 區塊拿掉地區與溫度那一行（頁首已常駐地區），白天不再顯示「地區預報」；區塊上下加分隔線 | `HomeUvHeadline.vue`、`HomePage.vue` | 已完成（2026-08-31） |
 
 視覺設計另見：
 
