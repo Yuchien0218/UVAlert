@@ -146,8 +146,28 @@ async function handleDelete(): Promise<void> {
       2026-08-24：返回從左側的文字連結改成右上角只有圖示的叉叉，跟記錄
       補擦／記錄狀況／更正紀錄／設定流程一致。「編輯」原本佔著右上角，
       移到下方的行動區——右上角保留給單一的離開動作。
+
+      2026-08-31：標題併進叉叉那一列。叉叉原本自己佔一個 <header>，下面
+      才是標題——實測標題上方憑空多出 60px，而那一列左邊什麼都沒有。
+      版型直接用 .flow-heading（app.css），跟那三個流程頁同一套。
+
+      **這個 header 刻意留在 v-if 鏈外面。** 讀取中與「找不到這件裝備」
+      兩種狀態也必須有離開的出口；把它搬進 v-else 會讓載入失敗的人被
+      困在頁面上。標題那一格改成有資料才填，所以讀取中就只是一列 44px
+      的按鈕——跟改動前一樣，沒有多出來的空白。
     -->
-    <header class="detail-header">
+    <header class="flow-heading">
+      <div>
+        <template v-if="product !== null">
+          <p class="category-badge">
+            {{ GEAR_CATEGORY_LABELS[product.gearCategory] }}
+            <span v-if="isArchived" class="category-badge__state">・收納中</span>
+          </p>
+          <h1 class="page-heading__title" data-typography-role="page-title">
+            {{ product.displayName }}
+          </h1>
+        </template>
+      </div>
       <IconButton
         icon="tool-close"
         label="返回裝備清單"
@@ -175,16 +195,6 @@ async function handleDelete(): Promise<void> {
     </EmptyStateCard>
 
     <template v-else>
-      <header class="page-heading">
-        <p class="category-badge">
-          {{ GEAR_CATEGORY_LABELS[product.gearCategory] }}
-          <span v-if="isArchived" class="category-badge__state">・收納中</span>
-        </p>
-        <h1 class="page-heading__title" data-typography-role="page-title">
-          {{ product.displayName }}
-        </h1>
-      </header>
-
       <section class="app-card spec-section">
         <h2 data-typography-role="card-title">裝備資訊</h2>
         <dl class="spec-list">
@@ -296,16 +306,6 @@ async function handleDelete(): Promise<void> {
 </template>
 
 <style scoped>
-.detail-header {
-  display: flex;
-  justify-content: flex-end;
-}
-
-.page-heading {
-  display: grid;
-  gap: var(--space-2);
-}
-
 .page-heading__title {
   margin: 0;
 }

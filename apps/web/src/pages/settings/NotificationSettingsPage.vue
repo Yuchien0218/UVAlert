@@ -76,22 +76,30 @@ async function runTest(): Promise<void> {
 
 <template>
   <div class="page-stack notification-settings-page">
-    <!-- 2026-08-24：返回改成右上角只有圖示的叉叉，跟其他頁一致。 -->
-    <header class="detail-header">
+    <!--
+      2026-08-24：返回改成右上角只有圖示的叉叉，跟其他頁一致。
+
+      2026-08-31：叉叉原本自己佔一個 <header>，下面才是標題——實測標題
+      上方憑空多出 60px（44px 的按鈕列 ＋ 16px 間距），而那一列左邊什麼
+      都沒有。使用者回報「右上角叉叉還是會跑版」，這是其中一種。
+
+      解法不是新發明的：直接用 .flow-heading，記錄補擦／記錄狀況／更正
+      紀錄三頁早就是這個版型（app.css，2026-08-26 收斂）。不另立第四套。
+    -->
+    <header class="flow-heading">
+      <div>
+        <h1 class="page-heading__title" data-typography-role="page-title">
+          通知設定
+        </h1>
+        <p>
+          在防曬即將失效或該補擦時接收提醒。提醒由這台裝置本機發出，不經由外部伺服器。
+        </p>
+      </div>
       <IconButton
         icon="tool-close"
         label="返回更多"
         @click="goBack"
       />
-    </header>
-
-    <header class="page-heading">
-      <h1 class="page-heading__title" data-typography-role="page-title">
-        通知設定
-      </h1>
-      <p>
-        在防曬即將失效或該補擦時接收提醒。提醒由這台裝置本機發出，不經由外部伺服器。
-      </p>
     </header>
 
     <!-- 裝置支援與權限狀態卡片 -->
@@ -265,12 +273,6 @@ async function runTest(): Promise<void> {
 .notification-settings-page {
   display: grid;
   gap: var(--page-stack-gap-compact);
-}
-
-/* 右上角的返回鈕靠右。 */
-.detail-header {
-  display: flex;
-  justify-content: flex-end;
 }
 
 .app-card {
