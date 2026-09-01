@@ -89,7 +89,7 @@
 | 衛教 hero 卡的標題份量（甲乙丙丁四案，建議乙；丁是橫幅式版型） | 待裁決 | **待使用者裁決**，見 `2026-08-30-pending-decisions.md` §16.1 |
 | `event-*` 四顆圖示：先查「記錄狀況」選單再補齊（建議乙） | 待裁決 | **待使用者裁決**，見 §16.2 |
 | 衛教 hero 卡改橫幅式（丁，**不加 CTA**）：離開卡片列表，放在區塊標題上方 | 待實作：`EducationIndexPage.vue` | **已裁決 2026-08-31**，見 `2026-08-30-pending-decisions.md` §16.1 |
-| `event-*` 四顆圖示走乙案：先查「記錄狀況」選單，補齊四種情境並各配 32px icon-first 卡 | 待實作：記錄狀況流程 | **已裁決 2026-08-31**，見 §16.2 |
+| `event-*` 四顆圖示接上「記錄狀況」選單，選項改 icon-first（圖示放在選項物件上，不放元件裡的對照表） | `createContextEventController.ts`、`ReportContextEventPage.vue`、`contextEventIcons.test.ts` | 已完成（2026-08-31） |
 | 右上角叉叉版型：`.detail-header`（兩處）併進 page-heading；`SessionEndControl` 移進倒數的 eyebrow 那一列 | 待實作：`ProductDetailPage`、`NotificationSettingsPage`、`SessionEndControl`、`HomeCountdown` | **全站盤點完成 2026-08-31**，見 §17 |
 
 視覺設計另見：
