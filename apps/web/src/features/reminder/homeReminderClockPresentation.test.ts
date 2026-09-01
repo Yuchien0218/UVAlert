@@ -235,3 +235,124 @@ function makeSession(zones: ZoneProjection[]): SessionProjection {
     derivedFromEventRefs: ["application-1"]
   };
 }
+
+/*
+ * 2026-08-31：水上活動進行中的旗標（使用者裁決：波浪只用在這裡）。
+ *
+ * 判定用投影上既有的 `activeWaterDeadline`——**有任何一個追蹤中的部位帶著
+ * 還沒過期的耐水期限**，就代表這段時間是照耐水規則在算，不是一般補擦間隔。
+ *
+ * 四件事分開守，因為它們可以互相掩護：只守「有水時為 true」→ 條件可以
+ * 寫成永遠 true；只守「沒水時為 false」→ 可以永遠 false；只守「過期的
+ * 不算」→ 時間比較可以整個拿掉；只守「非 active 的不算」→ 收合中的部位
+ * 會讓首頁誤報「你在水裡」。
+ */
+describe("水上活動進行中的判定", () => {
+  const now = new Date("2026-08-31T10:00:00.000Z");
+
+  function zoneWithWater(
+    deadline: string | null,
+    trackingStatus: ZoneProjection["trackingStatus"] = "active"
+  ): ZoneProjection {
+    return {
+      ...baseZone,
+      trackingStatus,
+      activeWaterDeadline: deadline,
+      zoneDueAt: "2026-08-31T11:00:00.000Z"
+    };
+  }
+
+  it("有還沒過期的耐水期限時為 true", () => {
+    const result = buildHomeReminderClockPresentation(
+      makeSession([zoneWithWater("2026-08-31T10:30:00.000Z")]),
+      now
+    );
+
+    expect(result?.inWater).toBe(true);
+  });
+
+  it("沒有耐水期限時為 false", () => {
+    const result = buildHomeReminderClockPresentation(
+      makeSession([zoneWithWater(null)]),
+      now
+    );
+
+    expect(result?.inWater).toBe(false);
+  });
+
+  /*
+   * 已經過期的耐水期限代表「那段水上活動結束了」，不是「還在水裡」。
+   * 少了時間比較的話，記錄過一次下水之後首頁就會永遠顯示水上活動進行中。
+   */
+  it("耐水期限已過期時為 false", () => {
+    const result = buildHomeReminderClockPresentation(
+      makeSession([zoneWithWater("2026-08-31T09:30:00.000Z")]),
+      now
+    );
+
+    expect(result?.inWater).toBe(false);
+  });
+
+  /*
+   * 非 active 的部位不算——已結束的部位可能還留著舊的耐水期限，
+   * 拿它當依據會讓首頁誤報。
+   */
+  it("非追蹤中的部位不算", () => {
+    const result = buildHomeReminderClockPresentation(
+      makeSession([
+        zoneWithWater("2026-08-31T10:30:00.000Z", "ended"),
+        { ...baseZone, zoneDueAt: "2026-08-31T11:00:00.000Z" }
+      ]),
+      now
+    );
+
+    expect(result?.inWater).toBe(false);
+  });
+});
+
+/*
+ * 標示沒說耐水多久的情況——**這一條是畫面實測才補上的**。
+ *
+ * 第一版只判斷 activeWaterDeadline，於是拿一件沒填包裝標示的防曬乳記錄
+ * 「游泳／下水」時，事件流看得到入水、首頁卻完全沒反應。而那正是最需要
+ * 提示的情況：連系統都不知道還能撐多久。
+ *
+ * 單元測試當時是全綠的，因為測試資料是自己捏的（見 CLAUDE.md「有些問題
+ * 只有畫出來看才找得到」）。
+ */
+describe("耐水標示不明時也算在水裡", () => {
+  const now = new Date("2026-08-31T10:00:00.000Z");
+
+  it("WATER_RESISTANCE_UNKNOWN 也算", () => {
+    const result = buildHomeReminderClockPresentation(
+      makeSession([
+        {
+          ...baseZone,
+          activeWaterDeadline: null,
+          reasonCodes: ["WATER_RESISTANCE_UNKNOWN"],
+          zoneDueAt: "2026-08-31T11:00:00.000Z"
+        }
+      ]),
+      now
+    );
+
+    expect(result?.inWater).toBe(true);
+  });
+
+  /* 其他 reason code 不該把它一起帶起來。 */
+  it("其他 reason code 不算", () => {
+    const result = buildHomeReminderClockPresentation(
+      makeSession([
+        {
+          ...baseZone,
+          activeWaterDeadline: null,
+          reasonCodes: ["PRODUCT_IDENTITY_UNKNOWN"],
+          zoneDueAt: "2026-08-31T11:00:00.000Z"
+        }
+      ]),
+      now
+    );
+
+    expect(result?.inWater).toBe(false);
+  });
+});

@@ -13,6 +13,7 @@ const basePresentation: HomeReminderClockPresentation = {
   remainingMinutes: 82,
   progress: 0.4,
   progressPercent: 40,
+  inWater: false,
   ariaLabel: "距離補擦還有 82 分鐘。"
 };
 
@@ -98,5 +99,43 @@ describe("HomeCountdown 的狀態圖示", () => {
     const wrapper = mountCountdown();
 
     expect(wrapper.get(".countdown__detail").find("svg").exists()).toBe(false);
+  });
+});
+
+/*
+ * 2026-08-31：水上活動進行中時，倒數底下多一道波浪與一句說明。
+ *
+ * 兩件事分開守：波浪是**條件性**出現的（不在水裡就不該有），而說明文字
+ * 必須跟著波浪一起出現——DESIGN.md 第十一節「不要單靠顏色／圖形傳達
+ * 狀態」，波浪自己不能是唯一的線索。
+ */
+describe("HomeCountdown 的水上活動提示", () => {
+  function mountWith(inWater: boolean) {
+    return mount(HomeCountdown, {
+      props: { presentation: { ...basePresentation, inWater } },
+      global: { stubs: { Transition: false } }
+    });
+  }
+
+  it("水上活動進行中時顯示波浪與說明", () => {
+    const wrapper = mountWith(true);
+
+    expect(wrapper.find(".countdown__water .wave-divider").exists()).toBe(true);
+    expect(wrapper.text()).toContain("補擦時間改依耐水規則計算");
+  });
+
+  it("不在水裡時完全不顯示", () => {
+    const wrapper = mountWith(false);
+
+    expect(wrapper.find(".countdown__water").exists()).toBe(false);
+  });
+
+  /* 波浪是裝飾，說明文字才是無障礙的內容。 */
+  it("波浪對螢幕閱讀器隱藏", () => {
+    const wrapper = mountWith(true);
+
+    expect(
+      wrapper.get(".countdown__water .wave-divider").attributes("aria-hidden")
+    ).toBe("true");
   });
 });
