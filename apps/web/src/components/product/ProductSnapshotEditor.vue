@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import Icon from "../icons/Icon.vue";
+import IconLead from "../common/IconLead.vue";
 import { computed, shallowRef, useId } from "vue";
 import type { ProductSnapshotFormValue } from "../../features/setup/productSnapshot";
 
@@ -84,11 +85,26 @@ const summary = computed(() => {
 
 <template>
   <div class="product-editor">
+    <!--
+      2026-09-01：改成衛教頁那種「圖示與標題並排」的排法（使用者要求
+      「現在左側很空」）。
+
+      原本是 `grid-template-columns: auto 1fr` ＋ 24px 圖示：圖示只有 24px
+      高，但它撐開的那一欄跟著整張卡一樣高——實測**圖示下方有 168px 的空
+      白直欄**，而右欄的文字被壓窄了一整個欄寬。這跟 2026-08-31 衛教分類卡
+      那個 122px 空欄是同一個病。
+
+      `IconLead`（40px，圖示與標題同一列）是這個問題既有的答案：圖示與
+      標題平起平坐，說明、摘要與按鈕回到整張卡的寬度。
+    -->
     <section class="session-product app-card">
-      <Icon name="feature-session-product" :size="24" />
+      <IconLead icon="feature-session-product">
+        <span>
+          <span class="session-product__eyebrow">{{ eyebrow }}</span>
+          <h2 data-typography-role="section-title">{{ title }}</h2>
+        </span>
+      </IconLead>
       <div>
-        <p class="session-product__eyebrow">{{ eyebrow }}</p>
-        <h2 data-typography-role="section-title">{{ title }}</h2>
         <p>
           {{ description }}
         </p>
@@ -362,15 +378,23 @@ const summary = computed(() => {
   gap: var(--space-5);
 }
 
+/*
+ * 2026-09-01：從「圖示一欄、內容一欄」改成單欄。
+ *
+ * 兩欄的版面只有第一列需要——圖示與標題那一列。剩下的說明、摘要與按鈕
+ * 沒有理由被壓在右欄裡（圖示下方那條 168px 的空白就是這樣來的）。改成
+ * 單欄之後，圖示與標題的並排交給 IconLead，其餘拿回整張卡的寬度。
+ */
 .session-product {
   display: grid;
-  grid-template-columns: auto minmax(0, 1fr);
-  gap: var(--space-4);
+  gap: var(--space-3);
   padding: var(--card-padding);
 }
 
+/* eyebrow 與標題疊在 IconLead 的文字側，所以 eyebrow 要自己成一行。 */
 .session-product__eyebrow {
-  margin: 0 0 var(--space-2);
+  display: block;
+  margin: 0 0 var(--space-1);
   color: var(--text-secondary);
   font-size: var(--font-size-caption);
   font-weight: 500;
