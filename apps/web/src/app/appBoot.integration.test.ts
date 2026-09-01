@@ -121,9 +121,13 @@ describe("App Boot with real IndexedDB projection", () => {
         sendTest: async () => false
       },
       remotePush: {
-      isSupported: () => false,
-      hydrate: async () => ({ state: "unsupported", isEnabled: false }),
-      enable: async () => "unsupported",
+        isSupported: () => false,
+        hydrate: async () => ({
+          state: "unsupported",
+          isEnabled: false,
+          needsTeardown: false
+        }),
+        enable: async () => "unsupported",
         schedule: async () => "unsupported",
         cancel: async () => "unsupported",
         disable: async () => "unsupported",

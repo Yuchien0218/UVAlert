@@ -39,12 +39,12 @@ begin
   -- A hash collision only serializes unrelated devices; it cannot mix rows.
   perform pg_advisory_xact_lock(hashtextextended(p_device_id::text, 0));
 
-  if not exists (
-    select 1
-    from public.push_subscriptions as subscription
-    where subscription.device_id = p_device_id
-      and subscription.status = 'active'
-  ) then
+  update public.push_subscriptions as subscription
+  set last_active_at = p_now
+  where subscription.device_id = p_device_id
+    and subscription.status = 'active';
+
+  if not found then
     return;
   end if;
 

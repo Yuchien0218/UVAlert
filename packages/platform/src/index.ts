@@ -392,6 +392,8 @@ export type PendingPushIntent =
 export type RemotePushHydration = {
   state: BackgroundPushState;
   isEnabled: boolean;
+  /** A persisted revoke remains and controller must retain retry ownership. */
+  needsTeardown: boolean;
 };
 
 /** 本機保存匿名推播憑證與尚未同步的唯一最新意圖。 */

@@ -160,6 +160,20 @@ describe("anonymous push schedule handler", () => {
     expect(cancelSchedule).toHaveBeenCalledOnce();
   });
 
+  it("DELETE forwards authenticated activity time into the atomic schedule operation", async () => {
+    const dependencies = makeDependencies();
+    const response = await createPushScheduleHandler(dependencies)(
+      request("DELETE", { operationId })
+    );
+
+    expect(response.status).toBe(200);
+    expect(dependencies.cancelSchedule).toHaveBeenCalledWith({
+      deviceId,
+      operationId,
+      now: now.toISOString()
+    });
+  });
+
   it.each([
     [{ state: "invalid" } as const, 401],
     [{ state: "unavailable" } as const, 500]

@@ -1,6 +1,6 @@
 begin;
 
-select plan(24);
+select plan(29);
 
 select has_function(
   'public',
@@ -71,6 +71,11 @@ select ok(
     where device_id = '10000000-0000-4000-8000-000000000021'
   ),
   'schedule operation initializes all delivery fields'
+);
+select is(
+  (select last_active_at from public.push_subscriptions where device_id = '10000000-0000-4000-8000-000000000021'),
+  '2026-08-30 10:00Z'::timestamptz,
+  'authenticated schedule atomically records device activity'
 );
 
 create temporary table replayed_schedule as
@@ -165,6 +170,11 @@ select ok(
   exists (select 1 from public.push_subscriptions where device_id = '10000000-0000-4000-8000-000000000021'),
   'cancel preserves the subscription'
 );
+select is(
+  (select last_active_at from public.push_subscriptions where device_id = '10000000-0000-4000-8000-000000000021'),
+  '2026-08-30 10:15Z'::timestamptz,
+  'authenticated cancel atomically records device activity'
+);
 select ok(
   (
     select replayed
@@ -203,6 +213,11 @@ select is(
   'cancelled',
   'cancel without an existing schedule persists replay state'
 );
+select is(
+  (select last_active_at from public.push_subscriptions where device_id = '10000000-0000-4000-8000-000000000022'),
+  '2026-08-30 10:20Z'::timestamptz,
+  'cancel without a prior schedule still records authenticated device activity'
+);
 
 select is(
   (
@@ -229,6 +244,33 @@ select throws_ok(
   '22023',
   null,
   'database rejects due time outside the server window'
+);
+
+insert into public.push_subscriptions (
+  device_id, device_secret_hash, endpoint, p256dh, auth, status,
+  created_at, updated_at, last_active_at
+) values (
+  '10000000-0000-4000-8000-000000000024', 'hash-24', 'https://push.example/24', 'key-24', 'auth-24', 'active',
+  '2026-05-01Z', '2026-05-01Z', '2026-05-01Z'
+);
+select is(
+  (
+    select state
+    from public.apply_push_schedule_operation(
+      '10000000-0000-4000-8000-000000000024',
+      '20000000-0000-4000-8000-000000000028',
+      'schedule',
+      '2026-08-30 10:30Z',
+      '2026-08-30 10:00Z'
+    )
+  ),
+  'scheduled',
+  'active device operation renews a previously stale subscription'
+);
+select public.cleanup_push_data('2026-08-30 12:00Z');
+select ok(
+  exists (select 1 from public.push_subscriptions where device_id = '10000000-0000-4000-8000-000000000024'),
+  '90-day cleanup preserves a subscription that used authenticated scheduling'
 );
 
 select * from finish();

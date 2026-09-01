@@ -192,4 +192,93 @@ describe("createLocalDataController", () => {
     localDataController.dispose();
     notificationController.dispose();
   });
+
+  it("retains persisted offline revoke ownership across reload until manual retry tears it down", async () => {
+    const credentials: PushDeviceCredentials = {
+      deviceId: "10000000-0000-4000-8000-000000000001",
+      deviceSecret: "device-secret"
+    };
+    let storedCredentials: PushDeviceCredentials | null = credentials;
+    let pendingIntent: PendingPushIntent | null = {
+      kind: "revoke",
+      operationId: "revoke-operation",
+      remoteRevoked: false
+    };
+    let online = false;
+    const state: PushStatePort = {
+      readCredentials: vi.fn(async () => storedCredentials),
+      writeCredentials: vi.fn(async (value) => {
+        storedCredentials = value;
+      }),
+      clearCredentials: vi.fn(async () => {
+        storedCredentials = null;
+      }),
+      readPendingIntent: vi.fn(async () => pendingIntent),
+      replacePendingIntent: vi.fn(async (value) => {
+        pendingIntent = value;
+      }),
+      clearPendingIntent: vi.fn(async (operationId) => {
+        if (pendingIntent?.operationId === operationId) pendingIntent = null;
+      })
+    };
+    const subscription = {
+      unsubscribe: vi.fn(async () => true)
+    } as unknown as PushSubscription;
+    const fetchMock = vi.fn(async () => new Response(null, { status: 204 }));
+    const remotePush = new BrowserRemotePush({
+      state,
+      apiBaseUrl: "https://project.supabase.co/functions/v1",
+      publicVapidKey: "AQ",
+      isSecureContext: () => true,
+      hasServiceWorker: () => true,
+      hasPushManager: () => true,
+      hasNotification: () => true,
+      getPermission: () => "granted",
+      requestPermission: async () => "granted",
+      getRegistration: async () =>
+        ({
+          pushManager: { getSubscription: async () => subscription }
+        }) as unknown as ServiceWorkerRegistration,
+      fetch: fetchMock as typeof fetch,
+      isOnline: () => online,
+      createOperationId: () => "unused-operation",
+      now: () => new Date("2026-08-31T00:00:00.000Z")
+    });
+    const connectivity = shallowRef<ConnectivityStatus>("offline");
+    const notifications: NotificationPort = {
+      isSupported: () => true,
+      ensureReady: async () => undefined,
+      getPermission: () => "granted",
+      requestPermission: async () => "granted",
+      schedule: async () => undefined,
+      cancel: async () => undefined,
+      cancelAll: async () => undefined,
+      canDeliverInBackground: () => false,
+      sendTest: async () => true
+    };
+    const notificationController = createNotificationController({
+      notifications,
+      remotePush,
+      currentSession: shallowRef(null),
+      connectivity,
+      createOperationId: () => "unused-controller-operation"
+    });
+    await flushPromises();
+
+    expect(notificationController.backgroundPushState.value).toBe(
+      "pending-sync"
+    );
+    expect(fetchMock).not.toHaveBeenCalled();
+    online = true;
+    await notificationController.retryBackgroundSync();
+
+    expect(fetchMock).toHaveBeenCalledWith(
+      "https://project.supabase.co/functions/v1/push-subscription",
+      expect.objectContaining({ method: "DELETE" })
+    );
+    expect(subscription.unsubscribe).toHaveBeenCalledOnce();
+    expect(storedCredentials).toBeNull();
+    expect(pendingIntent).toBeNull();
+    notificationController.dispose();
+  });
 });

@@ -62,32 +62,45 @@ export class BrowserRemotePush implements RemotePushPort {
   async hydrate(): Promise<RemotePushHydration> {
     return this.#enqueue(async () => {
       if (!this.isSupported()) {
-        return { state: "unsupported", isEnabled: false };
+        return { state: "unsupported", isEnabled: false, needsTeardown: false };
       }
       const pending = await this.#deps.state.readPendingIntent();
       if (pending?.kind === "revoke") {
+        const state = await this.#sendIntent(pending);
         return {
-          state: await this.#sendIntent(pending),
-          isEnabled: false
+          state,
+          isEnabled: false,
+          needsTeardown: state !== "permission-required"
         };
       }
       const credentials = await this.#deps.state.readCredentials();
       if (credentials === null) {
-        return { state: "permission-required", isEnabled: false };
+        return {
+          state: "permission-required",
+          isEnabled: false,
+          needsTeardown: false
+        };
       }
       const registration = await this.#deps.getRegistration();
       const subscription = await registration?.pushManager.getSubscription();
       if (subscription === null || subscription === undefined) {
-        return { state: "schedule-error", isEnabled: false };
+        return {
+          state: "schedule-error",
+          isEnabled: false,
+          needsTeardown: false
+        };
       }
-      if (pending === null) return { state: "enabled", isEnabled: true };
+      if (pending === null) {
+        return { state: "enabled", isEnabled: true, needsTeardown: false };
+      }
       const state = await this.#sendIntent(pending);
       return {
         state,
         isEnabled:
           state === "enabled" ||
           state === "scheduled" ||
-          state === "pending-sync"
+          state === "pending-sync",
+        needsTeardown: false
       };
     });
   }
@@ -186,8 +199,12 @@ export class BrowserRemotePush implements RemotePushPort {
       intent.kind === "schedule" &&
       new Date(intent.dueAt).getTime() <= this.#deps.now().getTime()
     ) {
-      await this.#deps.state.clearPendingIntent(intent.operationId);
-      return "enabled";
+      const cancel: PendingPushIntent = {
+        kind: "cancel",
+        operationId: this.#deps.createOperationId()
+      };
+      await this.#deps.state.replacePendingIntent(cancel);
+      return this.#sendIntent(cancel);
     }
     const credentials = await this.#deps.state.readCredentials();
     if (credentials === null) return "schedule-error";
@@ -208,6 +225,8 @@ export class BrowserRemotePush implements RemotePushPort {
       return "pending-sync";
     }
     if (!response.ok) {
+      if (response.status === 401)
+        return this.#recoverInvalidCredential(intent);
       return retryable(response) ? "pending-sync" : "schedule-error";
     }
     await this.#deps.state.clearPendingIntent(intent.operationId);
@@ -238,6 +257,8 @@ export class BrowserRemotePush implements RemotePushPort {
         } catch {
           return "pending-sync";
         }
+        if (response.status === 401)
+          return this.#recoverInvalidCredential(intent);
         if (!response.ok)
           return retryable(response) ? "pending-sync" : "schedule-error";
         await this.#deps.state.replacePendingIntent({
@@ -247,6 +268,24 @@ export class BrowserRemotePush implements RemotePushPort {
       }
     }
 
+    try {
+      const registration = await this.#deps.getRegistration();
+      const subscription = await registration?.pushManager.getSubscription();
+      if (subscription !== null && subscription !== undefined) {
+        const unsubscribed = await subscription.unsubscribe();
+        if (!unsubscribed) return "schedule-error";
+      }
+    } catch {
+      return "schedule-error";
+    }
+    await this.#deps.state.clearCredentials();
+    await this.#deps.state.clearPendingIntent(intent.operationId);
+    return "permission-required";
+  }
+
+  async #recoverInvalidCredential(
+    intent: PendingPushIntent
+  ): Promise<BackgroundPushState> {
     try {
       const registration = await this.#deps.getRegistration();
       const subscription = await registration?.pushManager.getSubscription();

@@ -109,6 +109,10 @@ export function createNotificationController(
           ? await remotePush.cancel(dependencies.createOperationId())
           : await remotePush.schedule(dueAt, dependencies.createOperationId());
       setSessionBackgroundState(token, result);
+      if (result === "permission-required") {
+        backgroundEnabled = false;
+        requiresDisable = false;
+      }
     } catch {
       setSessionBackgroundState(token, "schedule-error");
     }
@@ -177,7 +181,8 @@ export function createNotificationController(
       if (!isCurrentLifecycle(lifecycleToken)) return;
       backgroundPushState.value = hydration.state;
       backgroundEnabled = hydration.isEnabled;
-      requiresDisable = hydration.state === "schedule-error";
+      requiresDisable =
+        hydration.needsTeardown || hydration.state === "schedule-error";
       if (backgroundEnabled) await reconcileCurrentSession();
     } catch {
       if (isCurrentLifecycle(lifecycleToken)) {

@@ -300,22 +300,84 @@ describe("BrowserRemotePush", () => {
     });
   });
 
-  it("clears an expired offline schedule without sending it", async () => {
+  it("converts an expired offline schedule into a durable remote cancel", async () => {
     const local = createState({
       credentials,
       intent: { kind: "schedule", dueAt, operationId }
     });
-    const fetchMock = vi.fn();
+    const fetchMock = vi.fn(
+      async (_input: RequestInfo | URL, _init?: RequestInit) =>
+        new Response(null, { status: 200 })
+    ) as typeof fetch;
     const adapter = new BrowserRemotePush({
       ...createHarness({ credentials }).dependencies,
       state: local.state,
-      fetch: fetchMock as typeof fetch,
+      fetch: fetchMock,
       now: () => new Date("2026-08-30T10:30:00.000Z")
     });
 
     await expect(adapter.flushPendingIntent()).resolves.toBe("enabled");
-    expect(fetchMock).not.toHaveBeenCalled();
+    expect(vi.mocked(fetchMock).mock.calls[0]?.[1]?.method).toBe("DELETE");
     expect(local.readIntent()).toBeNull();
+  });
+
+  it("durably cancels an older remote schedule when its offline replacement expires", async () => {
+    let online = true;
+    let now = new Date("2026-08-30T10:00:00.000Z");
+    const replacementDueAt = "2026-08-30T10:15:00.000Z";
+    const replacementOperationId = "20000000-0000-4000-8000-000000000002";
+    const { state, readIntent } = createState({ credentials });
+    const fetchMock = vi.fn(
+      async () => new Response(null, { status: 200 })
+    ) as typeof fetch;
+    const adapter = new BrowserRemotePush({
+      ...createHarness({ credentials }).dependencies,
+      state,
+      fetch: fetchMock,
+      isOnline: () => online,
+      createOperationId: vi.fn(() => "20000000-0000-4000-8000-000000000003"),
+      now: () => now
+    });
+
+    await expect(adapter.schedule(dueAt, operationId)).resolves.toBe(
+      "scheduled"
+    );
+    online = false;
+    await expect(
+      adapter.schedule(replacementDueAt, replacementOperationId)
+    ).resolves.toBe("pending-sync");
+
+    online = true;
+    now = new Date("2026-08-30T10:15:00.000Z");
+    await expect(adapter.flushPendingIntent()).resolves.toBe("enabled");
+
+    expect(vi.mocked(fetchMock).mock.calls).toHaveLength(2);
+    expect(vi.mocked(fetchMock).mock.calls[0]?.[1]?.method).toBe("PUT");
+    expect(vi.mocked(fetchMock).mock.calls[1]?.[1]?.method).toBe("DELETE");
+    expect(readIntent()).toBeNull();
+  });
+
+  it("hydrates an offline persisted revoke as explicit pending teardown", async () => {
+    const { adapter, fetchMock, local, subscription } = createHarness({
+      credentials,
+      intent: { kind: "revoke", operationId, remoteRevoked: false },
+      online: false
+    });
+
+    await expect(adapter.hydrate()).resolves.toEqual({
+      state: "pending-sync",
+      isEnabled: false,
+      needsTeardown: true
+    });
+    expect(fetchMock).not.toHaveBeenCalled();
+
+    await expect(adapter.flushPendingIntent()).resolves.toBe("pending-sync");
+    expect(local.readIntent()).toEqual({
+      kind: "revoke",
+      operationId,
+      remoteRevoked: false
+    });
+    expect(subscription.unsubscribe).not.toHaveBeenCalled();
   });
 
   it("serializes remote writes so an older response cannot win after a newer intent", async () => {
@@ -352,26 +414,46 @@ describe("BrowserRemotePush", () => {
     expect(local.readIntent()).toBeNull();
   });
 
-  it("keeps pending intent for network and controlled API failures without exposing secrets", async () => {
-    for (const response of [
-      () => Promise.reject(new Error(`network ${credentials.deviceSecret}`)),
-      () => Promise.resolve(new Response(null, { status: 401 }))
-    ]) {
-      const fetchMock = vi.fn(response) as unknown as typeof fetch;
+  it("keeps pending intent for network failures without exposing secrets", async () => {
+    const fetchMock = vi.fn(() =>
+      Promise.reject(new Error(`network ${credentials.deviceSecret}`))
+    ) as unknown as typeof fetch;
+    const { adapter, local } = createHarness({ credentials, fetch: fetchMock });
+    const result = await adapter.schedule(dueAt, operationId);
+
+    expect(["pending-sync", "schedule-error"]).toContain(result);
+    expect(local.readIntent()).toEqual({
+      kind: "schedule",
+      dueAt,
+      operationId
+    });
+  });
+
+  it.each([
+    [
+      "schedule",
+      (adapter: BrowserRemotePush) => adapter.schedule(dueAt, operationId)
+    ],
+    ["cancel", (adapter: BrowserRemotePush) => adapter.cancel(operationId)],
+    ["revoke", (adapter: BrowserRemotePush) => adapter.disable()]
+  ] as const)(
+    "recovers from a controlled 401 while %s without retaining invalid device ownership",
+    async (_operation, execute) => {
+      const subscription = createSubscription();
       const { adapter, local } = createHarness({
         credentials,
-        fetch: fetchMock
+        subscription,
+        fetch: vi.fn(
+          async () => new Response(null, { status: 401 })
+        ) as typeof fetch
       });
-      const result = await adapter.schedule(dueAt, operationId);
 
-      expect(["pending-sync", "schedule-error"]).toContain(result);
-      expect(local.readIntent()).toEqual({
-        kind: "schedule",
-        dueAt,
-        operationId
-      });
+      await expect(execute(adapter)).resolves.toBe("permission-required");
+      expect(subscription.unsubscribe).toHaveBeenCalledOnce();
+      expect(local.readCredentials()).toBeNull();
+      expect(local.readIntent()).toBeNull();
     }
-  });
+  );
 
   it("revokes the backend before browser unsubscribe and clears local state", async () => {
     const order: string[] = [];
@@ -440,7 +522,8 @@ describe("BrowserRemotePush", () => {
     });
     await expect(reloadedAdapter.hydrate()).resolves.toEqual({
       state: "permission-required",
-      isEnabled: false
+      isEnabled: false,
+      needsTeardown: false
     });
     expect(vi.mocked(fetchMock).mock.calls[0]?.[1]?.method).toBe("DELETE");
     expect(subscription.unsubscribe).toHaveBeenCalledOnce();

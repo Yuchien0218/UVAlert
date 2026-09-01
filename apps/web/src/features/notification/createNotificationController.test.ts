@@ -35,10 +35,19 @@ function createNotificationsStub(
 function createRemotePushStub(
   supported = true,
   hydration:
-    | { state: BackgroundPushState; isEnabled: boolean }
-    | Promise<{ state: BackgroundPushState; isEnabled: boolean }> = {
+    | {
+        state: BackgroundPushState;
+        isEnabled: boolean;
+        needsTeardown: boolean;
+      }
+    | Promise<{
+        state: BackgroundPushState;
+        isEnabled: boolean;
+        needsTeardown: boolean;
+      }> = {
     state: "permission-required",
-    isEnabled: false
+    isEnabled: false,
+    needsTeardown: false
   }
 ): RemotePushPort & {
   enable: ReturnType<typeof vi.fn>;
@@ -86,8 +95,16 @@ function createController(
     supported?: boolean;
     connectivity?: ConnectivityStatus;
     hydration?:
-      | { state: BackgroundPushState; isEnabled: boolean }
-      | Promise<{ state: BackgroundPushState; isEnabled: boolean }>;
+      | {
+          state: BackgroundPushState;
+          isEnabled: boolean;
+          needsTeardown: boolean;
+        }
+      | Promise<{
+          state: BackgroundPushState;
+          isEnabled: boolean;
+          needsTeardown: boolean;
+        }>;
   } = {}
 ) {
   const notifications = createNotificationsStub();
@@ -136,9 +153,29 @@ describe("createNotificationController", () => {
     expect(controller.backgroundPushState.value).toBe("permission-required");
   });
 
+  it("keeps a persisted offline revoke under controller teardown ownership after reload", async () => {
+    const { controller, connectivity, remotePush } = createController({
+      connectivity: "offline",
+      hydration: {
+        state: "pending-sync",
+        isEnabled: false,
+        needsTeardown: true
+      }
+    });
+    await flush();
+
+    expect(controller.backgroundPushState.value).toBe("pending-sync");
+    expect(remotePush.schedule).not.toHaveBeenCalled();
+
+    connectivity.value = "online";
+    await flush();
+
+    expect(remotePush.flushPendingIntent).toHaveBeenCalledOnce();
+  });
+
   it("hydrates an enabled device after reload then replaces and cancels its remote schedule from the latest Session", async () => {
     const { controller, currentSession, remotePush } = createController({
-      hydration: { state: "enabled", isEnabled: true }
+      hydration: { state: "enabled", isEnabled: true, needsTeardown: false }
     });
     await flush();
 
@@ -166,14 +203,35 @@ describe("createNotificationController", () => {
     expect(remotePush.cancel).toHaveBeenCalledWith("operation-3");
   });
 
+  it("returns to re-registerable permission-required after a recovered remote credential 401", async () => {
+    const { controller, currentSession, remotePush } = createController({
+      hydration: { state: "enabled", isEnabled: true, needsTeardown: false }
+    });
+    remotePush.schedule.mockResolvedValueOnce("permission-required");
+    await flush();
+
+    expect(controller.backgroundPushState.value).toBe("permission-required");
+    const callsAfterRecovery = remotePush.schedule.mock.calls.length;
+    currentSession.value = sessionWith({
+      sessionNextDueAt: "2026-08-23T13:00:00.000Z"
+    });
+    await flush();
+    expect(remotePush.schedule).toHaveBeenCalledTimes(callsAfterRecovery);
+
+    await controller.enableBackgroundPush();
+    expect(remotePush.enable).toHaveBeenCalledOnce();
+  });
+
   it("keeps hydrated ownership when boot restores the latest Session while hydration is pending", async () => {
     let resolveHydration!: (value: {
       state: BackgroundPushState;
       isEnabled: boolean;
+      needsTeardown: boolean;
     }) => void;
     const hydration = new Promise<{
       state: BackgroundPushState;
       isEnabled: boolean;
+      needsTeardown: boolean;
     }>((resolve) => {
       resolveHydration = resolve;
     });
@@ -186,7 +244,11 @@ describe("createNotificationController", () => {
       sessionNextDueAt: "2026-08-23T15:00:00.000Z"
     });
     await nextTick();
-    resolveHydration({ state: "enabled", isEnabled: true });
+    resolveHydration({
+      state: "enabled",
+      isEnabled: true,
+      needsTeardown: false
+    });
     await flush();
 
     expect(controller.backgroundPushState.value).toBe("scheduled");
