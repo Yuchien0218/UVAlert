@@ -43,7 +43,7 @@ const safetyNotice = computed((): string | null =>
         <span
           v-if="!affectsCountdown(product.gearCategory)"
           class="gear-item__badge"
-          >不會建立倒數</span
+          >僅供紀錄</span
         >
       </p>
       <strong class="gear-item__name">{{ product.displayName }}</strong>

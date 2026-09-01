@@ -304,9 +304,9 @@ async function remove(): Promise<void> {
       `border: 0; padding: 0`，只有 tile 一層，這裡對齊它。
     -->
     <fieldset class="category-fieldset">
-      <legend>這件裝備屬於哪一類？</legend>
+      <legend>裝備分類</legend>
       <p v-if="categoryLocked" class="question-card__helper">
-        已使用過的防曬乳不可改為只做紀錄的裝備，否則已建立的倒數會失去依據。需要改類別請另建一筆新紀錄。
+        防曬乳無法變更分類。若需更改，請新增裝備。
       </p>
       <div class="category-grid">
         <label
@@ -364,7 +364,7 @@ async function remove(): Promise<void> {
       :sunscreen-fields="showSunscreenFields"
       collapsible
       eyebrow="包裝標示"
-      title="確認這瓶防曬乳"
+      title="防曬乳規格確認"
       :description="
         showSunscreenFields
           ? '請依包裝標示填寫。'
@@ -478,12 +478,12 @@ async function remove(): Promise<void> {
         </div>
       </div>
       <p v-if="affectsCountdown(gearCategory)" class="field-helper">
-        到期日一過就不會再建立補擦倒數。
+        逾期後將禁止建立補擦倒數。
       </p>
 
       <div class="field-pair">
         <div>
-          <label for="gear-price">買多少錢</label>
+          <label for="gear-price">購入價格</label>
           <!--
             刻意不用 type="number"，理由同上方 SPF 欄位：v-model 對 number
             input 會自動轉型，空字串會變成 undefined。
@@ -497,7 +497,7 @@ async function remove(): Promise<void> {
           />
         </div>
         <div>
-          <label for="gear-rating">好不好用</label>
+          <label for="gear-rating">使用評價</label>
           <select id="gear-rating" v-model="usageRating">
             <option value="">未評價</option>
             <option value="good">好用</option>
@@ -509,7 +509,7 @@ async function remove(): Promise<void> {
 
       <label for="gear-note">備註</label>
       <textarea id="gear-note" v-model="note" maxlength="500" rows="3" />
-      <p class="field-helper">請不要輸入疾病、症狀、用藥或聯絡資料。</p>
+      <p class="field-helper">勿填寫個人醫療、用藥或敏感個資。</p>
       </div>
     </section>
 

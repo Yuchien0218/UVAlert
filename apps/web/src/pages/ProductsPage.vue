@@ -68,7 +68,7 @@ function openGear(productId: string): void {
         我的防曬裝備
       </h1>
       <p>
-        這份清單會先儲存在這台裝置。只有防曬乳會建立補擦倒數；其他裝備只做紀錄。
+        清單儲存於本機。只有防曬乳支援補擦倒數，其他裝備僅供紀錄。
       </p>
     </header>
 
@@ -95,7 +95,7 @@ function openGear(productId: string): void {
         <template #actions>
           <button class="button button--primary" type="button" @click="addGear">
             <Icon name="tool-plus" :size="20" />
-            新增防曬裝備
+            新增裝備
           </button>
         </template>
       </EmptyStateCard>
@@ -149,7 +149,7 @@ function openGear(productId: string): void {
         -->
         <button class="button button--primary" type="button" @click="addGear">
           <Icon name="tool-plus" :size="20" />
-          新增防曬裝備
+          新增裝備
         </button>
 
         <!--

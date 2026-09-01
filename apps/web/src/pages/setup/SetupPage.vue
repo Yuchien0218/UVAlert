@@ -138,8 +138,51 @@ watch(selectedContext, async (value, previous) => {
 });
 
 
+/**
+ * 2026-08-31：送出失敗時把使用者帶到出問題的欄位（使用者要求）。
+ *
+ * 原本三種驗證失敗都只是在**頁面最下方**印一行紅字。「請確認這次實際的
+ * 塗抹時間」這一句離塗抹時間卡有整整一個畫面遠，使用者的原話是「不然
+ * 使用者不知道哪裡沒寫」。
+ *
+ * 現在做三件事，缺一不可：訊息移到欄位旁（`ApplicationTimePicker` 的
+ * `error` prop）、卡片上紅框、**捲過去並把焦點送進去**。只捲不 focus 的話
+ * 鍵盤與螢幕閱讀器使用者的位置沒有跟著移動，等於只修好了滑鼠那一半。
+ */
+const applicationTimePicker =
+  shallowRef<InstanceType<typeof ApplicationTimePicker> | null>(null);
+
+/** 塗抹時間那一欄的錯誤；null 代表這一欄目前沒問題。 */
+const applicationTimeError = shallowRef<string | null>(null);
+
+/* 一填就把紅框收掉，不必等再送出一次才知道問題解決了。 */
+watch(applicationTime, (value) => {
+  if (value !== null) applicationTimeError.value = null;
+});
+
+function focusApplicationTime(): void {
+  const picker = applicationTimePicker.value;
+  if (picker === null) return;
+  picker.$el?.scrollIntoView?.({ block: "center", behavior: "smooth" });
+  picker.focus();
+}
+
 async function submit(): Promise<void> {
+  applicationTimeError.value = null;
   localError.value = validateForm();
+
+  /*
+   * 塗抹時間的錯誤**只在欄位旁邊出現一次**，不同時印在頁尾——同一句話出現
+   * 兩次會讓人以為是兩個問題。其他兩種（情境、入水時間）仍走頁尾，它們的
+   * 欄位還沒有各自的錯誤位置，等 18.7 的全站盤點一起處理。
+   */
+  if (applicationTime.value === null && context.value !== null) {
+    applicationTimeError.value = localError.value;
+    localError.value = null;
+    focusApplicationTime();
+    return;
+  }
+
   if (localError.value !== null || applicationTime.value === null) {
     return;
   }
@@ -365,14 +408,21 @@ onMounted(async () => {
         的行內記號（DESIGN.md 第八節的檔位）。
       -->
       <div v-else class="setup-step-summary">
+        <!--
+          2026-08-31：圖示移到「情境」右邊（使用者要求）。
+
+          原本是 `[icon] 情境 一般戶外`——圖示貼在欄位標籤前面，但它畫的是
+          **值**（一般戶外那顆山），不是「情境」這個欄位。移到標籤右邊之後
+          變成 `情境 [icon] 一般戶外`，圖示緊貼著它所描述的那個詞。
+        -->
         <p class="setup-step-summary__value">
+          <span class="setup-step-summary__label">情境</span>
           <Icon
             v-if="context !== null"
             class="setup-step-summary__icon"
             :name="CONTEXT_ICONS[context]"
             :size="24"
           />
-          <span class="setup-step-summary__label">情境</span>
           {{ context === null ? "" : CONTEXT_LABELS[context] }}
         </p>
         <button
@@ -417,7 +467,11 @@ onMounted(async () => {
             現在是夜間，這個時段紫外線通常很低。仍然可以建立提醒——如果你正要夜間出發或想先設定好，直接繼續即可。
           </p>
 
-          <ApplicationTimePicker v-model="applicationTime" />
+          <ApplicationTimePicker
+            ref="applicationTimePicker"
+            v-model="applicationTime"
+            :error="applicationTimeError"
+          />
           <WaterStartPicker v-if="needsWaterStart" v-model="waterStart" />
 
           <ProductEligibilityNotice
@@ -588,11 +642,21 @@ onMounted(async () => {
   line-height: var(--line-height-body);
 }
 
+/*
+ * 2026-08-31：改用夜間的語意色（使用者回報「現在都太像了」）。
+ *
+ * 原本是 `--surface-soft`，跟這一頁其他說明框同一個底色——所以「現在是
+ * 夜間」跟一般說明長得一模一樣，讀者沒有理由多看它一眼。
+ *
+ * `--color-untimed-soft` 已經是這個 App 的夜間／未計時語意色
+ * （`HomeNightNotice` 的圖示就用 `--color-untimed`），沿用同一顆而不是
+ * 新增一個顏色：夜間在首頁與設定頁應該是同一件事。
+ */
 .night-notice {
   margin: 0;
   padding: var(--space-4);
   border-radius: var(--radius-sm);
-  background: var(--surface-soft);
+  background: var(--color-untimed-soft);
   color: var(--text-secondary);
   line-height: var(--line-height-body);
 }

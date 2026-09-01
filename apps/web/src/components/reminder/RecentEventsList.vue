@@ -2,9 +2,9 @@
 import { ref, computed } from "vue";
 import type { ZoneProjection } from "@sunshield/contracts";
 import type { SessionEventStreamV1 } from "@sunshield/contracts";
-import { getZoneLabel } from "../../features/reminder/reminderPresentation";
 import { formatMonthDayTime, formatTime } from "../../helpers/datetime";
 import ChevronLink from "../common/ChevronLink.vue";
+import ZoneScopeBadge from "../common/ZoneScopeBadge.vue";
 
 interface Props {
   zones: ZoneProjection[];
@@ -144,36 +144,13 @@ function formatEventTime(date: Date): string {
   return formatTime(date);
 }
 
-/**
- * 事件影響的部位，顯示在每一列的右欄。
+/*
+ * 2026-08-31：事件影響的部位（右欄）搬進 `ZoneScopeBadge`。
  *
- * **涵蓋全部追蹤中的部位時寫「全部位」**（2026-08-31 使用者要求）。原本
- * 寫「8 個部位」——但「開始提醒」本來就是全部位，報一個數字沒有告訴讀者
- * 任何事；而部分部位的事件顯示的是實際名稱（「手臂、耳朵」），兩者放在
- * 同一欄卻一個是數量一個是名稱，讀起來也不一致。
- *
- * 「全部位」兩者都解決：它是一個範圍描述，跟名稱清單是同一種東西。
+ * 「涵蓋全部就寫『全部位』、部分就寫名稱」原本只有這一頁做，夜間首頁
+ * 仍在寫「8 個追蹤部位」。規則只有一份實作之後兩處自動一致——使用者的
+ * 原話是「文字樣式、文字內容、數值都要統一」。
  */
-/** 這次事件是不是涵蓋了全部追蹤中的部位。 */
-function isAllZones(zoneIds: string[], zones: ZoneProjection[]): boolean {
-  if (zoneIds.length === 0) return false;
-  return (
-    zoneIds.length ===
-    zones.filter((zone) => zone.trackingStatus === "active").length
-  );
-}
-
-function getZoneNames(zoneIds: string[], zones: ZoneProjection[]): string {
-  if (zoneIds.length === 0) return "";
-  if (isAllZones(zoneIds, zones)) return "全部位";
-
-  return zoneIds
-    .map((id) => {
-      const zone = zones.find((z) => z.zoneInstanceId === id);
-      return zone ? getZoneLabel(zone) : id;
-    })
-    .join("、");
-}
 </script>
 
 <template>
@@ -207,18 +184,11 @@ function getZoneNames(zoneIds: string[], zones: ZoneProjection[]): string {
         >
           <span class="event-time">{{ formatEventTime(event.time) }}</span>
           <span class="event-label">{{ event.label }}</span>
-          <!--
-            2026-08-31：涵蓋全部位時改用膠囊（使用者要求）。
-
-            那一欄有兩種內容：實際部位名稱（「手臂、耳朵」）與範圍描述
-            （「全部位」）。名稱是資料，範圍是分類——分類用膠囊，跟衛教
-            卡的 kicker 與各部位狀態的 chip 是同一套語彙。
-          -->
-          <span
+          <ZoneScopeBadge
             class="event-zones"
-            :class="{ 'event-zones--all': isAllZones(event.zoneIds, zones) }"
-            >{{ getZoneNames(event.zoneIds, zones) }}</span
-          >
+            :zone-ids="event.zoneIds"
+            :zones="zones"
+          />
         </component>
       </template>
     </div>
@@ -231,16 +201,31 @@ function getZoneNames(zoneIds: string[], zones: ZoneProjection[]): string {
       份量不該大過事件本身。改成跟 ZoneStatusList 的 `.zone-group__toggle`
       同一種樣子：文字在左、箭頭在右，箭頭換圖示 name 而不是 rotate
       （DESIGN.md 第五節的展開收合契約）。
+
+      2026-08-31 第二次調整（使用者要求「改到最近事件的最後、文字縮短」）：
+
+      **縮短成「更多 1 筆」，不縮成純箭頭。** 使用者原本要求「刪除文字只要
+      `>` 符號」，實測下來不能做：裸箭頭沒有可及名稱（螢幕閱讀器只會讀到
+      「按鈕」）、命中區從 44px 掉到 20px（過不了 SC 2.5.5）、而且看不出
+      按下去會發生什麼。縮短是使用者第二輪確認的折衷。
+
+      **視覺上接成清單的最後一列，但 DOM 仍在 `#recent-events-list` 外面。**
+      移進去的話 `aria-controls` 會指向自己所在的容器——那等於宣告「這個
+      按鈕會展開包含它自己的區域」，是騙人的。用 `.event-row` 的欄位節奏
+      對齊即可，讀者看到的是最後一列，輔助技術拿到的關係仍然正確。
     -->
     <div v-if="displayEvents.length > 1" class="expand-control">
       <ChevronLink
         :expanded="isExpanded"
         controls="recent-events-list"
+        :label="
+          isExpanded
+            ? '收合事件清單'
+            : `展開其他 ${displayEvents.length - 1} 筆事件`
+        "
         @click="isExpanded = !isExpanded"
       >
-        {{
-          isExpanded ? "收合" : `查看其他 ${displayEvents.length - 1} 筆事件`
-        }}
+        {{ isExpanded ? "收合" : `更多 ${displayEvents.length - 1} 筆` }}
       </ChevronLink>
     </div>
   </section>
@@ -346,27 +331,20 @@ button.event-row:hover .event-label {
   font-weight: 500;
 }
 
+/* 顏色、膠囊與 nowrap 都在 ZoneScopeBadge 裡；這裡只管它在這一列的位置。 */
 .event-zones {
-  color: var(--text-secondary);
   text-align: right;
-  white-space: nowrap;
 }
 
 /*
- * 膠囊的數值與衛教卡的 kicker 一致（app.css 的 .education-card-status）。
- * 那裡是全域類別、這裡是 scoped，沒有直接共用——但值刻意對齊，兩種膠囊
- * 在同一個 App 裡不該長得不一樣。
+ * 接成清單的最後一列：跟 `.event-row` 用同一個縱向節奏（padding 與
+ * 列距），所以視覺上它就是清單的一部分，而不是清單下面另外一個東西。
+ * 大小與命中區仍然由 ChevronLink 決定，這裡不碰。
  */
-.event-zones--all {
-  padding: 0.15rem 0.5rem;
-  border-radius: var(--radius-pill);
-  background: var(--border-subtle);
-  font-size: var(--font-size-caption);
-}
-
 .expand-control {
   display: grid;
   justify-items: start;
-  padding-top: var(--space-2);
+  margin-top: calc(var(--space-1) * -1);
+  padding: var(--space-2) 0;
 }
 </style>

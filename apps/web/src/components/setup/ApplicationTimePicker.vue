@@ -28,7 +28,29 @@ import {
  * 需求靠展開收合就足夠。
  */
 
+/**
+ * 2026-08-31：錯誤改由這張卡自己顯示（使用者要求）。
+ *
+ * 原本沒填塗抹時間時，「請確認這次實際的塗抹時間。」印在頁面**最下方**的
+ * 錯誤區——離出問題的欄位有整整一個畫面遠，使用者的原話是「不然使用者
+ * 不知道哪裡沒寫」。訊息現在跟著欄位走，卡片同時上紅框。
+ *
+ * 這是 WCAG 3.3.1（錯誤要指出是哪一項）與 3.3.3（要說怎麼修）的基本做法。
+ */
+const props = defineProps<{ error?: string | null }>();
+
 const value = defineModel<string | null>({ required: true });
+
+/** 錯誤訊息的 id：欄位群用 aria-describedby 指過來，關係才是真的。 */
+const errorId = useId();
+
+/** 讓 SetupPage 在送出失敗時把焦點送進來——捲到定位還不夠，鍵盤要能接上。 */
+const defaultButton = shallowRef<HTMLButtonElement | null>(null);
+defineExpose({
+  focus(): void {
+    defaultButton.value?.focus();
+  }
+});
 
 const referenceNow = new Date();
 const DEFAULT_MINUTES_AGO = 1;
@@ -127,14 +149,27 @@ function applyAdjustment(): void {
 </script>
 
 <template>
-  <fieldset class="time-picker question-card app-card">
+  <fieldset
+    class="time-picker question-card app-card"
+    :class="{ 'time-picker--invalid': props.error }"
+    :aria-describedby="props.error ? errorId : undefined"
+  >
     <legend>塗抹時間</legend>
     <p class="question-card__helper">
       請選擇實際塗抹時間。系統會以此重新計算提醒狀態。
     </p>
 
+    <!--
+      訊息放在選項**上方**：由上往下讀時，先知道這裡出了什麼事，再看到要
+      操作的東西。放在下方的話，使用者已經看完選項才被告知「剛剛那個要填」。
+    -->
+    <p v-if="props.error" :id="errorId" class="time-picker__error" role="alert">
+      {{ props.error }}
+    </p>
+
     <div class="time-picker__quick">
       <button
+        ref="defaultButton"
         class="time-option app-card"
         :class="{ 'option-selected': usingDefault }"
         type="button"
@@ -202,6 +237,29 @@ function applyAdjustment(): void {
  * 同一頁兩張同構的卡片標題大小與間距不同，就是「排版像舊實作」的來源。
  * 改用共用的 .question-card，這裡只留這張卡特有的東西。
  */
+/*
+ * 紅框用 --color-due（「已到期」）。這個 App 只有這一顆紅：到期與錯誤共用
+ * 同一個「需要你處理」的語意，再開一顆錯誤紅只會多一個要記的顏色。
+ *
+ * 邊框不是唯一的訊號——旁邊同時有紅字訊息，所以不違反 SC 1.4.1
+ * （不可只用顏色傳達資訊）。
+ */
+.time-picker--invalid {
+  border-color: var(--color-due);
+}
+
+/*
+ * 這張卡的 grid row-gap 是 0，子元素各自用 margin 拉開（實測）。錯誤訊息
+ * 若沿用 `margin: 0`，它的頂線會**貼齊說明文字的底線**——畫出來看之後
+ * 讀起來像說明的第三行，而不是一則獨立的警告。
+ */
+.time-picker__error {
+  margin: var(--space-3) 0 0;
+  color: var(--color-due);
+  font-weight: 500;
+  line-height: var(--line-height-body);
+}
+
 .time-picker__cap {
   margin: 0;
   color: var(--color-due);

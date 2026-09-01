@@ -40,7 +40,7 @@ export const GEAR_CATEGORY_ICONS: Record<GearCategory, IconName> = {
  * 不得讓人以為提醒行為會因此改變（S-11）。
  */
 export const GEAR_CATEGORY_REMINDER_EFFECT: Record<GearCategory, string> = {
-  sunscreen: "防曬乳會依據資料，建立倒數提醒。",
+  sunscreen: "防曬乳將依設定，自動建立補擦倒數。",
   clothing: "被衣物遮住時不倒數，也不會自己產生補擦時間。",
   eyewear: "只做紀錄，不會影響補擦倒數。",
   other_gear: "只做紀錄，不會影響補擦倒數。"
