@@ -9,7 +9,6 @@ import {
   affectsCountdown,
   formatPurchaseMonth,
   GEAR_CATEGORY_LABELS,
-  GEAR_CATEGORY_REMINDER_EFFECT,
   gearSafetyState
 } from "../features/product/gearPresentation";
 
@@ -97,6 +96,27 @@ const specLine = computed(() => {
   return parts.length === 0 ? null : parts.join("・");
 });
 
+/**
+ * 「裝備資訊」這張卡有沒有東西可寫。
+ *
+ * 2026-09-01：「補擦提醒」改成只在限制情況顯示之後，一件剛建好、什麼都
+ * 沒填的防曬乳會讓這張卡完全空掉——**一張有標題、有邊框、裡面什麼都沒有
+ * 的卡片，比沒有這張卡更難懂**。所以整張跟著條件出現。
+ *
+ * 安全狀態（過期、回報有問題）也算一列：那是這件裝備當下的實際狀況。
+ */
+const hasSpecRows = computed(() => {
+  if (product.value === null) return false;
+  return (
+    specLine.value !== null ||
+    !affectsCountdown(product.value.gearCategory) ||
+    purchase.value !== null ||
+    product.value.expiryDate !== null ||
+    product.value.note !== null ||
+    (safety.value !== null && safety.value.kind !== "usable")
+  );
+});
+
 const isBusy = computed(() => productSettings.phase.value === "saving");
 
 const actionError = ref<string | null>(null);
@@ -168,8 +188,18 @@ async function handleDelete(): Promise<void> {
           </h1>
         </template>
       </div>
+      <!--
+        2026-09-01：叉叉改成返回箭頭（使用者要求）。
+
+        這一頁不是流程也不是浮層——它是清單的下一層，離開就是回到上一層。
+        叉叉的語意是「關掉」，用在這裡會讓人以為按下去等於丟棄什麼。
+        `aria-label` 原本就寫著「返回裝備清單」，圖示現在跟它一致了。
+
+        衛教分類頁與文章頁同一天走同一個方向；記錄補擦、記錄狀況那幾個
+        **流程頁**維持叉叉——那些真的是「中途放棄」。
+      -->
       <IconButton
-        icon="tool-close"
+        icon="tool-arrow-left"
         label="返回裝備清單"
         @click="goBack"
       />
@@ -195,22 +225,33 @@ async function handleDelete(): Promise<void> {
     </EmptyStateCard>
 
     <template v-else>
-      <section class="app-card spec-section">
+      <section v-if="hasSpecRows" class="app-card spec-section">
         <h2 data-typography-role="card-title">裝備資訊</h2>
         <dl class="spec-list">
           <div v-if="specLine !== null" class="spec-row">
             <dt>規格</dt>
             <dd>{{ specLine }}</dd>
           </div>
-          <div class="spec-row spec-row--full">
+          <!--
+            2026-09-01：只在「不會倒數」時才顯示（使用者問「框框內的文字
+            有需要這些嗎？我覺得怪怪的」——不需要）。
+
+            原本無條件顯示。問題是防曬乳那一句「防曬乳將依設定，自動建立
+            補擦倒數」講的是**品類的通則**，不是這一瓶的資料——同一句話在
+            新增裝備頁選到防曬乳時也會出現。一張叫「裝備資訊」的卡，唯一
+            內容卻是一句對所有防曬乳都成立的話，讀起來像這瓶沒填任何東西
+            卻硬湊出一列。
+
+            **「不會建立補擦倒數」相反，那是限制**，而且與使用者的預期不同
+            （放進裝備清單卻不會提醒）。這跟草稿狀態、通知失敗是同一條規則：
+            預期內的結果安靜，意外要出聲。
+          -->
+          <div
+            v-if="!affectsCountdown(product.gearCategory)"
+            class="spec-row spec-row--full"
+          >
             <dt>補擦提醒</dt>
-            <dd>
-              {{
-                affectsCountdown(product.gearCategory)
-                  ? GEAR_CATEGORY_REMINDER_EFFECT[product.gearCategory]
-                  : "不會建立補擦倒數"
-              }}
-            </dd>
+            <dd>不會建立補擦倒數</dd>
           </div>
           <div v-if="purchase !== null" class="spec-row">
             <dt>購買月份</dt>
