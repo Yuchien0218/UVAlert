@@ -366,7 +366,6 @@ button.event-row:hover .event-label {
 
 .expand-control {
   display: grid;
-  justify-items: start;
   padding-top: var(--space-2);
 }
 </style>
