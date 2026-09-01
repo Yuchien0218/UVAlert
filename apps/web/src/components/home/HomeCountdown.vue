@@ -102,6 +102,26 @@ const stateIcon = computed(() => STATE_ICON[props.presentation.tone]);
     <p class="countdown__detail">
       <span>{{ presentation.title }}・{{ presentation.timeLabel }}</span>
     </p>
+
+    <!--
+      2026-08-31：水上活動進行中時，倒數底下多一道波浪與一句說明。
+
+      **這是波浪在整個 App 裡唯一的非衛教用途**（使用者裁決）。它不是裝飾：
+      這段時間的倒數是照防曬乳的耐水標示在算，不是一般的補擦間隔——規則
+      不一樣，而畫面上原本沒有任何地方說得出這件事。
+
+      文案寫「耐水規則」而不是「耐水標示」：標示沒說耐水多久時（reducer 的
+      WATER_RESISTANCE_UNKNOWN）這裡一樣會出現，那時並沒有一個標示數字可以
+      依據——規則仍然適用，只是結果是「不計時」，細節由「各部位狀態」的
+      「抗水標示不明」那一則負責說明。
+
+      波浪與文字一起出現，不單獨承載資訊（DESIGN.md 第十一節「不要單靠
+      顏色／圖形傳達狀態」）。波浪本身 aria-hidden，文字才是無障礙的內容。
+    -->
+    <p v-if="presentation.inWater" class="countdown__water">
+      <span class="wave-divider countdown__water-wave" aria-hidden="true" />
+      水上活動進行中，補擦時間改依耐水規則計算。
+    </p>
   </section>
 </template>
 
@@ -135,6 +155,21 @@ const stateIcon = computed(() => STATE_ICON[props.presentation.tone]);
   gap: var(--space-2);
   margin: 0;
   font-size: var(--font-size-body);
+}
+
+.countdown__water {
+  display: grid;
+  justify-items: start;
+  gap: var(--space-2);
+  margin: 0;
+  color: var(--text-secondary);
+  font-size: var(--font-size-caption);
+  line-height: var(--line-height-body);
+}
+
+/* 這裡的波浪比衛教長文那條窄一些——它是行內的標記，不是章節分隔。 */
+.countdown__water-wave {
+  width: 4rem;
 }
 
 /*

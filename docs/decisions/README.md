@@ -92,6 +92,7 @@
 | `event-*` 四顆圖示接上「記錄狀況」選單，選項改 icon-first（圖示放在選項物件上，不放元件裡的對照表） | `createContextEventController.ts`、`ReportContextEventPage.vue`、`contextEventIcons.test.ts` | 已完成（2026-08-31） |
 | 右上角叉叉版型：兩處 `.detail-header` 改用 `.flow-heading`（class 已刪），首頁夜間併進 `home__session-head` | `ProductDetailPage.vue`、`NotificationSettingsPage.vue`、`HomePage.vue`、`closeButtonLayout.test.ts` | 已完成（2026-08-31，PR #69） |
 | 衛教 `<title>` 不重複相鄰的同名區段（首頁原本是「防曬衛教｜防曬衛教｜UVAlert」） | `educationSeo.ts` 的 `buildEducationTitle`、`tools/education/generate-public-site.mjs` 的 `buildTitle` | 已完成（2026-08-31） |
+| 水上活動進行中的倒數加一道波浪＋一句說明（波浪在 App 裡唯一的非衛教用途） | `homeReminderClockPresentation.ts` 的 `inWater`、`HomeCountdown.vue`；守門白名單在 `EducationPages.test.ts` | 已完成（2026-08-31） |
 
 視覺設計另見：
 

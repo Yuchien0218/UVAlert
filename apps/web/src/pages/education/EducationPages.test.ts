@@ -349,14 +349,32 @@ describe("衛教長文的波浪分隔線", () => {
   });
 
   /*
-   * 波浪只用在衛教長文。它一旦變成通用分隔元素就退回裝飾了，而且波浪在
-   * 這個 App 的其他地方已經有語意（水：入水時間、耐水時間、水上活動），
-   * 拿去當通用裝飾會稀釋掉那個意義。
+   * 波浪只用在衛教長文，加上**一個明確列出的例外**。
+   *
+   * 它一旦變成通用分隔元素就退回裝飾了。而波浪在這個 App 的另一個位置是
+   * 有語意的：水。所以例外只有 HomeCountdown——水上活動進行中時，倒數是
+   * 照耐水標示在算而不是一般補擦間隔，波浪在那裡是「規則不一樣」的提示，
+   * 不是分隔線。
+   *
+   * 用白名單而不是放寬條件：新增第三個使用點時這條會紅，逼人回來想清楚
+   * 它算不算例外，而不是默默地讓波浪散到全站。
    */
+  const WAVE_ALLOWED_OUTSIDE_EDUCATION = [
+    "components/home/HomeCountdown.vue"
+  ];
+
   it("wave-divider 不外流到衛教以外的頁面", () => {
     const offenders: string[] = [];
     for (const path of educationScanTargets()) {
       if (path.includes("education")) continue;
+      const normalized = path.split("\\").join("/");
+      if (
+        WAVE_ALLOWED_OUTSIDE_EDUCATION.some((allowed) =>
+          normalized.endsWith(allowed)
+        )
+      ) {
+        continue;
+      }
       const code = readFileSync(path, "utf8")
         .replace(/<!--[\s\S]*?-->/g, "")
         .replace(/\/\*[\s\S]*?\*\//g, "");
