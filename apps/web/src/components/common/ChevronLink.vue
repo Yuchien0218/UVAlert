@@ -70,17 +70,12 @@ const iconName = computed(() =>
     :aria-controls="controls"
     :aria-label="label"
   >
-    <!--
-      文字包一層才畫得下底線：底線只屬於文字，畫到箭頭上會變成一條穿過
-      箭頭的橫線。ZoneStatusList 傳兩個 span（狀態＋數量），兩者一起底線
-      是刻意的——它們是同一段可點的文字。
-    -->
-    <span class="chevron-link__label"><slot /></span>
+    <slot />
     <!--
       箭頭一律在最後，且是 flex 的最後一個項目——它是「往這邊」的指向，
       不是圖示。放在文字前面會讀成項目符號。
     -->
-    <Icon class="chevron-link__chevron" :name="iconName" :size="16" />
+    <Icon class="chevron-link__chevron" :name="iconName" :size="20" />
   </component>
 </template>
 
@@ -95,47 +90,16 @@ const iconName = computed(() =>
   display: inline-flex;
   align-items: center;
   gap: var(--space-2);
-
-  /*
-   * 2026-08-31：一律靠右（使用者要求「都像五日預報那樣」）。
-   *
-   * 自己推到最右端，而不是要每個容器各自寫一次對齊——那又會變成「改一個
-   * 其他沒跟著改到」。三種容器都吃得到：flex 的 uv-headline__value、
-   * grid 的 zone-group 與 expand-control。
-   */
-  margin-inline-start: auto;
   min-height: var(--tap-target);
   padding: 0;
   border: 0;
   background: none;
   color: var(--chevron-link-tone);
   cursor: pointer;
-
-  /*
-   * 2026-08-31（第二輪）：字級回到 caption(12px)、箭頭回到 16px。
-   *
-   * 第一輪把三處統一成 16px／20px，結果是**把五日預報放大**——而使用者
-   * 要的是「都像五日預報那樣」，也就是以它為準，不是以另外兩個為準。
-   * 使用者當場反映「五日預報好像變大了？底線也不見了」。
-   *
-   * caption 在 DESIGN.md 第五節是「短註腳、eyebrow、badge；不承載長段
-   * 說明」——這三個標籤都很短，符合。命中區仍然是 44px，字小不影響好按。
-   */
   font: inherit;
-  font-size: var(--font-size-caption);
   font-weight: 500;
   text-align: start;
   text-decoration: none;
-}
-
-/*
- * 底線只畫在文字上（使用者要求）。用 text-decoration 而不是 border-bottom：
- * 文字換行時底線會跟著斷，border 只會畫在整塊的下緣。
- * underline-offset 沿用 .text-link 的 0.25rem，兩者是同一種東西。
- */
-.chevron-link__label {
-  text-decoration: underline;
-  text-underline-offset: 0.25rem;
 }
 
 .chevron-link__chevron {
