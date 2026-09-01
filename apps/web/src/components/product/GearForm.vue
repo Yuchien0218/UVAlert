@@ -11,19 +11,11 @@ import {
 } from "../../features/setup/productSnapshot";
 import {
   affectsCountdown,
+  GEAR_CATEGORY_ICONS,
   GEAR_CATEGORY_LABELS,
   GEAR_CATEGORY_REMINDER_EFFECT,
   gearSafetyState
 } from "../../features/product/gearPresentation";
-import type { IconName } from "../../generated/icons.generated";
-
-/** 跟 GearListItem.vue 用同一組品類圖示對應。 */
-const GEAR_CATEGORY_ICONS: Record<GearCategory, IconName> = {
-  sunscreen: "gear-sunscreen",
-  clothing: "gear-clothing",
-  eyewear: "gear-sunglasses",
-  other_gear: "gear-other"
-};
 
 /**
  * S-12 新增防曬裝備／S-13 編輯防曬裝備的表單本體。
