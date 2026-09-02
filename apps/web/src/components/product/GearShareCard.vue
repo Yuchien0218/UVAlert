@@ -9,6 +9,8 @@ import { CONTEXT_LABELS } from "../../features/setup/setupCatalog";
 import { getUvRiskLevelLabel } from "../../features/uv/uvForecastRules";
 import { formatDate } from "../../helpers/datetime";
 import BrandLockup from "../shell/BrandLockup.vue";
+import Icon from "../icons/Icon.vue";
+import { GEAR_CATEGORY_ICONS } from "../../features/product/gearPresentation";
 
 /**
  * 可以截圖／輸出成圖片分享的「我的防曬裝備」卡片。
@@ -184,6 +186,20 @@ function detailsFor(product: ProductCatalogRecordV1): string[] {
     </p>
 
     <section v-if="data.sunscreen !== null" class="share-card__primary">
+      <!--
+        品類圖示當深色卡的視覺重心（2026-09-02 使用者要求）。放右上角而
+        不是名稱左邊：左邊已經有 eyebrow 在帶路，再放一個圖示會有兩個起點。
+
+        圖示的墨色繼承 --color-on-dark-soft（深色上 8.86）；裡面的琥珀金
+        原樣保留，那是圖示配色系統的重點色，而且這是裝飾性圖形、不受
+        4.5:1 約束。
+      -->
+      <Icon
+        class="share-card__badge"
+        :name="GEAR_CATEGORY_ICONS.sunscreen"
+        :size="32"
+        decorative
+      />
       <p class="share-card__eyebrow">主要防曬</p>
       <p class="share-card__product">{{ data.sunscreen.displayName }}</p>
 
@@ -216,11 +232,23 @@ function detailsFor(product: ProductCatalogRecordV1): string[] {
     </section>
 
     <ul v-if="data.gear.length > 0" class="share-card__gear">
+      <!--
+        每一列前面的品類圖示（2026-09-02 使用者要求）。三個放置點裡最實用
+        的一個：圖被縮小之後，不讀字也看得出這一列是防曬乳、太陽眼鏡、
+        衣物還是其他。
+      -->
       <li v-for="item in data.gear" :key="item.productId">
-        <strong>{{ item.displayName }}</strong>
-        <span v-if="detailsFor(item).length > 0">{{
-          detailsFor(item).join("・")
-        }}</span>
+        <Icon
+          :name="GEAR_CATEGORY_ICONS[item.gearCategory]"
+          :size="24"
+          decorative
+        />
+        <span class="share-card__gear-text">
+          <strong>{{ item.displayName }}</strong>
+          <span v-if="detailsFor(item).length > 0">{{
+            detailsFor(item).join("・")
+          }}</span>
+        </span>
       </li>
     </ul>
 
@@ -326,6 +354,8 @@ function detailsFor(product: ProductCatalogRecordV1): string[] {
 /* 深色卡：DESIGN.md 第十節的深色表面體系首次落地。 */
 .share-card__primary {
   display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: start;
   gap: var(--space-2);
   padding: var(--sheet-padding);
   border-radius: var(--radius-md);
@@ -337,7 +367,19 @@ function detailsFor(product: ProductCatalogRecordV1): string[] {
  * 標籤用 on-dark-soft（8.86）而不是琥珀金——`#C1832E` 在這個底色上是
  * 4.49，差 0.01 過不了 AA。跟 2026-08-31 `#956900`→`#946800` 同一種擦邊。
  */
+/*
+ * 圖示佔右欄、跨 eyebrow 與名稱兩列；規格網格在底下用回整個寬度。
+ * grid 子項預設可壓縮，圖示被壓縮就是變形——所以 flex: none。
+ */
+.share-card__badge {
+  grid-column: 2;
+  grid-row: 1 / span 2;
+  flex: none;
+  color: var(--color-on-dark-soft);
+}
+
 .share-card__eyebrow {
+  grid-column: 1;
   margin: 0;
   color: var(--color-on-dark-soft);
   font-size: var(--font-size-caption);
@@ -345,6 +387,7 @@ function detailsFor(product: ProductCatalogRecordV1): string[] {
 }
 
 .share-card__product {
+  grid-column: 1;
   margin: 0;
   font-size: var(--font-size-section-title);
   line-height: var(--line-height-section-title);
@@ -363,6 +406,7 @@ function detailsFor(product: ProductCatalogRecordV1): string[] {
  * 單欄——四個欄位變成四列，比改動前更糟。留一點餘裕取 6rem。
  */
 .share-card__stats {
+  grid-column: 1 / -1;
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(6rem, 1fr));
   gap: var(--space-3) var(--space-4);
@@ -390,9 +434,14 @@ function detailsFor(product: ProductCatalogRecordV1): string[] {
   list-style: none;
 }
 
+/*
+ * 圖示垂直置中於整格，不是對齊第一行——一列有沒有第二行（尺寸／顏色）
+ * 是變動的，對齊文字會讓有無細節的兩列圖示高度不一致。
+ */
 .share-card__gear li {
-  display: grid;
-  gap: var(--space-1);
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
   padding: var(--space-3) var(--space-4);
   border-radius: var(--radius-sm);
   background: var(--color-hairline);
@@ -406,7 +455,13 @@ function detailsFor(product: ProductCatalogRecordV1): string[] {
  * --color-hairline，**對比掉到 4.63**——過 AA 但只剩 0.13 餘裕。同一個 token
  * 換了背景就掉一階，這是「底色變深」造成的，不是字級問題。
  */
-.share-card__gear span {
+.share-card__gear-text {
+  display: grid;
+  gap: var(--space-1);
+  min-width: 0;
+}
+
+.share-card__gear-text span {
   color: var(--text-body);
   font-size: var(--font-size-caption);
 }

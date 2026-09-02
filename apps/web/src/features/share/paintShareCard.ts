@@ -1,4 +1,12 @@
 import type { GearShareCardData } from "../../components/product/GearShareCard.vue";
+import { ICONS } from "../../generated/icons.generated";
+import { GEAR_CATEGORY_ICONS } from "../product/gearPresentation";
+import {
+  BRAND_LOCKUP_HEIGHT,
+  BRAND_LOCKUP_MARKUP,
+  BRAND_LOCKUP_WIDTH
+} from "../../components/shell/brandLockupMarkup";
+import { drawIcon, drawSvgMarkup } from "./drawSvg";
 import { readShareCardColors, readSpacingScale } from "./shareCardTokens";
 
 /**
@@ -100,6 +108,34 @@ function wrapText(
   }
   if (current !== "") lines.push(current);
   return lines.length === 0 ? [""] : lines;
+}
+
+/**
+ * 單行截斷，超出的部分補上刪節號。
+ *
+ * **為什麼需要它。** 深色卡上的名稱與規格值都只畫第一行——多行會把卡片
+ * 高度變成另一個變數。原本的寫法是 `wrapText(...)[0]`，也就是**第二行以後
+ * 直接消失，而且看不出來消失過**：讀圖的人會以為那就是完整的名稱。
+ *
+ * 2026-09-02 深色卡右上角加了品類圖示，名稱的可用寬度因此變窄，靜靜截斷
+ * 的機率跟著變高——所以在同一次改動裡把它補上，而不是留給下一個人踩。
+ */
+function truncateToWidth(
+  context: CanvasRenderingContext2D,
+  text: string,
+  maxWidth: number
+): string {
+  if (context.measureText(text).width <= maxWidth) return text;
+
+  const ellipsis = "…";
+  let result = "";
+  for (const character of text) {
+    if (context.measureText(result + character + ellipsis).width > maxWidth) {
+      break;
+    }
+    result += character;
+  }
+  return result === "" ? ellipsis : result + ellipsis;
 }
 
 interface StatEntry {
@@ -257,15 +293,38 @@ function paint(
 
   let y = pad;
 
-  // 品牌列。畫文字而不是 logo——SVG 要先轉點陣，成本與收益不成比例。
-  context.font = `600 ${15 * SCALE}px ${sans}`;
-  context.fillStyle = colors["--text-secondary"];
-  context.fillText("防曬晴報員", pad, y);
+  /*
+   * 品牌列。
+   *
+   * **2026-09-02：畫真的 lockup，不再只畫「防曬晴報員」四個字。** 這裡原本
+   * 的註解寫「SVG 要先轉點陣，成本與收益不成比例」——那個判斷是錯的：
+   * lockup 是純幾何（path／circle），`drawSvg` 用 Path2D 向量直接畫，
+   * 不經過圖片、不需要 await、不會污染 canvas。理由完整版見 drawSvg.ts。
+   *
+   * 這同時修掉一個不一致：畫面上的 `GearShareCard.vue` 一直都用
+   * `BrandLockup`，只有輸出的 PNG 退化成文字，所以「預覽」跟「存下來的圖」
+   * 頂端長得不一樣。
+   */
+  const lockupHeight = 20 * SCALE;
+  drawSvgMarkup(
+    context,
+    BRAND_LOCKUP_MARKUP,
+    BRAND_LOCKUP_WIDTH,
+    BRAND_LOCKUP_HEIGHT,
+    { x: pad, y, size: lockupHeight, color: colors["--text-primary"] }
+  );
   if (input.dateLabel !== null) {
+    context.font = `600 ${15 * SCALE}px ${sans}`;
+    context.fillStyle = colors["--text-secondary"];
     const width = context.measureText(input.dateLabel).width;
-    context.fillText(input.dateLabel, OUTPUT_WIDTH - pad - width, y);
+    // 對齊 lockup 的視覺中線，不是它的頂端——lockup 比單行文字高。
+    context.fillText(
+      input.dateLabel,
+      OUTPUT_WIDTH - pad - width,
+      y + (lockupHeight - 15 * SCALE) / 2
+    );
   }
-  y += 22 * SCALE + space["--space-4"];
+  y += lockupHeight + space["--space-4"];
 
   // 標題
   context.font = `${28 * SCALE}px ${serif}`;
@@ -319,6 +378,31 @@ function paint(
     const innerLeft = pad + space["--space-4"];
     const innerWidth = contentWidth - space["--space-4"] * 2;
 
+    /*
+     * 品類圖示當深色卡的視覺重心（2026-09-02 使用者要求）。
+     *
+     * 放右上角而不是名稱左邊：左邊已經有「主要防曬」這個 eyebrow 在帶路，
+     * 再塞一個圖示會變成兩個起點。放右上角則是把整張卡的右上填起來——
+     * 那裡本來是空的，而規格是兩欄網格、佔滿整寬，只有這兩列有餘裕。
+     *
+     * 用 `--color-on-dark-soft` 當 currentColor（深色上 8.86，同 eyebrow）。
+     * 圖示裡的琥珀金會原樣保留，那是圖示配色系統的重點色（DESIGN.md 第八
+     * 節），而且這是裝飾性圖形不是文字，不受 4.5:1 的約束。
+     */
+    const badgeSize = 32 * SCALE;
+    drawIcon(context, ICONS[GEAR_CATEGORY_ICONS.sunscreen].body, {
+      x: pad + contentWidth - space["--space-4"] - badgeSize,
+      y: inner,
+      size: badgeSize,
+      color: colors["--color-on-dark-soft"]
+    });
+
+    /*
+     * 文字欄要讓開圖示，否則長名稱會壓到它上面。只有 eyebrow 與名稱這兩
+     * 列需要讓——底下的規格網格在圖示下方，可以用整個寬度。
+     */
+    const headWidth = innerWidth - badgeSize - space["--space-3"];
+
     context.font = `500 ${13 * SCALE}px ${sans}`;
     context.fillStyle = colors["--color-on-dark-soft"];
     context.fillText("主要防曬", innerLeft, inner);
@@ -327,7 +411,7 @@ function paint(
     context.font = `${20 * SCALE}px ${sans}`;
     context.fillStyle = colors["--text-inverse"];
     context.fillText(
-      wrapText(context, data.sunscreen.displayName, innerWidth)[0] ?? "",
+      truncateToWidth(context, data.sunscreen.displayName, headWidth),
       innerLeft,
       inner
     );
@@ -338,8 +422,7 @@ function paint(
       const column = index % 2;
       const row = Math.floor(index / 2);
       const x = innerLeft + column * (columnWidth + space["--space-4"]);
-      const top =
-        inner + row * (14 * SCALE + 22 * SCALE + space["--space-3"]);
+      const top = inner + row * (14 * SCALE + 22 * SCALE + space["--space-3"]);
 
       context.font = `${13 * SCALE}px ${sans}`;
       context.fillStyle = colors["--color-on-dark-soft"];
@@ -348,7 +431,7 @@ function paint(
       context.font = `500 ${17 * SCALE}px ${sans}`;
       context.fillStyle = colors["--text-inverse"];
       context.fillText(
-        wrapText(context, stat.value, columnWidth)[0] ?? "",
+        truncateToWidth(context, stat.value, columnWidth),
         x,
         top + 14 * SCALE + space["--space-1"]
       );
@@ -364,9 +447,23 @@ function paint(
     context.fillStyle = colors["--color-hairline"];
     context.fill();
 
-    context.font = `500 ${17 * SCALE}px ${sans}`;
-    context.fillStyle = colors["--text-primary"];
-    context.fillText(item.displayName, pad + space["--space-3"], y + 10 * SCALE);
+    /*
+     * 品類圖示（2026-09-02 使用者要求）。
+     *
+     * 這是三個放置點裡最實用的一個：收到圖的人不用讀字就知道每一列是
+     * 防曬乳、太陽眼鏡、衣物還是其他，圖被縮小時尤其有用。
+     *
+     * 垂直置中於整格，不是對齊第一行文字——一列有沒有第二行（尺寸／
+     * 顏色）是變動的，對齊文字會讓有無細節的兩列圖示高度不一致。
+     */
+    const tileIcon = 24 * SCALE;
+    drawIcon(context, ICONS[GEAR_CATEGORY_ICONS[item.gearCategory]].body, {
+      x: pad + space["--space-3"],
+      y: y + (tileHeight - tileIcon) / 2,
+      size: tileIcon,
+      color: colors["--text-body"]
+    });
+    const textLeft = pad + space["--space-3"] * 2 + tileIcon;
 
     const details: string[] = [];
     if (input.showPrice && item.priceTwd !== null) {
@@ -374,14 +471,25 @@ function paint(
     }
     if (item.size !== null) details.push(item.size);
     if (item.color !== null) details.push(item.color);
+
+    /*
+     * 名稱的垂直位置要看有沒有第二行。
+     *
+     * 原本固定在 y+10（等於「上緣對齊」），一列只有名稱時下面就空一截。
+     * 沒有圖示時那只是有點鬆；加了垂直置中的圖示之後，兩者的中線對不上
+     * 會直接看起來像壞掉。所以只有名稱時名稱也置中。
+     */
+    const nameTop =
+      details.length > 0 ? y + 10 * SCALE : y + (tileHeight - 20 * SCALE) / 2;
+
+    context.font = `500 ${17 * SCALE}px ${sans}`;
+    context.fillStyle = colors["--text-primary"];
+    context.fillText(item.displayName, textLeft, nameTop);
+
     if (details.length > 0) {
       context.font = `${13 * SCALE}px ${sans}`;
       context.fillStyle = colors["--text-body"];
-      context.fillText(
-        details.join("・"),
-        pad + space["--space-3"],
-        y + 34 * SCALE
-      );
+      context.fillText(details.join("・"), textLeft, y + 34 * SCALE);
     }
     y += tileHeight + space["--space-2"];
   }
