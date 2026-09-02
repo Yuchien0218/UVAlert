@@ -809,9 +809,13 @@ Noto Serif TC 是標題的唯一字型，沒有第二層自托管備援——載
 
 **數值完全沒有變動**，只是給它一個可以一次調的名字。
 
-只定義預設這一檔。第四節另外提到的 24px（bottom sheet）與 16px（狀態卡、清單項目）**先不預造 token**——2026-08-30 才因為「留著沒人用的 token 會讓人以為某處正在用它」移除過兩個 `--space-stack-*`。真的要分檔位時再照 page-stack 的方式加，並在這裡寫清楚適用場合。
+16px（狀態卡、清單項目）**先不預造 token**——2026-08-30 才因為「留著沒人用的 token 會讓人以為某處正在用它」移除過兩個 `--space-stack-*`。真的要分檔位時再照 page-stack 的方式加，並在這裡寫清楚適用場合。
 
-**已知落差**：第四節說 bottom sheet 用 24px，程式碼實際是 20px（跟一般卡片同值）。這次只做收斂不動視覺，差異留在這裡等裁決。
+| `--sheet-padding` | 24px | **bottom sheet 的內距**（header ＋ body） | `BottomSheet.vue` |
+
+**2026-09-01：上面那條「已知落差」已結案。** 原本記的是「第四節說 bottom sheet 用 24px，程式碼實際是 20px（跟一般卡片同值），差異留在這裡等裁決」。使用者要求把裝備詳情抽屜的外觀對齊整體設計風格時一併裁決成**照第四節走**，於是有了 `--sheet-padding`。
+
+為什麼 sheet 要比卡片鬆一階：卡片是頁面裡的一塊，四周還有頁面本身的邊界撐開；sheet 佔滿整個寬度、緊貼螢幕邊緣，同樣的 20px 在那裡讀起來更擠。守門在 `GearDetailSheet.test.ts`（守 token 名而不是數值——改值是調整，改回 `--card-padding` 才是回歸）。
 
 **唯一的具名例外**是 `SessionEndControl` 的 `.session-end__backdrop`：那個 20px 是 backdrop 與視窗邊緣的留白，不是任何表面的內距，調卡片時不該連帶動到它。`apps/web/src/assets/cardPadding.test.ts` 擋著其餘的寫死值。
 
