@@ -333,7 +333,37 @@ function activeSafetyReasons(
   };
 }
 
-function latestEligibleApplicationForCause(
+/**
+ * 最後一次「足以清掉原因」的塗抹。
+ *
+ * 損耗事件（流汗／擦毛巾／摩擦／洗手／離水）講的是「那層防曬被弄掉了」。
+ * 之後重新塗抹就是換上新的一層，先前那些事件因此在歷史上被取代——這個函式
+ * 回傳的就是判斷「取代點」的那筆塗抹。
+ *
+ * **2026-09-02：判準由 `eligible` 改為「沒有被 `blocksGeneralDeadline` 擋
+ * 住」。**
+ *
+ * 舊判準造成的實際後果：`identity_unconfirmed`（標示沒確認）自 2026-08-30
+ * 起**會**用 120 分鐘保守預設開始倒數，但它不算 `eligible`，所以清不掉原因。
+ * 而且沒有任何一筆合格塗抹時，下面的過濾會走 `=== null` 那一支，讓所有損耗
+ * 事件**無條件成立**——結果是：
+ *
+ * > 標示未確認的使用者，只要記錄過任何損耗事件，該部位就永遠到期，補擦也
+ * > 清不掉。
+ *
+ * 而「標示未確認」是預設路徑（沒填包裝標示就會落在這裡）。
+ *
+ * 新判準的原則很簡單：**足以開始一段倒數的塗抹，就足以清掉一個原因。**
+ * 兩件事用同一個閘門，不會再出現「這筆塗抹算數也不算數」的分裂。
+ *
+ * 被擋住的三種（過期／回報異常／回報不適）**維持不能清**，那是刻意的：
+ * 它們是安全封鎖（S-11／S-13 明訂無法直接恢復），拿一瓶過期的防曬乳再擦
+ * 一次不該讓警示消失。
+ *
+ * 耐水期限不走這裡，仍然要求 `eligible`——沒有抗水標示算不出耐水時間，
+ * 那不是保守預設能補的（見 `GENERAL_DEADLINE_BLOCKERS` 的註解）。
+ */
+function latestCauseResettingApplication(
   zoneId: string,
   applications: ApplicationEventV1[]
 ): ApplicationEventV1 | null {
@@ -342,8 +372,9 @@ function latestEligibleApplicationForCause(
       .filter(
         (application) =>
           application.zoneInstanceIds.includes(zoneId) &&
-          application.productLabelSnapshot.ruleEligibilityAtApplication ===
-            "eligible"
+          !blocksGeneralDeadline(
+            application.productLabelSnapshot.ruleEligibilityAtApplication
+          )
       )
       .sort(compareApplicationOrder)
   );
@@ -801,7 +832,7 @@ export function reduceSession(input: {
       }
     }
 
-    const latestEligibleForCause = latestEligibleApplicationForCause(
+    const causeResetAt = latestCauseResettingApplication(
       zoneId,
       stream.applicationEvents
     );
@@ -814,10 +845,15 @@ export function reduceSession(input: {
       ) {
         return false;
       }
+      /*
+       * `causeResetAt === null` 時所有原因都成立——那是「這個部位從來沒有
+       * 一次能開始倒數的塗抹」，沒有任何一層防曬被換掉過，所以沒有東西可以
+       * 取代先前的損耗。
+       */
       return (
-        latestEligibleForCause === null ||
+        causeResetAt === null ||
         Date.parse(event.effectiveOccurredAt) >=
-          Date.parse(latestEligibleForCause.appliedAt)
+          Date.parse(causeResetAt.appliedAt)
       );
     });
     const causesApplicable = applicable && tracking.trackingStatus === "active";
