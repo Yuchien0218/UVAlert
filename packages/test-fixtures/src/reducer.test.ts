@@ -742,6 +742,102 @@ describe("P0 reminder reducer fixed vectors", () => {
     expect(result.primaryAction.actionKind).toBe("report_context_event");
   });
 
+  /*
+   * **補擦要清得掉原因**（2026-09-02，實機驗證階段一時發現）。
+   *
+   * 判準原本是「最後一次 `eligible` 的塗抹」，但 `identity_unconfirmed`
+   * （標示沒確認）自 2026-08-30 起會用 120 分鐘保守預設開始倒數，卻不算
+   * `eligible`。而一筆合格塗抹都沒有時，過濾會讓所有損耗事件無條件成立——
+   * 結果是標示未確認的使用者只要記錄過流汗，該部位就永遠到期。
+   *
+   * 那是預設路徑（沒填包裝標示就會落在這裡）。
+   */
+  describe("補擦清掉損耗原因", () => {
+    function sweatThenReapply(
+      snapshot: ReturnType<typeof makeProductSnapshot>
+    ) {
+      const stream = makeStream({
+        appliedAt: "2026-07-29T09:00:00.000Z",
+        snapshot
+      });
+      const zones = stream.sessionStarted.zoneInstanceIds;
+      addContext(
+        stream,
+        causeEvent(stream, {
+          id: "sweat",
+          type: "heavy_sweat",
+          at: "2026-07-29T10:30:00.000Z",
+          sequence: 2,
+          zones
+        })
+      );
+      addApplication(stream, {
+        id: "reapply",
+        zoneInstanceIds: [...zones],
+        appliedAt: "2026-07-29T10:31:00.000Z",
+        sequence: 3,
+        snapshot
+      });
+      return firstZone(stream, "2026-07-29T10:32:00.000Z");
+    }
+
+    /* 修復前這條是紅的：期限停在流汗那一刻，補擦清不掉。 */
+    it("標示未確認也能清掉", () => {
+      const zone = sweatThenReapply(
+        makeProductSnapshot({
+          identityStatus: "identity_unconfirmed",
+          ruleEligibilityAtApplication: "identity_unconfirmed"
+        })
+      );
+
+      expect(zone.eventTriggeredDeadline).toBeNull();
+      expect(zone.timingStatus).not.toBe("reapply_due");
+    });
+
+    /* 合格標示本來就清得掉，順便釘住沒有回歸。 */
+    it("合格標示照樣清得掉", () => {
+      const zone = sweatThenReapply(makeProductSnapshot());
+
+      expect(zone.eventTriggeredDeadline).toBeNull();
+    });
+
+    /*
+     * **反向：安全封鎖不得被清掉。**
+     *
+     * 過期／回報異常／回報不適是 S-11／S-13 明訂無法直接恢復的狀態，拿一瓶
+     * 過期的防曬乳再擦一次不該讓警示消失。
+     *
+     * 只守上面兩條的話，把判準放寬成「任何塗抹都算」也會過——那會讓這三種
+     * 安全狀態被一次補擦洗掉。
+     */
+    for (const [label, overrides] of [
+      [
+        "已過期",
+        { expiryStatus: "expired", ruleEligibilityAtApplication: "expired" }
+      ],
+      [
+        "回報異常",
+        {
+          conditionStatus: "abnormal_reported",
+          ruleEligibilityAtApplication: "abnormal_reported"
+        }
+      ],
+      [
+        "回報不適",
+        {
+          conditionStatus: "discomfort_reported",
+          ruleEligibilityAtApplication: "discomfort_reported"
+        }
+      ]
+    ] as const) {
+      it(`${label}的塗抹不得清掉原因`, () => {
+        const zone = sweatThenReapply(makeProductSnapshot(overrides as never));
+
+        expect(zone.eventTriggeredDeadline).toBe("2026-07-29T10:30:00.000Z");
+      });
+    }
+  });
+
   it("TV-024 多個原因取最早未解除時間", () => {
     const stream = makeStream({ appliedAt: "2026-07-29T09:00:00.000Z" });
     const zones = stream.sessionStarted.zoneInstanceIds;
