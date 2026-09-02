@@ -81,12 +81,46 @@ const contextLabel = computed(() => {
   return context === null ? null : CONTEXT_LABELS[context];
 });
 
-/** 包裝標示上的補擦間隔；沒有明確分鐘數時就是一般間隔。 */
+/**
+ * 補擦間隔——**只在包裝真的有寫分鐘數時才印**（2026-09-02 使用者裁決）。
+ *
+ * 原本沒有明確分鐘數時會印「一般 120 分」。那個 120 是 `reducer.ts` 的
+ * `GENERAL_MAX_MINUTES` **系統預設**，不是包裝上寫的——把它印成「規格」
+ * 等於把預設值講成產品標示，違反 DESIGN.md 第九節「要顯示資料就顯示真的
+ * 資料」。
+ *
+ * 跟草稿狀態、通知失敗同一條規則：預期內的結果安靜，例外才出聲。
+ */
 const intervalLabel = computed(() => {
-  const snapshot = props.data.sunscreen?.currentSnapshot;
-  if (snapshot === undefined) return null;
-  const minutes = snapshot.reapplicationIntervalMinutes;
-  return minutes === null ? "一般 120 分" : `${minutes} 分`;
+  const minutes =
+    props.data.sunscreen?.currentSnapshot.reapplicationIntervalMinutes ?? null;
+  return minutes === null ? null : `${minutes} 分`;
+});
+
+/**
+ * 耐水標示。
+ *
+ * **這是少數真的會影響倒數的欄位**（`activeWaterDeadline`），原本沒印在
+ * 卡片上，反而印了不影響倒數的東西。2026-09-02 補上。
+ */
+const waterLabel = computed(() => {
+  const status = props.data.sunscreen?.currentSnapshot.waterResistanceStatus;
+  if (status === "40" || status === "80") return `${status} 分鐘`;
+  if (status === "not_water_resistant") return "標示不耐水";
+  return null;
+});
+
+const FORMULATION_LABELS = {
+  lotion: "乳液",
+  gel: "凝膠／水感",
+  cream: "霜狀",
+  spray: "噴霧",
+  stick: "防曬棒"
+} as const;
+
+const formulationLabel = computed(() => {
+  const value = props.data.sunscreen?.formulation ?? null;
+  return value === null ? null : FORMULATION_LABELS[value];
 });
 
 /** SPF／PA，只印真的有的。 */
@@ -162,6 +196,18 @@ function detailsFor(product: ProductCatalogRecordV1): string[] {
           <dt>補擦間隔</dt>
           <dd>{{ intervalLabel }}</dd>
         </div>
+        <div v-if="waterLabel !== null">
+          <dt>耐水</dt>
+          <dd>{{ waterLabel }}</dd>
+        </div>
+        <div v-if="data.sunscreen.volume !== null">
+          <dt>容量</dt>
+          <dd>{{ data.sunscreen.volume }}</dd>
+        </div>
+        <div v-if="formulationLabel !== null">
+          <dt>劑型</dt>
+          <dd>{{ formulationLabel }}</dd>
+        </div>
         <div v-if="contextLabel !== null">
           <dt>情境</dt>
           <dd>{{ contextLabel }}</dd>
@@ -221,7 +267,7 @@ function detailsFor(product: ProductCatalogRecordV1): string[] {
  * 這樣兩個使用點可以各自決定份量）。
  */
 .share-card__lockup {
-  height: 1.4rem;
+  height: 1.2rem;
   width: auto;
   flex: 0 0 auto;
 }
@@ -304,10 +350,22 @@ function detailsFor(product: ProductCatalogRecordV1): string[] {
   line-height: var(--line-height-section-title);
 }
 
+/*
+ * 2026-09-02：從 flex-wrap 改成 auto-fit grid。
+ *
+ * 欄位數是變動的（1–5，看使用者填了什麼）。flex-wrap 時第二列的起點跟著
+ * 內容寬度跑，跟第一列對不齊——實測四欄時第一列撐滿、第二列擠在左邊。
+ * grid 讓每一列的欄位落在同一組縱向格線上，接近 mockup 的樣子，而且欄位
+ * 增減時不會重新排出奇怪的斷點。
+ *
+ * **6rem 不是隨手挑的**：375px 下這個 dl 的可用寬度是 238px、欄距 16px，
+ * 兩欄的上限就是 (238-16)/2 = 111px ≈ 6.9rem。第一版寫 7rem，實測直接掉回
+ * 單欄——四個欄位變成四列，比改動前更糟。留一點餘裕取 6rem。
+ */
 .share-card__stats {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-3) var(--space-6);
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(6rem, 1fr));
+  gap: var(--space-3) var(--space-4);
   margin: 0;
   padding-top: var(--space-3);
   border-top: 1px solid var(--color-on-dark-soft);
@@ -340,8 +398,16 @@ function detailsFor(product: ProductCatalogRecordV1): string[] {
   background: var(--color-hairline);
 }
 
+/*
+ * 2026-09-02：從 --text-secondary 提到 --text-body（使用者回報「文字顏色
+ * 偏淡」）。
+ *
+ * 實測是真的：同一顆 --text-secondary 在畫布上是 5.92，但這些方塊的底色是
+ * --color-hairline，**對比掉到 4.63**——過 AA 但只剩 0.13 餘裕。同一個 token
+ * 換了背景就掉一階，這是「底色變深」造成的，不是字級問題。
+ */
 .share-card__gear span {
-  color: var(--text-secondary);
+  color: var(--text-body);
   font-size: var(--font-size-caption);
 }
 

@@ -189,6 +189,12 @@ export interface SaveProductInput {
   size?: string | null;
   /** 2026-09-01：純紀錄，不進 reducer。自由文字，只印字不做色塊。 */
   color?: string | null;
+  /** 2026-09-02：純紀錄，不進 reducer。 */
+  volume?: string | null;
+  /** 2026-09-02：純紀錄，不進 reducer。 */
+  formulation?: "lotion" | "gel" | "cream" | "spray" | "stick" | null;
+  /** 2026-09-02：純紀錄，不進 reducer。 */
+  protectionType?: "physical" | "chemical" | "hybrid" | null;
   now: string;
 }
 

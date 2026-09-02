@@ -108,6 +108,19 @@ const snapshotForm = ref<ProductSnapshotFormValue>({
 });
 const size = ref("");
 const color = ref("");
+/*
+ * 2026-09-02：防曬乳專屬的三個純紀錄欄位（使用者裁決的取捨）。
+ *
+ * 提案原本有 11 項，只採用這三個。刪掉的兩類：Broad Spectrum 與 BOOTS
+ * 星級（台灣市售包裝幾乎不標，欄位會永遠空著）、海洋友善／不易致粉刺／
+ * 低敏（那些是**產品宣稱不是規格**，讓使用者自己勾再印到分享圖上，等於
+ * 這個 App 幫忙散布未經驗證的宣稱）。
+ */
+const volume = ref("");
+const formulation = shallowRef<
+  "lotion" | "gel" | "cream" | "spray" | "stick" | ""
+>("");
+const protectionType = shallowRef<"physical" | "chemical" | "hybrid" | "">("");
 const localError = shallowRef<string | null>(null);
 const confirmingDelete = shallowRef(false);
 
@@ -151,6 +164,11 @@ const showsSize = computed(
 );
 const showsColor = computed(() => gearCategory.value !== "sunscreen");
 
+/* 容量／劑型／防護機制是防曬乳才有的概念。 */
+const showsSunscreenSpecs = computed(
+  () => gearCategory.value === "sunscreen"
+);
+
 const safety = computed(() =>
   existing.value === null ? null : gearSafetyState(existing.value)
 );
@@ -182,6 +200,9 @@ onMounted(async () => {
   paGradeInput.value = record.currentSnapshot.paGrade ?? "";
   size.value = record.size ?? "";
   color.value = record.color ?? "";
+  volume.value = record.volume ?? "";
+  formulation.value = record.formulation ?? "";
+  protectionType.value = record.protectionType ?? "";
 });
 
 /*
@@ -276,6 +297,18 @@ async function save(): Promise<void> {
     size: showsSize.value && size.value.trim() !== "" ? size.value.trim() : null,
     color:
       showsColor.value && color.value.trim() !== "" ? color.value.trim() : null,
+    volume:
+      showsSunscreenSpecs.value && volume.value.trim() !== ""
+        ? volume.value.trim()
+        : null,
+    formulation:
+      showsSunscreenSpecs.value && formulation.value !== ""
+        ? formulation.value
+        : null,
+    protectionType:
+      showsSunscreenSpecs.value && protectionType.value !== ""
+        ? protectionType.value
+        : null,
     productId: props.productId ?? undefined
   });
 
@@ -545,6 +578,52 @@ async function remove(): Promise<void> {
           <input id="gear-color" v-model="color" type="text" maxlength="20" />
         </div>
       </div>
+
+      <!--
+        2026-09-02：防曬乳的容量／劑型／防護機制（使用者裁決）。
+
+        **放在「我的紀錄」而不是「包裝標示」卡**，即使這三項都印在瓶身上。
+        判準是「會不會影響倒數」——它們都不會，所以跟價格、尺寸同一層。
+        放進包裝標示那組會改到 `ProductLabelSnapshotV1`，而
+        `snapshotFingerprint` 是由 snapshot 算出來的，加欄位會讓既有產品的
+        fingerprint 全部變掉，等於每一罐都變成「另一罐」。
+      -->
+      <template v-if="showsSunscreenSpecs">
+        <div class="field-pair">
+          <div>
+            <label for="gear-volume">包裝容量</label>
+            <input
+              id="gear-volume"
+              v-model="volume"
+              type="text"
+              maxlength="20"
+              placeholder="60ml"
+            />
+          </div>
+          <div>
+            <label for="gear-formulation">劑型</label>
+            <select id="gear-formulation" v-model="formulation">
+              <option value="">未填寫</option>
+              <option value="lotion">乳液</option>
+              <option value="gel">凝膠／水感</option>
+              <option value="cream">霜狀</option>
+              <option value="spray">噴霧</option>
+              <option value="stick">防曬棒</option>
+            </select>
+          </div>
+        </div>
+
+        <label for="gear-protection-type">防護機制</label>
+        <select id="gear-protection-type" v-model="protectionType">
+          <option value="">未填寫</option>
+          <option value="physical">物理性</option>
+          <option value="chemical">化學性</option>
+          <option value="hybrid">混合型</option>
+        </select>
+        <p class="field-helper">
+          依包裝標示填寫，不從膚感推測。這三項只是紀錄，不影響補擦倒數。
+        </p>
+      </template>
 
       <label for="gear-note">備註</label>
       <textarea id="gear-note" v-model="note" maxlength="500" rows="3" />

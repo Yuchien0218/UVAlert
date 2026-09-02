@@ -36,6 +36,9 @@ function product(
     usageRating: null,
     size: null,
     color: null,
+    volume: null,
+    formulation: null,
+    protectionType: null,
     currentSnapshot: snapshot,
     snapshotFingerprint: fingerprintProductLabelSnapshot(snapshot),
     createdAt: "2026-08-01T08:00:00.000Z",
@@ -318,5 +321,124 @@ describe("不升版就能加欄位", () => {
     expect(contract).toContain(
       "color: z.string().trim().max(20).nullable().default(null),"
     );
+  });
+});
+
+describe("補擦間隔只印包裝真的有寫的（2026-09-02 裁決）", () => {
+  /*
+   * 兩個方向分開守。原本沒有明確分鐘數時會印「一般 120 分」——那個 120 是
+   * `reducer.ts` 的 `GENERAL_MAX_MINUTES` **系統預設**，不是包裝上寫的。
+   * 只守「有寫才印」的話，改成永遠不印也會過，那時真的有標示也看不到。
+   */
+  it("包裝沒寫分鐘數時不印這一列", () => {
+    const wrapper = mountCard(data());
+    expect(wrapper.text()).not.toContain("補擦間隔");
+    expect(wrapper.text(), "不得把系統預設印成規格").not.toContain("120 分");
+  });
+
+  it("包裝有寫分鐘數時照印", () => {
+    const wrapper = mountCard(
+      data({
+        sunscreen: product({
+          currentSnapshot: {
+            ...snapshot,
+            reapplicationIntervalStatus: "explicit_minutes",
+            reapplicationIntervalMinutes: 80
+          }
+        })
+      })
+    );
+    expect(wrapper.text()).toContain("補擦間隔");
+    expect(wrapper.text()).toContain("80 分");
+  });
+});
+
+describe("耐水要印上卡片（會影響倒數）", () => {
+  it("有耐水標示就印", () => {
+    const wrapper = mountCard(
+      data({
+        sunscreen: product({
+          currentSnapshot: {
+            ...snapshot,
+            waterResistanceStatus: "80",
+            waterResistanceMinutes: 80
+          }
+        })
+      })
+    );
+    expect(wrapper.text()).toContain("耐水");
+    expect(wrapper.text()).toContain("80 分鐘");
+  });
+
+  /* 「不確定」與「沒有標示」不是資訊，不佔一格。 */
+  it("耐水未確認時不印", () => {
+    expect(mountCard(data()).text()).not.toContain("耐水");
+  });
+});
+
+describe("容量與劑型", () => {
+  it("有填才印，並用中文標籤", () => {
+    const wrapper = mountCard(
+      data({ sunscreen: product({ volume: "60ml", formulation: "spray" }) })
+    );
+    expect(wrapper.text()).toContain("60ml");
+    expect(wrapper.text()).toContain("噴霧");
+  });
+
+  it("沒填就整格不出現", () => {
+    const wrapper = mountCard(data());
+    expect(wrapper.text()).not.toContain("容量");
+    expect(wrapper.text()).not.toContain("劑型");
+  });
+});
+
+describe("防曬乳規格欄位的範圍", () => {
+  const FORM = readFileSync(
+    "apps/web/src/components/product/GearForm.vue",
+    "utf8"
+  ).replace(/\/\*[\s\S]*?\*\//g, "");
+
+  it("容量／劑型／防護機制只對防曬乳顯示", () => {
+    expect(FORM).toMatch(
+      /showsSunscreenSpecs = computed\(\s*\(\) => gearCategory\.value === "sunscreen"\s*\)/
+    );
+    // 三個欄位都掛在同一個條件底下，不是各自判斷。
+    expect(FORM).toContain('<template v-if="showsSunscreenSpecs">');
+  });
+
+  /* 品類不適用時存 null，跟 size／color 一致：不留「看不到但存著」的資料。 */
+  it("非防曬乳存 null", () => {
+    for (const field of ["volume", "formulation", "protectionType"]) {
+      expect(FORM, field).toContain(`showsSunscreenSpecs.value &&`);
+    }
+  });
+
+  /*
+   * **這條擋的是範圍蔓延，不是 bug。**
+   *
+   * 2026-09-02 的提案原本有 11 項規格。刻意沒做的兩類：
+   *
+   *   - Broad Spectrum、BOOTS 星級：台灣市售包裝幾乎不標，欄位會永遠空著
+   *   - 海洋友善、不易致粉刺、低敏：**那些是產品宣稱不是規格**。讓使用者
+   *     自己勾再印到一張要分享出去的圖上，等於這個 App 幫忙散布未經驗證的
+   *     宣稱——跟「不是防護效果保證」「只依包裝標示選擇，不從產品名稱推測」
+   *     的立場衝突。
+   *
+   * 要加回來是可以的，但必須是一次明確的裁決，不是順手加欄位。
+   */
+  it("沒有偷偷長出宣稱型欄位", () => {
+    const contract = readFileSync("packages/contracts/src/product.ts", "utf8");
+    for (const claim of [
+      "reefSafe",
+      "nonComedogenic",
+      "hypoallergenic",
+      "fragranceFree",
+      "broadSpectrum",
+      "bootsStars"
+    ]) {
+      expect(contract, `${claim} 是宣稱不是規格，要加須先裁決`).not.toContain(
+        claim
+      );
+    }
   });
 });

@@ -115,7 +115,7 @@ function goBack(): void {
         <h1 class="page-heading__title" data-typography-role="page-title">
           分享我的防曬裝備
         </h1>
-        <p>可以直接截圖分享。價格預設不會印在卡片上。</p>
+        <p>直接截圖即可分享你的防曬清單，價格預設不會印在卡片上。</p>
       </div>
       <IconButton
         icon="tool-arrow-left"
