@@ -335,6 +335,57 @@ export function createSetupController(
     });
   }
 
+  /**
+   * 入水時間的驗證。
+   *
+   * **抽成一份是必要的，不是整理癖。** 這段原本在 `savePendingTiming` 與
+   * 送出流程各寫了一次，兩份逐字相同——2026-09-02 要補「不能早於塗抹時間」
+   * 時，只改一邊就會變成兩種行為，而且錯的那一邊是使用者真的按下去的那條。
+   *
+   * 回傳錯誤訊息陣列，沒問題時回傳 null。
+   */
+  function validateWaterStart(
+    waterStart: WaterStartFormValue | null,
+    appliedAtMs: number,
+    trustedNow: Date,
+    nowLabel: string
+  ): string[] | null {
+    if (waterStart === null) {
+      return ["請確認實際入水時間，或選擇不確定。"];
+    }
+    if (waterStart.confidence !== "confirmed") return null;
+
+    const startedAt = waterStart.activityStartedAt;
+    if (startedAt === null) {
+      return [`入水時間不能晚於${nowLabel}。`];
+    }
+
+    const startedAtMs = Date.parse(startedAt);
+    if (!Number.isFinite(startedAtMs) || startedAtMs > trustedNow.getTime()) {
+      return [`入水時間不能晚於${nowLabel}。`];
+    }
+
+    /*
+     * **入水不得早於塗抹**（2026-09-02，使用者回報）。
+     *
+     * 兩個欄位原本各有各的上限（塗抹 120 分、入水 80 分），但沒有人比較它們
+     * 的先後。實測可以填「塗抹 4 分鐘前 ＋ 入水 59 分鐘前」而毫無阻攔——那在
+     * 物理上不可能：這次提醒用的防曬乳 4 分鐘前才擦，不可能在那之前 55 分鐘
+     * 就已經下水。
+     *
+     * 後果不只是資料難看：耐水區間的起點會落在一段「還沒擦防曬」的時間上，
+     * 耐水扣減因此算在不存在的保護上。
+     *
+     * `appliedAtMs` 無效時不檢查——那時已經有 appliedAt 自己的錯誤訊息，再多
+     * 一句只會讓使用者不知道該先修哪一個。
+     */
+    if (Number.isFinite(appliedAtMs) && startedAtMs < appliedAtMs) {
+      return ["入水時間不能早於塗抹時間，請重新確認。"];
+    }
+
+    return null;
+  }
+
   async function savePendingTiming(input: TimingDraftInput): Promise<boolean> {
     const draft = requireDraft();
     const fieldErrors: Record<string, string[]> = {};
@@ -350,15 +401,13 @@ export function createSetupController(
     }
 
     if (draft.initialContext === "water_active") {
-      if (input.waterStart === null) {
-        fieldErrors.waterStart = ["請確認實際入水時間，或選擇不確定。"];
-      } else if (
-        input.waterStart.confidence === "confirmed" &&
-        (input.waterStart.activityStartedAt === null ||
-          Date.parse(input.waterStart.activityStartedAt) > trustedNow.getTime())
-      ) {
-        fieldErrors.waterStart = ["入水時間不能晚於目前時間。"];
-      }
+      const waterErrors = validateWaterStart(
+        input.waterStart,
+        appliedAtMs,
+        trustedNow,
+        "目前時間"
+      );
+      if (waterErrors !== null) fieldErrors.waterStart = waterErrors;
     }
 
     if (Object.keys(fieldErrors).length > 0) {
@@ -433,15 +482,13 @@ export function createSetupController(
     // 領域層的 StartSessionCommand 本來就允許 applicationGroup 為 null。
 
     if (draft.initialContext === "water_active") {
-      if (input.waterStart === null) {
-        fieldErrors.waterStart = ["請確認實際入水時間，或選擇不確定。"];
-      } else if (
-        input.waterStart.confidence === "confirmed" &&
-        (input.waterStart.activityStartedAt === null ||
-          Date.parse(input.waterStart.activityStartedAt) > trustedNow.getTime())
-      ) {
-        fieldErrors.waterStart = ["入水時間不能晚於目前可信時間。"];
-      }
+      const waterErrors = validateWaterStart(
+        input.waterStart,
+        appliedAtMs,
+        trustedNow,
+        "目前可信時間"
+      );
+      if (waterErrors !== null) fieldErrors.waterStart = waterErrors;
     }
 
     if (Object.keys(fieldErrors).length > 0) {
