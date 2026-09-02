@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import BackToMoreLink from "../../components/common/BackToMoreLink.vue";
 import { computed } from "vue";
 import EmptyStateCard from "../../components/common/EmptyStateCard.vue";
 import { listPublishableTopics } from "../../features/help/helpTopics";
@@ -44,9 +45,7 @@ const topics = computed(() => listPublishableTopics());
       role="status"
     />
 
-    <RouterLink class="text-link text-link--muted" to="/more"
-      >返回更多</RouterLink
-    >
+    <BackToMoreLink />
   </div>
 </template>
 

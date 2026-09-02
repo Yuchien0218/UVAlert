@@ -3,6 +3,7 @@ import Icon from "../../components/icons/Icon.vue";
 import { computed, onMounted, shallowRef } from "vue";
 import { useWebAppServices } from "../../app/injection";
 import AppNotice from "../../components/common/AppNotice.vue";
+import BackToMoreLink from "../../components/common/BackToMoreLink.vue";
 import ChevronLink from "../../components/common/ChevronLink.vue";
 import ConfirmAction from "../../components/common/ConfirmAction.vue";
 import EmptyStateCard from "../../components/common/EmptyStateCard.vue";
@@ -198,7 +199,8 @@ function writeSyncDisabled(value: boolean): void {
         </h2>
         <div class="card-prose">
           <p>
-            匯出包含裝備、提醒與偏好的 JSON 檔案（<strong>不含</strong>定位與裝置識別碼）。
+            匯出包含裝備、提醒與偏好的 JSON
+            檔案（<strong>不含</strong>定位與裝置識別碼）。
           </p>
           <p class="caution">
             目前<strong>僅支援匯出備份</strong>，匯入還原功能將於後續版本更新。
@@ -455,6 +457,21 @@ function writeSyncDisabled(value: boolean): void {
         管理登入與雲端資料
       </ChevronLink>
     </section>
+
+    <!--
+      2026-09-02：補上返回（使用者裁決）。
+
+      這一頁原本**完全沒有返回機制**——沒有右上圖示鈕、沒有頁尾連結、也沒有
+      router.back。兩個兄弟頁都給了明確出口（AccountDataPage 有頁尾連結、
+      NotificationSettingsPage 有右上圖示鈕），只有它沒有，使用者只能靠底部
+      導覽或瀏覽器上一頁。
+
+      **刻意選頁尾連結而不是右上圖示鈕**：叉叉／箭頭要怎麼統一仍在
+      `2026-09-02-ui-layout-consistency-audit.md` §1 待裁決。補一個跟
+      AccountDataPage 一模一樣的頁尾連結是把缺口補起來，不會替使用者先決定
+      那條還沒定的規則。
+    -->
+    <BackToMoreLink />
   </div>
 </template>
 

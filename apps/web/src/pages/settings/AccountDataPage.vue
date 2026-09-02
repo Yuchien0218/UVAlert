@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import BackToMoreLink from "../../components/common/BackToMoreLink.vue";
 import { computed, onMounted, shallowRef } from "vue";
 import { useWebAppServices } from "../../app/injection";
 import AppNotice from "../../components/common/AppNotice.vue";
@@ -144,9 +145,7 @@ async function deleteCloudData(): Promise<void> {
 
     <AppNotice v-if="notice" kind="ok">{{ notice }}</AppNotice>
     <AppNotice v-if="error" kind="error">{{ error }}</AppNotice>
-    <RouterLink class="text-link text-link--muted" to="/more"
-      >返回更多</RouterLink
-    >
+    <BackToMoreLink />
   </div>
 </template>
 

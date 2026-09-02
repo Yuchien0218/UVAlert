@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import BackToMoreLink from "../components/common/BackToMoreLink.vue";
 import { computed, onMounted, onUnmounted, shallowRef } from "vue";
 
 /**
@@ -109,9 +110,7 @@ async function install(): Promise<void> {
       </ul>
     </section>
 
-    <RouterLink class="text-link text-link--muted" to="/more"
-      >返回更多</RouterLink
-    >
+    <BackToMoreLink />
   </div>
 </template>
 
