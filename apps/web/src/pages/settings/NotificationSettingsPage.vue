@@ -77,7 +77,22 @@ async function runTest(): Promise<void> {
 <template>
   <div class="page-stack notification-settings-page">
     <!--
-      2026-08-24：返回改成右上角只有圖示的叉叉，跟其他頁一致。
+      2026-08-24：返回改成右上角只有圖示的按鈕，跟其他頁一致。
+
+      **2026-09-02：圖示由叉叉改成箭頭（使用者裁決）。** 當時寫「跟其他頁
+      一致」時，全站只有一種右上圖示鈕；後來出口分化成兩族，而這一頁站錯
+      邊了。現行規則見
+      `docs/decisions/2026-09-02-secondary-page-exit-rule.md`：
+
+        可放棄的流程 → 叉叉（tool-close）
+        階層下鑽     → 箭頭（tool-arrow-left）
+
+      通知設定是從「更多」下鑽進來的一頁設定，不是一段做到一半可以放棄的
+      流程——叉叉會讓人以為按下去等於「不儲存就離開」，但這頁的每個開關
+      都是即時生效的。
+
+      **位置維持右上、維持 .flow-heading，只換圖示。** 箭頭要放左上還是
+      右上仍在 `2026-08-30-pending-decisions §2／§12.2` 待裁決，這次不動它。
 
       2026-08-31：叉叉原本自己佔一個 <header>，下面才是標題——實測標題
       上方憑空多出 60px（44px 的按鈕列 ＋ 16px 間距），而那一列左邊什麼
@@ -96,7 +111,7 @@ async function runTest(): Promise<void> {
         </p>
       </div>
       <IconButton
-        icon="tool-close"
+        icon="tool-arrow-left"
         label="返回更多"
         @click="goBack"
       />
