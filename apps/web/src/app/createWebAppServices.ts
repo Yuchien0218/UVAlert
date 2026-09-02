@@ -63,6 +63,7 @@ import {
   createLocalDataController,
   type LocalDataController
 } from "../features/settings/createLocalDataController";
+import { BrowserShare } from "../adapters/BrowserShare";
 import { downloadTextFile } from "../helpers/downloadTextFile";
 import {
   createSessionEventsController,
@@ -81,7 +82,7 @@ import {
   createFeedbackController,
   type FeedbackController
 } from "../features/feedback/createFeedbackController";
-import type { CloudSyncPort } from "@sunshield/platform";
+import type { CloudSyncPort, SharePort } from "@sunshield/platform";
 import {
   createNotificationController,
   type NotificationController
@@ -104,6 +105,8 @@ export interface WebAppServices {
   readonly cloudSync: CloudSyncPort;
   readonly feedback: FeedbackController;
   readonly notifications: NotificationController;
+  /** 分享卡輸出圖片後交給系統分享（計畫階段三）。 */
+  readonly share: SharePort;
   dispose(): void;
 }
 
@@ -259,6 +262,7 @@ export function createWebAppServices(
     boot,
     setup,
     productSettings,
+    share: new BrowserShare(),
     sessionControl,
     uvForecast,
     region,

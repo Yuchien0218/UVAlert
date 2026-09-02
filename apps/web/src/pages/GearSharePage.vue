@@ -3,23 +3,27 @@ import { computed, onMounted, shallowRef } from "vue";
 import { useRouter } from "vue-router";
 import type { SessionContext } from "@sunshield/contracts";
 import { useWebAppServices } from "../app/injection";
+import { paintShareCard } from "../features/share/paintShareCard";
+import { getUvRiskLevelLabel } from "../features/uv/uvForecastRules";
+import { CONTEXT_LABELS } from "../features/setup/setupCatalog";
+import { formatDate } from "../helpers/datetime";
 import IconButton from "../components/common/IconButton.vue";
 import GearShareCard, {
   type GearShareCardData
 } from "../components/product/GearShareCard.vue";
 
 /**
- * 「我的防曬裝備」分享頁（階段一）。
+ * 「我的防曬裝備」分享頁。
  *
- * 計畫見 `docs/superpowers/plans/2026-09-01-gear-share-card.md`。這一階段
- * 只做畫面——做完就已經可用（使用者能自己截圖），也是階段二輸出 PNG、
- * 階段三系統分享唯一的資料來源。
+ * 計畫見 `docs/superpowers/plans/2026-09-01-gear-share-card.md`：階段一是
+ * 卡片畫面、階段二輸出 PNG、階段三交給系統分享。畫面上的那張卡是三者
+ * 唯一的資料來源——`paintShareCard` 讀的是同一份 `cardData`。
  *
  * **只放使用中的裝備**（2026-09-01 使用者裁決）。收納中的裝備依定義不會
  * 用於新的提醒，印在「我今天用什麼」的卡片上是錯的。
  */
 
-const { boot, productSettings, sessionEvents, uvForecast } =
+const { boot, productSettings, sessionEvents, share, uvForecast } =
   useWebAppServices();
 const router = useRouter();
 
@@ -103,6 +107,85 @@ const hasPrice = computed(() =>
   activeGear.value.some((product) => product.priceTwd !== null)
 );
 
+/*
+ * 階段二、三：輸出 PNG 並交給系統分享。
+ *
+ * **兩顆按鈕不是二選一。** 「儲存圖片」永遠都在（下載是每個瀏覽器都會的
+ * 事）；「分享」只在 Web Share API 真的收得下這個檔案時才出現。先畫圖再
+ * 問能不能分享——`canShare({ files })` 要帶著真的那個 file 去問，有些實作
+ * 會依 MIME 與大小拒絕。
+ */
+const busy = shallowRef(false);
+const shareError = shallowRef<string | null>(null);
+const canShare = shallowRef(false);
+
+async function renderFile(): Promise<File> {
+  const blob = await paintShareCard({
+    data: cardData.value,
+    title: sessionInfo.value === null ? "我的防曬裝備" : "我今天的防曬裝備",
+    dateLabel:
+      sessionInfo.value === null
+        ? null
+        : formatDate(new Date(sessionInfo.value.startedAt)),
+    riskLabel:
+      sessionInfo.value !== null && uvDay.value?.riskLevel != null
+        ? getUvRiskLevelLabel(uvDay.value.riskLevel)
+        : null,
+    contextLabel:
+      sessionInfo.value?.context == null
+        ? null
+        : CONTEXT_LABELS[sessionInfo.value.context],
+    showPrice: showPrice.value
+  });
+  return new File([blob], "uvalert-gear.png", { type: "image/png" });
+}
+
+async function saveImage(): Promise<void> {
+  if (busy.value) return;
+  busy.value = true;
+  shareError.value = null;
+  try {
+    const file = await renderFile();
+    const url = URL.createObjectURL(file);
+    const anchor = document.createElement("a");
+    anchor.href = url;
+    anchor.download = file.name;
+    document.body.append(anchor);
+    anchor.click();
+    anchor.remove();
+    // 立刻 revoke 會讓部分瀏覽器來不及開始下載（跟 downloadTextFile 一致）。
+    setTimeout(() => URL.revokeObjectURL(url), 10_000);
+    canShare.value = share.canShareFiles(file);
+  } catch {
+    shareError.value = "圖片沒有產生成功，卡片內容沒有變動，可以再試一次。";
+  } finally {
+    busy.value = false;
+  }
+}
+
+async function shareImage(): Promise<void> {
+  if (busy.value) return;
+  busy.value = true;
+  shareError.value = null;
+  try {
+    const file = await renderFile();
+    if (!share.canShareFiles(file)) {
+      canShare.value = false;
+      shareError.value = "這個瀏覽器不支援直接分享圖片，請改用「儲存圖片」。";
+      return;
+    }
+    const result = await share.shareFile(file, "我的防曬裝備");
+    // 使用者按取消不是錯誤，不跳訊息。
+    if (result === "failed") {
+      shareError.value = "分享沒有完成，圖片已經產生好，可以改用「儲存圖片」。";
+    }
+  } catch {
+    shareError.value = "圖片沒有產生成功，卡片內容沒有變動，可以再試一次。";
+  } finally {
+    busy.value = false;
+  }
+}
+
 function goBack(): void {
   void router.push({ name: "products" });
 }
@@ -115,7 +198,7 @@ function goBack(): void {
         <h1 class="page-heading__title" data-typography-role="page-title">
           分享我的防曬裝備
         </h1>
-        <p>直接截圖即可分享你的防曬清單，價格預設不會印在卡片上。</p>
+        <p>存成圖片或直接分享你的防曬清單，價格預設不會印在卡片上。</p>
       </div>
       <IconButton
         icon="tool-arrow-left"
@@ -140,6 +223,38 @@ function goBack(): void {
       <input v-model="showPrice" type="checkbox" />
       <span>在卡片上顯示價格</span>
     </label>
+
+    <!--
+      **「儲存圖片」是主要動作，「分享」是加分的。** 下載每個瀏覽器都會，
+      Web Share API level 2（分享檔案）在桌面幾乎沒有支援——把分享當主要
+      動作會讓多數使用者按到一顆不能用的按鈕。
+
+      分享鈕只在畫過一次圖、而且瀏覽器真的收得下那個檔案時才出現：
+      `canShare({ files })` 必須帶著真的那個 file 去問。
+    -->
+    <div class="share-page__actions">
+      <button
+        class="button button--primary"
+        type="button"
+        :disabled="busy"
+        @click="saveImage"
+      >
+        {{ busy ? "產生中…" : "儲存圖片" }}
+      </button>
+      <button
+        v-if="canShare"
+        class="button button--quiet"
+        type="button"
+        :disabled="busy"
+        @click="shareImage"
+      >
+        分享圖片
+      </button>
+    </div>
+
+    <p v-if="shareError !== null" class="form-error" role="alert">
+      {{ shareError }}
+    </p>
   </div>
 </template>
 
@@ -151,6 +266,11 @@ function goBack(): void {
 .flow-heading p {
   color: var(--text-body);
   line-height: var(--line-height-body);
+}
+
+.share-page__actions {
+  display: grid;
+  gap: var(--space-3);
 }
 
 .share-page__toggle {
