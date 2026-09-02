@@ -150,8 +150,23 @@ function writeSyncDisabled(value: boolean): void {
 
     <template v-else-if="summary">
       <section class="app-card" aria-labelledby="data-summary-title">
-        <h2 id="data-summary-title" data-typography-role="card-title">
-          這台裝置儲存了什麼
+        <!--
+          2026-09-02：三個區塊各配一個圖示當視覺錨點（排版稽核 §4）。
+
+          **沿用 MorePage 卡片列的既有樣式**（32px 圖示 ＋ 標題同列），
+          不發明第四種「圖示＋標題」的排法。IconLead 的 40／56 是給頁面
+          標題與空狀態的，三張設定卡各放一個 40px 會太重。
+
+          第一個用 `more-data`：那正是「更多」頁上通往這裡的那張卡的圖示
+          ——點進來之後圖示還在原地，跟衛教分類頁同一個作法。
+        -->
+        <h2
+          class="section-heading"
+          id="data-summary-title"
+          data-typography-role="card-title"
+        >
+          <Icon name="more-data" :size="32" />
+          <span>這台裝置儲存了什麼</span>
         </h2>
         <!--
           2026-08-30：補上範圍說明。這些數字只數得到本機 IndexedDB 裡的
@@ -194,8 +209,13 @@ function writeSyncDisabled(value: boolean): void {
       </section>
 
       <section class="app-card" aria-labelledby="data-export-title">
-        <h2 id="data-export-title" data-typography-role="card-title">
-          匯出本機資料
+        <h2
+          class="section-heading"
+          id="data-export-title"
+          data-typography-role="card-title"
+        >
+          <Icon name="tool-download" :size="32" />
+          <span>匯出本機資料</span>
         </h2>
         <div class="card-prose">
           <p>
@@ -212,7 +232,6 @@ function writeSyncDisabled(value: boolean): void {
           :disabled="busy"
           @click="localData.exportData"
         >
-          <Icon name="tool-download" :size="20" />
           {{ busy ? "處理中…" : "匯出本機資料" }}
         </button>
 
@@ -229,8 +248,13 @@ function writeSyncDisabled(value: boolean): void {
       </section>
 
       <section class="app-card" aria-labelledby="data-clear-title">
-        <h2 id="data-clear-title" data-typography-role="card-title">
-          清除本機資料
+        <h2
+          class="section-heading"
+          id="data-clear-title"
+          data-typography-role="card-title"
+        >
+          <Icon name="tool-delete" :size="32" />
+          <span>清除本機資料</span>
         </h2>
         <p class="caution">
           清除後<strong>無法還原</strong>，如需備份請先匯出資料。
@@ -476,6 +500,21 @@ function writeSyncDisabled(value: boolean): void {
 </template>
 
 <style scoped>
+/*
+ * 區塊標題的圖示錨點。跟 MorePage 卡片列同一種排法：圖示與標題同列、
+ * 垂直置中。flex: none 不是保險——flex 子項預設可壓縮，圖示被壓縮就是
+ * 變形（跟 IconLead 那條註解同一個理由）。
+ */
+.section-heading {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.section-heading svg {
+  flex: none;
+}
+
 .page-heading {
   display: grid;
   gap: var(--space-2);
