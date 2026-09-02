@@ -3,7 +3,7 @@
 > **For agentic workers:** 四個階段依序做，一～三是一批（使用者裁決「三階段一起排」），第四階段暫緩。動手前先讀 `Global Constraints`，每個 Task 的「驗證」欄就是它的守門要求。做完把 `- [ ]` 改成 `- [x]` 並補上 PR 編號。
 
 **日期**：2026-09-01（Asia/Taipei）
-**狀態**：**階段一已完成（PR #96）**，階段二、三待做
+**狀態**：**一～三階段全部完成**（#96、#98、#99）。階段四（照片）暫緩
 **來源**：使用者提供一張 mockup（暖象牙底 ＋ 深咖啡卡）並要求「分享按鈕位置、配色參考這個，使用共通元件」
 **範圍**：`apps/web`（新頁面、新元件、adapter）、`packages/contracts`（兩個選填欄位）、`packages/platform`（一個新 port）、`packages/ui`（可能新增 on-dark token 別名）
 **不動**：`packages/domain`（分享卡完全不進 reducer）、`packages/persistence-web` 的既有 store
@@ -148,11 +148,11 @@ BrandHeader 風格的一行：logo ＋（有 session 時）日期
 
 ## 階段二：輸出 PNG
 
-- [ ] `features/share/paintShareCard.ts`：Canvas 2D 手繪
-- [ ] **顏色與間距從 `getComputedStyle(document.documentElement)` 讀 token**，
+- [x] `features/share/paintShareCard.ts`：Canvas 2D 手繪
+- [x] **顏色與間距從 `getComputedStyle(document.documentElement)` 讀 token**，
       不要在 JS 裡再抄一份色碼——否則設計系統會多出第四份真相
-- [ ] 輸出 1080×1350（IG 直式）
-- [ ] 繪圖前 `await document.fonts.ready`
+- [x] 輸出 1080×1350（IG 直式）
+- [x] 繪圖前 `await document.fonts.ready`
 
 **為什麼手繪而不是 html2canvas／html-to-image**：新依賴、CJK web font 在 canvas
 常出問題、輸出品質不穩。手繪零依賴且完全可控。
@@ -167,10 +167,10 @@ BrandHeader 風格的一行：logo ＋（有 session 時）日期
 
 ## 階段三：系統分享
 
-- [ ] `packages/platform`：新增 `SharePort`（`canShareFiles()`／`shareFile()`）
-- [ ] `apps/web/src/adapters/`：`BrowserShare` 實作 `navigator.canShare({ files })`
-- [ ] 不支援時退回下載（`<a download>`）
-- [ ] 接進 `createWebAppServices.ts`
+- [x] `packages/platform`：新增 `SharePort`（`canShareFiles()`／`shareFile()`）
+- [x] `apps/web/src/adapters/`：`BrowserShare` 實作 `navigator.canShare({ files })`
+- [x] 不支援時退回下載（`<a download>`）
+- [x] 接進 `createWebAppServices.ts`
 
 照這個 repo 的單向依賴，瀏覽器 API 一律走 port＋adapter，不在元件裡直接碰
 `navigator`。

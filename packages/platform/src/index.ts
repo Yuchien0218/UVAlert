@@ -198,6 +198,31 @@ export interface SaveProductInput {
   now: string;
 }
 
+/**
+ * 把檔案交給系統分享（Web Share API level 2）。
+ *
+ * 走 port 而不是在元件裡直接碰 `navigator`：這個 repo 的依賴方向是單向的，
+ * 瀏覽器 API 一律由 `apps/web/src/adapters/` 實作。分享卡的測試因此不必
+ * mock 全域物件，給一個假的 port 就好。
+ *
+ * `canShareFiles()` 是同步的：畫面要在按下去**之前**就決定顯示「分享」還是
+ * 只顯示「儲存圖片」，不能等 Promise。
+ */
+export interface SharePort {
+  canShareFiles(file: File): boolean;
+  /**
+   * 呼叫系統分享。
+   *
+   * 回傳值刻意分成三種而不是 boolean：**使用者按取消不是錯誤**，不該跳出
+   * 「分享失敗」。Web Share API 對取消與失敗都是 reject，差別在 error.name
+   * 是不是 AbortError，判斷留在 adapter 裡。
+   */
+  shareFile(
+    file: File,
+    title: string
+  ): Promise<"shared" | "cancelled" | "failed">;
+}
+
 /** S-19 本機資料管理的清單摘要。 */
 export interface LocalDataSummary {
   productCount: number;
