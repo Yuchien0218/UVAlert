@@ -8,6 +8,7 @@ import { getUvRiskLevelLabel } from "../features/uv/uvForecastRules";
 import { CONTEXT_LABELS } from "../features/setup/setupCatalog";
 import { formatDate } from "../helpers/datetime";
 import IconButton from "../components/common/IconButton.vue";
+import IconLead from "../components/common/IconLead.vue";
 import GearShareCard, {
   type GearShareCardData
 } from "../components/product/GearShareCard.vue";
@@ -194,10 +195,19 @@ function goBack(): void {
 <template>
   <div class="page-stack share-page">
     <header class="flow-heading">
-      <div>
-        <h1 class="page-heading__title" data-typography-role="page-title">
-          分享我的防曬裝備
-        </h1>
+      <div class="share-page__heading-main">
+        <!--
+          2026-09-02：標題帶上 `feature-share`（使用者要求「幫我畫」）。
+
+          走 IconLead 而不是自己寫 `<Icon :size="40">`——尺寸只有 IconLead
+          一個地方在管，這一頁跟衛教主題頁是同一種「頁面標題＋領銜圖示」。
+          說明文字留在圖示外面、橫跨整欄，不要被擠進 40px 圖示右邊的窄欄。
+        -->
+        <IconLead icon="feature-share">
+          <h1 class="page-heading__title" data-typography-role="page-title">
+            分享我的防曬裝備
+          </h1>
+        </IconLead>
         <p>存成圖片或直接分享你的防曬清單，價格預設不會印在卡片上。</p>
       </div>
       <IconButton
@@ -261,6 +271,11 @@ function goBack(): void {
 <style scoped>
 .share-page {
   gap: var(--page-stack-gap);
+}
+
+.share-page__heading-main {
+  display: grid;
+  gap: var(--space-3);
 }
 
 .flow-heading p {
