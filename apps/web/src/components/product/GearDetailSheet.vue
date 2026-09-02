@@ -86,21 +86,24 @@ const specLine = computed(() => {
 });
 
 /**
- * 「裝備資訊」那一段有沒有東西可寫。
+ * 規格清單有沒有東西可寫。
  *
- * 「補擦提醒」只在**不會倒數**時顯示（防曬乳那句講的是品類通則，不是這
- * 一瓶的資料），所以一件什麼都沒填的防曬乳會讓這一段完全空掉——有標題、
- * 有邊框、裡面什麼都沒有的區塊，比沒有這個區塊更難懂。
+ * 只算**這一件裝備自己的資料**：品類通則（「防曬乳會建立倒數」）不在內，
+ * 那句話對所有防曬乳都成立；「不會建立倒數」這個限制也不在內，它 2026-09-01
+ * 改由標題下的「僅供紀錄」膠囊表示，留在這裡會變成同一件事講兩次。
+ *
+ * 所以一件什麼都沒填的裝備不會渲染一張空的清單——有邊框、裡面什麼都沒有
+ * 的區塊，比沒有這個區塊更難懂。
+ *
+ * 安全狀態不算進來：它有自己的警示樣式，不在 `<dl>` 裡。
  */
 const hasSpecRows = computed(() => {
   if (props.product === null) return false;
   return (
     specLine.value !== null ||
-    !affectsCountdown(props.product.gearCategory) ||
     purchase.value !== null ||
     props.product.expiryDate !== null ||
-    props.product.note !== null ||
-    (safety.value !== null && safety.value.kind !== "usable")
+    props.product.note !== null
   );
 });
 
@@ -155,26 +158,34 @@ async function handleDelete(): Promise<void> {
     @close="emit('close')"
   >
     <div v-if="product !== null" class="gear-detail">
-      <p class="category-badge">
+      <!--
+        2026-09-01：品類與狀態改用清單項目那一套「說明文字 ＋ 外框膠囊」。
+
+        原本是「防曬乳・收納中」一行純文字，孤零零掛在標題下面——**標題在
+        sheet 的 header 裡，這一行在 body 裡，中間隔著一條分隔線**，讀起來
+        不像副標而像一句沒有來由的字。
+
+        改成跟 `GearListItem` 的 caption 一模一樣的語彙：品類是說明文字，
+        限制與狀態是外框膠囊。從清單點進來時同一組字還在原位，只是換了
+        容器——這比在 sheet 裡另外發明一種標示法好。
+
+        「僅供紀錄」同時取代了原本那一列「補擦提醒／不會建立補擦倒數」——
+        兩者說的是同一件事，而膠囊佔一行不到、規格列要佔兩行。
+      -->
+      <p class="gear-detail__caption">
         {{ GEAR_CATEGORY_LABELS[product.gearCategory] }}
-        <span v-if="isArchived" class="category-badge__state">・收納中</span>
+        <span
+          v-if="!affectsCountdown(product.gearCategory)"
+          class="gear-detail__badge"
+          >僅供紀錄</span
+        >
+        <span v-if="isArchived" class="gear-detail__badge">收納中</span>
       </p>
 
       <dl v-if="hasSpecRows" class="spec-list">
         <div v-if="specLine !== null" class="spec-row">
           <dt>規格</dt>
           <dd>{{ specLine }}</dd>
-        </div>
-        <!--
-          只在「不會倒數」時顯示：防曬乳那句「將依設定，自動建立補擦倒數」
-          講的是品類通則，不是這一瓶的資料。限制才要說。
-        -->
-        <div
-          v-if="!affectsCountdown(product.gearCategory)"
-          class="spec-row spec-row--full"
-        >
-          <dt>補擦提醒</dt>
-          <dd>不會建立補擦倒數</dd>
         </div>
         <div v-if="purchase !== null" class="spec-row">
           <dt>購買月份</dt>
@@ -235,9 +246,25 @@ async function handleDelete(): Promise<void> {
           {{ safety.detail }}同配方的新批次請另建一筆新紀錄，不要用恢復繞過。
         </p>
 
+      </div>
+
+      <!--
+        2026-09-01：刪除從三顆等重的按鈕裡分出來。
+
+        原本「編輯」與「刪除這件防曬裝備」都是 `button--quiet`——**兩顆長得
+        一模一樣，其中一顆會永久刪掉資料。** 分兩件事處理：
+
+        1. 一條 hairline 把它跟上面的日常動作隔開（不同性質的動作不該只靠
+           順序區分）
+        2. 按鈕文字用 `--color-due`，跟資料設定頁「清除全部本機資料」同一套
+           ——那裡是紅標題配中性按鈕，**這個 App 不用整顆紅按鈕**
+
+        紅字不是唯一訊號（旁邊有分隔線與段落標題），所以不違反 SC 1.4.1。
+      -->
+      <div class="gear-detail__danger">
         <template v-if="!confirmingDelete">
           <button
-            class="button button--quiet"
+            class="button button--quiet gear-detail__delete"
             type="button"
             @click="confirmingDelete = true"
           >
@@ -278,14 +305,21 @@ async function handleDelete(): Promise<void> {
   gap: var(--space-4);
 }
 
-.category-badge {
+/* 與 GearListItem 的 caption 同一套：品類是說明文字，狀態是外框膠囊。 */
+.gear-detail__caption {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
   margin: 0;
   color: var(--text-secondary);
   font-size: var(--font-size-caption);
 }
 
-.category-badge__state {
-  color: var(--text-secondary);
+.gear-detail__badge {
+  padding: 0 var(--space-2);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-pill);
 }
 
 .spec-list {
@@ -353,5 +387,21 @@ async function handleDelete(): Promise<void> {
 .gear-detail__actions {
   display: grid;
   gap: var(--space-3);
+}
+
+/*
+ * 破壞性動作自己一區，用一條 hairline 跟日常動作隔開。
+ * 上方留 space-2 而不是沿用 .gear-detail 的 gap：線本身已經是間隔，
+ * 再疊一次會讓底部空一大塊。
+ */
+.gear-detail__danger {
+  display: grid;
+  gap: var(--space-3);
+  padding-top: var(--space-4);
+  border-top: 1px solid var(--border-subtle);
+}
+
+.gear-detail__delete {
+  color: var(--color-due);
 }
 </style>

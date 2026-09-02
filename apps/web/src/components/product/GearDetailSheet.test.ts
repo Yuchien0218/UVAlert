@@ -156,9 +156,19 @@ describe("GearDetailSheet", () => {
     expect(sheetText()).not.toContain("自動建立補擦倒數");
   });
 
+  /*
+   * 2026-09-01：限制改由標題下的「僅供紀錄」膠囊表示（原本是一列「補擦提醒
+   * ／不會建立補擦倒數」的規格）。**斷言的意圖沒變**——這個限制必須看得到，
+   * 只是換了呈現方式，而且跟清單項目用同一組字。
+   */
   it("不會倒數的裝備要說出這個限制", async () => {
     await mountSheet(makeProduct({ gearCategory: "eyewear" }));
-    expect(sheetText()).toContain("不會建立補擦倒數");
+    expect(sheetText()).toContain("僅供紀錄");
+  });
+
+  it("會倒數的裝備不掛這個膠囊", async () => {
+    await mountSheet(makeProduct());
+    expect(sheetText()).not.toContain("僅供紀錄");
   });
 
   describe("主要行動依狀態切換", () => {
@@ -276,5 +286,74 @@ describe("版型", () => {
     ).replace(/\/\*[\s\S]*?\*\//g, "");
 
     expect(source).toMatch(/\.spec-row dt \{[^}]*flex: 0 0 auto;/);
+  });
+});
+
+/**
+ * 2026-09-01：抽屜的外觀對齊整體設計風格（使用者要求）。
+ */
+describe("外觀與設計系統一致", () => {
+  const SOURCE = readFileSync(
+    "apps/web/src/components/product/GearDetailSheet.vue",
+    "utf8"
+  ).replace(/\/\*[\s\S]*?\*\//g, "");
+
+  /*
+   * 破壞性動作與日常動作原本都是 `button--quiet`，**兩顆長得一模一樣，
+   * 其中一顆會永久刪掉資料**。兩件事分開守：要有分隔，也要有紅字。
+   * 只守其中一件的話，拿掉另一件仍然會綠。
+   */
+  it("刪除自己一區，與日常動作用 hairline 隔開", () => {
+    expect(SOURCE).toContain('<div class="gear-detail__danger">');
+    expect(SOURCE).toMatch(
+      /\.gear-detail__danger \{[^}]*border-top:\s*1px solid var\(--border-subtle\);/
+    );
+  });
+
+  it("刪除的按鈕文字用到期紅，但不是整顆紅按鈕", () => {
+    expect(SOURCE).toMatch(
+      /\.gear-detail__delete \{[^}]*color:\s*var\(--color-due\);/
+    );
+    // 這個 App 的破壞性動作是「紅字＋中性按鈕」，跟資料設定頁一致。
+    expect(SOURCE).not.toContain("button--danger");
+  });
+
+  /*
+   * 品類與狀態沿用 `GearListItem` 的 caption 語彙（說明文字 ＋ 外框膠囊），
+   * 不在 sheet 裡另外發明一種標示法。
+   */
+  it("狀態用外框膠囊，值與清單項目一致", () => {
+    expect(SOURCE).toMatch(
+      /\.gear-detail__badge \{[^}]*border:\s*1px solid var\(--border-strong\);[^}]*border-radius:\s*var\(--radius-pill\);/
+    );
+  });
+});
+
+describe("BottomSheet 的內距照 DESIGN.md 第四節", () => {
+  const SHEET = readFileSync(
+    "apps/web/src/components/common/BottomSheet.vue",
+    "utf8"
+  ).replace(/\/\*[\s\S]*?\*\//g, "");
+
+  /*
+   * DESIGN.md 第四節訂 bottom sheet 用 24px，程式碼一直沿用 `--card-padding`
+   * （20px），差異被記在第六節「等裁決」。2026-09-01 裁決成照規範走。
+   *
+   * 守 token 名而不是數值：改 `--sheet-padding` 的值是一次調整，把 sheet
+   * 改回 `--card-padding` 才是回歸。
+   */
+  it("header 與 body 都用 --sheet-padding", () => {
+    expect(SHEET).toMatch(/\.bottom-sheet__header \{[^}]*var\(--sheet-padding\)/);
+    expect(SHEET).toMatch(/\.bottom-sheet__body \{[^}]*var\(--sheet-padding\)/);
+    expect(SHEET, "不再沿用卡片內距").not.toContain("var(--card-padding)");
+  });
+
+  it("--sheet-padding 是 24px 那一階", () => {
+    const tokens = readFileSync("packages/ui/src/styles.css", "utf8").replace(
+      /\/\*[\s\S]*?\*\//g,
+      ""
+    );
+    expect(tokens).toContain("--sheet-padding: var(--space-6);");
+    expect(tokens).toContain("--space-6: 1.5rem;");
   });
 });

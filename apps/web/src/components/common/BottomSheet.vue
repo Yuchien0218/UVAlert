@@ -102,7 +102,8 @@ const { closeFromBackdrop } = useOverlay({
   align-items: start;
   justify-content: space-between;
   gap: var(--space-4);
-  padding: var(--card-padding);
+  /* 2026-09-01：sheet 用 --sheet-padding（24px），照 DESIGN.md 第四節。 */
+  padding: var(--sheet-padding);
   border-bottom: 1px solid var(--border-subtle);
 }
 
@@ -115,8 +116,8 @@ const { closeFromBackdrop } = useOverlay({
   min-height: 0;
   overflow-y: auto;
   overscroll-behavior: contain;
-  padding: var(--card-padding) var(--card-padding)
-    max(var(--card-padding), env(safe-area-inset-bottom));
+  padding: var(--sheet-padding) var(--sheet-padding)
+    max(var(--sheet-padding), env(safe-area-inset-bottom));
 }
 
 .bottom-sheet__footer {
