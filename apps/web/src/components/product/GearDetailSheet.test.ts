@@ -59,6 +59,8 @@ function makeProduct(
     note: "清爽好推",
     priceTwd: null,
     usageRating: null,
+    size: null,
+    color: null,
     // paGrade 存照包裝抄的完整標示，顯示端不再自己加 PA 前綴。
     currentSnapshot: { ...snapshot, spf: 50, paGrade: "PA++++" },
     snapshotFingerprint: fingerprintProductLabelSnapshot(snapshot),

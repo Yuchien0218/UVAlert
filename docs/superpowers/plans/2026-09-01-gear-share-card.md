@@ -3,7 +3,7 @@
 > **For agentic workers:** 四個階段依序做，一～三是一批（使用者裁決「三階段一起排」），第四階段暫緩。動手前先讀 `Global Constraints`，每個 Task 的「驗證」欄就是它的守門要求。做完把 `- [ ]` 改成 `- [x]` 並補上 PR 編號。
 
 **日期**：2026-09-01（Asia/Taipei）
-**狀態**：計畫完成，尚未動工
+**狀態**：**階段一已完成（PR #96）**，階段二、三待做
 **來源**：使用者提供一張 mockup（暖象牙底 ＋ 深咖啡卡）並要求「分享按鈕位置、配色參考這個，使用共通元件」
 **範圍**：`apps/web`（新頁面、新元件、adapter）、`packages/contracts`（兩個選填欄位）、`packages/platform`（一個新 port）、`packages/ui`（可能新增 on-dark token 別名）
 **不動**：`packages/domain`（分享卡完全不進 reducer）、`packages/persistence-web` 的既有 store
@@ -74,14 +74,14 @@ eyebrow 看起來是琥珀金，實作要改用 `--color-on-dark-soft`。
 
 ### Task 1.1　新增 `size`／`color` 兩個選填欄位
 
-- [ ] `packages/contracts/src/product.ts`：`size`、`color` 皆
+- [x] `packages/contracts/src/product.ts`：`size`、`color` 皆
       `z.string().trim().max(20).nullable().default(null)`，**不升版**
-- [ ] `GearForm.vue`：依品類顯示
+- [x] `GearForm.vue`：依品類顯示
       - 防曬衣物：尺寸、顏色
       - 太陽眼鏡：顏色
       - 其他裝備：尺寸、顏色
       - **防曬乳：兩者都不顯示**（它的識別資訊是 SPF／PA）
-- [ ] 兩個欄位放進「我的紀錄」那張收合卡，跟價格／評價同一區
+- [x] 兩個欄位放進「我的紀錄」那張收合卡，跟價格／評價同一區
 
 **驗證**：舊紀錄（沒有這兩個欄位）解析得過且補成 null；`product-catalog.test.ts`
 既有的「不升版」守門仍綠；防曬乳看不到這兩欄。
@@ -116,19 +116,19 @@ BrandHeader 風格的一行：logo ＋（有 session 時）日期
 
 **價格開關預設關**（使用者裁決）。開關本身放在分享頁，不進卡片。
 
-- [ ] 深色卡用 `--surface-inverse`，文字 `--text-inverse`，標籤 `--color-on-dark-soft`
-- [ ] 風險色只出現在淺色區
-- [ ] 只印有值的欄位，沒有的不留空位（`GearDetailSheet` 已有這個模式可抄）
+- [x] 深色卡用 `--surface-inverse`，文字 `--text-inverse`，標籤 `--color-on-dark-soft`
+- [x] 風險色只出現在淺色區
+- [x] 只印有值的欄位，沒有的不留空位（`GearDetailSheet` 已有這個模式可抄）
 
 **驗證**：兩種模式各一條掛載測試；一條守「深色卡內不得出現 `--color-uvi-*`」；
 價格預設不出現。
 
 ### Task 1.3　分享入口
 
-- [ ] `ProductsPage` 標題列右上角 `IconButton` + `tool-share`，
+- [x] `ProductsPage` 標題列右上角 `IconButton` + `tool-share`，
       label「分享我的防曬裝備」
-- [ ] **只在有使用中裝備時出現**
-- [ ] 路由 `/products/share`，`hideNavigation: true`
+- [x] **只在有使用中裝備時出現**
+- [x] 路由 `/products/share`，`hideNavigation: true`
 
 位置理由：卡片是整組而非單件，所以入口在清單頁不在抽屜；而且標題列右側單一動作
 是 2026-09-01 剛統一出來的語彙（衛教兩頁、裝備詳情）。
@@ -141,8 +141,8 @@ BrandHeader 風格的一行：logo ＋（有 session 時）日期
 ——**這正是 2026-08-31 `state-untimed` 放大後讀成刪除記號、被否決的那個坑**
 （見 `HomeNightNotice.vue` 註解）。
 
-- [ ] **甲**：使用者在 Illustrator 畫雙色 `feature-share`，跑 `generate-icons.mjs`
-- [ ] **乙**（預設先走）：只在標題列用 24px 的 `tool-share`，分享頁不做 hero
+- [ ] **甲**（暫緩，使用者選乙）：在 Illustrator 畫雙色 `feature-share`，跑 `generate-icons.mjs`
+- [x] **乙**（預設先走）：只在標題列用 24px 的 `tool-share`，分享頁不做 hero
 
 ---
 

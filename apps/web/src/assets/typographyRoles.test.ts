@@ -44,7 +44,13 @@ const allowedHeadingRolesByTag = {
 
 const allowedComponentExceptions = new Set([
   "apps/web/src/components/setup/ZoneProtectionForm.vue:setup-preset-headline",
-  "apps/web/src/pages/setup/SetupPage.vue:setup-recovery-headline"
+  "apps/web/src/pages/setup/SetupPage.vue:setup-recovery-headline",
+  /*
+   * 2026-09-01：分享卡的標題。role 仍是 section-title，但它被分享出去之後
+   * 是整張圖唯一的主體，版面上必須是展示級——跟頁面裡的區塊標題不是同一
+   * 種角色。
+   */
+  "apps/web/src/components/product/GearShareCard.vue:share-card-hero-title"
 ]);
 
 /*

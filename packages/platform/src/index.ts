@@ -185,6 +185,10 @@ export interface SaveProductInput {
   priceTwd?: number | null;
   /** 2026-08-30：純紀錄，不進 reducer。 */
   usageRating?: "good" | "ok" | "bad" | null;
+  /** 2026-09-01：純紀錄，不進 reducer。自由文字。 */
+  size?: string | null;
+  /** 2026-09-01：純紀錄，不進 reducer。自由文字，只印字不做色塊。 */
+  color?: string | null;
   now: string;
 }
 

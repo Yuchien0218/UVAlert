@@ -47,6 +47,8 @@ function makeProduct(
     note: null,
     priceTwd: null,
     usageRating: null,
+    size: null,
+    color: null,
     currentSnapshot: baseSnapshot,
     snapshotFingerprint: fingerprintProductLabelSnapshot(baseSnapshot),
     createdAt: "2026-08-24T00:00:00.000Z",

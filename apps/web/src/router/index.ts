@@ -59,6 +59,17 @@ export function createAppRouter(
         meta: { title: "編輯防曬裝備", hideNavigation: true }
       },
       /*
+       * 靜態的 /products/share 必須排在 /products/:id 前面。vue-router 的
+       * 排名本來就讓靜態片段贏過參數，但**順序讀起來要是對的**——把它排在
+       * 後面等於要求每個讀這份路由表的人都記得那條排名規則。
+       */
+      {
+        path: "/products/share",
+        name: "product-share",
+        component: () => import("../pages/GearSharePage.vue"),
+        meta: { title: "分享我的防曬裝備", hideNavigation: true }
+      },
+      /*
        * 2026-09-01：裝備詳情從整頁改成清單上的抽屜（使用者裁決），
        * `ProductDetailPage.vue` 已刪除。
        *
