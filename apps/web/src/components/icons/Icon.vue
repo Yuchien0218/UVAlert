@@ -38,11 +38,27 @@ interface Props {
    */
   size?: 16 | 20 | 24 | 32 | 40 | 56;
   decorative?: boolean;
+  /**
+   * 把圖示裡寫死的重點色改成繼承外層顏色。
+   *
+   * **給實心色底用的。** 雙色圖示的琥珀金 `#C1832E` 是為了淺色畫布挑的
+   * ——放在 primary 按鈕（深杏桃 `#9F5E42`）上實測只有 **1.58**，而琥珀金
+   * 那一半往往正是圖示的語意本體（`more-install` 的箭頭、`feature-share`
+   * 的箭頭）。結果是圖示看起來破了一半。
+   *
+   * 既有的按鈕內圖示（`tool-plus`、`tool-refresh`）剛好都是單色，所以
+   * 在 2026-09-02 之前沒有人踩到這件事。
+   *
+   * 換的是**所有**明確色值而不是特寫琥珀金：規則是「在色底上一律繼承」，
+   * 不是「躲開某一顆顏色」。
+   */
+  mono?: boolean;
 }
 
 const props = withDefaults(defineProps<Props>(), {
   size: 24,
-  decorative: true
+  decorative: true,
+  mono: false
 });
 
 const icon = computed(() => ICONS[props.name]);
@@ -52,11 +68,18 @@ const icon = computed(() => ICONS[props.name]);
  * <title> 的文字仍算進 DOM textContent，跟旁邊本來就有的可見文字
  * 標籤重複（例如下排導覽「提醒」連結會變成「提醒\n提醒」）。
  */
-const body = computed(() =>
-  props.decorative
+const body = computed(() => {
+  const withTitle = props.decorative
     ? icon.value.body.replace(/<title>.*?<\/title>/, "")
-    : icon.value.body
-);
+    : icon.value.body;
+
+  return props.mono
+    ? withTitle.replace(
+        /(fill|stroke)="#[0-9a-fA-F]{3,8}"/g,
+        '$1="currentColor"'
+      )
+    : withTitle;
+});
 </script>
 
 <template>
