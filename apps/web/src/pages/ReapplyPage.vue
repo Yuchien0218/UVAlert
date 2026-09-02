@@ -3,6 +3,7 @@ import { nextTick, onMounted, watch } from "vue";
 import { useRouter } from "vue-router";
 import { useWebAppServices } from "../app/injection";
 import ReapplicationZoneSelector from "../components/reapplication/ReapplicationZoneSelector.vue";
+import ReapplyReasonPicker from "../components/reapplication/ReapplyReasonPicker.vue";
 import ReapplicationProductAssignments from "../components/reapplication/ReapplicationProductAssignments.vue";
 import QuickTimePicker from "../components/common/QuickTimePicker.vue";
 import ReapplicationReview from "../components/reapplication/ReapplicationReview.vue";
@@ -60,11 +61,7 @@ function zoneNames(zoneIds: string[]): string {
         <h1 data-typography-role="page-title">記錄補擦</h1>
         <p>請確認要記錄的部位、防曬乳與時間；儲存前不會更新提醒。</p>
       </div>
-      <IconButton
-        icon="tool-close"
-        label="返回提醒"
-        @click="cancel"
-      />
+      <IconButton icon="tool-close" label="返回提醒" @click="cancel" />
     </header>
 
     <p v-if="reapplication.phase.value === 'loading'" role="status">
@@ -123,6 +120,16 @@ function zoneNames(zoneIds: string[]): string {
     </section>
 
     <template v-else-if="reapplication.session.value">
+      <!--
+        「為什麼補擦？」放在最前面（2026-09-02，事件＝需要補擦 階段一）。
+
+        排在部位之前是刻意的：原因是這次補擦的脈絡，先講脈絡再問細節，
+        跟記錄狀況那頁「發生了什麼？→ 影響哪些部位？」同一個順序。
+      -->
+      <ReapplyReasonPicker
+        :model-value="reapplication.reason.value"
+        @update:model-value="reapplication.setReason"
+      />
       <ReapplicationZoneSelector
         :zones="reapplication.session.value.zones"
         :selected-zone-ids="reapplication.selectedZoneIds.value"
