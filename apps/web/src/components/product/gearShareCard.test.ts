@@ -17,6 +17,16 @@ import GearShareCard, {
  * 分享卡（計畫階段一，`docs/superpowers/plans/2026-09-01-gear-share-card.md`）。
  */
 
+const PAINTER_PATH = "apps/web/src/features/share/paintShareCard.ts";
+
+/** 掃原始碼前先剝註解——理由見 CLAUDE.md「守門測試：坑一」。 */
+function stripComments(source: string): string {
+  return source
+    .replace(/<!--[\s\S]*?-->/g, "")
+    .replace(/\/\*[\s\S]*?\*\//g, "")
+    .replace(/^\s*\/\/.*$/gm, "");
+}
+
 const snapshot = makeProductSnapshot();
 
 function product(
@@ -263,6 +273,63 @@ describe("品牌 lockup 只有一份", () => {
       expect(source, file).toContain("<BrandLockup");
       expect(source, `${file} 不該自己貼 lockup 的 path`).not.toContain(
         'data-part="wordmark"'
+      );
+    }
+  });
+
+  /*
+   * 2026-09-02 多了**第三個消費者**：分享圖的 canvas 繪圖。
+   *
+   * 它是唯一不能用 `<BrandLockup>` 的地方——canvas 讀不到 Vue 模板，所以
+   * 幾何才往下抽成 `brandLockupMarkup.ts`。這條擋住「那就在畫布這邊貼一份
+   * path 吧」，那正是抽出來想避免的事。
+   */
+  it("canvas 繪圖也從同一份幾何讀，沒有第三份 path", () => {
+    const painter = readFileSync(PAINTER_PATH, "utf8");
+
+    // 比對完整的 import 來源而不是常數名——`BRAND_LOCKUP_MARKUP_X` 也會
+    // 滿足名稱片段的比對（CLAUDE.md「守門測試：坑二」，實測過會滑過去）。
+    expect(painter).toContain(
+      'from "../../components/shell/brandLockupMarkup"'
+    );
+    expect(painter).toMatch(/\bBRAND_LOCKUP_MARKUP\b/);
+    expect(painter, "畫布不該自己貼 lockup 的 path").not.toContain(
+      'data-part="wordmark"'
+    );
+  });
+
+  /*
+   * 品牌列曾經在畫布上退化成「防曬晴報員」四個字，而畫面上的卡一直是
+   * 真的 lockup——預覽跟存下來的圖頂端長得不一樣。修掉之後留一條守門，
+   * 因為那種不一致只有把圖存下來比對才看得出來。
+   */
+  it("畫布不再用文字冒充品牌列", () => {
+    const painter = readFileSync(PAINTER_PATH, "utf8");
+
+    expect(stripComments(painter)).not.toContain('fillText("防曬晴報員"');
+  });
+});
+
+/*
+ * 畫面上的卡與輸出的 PNG 是兩份各自獨立的繪圖程式碼。它們**必須**看起來
+ * 一樣——那張卡的存在意義就是「等一下會被分享出去的就是這個」。
+ *
+ * 品類圖示是最容易漂移的部分：兩邊各自寫一次對照表的話，哪天新增品類就
+ * 會有一邊漏掉，而且漏掉的那邊是使用者看不到的（PNG 要存下來才知道）。
+ * 所以守的是「兩邊都從 GEAR_CATEGORY_ICONS 讀」，不是「兩邊都有圖示」。
+ */
+describe("預覽與輸出用同一份品類圖示", () => {
+  it("兩邊都讀 GEAR_CATEGORY_ICONS，沒有人自己列一張表", () => {
+    for (const file of [
+      "apps/web/src/components/product/GearShareCard.vue",
+      PAINTER_PATH
+    ]) {
+      const source = stripComments(readFileSync(file, "utf8"));
+      expect(source, `${file} 應該從 gearPresentation 讀品類圖示`).toContain(
+        "GEAR_CATEGORY_ICONS"
+      );
+      expect(source, `${file} 不該自己寫圖示名稱`).not.toContain(
+        "gear-sunglasses"
       );
     }
   });

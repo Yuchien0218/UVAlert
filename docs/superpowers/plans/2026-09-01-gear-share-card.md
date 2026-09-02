@@ -141,7 +141,9 @@ BrandHeader 風格的一行：logo ＋（有 session 時）日期
 ——**這正是 2026-08-31 `state-untimed` 放大後讀成刪除記號、被否決的那個坑**
 （見 `HomeNightNotice.vue` 註解）。
 
-- [ ] **甲**（暫緩，使用者選乙）：在 Illustrator 畫雙色 `feature-share`，跑 `generate-icons.mjs`
+- [x] **甲**（2026-09-02 使用者改口「幫我畫」）：雙色 `feature-share` 已加入登記表與 `icons/`，走 `IconLead`（40px）放在頁面標題左側。
+
+      **例外說明**：README 寫「幾何的真實來源是 Illustrator」，這張是直接寫 SVG path 的，是唯一的例外，因為使用者明確要求由我畫。日後若要調型，還是回 Illustrator 重畫再跑 `generate-icons.mjs` 覆蓋。
 - [x] **乙**（預設先走）：只在標題列用 24px 的 `tool-share`，分享頁不做 hero
 
 ---

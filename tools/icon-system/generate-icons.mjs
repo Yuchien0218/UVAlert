@@ -216,7 +216,21 @@ export const ICONS = Object.freeze([
     twoTone: true,
     board: "new"
   },
-  { id: "feature-locate", group: "feature", label: "取得目前位置", board: "new" }
+  { id: "feature-locate", group: "feature", label: "取得目前位置", board: "new" },
+  // 分享頁的領銜圖示。跟 `tool-share`（節點＋連線）刻意不同型：那顆是
+  // 按鈕裡的動作，這張是頁面主題「把卡片送出去」，所以用開口盒＋向上
+  // 箭頭，40px 下兩者不會被誤認成同一個東西。
+  //
+  // 琥珀金放在箭頭而不是盒子：箭頭才是「分享」這個語意本身，盒子只是
+  // 被分享的東西。而且箭頭是描邊不是填色，沒有 feature-protection-summary
+  // 那個「內部沒面積、縮小就看不見」的問題。
+  {
+    id: "feature-share",
+    group: "feature",
+    label: "分享我的防曬裝備",
+    twoTone: true,
+    board: "new"
+  }
 ]);
 
 function escapeXml(value) {

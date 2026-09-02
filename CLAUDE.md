@@ -218,6 +218,32 @@ const box = svgGroup.getBBox();
 
 只做第 1 項不夠——另一個 session 可能正好在你檢查之後、移除之前寫入。
 
+### 共用 working tree：分支是「誰的」，不是「哪個目錄的」
+
+2026-09-02 一天內兩次，都是因為多個 session 共用**同一個 working tree**——不是各自的 worktree。共用時 `git checkout` 是全域的，你切分支等於幫別人也切了。
+
+**事故一：在 `main` 上就直接 commit。** 忘了先開分支，做完才發現。內容與 `origin/main` 相同才救得回來（`git reset --hard origin/main`），有實質差異的話就得手動搬。
+
+**事故二：commit 落在別人的分支上。** 另一個 session 先 checkout 了自己的 `polish/...`，我沒看就開始做，commit 因此長在他們的分支頂端，而且他們還有 5 個未 commit 的檔案在同一個 tree 裡。
+
+第二種不能用 `reset --hard` 救——那會連別人未 commit 的檔案一起清掉。正確做法是**只動 ref，不動檔案**：
+
+```bash
+git branch -f feat/my-work <my-commit-sha>
+```
+
+```bash
+git checkout feat/my-work
+```
+
+```bash
+git branch -f polish/their-work origin/main
+```
+
+中間那個 `checkout` 指向同一個 commit，所以工作目錄零變動，別人未 commit 的檔案原封不動。做完要主動告訴對方你動過他們的分支 ref。
+
+**所以動手前先 `git branch --show-current`**，不要假設它還停在你上次離開的地方。`ListAgents` 看得到誰在跑，但看不到誰剛剛切了分支。
+
 ### 其他
 
 - 改設計 token、CSS 或共用元件前，先確認沒有別的 session 在動同一批檔案。

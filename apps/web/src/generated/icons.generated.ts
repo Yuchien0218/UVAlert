@@ -381,6 +381,12 @@ export const ICONS = {
     title: "取得目前位置",
     body: `<title>取得目前位置</title>
   <path d="M4.6 11.6L19.4 4.6L12.4 19.4L11.6 11.6Z" fill="currentColor" stroke="currentColor" stroke-width="2.5" stroke-linejoin="round"/>`
+  },
+  "feature-share": {
+    viewBox: "0 0 24 24",
+    title: "分享我的防曬裝備",
+    body: `<title>分享我的防曬裝備</title>
+  <path d="M8.6 9.4H6.3A2.3 2.3 0 0 0 4 11.7V17.8A2.3 2.3 0 0 0 6.3 20.1H17.7A2.3 2.3 0 0 0 20 17.8V11.7A2.3 2.3 0 0 0 17.7 9.4H15.4" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/> <path d="M12 13.9V4.2" fill="none" stroke="#C1832E" stroke-width="2.5" stroke-linecap="round"/> <path d="M8.3 7.9L12 4.2L15.7 7.9" fill="none" stroke="#C1832E" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>`
   }
 } as const satisfies Record<string, IconEntry>;
 
