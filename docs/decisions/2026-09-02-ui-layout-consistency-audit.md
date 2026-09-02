@@ -193,4 +193,41 @@
 1. **嚴禁自行造輪子**：所有按鈕、圖示、提示盒一律引用 `IconButton`、`IconLead`、`AppNotice`、`Icon` 等共用元件。
 2. **CSS Token 紀律**：禁止在 scoped `<style>` 中寫死 px 顏色、圓角或間距，一律引用 `var(--*)`。
 3. **無障礙對比度（WCAG AA）**：修改底色與文字搭配時，確保文字對比度高於 4.5:1（大字 3:1）。
-4. **自動化檢驗**：修改完畢後執行 `pnpm check`，確保全 Workspace 132 個測試檔案與 stylelint 100% 通過。
+4. **自動化檢驗**：修改完畢後執行 `pnpm check`，確保全 Workspace 測試與 stylelint 100% 通過。（原文寫「132 個測試檔案」是稽核當下的數字，會一直變，不要當驗收標準。）
+
+---
+
+## 檢視結果與待辦（2026-09-02，接手 AI 逐項對照程式碼與既有裁決後）
+
+這份稽核**觀察大多準確**，但有幾個「解法」與近期的刻意決策衝突，另有兩處前提是錯的。以下是逐項處置狀態。
+
+### ✅ 已採用並實作（PR #100，commit `5930da2`）
+
+| 稽核項 | 實作 |
+| --- | --- |
+| §7.1 段落 Flat Gap | `DataSettingsPage`「匯出本機資料」卡：兩段說明包進 `.card-prose`（段落間 `--space-2`，與按鈕維持 `--space-4`） |
+| §7.2 審查卡文字層級 | `ContentUnderReview`：`__meta`＋`__note` 收成 `.under-review__aside` 群組、降 `--font-size-supporting`、以 `--space-1` 貼緊 |
+| §7.3 blockquote 間距 | `EducationArticlePage`：`margin: var(--space-5) 0` → `margin-block: var(--space-4)`。**修正稽核前提**：相鄰 `<p>`/`blockquote` 在一般流裡邊距會折疊，不是「疊加 36px」 |
+| §6.1 「裝置測試」空卡 | `NotificationSettingsPage`：移除獨立空卡，「送出測試通知」併進「通知傳送說明」卡頁尾當操作列（`v-if="isGranted"`）；守門測試與 sitemap §通知設定頁 分區敘述同步 |
+
+### ❌ 不採用（與既有裁決衝突，或前提有誤）
+
+| 稽核項 | 不採用理由 |
+| --- | --- |
+| **§1 / P0 統一二級頁面出口** | 觀察正確（四種出口方式並存），但「設定頁一律左上箭頭＋刪頁尾連結」的**解法是設計方向題，不是 bug 修正**。與 `NotificationSettingsPage` 2026-08-24「改成右上叉叉跟其他頁一致」的註解衝突；`2026-08-30-pending-decisions §2／§12.2` 顯示 `/setup` 的箭頭要左上還是右上**使用者當時正在裁決、尚未定案**。頁尾「返回更多」照 `2026-08-27-copy-a11y-test-dead-code-audit.md` 的既有結論應抽成 `BackToMoreLink` 元件，而不是全刪。**待使用者定一條規則**再一次套。 |
+| **§5 / P3 區塊標題改襯線** | **前提錯**：`section-title` 角色本來就是襯線（`--font-family-section-title: var(--font-serif)`，20px）。設定頁 `<h2>` 用的是 `card-title`，B8 規格（`2026-08-27-b8-role-based-typography-design.md`）**刻意**讓它是黑體。要更多襯線＝改 B8 規格與 `typographyRoles.test.ts` 守門，是規格修訂不是微調；另 `--font-weight-section-title: 500` 對只有 400 的 Noto Serif TC 會觸發假粗糊字（見 `2026-08-30-pending-decisions:440`），連帶要處理。 |
+| **§6.2 GearDetailSheet 膠囊夾心** | 團隊已辨識同一張力並選了**另一種解法**（`GearDetailSheet.vue:162-174` 註解：改用和 `GearListItem` 一致的「說明文字＋膠囊」語彙，而非移進 header）。是否再改成「移進 header」需要截圖佐證「30px 斷層」確實還在，光看程式碼無法確認。 |
+| **§6.3 RegionPage 下半部真空** | `2026-08-23-hifi-redesign-round2-closeout.md:74` 明寫「RegionPage 核對後不需要改」。折疊區下方的空白不是壞掉，硬塞說明卡是為填空而填空。 |
+| **§6.4 首頁夜間加內容卡** | **直接推翻 `2026-08-26-night-session-layout-revert.md`**——那是使用者第三度翻案，刻意選「收工版面／極簡／不讓倒數跨夜」。夜間畫面短是設計意圖，不是塌陷。要加內容＝再翻一次案，需使用者明確點頭。 |
+
+### ⏳ 待實作（方向可行，但要調整；未動工）
+
+| 稽核項 | 前置條件／調整 |
+| --- | --- |
+| **§1 導覽出口** | 待使用者定「模態流程＝右上叉叉／階層下鑽＝左上箭頭」這類規則，再一次套到所有二級頁；頁尾連結抽 `BackToMoreLink`。 |
+| **§3 / P2 原生 Radio → 膠囊組** | `NotificationSettingsPage` 的「再次提醒頻率」是全站唯一原生 radio。原生 radio group **無障礙上完全合格**，這是視覺一致性而非破綻。可做，屬 polish，優先序建議降為 P3。做的話用既有 `.choice-grid` + `.option-selected`，不可自刻選取色。 |
+| **§4 / P3 設定頁圖示錨點** | `DataSettingsPage` 三大區塊配 `<Icon>` 可做；頁首 `IconLead` 要先確認不破壞 `.flow-heading`（右上叉叉版型盤點 §17 剛收斂過）的 grid 兩欄——先出一版截圖再定。 |
+| **§2 深色表面語意** | 主要是 `DESIGN.md §10` 的文件缺口（`--surface-inverse` 引用 0 次，早記為待處理），不是程式碼 bug。落點是 `DESIGN.md` 補一條「深色表面只用於：即時核心看板／分享卡主角卡」，程式碼幾乎不動。 |
+| **§7.4 ProductEligibilityNotice 圖示基線** | 2~3px 光學偏移可能存在，但稿子建議的 `margin-top: 1px` 是寫死魔術數字。要做的話先截圖確認偏移量，改用 `align-items` 或既有間距 token，不塞 `1px`。 |
+
+**回寫落點**：`docs/decisions/README.md` 的「裁決 → 回寫落點」表已補一列指向本節。
