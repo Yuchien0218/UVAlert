@@ -702,6 +702,46 @@ describe("P0 reminder reducer fixed vectors", () => {
     ).toBe("2026-07-29T10:30:00.000Z");
   });
 
+  /*
+   * 2026-09-02 使用者裁決：一切正常時的主行動是「記錄補擦」，不是「記錄
+   * 狀況」。改動前首頁只有一顆按鈕、secondaryActions 是空的，所以還沒到期
+   * 就沒有辦法記錄補擦——而提早補擦是常見的。
+   *
+   * 記錄狀況沒有消失，改由首頁的提問卡承接（HomePage.test.ts 守著）。
+   */
+  it("tracking 的主行動是記錄補擦", () => {
+    const stream = makeStream({ appliedAt: "2026-07-29T10:50:00.000Z" });
+    const result = projection(stream, "2026-07-29T11:00:00.000Z");
+
+    expect(result.zones[0]!.timingStatus).toBe("tracking");
+    expect(result.primaryAction.actionKind).toBe("record_reapplication");
+  });
+
+  /*
+   * 反向：遮蔽等「補擦不適用」的狀態仍然是記錄狀況。只守上面那條的話，
+   * 把整個 actionKind 一律改成 record_reapplication 也會過——那會讓沒有
+   * 防曬乳可補的部位也叫人去補擦。
+   */
+  it("補擦不適用時仍然是記錄狀況", () => {
+    const stream = makeStream({ appliedAt: "2026-07-29T10:50:00.000Z" });
+    const zoneId = stream.sessionStarted.zoneInstanceIds[0]!;
+    addMethod(stream, {
+      id: "cover",
+      zoneInstanceId: zoneId,
+      at: "2026-07-29T10:55:00.000Z",
+      sequence: 9,
+      components: ["clothing"],
+      exposure: "clothing_covered"
+    });
+    const result = projection(stream, "2026-07-29T11:00:00.000Z");
+    const zone = result.zones.find((z) => z.zoneInstanceId === zoneId)!;
+
+    expect(zone.timingStatus).toBe("not_applicable");
+    // **要斷言的是 actionKind，不是 timingStatus。** 第一版只比對後者，
+    // 破壞驗證時發現「把全部 actionKind 一律改成補擦」照樣是綠的。
+    expect(result.primaryAction.actionKind).toBe("report_context_event");
+  });
+
   it("TV-024 多個原因取最早未解除時間", () => {
     const stream = makeStream({ appliedAt: "2026-07-29T09:00:00.000Z" });
     const zones = stream.sessionStarted.zoneInstanceIds;
