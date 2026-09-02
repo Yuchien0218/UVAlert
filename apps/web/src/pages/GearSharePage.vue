@@ -6,7 +6,7 @@ import { useWebAppServices } from "../app/injection";
 import { paintShareCard } from "../features/share/paintShareCard";
 import { getUvRiskLevelLabel } from "../features/uv/uvForecastRules";
 import { CONTEXT_LABELS } from "../features/setup/setupCatalog";
-import { formatDate } from "../helpers/datetime";
+import { formatFullDate } from "../helpers/datetime";
 import IconButton from "../components/common/IconButton.vue";
 import IconLead from "../components/common/IconLead.vue";
 import GearShareCard, {
@@ -124,10 +124,13 @@ async function renderFile(): Promise<File> {
   const blob = await paintShareCard({
     data: cardData.value,
     title: sessionInfo.value === null ? "我的防曬裝備" : "我今天的防曬裝備",
-    dateLabel:
+    // 沒有進行中提醒時用今天——這張卡就是今天做出來的。與 GearShareCard
+    // 的 dateLabel 同一條規則，兩邊都要有日期（2026-09-02 使用者要求）。
+    dateLabel: formatFullDate(
       sessionInfo.value === null
-        ? null
-        : formatDate(new Date(sessionInfo.value.startedAt)),
+        ? new Date()
+        : new Date(sessionInfo.value.startedAt)
+    ),
     riskLabel:
       sessionInfo.value !== null && uvDay.value?.riskLevel != null
         ? getUvRiskLevelLabel(uvDay.value.riskLevel)

@@ -146,7 +146,8 @@ interface StatEntry {
 /** 深色卡上的規格欄位——與 `GearShareCard.vue` 的判斷邏輯逐條對應。 */
 function buildStats(
   data: GearShareCardData,
-  contextLabel: string | null
+  contextLabel: string | null,
+  showPrice: boolean
 ): StatEntry[] {
   const sunscreen = data.sunscreen;
   if (sunscreen === null) return [];
@@ -186,6 +187,16 @@ function buildStats(
     stats.push({ label: "情境", value: contextLabel });
   }
 
+  /*
+   * 價格（2026-09-02 使用者要求「防曬乳也要可以顯示價格」）。
+   *
+   * 跟其他裝備共用同一個 showPrice 開關、一樣預設不印——深色卡不是例外。
+   * 放在最後，因為它是紀錄不是包裝標示。
+   */
+  if (showPrice && sunscreen.priceTwd !== null) {
+    stats.push({ label: "價格", value: `NT$ ${sunscreen.priceTwd}` });
+  }
+
   return stats;
 }
 
@@ -193,8 +204,13 @@ export interface PaintShareCardInput {
   data: GearShareCardData;
   /** 卡片標題，由呼叫端決定（兩種模式的文字在元件裡定義）。 */
   title: string;
-  /** 有進行中提醒時才有。 */
-  dateLabel: string | null;
+  /**
+   * 卡片日期，畫在頁尾。
+   *
+   * 2026-09-02 起**兩種模式都有**（原本只有進行中提醒才有，而且在頁首），
+   * 所以不再可為 null。
+   */
+  dateLabel: string;
   /** 風險等級的中文標籤。 */
   riskLabel: string | null;
   /** 情境的中文標籤；沒有進行中提醒時是 null。 */
@@ -313,17 +329,6 @@ function paint(
     BRAND_LOCKUP_HEIGHT,
     { x: pad, y, size: lockupHeight, color: colors["--text-primary"] }
   );
-  if (input.dateLabel !== null) {
-    context.font = `600 ${15 * SCALE}px ${sans}`;
-    context.fillStyle = colors["--text-secondary"];
-    const width = context.measureText(input.dateLabel).width;
-    // 對齊 lockup 的視覺中線，不是它的頂端——lockup 比單行文字高。
-    context.fillText(
-      input.dateLabel,
-      OUTPUT_WIDTH - pad - width,
-      y + (lockupHeight - 15 * SCALE) / 2
-    );
-  }
   y += lockupHeight + space["--space-4"];
 
   // 標題
@@ -361,13 +366,24 @@ function paint(
 
   // 深色卡
   if (data.sunscreen !== null) {
-    const stats = buildStats(data, input.contextLabel);
+    const stats = buildStats(data, input.contextLabel, input.showPrice);
     const rows = Math.ceil(stats.length / 2);
+    /*
+     * 規格區上緣的分隔線（2026-09-02 使用者回報「線條不見了」）。
+     *
+     * 畫面上的卡一直有這條線（`.share-card__stats` 的 border-top），**畫布
+     * 從來沒有畫過**——整個 painter 原本只有一次 stroke，在頁尾。這是預覽
+     * 與輸出不一致的第二個案例，跟品牌列（原本退化成純文字）同一類：兩份
+     * 各自獨立的繪圖程式碼，少寫一行不會有人發現，除非把圖存下來比對。
+     *
+     * 線佔的高度要算進 cardHeight，否則規格區會被卡片底緣切掉。
+     */
     const cardHeight =
       space["--space-4"] * 2 +
       14 * SCALE +
       26 * SCALE +
-      space["--space-3"] +
+      space["--space-3"] * 2 +
+      SCALE +
       rows * (14 * SCALE + 22 * SCALE + space["--space-3"]);
 
     roundedRect(context, pad, y, contentWidth, cardHeight, 14 * SCALE);
@@ -416,6 +432,15 @@ function paint(
       inner
     );
     inner += 26 * SCALE + space["--space-3"];
+
+    context.strokeStyle = colors["--color-on-dark-soft"];
+    context.lineWidth = SCALE;
+    context.beginPath();
+    // +0.5 讓 1px 的線落在像素中心，否則會糊成兩條半透明的線。
+    context.moveTo(innerLeft, Math.round(inner) + 0.5);
+    context.lineTo(innerLeft + innerWidth, Math.round(inner) + 0.5);
+    context.stroke();
+    inner += SCALE + space["--space-3"];
 
     const columnWidth = (innerWidth - space["--space-4"]) / 2;
     stats.forEach((stat, index) => {
@@ -495,8 +520,12 @@ function paint(
   }
 
   /*
-   * 安全註記。DESIGN.md 第五節的「不可隱藏」清單——分享出去的圖更需要它，
-   * 收到圖的人沒有這個 App 的脈絡。畫布高度就是為了讓這一段一定畫得下。
+   * 頁尾。**2026-09-02 從安全註記改成日期**（使用者要求）。
+   *
+   * 原本那段在 DESIGN.md 第五節的「不可隱藏」清單裡，移除是使用者的裁決；
+   * 理由與代價記在 `docs/decisions/2026-09-02-share-card-footer-date.md`。
+   *
+   * 日期同時也從頁首拿掉了——兩邊都留會變成一張卡上有兩個日期。
    */
   y += space["--space-3"];
   context.strokeStyle = colors["--border-subtle"];
@@ -509,14 +538,8 @@ function paint(
 
   context.font = `${12 * SCALE}px ${sans}`;
   context.fillStyle = colors["--text-secondary"];
-  const note =
-    input.riskLabel === null
-      ? "這是協助記得補擦的紀錄，不是安全曝曬時間或防護效果保證。"
-      : "這是協助記得補擦的紀錄，不是安全曝曬時間或防護效果保證。UV 資料來源：中央氣象署 F-D0047-091。";
-  for (const line of wrapText(context, note, contentWidth)) {
-    context.fillText(line, pad, y);
-    y += 18 * SCALE;
-  }
+  context.fillText(input.dateLabel, pad, y);
+  y += 18 * SCALE;
 
   /* 回傳內容底部——呼叫端用它決定畫布高度，見 paintShareCard 的「畫兩次」。 */
   return y;
