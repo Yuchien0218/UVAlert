@@ -103,7 +103,7 @@ describe("NotificationSettingsPage", () => {
     expect(wrapper.text()).toContain("目前狀態：通知已開啟");
   });
 
-  it("已授權時顯示再次提醒頻率與裝置測試", async () => {
+  it("已授權時顯示再次提醒頻率與測試通知按鈕", async () => {
     const services = makeServices({
       permission: "granted",
       reminderFrequencyMinutes: 5
@@ -129,14 +129,14 @@ describe("NotificationSettingsPage", () => {
       services.notifications.setReminderFrequencyMinutes
     ).toHaveBeenCalledWith(15);
 
-    expect(wrapper.text()).toContain("裝置測試");
+    expect(wrapper.text()).toContain("送出測試通知");
     await wrapper.get("button.button--quiet").trigger("click");
     expect(services.notifications.sendTestNotification).toHaveBeenCalledOnce();
     await nextTick();
     expect(wrapper.text()).toContain("已送出");
   });
 
-  it("未授權時不顯示再次提醒頻率與裝置測試", () => {
+  it("未授權時不顯示再次提醒頻率與測試通知按鈕", () => {
     const services = makeServices({ permission: "default" });
     vi.mocked(useWebAppServices).mockReturnValue(
       services as unknown as WebAppServices
@@ -150,7 +150,7 @@ describe("NotificationSettingsPage", () => {
     });
 
     expect(wrapper.text()).not.toContain("再次提醒頻率");
-    expect(wrapper.text()).not.toContain("裝置測試");
+    expect(wrapper.text()).not.toContain("送出測試通知");
   });
 
   it("被封鎖時顯示已被封鎖警示", () => {

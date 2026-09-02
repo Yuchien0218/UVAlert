@@ -196,12 +196,14 @@ function writeSyncDisabled(value: boolean): void {
         <h2 id="data-export-title" data-typography-role="card-title">
           匯出本機資料
         </h2>
-        <p>
-          匯出包含裝備、提醒與偏好的 JSON 檔案（<strong>不含</strong>定位與裝置識別碼）。
-        </p>
-        <p class="caution">
-          目前<strong>僅支援匯出備份</strong>，匯入還原功能將於後續版本更新。
-        </p>
+        <div class="card-prose">
+          <p>
+            匯出包含裝備、提醒與偏好的 JSON 檔案（<strong>不含</strong>定位與裝置識別碼）。
+          </p>
+          <p class="caution">
+            目前<strong>僅支援匯出備份</strong>，匯入還原功能將於後續版本更新。
+          </p>
+        </div>
         <button
           class="button button--primary"
           type="button"
@@ -484,6 +486,18 @@ dd {
 
 .app-card > h2 {
   font-size: var(--font-size-card-title);
+}
+
+/*
+ * 關聯的多段說明收成一個閱讀群組：段落之間 8px，與外層卡片的 16px
+ * gap（到按鈕）拉開差距，落實鄰近律。原本兩段 <p> 直屬 .app-card 的
+ * grid，段落間距與「段落→按鈕」完全等寬，讀起來像互不相干的句子
+ * （2026-09-02 排版稽核 §7.1）。
+ */
+.card-prose {
+  display: grid;
+  gap: var(--space-2);
+  justify-items: start;
 }
 
 /*
