@@ -2,11 +2,13 @@ import {
   COMMAND_SCHEMA_VERSION,
   fingerprintProductLabelSnapshot,
   ReapplyCommandV1Schema,
+  ReportContextEventCommandV1Schema,
   type ProductLabelSnapshotV1,
   type ReapplyCommandV1,
   type SessionProjection
 } from "@sunshield/contracts";
 import type {
+  ContextEventRepositoryPort,
   DeviceIdentityPort,
   LocalIdentityPort,
   ReapplicationRepositoryPort
@@ -47,6 +49,7 @@ export interface ReapplicationController {
   phase: Readonly<ShallowRef<ReapplicationPhase>>;
   session: Readonly<ShallowRef<SessionProjection | null>>;
   suggestedZoneIds: Readonly<ShallowRef<string[]>>;
+  reason: Readonly<ShallowRef<ReapplyReason | null>>;
   selectedZoneIds: Readonly<ShallowRef<string[]>>;
   productChoices: Readonly<ShallowRef<ReapplicationProductChoice[]>>;
   assignments: Readonly<ShallowRef<Record<string, string>>>;
@@ -57,6 +60,7 @@ export interface ReapplicationController {
   success: Readonly<ShallowRef<ReapplicationSuccess | null>>;
   load(): Promise<void>;
   selectSuggested(): void;
+  setReason(value: ReapplyReason | null): void;
   selectAll(): void;
   toggleZone(zoneId: string): void;
   assignProduct(zoneId: string, choiceId: string): void;
@@ -68,8 +72,29 @@ export interface ReapplicationController {
   dispose(): void;
 }
 
+/**
+ * 補擦的原因（2026-09-02，`2026-09-02-event-means-reapply.md` 階段一）。
+ *
+ * `null` 是「時間到了」——沒有損耗事件，只是例行補擦。其餘四種會在補擦之前
+ * 先寫下一筆損耗事件。
+ *
+ * **不含「離水」是刻意的。** 離水不只是一個原因，它還會關閉一段水中區間
+ * （需要 `activityIntervalId`），那是狀態轉換而不是註記。它留在「記錄狀況」
+ * 流程，而那條路 2026-09-02（#108）之後本來就能直接接著補擦。
+ */
+export type ReapplyReason = "heavy_sweat" | "towel" | "friction" | "hand_wash";
+
+/**
+ * 損耗事件要比塗抹時間早多久。
+ *
+ * 一分鐘。理由不是美觀：reducer 的條件是 `事件時間 >= 最新塗抹時間`，相同時
+ * 事件依然成立、期限被拉到那一刻，補完立刻又到期。往前挪也符合現實——先流汗，
+ * 才去補擦。
+ */
+const REASON_LEAD_MS = 60_000;
+
 interface Dependencies {
-  repository: ReapplicationRepositoryPort;
+  repository: ReapplicationRepositoryPort & ContextEventRepositoryPort;
   identity: LocalIdentityPort & DeviceIdentityPort;
   boot: AppBootController;
   createId(): string;
@@ -83,6 +108,14 @@ export function createReapplicationController(
   const phase = shallowRef<ReapplicationPhase>("idle");
   const session = shallowRef<SessionProjection | null>(null);
   const suggestedZoneIds = shallowRef<string[]>([]);
+  const reason = shallowRef<ReapplyReason | null>(null);
+  /**
+   * 原因事件送出後的 revision。
+   *
+   * **重試時不能再送一次事件。** 送出分成兩段（先事件、後補擦），第二段失敗
+   * 而使用者重試時，第一段已經成功了——記著它才不會寫出兩筆流汗。
+   */
+  let committedReasonRevision: number | null = null;
   const selectedZoneIds = shallowRef<string[]>([]);
   const productChoices = shallowRef<ReapplicationProductChoice[]>([]);
   const assignments = shallowRef<Record<string, string>>({});
@@ -186,10 +219,21 @@ export function createReapplicationController(
         ? suggested
         : context.session.primaryAction.affectedZoneInstanceIds;
     selectedZoneIds.value = [...suggestedZoneIds.value];
+    reason.value = null;
+    committedReasonRevision = null;
     referenceNow.value = dependencies.now().toISOString();
     appliedAt.value = referenceNow.value;
     pendingCommand = null;
     phase.value = "ready";
+  }
+
+  /**
+   * 換原因會作廢已建好的補擦命令：原因會決定要不要先送事件，而事件會推進
+   * revision，`pendingCommand` 裡的 `expectedRevision` 因此不再有效。
+   */
+  function setReason(value: ReapplyReason | null): void {
+    reason.value = value;
+    pendingCommand = null;
   }
 
   function selectSuggested(): void {
@@ -260,7 +304,24 @@ export function createReapplicationController(
     }
     phase.value = "submitting";
     fieldErrors.value = {};
-    if (pendingCommand === null) pendingCommand = await buildCommand();
+
+    /*
+     * 有原因時先寫下損耗事件，再寫補擦。
+     *
+     * **不做成單一合併命令是刻意的**（`2026-09-02-event-means-reapply.md`
+     * 第五節）：中間狀態本來就合法——「記錄了事件、還沒補擦」正是這個 App
+     * 既有的產品狀態。第二段失敗時使用者落在一個有意義的地方，不是半筆爛帳，
+     * 所以兩段交易就夠，不需要動 contracts／domain／persistence 三層。
+     */
+    let revision = session.value.revision;
+    if (reason.value !== null && committedReasonRevision === null) {
+      const reasonResult = await submitReason(revision);
+      if (reasonResult === null) return false;
+      committedReasonRevision = reasonResult;
+    }
+    if (committedReasonRevision !== null) revision = committedReasonRevision;
+
+    if (pendingCommand === null) pendingCommand = await buildCommand(revision);
     let result;
     try {
       result = await dependencies.repository.reapply(pendingCommand, {
@@ -293,6 +354,7 @@ export function createReapplicationController(
     }
     const committedCommand = pendingCommand;
     pendingCommand = null;
+    committedReasonRevision = null;
     success.value = {
       groupId: committedCommand.payload.applicationConfirmationId,
       zoneIds: [...selectedZoneIds.value],
@@ -340,7 +402,7 @@ export function createReapplicationController(
     return false;
   }
 
-  async function buildCommand(): Promise<ReapplyCommandV1> {
+  async function buildCommand(revision: number): Promise<ReapplyCommandV1> {
     const [visitorId, deviceId] = await Promise.all([
       dependencies.identity.getOrCreateLocalVisitorId(),
       dependencies.identity.getOrCreateDeviceLocalId()
@@ -366,9 +428,9 @@ export function createReapplicationController(
       owner: { type: "guest", localVisitorId: visitorId },
       deviceLocalId: deviceId,
       sessionId: session.value!.sessionId,
-      clientSequence: session.value!.revision + 1,
+      clientSequence: revision + 1,
       clientCreatedAt: dependencies.now().toISOString(),
-      expectedRevision: session.value!.revision,
+      expectedRevision: revision,
       payload: {
         applicationConfirmationId: dependencies.createId(),
         appliedAt: new Date(appliedAt.value).toISOString(),
@@ -383,6 +445,76 @@ export function createReapplicationController(
     });
   }
 
+  /**
+   * 送出損耗事件。成功回傳新的 revision，失敗回傳 null（並已設好錯誤狀態）。
+   *
+   * **事件時間必須嚴格早於塗抹時間。** reducer 判斷損耗事件還算不算數的條件
+   * 是 `事件時間 >= 最新塗抹時間`（`reducer.ts` 的 causeEvents 過濾），所以
+   * 兩者相同時事件依然成立，期限被拉到那一刻——**補完立刻又到期**。這一點
+   * 用 `packages/domain` 的純函式實測過，數據見
+   * `docs/decisions/2026-09-02-event-means-reapply.md` 第二節。
+   *
+   * 往前挪一分鐘也符合現實：使用者是先流汗、才去補擦。
+   */
+  async function submitReason(revision: number): Promise<number | null> {
+    const kind = reason.value;
+    if (kind === null || session.value === null) return null;
+
+    const [visitorId, deviceId] = await Promise.all([
+      dependencies.identity.getOrCreateLocalVisitorId(),
+      dependencies.identity.getOrCreateDeviceLocalId()
+    ]);
+    const occurredAt = new Date(
+      Date.parse(appliedAt.value) - REASON_LEAD_MS
+    ).toISOString();
+
+    const command = ReportContextEventCommandV1Schema.parse({
+      commandVersion: COMMAND_SCHEMA_VERSION,
+      commandType: "report_context_event",
+      commandId: dependencies.createId(),
+      idempotencyKey: dependencies.createId(),
+      owner: { type: "guest", localVisitorId: visitorId },
+      deviceLocalId: deviceId,
+      sessionId: session.value.sessionId,
+      clientSequence: revision + 1,
+      clientCreatedAt: dependencies.now().toISOString(),
+      expectedRevision: revision,
+      payload: {
+        eventId: dependencies.createId(),
+        effectiveOccurredAt: occurredAt,
+        detail: {
+          contextType: kind,
+          zoneInstanceIds: [...selectedZoneIds.value]
+        }
+      }
+    });
+
+    let result;
+    try {
+      result = await dependencies.repository.reportContextEvent(command, {
+        status: "trusted",
+        trustedNow: dependencies.now().toISOString(),
+        connectivity: dependencies.getConnectivity()
+      });
+    } catch {
+      error.value = "persistence";
+      phase.value = "error";
+      return null;
+    }
+    if (!result.ok) {
+      error.value =
+        result.code === "NOT_FOUND"
+          ? "not_found"
+          : result.code === "REVISION_CONFLICT" ||
+              result.code === "CLIENT_SEQUENCE_CONFLICT"
+            ? "state_changed"
+            : "validation";
+      phase.value = "error";
+      return null;
+    }
+    return result.revision ?? revision + 1;
+  }
+
   function resetError(): void {
     error.value = null;
     if (phase.value === "error") phase.value = "ready";
@@ -395,6 +527,8 @@ export function createReapplicationController(
     session: shallowReadonly(session),
     suggestedZoneIds: shallowReadonly(suggestedZoneIds),
     selectedZoneIds: shallowReadonly(selectedZoneIds),
+    reason: shallowReadonly(reason),
+    setReason,
     productChoices: shallowReadonly(productChoices),
     assignments: shallowReadonly(assignments),
     appliedAt: shallowReadonly(appliedAt),

@@ -167,7 +167,9 @@ describe("createReapplicationController", () => {
     const controller = createReapplicationController({
       repository: {
         getReapplicationContext: vi.fn().mockResolvedValue(source),
-        reapply: vi.fn()
+        reapply: vi.fn(),
+        getContextEventContext: vi.fn(),
+        reportContextEvent: vi.fn()
       },
       identity: {
         getOrCreateLocalVisitorId: vi.fn().mockResolvedValue("visitor"),
@@ -229,11 +231,140 @@ describe("createReapplicationController", () => {
     expect(reapply).toHaveBeenCalledTimes(1);
   });
 
+  /*
+   * 「為什麼補擦？」（`2026-09-02-event-means-reapply.md` 階段一）。
+   *
+   * 使用者的原則：遇到了事件＝需要補擦。所以損耗事件是補擦的理由，在補擦
+   * 之前先寫下來，而不是另一條要自己走完的流程。
+   */
+  describe("補擦原因", () => {
+    function arrange(overrides: Record<string, unknown> = {}) {
+      const reapply = vi.fn().mockResolvedValue({ ok: true, revision: 9 });
+      const reportContextEvent = vi
+        .fn()
+        .mockResolvedValue({ ok: true, revision: 8 });
+      const controller = createReapplicationController({
+        repository: {
+          getReapplicationContext: vi.fn().mockResolvedValue(context()),
+          reapply,
+          getContextEventContext: vi.fn(),
+          reportContextEvent,
+          ...overrides
+        } as never,
+        identity: {
+          getOrCreateLocalVisitorId: vi.fn().mockResolvedValue("visitor"),
+          getOrCreateDeviceLocalId: vi.fn().mockResolvedValue("device")
+        } as never,
+        boot: {
+          refresh: vi.fn().mockResolvedValue(undefined),
+          currentSession: { value: { revision: 9 } }
+        } as never,
+        createId: () => crypto.randomUUID(),
+        now: () => new Date("2026-07-29T11:00:00.000Z"),
+        getConnectivity: () => "online"
+      });
+      return { controller, reapply, reportContextEvent };
+    }
+
+    /* 預設是「時間到了」——例行補擦最常見，不該強迫每次挑一個原因。 */
+    it("沒有選原因時不送出損耗事件", async () => {
+      const { controller, reapply, reportContextEvent } = arrange();
+      await controller.load();
+      await controller.submit();
+
+      expect(reportContextEvent).not.toHaveBeenCalled();
+      expect(reapply).toHaveBeenCalledTimes(1);
+    });
+
+    /*
+     * **這條是整個階段一最重要的守門。**
+     *
+     * reducer 判斷損耗事件還算不算數的條件是 `事件時間 >= 最新塗抹時間`，
+     * 所以兩者相同時事件依然成立、期限被拉到那一刻——補完立刻又到期。
+     * 實測數據見 `2026-09-02-event-means-reapply.md` 第二節。
+     */
+    it("事件時間嚴格早於塗抹時間", async () => {
+      const { controller, reapply, reportContextEvent } = arrange();
+      await controller.load();
+      controller.setReason("heavy_sweat");
+      await controller.submit();
+
+      const eventAt = Date.parse(
+        reportContextEvent.mock.calls[0]![0].payload.effectiveOccurredAt
+      );
+      const appliedAt = Date.parse(reapply.mock.calls[0]![0].payload.appliedAt);
+
+      expect(eventAt).toBeLessThan(appliedAt);
+    });
+
+    it("事件帶著這次補擦的部位與選定的原因", async () => {
+      const { controller, reportContextEvent } = arrange();
+      await controller.load();
+      controller.setReason("towel");
+      await controller.submit();
+
+      const detail = reportContextEvent.mock.calls[0]![0].payload.detail;
+      expect(detail.contextType).toBe("towel");
+      expect(detail.zoneInstanceIds).toEqual(controller.selectedZoneIds.value);
+    });
+
+    /*
+     * 事件會推進 revision，補擦命令必須用推進後的值——否則第二段會撞
+     * REVISION_CONFLICT。
+     */
+    it("補擦用事件之後的 revision", async () => {
+      const { controller, reapply } = arrange();
+      await controller.load();
+      controller.setReason("friction");
+      await controller.submit();
+
+      expect(reapply.mock.calls[0]![0].expectedRevision).toBe(8);
+    });
+
+    /*
+     * 第二段失敗後重試時**不能再送一次事件**，否則會寫出兩筆流汗。
+     * 中間狀態（事件已寫、補擦未寫）本來就合法，所以兩段交易是可以的——
+     * 但重試必須認得自己走到哪。
+     */
+    it("補擦失敗後重試不會重複送出事件", async () => {
+      const reapply = vi
+        .fn()
+        .mockResolvedValueOnce({ ok: false, code: "PERSISTENCE" })
+        .mockResolvedValueOnce({ ok: true, revision: 9 });
+      const { controller, reportContextEvent } = arrange({ reapply });
+      await controller.load();
+      controller.setReason("hand_wash");
+
+      await controller.submit();
+      await controller.submit();
+
+      expect(reportContextEvent).toHaveBeenCalledTimes(1);
+      expect(reapply).toHaveBeenCalledTimes(2);
+    });
+
+    /* 事件失敗就不該送出補擦——否則補擦會少掉它的理由。 */
+    it("事件失敗時不送出補擦", async () => {
+      const reportContextEvent = vi
+        .fn()
+        .mockResolvedValue({ ok: false, code: "REVISION_CONFLICT" });
+      const { controller, reapply } = arrange({ reportContextEvent });
+      await controller.load();
+      controller.setReason("heavy_sweat");
+
+      const ok = await controller.submit();
+
+      expect(ok).toBe(false);
+      expect(reapply).not.toHaveBeenCalled();
+    });
+  });
+
   it("預選 due/soon 並保留不同部位目前的不同產品", async () => {
     const controller = createReapplicationController({
       repository: {
         getReapplicationContext: vi.fn().mockResolvedValue(context()),
-        reapply: vi.fn()
+        reapply: vi.fn(),
+        getContextEventContext: vi.fn(),
+        reportContextEvent: vi.fn()
       },
       identity: {
         getOrCreateLocalVisitorId: vi.fn().mockResolvedValue("visitor"),
