@@ -340,7 +340,10 @@ describe("品牌 lockup 只有一份", () => {
     expect(painter).toContain(
       'from "../../components/shell/brandLockupMarkup"'
     );
-    expect(painter).toMatch(/\bBRAND_LOCKUP_MARKUP\b/);
+    // 2026-09-02 起畫布用的是**只有標記**那一份（標題前面不放中文字標）。
+    // 守的是「幾何來自那個模組」，不是特定常數名——哪一個 variant 是版面
+    // 決定，換 variant 不該讓這條紅。
+    expect(painter).toMatch(/\bBRAND_(?:LOCKUP|MARK)_MARKUP\b/);
     expect(painter, "畫布不該自己貼 lockup 的 path").not.toContain(
       'data-part="wordmark"'
     );
@@ -366,6 +369,76 @@ describe("品牌 lockup 只有一份", () => {
  * 會有一邊漏掉，而且漏掉的那邊是使用者看不到的（PNG 要存下來才知道）。
  * 所以守的是「兩邊都從 GEAR_CATEGORY_ICONS 讀」，不是「兩邊都有圖示」。
  */
+/*
+ * 2026-09-02（使用者要求）：分享卡拿掉「標記＋防曬晴報員」那一組，改成
+ * 標題前面只放標記。
+ *
+ * 兩邊都要守，理由跟品類圖示那組一樣：預覽與 PNG 是兩份獨立的繪圖程式碼。
+ */
+describe("卡片抬頭只有標記，沒有中文字標", () => {
+  it('畫面上的卡用 variant="mark"', () => {
+    const card = stripComments(
+      readFileSync("apps/web/src/components/product/GearShareCard.vue", "utf8")
+    );
+
+    // 比對完整屬性，不是片段——`variant` 三個字自己會出現在別處。
+    expect(card).toContain('variant="mark"');
+  });
+
+  it("畫布畫的也是標記，不是完整 lockup", () => {
+    const painter = stripComments(readFileSync(PAINTER_PATH, "utf8"));
+
+    expect(painter).toContain("BRAND_MARK_MARKUP");
+    expect(painter, "畫布不該畫到中文字標").not.toContain(
+      "BRAND_LOCKUP_MARKUP"
+    );
+  });
+
+  /*
+   * 字標本身沒有被刪除——App 頁首仍然用完整 lockup。這條擋的是「順手把
+   * 字標從幾何檔裡拿掉」，那會讓頁首跟著壞掉。
+   */
+  it("完整 lockup 仍然存在，頁首還在用", () => {
+    const markup = readFileSync(
+      "apps/web/src/components/shell/brandLockupMarkup.ts",
+      "utf8"
+    );
+    const header = readFileSync(
+      "apps/web/src/components/shell/BrandHeader.vue",
+      "utf8"
+    );
+
+    expect(markup).toContain("BRAND_LOCKUP_MARKUP");
+    expect(header).toContain("<BrandLockup");
+    expect(header, "頁首要的是完整 lockup").not.toContain('variant="mark"');
+  });
+});
+
+/* 2026-09-02：頁尾日期靠右（使用者要求）。 */
+describe("日期靠右", () => {
+  it("畫面上的卡用 text-align: end", () => {
+    const card = stripComments(
+      readFileSync("apps/web/src/components/product/GearShareCard.vue", "utf8")
+    );
+    const dateBlock = /\.share-card__date \{[^}]*\}/.exec(card)?.[0];
+
+    expect(dateBlock, "找不到日期的規則").toBeDefined();
+    expect(dateBlock).toContain("text-align: end;");
+  });
+
+  /*
+   * canvas 沒有 text-align: end，只能自己量字寬再往回推。這條擋住
+   * 「畫面改了、畫布忘了改」——那正是分隔線與品牌列各出過一次的事。
+   */
+  it("畫布自己量寬度靠右", () => {
+    const painter = stripComments(readFileSync(PAINTER_PATH, "utf8"));
+
+    expect(painter).toContain(
+      "context.fillText(input.dateLabel, OUTPUT_WIDTH - pad - dateWidth, y);"
+    );
+  });
+});
+
 describe("預覽與輸出用同一份品類圖示", () => {
   it("兩邊都讀 GEAR_CATEGORY_ICONS，沒有人自己列一張表", () => {
     for (const file of [

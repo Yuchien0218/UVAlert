@@ -8,7 +8,7 @@ import { getUvRiskLevelLabel } from "../features/uv/uvForecastRules";
 import { CONTEXT_LABELS } from "../features/setup/setupCatalog";
 import { formatFullDate } from "../helpers/datetime";
 import IconButton from "../components/common/IconButton.vue";
-import IconLead from "../components/common/IconLead.vue";
+import Icon from "../components/icons/Icon.vue";
 import GearShareCard, {
   type GearShareCardData
 } from "../components/product/GearShareCard.vue";
@@ -200,17 +200,14 @@ function goBack(): void {
     <header class="flow-heading">
       <div class="share-page__heading-main">
         <!--
-          2026-09-02：標題帶上 `feature-share`（使用者要求「幫我畫」）。
+          2026-09-02：標題不放圖示（使用者要求）。
 
-          走 IconLead 而不是自己寫 `<Icon :size="40">`——尺寸只有 IconLead
-          一個地方在管，這一頁跟衛教主題頁是同一種「頁面標題＋領銜圖示」。
-          說明文字留在圖示外面、橫跨整欄，不要被擠進 40px 圖示右邊的窄欄。
+          `feature-share` 仍然登記在圖示系統裡，只是這一頁不用它——這頁的
+          主體是下方那張卡片預覽，標題再放一個 40px 圖示會多出一個視覺重心。
         -->
-        <IconLead icon="feature-share">
-          <h1 class="page-heading__title" data-typography-role="page-title">
-            分享我的防曬裝備
-          </h1>
-        </IconLead>
+        <h1 class="page-heading__title" data-typography-role="page-title">
+          分享我的防曬裝備
+        </h1>
         <p>存成圖片或直接分享你的防曬清單，價格預設不會印在卡片上。</p>
       </div>
       <IconButton
@@ -246,13 +243,27 @@ function goBack(): void {
       `canShare({ files })` 必須帶著真的那個 file 去問。
     -->
     <div class="share-page__actions">
+      <!--
+        2026-09-02：「儲存圖片」左邊放 `more-install`（使用者指定這一顆）。
+
+        **`mono` 是必要的，不是保險。** 這是雙色圖示，琥珀金在 primary
+        按鈕上實測只有 1.58——而琥珀金那一半正是那支箭頭，也就是「下載」
+        的語意本體。理由完整版見 Icon.vue 的 mono。
+
+        圖示是裝飾性的——按鈕本身就有可見文字，螢幕閱讀器讀那句就夠了，
+        再播報一次圖示的 title 會變成「儲存圖片 儲存圖片」那類重複。
+
+        產生中時圖示不換掉：文字已經從「儲存圖片」變成「產生中…」，
+        圖示跟著抽換只會讓按鈕在點下去的瞬間跳一下。
+      -->
       <button
-        class="button button--primary"
+        class="button button--primary share-page__save"
         type="button"
         :disabled="busy"
         @click="saveImage"
       >
-        {{ busy ? "產生中…" : "儲存圖片" }}
+        <Icon name="more-install" :size="20" mono />
+        <span>{{ busy ? "產生中…" : "儲存圖片" }}</span>
       </button>
       <button
         v-if="canShare"
@@ -289,6 +300,17 @@ function goBack(): void {
 .share-page__actions {
   display: grid;
   gap: var(--space-3);
+}
+
+/*
+ * 圖示與文字一起置中。`.button` 本身沒有 flex 佈局（它只排文字），所以
+ * 這裡補上——不改 `.button` 共用類別，那會影響全站每一顆按鈕。
+ */
+.share-page__save {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
 }
 
 .share-page__toggle {

@@ -172,17 +172,27 @@ function detailsFor(product: ProductCatalogRecordV1): string[] {
 
 <template>
   <article class="share-card">
-    <header class="share-card__masthead">
-      <BrandLockup class="share-card__lockup" />
-    </header>
+    <!--
+      2026-09-02（使用者要求）：拿掉原本自己一列的「標記＋防曬晴報員」
+      lockup，改成標題前面只放標記。
 
-    <h2
-      class="share-card__title"
-      data-typography-role="section-title"
-      data-typography-exception="share-card-hero-title"
-    >
-      {{ title }}
-    </h2>
+      **不放字標是對的**：這一列的標題是「我的防曬裝備」，再擺一次
+      「防曬晴報員」等於同一列有兩組中文字在搶第一眼。標記本身已經足夠
+      標示來源，而且不會跟標題競爭。
+
+      標記是裝飾性的（aria-hidden 由 BrandLockup 負責）——它旁邊就是可見
+      的標題文字，螢幕閱讀器讀那句就夠了。
+    -->
+    <header class="share-card__masthead">
+      <BrandLockup class="share-card__mark" variant="mark" />
+      <h2
+        class="share-card__title"
+        data-typography-role="section-title"
+        data-typography-exception="share-card-hero-title"
+      >
+        {{ title }}
+      </h2>
+    </header>
 
     <!--
       地區與 UV 在**淺色區**，不是深色卡裡——五個 UV 風險色在
@@ -312,30 +322,40 @@ function detailsFor(product: ProductCatalogRecordV1): string[] {
   background: var(--color-canvas);
 }
 
-/* 日期搬走之後這一列只剩 lockup，但保留 flex 讓它不被拉伸。 */
+/*
+ * 標記與標題同一列。
+ *
+ * 用 center 而不是 baseline：標記是圖形沒有文字基線，baseline 對齊會讓它
+ * 掉到標題下緣。標記高度綁在標題的行高上（1em），這樣改字級時兩者一起動。
+ */
 .share-card__masthead {
   display: flex;
-  align-items: baseline;
+  align-items: center;
   gap: var(--space-3);
-  color: var(--text-secondary);
-  font-size: var(--font-size-caption);
 }
 
 /*
  * 跟頁首同一個 `BrandLockup` 元件，尺寸由呼叫端決定（元件本身不設 height，
  * 這樣兩個使用點可以各自決定份量）。
  */
-.share-card__lockup {
-  height: 1.2rem;
+/*
+ * flex: none 不是保險——flex 子項預設可壓縮，標記被壓縮就是變形
+ * （跟 IconLead 那條註解同一個理由）。
+ */
+.share-card__mark {
+  height: 1em;
   width: auto;
-  flex: 0 0 auto;
+  flex: none;
+  font-size: var(--font-size-page-title);
 }
 
+/* 2026-09-02：靠右（使用者要求）。 */
 .share-card__date {
   margin: 0;
   color: var(--text-secondary);
   font-size: var(--font-size-caption);
   font-variant-numeric: tabular-nums;
+  text-align: end;
 }
 
 .share-card__title {

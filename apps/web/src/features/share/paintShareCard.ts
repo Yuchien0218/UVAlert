@@ -2,11 +2,11 @@ import type { GearShareCardData } from "../../components/product/GearShareCard.v
 import { ICONS } from "../../generated/icons.generated";
 import { GEAR_CATEGORY_ICONS } from "../product/gearPresentation";
 import {
-  BRAND_LOCKUP_HEIGHT,
-  BRAND_LOCKUP_MARKUP,
-  BRAND_LOCKUP_WIDTH
+  BRAND_MARK_HEIGHT,
+  BRAND_MARK_MARKUP,
+  BRAND_MARK_WIDTH
 } from "../../components/shell/brandLockupMarkup";
-import { drawIcon, drawSvgMarkup } from "./drawSvg";
+import { drawIcon, drawSvgMarkup, svgWidthFor } from "./drawSvg";
 import { readShareCardColors, readSpacingScale } from "./shareCardTokens";
 
 /**
@@ -310,34 +310,53 @@ function paint(
   let y = pad;
 
   /*
-   * 品牌列。
+   * 標記 ＋ 標題，同一列。
    *
-   * **2026-09-02：畫真的 lockup，不再只畫「防曬晴報員」四個字。** 這裡原本
-   * 的註解寫「SVG 要先轉點陣，成本與收益不成比例」——那個判斷是錯的：
-   * lockup 是純幾何（path／circle），`drawSvg` 用 Path2D 向量直接畫，
-   * 不經過圖片、不需要 await、不會污染 canvas。理由完整版見 drawSvg.ts。
+   * **2026-09-02（使用者要求）**：原本頂端有一列「標記＋防曬晴報員」的
+   * 完整 lockup，標題在它下面自成一列。改成標題前面只放標記——這一列的
+   * 標題是「我的防曬裝備」，再擺一次「防曬晴報員」等於同一列有兩組中文字。
    *
-   * 這同時修掉一個不一致：畫面上的 `GearShareCard.vue` 一直都用
-   * `BrandLockup`，只有輸出的 PNG 退化成文字，所以「預覽」跟「存下來的圖」
-   * 頂端長得不一樣。
+   * 標記畫的是真的幾何而不是文字：它是純 path／circle，`drawSvg` 用 Path2D
+   * 向量直接畫，不經過圖片。（這個檔案原本有一句「SVG 要先轉點陣，成本與
+   * 收益不成比例」，那個前提只有在圖是圖片時才成立，見 drawSvg.ts。）
    */
-  const lockupHeight = 20 * SCALE;
+  const markHeight = 28 * SCALE;
+  const markWidth = svgWidthFor(
+    BRAND_MARK_WIDTH,
+    BRAND_MARK_HEIGHT,
+    markHeight
+  );
   drawSvgMarkup(
     context,
-    BRAND_LOCKUP_MARKUP,
-    BRAND_LOCKUP_WIDTH,
-    BRAND_LOCKUP_HEIGHT,
-    { x: pad, y, size: lockupHeight, color: colors["--text-primary"] }
+    BRAND_MARK_MARKUP,
+    BRAND_MARK_WIDTH,
+    BRAND_MARK_HEIGHT,
+    {
+      x: pad,
+      y,
+      size: markHeight,
+      color: colors["--text-primary"]
+    }
   );
-  y += lockupHeight + space["--space-4"];
 
-  // 標題
+  /*
+   * 標題從標記右邊起排，之後的行回到左邊界。
+   *
+   * 只有第一行需要讓開標記——標題換行後如果每一行都縮排，看起來會像
+   * 一個獨立的引言區塊而不是標題。
+   */
+  const titleLeft = pad + markWidth + space["--space-3"];
   context.font = `${28 * SCALE}px ${serif}`;
   context.fillStyle = colors["--text-primary"];
-  for (const line of wrapText(context, input.title, contentWidth)) {
-    context.fillText(line, pad, y);
+  const titleLines = wrapText(
+    context,
+    input.title,
+    contentWidth - markWidth - space["--space-3"]
+  );
+  titleLines.forEach((line, index) => {
+    context.fillText(line, index === 0 ? titleLeft : pad, y);
     y += 34 * SCALE;
-  }
+  });
   y += space["--space-3"];
 
   /*
@@ -538,7 +557,9 @@ function paint(
 
   context.font = `${12 * SCALE}px ${sans}`;
   context.fillStyle = colors["--text-secondary"];
-  context.fillText(input.dateLabel, pad, y);
+  // 2026-09-02：靠右（使用者要求）。canvas 沒有 text-align: end，自己量寬度。
+  const dateWidth = context.measureText(input.dateLabel).width;
+  context.fillText(input.dateLabel, OUTPUT_WIDTH - pad - dateWidth, y);
   y += 18 * SCALE;
 
   /* 回傳內容底部——呼叫端用它決定畫布高度，見 paintShareCard 的「畫兩次」。 */
