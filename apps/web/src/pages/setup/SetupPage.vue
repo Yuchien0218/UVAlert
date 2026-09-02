@@ -137,7 +137,6 @@ watch(selectedContext, async (value, previous) => {
   }
 });
 
-
 /**
  * 2026-08-31：送出失敗時把使用者帶到出問題的欄位（使用者要求）。
  *
@@ -149,8 +148,9 @@ watch(selectedContext, async (value, previous) => {
  * `error` prop）、卡片上紅框、**捲過去並把焦點送進去**。只捲不 focus 的話
  * 鍵盤與螢幕閱讀器使用者的位置沒有跟著移動，等於只修好了滑鼠那一半。
  */
-const applicationTimePicker =
-  shallowRef<InstanceType<typeof ApplicationTimePicker> | null>(null);
+const applicationTimePicker = shallowRef<InstanceType<
+  typeof ApplicationTimePicker
+> | null>(null);
 
 /** 塗抹時間那一欄的錯誤；null 代表這一欄目前沒問題。 */
 const applicationTimeError = shallowRef<string | null>(null);
@@ -425,11 +425,7 @@ onMounted(async () => {
           />
           {{ context === null ? "" : CONTEXT_LABELS[context] }}
         </p>
-        <button
-          class="text-link"
-          type="button"
-          @click="editingContext = true"
-        >
+        <button class="text-link" type="button" @click="editingContext = true">
           更改
         </button>
       </div>
@@ -472,7 +468,15 @@ onMounted(async () => {
             v-model="applicationTime"
             :error="applicationTimeError"
           />
-          <WaterStartPicker v-if="needsWaterStart" v-model="waterStart" />
+          <!--
+            `applied-at` 讓入水選擇器選不到早於塗抹的時間（2026-09-02
+            使用者回報）。控制器的 validateWaterStart 再擋一次打字繞過。
+          -->
+          <WaterStartPicker
+            v-if="needsWaterStart"
+            v-model="waterStart"
+            :applied-at="applicationTime"
+          />
 
           <ProductEligibilityNotice
             :product-snapshot="productSettings.snapshot.value"

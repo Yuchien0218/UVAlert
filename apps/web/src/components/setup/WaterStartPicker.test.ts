@@ -9,10 +9,14 @@ import WaterStartPicker from "./WaterStartPicker.vue";
  * 前」＋「調整時間」＋「不確定」，並加上 80 分鐘上限），而它**先前沒有
  * 任何測試**。
  */
-function mountPicker(modelValue: WaterStartFormValue | null = null) {
+function mountPicker(
+  modelValue: WaterStartFormValue | null = null,
+  appliedAt: string | null = null
+) {
   const wrapper = mount(WaterStartPicker, {
     props: {
       modelValue,
+      appliedAt,
       "onUpdate:modelValue": (value: WaterStartFormValue | null) =>
         wrapper.setProps({ modelValue: value })
     }
@@ -123,5 +127,67 @@ describe("WaterStartPicker", () => {
     const expected = Date.now() - 80 * 60_000;
 
     expect(Math.abs(min - expected)).toBeLessThan(120_000);
+  });
+});
+
+/*
+ * **入水不得早於塗抹**（2026-09-02 使用者回報）。
+ *
+ * 這個元件原本不知道塗抹時間，於是選得出「塗抹 4 分鐘前 ＋ 入水 59 分鐘
+ * 前」——物理上不可能，而且會讓耐水扣減算在一段還沒擦防曬的時間上。
+ *
+ * 表單層只是讓它選不到；真正擋住手動打字的是控制器的 validateWaterStart，
+ * 那一層另有測試。兩層都要。
+ */
+describe("WaterStartPicker 的塗抹時間下限", () => {
+  it("塗抹時間比 80 分鐘上限晚時，min 用塗抹時間", async () => {
+    const appliedAt = new Date(Date.now() - 10 * 60_000).toISOString();
+    const wrapper = mountPicker(null, appliedAt);
+    await findButton(wrapper, "調整時間").trigger("click");
+
+    const min = Date.parse(
+      wrapper.get('input[type="datetime-local"]').attributes("min") ?? ""
+    );
+
+    // 進位到下一分鐘，所以允許一分鐘內的差距。
+    expect(min).toBeGreaterThanOrEqual(Date.parse(appliedAt) - 1000);
+    expect(min - Date.parse(appliedAt)).toBeLessThan(60_000);
+  });
+
+  /*
+   * 反向也要守：塗抹很久以前時，下限仍然是 80 分鐘上限而不是塗抹時間
+   * ——否則耐水上限會被塗抹時間架空。兩個方向分開守，才不會變成「A 或 B」。
+   */
+  it("塗抹時間早於 80 分鐘上限時，min 維持上限", async () => {
+    const appliedAt = new Date(Date.now() - 120 * 60_000).toISOString();
+    const wrapper = mountPicker(null, appliedAt);
+    await findButton(wrapper, "調整時間").trigger("click");
+
+    const min = Date.parse(
+      wrapper.get('input[type="datetime-local"]').attributes("min") ?? ""
+    );
+
+    expect(Math.abs(min - (Date.now() - 80 * 60_000))).toBeLessThan(120_000);
+  });
+
+  /*
+   * 塗抹不到一分鐘前時，「1 分鐘前」入水在字面上就不可能。快選夾到塗抹
+   * 當下（＝擦完就下水），而不是送出一個控制器一定會退回的值。
+   */
+  it("塗抹不到一分鐘前時，快選夾到塗抹時間", async () => {
+    const appliedAt = new Date(Date.now() - 10_000).toISOString();
+    const wrapper = mountPicker(null, appliedAt);
+
+    await findButton(wrapper, "分鐘前").trigger("click");
+
+    const emitted = wrapper.emitted(
+      "update:modelValue"
+    ) as WaterStartFormValue[][];
+    const sent = emitted.at(-1)?.[0];
+
+    expect(sent?.confidence).toBe("confirmed");
+    expect(Date.parse(sent?.activityStartedAt ?? "")).toBeGreaterThanOrEqual(
+      Date.parse(appliedAt) - 1000
+    );
   });
 });

@@ -28,6 +28,18 @@ const value = defineModel<WaterStartFormValue | null>({
   required: true
 });
 
+/**
+ * 這次提醒的塗抹時間。
+ *
+ * **2026-09-02 新增（使用者回報）。** 在這之前這個元件不知道塗抹時間，
+ * 於是可以選出「入水早於塗抹」——實測填得出「塗抹 4 分鐘前 ＋ 入水 59
+ * 分鐘前」而毫無阻攔，那在物理上不可能。
+ *
+ * 表單層讓它選不到，控制器層再擋一次手動打字（`validateWaterStart`）。
+ * 兩層都要：`min` 只收窄瀏覽器的選擇器，打字繞得過去。
+ */
+const props = defineProps<{ appliedAt?: string | null }>();
+
 const referenceNow = new Date();
 const DEFAULT_MINUTES_AGO = 1;
 
@@ -86,15 +98,39 @@ const tooLongAgoNotice = computed(() => {
   );
 });
 
+/**
+ * 可選的最早入水時間。
+ *
+ * 兩個下限取**較晚**的那個：耐水上限（80 分鐘）與塗抹時間。塗抹之後才
+ * 可能入水，所以塗抹時間比 80 分鐘上限晚時，它才是真正的下限。
+ *
+ * 塗抹時間進位到下一分鐘：`datetime-local` 的精度只到分鐘，直接取整會
+ * 讓「14:27:45 塗抹」允許選到 14:27:00——比塗抹早 45 秒，畫面允許但控制器
+ * 會擋，那種前後不一致比擋不住更難懂。
+ */
+const earliestSelectable = computed(() => {
+  const cap = referenceNow.getTime() - WATER_START_MAX_MINUTES_AGO * 60_000;
+  const applied = props.appliedAt == null ? null : Date.parse(props.appliedAt);
+  if (applied === null || !Number.isFinite(applied)) return new Date(cap);
+  return new Date(Math.max(cap, Math.ceil(applied / 60_000) * 60_000));
+});
+
 const earliestLocalValue = computed(() =>
-  toLocalInputValue(
-    new Date(referenceNow.getTime() - WATER_START_MAX_MINUTES_AGO * 60_000)
-  )
+  toLocalInputValue(earliestSelectable.value)
 );
 
+/**
+ * 快選的預設值也要夾在塗抹時間之後。
+ *
+ * 塗抹不到一分鐘前時，「1 分鐘前」入水在字面上就是不可能的；夾到塗抹
+ * 當下等於「擦完就下水」，是那個情境下唯一說得通的解讀。
+ */
 function selectDefault(): void {
   const selected = new Date(
-    referenceNow.getTime() - DEFAULT_MINUTES_AGO * 60_000
+    Math.max(
+      referenceNow.getTime() - DEFAULT_MINUTES_AGO * 60_000,
+      earliestSelectable.value.getTime()
+    )
   );
   value.value = {
     confidence: "confirmed",
@@ -114,7 +150,13 @@ function toggleAdjust(): void {
     return;
   }
   draftLocalValue.value = toLocalInputValue(
-    selectedAt.value ?? new Date(referenceNow.getTime() - 60_000)
+    selectedAt.value ??
+      new Date(
+        Math.max(
+          referenceNow.getTime() - 60_000,
+          earliestSelectable.value.getTime()
+        )
+      )
   );
   adjusting.value = true;
 }

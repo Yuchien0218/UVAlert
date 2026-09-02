@@ -459,6 +459,91 @@ describe("SetupDraft to StartSession transaction", () => {
       activityStartedAt: null
     });
   });
+  /*
+   * **入水不得早於塗抹**（2026-09-02 使用者回報）。
+   *
+   * 兩個時間欄位原本各有各的上限（塗抹 120 分、入水 80 分），但沒有人比較
+   * 它們的先後。實測填得出「塗抹 4 分鐘前 ＋ 入水 59 分鐘前」而毫無阻攔，
+   * 直接建立提醒——那在物理上不可能：這次用的防曬乳 4 分鐘前才擦。
+   *
+   * 後果不只是資料難看：耐水區間的起點會落在一段「還沒擦防曬」的時間上，
+   * 耐水扣減因此算在不存在的保護上。
+   *
+   * 表單層（WaterStartPicker 的 min）讓它選不到，這一層擋手動打字。
+   */
+  async function arrangeWaterSession(): Promise<void> {
+    await controller.saveContext("water_active");
+    await controller.saveProtection({
+      setupEntryMode: "quick_preset",
+      suggestedPresetId: "beach_tracked",
+      suggestedPresetVersion: "BODY_ZONE_PRESET_V3@1",
+      presetDecision: "accepted",
+      zones: [
+        {
+          draftZoneKey: "face_forehead",
+          bodyZoneCode: "face_forehead",
+          customLabel: null,
+          skinExposureStatus: "exposed",
+          methodComponents: ["sunscreen"]
+        }
+      ]
+    });
+  }
+
+  it("入水早於塗抹時退回，並指出是哪一個欄位", async () => {
+    await arrangeWaterSession();
+
+    const saved = await controller.saveTiming({
+      productLabelSnapshot: makeProductSnapshot(),
+      // 現在是 11:00；塗抹 10:55，入水 10:30 —— 比塗抹早 25 分鐘。
+      appliedAt: "2026-07-29T10:55:00.000Z",
+      waterStart: {
+        confidence: "confirmed",
+        activityStartedAt: "2026-07-29T10:30:00.000Z"
+      }
+    });
+
+    expect(saved).toBe(false);
+    expect(controller.fieldErrors.value.waterStart).toEqual([
+      "入水時間不能早於塗抹時間，請重新確認。"
+    ]);
+    // 塗抹本身是合法的，不該一起被標成錯誤。
+    expect(controller.fieldErrors.value.appliedAt).toBeUndefined();
+  });
+
+  /*
+   * 邊界：入水與塗抹同一刻是合法的（擦完就下水）。只守「早於會擋」的話，
+   * 把條件寫成 `<=` 也會過——那會讓最常見的情境反而不能用。
+   */
+  it("入水與塗抹同一刻仍然接受", async () => {
+    await arrangeWaterSession();
+
+    const saved = await controller.saveTiming({
+      productLabelSnapshot: makeProductSnapshot(),
+      appliedAt: "2026-07-29T10:55:00.000Z",
+      waterStart: {
+        confidence: "confirmed",
+        activityStartedAt: "2026-07-29T10:55:00.000Z"
+      }
+    });
+
+    expect(saved).toBe(true);
+    expect(controller.fieldErrors.value.waterStart).toBeUndefined();
+  });
+
+  /* 「不確定」不帶時間，不受先後檢查影響——那是它存在的理由。 */
+  it("選不確定時不做先後檢查", async () => {
+    await arrangeWaterSession();
+
+    const saved = await controller.saveTiming({
+      productLabelSnapshot: makeProductSnapshot(),
+      appliedAt: "2026-07-29T10:55:00.000Z",
+      waterStart: { confidence: "unknown", activityStartedAt: null }
+    });
+
+    expect(saved).toBe(true);
+    expect(controller.fieldErrors.value.waterStart).toBeUndefined();
+  });
 
   it("自動套用推薦方案並立即寫入 SetupDraft", async () => {
     await controller.saveContext("outdoor_general");
