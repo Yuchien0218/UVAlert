@@ -42,6 +42,12 @@ export interface SaveGearInput {
   size?: string | null | undefined;
   /** 2026-09-01：純紀錄，不進 reducer。 */
   color?: string | null | undefined;
+  /** 2026-09-02：純紀錄，不進 reducer。 */
+  volume?: string | null | undefined;
+  /** 2026-09-02：純紀錄，不進 reducer。 */
+  formulation?: "lotion" | "gel" | "cream" | "spray" | "stick" | null | undefined;
+  /** 2026-09-02：純紀錄，不進 reducer。 */
+  protectionType?: "physical" | "chemical" | "hybrid" | null | undefined;
   productId?: string | undefined;
   /**
    * 只有 sunscreen 會成為「目前使用產品」。記錄一副墨鏡不該改變
@@ -110,6 +116,9 @@ export function createProductSettingsController(
         usageRating: input.usageRating ?? null,
         size: input.size ?? null,
         color: input.color ?? null,
+        volume: input.volume ?? null,
+        formulation: input.formulation ?? null,
+        protectionType: input.protectionType ?? null,
         now
       });
       if (setAsCurrent) {

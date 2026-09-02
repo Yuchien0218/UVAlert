@@ -257,6 +257,39 @@ export const ProductCatalogRecordV1Schema = z.object({
    * 那會變成另一件事。
    */
   color: z.string().trim().max(20).nullable().default(null),
+  /**
+   * 包裝容量（照抄標示，例如「60ml」「50g」）。不進 reducer。
+   *
+   * **為什麼放在目錄紀錄而不是 `ProductLabelSnapshotV1`。** 容量確實印在
+   * 包裝上，直覺會想放進「包裝標示」那一組。但 snapshot 是**進 reducer 的
+   * 那一層**，而且 `snapshotFingerprint` 是由它算出來的——加一個欄位會讓
+   * 所有既有產品的 fingerprint 變掉，等於每一罐都變成「另一罐」。
+   *
+   * 判準是「會不會影響倒數」，不是「印不印在瓶身上」。這三個新欄位都不會，
+   * 所以跟 priceTwd／size／color 同一層。
+   */
+  volume: z.string().trim().max(20).nullable().default(null),
+  /**
+   * 劑型。不進 reducer。
+   *
+   * 用 enum 而不是自由文字（跟 size 的判斷相反）：劑型是**有限且穩定**的
+   * 分類，使用者不需要照抄任何標示；enum 之後才能拿來篩選「我的噴霧有
+   * 哪些」。size 是照抄吊牌，所以才必須自由文字。
+   */
+  formulation: z
+    .enum(["lotion", "gel", "cream", "spray", "stick"])
+    .nullable()
+    .default(null),
+  /**
+   * 防護機制。不進 reducer。
+   *
+   * 三檔而不是逐項成分：這是「敏弱肌挑得出來」需要的粒度，列成分表就變成
+   * 產品資料庫了（2026-09-02 使用者裁決的取捨）。
+   */
+  protectionType: z
+    .enum(["physical", "chemical", "hybrid"])
+    .nullable()
+    .default(null),
   /** 「過去用過」的時間戳，不進 reducer。 */
   archivedAt: z.string().datetime({ offset: true }).nullable().default(null),
   createdAt: z.string().datetime({ offset: true }),
