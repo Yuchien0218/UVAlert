@@ -285,6 +285,68 @@ describe("HomePage", () => {
      * 下面兩條把兩個變因拆開，才真的守得住。
      */
 
+    /*
+     * 2026-09-02：tracking 的主行動改成「記錄補擦」之後，提問卡與主 CTA
+     * **必須並存**——提問卡是記錄狀況唯一的入口，主 CTA 是補擦。
+     *
+     * 這條擋的是「改了 domain 卻忘了改首頁」：那時提問卡的條件會失效，
+     * 記錄狀況就沒有入口了。
+     */
+    it("倒數正常時，提問卡與補擦 CTA 並存", async () => {
+      mockServices({
+        session: {
+          ...session,
+          primaryAction: {
+            ...session.primaryAction,
+            actionKind: "record_reapplication",
+            actionAt: "2099-01-01T00:00:00.000Z"
+          }
+        },
+        region: { displayName: "臺北市 大安區" }
+      });
+
+      const wrapper = await mountHome();
+
+      expect(wrapper.find(".home__prompt").exists()).toBe(true);
+      expect(wrapper.find(".home__cta").exists()).toBe(true);
+      // 提問卡那顆必須是記錄狀況，不能跟著主行動變成補擦。
+      expect(wrapper.get(".home__prompt").text()).toContain("記錄狀況");
+    });
+
+    /*
+     * **不變式：畫面上永遠恰好有一個可按的行動。**
+     *
+     * 第一版的 showPrimaryCta 寫成「actionKind 是 report_context_event 就
+     * 隱藏」，在「到期又是記錄狀況」時會讓提問卡與 CTA 同時消失。既有的
+     * 「記錄狀況到期時回到主 CTA」接住了那次，這條把不變式本身講明白。
+     */
+    it("任何狀態下都至少有一個可按的行動", async () => {
+      for (const [actionKind, actionAt] of [
+        ["record_reapplication", "2099-01-01T00:00:00.000Z"],
+        ["record_reapplication", "2020-01-01T00:00:00.000Z"],
+        ["report_context_event", "2099-01-01T00:00:00.000Z"],
+        ["report_context_event", "2020-01-01T00:00:00.000Z"],
+        ["complete_protection_record", "2099-01-01T00:00:00.000Z"]
+      ] as const) {
+        mockServices({
+          session: {
+            ...session,
+            primaryAction: { ...session.primaryAction, actionKind, actionAt }
+          },
+          region: { displayName: "臺北市 大安區" }
+        });
+
+        const wrapper = await mountHome();
+        const hasPrompt = wrapper.find(".home__prompt").exists();
+        const hasCta = wrapper.find(".home__cta").exists();
+
+        expect(
+          hasPrompt || hasCta,
+          `${actionKind} / ${actionAt} 沒有任何可按的行動`
+        ).toBe(true);
+      }
+    });
+
     // 守 tone：同樣是「記錄狀況」，到期時就不該再降級。
     it("記錄狀況到期時回到主 CTA", async () => {
       mockServices({

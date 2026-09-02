@@ -476,6 +476,29 @@ function candidateForZone(zone: ZoneProjection): CandidateAction | null {
       actionAt: zone.zoneDueAt
     };
   }
+  /*
+   * **2026-09-02：tracking 的主行動從 report_context_event 改成
+   * record_reapplication（使用者裁決）。**
+   *
+   * 使用者的原則是「這款 App 的主要功能就是提醒要補擦防曬乳」。照那條
+   * 原則，一切正常時 App 唯一叫使用者做的事不該是「去宣告一個問題」。
+   *
+   * 改動前的實際後果：首頁只有一顆按鈕，tracking 時指向記錄狀況，而
+   * secondaryActions 是空的——**還沒到期就沒有辦法記錄補擦**。但提早補擦
+   * 是常見的（要再出門、快下水、覺得乾了），核心動作在正常狀態下不可達
+   * 說不過去。
+   *
+   * 記錄狀況沒有消失，改由首頁的提問卡承接（`showContextEventPrompt`）
+   * ——那張卡 2026-08-30 就已經把它從深杏桃主 CTA 降級了，這次只是讓
+   * domain 的語意跟上 UI 早就做出的判斷。
+   *
+   * 舊版 P0 決策表（`docs/archive/2026-08-pre-redesign/`）把 tier 70 寫成
+   * report_context_event，但那份是歸檔，依 CLAUDE.md「只能用來理解歷史，
+   * 不可當作現行依據」。
+   *
+   * tier／presentationType／actionAt 都不動——**只換 actionKind**。倒數環
+   * 仍然是這個狀態的主體。
+   */
   if (zone.timingStatus === "tracking") {
     return {
       ...base,
@@ -483,7 +506,7 @@ function candidateForZone(zone: ZoneProjection): CandidateAction | null {
       priority: 70,
       presentationType: "timed_ring",
       variant: null,
-      actionKind: "report_context_event",
+      actionKind: "record_reapplication",
       actionAt: zone.zoneDueAt
     };
   }

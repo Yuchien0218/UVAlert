@@ -6,6 +6,7 @@ import QuickTimePicker from "../components/common/QuickTimePicker.vue";
 import BroadcastLoader from "../components/feedback/BroadcastLoader.vue";
 import ZoneSelectorGrid from "../components/reminder/ZoneSelectorGrid.vue";
 import { getZoneLabel } from "../features/reminder/reminderPresentation";
+import { suggestsReapplyAfter } from "../features/reminder/createContextEventController";
 import { formatDateTime } from "../helpers/datetime";
 import IconButton from "../components/common/IconButton.vue";
 import Icon from "../components/icons/Icon.vue";
@@ -38,6 +39,38 @@ watch(
 function cancel(): void {
   void router.push({ name: "home" });
 }
+
+/**
+ * 記錄完狀況之後，接著去記錄補擦。
+ *
+ * **為什麼需要這條捷徑（2026-09-02 使用者回報）。** 現實裡「大量流汗」與
+ * 「所以我補擦了」是同一件事的兩半，但原本的成功頁只給「返回目前提醒」
+ * ——要補擦得先回首頁、再從主行動進來一次，而 App 從頭到尾沒說過「接下來
+ * 該補擦」。
+ *
+ * 資料上不繞路：補擦頁會自動預選 `reapply_due`／`reapply_soon` 的部位，
+ * 而剛才記錄的狀況正好讓那些部位到期，所以不需要再選一次。
+ */
+function goReapply(): void {
+  void router.push({ name: "reminder-reapply" });
+}
+
+/**
+ * 這次記錄的狀況會不會讓部位立刻到期。
+ *
+ * **只有「游泳／下水」不會。** reducer 把 `water_start` 排除在 timedCauses
+ * 之外——它開啟的是一段水中區間（期限改由耐水標示決定），不是一個立刻
+ * 到期的原因。其餘五種（流汗／擦毛巾／摩擦／洗手／離水）都把期限拉到
+ * 事件發生的那一刻。
+ *
+ * 所以下水之後不提示補擦：那時人還在水裡，而且根本還沒到期。離水之後
+ * 反而要提示，那是最該補擦的時機。
+ */
+const suggestsReapply = computed(() =>
+  contextEvent.success.value === null
+    ? false
+    : suggestsReapplyAfter(contextEvent.success.value.kind)
+);
 
 /**
  * 送出按鈕的文字。跟著已選事件走，例如「記錄流汗」。
@@ -73,11 +106,7 @@ function zoneNames(zoneIds: string[]): string {
         <h1 data-typography-role="page-title">記錄這次狀況</h1>
         <p>記下這次狀況後，相關部位的提醒會更新；確認前不會改變提醒。</p>
       </div>
-      <IconButton
-        icon="tool-close"
-        label="返回提醒"
-        @click="cancel"
-      />
+      <IconButton icon="tool-close" label="返回提醒" @click="cancel" />
     </header>
 
     <BroadcastLoader
@@ -111,7 +140,41 @@ function zoneNames(zoneIds: string[]): string {
       >
         狀況紀錄已儲存，但目前提醒尚未重新讀取。
       </p>
-      <button class="button button--primary" type="button" @click="cancel">
+
+      <!--
+        接續到補擦（2026-09-02 使用者回報）。
+
+        **這句話不能寫成「已經補擦」。** 控制器裡對送出按鈕有一條既有規則：
+        記錄狀況與記錄補擦是兩件不同的事，措辭讓人以為補過了是這個 App 最
+        不能出錯的地方。所以這裡寫的是「接著去做」，而且明說目前的狀態是
+        「已到期」而不是「已補擦」。
+      -->
+      <template v-if="suggestsReapply">
+        <p class="control-rule-note">這些部位現在已經到期，還沒有補擦紀錄。</p>
+        <button class="button button--primary" type="button" @click="goReapply">
+          接著記錄補擦
+        </button>
+        <!--
+          次要動作用文字連結而不是第二顆按鈕：2026-08-31 的裁決（送出區那
+          兩顆同寬堆疊，次要動作拿到跟主要動作一樣的視覺份量）在這裡同樣
+          成立，而且該頁的守門測試就擋著 button--quiet。
+        -->
+        <button
+          class="text-link success-panel__skip"
+          data-typography-role="body"
+          type="button"
+          @click="cancel"
+        >
+          先不補擦，返回提醒
+        </button>
+      </template>
+
+      <button
+        v-else
+        class="button button--primary"
+        type="button"
+        @click="cancel"
+      >
         返回目前提醒
       </button>
       <p class="correction-note">
@@ -351,6 +414,12 @@ p {
   line-height: var(--line-height-body);
 }
 
+/*
+ * 成功頁的次要動作。刻意**不共用** .submit-actions__cancel——那個名字屬於
+ * 送出區，而且該頁的守門測試用它抓「送出區的取消按鈕」，借來用會讓守門
+ * 抓到錯的那一顆（實測過：它抓第一個符合的，而成功頁在前面）。
+ */
+.success-panel__skip,
 .submit-actions__cancel {
   justify-self: center;
   padding: var(--space-2) 0;

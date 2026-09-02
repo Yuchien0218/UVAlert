@@ -30,6 +30,24 @@ export type ContextEventKind =
   | "water_start"
   | "water_end";
 
+/**
+ * 記錄完這種狀況之後，接下來該不該去記錄補擦。
+ *
+ * **只有「游泳／下水」不該。** reducer 把 `water_start` 排除在 timedCauses
+ * 之外（`reducer.ts` 的 causeEvents 過濾）——它開啟的是一段水中區間，期限
+ * 改由耐水標示決定，不是一個立刻到期的原因。其餘五種都把期限拉到事件發生
+ * 的那一刻，也就是記錄完當下就已經到期。
+ *
+ * 語意上也對得起來：剛下水的人在水裡，補擦既做不到也還不需要；離水之後
+ * 反而是最該補擦的時機。
+ *
+ * **抽成函式而不是在頁面裡寫一個 `!==`**：這樣才守得住「新增第七種事件時
+ * 必須選邊」——`contextEventFollowUp.test.ts` 逐一列舉所有 kind。
+ */
+export function suggestsReapplyAfter(kind: ContextEventKind): boolean {
+  return kind !== "water_start";
+}
+
 export type ContextEventPhase =
   "idle" | "loading" | "ready" | "submitting" | "success" | "error";
 

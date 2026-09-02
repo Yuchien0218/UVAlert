@@ -178,21 +178,53 @@ const reminderPresentation = computed(() => {
  * **本來就是條件觸發**，不是每次都要做。滿寬實心按鈕讀起來是「你現在該做
  * 這件事」，跟「如果剛好發生了，才需要點」不是同一件事。
  *
+ * **2026-09-02：這張卡不再是「主行動剛好是記錄狀況」的變體，而是一個
+ * 獨立的次要入口。** tracking 的主行動改成「記錄補擦」之後，如果提問卡
+ * 仍然綁在 `actionKind === "report_context_event"`，它會在正常狀態下整個
+ * 消失——記錄狀況就沒有入口了。所以條件改成「倒數正常跑著」，而卡片裡的
+ * 按鈕明確導向記錄狀況，不再跟著主行動走。
+ *
  * 兩個條件缺一不可：
  *
- * 1. `actionKind === "report_context_event"`。那顆按鈕的文字跟著 actionKind
- *    走，共 13 種；問句只對「記錄狀況」成立。「補上防護紀錄」「確認防護
- *    方式」這些是真的要使用者去做的事，配上問句會變成明明要求動作卻寫得
- *    像可有可無。
- * 2. `tone !== "due"`。到了補擦時間時它是「記錄補擦」，那是當下最主要的
- *    任務，降級反而有害——這也是為什麼不能一刀切。
+ * 1. 主行動是 `record_reapplication`（倒數在跑）或 `report_context_event`
+ *    （遮蔽等狀態下補擦不適用，記錄狀況就是唯一能做的事）。其餘 actionKind
+ *    是真的要使用者去做的事（補上防護紀錄、確認防護方式），配上問句會變成
+ *    明明要求動作卻寫得像可有可無。
+ * 2. `tone !== "due"`。到了補擦時間時最主要的任務是補擦，這時再問一句
+ *    「剛才有流汗嗎」會分散那個任務。
  */
-const showContextEventPrompt = computed(
-  () =>
-    reminderPresentation.value !== null &&
-    reminderPresentation.value.actionKind === "report_context_event" &&
-    reminderPresentation.value.tone !== "due"
-);
+const showContextEventPrompt = computed(() => {
+  const presentation = reminderPresentation.value;
+  if (presentation === null) return false;
+  if (presentation.tone === "due") return false;
+  return (
+    presentation.actionKind === "record_reapplication" ||
+    presentation.actionKind === "report_context_event"
+  );
+});
+
+/**
+ * 主行動按鈕要不要出現。
+ *
+ * **不變式：畫面上永遠恰好有一個可按的行動。**
+ *
+ * 只有在「提問卡正在顯示，而且它那顆按鈕就是主行動本身」時才隱藏——那時
+ * 兩顆一起會變成同一個動作出現兩次（2026-08-30 把記錄狀況從主 CTA 降級的
+ * 裁決在這個狀態仍然成立）。
+ *
+ * 第一版寫成「actionKind 是 report_context_event 就隱藏」，被 HomePage 的
+ * 既有守門抓到：到期又是記錄狀況時提問卡也不顯示，結果兩個都消失，使用者
+ * 沒有任何可按的東西。那條守門是 2026-08-30 為了拆開 actionKind 與 tone 兩
+ * 個變因才加的，這次正好接住。
+ */
+const showPrimaryCta = computed(() => {
+  const presentation = reminderPresentation.value;
+  if (presentation === null) return false;
+  return !(
+    showContextEventPrompt.value &&
+    presentation.actionKind === "report_context_event"
+  );
+});
 
 /**
  * S-07 的動作分派。
@@ -397,17 +429,21 @@ function handleEndSession(): void {
           剛才有流汗、碰水或擦拭嗎？
         </p>
         <p class="home__prompt-hint">記錄後會重新計算補擦時間。</p>
+        <!--
+          明確導向記錄狀況，不再跟著主行動走——2026-09-02 之後 tracking 的
+          主行動是「記錄補擦」，跟著走會把這顆按鈕變成補擦。
+        -->
         <button
           class="button button--quiet"
           type="button"
-          @click="handleAction(reminderPresentation.actionKind)"
+          @click="handleAction('report_context_event')"
         >
-          {{ reminderPresentation.actionLabel }}
+          記錄狀況
         </button>
       </section>
 
       <button
-        v-else-if="reminderPresentation !== null"
+        v-if="showPrimaryCta && reminderPresentation !== null"
         class="button button--primary home__cta"
         type="button"
         @click="handleAction(reminderPresentation.actionKind)"
