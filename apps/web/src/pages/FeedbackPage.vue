@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import BackToMoreLink from "../components/common/BackToMoreLink.vue";
 import { computed, shallowRef } from "vue";
 import type { FeedbackType } from "@sunshield/contracts";
 import { useFeedbackController } from "../app/injection";
@@ -30,9 +31,7 @@ async function submit(): Promise<void> {
       <h1 class="page-heading__title" data-typography-role="page-title">
         問題回報與意見回饋
       </h1>
-      <p class="page-heading__body">
-        免登入即可回報，僅會收到此表單的內容。
-      </p>
+      <p class="page-heading__body">免登入即可回報，僅會收到此表單的內容。</p>
     </header>
 
     <form class="app-card feedback-form" @submit.prevent="submit">
@@ -74,9 +73,7 @@ async function submit(): Promise<void> {
       </AppNotice>
     </form>
 
-    <RouterLink class="text-link text-link--muted" to="/more"
-      >返回更多</RouterLink
-    >
+    <BackToMoreLink />
   </div>
 </template>
 
