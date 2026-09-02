@@ -18,11 +18,13 @@ withDefaults(defineProps<Props>(), { requiredReview: null });
 <template>
   <section class="under-review app-card" role="status">
     <h2 data-typography-role="section-title">{{ title }}</h2>
-    <p>{{ body }}</p>
-    <p v-if="requiredReview" class="under-review__meta">
-      需要完成的審查：{{ requiredReview }}
-    </p>
-    <p class="under-review__note">這不影響提醒功能。</p>
+    <p class="under-review__body">{{ body }}</p>
+    <div class="under-review__aside">
+      <p v-if="requiredReview" class="under-review__meta">
+        需要完成的審查：{{ requiredReview }}
+      </p>
+      <p class="under-review__note">這不影響提醒功能。</p>
+    </div>
   </section>
 </template>
 
@@ -45,13 +47,20 @@ withDefaults(defineProps<Props>(), { requiredReview: null });
   line-height: var(--line-height-body);
 }
 
-.under-review__meta {
-  color: var(--text-secondary);
-  font-size: var(--font-size-body);
+/*
+ * 次要資訊（審查要求＋「不影響提醒」）自成一組、貼緊排列，與上方主說明
+ * 之間保留卡片的 var(--space-3) 呼吸。原本三段等距（12px）排在同一個
+ * grid 裡，讀起來像互不相干的零散句子（2026-09-02 排版稽核 §7.2）。
+ */
+.under-review__aside {
+  display: grid;
+  gap: var(--space-1);
 }
 
+.under-review__meta,
 .under-review__note {
   color: var(--text-secondary);
-  font-size: var(--font-size-body);
+  font-size: var(--font-size-supporting);
+  line-height: var(--line-height-supporting);
 }
 </style>

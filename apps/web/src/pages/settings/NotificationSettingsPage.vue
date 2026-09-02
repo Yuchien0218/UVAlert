@@ -185,6 +185,29 @@ async function runTest(): Promise<void> {
           需保持瀏覽器分頁開啟；若關閉或遭系統清理將無法送達，請適時確認補擦狀態。
         </p>
       </div>
+
+      <!--
+        2026-09-02：「裝置測試」原本是一張只有標題與一顆靠左按鈕的獨立
+        app-card，卡片約 75% 是空白（排版稽核 §6.1）。測試通知本來就是
+        「確認送達行為」的一部分，併進這張卡的頁尾當操作列，不再單獨
+        撐出一張空卡。
+      -->
+      <div v-if="isGranted" class="delivery-test">
+        <button
+          class="button button--quiet"
+          type="button"
+          :disabled="testResult === 'sending'"
+          @click="runTest"
+        >
+          {{ testResult === "sending" ? "傳送中…" : "送出測試通知" }}
+        </button>
+        <p v-if="testResult === 'sent'" class="delivery-note" role="status">
+          已送出，請查看系統通知。
+        </p>
+        <p v-if="testResult === 'failed'" class="form-error" role="alert">
+          測試通知傳送失敗，請確認瀏覽器通知權限。
+        </p>
+      </div>
     </section>
 
     <section v-if="isGranted" class="app-card" aria-labelledby="repeat-heading">
@@ -233,34 +256,6 @@ async function runTest(): Promise<void> {
       </p>
     </section>
 
-    <section v-if="isGranted" class="app-card" aria-labelledby="test-heading">
-      <h2
-        id="test-heading"
-        class="settings-card-heading"
-        data-typography-role="card-title"
-      >
-        裝置測試
-      </h2>
-      <!--
-        沒有說明文字是刻意的：原本的「送一則測試通知，確認這台裝置目前
-        收得到。」幾乎重述按鈕文字「送出測試通知」，沒有帶進新資訊
-        （B9 第二輪分類，2026-08-29 裁決）。
-      -->
-      <button
-        class="button button--quiet"
-        type="button"
-        :disabled="testResult === 'sending'"
-        @click="runTest"
-      >
-        {{ testResult === "sending" ? "傳送中…" : "送出測試通知" }}
-      </button>
-      <p v-if="testResult === 'sent'" class="delivery-note" role="status">
-        已送出，請查看系統通知。
-      </p>
-      <p v-if="testResult === 'failed'" class="form-error" role="alert">
-        測試通知傳送失敗，請確認瀏覽器通知權限。
-      </p>
-    </section>
   </div>
 </template>
 
@@ -321,6 +316,13 @@ async function runTest(): Promise<void> {
   color: var(--text-secondary);
   font-size: var(--font-size-supporting);
   line-height: var(--line-height-body);
+}
+
+/* 併進「通知傳送說明」卡頁尾的測試操作列。 */
+.delivery-test {
+  display: grid;
+  justify-items: start;
+  gap: var(--space-2);
 }
 
 .delivery-emphasis {

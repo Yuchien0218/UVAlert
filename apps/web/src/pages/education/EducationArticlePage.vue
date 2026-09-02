@@ -250,8 +250,14 @@ const relatedArticles = computed(() =>
   text-underline-offset: 0.2em;
 }
 
+/*
+ * 引用區塊的外距對齊內文段落節奏。相鄰的 <p>（bottom 為
+ * --prose-paragraph-gap）與 blockquote 在一般流裡邊距會折疊，取較大值——
+ * 原本 --space-5 讓引用前後比段落間多出一截；改用 --space-4 收斂到接近
+ * 內文呼吸（2026-09-02 排版稽核 §7.3）。
+ */
 .education-article-body :deep(blockquote) {
-  margin: var(--space-5) 0;
+  margin-block: var(--space-4);
   padding-left: var(--space-4);
   border-left: 0.2rem solid var(--border-subtle);
   color: var(--text-secondary);

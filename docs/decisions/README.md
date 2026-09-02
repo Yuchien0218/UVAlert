@@ -29,6 +29,7 @@
 | `2026-08-30-unused-declaration-audit.md`          | 「宣告了但沒套用」全面稽核：class／圖示／元件／token 四類；前三類乾淨，8 個 token 從未被 var() 引用                                                                                                         | **稽核完成，未動工**——第四節有四項建議待裁決                                                                                                                  |
 | `2026-08-30-pending-decisions.md`                 | **所有還沒定案事項的單一入口**——衛教首頁三套規格矛盾、`/setup` 叉叉語意、部位狀態 pill、裝備區簡化、殘留 worktree                                                                                           | **待裁決事項的權威清單**，決一項標一項。§1–§4 已全部裁決（2026-08-30），§1／§2 並已實作；§5 是 worktree 提醒                                                  |
 | `2026-09-02-taiwan-copy-optimization-audit.md`    | 全站台灣在地化文案精簡：消除工程／領域術語（保守提醒、部位集合、時鐘校準、F-D0047-091）、精簡免責切結腔、名詞生活化（鼻部→鼻子、追蹤部位→常曬部位）、通知權限指引拆成步驟                                    | 已套用（2026-09-02）——見下方回寫落點                                                                                                                          |
+| `2026-09-02-ui-layout-consistency-audit.md`       | 另一 AI 整理的排版一致性稽核：二級頁面出口、卡片深淺語意、原生 Radio、圖示節奏、襯線標題、異常空白、段落間距。**文末「檢視結果與待辦」是接手 AI 逐項對照程式碼與既有裁決後的處置狀態**                       | 部分採用：§7.1／§7.2／§7.3／§6.1 已實作（PR #100）；§1／§5／§6.2／§6.3／§6.4 不採用；§2／§3／§4／§7.4 待實作——狀態一律看該文件文末                              |
 
 `2026-08-22-mvp-flow-review.md` 原為待裁決的分析文件，2026-08-23 已逐項裁決完畢，轉為歷史參考。它指出的問題有一部分與實際程式碼不符（例如「三個並行的衛教入口」），採用前請先核對程式碼。
 
@@ -116,6 +117,7 @@
 | **裝備詳情從 `/products/:id` 整頁改成清單上的抽屜，該路由移除**（導回清單，不做「導回並自動打開」） | `components/product/GearDetailSheet.vue`、`ProductsPage.vue`、`router/index.ts` | **使用者裁決 2026-09-01** |
 | bottom sheet 內距 20→24px，新增 `--sheet-padding`——**結案 `DESIGN.md` 第六節那條「等裁決」的已知落差**（第四節本來就訂 24px） | `packages/ui/src/styles.css`、`BottomSheet.vue`、`DESIGN.md` 第六節 | **使用者裁決 2026-09-01** |
 | 台灣在地化文案精簡 11 項：離線／時鐘倒數狀態去掉「保守提醒／狀態」、`METHOD_UNKNOWN` 收句、免責切結腔改成正面安全指引、五日預報去掉資料集編號、部位與情境名詞生活化（鼻子／腳背／通勤常曬部位／室內靠窗）、通知權限指引改成 `<ol>` 步驟 | `features/reminder/reminderPresentation.ts`、`features/setup/setupCatalog.ts`、`pages/ReportContextEventPage.vue`、`components/uv/FiveDayUvCard.vue`、`pages/settings/DataSettingsPage.vue`、`pages/settings/NotificationSettingsPage.vue`、`components/region/RegionLocationPanel.vue`（＋ 3 個守門測試同步） | 已完成（2026-09-02） |
+| 排版稽核第 2 批（只做低風險、與既有裁決不衝突的）：§7.1 段落鄰近律、§7.2 審查卡文字層級、§7.3 blockquote 間距、§6.1 「裝置測試」空卡併進「通知傳送說明」卡 | `DataSettingsPage.vue`、`ContentUnderReview.vue`、`EducationArticlePage.vue`、`NotificationSettingsPage.vue`（＋ test）、`2026-08-15-…-current.md` §通知設定頁 | 已完成（2026-09-02，PR #100）——§1／§5／§6.2–6.4 不採用、§2／§3／§4／§7.4 待實作，狀態看 `2026-09-02-ui-layout-consistency-audit.md` 文末 |
 
 ### 為什麼裝備詳情值得單獨記一筆
 
