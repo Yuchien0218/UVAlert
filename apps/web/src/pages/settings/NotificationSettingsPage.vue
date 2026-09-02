@@ -106,15 +106,9 @@ async function runTest(): Promise<void> {
         <h1 class="page-heading__title" data-typography-role="page-title">
           通知設定
         </h1>
-        <p>
-          通知皆於本機發出，不經外部伺服器。
-        </p>
+        <p>通知皆於本機發出，不經外部伺服器。</p>
       </div>
-      <IconButton
-        icon="tool-arrow-left"
-        label="返回更多"
-        @click="goBack"
-      />
+      <IconButton icon="tool-arrow-left" label="返回更多" @click="goBack" />
     </header>
 
     <!-- 裝置支援與權限狀態卡片 -->
@@ -233,12 +227,25 @@ async function runTest(): Promise<void> {
       >
         再次提醒頻率
       </h2>
+      <!--
+        2026-09-02：改用共用的 `.choice-grid`（排版稽核 §3）。
+
+        這一組原本是全站唯一沒有套任何選項樣式的原生 radio——**無障礙上
+        本來就完全合格**，問題純粹是它跟其他所有選一個的地方長得不一樣。
+
+        `.choice-grid` **保留原生 radio**（`accent-color` 上色，不是把它
+        藏起來自刻圓點），所以鍵盤操作、方向鍵在群組內移動、螢幕閱讀器的
+        radiogroup 語意全部不變，只是外框與選取態跟著全站走。
+
+        選取色來自 `.choice-grid label:has(input:checked)`，不自刻——那組
+        顏色 2026-08-24 才從 5 個各自實作的地方收斂成一份。
+      -->
       <div
-        class="repeat-options"
+        class="choice-grid"
         role="radiogroup"
         aria-labelledby="repeat-heading"
       >
-        <label class="repeat-option">
+        <label>
           <input
             type="radio"
             name="reminder-frequency"
@@ -247,7 +254,7 @@ async function runTest(): Promise<void> {
           />
           只提醒一次
         </label>
-        <label class="repeat-option">
+        <label>
           <input
             type="radio"
             name="reminder-frequency"
@@ -256,7 +263,7 @@ async function runTest(): Promise<void> {
           />
           每 5 分鐘再提醒一次
         </label>
-        <label class="repeat-option">
+        <label>
           <input
             type="radio"
             name="reminder-frequency"
@@ -270,7 +277,6 @@ async function runTest(): Promise<void> {
         此限制與單次提醒相同：需保持瀏覽器分頁開啟才會送達。
       </p>
     </section>
-
   </div>
 </template>
 
@@ -361,17 +367,5 @@ async function runTest(): Promise<void> {
   margin: 0;
   color: var(--text-body);
   line-height: var(--line-height-body);
-}
-
-.repeat-options {
-  display: grid;
-  gap: var(--space-2);
-}
-
-.repeat-option {
-  display: flex;
-  align-items: center;
-  gap: var(--space-2);
-  min-height: var(--tap-target);
 }
 </style>
