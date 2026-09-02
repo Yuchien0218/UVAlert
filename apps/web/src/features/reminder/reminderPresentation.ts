@@ -62,7 +62,7 @@ function secondary(...kinds: SecondaryActionKind[]): SecondaryAction[] {
 
 export const BODY_ZONE_LABELS: Record<BodyZoneCode, string> = {
   face_forehead: "額頭",
-  face_nose_cheeks: "鼻部與雙頰",
+  face_nose_cheeks: "鼻子與雙頰",
   face_lower: "臉部下半部",
   ears: "耳朵",
   lips: "嘴唇",
@@ -254,13 +254,13 @@ function buildUntimedPresentation(options: {
     const online = connectivity === "online";
     return {
       ...base,
-      eyebrow: online ? "時間需要重新確認" : "目前無法校準時間",
+      eyebrow: online ? "時間需要重新確認" : "目前無法校對時間",
       title: "裝置時間可能不正確",
       body: online
-        ? "為避免錯誤延長提醒，請重新連線校準。目前採較短的保守狀態。"
-        : "目前離線，無法確認可信時間。系統不會因此延長期限，請查看保守提醒。",
-      timeLabel: "保守提醒",
-      ariaLabel: "裝置時間可能不正確，目前使用保守提醒。",
+        ? "請重新連線校對時間。離線期間系統已自動縮短提醒間隔以維護防護安全。"
+        : "目前離線無法校對時間，系統已自動縮短提醒間隔以維護防護安全。",
+      timeLabel: "已縮短間隔",
+      ariaLabel: "裝置時間可能不正確，系統已自動縮短提醒間隔。",
       // 時鐘不可信時使用者要確認的是「我已經記了什麼」，資料就在本頁下方，
       // 離開頁面反而失去脈絡——所以是原地錨點而不是換頁。
       secondaryActions: secondary("view_saved_records")
@@ -281,7 +281,7 @@ function buildUntimedPresentation(options: {
       ...base,
       eyebrow: "防護方式不確定",
       title: `請確認${zoneLabel}目前的防護方式`,
-      body: "防護方式尚未確認，目前會採用保守提醒，暫不顯示補擦倒數。確認防護方式後，即可建立對應的提醒時間。",
+      body: "防護方式尚未確認，暫不顯示補擦倒數。確認後即可開始計時。",
       timeLabel: "未計時",
       ariaLabel: `${zoneLabel}防護方式不確定。`
     };
@@ -364,7 +364,7 @@ function buildUntimedPresentation(options: {
       ...base,
       eyebrow: "請依防曬乳標示等待",
       title: `${zoneLabel}仍在防曬乳標示的等待時間內`,
-      body: `依包裝標示等待至 ${absoluteTime}。期間請搭配衣物或遮蔭；等待結束不代表系統已確認防護效果，也不代表可以放心待在陽光下。`,
+      body: `建議依包裝標示等待至 ${absoluteTime}。等待期間可搭配帽子、長袖或待在陰涼處。`,
       timeLabel: absoluteTime,
       ariaLabel: `${zoneLabel}仍在防曬乳標示的等待時間內，標示等待至 ${absoluteTime}。`
     };
@@ -405,7 +405,7 @@ function buildUntimedPresentation(options: {
       ...base,
       eyebrow: "本次提醒已結束",
       title: "本次提醒已結束",
-      body: "結束不代表已完成補擦，也不代表防護完成或可以放心待在陽光下。需要時可以重新開始新的提醒。",
+      body: "本次提醒已結束。若仍在戶外，請記得補擦防曬或移至陰涼處。",
       timeLabel: "已結束",
       ariaLabel: "本次提醒已結束。"
     };

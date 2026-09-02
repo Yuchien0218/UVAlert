@@ -190,7 +190,7 @@ describe("QuickProtectionSummary", () => {
      * 另外守住 preset 名稱仍然看得到——去掉外框之後它是唯一的標題。
      */
     expect(wrapper.text()).not.toContain("快速提醒（推薦）");
-    expect(wrapper.text()).toContain("通勤常見追蹤部位");
+    expect(wrapper.text()).toContain("通勤常曬部位");
     expect(wrapper.text()).toContain("使用這組並繼續");
     await findButton(wrapper, "使用這組並繼續").trigger("click");
     expect(wrapper.emitted("accept")).toHaveLength(1);

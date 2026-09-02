@@ -130,11 +130,11 @@ async function runTest(): Promise<void> {
           如何開啟
         </button>
         <div v-if="showDeniedSteps" id="denied-steps" class="note-box">
-          <p>
-            開啟位置依瀏覽器而異，通常在網址列左側的鎖頭或資訊圖示裡找到「網站設定」或「權限」，把通知改為允許；也可以到瀏覽器的「設定
-            → 隱私權與安全性 → 網站設定 →
-            通知」找到本網站調整。若系統整體關閉了通知，還需要到作業系統的通知設定裡一併打開。
-          </p>
+          <ol class="steps-list">
+            <li>點擊網址列左側的「鎖頭」或「資訊」圖示。</li>
+            <li>找到「權限」，將「通知」改為「允許」。</li>
+            <li>若仍無法接收，請檢查手機或電腦作業系統的通知設定。</li>
+          </ol>
         </div>
       </div>
 
@@ -229,7 +229,7 @@ async function runTest(): Promise<void> {
         </label>
       </div>
       <p class="delivery-note">
-        重複提醒跟單次提醒受同一個限制：只在分頁還活著時有效，不是新的送達保證。
+        此限制與單次提醒相同：需保持瀏覽器分頁開啟才會送達。
       </p>
     </section>
 
@@ -302,6 +302,13 @@ async function runTest(): Promise<void> {
 .note-box p,
 .action-box p {
   margin: 0;
+}
+
+.steps-list {
+  margin: 0;
+  padding-left: var(--space-4);
+  display: grid;
+  gap: var(--space-2);
 }
 
 .action-box {

@@ -88,11 +88,11 @@ const errorMessage = computed(() => {
         確認所在行政區
       </h3>
       <p>
-        系統配對為 <strong>{{ candidate.displayName }}</strong>
+        目前定位在 <strong>{{ candidate.displayName }}</strong>
         <template v-if="approximateAccuracyMeters !== null">
-          ，這次定位精度約 {{ approximateAccuracyMeters }} 公尺
+          （誤差約 {{ approximateAccuracyMeters }} 公尺）
         </template>
-        。請確認後再儲存。
+        ，請確認是否正確。
       </p>
       <button
         class="button button--primary"
