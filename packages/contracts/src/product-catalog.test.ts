@@ -63,7 +63,7 @@ describe("ProductCatalogRecordV1Schema", () => {
    *
    * 這條測試證明「不升版」確實可行：缺少新欄位的舊紀錄仍然解析得過。
    */
-  it("缺少 priceTwd／usageRating 的舊紀錄仍解析得過，不需要升版", () => {
+  it("缺少 priceTwd／usageRating／size／color 的舊紀錄仍解析得過，不需要升版", () => {
     const legacy = {
       schemaVersion: PRODUCT_CATALOG_RECORD_VERSION,
       productId: "product-legacy",
@@ -98,6 +98,9 @@ describe("ProductCatalogRecordV1Schema", () => {
 
     expect(result.priceTwd).toBeNull();
     expect(result.usageRating).toBeNull();
+    // 2026-09-01 新增的兩欄同樣走 .default(null)，舊紀錄不需要遷移。
+    expect(result.size).toBeNull();
+    expect(result.color).toBeNull();
     // 既有資料不能在解析過程中被動到。
     expect(result.gearCategory).toBe("eyewear");
     expect(result.purchaseMonth).toBe("2026-07");

@@ -184,7 +184,8 @@ export const ExpiryDateSchema = z
 /**
  * 產品目錄紀錄的 schema 版本。
  *
- * **2026-08-30 新增 `priceTwd` 與 `usageRating` 時刻意「不」升版。**
+ * **2026-08-30 新增 `priceTwd` 與 `usageRating`、2026-09-01 新增 `size` 與
+ * `color` 時，都刻意「不」升版。**
  * 規格草案原本推論「`schemaVersion` 是 `z.literal()`，不升版舊紀錄反而會
  * 過不了」——實際查證後那個推論是反的，而且升版才是危險的那一邊：
  *
@@ -235,6 +236,27 @@ export const ProductCatalogRecordV1Schema = z.object({
    * 評分網站。
    */
   usageRating: z.enum(["good", "ok", "bad"]).nullable().default(null),
+  /**
+   * 尺寸。不進 reducer。
+   *
+   * **自由文字而不是 S／M／L／XL enum**（2026-09-01 使用者裁決）：歐碼、
+   * 數字碼、Free Size 都真實存在，enum 會擋掉使用者手上的實際標示。跟
+   * `usageRating` 選三檔 enum 的理由相反是刻意的——那個要能排序與篩選，
+   * 這個只是照抄吊牌。
+   *
+   * 只對「有尺寸這個概念」的品類有意義（防曬衣物、其他裝備）。防曬乳與
+   * 太陽眼鏡的表單不顯示這一欄——限制在表單層，不在 schema 層，因為
+   * schema 不該假設使用者的分類習慣。
+   */
+  size: z.string().trim().max(20).nullable().default(null),
+  /**
+   * 顏色。不進 reducer。
+   *
+   * 同樣是自由文字，而且**只印字不做色塊**（2026-09-01 使用者裁決）：
+   * 「霧灰藍」這種描述沒辦法對應到一個色碼，硬要色塊就得限定色票，
+   * 那會變成另一件事。
+   */
+  color: z.string().trim().max(20).nullable().default(null),
   /** 「過去用過」的時間戳，不進 reducer。 */
   archivedAt: z.string().datetime({ offset: true }).nullable().default(null),
   createdAt: z.string().datetime({ offset: true }),

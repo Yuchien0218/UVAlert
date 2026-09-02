@@ -5,6 +5,7 @@ import EmptyStateCard from "../components/common/EmptyStateCard.vue";
 import { computed, onMounted, shallowRef } from "vue";
 import { useRouter } from "vue-router";
 import { useWebAppServices } from "../app/injection";
+import IconButton from "../components/common/IconButton.vue";
 import GearDetailSheet from "../components/product/GearDetailSheet.vue";
 import GearListItem from "../components/product/GearListItem.vue";
 import { GEAR_CATEGORY_LABELS } from "../features/product/gearPresentation";
@@ -57,6 +58,10 @@ function addGear(): void {
   void router.push({ name: "product-new" });
 }
 
+function shareGear(): void {
+  void router.push({ name: "product-share" });
+}
+
 /**
  * 2026-09-01：詳情從整頁改成就地升起的抽屜（使用者裁決）。
  *
@@ -93,13 +98,30 @@ function editGear(productId: string): void {
 
 <template>
   <div class="page-stack gear-page">
-    <header class="page-heading">
-      <h1 class="page-heading__title" data-typography-role="page-title">
-        我的防曬裝備
-      </h1>
-      <p>
-        清單儲存於本機。只有防曬乳支援補擦倒數，其他裝備僅供紀錄。
-      </p>
+    <!--
+      2026-09-01：標題列右上角加分享入口（計畫 Task 1.3）。
+
+      卡片是「我的裝備」整組而不是單件，所以入口在清單頁而不是詳情抽屜。
+      位置沿用 2026-09-01 統一出來的「標題列右側單一動作」語彙（衛教兩頁、
+      裝備詳情），那一格在這頁本來是空的。
+
+      **沒有使用中的裝備時不出現**——沒東西可分享。
+    -->
+    <header class="page-heading gear-heading">
+      <div>
+        <h1 class="page-heading__title" data-typography-role="page-title">
+          我的防曬裝備
+        </h1>
+        <p>
+          清單儲存於本機。只有防曬乳支援補擦倒數，其他裝備僅供紀錄。
+        </p>
+      </div>
+      <IconButton
+        v-if="current.length > 0"
+        icon="tool-share"
+        label="分享我的防曬裝備"
+        @click="shareGear"
+      />
     </header>
 
 
@@ -238,6 +260,18 @@ p {
 }
 
 .page-heading {
+  display: grid;
+  gap: var(--space-2);
+}
+
+/* 標題群組在左、分享鈕在右上角同一列——跟 .flow-heading 同一套版型。 */
+.gear-heading {
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: start;
+  gap: var(--space-4);
+}
+
+.gear-heading > div {
   display: grid;
   gap: var(--space-2);
 }

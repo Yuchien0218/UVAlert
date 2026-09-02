@@ -106,6 +106,8 @@ const snapshotForm = ref<ProductSnapshotFormValue>({
   intervalMinutes: null,
   waterResistance: "unknown"
 });
+const size = ref("");
+const color = ref("");
 const localError = shallowRef<string | null>(null);
 const confirmingDelete = shallowRef(false);
 
@@ -140,6 +142,15 @@ const needsLabelFields = computed(
 );
 const showSunscreenFields = computed(() => gearCategory.value === "sunscreen");
 
+/*
+ * 尺寸與顏色只對有這個概念的品類顯示（2026-09-01 使用者指定）：
+ * 防曬衣物與其他裝備兩者都有、太陽眼鏡只有顏色、防曬乳兩者都沒有。
+ */
+const showsSize = computed(
+  () => gearCategory.value === "clothing" || gearCategory.value === "other_gear"
+);
+const showsColor = computed(() => gearCategory.value !== "sunscreen");
+
 const safety = computed(() =>
   existing.value === null ? null : gearSafetyState(existing.value)
 );
@@ -169,6 +180,8 @@ onMounted(async () => {
       ? ""
       : String(record.currentSnapshot.spf);
   paGradeInput.value = record.currentSnapshot.paGrade ?? "";
+  size.value = record.size ?? "";
+  color.value = record.color ?? "";
 });
 
 /*
@@ -259,6 +272,10 @@ async function save(): Promise<void> {
     note: note.value.trim() === "" ? null : note.value.trim(),
     priceTwd: parsePriceTwd(priceTwd.value),
     usageRating: usageRating.value === "" ? null : usageRating.value,
+    // 品類不適用時一律存 null，避免留下看起來有意義、實際不會顯示的資料。
+    size: showsSize.value && size.value.trim() !== "" ? size.value.trim() : null,
+    color:
+      showsColor.value && color.value.trim() !== "" ? color.value.trim() : null,
     productId: props.productId ?? undefined
   });
 
@@ -505,6 +522,27 @@ async function remove(): Promise<void> {
             <option value="ok">普通</option>
             <option value="bad">不好用</option>
           </select>
+        </div>
+      </div>
+
+      <!--
+        2026-09-01：尺寸與顏色（分享卡要印，使用者裁決）。
+
+        **只對有這個概念的品類顯示**：防曬衣物與其他裝備有尺寸與顏色、
+        太陽眼鏡只有顏色、**防曬乳兩者都沒有**——它的識別資訊是 SPF／PA。
+        限制做在表單層而不是 schema 層：schema 不該假設使用者的分類習慣，
+        而且欄位是選填的，硬擋只會讓資料進不來。
+
+        自由文字而不是 S／M／L／XL：歐碼、數字碼、Free Size 都真實存在。
+      -->
+      <div v-if="showsSize || showsColor" class="field-pair">
+        <div v-if="showsSize">
+          <label for="gear-size">尺寸</label>
+          <input id="gear-size" v-model="size" type="text" maxlength="20" />
+        </div>
+        <div v-if="showsColor">
+          <label for="gear-color">顏色</label>
+          <input id="gear-color" v-model="color" type="text" maxlength="20" />
         </div>
       </div>
 
