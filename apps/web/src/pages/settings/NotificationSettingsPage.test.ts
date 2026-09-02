@@ -186,7 +186,8 @@ describe("NotificationSettingsPage", () => {
     expect(wrapper.find("#denied-steps").exists()).toBe(false);
     await wrapper.get("button.button--quiet").trigger("click");
     expect(wrapper.find("#denied-steps").exists()).toBe(true);
-    expect(wrapper.text()).toContain("網站設定");
+    expect(wrapper.findAll("#denied-steps li").length).toBe(3);
+    expect(wrapper.text()).toContain("將「通知」改為「允許」");
   });
 
   it("裝置不支援時顯示不支援提示", () => {

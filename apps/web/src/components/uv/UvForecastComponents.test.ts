@@ -40,7 +40,7 @@ describe("FiveDayUvCard", () => {
     );
     expect(wrapper.text()).toContain("臺北市中正區");
     expect(wrapper.text()).toContain("過量級");
-    expect(wrapper.text()).toContain("F-D0047-091");
+    expect(wrapper.text()).toContain("日間紫外線預報");
     /*
      * 2026-08-31：免責文案移到 ForecastPage（卡片與頁面原本各有一份幾乎
      * 一樣的，使用者回饋重複）。守門跟著搬到 ForecastPage.test.ts，**沒有

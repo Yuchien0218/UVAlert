@@ -186,7 +186,7 @@ function writeSyncDisabled(value: boolean): void {
             <dd>{{ formatTime(summary.lastWeatherSnapshotAt) }}</dd>
           </div>
           <div>
-            <dt>最後一次時鐘校準</dt>
+            <dt>上次時間校對</dt>
             <dd>{{ formatTime(summary.lastClockCalibrationAt) }}</dd>
           </div>
         </dl>

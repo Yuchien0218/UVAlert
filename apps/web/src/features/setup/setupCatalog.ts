@@ -39,7 +39,7 @@ export const BODY_ZONE_GROUPS: readonly BodyZoneGroup[] = [
   {
     id: "face",
     label: "臉部",
-    description: "額頭、鼻部與雙頰、臉部下半部",
+    description: "額頭、鼻子與雙頰、臉部下半部",
     zoneCodes: ["face_forehead", "face_nose_cheeks", "face_lower"]
   },
   {
@@ -80,7 +80,7 @@ export const BODY_ZONE_GROUPS: readonly BodyZoneGroup[] = [
   },
   {
     id: "feet",
-    label: "腳背／外露腳部",
+    label: "腳背",
     description: "目前露出的足部",
     zoneCodes: ["feet"]
   },
@@ -107,14 +107,14 @@ export const SETUP_PRESETS: readonly SetupPreset[] = [
   },
   {
     id: "commute_tracked",
-    label: "通勤常見追蹤部位",
+    label: "通勤常曬部位",
     summary: "臉部、耳朵、頸部、手臂、手背",
     groupIds: ["face", "ears", "neck", "arms", "hand_backs"]
   },
   {
     id: "broad_tracked",
     label: "臉頸＋手腳",
-    summary: "通勤常見部位，加上腿部與外露腳部",
+    summary: "通勤常曬部位，加上腿部與腳背",
     groupIds: ["face", "ears", "neck", "arms", "hand_backs", "legs", "feet"]
   },
   {
@@ -135,8 +135,8 @@ export const SETUP_PRESETS: readonly SetupPreset[] = [
 ];
 
 export const CONTEXT_LABELS: Record<SessionContext, string> = {
-  indoor_away: "室內遠離直射陽光",
-  indoor_window: "室內近直射窗邊",
+  indoor_away: "室內（遠離窗戶）",
+  indoor_window: "室內（靠窗邊）",
   outdoor_general: "一般戶外",
   outdoor_exercise: "戶外運動",
   water_preparing: "水上活動・準備下水",
@@ -168,7 +168,7 @@ export const CONTEXT_ICONS: Record<SessionContext, IconName> = {
 
 export const BODY_ZONE_LABELS: Record<BodyZoneCode, string> = {
   face_forehead: "額頭",
-  face_nose_cheeks: "鼻部與雙頰",
+  face_nose_cheeks: "鼻子與雙頰",
   face_lower: "臉部下半部",
   ears: "耳朵",
   lips: "嘴唇",
@@ -181,7 +181,7 @@ export const BODY_ZONE_LABELS: Record<BodyZoneCode, string> = {
   arms: "手臂",
   hand_backs: "手背",
   legs: "腿部",
-  feet: "腳背／外露腳部",
+  feet: "腳背",
   custom: "其他部位"
 };
 

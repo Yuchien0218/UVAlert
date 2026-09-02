@@ -66,7 +66,7 @@ describe("buildHomeReminderClockPresentation", () => {
 
     expect(result).not.toBeNull();
     expect(result?.scope).toBe("priority");
-    expect(result?.title).toBe("接下來需要補擦：鼻部與雙頰");
+    expect(result?.title).toBe("接下來需要補擦：鼻子與雙頰");
     expect(result?.timeLabel).toMatch(/^預計 \d{2}:\d{2}$/);
     expect(result?.remainingMinutes).toBe(30);
     expect(result?.progress).toBeCloseTo(1 / 3);

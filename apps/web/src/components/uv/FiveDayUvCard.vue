@@ -150,7 +150,7 @@ function getUnavailableMessage(error: UvForecastError): string {
         span 並禁止在中間斷行——「更新時間 9/1 14:23」是一個詞組。
       -->
       <p class="uv-forecast__source">
-        {{ forecast.sourceDisplayName }}・F-D0047-091・白日時段
+        {{ forecast.sourceDisplayName }}・日間紫外線預報
         <span class="uv-forecast__updated">
           更新時間
           <span class="uv-forecast__updated-at stat-figure">{{

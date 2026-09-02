@@ -126,7 +126,7 @@ function zoneNames(zoneIds: string[]): string {
           發生了什麼？
         </h2>
         <p class="control-rule-note">
-          選擇最符合的一項。沒有可以結束的水上活動時，不會顯示「離水」。
+          請選擇剛才發生的狀況（例如大量流汗或碰水）。
         </p>
         <div class="kind-grid">
           <button
@@ -164,7 +164,7 @@ function zoneNames(zoneIds: string[]): string {
             v-if="contextEvent.zoneSelectionLocked.value"
             class="control-rule-note"
           >
-            離水必須沿用入水時的部位集合，因此這裡不可調整。
+            離水會直接套用下水時選取的部位，無法在此修改。
           </p>
           <p v-else class="control-rule-note">
             只勾選這次實際受影響的部位；未勾選的部位狀態不會改變。
