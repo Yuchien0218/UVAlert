@@ -52,7 +52,32 @@ defineExpose({
   }
 });
 
-const referenceNow = new Date();
+/**
+ * 這個選擇器的「現在」。
+ *
+ * **2026-09-02：改成在互動當下重新取樣，不再凍結在掛載那一刻。**
+ *
+ * 改動前是 `const referenceNow = new Date()`，於是頁面開著愈久偏得愈多：
+ *
+ * - 「1 分鐘前」實際上是「開頁前一分鐘」，開著十分鐘就變成十一分鐘前
+ * - `max` 停在開頁那一刻，**選不了比開頁更晚的時間**
+ *
+ * **刻意不用 ticker。** `useCurrentTime` 那類每秒跳動的時鐘會讓畫面在使用者
+ * 眼前漂移：選了「1 分鐘前」之後放著不動，過一分鐘就會自己變成「已調整為
+ * 2 分鐘前」、選取高亮還會跳到另一顆——使用者什麼都沒做，畫面卻在變。
+ *
+ * 只在**使用者動作的當下**重新取樣（按快選、展開調整面板），兩個真正壞掉的
+ * 行為就都好了，而且沒有任何東西會自己動。
+ *
+ * 已知的殘留：展開面板之後放很久才選，`max` 會是展開當下的值。那時送出仍有
+ * 控制器的「不能晚於目前時間」把關，不會寫進未來的時間。
+ */
+const referenceNow = shallowRef(new Date());
+
+/** 在使用者動作的當下把「現在」對回真正的現在。 */
+function syncNow(): void {
+  referenceNow.value = new Date();
+}
 const DEFAULT_MINUTES_AGO = 1;
 
 const adjusting = shallowRef(false);
@@ -61,7 +86,9 @@ const draftLocalValue = shallowRef("");
 const adjustPanelId = useId();
 
 function isoFor(minutesAgo: number): string {
-  return new Date(referenceNow.getTime() - minutesAgo * 60_000).toISOString();
+  return new Date(
+    referenceNow.value.getTime() - minutesAgo * 60_000
+  ).toISOString();
 }
 
 /** datetime-local 需要不含時區的本地字串。 */
@@ -81,14 +108,16 @@ const selectedAt = computed(() =>
 const minutesAgo = computed(() => {
   const at = selectedAt.value;
   if (at === null) return null;
-  return Math.round((referenceNow.getTime() - at.getTime()) / 60_000);
+  return Math.round((referenceNow.value.getTime() - at.getTime()) / 60_000);
 });
 
 /** 預設快選是否正在生效——允許幾秒誤差，避免時鐘跳動造成閃爍。 */
 const usingDefault = computed(() => {
   const at = selectedAt.value;
   if (at === null) return false;
-  return Math.abs(at.getTime() - (referenceNow.getTime() - 60_000)) < 30_000;
+  return (
+    Math.abs(at.getTime() - (referenceNow.value.getTime() - 60_000)) < 30_000
+  );
 });
 
 /**
@@ -102,7 +131,7 @@ const tooLongAgoNotice = computed(() => {
   const at = selectedAt.value;
   if (at === null) return null;
   return describeTooLongAgo(
-    minutesBetween(at, referenceNow),
+    minutesBetween(at, referenceNow.value),
     APPLICATION_MAX_MINUTES_AGO,
     "application"
   );
@@ -110,7 +139,9 @@ const tooLongAgoNotice = computed(() => {
 
 const earliestLocalValue = computed(() =>
   toLocalInputValue(
-    new Date(referenceNow.getTime() - APPLICATION_MAX_MINUTES_AGO * 60_000)
+    new Date(
+      referenceNow.value.getTime() - APPLICATION_MAX_MINUTES_AGO * 60_000
+    )
   )
 );
 
@@ -125,6 +156,7 @@ const adjustedLabel = computed(() => {
 });
 
 function selectDefault(): void {
+  syncNow();
   value.value = isoFor(DEFAULT_MINUTES_AGO);
 }
 
@@ -133,8 +165,9 @@ function toggleAdjust(): void {
     adjusting.value = false;
     return;
   }
+  syncNow();
   draftLocalValue.value = toLocalInputValue(
-    selectedAt.value ?? new Date(referenceNow.getTime() - 60_000)
+    selectedAt.value ?? new Date(referenceNow.value.getTime() - 60_000)
   );
   adjusting.value = true;
 }
