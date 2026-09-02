@@ -183,7 +183,8 @@ export function isTrustedPushServiceEndpoint(endpoint: URL): boolean {
   }
   if (
     endpoint.hostname === "updates.push.services.mozilla.com" &&
-    hasRequiredPathSegment(endpoint.pathname, "/wpush/v2/")
+    (hasRequiredPathSegment(endpoint.pathname, "/wpush/v1/") ||
+      hasRequiredPathSegment(endpoint.pathname, "/wpush/v2/"))
   ) {
     return true;
   }

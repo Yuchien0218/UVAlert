@@ -34,6 +34,18 @@ describe("push subscription request contract", () => {
     ).resolves.toEqual(validSubscription);
   });
 
+  it("accepts a Firefox Web Push v1 endpoint", async () => {
+    const endpoint =
+      "https://updates.push.services.mozilla.com/wpush/v1/subscription-abc";
+
+    await expect(
+      parsePushSubscriptionRequest(
+        request({ ...validSubscription, endpoint }),
+        { allowLocalHttp: false }
+      )
+    ).resolves.toMatchObject({ endpoint });
+  });
+
   it.each([
     "http://push.example.test/subscription/abc",
     "ftp://push.example.test/subscription/abc",
