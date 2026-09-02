@@ -8,10 +8,9 @@ import {
 } from "@sunshield/contracts";
 import { makeProductSnapshot } from "@sunshield/test-fixtures";
 import { mount } from "@vue/test-utils";
+import { formatFullDate } from "../../helpers/datetime";
 import { describe, expect, it } from "vitest";
-import GearShareCard, {
-  type GearShareCardData
-} from "./GearShareCard.vue";
+import GearShareCard, { type GearShareCardData } from "./GearShareCard.vue";
 
 /**
  * 分享卡（計畫階段一，`docs/superpowers/plans/2026-09-01-gear-share-card.md`）。
@@ -78,12 +77,15 @@ function mountCard(
 
 describe("兩種模式", () => {
   /*
-   * 沒有進行中的提醒時，這張卡不是「今天」的快照。**這時不印日期也不印 UV**
-   * ——一張沒有日期的卡片配一個當下的 UV 值，傳出去過幾天再看就是錯的。
+   * 沒有進行中的提醒時，這張卡不是「今天」的快照，所以**不印 UV**——一張
+   * 通用清單配一個當下的 UV 值，傳出去過幾天再看就是錯的。
    *
-   * 三件事分開守：標題、日期、UV。只守標題的話，把日期留著也會過。
+   * **2026-09-02：日期不再是這條守門的一部分。** 原本這裡連日期一起擋（測試
+   * 名稱寫「不印日期與 UV」），因為當時的版面把日期放在頁首、只有進行中提醒
+   * 才有。頁尾改成日期之後兩種模式都印，守日期的責任移到「頁尾是日期」那一
+   * 組。留下這段是為了說明規則變了，不是被漏掉。
    */
-  it("沒有進行中的提醒：標題不帶「今天」，不印日期與 UV", () => {
+  it("沒有進行中的提醒：標題不帶「今天」，不印 UV", () => {
     const wrapper = mountCard(data());
 
     expect(wrapper.text()).toContain("我的防曬裝備");
@@ -232,30 +234,76 @@ describe("配色約束", () => {
   });
 });
 
-describe("安全註記不可省略", () => {
+/*
+ * **2026-09-02：頁尾從安全註記改成日期（使用者裁決）。**
+ *
+ * 這裡原本有兩條守門，守的是 DESIGN.md 第五節「不可隱藏」清單上的安全
+ * 註記。它們現在被移除了，取代的是下面這組守日期的測試。
+ *
+ * 保留這段說明是刻意的：把守門刪掉而不留痕跡，下一個人會以為那條規則
+ * 從來不存在。裁決的理由與代價見
+ * `docs/decisions/2026-09-02-share-card-footer-date.md`。
+ */
+describe("頁尾是日期", () => {
   /*
-   * DESIGN.md 第五節的「不可隱藏」清單。分享出去的圖更需要它——收到圖的人
-   * 沒有這個 App 的脈絡。
+   * 兩種模式都要有日期。分享出去的圖會被轉傳，收到的人需要知道它是什麼
+   * 時候的清單——沒有進行中提醒時用「今天」，也就是卡片被做出來的日子。
    */
-  it("卡片一定帶著安全註記", () => {
-    expect(mountCard(data()).text()).toContain(
-      "不是安全曝曬時間或防護效果保證"
-    );
+  it("沒有進行中提醒時用今天的日期", () => {
+    const text = mountCard(data()).text();
+
+    expect(text).toContain(formatFullDate(new Date()));
   });
 
-  /* 有印 UV 才附資料來源；沒印 UV 時附出處是多餘的。 */
-  it("印了 UV 才附中央氣象署出處", () => {
-    expect(mountCard(data()).text()).not.toContain("F-D0047-091");
-
-    const withUv = mountCard(
+  it("有進行中提醒時用提醒的起始日", () => {
+    const text = mountCard(
       data({
         session: {
           context: "outdoor_general",
           startedAt: "2026-08-23T01:00:00.000Z"
         }
       })
+    ).text();
+
+    expect(text).toContain(
+      formatFullDate(new Date("2026-08-23T01:00:00.000Z"))
     );
-    expect(withUv.text()).toContain("F-D0047-091");
+  });
+
+  /*
+   * 日期從頁首搬到頁尾。兩邊都留會變成一張卡上有兩個日期——這條擋住
+   * 「補回頁首那個」時沒有人發現重複。
+   */
+  it("日期只出現一次", () => {
+    const text = mountCard(data()).text();
+    const today = formatFullDate(new Date());
+
+    expect(text.split(today).length - 1).toBe(1);
+  });
+});
+
+/*
+ * 深色卡的規格分隔線。
+ *
+ * 2026-09-02 使用者回報「線條不見了」：畫面上一直有（border-top），**畫布
+ * 從來沒畫過**。兩份各自獨立的繪圖程式碼，少一行不會有人發現，除非把圖
+ * 存下來比對——所以兩邊都要守。
+ */
+describe("預覽與輸出都有規格分隔線", () => {
+  it("畫面上的卡用 border-top", () => {
+    const card = stripComments(
+      readFileSync("apps/web/src/components/product/GearShareCard.vue", "utf8")
+    );
+
+    expect(card).toContain("border-top: 1px solid var(--color-on-dark-soft);");
+  });
+
+  it("畫布也描一條，用同一個 token", () => {
+    const painter = stripComments(readFileSync(PAINTER_PATH, "utf8"));
+
+    expect(painter).toContain('colors["--color-on-dark-soft"];');
+    // 頁尾本來就有一條線，所以要確認深色卡那條是**另外**一條。
+    expect(painter.match(/context\.stroke\(\)/g)?.length ?? 0).toBe(2);
   });
 });
 

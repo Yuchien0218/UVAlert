@@ -7,7 +7,7 @@ import type {
 } from "@sunshield/contracts";
 import { CONTEXT_LABELS } from "../../features/setup/setupCatalog";
 import { getUvRiskLevelLabel } from "../../features/uv/uvForecastRules";
-import { formatDate } from "../../helpers/datetime";
+import { formatFullDate } from "../../helpers/datetime";
 import BrandLockup from "../shell/BrandLockup.vue";
 import Icon from "../icons/Icon.vue";
 import { GEAR_CATEGORY_ICONS } from "../../features/product/gearPresentation";
@@ -64,10 +64,28 @@ const title = computed(() =>
   isToday.value ? "我今天的防曬裝備" : "我的防曬裝備"
 );
 
+/**
+ * 卡片日期。
+ *
+ * **2026-09-02：從右上角搬到頁尾，並且兩種模式都有**（使用者要求把頁尾
+ * 那段註記換成日期）。原本只有進行中提醒才顯示，而且在頁首——搬到頁尾之
+ * 後如果兩邊都留就會出現兩個日期，所以頁首那個拿掉。
+ *
+ * 沒有進行中提醒時用「今天」，也就是這張卡被做出來的日子。這比沒有日期
+ * 好：分享出去的圖會被轉傳，收到的人需要知道它是什麼時候的清單。
+ */
 const dateLabel = computed(() => {
   const session = props.data.session;
-  if (session === null) return null;
-  return formatDate(new Date(session.startedAt));
+  return formatFullDate(
+    session === null ? new Date() : new Date(session.startedAt)
+  );
+});
+
+/** 深色卡的價格，跟其他裝備共用同一個 showPrice 開關。 */
+const sunscreenPrice = computed(() => {
+  const sunscreen = props.data.sunscreen;
+  if (props.showPrice !== true || sunscreen === null) return null;
+  return sunscreen.priceTwd === null ? null : `NT$ ${sunscreen.priceTwd}`;
 });
 
 const showsUv = computed(
@@ -156,9 +174,6 @@ function detailsFor(product: ProductCatalogRecordV1): string[] {
   <article class="share-card">
     <header class="share-card__masthead">
       <BrandLockup class="share-card__lockup" />
-      <span v-if="dateLabel !== null" class="share-card__date">{{
-        dateLabel
-      }}</span>
     </header>
 
     <h2
@@ -220,6 +235,7 @@ function detailsFor(product: ProductCatalogRecordV1): string[] {
           <dt>容量</dt>
           <dd>{{ data.sunscreen.volume }}</dd>
         </div>
+
         <div v-if="formulationLabel !== null">
           <dt>劑型</dt>
           <dd>{{ formulationLabel }}</dd>
@@ -227,6 +243,19 @@ function detailsFor(product: ProductCatalogRecordV1): string[] {
         <div v-if="contextLabel !== null">
           <dt>情境</dt>
           <dd>{{ contextLabel }}</dd>
+        </div>
+        <!--
+          2026-09-02：價格（使用者要求「防曬乳也要可以顯示價格」）。
+
+          跟其他裝備一樣受 showPrice 控制、預設不印——深色卡不是例外。
+
+          **順序必須跟畫布的 buildStats 一致**（那邊 push 在最後）。第一版
+          放在「容量」後面，預覽是 容量／價格／劑型、PNG 是 …／情境／價格，
+          兩邊排出來不一樣——正是這一批一直在防的漂移。
+        -->
+        <div v-if="sunscreenPrice !== null">
+          <dt>價格</dt>
+          <dd>{{ sunscreenPrice }}</dd>
         </div>
       </dl>
     </section>
@@ -253,16 +282,18 @@ function detailsFor(product: ProductCatalogRecordV1): string[] {
     </ul>
 
     <!--
-      安全註記與 UV 出處。這一段在 DESIGN.md 第五節的「不可隱藏」清單裡，
-      分享出去的圖更需要它——收到圖的人沒有這個 App 的脈絡。
+      2026-09-02：頁尾改成日期（使用者要求）。
+
+      **原本這裡是安全註記**，而那段在 DESIGN.md 第五節的「不可隱藏」清單
+      裡。移除是使用者的裁決，理由與代價記在
+      `docs/decisions/2026-09-02-share-card-footer-date.md`——這裡只留指標，
+      不要在註解裡另立一份說法。
+
+      UV 出處（中央氣象署）跟著那段一起消失了。資料集代號 F-D0047-091 本來
+      就已被 2026-09-02 的在地化稽核判定為對一般人無意義，所以沒有沿用。
     -->
     <footer class="share-card__footer">
-      <p>
-        這是協助記得補擦的紀錄，不是安全曝曬時間或防護效果保證。<template
-          v-if="showsUv"
-          >UV 資料來源：中央氣象署 F-D0047-091。</template
-        >
-      </p>
+      <p class="share-card__date">{{ dateLabel }}</p>
     </footer>
   </article>
 </template>
@@ -281,10 +312,10 @@ function detailsFor(product: ProductCatalogRecordV1): string[] {
   background: var(--color-canvas);
 }
 
+/* 日期搬走之後這一列只剩 lockup，但保留 flex 讓它不被拉伸。 */
 .share-card__masthead {
   display: flex;
   align-items: baseline;
-  justify-content: space-between;
   gap: var(--space-3);
   color: var(--text-secondary);
   font-size: var(--font-size-caption);
@@ -301,6 +332,9 @@ function detailsFor(product: ProductCatalogRecordV1): string[] {
 }
 
 .share-card__date {
+  margin: 0;
+  color: var(--text-secondary);
+  font-size: var(--font-size-caption);
   font-variant-numeric: tabular-nums;
 }
 
