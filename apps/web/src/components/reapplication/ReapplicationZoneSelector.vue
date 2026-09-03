@@ -1,11 +1,10 @@
 <script setup lang="ts">
 import type { ZoneProjection } from "@sunshield/contracts";
-import { getZoneLabel } from "../../features/reminder/reminderPresentation";
+import ZoneSelectorGrid from "../reminder/ZoneSelectorGrid.vue";
 
 defineProps<{
   zones: ZoneProjection[];
   selectedZoneIds: string[];
-  suggestedZoneIds: string[];
   error: string | undefined;
 }>();
 const emit = defineEmits<{
@@ -52,25 +51,19 @@ const emit = defineEmits<{
       </button>
     </div>
     <!--
-      部位清單包一層：`.question-card > * + *` 是給「區塊之間」的 16px，
-      13 個 label 各自當直接子代的話，每一列都會多 16px，整張卡會膨脹成
-      現在的兩倍高。包起來之後那 16px 只出現在清單與上方按鈕之間。
+      2026-09-03：改用記錄狀況那頁在用的 `ZoneSelectorGrid`（chip）。
+      同一個問題「哪些部位？」原本有兩種樣子：那頁是會換行的藥丸，這頁是
+      13 個整列。整列量到 766px，chip 換行之後大約一半。
+
+      「建議」badge 跟著拿掉：被建議的部位本來就已經勾起來了，badge 只是
+      把同一件事再說一次；13 個 badge 在一頁裡也是噪音。說明文字已經寫著
+      「已預選到期或快到補擦時間的部位」。
     -->
-    <div class="zone-list">
-      <label
-        v-for="zone in zones"
-        :key="zone.zoneInstanceId"
-        class="zone-choice"
-      >
-        <input
-          type="checkbox"
-          :checked="selectedZoneIds.includes(zone.zoneInstanceId)"
-          @change="emit('toggle', zone.zoneInstanceId)"
-        />
-        <span>{{ getZoneLabel(zone) }}</span>
-        <small v-if="suggestedZoneIds.includes(zone.zoneInstanceId)">建議</small>
-      </label>
-    </div>
+    <ZoneSelectorGrid
+      :zones="zones"
+      :selected-zone-ids="selectedZoneIds"
+      @toggle="(zoneId: string) => emit('toggle', zoneId)"
+    />
     <p v-if="error" id="zone-selection-error" class="form-error" role="alert">
       {{ error }}
     </p>
@@ -89,29 +82,5 @@ const emit = defineEmits<{
 /* 版面（間距）留在這裡，排法交給 `.button-group`。 */
 .mode-actions {
   margin-block: var(--space-4);
-}
-.zone-list {
-  display: grid;
-}
-
-.zone-choice {
-  display: grid;
-  grid-template-columns: auto 1fr auto;
-  align-items: center;
-  min-height: var(--tap-target);
-  gap: var(--space-3);
-  border-top: 1px solid var(--border-subtle);
-}
-.zone-choice input {
-  inline-size: 1.35rem;
-  block-size: 1.35rem;
-}
-/*
- * 這個 `<small>` 是 badge（「建議」），不是說明文字，所以覆寫掉 app.css 給
- * `small` 的 supporting 預設，改用 DESIGN.md 第五節指定給 badge 的 caption。
- */
-.zone-choice small {
-  color: var(--color-tracking);
-  font-size: var(--font-size-caption);
 }
 </style>

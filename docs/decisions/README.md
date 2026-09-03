@@ -129,6 +129,7 @@
 | 待辦第二項（乙案）：部位群組只留「從標籤推不出來」的說明（十條刪四條），並改成接在名稱後面、字級小一階；列高 68→44px | `setupCatalog.ts`、`ZoneProtectionForm.vue`、`zoneGroupDescriptions.test.ts`（＋ 17 條守門） | 已完成（2026-09-03） |
 | 階段三：下水／離水搬離損耗選單，改由首頁一條連結進入（`?kind=water`，由記錄狀況頁解析成當下可用的那一種）；`context_changed` 明確不做 | `HomePage.vue`、`ReportContextEventPage.vue`、`createContextEventController.ts`、`vite.config.ts`（＋ 16 條守門） | 已完成（2026-09-03） |
 | 記錄補擦頁的共用元件與字級一致性：五個區塊標題統一 card-title（原本兩種字級）、說明文字統一 `question-card__helper`（原本三種）、確認區塊補 `app-card`、成對按鈕改用 `.button-group`、取消改文字連結；`accent-color` 與 `.submit-actions__cancel` 收斂到 app.css | `ReapplicationZoneSelector.vue`、`ReapplicationProductAssignments.vue`、`ReapplicationReview.vue`、`ReapplyPage.vue`、`app.css`（＋ 15 條守門） | 已完成（2026-09-03） |
+| 記錄補擦頁簡化（使用者裁決）：刪除「不同部位用不同防曬乳」、部位選擇改用共用 chip（與記錄狀況同一個元件）、「建議」badge 拿掉（原本借用狀態色 `--color-tracking`）。整頁 2591→1879px | `ReapplicationZoneSelector.vue`、`ReapplicationProductAssignments.vue`、`ReapplicationReview.vue`（＋ 22 條守門） | 已完成（2026-09-03） |
 | 排版稽核 §2：`DESIGN.md` 第二節新增〈深色表面的使用範圍〉（判準是「是不是要被單獨看的主角」），第七／第十節同步；並加白名單守門，未登記的深色表面會紅 | `DESIGN.md`、`assets/darkSurfaceScope.test.ts`（＋ 6 條守門） | 已完成（2026-09-03） |
 | 排版稽核第 2 批（只做低風險、與既有裁決不衝突的）：§7.1 段落鄰近律、§7.2 審查卡文字層級、§7.3 blockquote 間距、§6.1 「裝置測試」空卡併進「通知傳送說明」卡 | `DataSettingsPage.vue`、`ContentUnderReview.vue`、`EducationArticlePage.vue`、`NotificationSettingsPage.vue`（＋ test）、`2026-08-15-…-current.md` §通知設定頁 | 已完成（2026-09-02，PR #100）——§1／§5／§6.2–6.4 不採用、§2／§3／§4／§7.4 待實作，狀態看 `2026-09-02-ui-layout-consistency-audit.md` 文末 |
 
