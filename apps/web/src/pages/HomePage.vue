@@ -55,6 +55,17 @@ const { boot, sessionControl, sessionEvents, productSettings, uvForecast } =
 /** `view_product_label` 的原地展開；規格語意是「正在等待，不要離開」。 */
 const productLabelExpanded = shallowRef(false);
 const clockNotice = shallowRef<string | null>(null);
+
+/**
+ * `view_conservative_reminder` 的原地展開。
+ *
+ * **2026-09-03：這顆按鈕原本會跳到 `/help/how-it-works`，而那頁的內容仍在審查，
+ * 只顯示「內容正在審查」——在最需要說明的狀態下給一頁空白。**
+ *
+ * 改成在原地展開說明。內容只講 App 自己的行為（時間對不上、間隔已縮短、
+ * 恢復連線後會自己好），不含任何防曬建議或時間長度，所以不受衛教審查閘門管轄。
+ */
+const shortenedIntervalExplained = shallowRef(false);
 const recentEventsRef = shallowRef<{ expand?: () => void } | null>(null);
 
 /**
@@ -253,6 +264,9 @@ function handleAction(kind: ActionKind): void {
       // 明講現況勝過靜默失敗或假裝已校準。
       clockNotice.value =
         "目前無法在這台裝置上校準時間。請確認系統時間後重新整理。";
+      return;
+    case "explain_shortened_interval":
+      shortenedIntervalExplained.value = true;
       return;
     default:
       return;
@@ -478,6 +492,29 @@ function handleEndSession(): void {
         {{ clockNotice }}
       </p>
 
+      <!--
+        view_conservative_reminder：原地展開。
+        只描述 App 的行為，不給防曬建議，也不提任何時間長度。
+      -->
+      <section
+        v-if="shortenedIntervalExplained"
+        class="shortened-interval app-card"
+        aria-labelledby="shortened-interval-title"
+      >
+        <h2 id="shortened-interval-title" data-typography-role="section-title">
+          為什麼間隔變短？
+        </h2>
+        <p>
+          這台裝置的時間和實際時間對不上，而且目前無法連線確認，所以無法確定你上次擦防曬乳到現在過了多久。
+        </p>
+        <p>
+          遇到這種情況，提醒一律往「早一點」的方向走——寧可提醒你太多次，也不會因為時間算錯而讓你曬太久。
+        </p>
+        <p>
+          恢復連線、或把裝置的系統時間調正之後，提醒間隔會自己回到正常。
+        </p>
+      </section>
+
       <!-- view_product_label：原地展開，語意是「正在等待，不要離開」 -->
       <section
         v-if="productLabelExpanded && productSettings.snapshot.value"
@@ -628,6 +665,23 @@ function handleEndSession(): void {
   justify-items: start;
   gap: var(--space-3);
   padding: var(--card-padding);
+}
+
+.shortened-interval {
+  display: grid;
+  gap: var(--space-3);
+  padding: var(--card-padding);
+}
+
+.shortened-interval h2 {
+  margin: 0;
+  font-size: var(--font-size-section-title);
+}
+
+.shortened-interval p {
+  margin: 0;
+  color: var(--text-body);
+  line-height: var(--line-height-body);
 }
 
 /*

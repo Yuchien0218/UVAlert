@@ -388,6 +388,60 @@ describe("HomePage", () => {
       expect(wrapper.find(".home__cta").exists()).toBe(true);
     });
 
+    /*
+     * **時鐘不可信又離線時，說明必須在原地給。**（2026-09-03）
+     *
+     * 改動前這顆 CTA 會跳到 `/help/how-it-works`，而那頁的主題仍是
+     * `MULTI_REVIEW`，畫面上只有「內容正在審查」——在最需要說明的狀態下
+     * 把人送去一頁空白。
+     *
+     * 兩件事分開守，避免互相掩護：這條守「說明出現」，下一條守「沒有換頁」。
+     */
+    it("查詢間隔為何變短時就地展開說明", async () => {
+      mockServices({
+        session: {
+          ...session,
+          primaryAction: {
+            ...session.primaryAction,
+            presentationType: "untimed_action_card",
+            actionKind: "view_conservative_reminder",
+            actionAt: null,
+            reasonCodes: ["CLOCK_UNTRUSTED"]
+          }
+        },
+        region: { displayName: "臺北市 大安區" }
+      });
+
+      const wrapper = await mountHome();
+      expect(wrapper.find(".shortened-interval").exists()).toBe(false);
+
+      await wrapper.find(".home__cta").trigger("click");
+
+      expect(wrapper.find(".shortened-interval").exists()).toBe(true);
+    });
+
+    it("查詢間隔為何變短時不離開首頁", async () => {
+      mockServices({
+        session: {
+          ...session,
+          primaryAction: {
+            ...session.primaryAction,
+            presentationType: "untimed_action_card",
+            actionKind: "view_conservative_reminder",
+            actionAt: null,
+            reasonCodes: ["CLOCK_UNTRUSTED"]
+          }
+        },
+        region: { displayName: "臺北市 大安區" }
+      });
+
+      const wrapper = await mountHome();
+      await wrapper.find(".home__cta").trigger("click");
+      await wrapper.vm.$nextTick();
+
+      expect(wrapper.vm.$route.path).toBe("/");
+    });
+
     it("結束鈕與倒數在同一列，不各佔一列", async () => {
       mockServices({ session, region: { displayName: "臺北市 大安區" } });
 

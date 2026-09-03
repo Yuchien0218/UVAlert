@@ -51,12 +51,27 @@ const REPORT_ACTION_KINDS = new Set<ActionKind>([
 
 /** 在提醒頁就地完成、不換頁的行為。 */
 export type InPlaceBehavior =
-  "anchor_zones" | "expand_product_label" | "recalibrate_clock" | "ended_state";
+  | "anchor_zones"
+  | "expand_product_label"
+  | "recalibrate_clock"
+  | "explain_shortened_interval"
+  | "ended_state";
 
 const IN_PLACE_BEHAVIORS: Partial<Record<ActionKind, InPlaceBehavior>> = {
   review_required_zones: "anchor_zones",
   view_product_label: "expand_product_label",
   recalibrate_clock: "recalibrate_clock",
+  /*
+   * **2026-09-03：從 `/help/how-it-works` 改成原地說明。**
+   *
+   * 原本導向 S-16 的運作說明頁，但那頁的兩則主題都還是 `MULTI_REVIEW`，
+   * 畫面上只有「內容正在審查」——**在最需要說明的狀態下給一頁空白**。
+   *
+   * 而且這裡要回答的是「為什麼提醒突然變密集」，那是 App 行為的說明，
+   * 不是衛教內容，本來就不該被衛教審查閘門擋住。內容審查通過之後，
+   * `/help/how-it-works` 仍然會自己出現在說明中心，兩者不衝突。
+   */
+  view_conservative_reminder: "explain_shortened_interval",
   view_ended_state: "ended_state"
 };
 
@@ -93,10 +108,6 @@ export function resolveActionRoute(kind: ActionKind): RouteLocationRaw {
   }
   if (REPORT_ACTION_KINDS.has(kind)) {
     return { name: "reminder-report" };
-  }
-  // 時鐘不可信且離線時的保守提醒說明（S-16）。
-  if (kind === "view_conservative_reminder") {
-    return { name: "help-how-it-works" };
   }
   // 2026-08-24：`/reminder` 已移除、內容併入首頁，這些落點改指 home。
   // #zone-status 錨點仍然有效——部位清單現在在首頁下半部。
