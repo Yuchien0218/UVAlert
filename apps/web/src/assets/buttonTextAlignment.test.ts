@@ -120,3 +120,59 @@ describe("掃描範圍不是空的", () => {
     expect(components).toContain("common");
   });
 });
+
+/**
+ * 2026-09-03：窄螢幕的 `.button-group` 維持並排，不再拆成上下兩列。
+ *
+ * 使用者回報「這組按鈕歪歪的，要水平擺放」——直排時兩顆按鈕的圖示一顆在
+ * 字後（→）、一顆在字前（↺），上下疊起來讀成參差不齊的兩行。
+ *
+ * 全站三組 `.button-group` 都是「主要動作＋次要動作」的短標籤配對。
+ */
+describe("按鈕組在窄螢幕仍然並排", () => {
+  const narrow = /@media \(max-width: 31rem\) \{([\s\S]*?)\n\}/.exec(css)?.[1];
+
+  it("找得到窄螢幕的區塊", () => {
+    expect(narrow, "找不到 31rem 的 media query").toBeDefined();
+  });
+
+  /*
+   * **這條才是真正的原因，而且第一版漏掉了。**
+   *
+   * `.recovery-card` 是 `display: grid` ＋ `justify-items: start`，群組會
+   * 縮成內容寬（實測 600px 視窗下卡片欄寬 472px、群組只有 280px）。兩顆
+   * `flex-basis: 10rem` 的按鈕加起來 332px 塞不進去，於是換行——**跟視窗
+   * 多寬無關**。
+   *
+   * 第一版只改 31rem 以下的 media query，所以窄螢幕好了、500–600px 之間
+   * 還是壞的，使用者回報「手機尺寸按鈕還是歪歪的」。
+   */
+  it("按鈕組先拿到整欄寬度", () => {
+    expect(block(".button-group")).toContain("width: 100%;");
+  });
+
+  it("不再把按鈕組改成直排", () => {
+    // 比對完整宣告：`display: grid` 就是直排那一版。
+    expect(narrow).not.toMatch(/\.button-group \{[^}]*display:\s*grid;/);
+  });
+
+  /*
+   * **平分而不是 `10rem` 基準。**
+   *
+   * 只把 `display: grid` 拿掉是不夠的——外面的 `.button-group > .button`
+   * 是 `flex: 1 1 10rem`，兩顆加起來在 375px 上超過可用寬度，`flex-wrap`
+   * 會讓它們照樣換行，等於改了跟沒改一樣（實測過）。
+   */
+  it("窄螢幕下按鈕平分寬度", () => {
+    expect(narrow).toMatch(/\.button-group > \.button \{[^}]*flex:\s*1 1 0;/);
+  });
+
+  /*
+   * `.button { width: 100% }` 仍然要留給**不在組裡**的單顆按鈕（主 CTA
+   * 滿寬）——所以組裡那些要把 width 收回 auto，否則 100% 會跟平分打架。
+   */
+  it("單顆按鈕仍然滿寬，組裡的收回 auto", () => {
+    expect(narrow).toMatch(/\.button \{[^}]*width:\s*100%;/);
+    expect(narrow).toMatch(/\.button-group > \.button \{[^}]*width:\s*auto;/);
+  });
+});
