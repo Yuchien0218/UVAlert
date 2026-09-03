@@ -61,7 +61,15 @@ const CHOICES: Choice[] = [
           :value="choice.value"
         />
         <span class="reason-picker__label">
-          <Icon v-if="choice.icon !== null" :name="choice.icon" :size="20" />
+          <!--
+            2026-09-03：圖示欄**永遠佔位**，沒有圖示時是一個空格子。
+            原生圓點藏起來之前，那顆圓點就是共同的左欄，五個選項的文字
+            自然對齊；圓點拿掉之後「時間到了」會自己貼到最左邊，跟另外
+            四項差一個圖示的寬度。
+          -->
+          <span class="reason-picker__icon">
+            <Icon v-if="choice.icon !== null" :name="choice.icon" :size="20" />
+          </span>
           {{ choice.label }}
         </span>
       </label>
@@ -84,9 +92,11 @@ const CHOICES: Choice[] = [
 
 <style scoped>
 /*
- * `.choice-grid` 的 label 是「auto ＋ 1fr」兩欄（radio ＋ 內容），所以圖示要
- * 跟文字一起待在第二欄裡，不能自己再開一欄——那會讓沒有圖示的「時間到了」
- * 跟其他四項對不齊。
+ * 圖示要跟文字待在同一個 span 裡，不能自己開一欄——那會讓沒有圖示的
+ * 「時間到了」跟其他四項對不齊。
+ *
+ * （2026-09-03：`.choice-grid` 的 label 從「auto ＋ 1fr」兩欄改成一欄，
+ * 原生圓點藏起來了。上面這條約束不變，只是不再有「第二欄」這個說法。）
  */
 .reason-picker__label {
   display: flex;
@@ -97,6 +107,13 @@ const CHOICES: Choice[] = [
 
 .reason-picker__label svg {
   flex: none;
+}
+
+/* 空的時候也要撐出圖示的寬度，否則就沒有對齊可言。 */
+.reason-picker__icon {
+  display: flex;
+  flex: none;
+  width: 20px;
 }
 
 /* 出口貼齊卡片左緣，並保有可點區高度。 */

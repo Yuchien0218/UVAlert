@@ -234,9 +234,10 @@ async function runTest(): Promise<void> {
         這一組原本是全站唯一沒有套任何選項樣式的原生 radio——**無障礙上
         本來就完全合格**，問題純粹是它跟其他所有選一個的地方長得不一樣。
 
-        `.choice-grid` **保留原生 radio**（`accent-color` 上色，不是把它
-        藏起來自刻圓點），所以鍵盤操作、方向鍵在群組內移動、螢幕閱讀器的
-        radiogroup 語意全部不變，只是外框與選取態跟著全站走。
+        2026-09-03：原生 radio 改成**視覺上藏起來**（不是刪掉，也不是自刻
+        一個圓點），選了哪一項由選項卡片本身呈現。控制項仍在 DOM 裡，所以
+        鍵盤操作、方向鍵在群組內移動、上面那個 radiogroup 語意全部不變；
+        焦點框改畫在卡片上，見 app.css 的 `:has(> input:focus-visible)`。
 
         選取色來自 `.choice-grid label:has(input:checked)`，不自刻——那組
         顏色 2026-08-24 才從 5 個各自實作的地方收斂成一份。
