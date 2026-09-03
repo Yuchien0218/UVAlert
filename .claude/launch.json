@@ -6,6 +6,7 @@
       "runtimeExecutable": "pnpm",
       "runtimeArgs": ["--filter", "@sunshield/web", "dev"],
       "port": 5173,
+      "autoPort": true,
       "env": {
         "CI": "true"
       }
