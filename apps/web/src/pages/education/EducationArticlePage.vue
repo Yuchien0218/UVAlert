@@ -402,4 +402,15 @@ const relatedArticles = computed(() =>
   font-size: var(--font-size-supporting);
   list-style: disc;
 }
+
+/*
+ * 2026-09-03：不要粗體（使用者要求）。
+ *
+ * `.text-link` 的 500 是給**行動**用的（「改為填寫完整的包裝標示」那種），
+ * 這裡是一份可以瀏覽的清單，不是要你現在按的東西。用 supporting 的字重，
+ * 跟它的字級是同一個角色。
+ */
+.education-related-list .text-link {
+  font-weight: var(--font-weight-supporting);
+}
 </style>

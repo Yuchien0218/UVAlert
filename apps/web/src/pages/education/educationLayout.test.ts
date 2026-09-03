@@ -149,6 +149,28 @@ describe("附錄的字級與項目符號", () => {
   });
 
   /*
+   * 不要粗體（2026-09-03 使用者要求）。
+   *
+   * `.text-link` 的 500 是給**行動**用的（「改為填寫完整的包裝標示」那種）；
+   * 這裡是一份可以瀏覽的清單，不是要你現在按的東西。
+   */
+  it("延伸閱讀的連結不是粗體", () => {
+    expect(read(ARTICLE)).toMatch(
+      /\.education-related-list \.text-link \{[^}]*font-weight: var\(--font-weight-supporting\);/
+    );
+  });
+
+  /*
+   * **反向：只改這一份清單，不要把 `.text-link` 全站的字重也改掉。**
+   * 那顆 500 在別處是有意義的。
+   */
+  it("共用的 text-link 仍然是 500", () => {
+    const appCss = read("apps/web/src/assets/app.css");
+
+    expect(appCss).toMatch(/\.text-link \{[^}]*font-weight: 500;/);
+  });
+
+  /*
    * 資料來源靠「這是一份外部參考連結」來認，不是靠位置——產生器沒有給它
    * class，而全文 67 個 `<ul>` 裡帶 `target="_blank"` 的正好 48 個，等於
    * 48 篇文章各一份（2026-09-03 實測）。
