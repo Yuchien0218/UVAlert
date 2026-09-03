@@ -30,7 +30,7 @@ interface Props {
   heading?: string;
   idPrefix?: string;
   summaryLabel?: string;
-  /** 預設那一顆的文字，例如「剛剛」。 */
+  /** 預設那一顆的文字，例如「1 分鐘前」。 */
   defaultLabel?: string;
 }
 
@@ -38,7 +38,7 @@ const props = withDefaults(defineProps<Props>(), {
   heading: "實際何時補擦？",
   idPrefix: "reapply-time",
   summaryLabel: "確認時間：",
-  defaultLabel: "剛剛"
+  defaultLabel: "1 分鐘前"
 });
 
 const emit = defineEmits<{
@@ -63,8 +63,13 @@ const minutesAgo = computed(() =>
   )
 );
 
-/** 少於一分鐘就當成「還沒調整過」，跟預設那一顆是同一件事。 */
-const usingDefault = computed(() => minutesAgo.value < 1);
+/**
+ * 一分鐘以內都當成「還沒調整過」，跟預設那一顆是同一件事。
+ *
+ * 2026-09-03：上界從「< 1」放寬成「<= 1」。預設那一顆改成送出「1 分鐘前」
+ * 之後，若仍以 1 分鐘為界，按下去反而會讓它自己取消選取。
+ */
+const usingDefault = computed(() => minutesAgo.value <= 1);
 
 const adjustedLabel = computed(() => {
   if (usingDefault.value) return null;
@@ -75,8 +80,18 @@ const adjustedLabel = computed(() => {
   return rest === 0 ? `${hours} 小時前` : `${hours} 小時 ${rest} 分鐘前`;
 });
 
+/**
+ * 預設那一顆送出的是「1 分鐘前」，不是「現在」（2026-09-03，使用者要求把
+ * 文字從「剛剛」改成「1 分鐘前」）。
+ *
+ * 塗抹時間（`ApplicationTimePicker`）與入水時間（`WaterStartPicker`）的
+ * `DEFAULT_MINUTES_AGO` 本來就是 1，按鈕上寫的也是「1 分鐘前」。這個元件
+ * 是三頁共用的第三種時間選擇器，卻自己寫「剛剛」、自己送 0——同一個 App
+ * 裡的同一顆按鈕有兩種說法。文字與送出的值一起改，才不會出現「寫著 1
+ * 分鐘前、存進去卻是現在」。
+ */
 function selectDefault(): void {
-  emit("quick", 0);
+  emit("quick", 1);
 }
 
 function toggleAdjust(): void {

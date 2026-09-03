@@ -1,5 +1,6 @@
 // @vitest-environment happy-dom
 
+import { readFileSync } from "node:fs";
 import type { ZoneProjection } from "@sunshield/contracts";
 import { mount } from "@vue/test-utils";
 import { describe, expect, it } from "vitest";
@@ -67,5 +68,47 @@ describe("ZoneSelectorGrid", () => {
       wrapper.get("input[type=checkbox]").attributes("disabled")
     ).toBeDefined();
     expect(wrapper.get("label").classes()).toContain("zone-chip--locked");
+  });
+});
+
+/**
+ * 2026-09-03（使用者：「前面不要有勾勾符號」）。
+ *
+ * 原生的方塊藏起來，選取狀態改由藥丸本身呈現。**藏起來不是刪掉**——控制項
+ * 還在 DOM 裡，上面三條測試（勾選狀態、change 事件、locked）守的就是這件事。
+ */
+describe("藥丸不再顯示原生的核取方塊", () => {
+  const strip = (source: string): string =>
+    source
+      .replace(/<!--[\s\S]*?-->/g, "")
+      .replace(/\/\*[\s\S]*?\*\//g, "");
+
+  const SOURCE = strip(
+    readFileSync("apps/web/src/components/reminder/ZoneSelectorGrid.vue", "utf8")
+  );
+
+  /* 比對完整屬性，不是 class 名的片段——`screen-reader-only-x` 也含得下。 */
+  it("控制項用共用的 screen-reader-only 藏起來", () => {
+    expect(SOURCE).toContain('class="screen-reader-only"');
+  });
+
+  /*
+   * **反向一：選取狀態要有別的出口。** 只藏掉方塊的話，勾了哪幾顆完全看
+   * 不出來。
+   */
+  it("選取狀態改由藥丸本身呈現", () => {
+    expect(SOURCE).toMatch(
+      /\.zone-chip:has\(input:checked\) \{[^}]*background: var\(--color-hairline\);/
+    );
+  });
+
+  /*
+   * **反向二：焦點框要自己接回來。** 焦點原本畫在那個方塊上；方塊不見了，
+   * 鍵盤使用者就看不出停在哪一顆（WCAG SC 2.4.7）。
+   */
+  it("焦點框畫在藥丸上", () => {
+    expect(SOURCE).toMatch(
+      /\.zone-chip:has\(input:focus-visible\) \{[^}]*outline: 0\.15rem solid var\(--focus-ring\);/
+    );
   });
 });

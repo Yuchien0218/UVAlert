@@ -1,5 +1,6 @@
 // @vitest-environment happy-dom
 
+import { readFileSync } from "node:fs";
 import { mount } from "@vue/test-utils";
 import { describe, expect, it } from "vitest";
 import QuickTimePicker from "./QuickTimePicker.vue";
@@ -84,17 +85,51 @@ describe("QuickTimePicker", () => {
   });
 
   /*
-   * 預設那一顆的文字可以改（記錄狀況是「剛剛」，補擦頁沿用同一個預設）。
-   * 點它 emit quick(0)——回到「就是現在」。
+   * 預設那一顆寫的是「1 分鐘前」，送出的也必須是 1（2026-09-03）。
+   *
+   * **兩件事一起守。** 只斷言文字的話，把 emit 改回 0 仍然是綠的——那正是
+   * 改動前的狀態：按鈕寫著一個時間、存進去的是另一個。
    */
-  it("點預設那一顆 emit quick(0)", async () => {
-    const wrapper = mountPicker({ defaultLabel: "剛剛" });
+  it("預設那一顆寫「1 分鐘前」，送出的也是 1 分鐘前", async () => {
+    const wrapper = mountPicker();
     const first = wrapper.findAll("button")[0]!;
 
-    expect(first.text()).toBe("剛剛");
+    expect(first.text()).toBe("1 分鐘前");
     await first.trigger("click");
 
-    expect(wrapper.emitted("quick")).toEqual([[0]]);
+    expect(wrapper.emitted("quick")).toEqual([[1]]);
+  });
+
+  /*
+   * 三個時間選擇器的預設值要說同一句話。這條掃原始碼——它守的正是
+   * 「有沒有人又在某一個檔案裡自己寫一種說法」。
+   */
+  it("塗抹時間與入水時間的預設也是 1 分鐘前", () => {
+    for (const path of [
+      "apps/web/src/components/setup/ApplicationTimePicker.vue",
+      "apps/web/src/components/setup/WaterStartPicker.vue"
+    ]) {
+      expect(readFileSync(path, "utf8"), path).toContain(
+        "const DEFAULT_MINUTES_AGO = 1;"
+      );
+    }
+  });
+
+  /*
+   * 按下預設那一顆之後它必須仍然是選取狀態。`usingDefault` 原本以 1 分鐘
+   * 為界，值變成 1 分鐘前就會讓它自己取消選取——兩顆都不亮，就是 2026-09-03
+   * 入水時間那次修掉的同一個病。
+   */
+  it("值正好是 1 分鐘前時，預設那一顆仍然是選取狀態", () => {
+    const wrapper = mountPicker({
+      appliedAt: "2026-08-25T09:59:00.000Z",
+      referenceNow: AT
+    });
+
+    expect(wrapper.findAll("button")[0]!.classes()).toContain(
+      "option-selected"
+    );
+    expect(wrapper.text()).not.toContain("確認時間：");
   });
 
   /*
