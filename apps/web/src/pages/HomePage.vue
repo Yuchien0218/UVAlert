@@ -701,11 +701,34 @@ function handleEndSession(): void {
  * 倒數頂端（也就是「補擦倒數」那一行），而不是被拉到整塊的垂直中線。
  * 第一欄用 minmax(0, 1fr)，倒數裡的大讀數才不會把按鈕擠出容器。
  */
+/*
+ * 結束鈕疊在右上角，而不是自己佔一欄（2026-09-03，使用者回報倒數下面那行
+ * 說明「莫名其妙換行」並猜是叉叉造成的——**是**）。
+ *
+ * 改動前這裡是 `minmax(0, 1fr) auto` 兩欄：叉叉只有 44px 高，卻讓**整個
+ * 倒數區塊**（eyebrow、數字、進度條、下面那行說明）都被壓到 280px。實測
+ * 375px 視窗：可用 336px、倒數只拿到 280px，少掉的 56px 正好夠讓
+ * 「建議優先補擦：手背・預計 15:52」折成兩行。
+ *
+ * 改成單欄重疊：兩個子元素放在同一個 grid 區域，叉叉靠右上。倒數因此拿回
+ * 整個寬度，而 2026-08-30「叉叉與倒數同一列、省下 60px」的目的不變。
+ *
+ * 安全性：`SessionEndControl` 的確認彈窗是 `position: fixed` 的遮罩，不是
+ * 就地展開，所以 `.session-end` 永遠只有那顆 44×44 的按鈕，重疊不會蓋到
+ * 會變高的東西。
+ */
 .home__session-head {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-columns: minmax(0, 1fr);
   align-items: start;
-  gap: var(--space-3);
+}
+
+.home__session-head > * {
+  grid-area: 1 / 1;
+}
+
+.home__session-head > .session-end {
+  justify-self: end;
 }
 
 .home__cta {

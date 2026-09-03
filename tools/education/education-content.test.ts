@@ -63,3 +63,40 @@ describe("generated education content", () => {
     }
   });
 });
+
+/**
+ * 分類卡的說明要能在 375px 上排成一行（2026-09-03，使用者回報「文字太快
+ * 換行、右邊很空」）。
+ *
+ * 這件事來回過兩次，兩次都是同一句抱怨：
+ *
+ * - 2026-09-01：`text-wrap` 是預設值，第一行擠滿、只把「好。」兩個字丟到
+ *   第二行 → 加上 `text-wrap: balance`
+ * - 2026-09-03：balance 把 21 個字平分成兩行各約 11 字，**兩行都只用掉一半
+ *   寬度**（實測 142／156，可用 294）→ 看起來更空
+ *
+ * 兩種斷行都醜，因為真正的問題是**字數剛好超過一行**。所以規則訂在字數上：
+ * 實測 375px 的卡片內寬 294px、字級 16px，18 個中文字約 255px，是安全的
+ * 上限；`balance` 留著給更窄的手機（那時平均分配仍比孤字行好看）。
+ */
+describe("分類卡說明的長度", () => {
+  const MAX_CHARS = 18;
+
+  it.each(educationCategories.map((category) => [category.slug, category]))(
+    "%s 的說明不超過 18 個字",
+    (_slug, category) => {
+      expect(category.description.length).toBeLessThanOrEqual(MAX_CHARS);
+    }
+  );
+
+  /*
+   * 反向：不可以為了過這條測試把說明砍成沒有內容。太短的話卡片標題底下
+   * 那一行就不再提供任何新資訊。
+   */
+  it.each(educationCategories.map((category) => [category.slug, category]))(
+    "%s 的說明仍然講得出內容",
+    (_slug, category) => {
+      expect(category.description.length).toBeGreaterThanOrEqual(10);
+    }
+  );
+});
