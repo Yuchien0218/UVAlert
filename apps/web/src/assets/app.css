@@ -949,7 +949,12 @@ p.prose-block {
   border-radius: var(--radius-sm);
   color: var(--text-primary);
   cursor: pointer;
-  text-align: left;
+  /*
+   * 2026-09-03：原本是 `left`。這兩顆是「兩欄並排、內容只有一個短標籤」
+   * 的按鈕，屬於**置中**那一族；靠左是「一整列、左標籤右值」那一族的
+   * 語彙。判準見 DESIGN.md 第五節〈按鈕與列的文字對齊〉。
+   */
+  text-align: center;
   transition:
     background-color var(--duration-fast) var(--ease-out),
     border-color var(--duration-fast) var(--ease-out);
@@ -964,9 +969,14 @@ p.prose-block {
   filter: brightness(0.92);
 }
 
+/*
+ * 這是 flex 容器，所以 `.time-option` 的 `text-align` 對它無效——
+ * 置中要靠 `justify-content`。只改 text-align 會看起來沒反應。
+ */
 .time-option__label {
   display: flex;
   align-items: baseline;
+  justify-content: center;
   gap: var(--space-2);
   font-weight: 500;
 }
