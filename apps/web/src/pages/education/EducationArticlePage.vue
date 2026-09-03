@@ -67,14 +67,24 @@ const relatedArticles = computed(() =>
       螢幕閱讀器讀到時要知道會回到哪裡。
     -->
     <header class="education-article-header">
-      <div class="education-article-header__main">
-        <p class="page-heading__eyebrow">{{ article.primaryQuestion }}</p>
-        <h1 class="page-heading__title" data-typography-role="page-title">
-          {{ article.title }}
-        </h1>
-      </div>
+      <!--
+        2026-09-03：拿掉標題上方的 `primaryQuestion`（使用者要求）。
 
+        讀者是從分類頁的卡片點進來的，**那張卡片正面就寫著這個問題**
+        （`EducationCategoryPage` 仍然顯示它）——落地後在標題上方再看一次
+        是同一句話說兩遍，而且它把大標往下推了一整行。
+
+        資料沒有刪：`primaryQuestion` 仍是 AEO 欄位（`docs/education/README`
+        第 121 行），分類頁的卡片與公開靜態站（`generate-public-site.mjs`）
+        都還在用——那兩個地方它是「還沒讀過的資訊」，這裡不是。
+      -->
+      <!--
+        返回鈕排在標題**之前**，因為它是浮動的——CSS 的 float 只影響原始碼
+        上排在它後面的內容。閱讀順序上也說得通：這顆是這一頁的逃生出口，
+        而且可及名稱帶著目的地（「返回了解今天的 UV」）。
+      -->
       <IconButton
+        class="education-article-header__back"
         icon="tool-arrow-left"
         :label="`返回${category?.title ?? '防曬衛教'}`"
         @click="
@@ -85,6 +95,16 @@ const relatedArticles = computed(() =>
           )
         "
       />
+
+      <!--
+        標題不再包一層 div：那層是 `display: grid`，而 **grid 容器不會與
+        float 重疊**——它會整個縮到浮動元素旁邊，於是每一行都被壓窄，等於
+        float 白做（2026-09-03 實測：三行都是 280px）。拿掉之後 h1 是普通
+        區塊，只有被按鈕擋住的那幾行會縮短。
+      -->
+      <h1 class="page-heading__title" data-typography-role="page-title">
+        {{ article.title }}
+      </h1>
       <!--
         2026-08-31：拿掉這裡的 summary。
 
@@ -126,15 +146,21 @@ const relatedArticles = computed(() =>
       <h2 id="related-title" data-typography-role="section-title">
         同主題延伸閱讀
       </h2>
-      <nav class="education-related-list" aria-label="同主題文章">
-        <RouterLink
-          v-for="related in relatedArticles"
-          :key="related.slug"
-          class="text-link"
-          :to="educationArticlePath(related.slug)"
-        >
-          {{ related.title }}
-        </RouterLink>
+      <!--
+        2026-09-03：改成真的 `<ul>`（使用者要求前面加圓點）。
+        除了圓點之外，`nav > ul` 也讓螢幕閱讀器報得出「幾個項目」。
+      -->
+      <nav aria-label="同主題文章">
+        <ul class="education-related-list">
+          <li v-for="related in relatedArticles" :key="related.slug">
+            <RouterLink
+              class="text-link"
+              :to="educationArticlePath(related.slug)"
+            >
+              {{ related.title }}
+            </RouterLink>
+          </li>
+        </ul>
       </nav>
     </section>
   </article>
@@ -150,17 +176,35 @@ const relatedArticles = computed(() =>
 }
 
 /* 標題群組在左、返回鈕在右上角同一列；下方兩列橫跨兩欄。 */
+/*
+ * 返回鈕改用 float（2026-09-03，使用者回報大標「提早換行」並圈出右邊那塊
+ * 空白）。
+ *
+ * 走過的三個版本，記下來免得有人再繞一次：
+ *
+ * 1. `minmax(0, 1fr) auto` 兩欄——箭頭只有 44px 高，卻讓**整個標題區**
+ *    永遠少掉一個按鈕的寬度，每一行都提早折
+ * 2. 重疊（首頁倒數用的那招）——**這裡不行**：首頁第一行是很短的 eyebrow，
+ *    這一頁第一行就是大標，而標題最長 33 個字（「SPF 30 和 SPF 50 差多少？
+ *    數字越高不代表可以越久不補」），第一行一定壓在按鈕底下
+ * 3. 箭頭自成一列——大標每一行都拿得到整個寬度，但**違反 2026-08-31 的
+ *    裁決**：`educationLayout.test.ts` 明文守著「返回鈕必須跟標題同一列」，
+ *    理由是那次「叉叉獨佔一列」的跑版事故
+ *
+ * 所以採用 float：箭頭留在標題那一列（不多佔垂直空間），只有被它擋住的
+ * 那一兩行會縮短，其餘拿回整個寬度。第一行仍然讓開 56px——那是箭頭實際
+ * 佔的位置，除非把它移走，否則消不掉。
+ *
+ * 注意標題**不能**再包一層 `display: grid` 的 div：grid 容器不會與 float
+ * 重疊，會整個縮到旁邊，等於 float 白做（實測三行都變成 280px）。
+ */
 .education-article-header {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
-  align-items: start;
-  gap: var(--space-3);
   max-width: 44rem;
 }
 
-.education-article-header__main {
-  display: grid;
-  gap: var(--space-3);
+.education-article-header__back {
+  float: inline-end;
+  margin-inline-start: var(--space-3);
 }
 
 .education-article-header .page-heading__title {
@@ -176,11 +220,16 @@ const relatedArticles = computed(() =>
  * 下面，讀起來像副標；靠右之後它退到頁面邊緣，跟返回鈕同一側，讀者的
  * 視線不會把它算進正文。
  */
-.education-article-meta {
-  grid-column: 1 / -1;
-  justify-self: end;
-  text-align: end;
-}
+/*
+ * 「最後查閱」靠左（2026-09-03，使用者要求）。
+ *
+ * **這是推翻 2026-09-01 的「靠右」。** 當時的理由是「它是文章的後設資料，
+ * 靠左會讀起來像副標」——但標題上方的問句拿掉之後，靠右反而變成整個標題
+ * 區唯一一個靠右的東西，比副標更突兀。
+ *
+ * `grid-column`／`justify-self` 一併刪掉：標題列改用 float 之後這個 header
+ * 已經不是 grid，那兩行是失效的殘留。
+ */
 
 .education-article-meta,
 .education-card-kicker {
@@ -243,6 +292,19 @@ const relatedArticles = computed(() =>
 
 .education-article-body :deep(li + li) {
   margin-top: var(--space-2);
+}
+
+/*
+ * 資料來源清單小一階（2026-09-03，使用者要求）。
+ *
+ * **靠「這是一份外部參考連結」來認，不是靠位置。** 產生器沒有給這份清單
+ * 任何 class，而全文 67 個 `<ul>` 裡帶 `target="_blank"` 的正好是 48 個
+ * ——等於 48 篇文章各一份資料來源，沒有第二種東西長這樣（2026-09-03 實測）。
+ *
+ * 內文的清單維持內文字級：那些是文章在講的內容，資料來源是查證用的附錄。
+ */
+.education-article-body :deep(ul:has(a[target="_blank"])) {
+  font-size: var(--font-size-supporting);
 }
 
 .education-article-body :deep(a) {
@@ -326,8 +388,29 @@ const relatedArticles = computed(() =>
   font-size: var(--font-size-section-title);
 }
 
+/*
+ * 2026-09-03：加圓點、字級小一階（使用者要求）。
+ *
+ * 這是文章結束後的「還可以看什麼」，不是正文——比內文小一階（supporting）
+ * 讓它退到正文後面，圓點則讓它讀起來是一份清單而不是幾條散落的連結。
+ */
 .education-related-list {
   display: grid;
   gap: var(--space-3);
+  margin: 0;
+  padding-inline-start: var(--space-6);
+  font-size: var(--font-size-supporting);
+  list-style: disc;
+}
+
+/*
+ * 2026-09-03：不要粗體（使用者要求）。
+ *
+ * `.text-link` 的 500 是給**行動**用的（「改為填寫完整的包裝標示」那種），
+ * 這裡是一份可以瀏覽的清單，不是要你現在按的東西。用 supporting 的字重，
+ * 跟它的字級是同一個角色。
+ */
+.education-related-list .text-link {
+  font-weight: var(--font-weight-supporting);
 }
 </style>
