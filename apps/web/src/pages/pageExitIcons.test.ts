@@ -50,12 +50,25 @@ const ABANDONABLE = [
   "pages/ReportContextEventPage.vue"
 ];
 
-/** 離開＝回到上一層，沒有東西被放棄。 */
+/**
+ * 離開＝回到上一層，沒有東西被放棄。
+ *
+ * 2026-09-03 補進七頁（稽核 §G）：`2026-09-02` 那次只定了「叉叉還是箭頭」，
+ * 明講「哪些頁面該有頂端出口」不在範圍，於是這幾頁當時只有頁尾的文字連結。
+ * 現在下鑽頁一律有頂端箭頭。
+ */
 const DRILL_DOWN = [
   "components/setup/SetupStepShell.vue",
+  "pages/FeedbackPage.vue",
   "pages/GearSharePage.vue",
+  "pages/InstallPage.vue",
+  "pages/SpecialSituationPage.vue",
   "pages/education/EducationArticlePage.vue",
   "pages/education/EducationCategoryPage.vue",
+  "pages/help/HelpIndexPage.vue",
+  "pages/help/HelpTopicPage.vue",
+  "pages/settings/AccountDataPage.vue",
+  "pages/settings/DataSettingsPage.vue",
   "pages/settings/NotificationSettingsPage.vue"
 ];
 

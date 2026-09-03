@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import BackToMoreLink from "../../components/common/BackToMoreLink.vue";
+import { useRouter } from "vue-router";
+import IconButton from "../../components/common/IconButton.vue";
 import { computed, onMounted, shallowRef } from "vue";
 import { useWebAppServices } from "../../app/injection";
 import AppNotice from "../../components/common/AppNotice.vue";
@@ -64,17 +65,27 @@ async function deleteCloudData(): Promise<void> {
     busy.value = false;
   }
 }
+const router = useRouter();
+
+/*
+ * 頂端的返回出口（2026-09-03，稽核 §G：下鑽頁一律有頂端箭頭）。
+ * 直接回「更多」，不用 history.back——這一頁也可能是從網址列直接打開的。
+ */
+function goBack(): void {
+  void router.push({ name: "more" });
+}
 </script>
 
 <template>
   <div class="page-stack">
-    <header class="page-heading">
+    <header class="page-heading page-heading--with-exit">
       <h1 class="page-heading__title" data-typography-role="page-title">
         登入與雲端資料
       </h1>
       <p class="page-heading__body">
         此處僅管理雲端同步資料，清除不會影響 Google 帳號與本機現有提醒。
       </p>
+      <IconButton icon="tool-arrow-left" label="返回更多" @click="goBack" />
     </header>
 
     <section v-if="!signedIn" class="app-card account-card">
@@ -145,7 +156,6 @@ async function deleteCloudData(): Promise<void> {
 
     <AppNotice v-if="notice" kind="ok">{{ notice }}</AppNotice>
     <AppNotice v-if="error" kind="error">{{ error }}</AppNotice>
-    <BackToMoreLink />
   </div>
 </template>
 

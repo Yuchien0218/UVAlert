@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import BackToMoreLink from "../components/common/BackToMoreLink.vue";
+import { useRouter } from "vue-router";
+import IconButton from "../components/common/IconButton.vue";
 import ContentUnderReview from "../components/help/ContentUnderReview.vue";
 
 /**
@@ -13,14 +14,24 @@ import ContentUnderReview from "../components/help/ContentUnderReview.vue";
  * 因此本頁不提供任何醫療判斷、就醫指引或急症分流文字。
  * 開一個無法處理急症的分類流程，比不開更危險（AC-99）。
  */
+const router = useRouter();
+
+/*
+ * 頂端的返回出口（2026-09-03，稽核 §G：下鑽頁一律有頂端箭頭）。
+ * 直接回「更多」，不用 history.back——這一頁也可能是從網址列直接打開的。
+ */
+function goBack(): void {
+  void router.push({ name: "more" });
+}
 </script>
 
 <template>
   <div class="page-stack">
-    <header class="page-heading">
+    <header class="page-heading page-heading--with-exit">
       <h1 class="page-heading__title" data-typography-role="page-title">
         特殊狀況
       </h1>
+      <IconButton icon="tool-arrow-left" label="返回更多" @click="goBack" />
     </header>
 
     <ContentUnderReview
@@ -28,8 +39,6 @@ import ContentUnderReview from "../components/help/ContentUnderReview.vue";
       body="特殊狀況的分類與說明尚未完成必要審查，因此目前不提供。本服務不提供診斷、治療建議，也無法判斷你能否曝曬或使用特定產品。"
       required-review="醫療／法務"
     />
-
-    <BackToMoreLink />
   </div>
 </template>
 

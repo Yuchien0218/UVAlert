@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { useRouter } from "vue-router";
+import IconButton from "../../components/common/IconButton.vue";
 import Icon from "../../components/icons/Icon.vue";
 import { computed, onMounted, shallowRef } from "vue";
 import { useWebAppServices } from "../../app/injection";
@@ -123,17 +125,30 @@ function writeSyncDisabled(value: boolean): void {
   if (value) globalThis.localStorage?.setItem("uvalert.sync.disabled", "true");
   else globalThis.localStorage?.removeItem("uvalert.sync.disabled");
 }
+const router = useRouter();
+
+/*
+ * 頂端的返回出口（2026-09-03，稽核 §G）。
+ *
+ * **這一頁頁尾的 `BackToMoreLink` 刻意留著**：它是唯一超過一屏的下鑽頁
+ * （375×812 實測 2064px），捲到底之後再要一個出口是合理的。其餘五頁都在
+ * 一屏內，只留頂端箭頭。
+ */
+function goBack(): void {
+  void router.push({ name: "more" });
+}
 </script>
 
 <template>
   <div class="page-stack data-page">
-    <header class="page-heading">
+    <header class="page-heading page-heading--with-exit">
       <h1 class="page-heading__title" data-typography-role="page-title">
         本機資料與隱私
       </h1>
       <p>
         免登入即可使用，未同步的資料只留於本機。匯出檔案由裝置直接產生，絕不上傳或用於分析。
       </p>
+      <IconButton icon="tool-arrow-left" label="返回更多" @click="goBack" />
     </header>
 
     <BroadcastLoader
@@ -180,6 +195,14 @@ function writeSyncDisabled(value: boolean): void {
         <p class="summary-scope">
           以下數量只代表這台裝置上的本機紀錄，不包含其他裝置或尚未下載的雲端資料。
         </p>
+        <!--
+          2026-09-03：空值一律說「沒有紀錄」。
+
+          這張表原本同時有「0 筆」「0 次」「無」「沒有紀錄」四種說法，其中
+          後兩種講的是同一件事（稽核 §F）。規則：**有數量的用數字＋單位，
+          沒有數量的用「沒有紀錄」**——「無」太短，在一欄值裡讀起來像被
+          截斷。
+        -->
         <dl class="summary-grid">
           <div>
             <dt>防曬裝備</dt>
@@ -187,7 +210,7 @@ function writeSyncDisabled(value: boolean): void {
           </div>
           <div>
             <dt>進行中提醒</dt>
-            <dd>{{ summary.hasActiveSession ? "有" : "無" }}</dd>
+            <dd>{{ summary.hasActiveSession ? "有" : "沒有紀錄" }}</dd>
           </div>
           <div>
             <dt>已結束的提醒</dt>
@@ -195,7 +218,7 @@ function writeSyncDisabled(value: boolean): void {
           </div>
           <div>
             <dt>未儲存草稿</dt>
-            <dd>{{ summary.hasSetupDraft ? "有" : "無" }}</dd>
+            <dd>{{ summary.hasSetupDraft ? "有" : "沒有紀錄" }}</dd>
           </div>
           <div>
             <dt>氣象資料最後更新</dt>

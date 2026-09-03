@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import BackToMoreLink from "../components/common/BackToMoreLink.vue";
+import { useRouter } from "vue-router";
+import IconButton from "../components/common/IconButton.vue";
 import { computed, shallowRef } from "vue";
 import type { FeedbackType } from "@sunshield/contracts";
 import { useFeedbackController } from "../app/injection";
@@ -23,15 +24,25 @@ async function submit(): Promise<void> {
     contactEmail.value = "";
   }
 }
+const router = useRouter();
+
+/*
+ * 頂端的返回出口（2026-09-03，稽核 §G：下鑽頁一律有頂端箭頭）。
+ * 直接回「更多」，不用 history.back——這一頁也可能是從網址列直接打開的。
+ */
+function goBack(): void {
+  void router.push({ name: "more" });
+}
 </script>
 
 <template>
   <div class="page-stack">
-    <header class="page-heading">
+    <header class="page-heading page-heading--with-exit">
       <h1 class="page-heading__title" data-typography-role="page-title">
         問題回報與意見回饋
       </h1>
       <p class="page-heading__body">免登入即可回報，僅會收到此表單的內容。</p>
+      <IconButton icon="tool-arrow-left" label="返回更多" @click="goBack" />
     </header>
 
     <form class="app-card feedback-form" @submit.prevent="submit">
@@ -72,8 +83,6 @@ async function submit(): Promise<void> {
         {{ feedback.state.value.error.message }}
       </AppNotice>
     </form>
-
-    <BackToMoreLink />
   </div>
 </template>
 

@@ -128,12 +128,20 @@ const robots = computed(() =>
           class="app-card education-category-card"
           :to="educationCategoryPath(category.slug)"
         >
+          <!--
+            2026-09-03：篇數藥丸從標題**上方**移到標題**右邊**。
+
+            疊在上方時它把標題往下推，而 `IconLead` 的 40px 圖示是對整個
+            文字區塊垂直置中——於是圖示既不對齊藥丸也不對齊標題（實測圖示
+            中心 528、標題中心 542，差 14px）。放到同一行之後，圖示對齊的
+            就是標題本身。
+          -->
           <IconLead :icon="category.icon">
             <span class="education-category-card__titles">
+              <strong>{{ category.title }}</strong>
               <span class="education-card-kicker"
                 >{{ category.articleCount }} 篇文章</span
               >
-              <strong>{{ category.title }}</strong>
             </span>
           </IconLead>
           <small>{{ category.description }}</small>
@@ -261,9 +269,19 @@ const robots = computed(() =>
   line-height: var(--line-height-card-title);
 }
 
+/*
+ * 標題與篇數同一行。`baseline` 而不是 `center`：兩者字級差一階（18 對 12），
+ * 靠中線對齊會讓小字看起來浮在半空中——跟 `ZoneProtectionForm` 的
+ * `.zone-group-choice__text` 是同一個判斷。
+ *
+ * `wrap` 是保險：最長的分類名加上藥丸在 320px 上放不下時折行即可，不要
+ * 讓藥丸被壓扁或溢出。
+ */
 .education-category-card__titles {
-  display: grid;
-  gap: var(--space-1);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--space-2);
 }
 
 /*

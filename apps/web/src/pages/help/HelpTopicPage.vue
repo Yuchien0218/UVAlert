@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed } from "vue";
-import { useRoute } from "vue-router";
+import { useRoute, useRouter } from "vue-router";
+import IconButton from "../../components/common/IconButton.vue";
 import ContentUnderReview from "../../components/help/ContentUnderReview.vue";
 import { findTopic, isPublishable } from "../../features/help/helpTopics";
 
@@ -13,6 +14,15 @@ import { findTopic, isPublishable } from "../../features/help/helpTopics";
  */
 
 const route = useRoute();
+const router = useRouter();
+
+/*
+ * 頂端的返回出口（2026-09-03，稽核 §G：下鑽頁一律有頂端箭頭）。
+ * 這一頁的上一層是常見問題，不是「更多」。
+ */
+function goBack(): void {
+  void router.push({ name: "help" });
+}
 const topic = computed(() => findTopic(String(route.meta.helpTopicSlug ?? "")));
 const publishable = computed(() =>
   topic.value === undefined ? false : isPublishable(topic.value)
@@ -21,10 +31,11 @@ const publishable = computed(() =>
 
 <template>
   <div class="page-stack">
-    <header class="page-heading">
+    <header class="page-heading page-heading--with-exit">
       <h1 class="page-heading__title" data-typography-role="page-title">
         {{ topic?.title ?? "說明" }}
       </h1>
+      <IconButton icon="tool-arrow-left" label="返回常見問題" @click="goBack" />
     </header>
 
     <ContentUnderReview
@@ -33,9 +44,5 @@ const publishable = computed(() =>
       :body="`這篇內容正在審查中，完成前暫不提供。`"
       :required-review="topic?.requiredReview ?? null"
     />
-
-    <RouterLink class="text-link text-link--muted" :to="{ name: 'help' }">
-      返回常見問題
-    </RouterLink>
   </div>
 </template>

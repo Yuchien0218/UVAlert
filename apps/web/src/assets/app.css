@@ -268,6 +268,53 @@ strong {
   gap: var(--space-3);
 }
 
+/*
+ * 下鑽頁的頂端返回鈕（2026-09-03，稽核 §G）。
+ *
+ * `2026-09-02-secondary-page-exit-rule.md` 定了「叉叉／箭頭怎麼選」，但明講
+ * **「哪些頁面該有頂端出口」不在該次範圍**。稽核量到的現況是三個設定頁三種
+ * 組合（通知設定只有頂端箭頭、本機資料與帳號資料只有頁尾連結）。
+ *
+ * 裁決：**下鑽頁一律有頂端箭頭，頁尾連結留給長頁面**——頂端出口不必捲到底
+ * 才找得到。實測 375×812 的頁高：問題回報 831、安裝 812、常見問題 812、
+ * 特殊狀況 812、帳號資料 812，全部一屏內；只有本機資料與隱私 2064 需要
+ * 頁尾也留一個。
+ *
+ * 版型沿用 `.flow-heading`：標題與箭頭同一列，其餘（說明段落）橫跨兩欄。
+ * 這裡不改成直接套 `.flow-heading`，因為 `.page-heading` 的標題有
+ * `max-width: 18em` 與較緊的行高，那是頁面大標自己的規格。
+ */
+.page-heading--with-exit {
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: start;
+  column-gap: var(--space-4);
+}
+
+/*
+ * 只有標題要為箭頭讓出寬度，其餘（說明段落）橫跨兩欄。
+ *
+ * 這是 2026-09-03 `.flow-heading` 那次修過的同一個坑：說明在箭頭**下方**，
+ * 本來就不必讓位。實測 375px，讓位的話「免登入即可回報，僅會收到此表單的
+ * 內容。」會多折一行，只為第二行留兩個字。
+ */
+.page-heading--with-exit > * {
+  grid-column: 1 / -1;
+}
+
+.page-heading--with-exit > .page-heading__title {
+  grid-column: 1;
+}
+
+/*
+ * 箭頭固定在第一列右側。它寫在標題**後面**，所以要明確指定 row——
+ * 否則自動排版會把它放到標題的下一列，變成 2026-08-31 修過的「圖示鈕
+ * 獨佔一列」。
+ */
+.page-heading--with-exit > .icon-button {
+  grid-column: 2;
+  grid-row: 1;
+}
+
 .page-heading__eyebrow {
   margin: 0;
   color: var(--text-secondary);
