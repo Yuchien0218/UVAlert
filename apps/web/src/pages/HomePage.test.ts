@@ -220,13 +220,16 @@ describe("HomePage", () => {
      * 測試也不會紅，就只是默默地把 60px 還回去。
      */
     /*
-     * 2026-08-30 使用者裁決（pending-decisions §6）：「事件現在是深色按鈕，
-     * 會一直注意到這個事件的存在」——「記錄狀況」改成提問式的提示卡。
+     * **階段二（2026-09-03）：首頁不再有「剛才有流汗嗎？」提問卡。**
      *
-     * 這與 domain 語意相符：情境事件（流汗／毛巾／摩擦／洗手／下水）本來
-     * 就是條件觸發，不是每次都要做。
+     * `2026-09-02-event-means-reapply.md` 的原則是「遇到了事件＝需要補擦」，
+     * 所以記錄狀況從一個與補擦並列的目的地，降成補擦流程裡的出口
+     * （`ReapplyReasonPicker` 的「現在還不能補擦，先記錄狀況」）。
+     *
+     * 這條守的是提問卡真的不在了——留著它等於同一件事有兩個入口，
+     * 而且其中一個把使用者導離主線。
      */
-    it("倒數進行中時「記錄狀況」是提問式提示卡，不是主 CTA", async () => {
+    it("倒數進行中時首頁沒有記錄狀況的提問卡", async () => {
       // 共用的 session fixture 其實已經到期（zoneDueAt 是 2026-08-01），
       // 這裡要的是「還在倒數」，所以把 actionAt 推到未來。
       mockServices({
@@ -234,6 +237,7 @@ describe("HomePage", () => {
           ...session,
           primaryAction: {
             ...session.primaryAction,
+            actionKind: "record_reapplication",
             actionAt: "2099-01-01T00:00:00.000Z"
           }
         },
@@ -242,16 +246,10 @@ describe("HomePage", () => {
 
       const wrapper = await mountHome();
 
-      const prompt = wrapper.find(".home__prompt");
-      expect(prompt.exists()).toBe(true);
-      expect(prompt.text()).toContain("流汗");
-      // 涵蓋五種狀況，不只流汗——只講流汗會讓另外四種看起來不算數。
-      expect(prompt.text()).toContain("碰水");
-      expect(prompt.get("button").classes()).toContain("button--quiet");
-      // 深杏桃滿寬主 CTA 不該同時存在。
-      expect(wrapper.find(".home__cta").exists()).toBe(false);
-      // 全站一致用「你」（wireframe-copy-fixes §2.3 的實測結論）。
-      expect(prompt.text()).not.toContain("您");
+      expect(wrapper.find(".home__prompt").exists()).toBe(false);
+      expect(wrapper.text()).not.toContain("剛才有流汗");
+      // 主 CTA 補上來，畫面不會變成沒有東西可按。
+      expect(wrapper.get(".home__cta").text()).toContain("記錄補擦");
     });
 
     /*
@@ -286,19 +284,18 @@ describe("HomePage", () => {
      */
 
     /*
-     * 2026-09-02：tracking 的主行動改成「記錄補擦」之後，提問卡與主 CTA
-     * **必須並存**——提問卡是記錄狀況唯一的入口，主 CTA 是補擦。
+     * **反向：記錄狀況沒有被刪掉，只是不再有自己的入口。**
      *
-     * 這條擋的是「改了 domain 卻忘了改首頁」：那時提問卡的條件會失效，
-     * 記錄狀況就沒有入口了。
+     * 它在**真的是主行動時**仍然是主 CTA——例如遮蔽狀態下補擦不適用，
+     * 記錄狀況就是唯一能做的事。這條擋的是「降級做過頭，變成拿掉」。
      */
-    it("倒數正常時，提問卡與補擦 CTA 並存", async () => {
+    it("記錄狀況真的是主行動時仍然是主 CTA", async () => {
       mockServices({
         session: {
           ...session,
           primaryAction: {
             ...session.primaryAction,
-            actionKind: "record_reapplication",
+            actionKind: "report_context_event",
             actionAt: "2099-01-01T00:00:00.000Z"
           }
         },
@@ -307,10 +304,7 @@ describe("HomePage", () => {
 
       const wrapper = await mountHome();
 
-      expect(wrapper.find(".home__prompt").exists()).toBe(true);
-      expect(wrapper.find(".home__cta").exists()).toBe(true);
-      // 提問卡那顆必須是記錄狀況，不能跟著主行動變成補擦。
-      expect(wrapper.get(".home__prompt").text()).toContain("記錄狀況");
+      expect(wrapper.get(".home__cta").text()).toContain("記錄狀況");
     });
 
     /*

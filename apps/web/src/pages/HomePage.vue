@@ -180,61 +180,27 @@ const reminderPresentation = computed(() => {
 });
 
 /**
- * 「記錄狀況」改用提問式的提示卡，不再是深杏桃主 CTA。
- *
- * 2026-08-30 使用者裁決（見 docs/decisions/2026-08-30-pending-decisions.md
- * 第六節）：「事件現在是深色按鈕，會一直注意到這個事件的存在」。
- *
- * 這與 domain 的語意是相符的——情境事件（流汗／擦毛巾／摩擦／洗手／下水）
- * **本來就是條件觸發**，不是每次都要做。滿寬實心按鈕讀起來是「你現在該做
- * 這件事」，跟「如果剛好發生了，才需要點」不是同一件事。
- *
- * **2026-09-02：這張卡不再是「主行動剛好是記錄狀況」的變體，而是一個
- * 獨立的次要入口。** tracking 的主行動改成「記錄補擦」之後，如果提問卡
- * 仍然綁在 `actionKind === "report_context_event"`，它會在正常狀態下整個
- * 消失——記錄狀況就沒有入口了。所以條件改成「倒數正常跑著」，而卡片裡的
- * 按鈕明確導向記錄狀況，不再跟著主行動走。
- *
- * 兩個條件缺一不可：
- *
- * 1. 主行動是 `record_reapplication`（倒數在跑）或 `report_context_event`
- *    （遮蔽等狀態下補擦不適用，記錄狀況就是唯一能做的事）。其餘 actionKind
- *    是真的要使用者去做的事（補上防護紀錄、確認防護方式），配上問句會變成
- *    明明要求動作卻寫得像可有可無。
- * 2. `tone !== "due"`。到了補擦時間時最主要的任務是補擦，這時再問一句
- *    「剛才有流汗嗎」會分散那個任務。
- */
-const showContextEventPrompt = computed(() => {
-  const presentation = reminderPresentation.value;
-  if (presentation === null) return false;
-  if (presentation.tone === "due") return false;
-  return (
-    presentation.actionKind === "record_reapplication" ||
-    presentation.actionKind === "report_context_event"
-  );
-});
-
-/**
  * 主行動按鈕要不要出現。
  *
  * **不變式：畫面上永遠恰好有一個可按的行動。**
  *
- * 只有在「提問卡正在顯示，而且它那顆按鈕就是主行動本身」時才隱藏——那時
- * 兩顆一起會變成同一個動作出現兩次（2026-08-30 把記錄狀況從主 CTA 降級的
- * 裁決在這個狀態仍然成立）。
+ * **2026-09-03（階段二）：首頁的「剛才有流汗嗎？」提問卡已移除，所以這裡
+ * 不再有「提問卡與主 CTA 二選一」的分支——主 CTA 永遠顯示。**
  *
- * 第一版寫成「actionKind 是 report_context_event 就隱藏」，被 HomePage 的
- * 既有守門抓到：到期又是記錄狀況時提問卡也不顯示，結果兩個都消失，使用者
- * 沒有任何可按的東西。那條守門是 2026-08-30 為了拆開 actionKind 與 tone 兩
- * 個變因才加的，這次正好接住。
+ * 那張卡是 2026-08-30 把記錄狀況從主 CTA 降級時留下的獨立入口。
+ * `2026-09-02-event-means-reapply.md` 的原則是「遇到了事件＝需要補擦」，
+ * 記錄狀況因此從一個並列的目的地降成補擦流程裡的出口
+ * （`ReapplyReasonPicker` 的「現在還不能補擦，先記錄狀況」）。
+ * 它仍然會在**真的是主行動時**當主 CTA 出現（例如遮蔽狀態下補擦不適用）。
+ *
+ * 歷史：第一版的隱藏條件寫成「actionKind 是 report_context_event 就隱藏」，
+ * 在「到期又是記錄狀況」時會讓提問卡與 CTA 同時消失，被既有守門接住。
+ * 現在整個分支都不存在了，那個坑跟著消失。
  */
 const showPrimaryCta = computed(() => {
   const presentation = reminderPresentation.value;
   if (presentation === null) return false;
-  return !(
-    showContextEventPrompt.value &&
-    presentation.actionKind === "report_context_event"
-  );
+  return true;
 });
 
 /**
@@ -425,36 +391,6 @@ function handleEndSession(): void {
           @reset-error="sessionControl.clearEndError"
         />
       </div>
-
-      <!--
-        提問式的提示卡。文案涵蓋 ReportContextEventPage 實際提供的五個
-        選項（大量流汗／擦毛巾／明顯摩擦／洗手／游泳下水），不只講流汗
-        ——只講流汗會讓另外四種看起來不算數。
-
-        用「你」不用「您」：2026-08-23-wireframe-copy-fixes.md 第 2.3 節
-        有實測紀錄，apps/web/src/ 之中「您」0 次、「你」41 次。
-      -->
-      <section
-        v-if="showContextEventPrompt && reminderPresentation !== null"
-        class="home__prompt app-card"
-        aria-labelledby="context-event-prompt"
-      >
-        <p id="context-event-prompt" class="home__prompt-question">
-          剛才有流汗、碰水或擦拭嗎？
-        </p>
-        <p class="home__prompt-hint">記錄後會重新計算補擦時間。</p>
-        <!--
-          明確導向記錄狀況，不再跟著主行動走——2026-09-02 之後 tracking 的
-          主行動是「記錄補擦」，跟著走會把這顆按鈕變成補擦。
-        -->
-        <button
-          class="button button--quiet"
-          type="button"
-          @click="handleAction('report_context_event')"
-        >
-          記錄狀況
-        </button>
-      </section>
 
       <button
         v-if="showPrimaryCta && reminderPresentation !== null"
@@ -711,33 +647,6 @@ function handleEndSession(): void {
 
 .home__cta {
   width: 100%;
-}
-
-/*
- * 2026-08-30：情境事件的提示卡。留在倒數正下方（使用者裁決的位置），
- * 但份量從深杏桃實心滿寬按鈕降成一張卡片內的 quiet 按鈕。
- *
- * 按鈕**不設 width: 100%**：滿寬是主 CTA 的語彙，這裡要的是「如果剛好
- * 發生了，才需要點」，按鈕貼齊左緣、只佔內容寬度即可。
- */
-.home__prompt {
-  display: grid;
-  justify-items: start;
-  gap: var(--space-2);
-  padding: var(--space-4);
-}
-
-.home__prompt-question {
-  margin: 0;
-  font-weight: 500;
-  line-height: var(--line-height-body);
-}
-
-.home__prompt-hint {
-  margin: 0;
-  color: var(--text-secondary);
-  font-size: var(--font-size-supporting);
-  line-height: var(--line-height-body);
 }
 
 .home-state {
