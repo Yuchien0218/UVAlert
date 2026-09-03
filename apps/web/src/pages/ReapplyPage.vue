@@ -148,7 +148,6 @@ function zoneNames(zoneIds: string[]): string {
       <ReapplicationZoneSelector
         :zones="reapplication.session.value.zones"
         :selected-zone-ids="reapplication.selectedZoneIds.value"
-        :suggested-zone-ids="reapplication.suggestedZoneIds.value"
         :error="reapplication.fieldErrors.value.zones?.[0]"
         @suggested="reapplication.selectSuggested"
         @all="reapplication.selectAll"

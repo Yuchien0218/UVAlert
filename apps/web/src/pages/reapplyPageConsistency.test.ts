@@ -170,3 +170,69 @@ describe("取消是文字連結", () => {
     );
   });
 });
+
+describe("兩頁的部位選擇器共用同一個元件", () => {
+  /*
+   * 2026-09-03（裁決 1）：同一個問題「哪些部位？」原本有兩種樣子——記錄
+   * 狀況那頁是會換行的藥丸 chip，記錄補擦是 13 個整列。整列實測 766px，
+   * chip 換行之後 498px。
+   */
+  it("記錄補擦改用 ZoneSelectorGrid", () => {
+    /*
+     * 標籤後面要接空白或 `/>`——`toContain("<ZoneSelectorGrid")` 會被
+     * `<ZoneSelectorGridX` 滿足（2026-09-03 實測：改名之後測試照樣全綠）。
+     * CLAUDE.md 坑二。
+     */
+    expect(ZONE).toMatch(/<ZoneSelectorGrid[\s/>]/);
+    expect(ZONE).toContain(
+      'import ZoneSelectorGrid from "../reminder/ZoneSelectorGrid.vue";'
+    );
+  });
+
+  /* 反向：自刻的那一份要真的消失，不是留著沒用。 */
+  it("不再自刻整列的部位清單", () => {
+    expect(ZONE).not.toContain("zone-choice");
+    expect(ZONE).not.toContain("zone-list");
+  });
+
+  /*
+   * 「建議」badge 跟著拿掉（裁決 3）：被建議的部位本來就已經勾起來了，
+   * badge 只是把同一件事再說一次，而且 13 個 badge 在一頁裡是噪音。
+   *
+   * 它原本用 `--color-tracking`——那是「追蹤中」的**狀態色**，而「建議」
+   * 不是狀態。與其換一個顏色，不如不要那個 badge。
+   */
+  it("不再有建議 badge，也不再借用狀態色", () => {
+    expect(ZONE).not.toContain("建議</small>");
+    expect(ZONE).not.toContain("--color-tracking");
+  });
+
+  /* 說明文字要接住 badge 拿掉之後留下的資訊。 */
+  it("說明仍然講出「已預選」這件事", () => {
+    expect(ZONE).toContain("已預選");
+  });
+});
+
+describe("不再逐部位指定防曬乳", () => {
+  /*
+   * 2026-09-03 使用者裁決：「不用去紀錄不同防曬擦不同部位 可以刪除」。
+   *
+   * 命令的形狀沒有變——`ReapplyCommandV1` 本來就吃「一組 application」，
+   * 只是這個介面現在永遠只產生一組。
+   */
+  it("沒有逐部位模式的切換", () => {
+    expect(ASSIGN).not.toContain("perZone");
+    expect(ASSIGN).not.toContain("不同部位使用不同防曬乳");
+    expect(ASSIGN).not.toContain("assignment-row");
+  });
+
+  /* 反向：共用的那一個下拉還在，不是把整張卡刪掉。 */
+  it("共用下拉還在", () => {
+    expect(ASSIGN).toContain('id="product-shared"');
+  });
+
+  /* 確認區塊跟著不再分組——分組只服務已經拿掉的那個模式。 */
+  it("確認區塊不再依產品分組", () => {
+    expect(REVIEW).not.toContain("review__groups");
+  });
+});

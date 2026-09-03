@@ -51,35 +51,32 @@ describe("確認區塊", () => {
   });
 
   /*
-   * 全部同一瓶時只印產品名一次——那是最常見的情況，也是改動前最浪費的
-   * 地方（13 行的右半邊都是同一個名字）。
+   * 只印產品名一次——改動前這裡是 13 行，每行右半邊都是同一個名字。
    */
-  it("全部同一瓶時不逐項列出部位", () => {
+  it("不逐項列出部位", () => {
     const wrapper = mountReview({ z1: "a", z2: "a", z3: "a" });
 
     expect(wrapper.find(".review__product").text()).toBe("A 防曬乳");
-    expect(wrapper.find(".review__groups").exists()).toBe(false);
     // 部位名稱不再重複——那份清單就在這張卡的正上方。
     expect(wrapper.text()).not.toContain("手臂");
   });
 
   /*
-   * **反向：分了不同瓶就必須列出來。**
+   * **2026-09-03（使用者裁決）：不再分組。**
    *
-   * 只守上面那條的話，把整個分組拿掉、永遠只印第一個產品名也是綠的——
-   * 那時使用者會看到「A 防曬乳」卻不知道有兩個部位用的是 B。
+   * 前一版依產品分組，是為了「不同部位用不同防曬乳」那個模式。使用者把
+   * 那條路拿掉之後，指派不一致只會來自舊資料——那時要跟上方的下拉一樣顯示
+   * 「尚未選擇」，顯示其中一瓶會是騙人的。
    */
-  it("分了不同瓶時逐組列出部位", () => {
-    const wrapper = mountReview({ z1: "a", z2: "b", z3: "b" });
-    const text = wrapper.find(".review__groups").text();
+  it("指派不一致時說尚未選擇，不挑一瓶顯示", () => {
+    const text = mountReview({ z1: "a", z2: "b", z3: "b" }).text();
 
-    expect(text).toContain("A 防曬乳");
-    expect(text).toContain("B 防曬乳");
-    expect(text).toContain("手臂");
-    expect(text).toContain("腿部");
+    expect(text).toContain("尚未選擇");
+    expect(text).not.toContain("A 防曬乳");
+    expect(text).not.toContain("B 防曬乳");
   });
 
-  it("沒選產品時說尚未選擇，不是空白", () => {
+  it("完全沒選產品時也說尚未選擇", () => {
     expect(mountReview({}).text()).toContain("尚未選擇");
   });
 });

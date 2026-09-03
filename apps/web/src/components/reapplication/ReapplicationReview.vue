@@ -2,7 +2,6 @@
 import { computed } from "vue";
 import type { ZoneProjection } from "@sunshield/contracts";
 import type { ReapplicationProductChoice } from "../../features/reapplication/createReapplicationController";
-import { getZoneLabel } from "../../features/reminder/reminderPresentation";
 import { formatDateTime } from "../../helpers/datetime";
 
 const props = defineProps<{
@@ -26,32 +25,20 @@ function productName(zoneInstanceId: string): string {
 }
 
 /**
- * 依防曬乳分組。
+ * 這次會記錄成哪一瓶。
  *
- * **2026-09-03：從「逐條列出每個部位」改成分組摘要。**
+ * **2026-09-03（使用者裁決）：不再分組。** 前一版依產品分組，是為了
+ * 「不同部位用不同防曬乳」那個模式；使用者把那條路拿掉之後，選取的部位
+ * 永遠共用同一瓶，分組只會剩下一組。
  *
- * 改動前這一塊把 13 個部位一行一行再列一次，每一行的右半邊都是同一個
- * 產品名——實測 488px，是這一頁最高的區塊之一，而它的內容**上面三張卡
- * 全部都已經顯示過**（部位清單就在正上方，而且是勾選狀態看得見的）。
- *
- * 分組之後，多數情況（全部同一瓶）只有一行；真的分了不同瓶時才會多幾行，
- * 那時的差異也才是使用者真正需要再確認的東西。
- *
- * 分組形狀刻意與成功頁的 `productGroups` 一致——同一件事在提交前後不該
- * 長成兩種樣子。
+ * 各部位指派不一致時回 null——與上方那個下拉一致（那時它也是空的）。
+ * 顯示其中一瓶會是騙人的：介面已經沒有辦法表達「分開」。
  */
-const groups = computed(() => {
-  const byProduct = new Map<string, string[]>();
-  for (const zone of selectedZones.value) {
-    const name = productName(zone.zoneInstanceId);
-    const labels = byProduct.get(name) ?? [];
-    labels.push(getZoneLabel(zone));
-    byProduct.set(name, labels);
-  }
-  return [...byProduct.entries()].map(([displayName, zoneLabels]) => ({
-    displayName,
-    zoneLabels
-  }));
+const productLabel = computed<string | null>(() => {
+  const names = new Set(
+    selectedZones.value.map((zone) => productName(zone.zoneInstanceId))
+  );
+  return names.size === 1 ? ([...names][0] ?? null) : null;
 });
 </script>
 <template>
@@ -66,19 +53,7 @@ const groups = computed(() => {
       <strong>{{ selectedZones.length }}</strong>
       個部位，{{ formatDateTime(appliedAt) }}。
     </p>
-    <!--
-      只有一種產品時不再列表：那一行的內容等於上面那句話加一個產品名，
-      直接接在後面讀起來比較短。分了不同瓶才需要逐項看。
-    -->
-    <p v-if="groups.length === 1" class="review__product">
-      {{ groups[0]?.displayName }}
-    </p>
-    <ul v-else class="review__groups">
-      <li v-for="group in groups" :key="group.displayName">
-        <strong>{{ group.displayName }}</strong
-        >：{{ group.zoneLabels.join("、") }}
-      </li>
-    </ul>
+    <p class="review__product">{{ productLabel ?? "尚未選擇防曬乳" }}</p>
   </section>
 </template>
 <style scoped>
@@ -101,10 +76,5 @@ const groups = computed(() => {
 }
 .review__product {
   color: var(--text-secondary);
-}
-.review__groups {
-  margin: 0;
-  padding-inline-start: var(--space-5);
-  line-height: var(--line-height-body);
 }
 </style>

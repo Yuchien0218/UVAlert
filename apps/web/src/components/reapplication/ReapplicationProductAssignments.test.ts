@@ -79,26 +79,47 @@ describe("ReapplicationProductAssignments", () => {
     expect(emitted.every((call) => call[1] === "product:a")).toBe(true);
   });
 
-  it("既有紀錄本來就分開指派時直接展開，不把差異藏起來", () => {
+  /*
+   * **2026-09-03（使用者裁決）：整條「不同部位用不同防曬乳」拿掉。**
+   *
+   * 原本這裡有兩條測試守著「既有紀錄分開指派時自動展開」與「可以手動
+   * 展開成逐部位」。那個模式已經不存在——使用者的原話是「不用去紀錄不同
+   * 防曬擦不同部位」。
+   *
+   * 換成守新的規則：永遠只有一個下拉，而且各部位指派不一致時它是空的
+   * （顯示其中一瓶會是騙人的，因為介面已經沒辦法表達「分開」）。
+   */
+  it("永遠只有一個下拉", () => {
+    const wrapper = mountWith({
+      "z-forehead": "product:a",
+      "z-arms": "product:a",
+      "z-hands": "product:a"
+    });
+
+    expect(wrapper.findAll("select")).toHaveLength(1);
+  });
+
+  it("舊資料分開指派過時，下拉是空的，要求重新選一次", () => {
     const wrapper = mountWith({
       "z-forehead": "product:a",
       "z-arms": "product:b",
       "z-hands": "product:a"
     });
 
-    expect(wrapper.findAll("select")).toHaveLength(zones.length);
+    expect(wrapper.findAll("select")).toHaveLength(1);
+    expect((wrapper.get("select").element as HTMLSelectElement).value).toBe("");
   });
 
-  it("可以手動展開成逐部位", async () => {
+  /* 反向：一致時要真的把那一瓶顯示出來，不是永遠空白。 */
+  it("一致時顯示目前那一瓶", () => {
     const wrapper = mountWith({
       "z-forehead": "product:a",
       "z-arms": "product:a",
       "z-hands": "product:a"
     });
-    expect(wrapper.findAll("select")).toHaveLength(1);
 
-    await wrapper.get("button").trigger("click");
-
-    expect(wrapper.findAll("select")).toHaveLength(zones.length);
+    expect((wrapper.get("select").element as HTMLSelectElement).value).toBe(
+      "product:a"
+    );
   });
 });
