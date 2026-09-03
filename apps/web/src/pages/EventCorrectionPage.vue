@@ -78,15 +78,16 @@ async function runVoid(): Promise<void> {
       <div>
         <p class="eyebrow">更正紀錄</p>
         <h1 data-typography-role="page-title">更正這筆紀錄</h1>
-        <p>
-          原本的紀錄會保留下來，你會在後面新增一筆更正。送出前不會改變目前提醒。
-        </p>
       </div>
       <IconButton
         icon="tool-close"
         label="返回提醒"
         @click="back"
       />
+      <!-- 說明橫跨兩欄，不必為圖示鈕讓出寬度（2026-09-03）。 -->
+      <p>
+        原本的紀錄會保留下來，你會在後面新增一筆更正。送出前不會改變目前提醒。
+      </p>
     </header>
 
     <BroadcastLoader

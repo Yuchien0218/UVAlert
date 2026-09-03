@@ -74,15 +74,18 @@ function zoneNames(zoneIds: string[]): string {
           的標題已經把那三件事各問了一次，頁首再列一遍是同一句話說兩次。
           留下的是這一頁唯一還沒被說過的事：按下儲存之前什麼都不會變。
         -->
-        <!--
-          2026-09-03：成功之後這句要收起來。它與正下方的「補擦紀錄已更新」
-          直接矛盾——記錄已經寫進去了，「儲存前不會更新」不再成立。
-        -->
-        <p v-if="reapplication.phase.value !== 'success'">
-          儲存前不會更新提醒。
-        </p>
       </div>
       <IconButton icon="tool-close" label="返回提醒" @click="cancel" />
+      <!--
+        2026-09-03：成功之後這句要收起來。它與正下方的「補擦紀錄已更新」
+        直接矛盾——記錄已經寫進去了，「儲存前不會更新」不再成立。
+
+        同日搬出上面那個 div：說明在圖示鈕下方，不必為按鈕讓出寬度，
+        `.flow-heading > p` 讓它橫跨兩欄。
+      -->
+      <p v-if="reapplication.phase.value !== 'success'">
+        儲存前不會更新提醒。
+      </p>
     </header>
 
     <p v-if="reapplication.phase.value === 'loading'" role="status">

@@ -150,3 +150,66 @@ describe("衛教文章頁的大標拿得到整個寬度", () => {
     expect(category).toContain("article.primaryQuestion");
   });
 });
+
+/**
+ * `.flow-heading` 的說明文字（2026-09-03）。
+ *
+ * 同一個病的第三個病例，五個頁面共用：記錄補擦、記錄狀況、更正紀錄、
+ * 分享裝備、通知設定。
+ *
+ * 原本是 flex：標題群組（eyebrow ＋ h1 ＋ 說明）一整塊在左、圖示鈕在右，
+ * 於是**說明也跟著少掉一個按鈕的寬度**（實測 375px：可用 336、標題群組
+ * 275）。說明在按鈕下方，本來就不必讓位。
+ */
+describe("流程頁的說明文字橫跨兩欄", () => {
+  const FLOW_PAGES = [
+    "pages/ReapplyPage.vue",
+    "pages/ReportContextEventPage.vue",
+    "pages/EventCorrectionPage.vue",
+    "pages/GearSharePage.vue",
+    "pages/settings/NotificationSettingsPage.vue"
+  ];
+
+  const APP_CSS = strip(readFileSync("apps/web/src/assets/app.css", "utf8"));
+
+  it("共用版型改成 grid，說明跨欄", () => {
+    expect(APP_CSS).toMatch(
+      /\.flow-heading \{[^}]*grid-template-columns: minmax\(0, 1fr\) auto;/
+    );
+    expect(APP_CSS).toMatch(
+      /\.flow-heading > p \{[^}]*grid-column: 1 \/ -1;/
+    );
+  });
+
+  /*
+   * 說明必須是 `<header>` 的**直接子代**——留在裡面那個 div 就跨不了欄，
+   * 改了 CSS 也沒有用。
+   */
+  it.each(FLOW_PAGES)("%s 的說明是 header 的直接子代", (relative) => {
+    const source = strip(readFileSync(`apps/web/src/${relative}`, "utf8"));
+    const header = /<header class="flow-heading">([\s\S]*?)<\/header>/.exec(
+      source
+    )?.[1];
+
+    expect(header, `${relative} 找不到 flow-heading`).toBeDefined();
+
+    // header 裡的 div 收掉之後，剩下的內容必須還有一個 <p>。
+    const withoutDiv = header!.replace(/<div[\s\S]*?<\/div>/, "");
+    expect(withoutDiv, relative).toMatch(/<p[\s>]/);
+  });
+
+  /*
+   * **反向：舊的「div 裡最後一個 p」規則要拿掉。** 說明搬走之後那個位置
+   * 變成 eyebrow，留著會把 eyebrow 染成內文色。
+   */
+  it("不再靠「div 的最後一個 p」認說明", () => {
+    expect(APP_CSS).not.toContain(".flow-heading div > p:last-child");
+  });
+
+  /* 圖示鈕仍然與標題同一列——`closeButtonLayout.test.ts` 守的那條規則不變。 */
+  it("圖示鈕仍在第一列，不獨佔一列", () => {
+    expect(APP_CSS).toMatch(
+      /\.flow-heading \{[^}]*grid-template-columns: minmax\(0, 1fr\) auto;/
+    );
+  });
+});

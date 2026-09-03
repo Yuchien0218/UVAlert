@@ -208,13 +208,14 @@ function goBack(): void {
         <h1 class="page-heading__title" data-typography-role="page-title">
           分享我的防曬裝備
         </h1>
-        <p>存成圖片或直接分享你的防曬清單，價格預設不會印在卡片上。</p>
       </div>
       <IconButton
         icon="tool-arrow-left"
         label="返回我的防曬裝備"
         @click="goBack"
       />
+      <!-- 說明橫跨兩欄，不必為圖示鈕讓出寬度（2026-09-03）。 -->
+      <p>存成圖片或直接分享你的防曬清單，價格預設不會印在卡片上。</p>
     </header>
 
     <GearShareCard :data="cardData" :show-price="showPrice" />
@@ -292,10 +293,10 @@ function goBack(): void {
   gap: var(--space-3);
 }
 
-.flow-heading p {
-  color: var(--text-body);
-  line-height: var(--line-height-body);
-}
+/*
+ * 2026-09-03：說明的顏色與行高由 app.css 的 `.flow-heading > p` 統一給，
+ * 這裡那份逐字重複的覆寫刪掉。
+ */
 
 .share-page__actions {
   display: grid;
