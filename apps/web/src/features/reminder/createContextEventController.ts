@@ -98,7 +98,29 @@ export interface ContextEventSuccess {
 export interface ContextEventController {
   phase: Readonly<ShallowRef<ContextEventPhase>>;
   session: Readonly<ShallowRef<SessionProjection | null>>;
-  availableChoices: Readonly<ShallowRef<ContextEventChoice[]>>;
+  /**
+   * 選單上那四種「防曬被磨掉了」。
+   *
+   * **2026-09-03（階段三）：水上活動不再混在這裡面。** 損耗與狀態轉換是
+   * 兩件不同的事——四種損耗會把期限拉到事件發生的那一刻（記錄完就到期），
+   * 下水／離水則是開關一段水中區間、改由耐水標示決定期限。混在同一張清單
+   * 裡讀起來像六個並列的選項，實際上它們連「記錄完接下來要做什麼」都相反
+   * （見 `suggestsReapplyAfter`）。
+   *
+   * 這四種與補擦流程「為什麼補擦？」的四個原因是同一組——那不是巧合，
+   * 是同一件事的兩個入口。
+   */
+  ordinaryChoices: Readonly<ShallowRef<ContextEventChoice[]>>;
+  /**
+   * 目前可用的水上活動動作：沒有進行中的區間就是「下水」，有就是「離水」，
+   * 兩者永遠不會同時出現。
+   *
+   * 入口在首頁（`WaterActivityLink`），不在這一頁的選單裡。這裡保留它是為了
+   * 讓深連結（`/reminder/report?kind=water_start`）查得到對應的 choice。
+   */
+  waterChoice: Readonly<ShallowRef<ContextEventChoice | null>>;
+  /** 深連結與錯誤訊息用：四種損耗 ＋ 目前那一種水上動作。 */
+  allChoices: Readonly<ShallowRef<ContextEventChoice[]>>;
   selectedKind: Readonly<ShallowRef<ContextEventKind | null>>;
   selectableZones: Readonly<ShallowRef<ZoneProjection[]>>;
   selectedZoneIds: Readonly<ShallowRef<string[]>>;
@@ -165,7 +187,7 @@ const ORDINARY_CHOICES: ContextEventChoice[] = [
 /*
  * 下水與離水共用 `context-water`。看起來像偷懶，但它們**永遠不會同時
  * 出現**——有進行中的水上區間就只給離水，沒有就只給下水（見下方
- * availableChoices 的組法）。同一個主題的兩個時刻，用同一顆圖示是準的；
+ * waterChoice 的組法）。同一個主題的兩個時刻，用同一顆圖示是準的；
  * 為「離水」另畫一顆只會多一顆幾乎一樣的幾何。
  */
 const WATER_START_CHOICE: ContextEventChoice = {
@@ -251,7 +273,9 @@ export function createContextEventController(
 ): ContextEventController {
   const phase = shallowRef<ContextEventPhase>("idle");
   const session = shallowRef<SessionProjection | null>(null);
-  const availableChoices = shallowRef<ContextEventChoice[]>([]);
+  const ordinaryChoices = shallowRef<ContextEventChoice[]>([]);
+  const waterChoice = shallowRef<ContextEventChoice | null>(null);
+  const allChoices = shallowRef<ContextEventChoice[]>([]);
   const selectedKind = shallowRef<ContextEventKind | null>(null);
   const selectableZones = shallowRef<ZoneProjection[]>([]);
   const selectedZoneIds = shallowRef<string[]>([]);
@@ -294,13 +318,11 @@ export function createContextEventController(
 
     session.value = context.session;
     openWaterInterval.value = context.openWaterInterval;
+    ordinaryChoices.value = [...ORDINARY_CHOICES];
     // 已有進行中的水上區間就不能再開一段；沒有就沒有東西可以關閉。
-    availableChoices.value = [
-      ...ORDINARY_CHOICES,
-      ...(context.openWaterInterval === null
-        ? [WATER_START_CHOICE]
-        : [WATER_END_CHOICE])
-    ];
+    waterChoice.value =
+      context.openWaterInterval === null ? WATER_START_CHOICE : WATER_END_CHOICE;
+    allChoices.value = [...ordinaryChoices.value, waterChoice.value];
     lastZoneIdsByKind = context.lastZoneIdsByKind;
     selectableZones.value = context.session.zones.filter(isExposedActive);
     selectedKind.value = null;
@@ -512,7 +534,9 @@ export function createContextEventController(
   return {
     phase: shallowReadonly(phase),
     session: shallowReadonly(session),
-    availableChoices: shallowReadonly(availableChoices),
+    ordinaryChoices: shallowReadonly(ordinaryChoices),
+    waterChoice: shallowReadonly(waterChoice),
+    allChoices: shallowReadonly(allChoices),
     selectedKind: shallowReadonly(selectedKind),
     selectableZones: shallowReadonly(selectableZones),
     selectedZoneIds: shallowReadonly(selectedZoneIds),

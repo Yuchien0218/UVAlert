@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, nextTick, onMounted, watch } from "vue";
-import { useRouter } from "vue-router";
+import { useRoute, useRouter } from "vue-router";
 import { useWebAppServices } from "../app/injection";
 import QuickTimePicker from "../components/common/QuickTimePicker.vue";
 import BroadcastLoader from "../components/feedback/BroadcastLoader.vue";
@@ -13,10 +13,57 @@ import Icon from "../components/icons/Icon.vue";
 
 const { contextEvent } = useWebAppServices();
 const router = useRouter();
+const route = useRoute();
+
+/**
+ * 深連結進來的事件種類（`/reminder/report?kind=water`）。
+ *
+ * **2026-09-03（階段三）：水上活動的入口移到首頁。** 首頁那個連結帶著
+ * `kind` 進來，直接跳過「發生了什麼？」那一層——使用者在首頁已經表明過
+ * 要做什麼，再讓他從一張清單裡把同一件事再選一次是多餘的。
+ *
+ * **`water` 是刻意的**：首頁不知道現在有沒有進行中的水中區間（那是
+ * repository 的 `openWaterInterval`，投影在預設路徑上根本看不到它——見
+ * HomePage 的註解）。所以首頁只說「要處理水上活動」，由這裡解析成當下
+ * 唯一可用的那一種：沒有區間就是下水，有就是離水。
+ *
+ * 也接受寫死的 `water_start`／`water_end`，但**只有那一種真的可用時才生效**
+ * ——`allChoices` 在任一時刻只含其中一種。網址是使用者改得動的東西，
+ * 不合法的值一律忽略、退回正常的選單。
+ */
+const deepLinkedKind = computed(() => {
+  const raw = route.query.kind;
+  const value = Array.isArray(raw) ? raw[0] : raw;
+  if (typeof value !== "string") return null;
+  if (value === "water") return contextEvent.waterChoice.value?.kind ?? null;
+  return (
+    contextEvent.allChoices.value.find((choice) => choice.kind === value)
+      ?.kind ?? null
+  );
+});
+
+/** 深連結時不顯示第一層選單——那一層已經在首頁回答過了。 */
+const showKindChooser = computed(() => deepLinkedKind.value === null);
 
 onMounted(() => {
   void contextEvent.load();
 });
+
+/*
+ * 等 load() 之後才能選：`allChoices` 要有內容，`selectKind` 也才算得出
+ * 預設部位。所以掛在 phase 上而不是 onMounted 裡直接呼叫。
+ */
+watch(
+  () => contextEvent.phase.value,
+  (value) => {
+    if (value !== "ready") return;
+    const kind = deepLinkedKind.value;
+    if (kind !== null && contextEvent.selectedKind.value === null) {
+      contextEvent.selectKind(kind);
+    }
+  },
+  { immediate: true }
+);
 
 watch(
   () => contextEvent.error.value,
@@ -81,7 +128,7 @@ const submitLabel = computed(() => {
   const kind = contextEvent.selectedKind.value;
   if (kind === null) return "確認記錄";
   return (
-    contextEvent.availableChoices.value.find((choice) => choice.kind === kind)
+    contextEvent.allChoices.value.find((choice) => choice.kind === kind)
       ?.submitLabel ?? "確認記錄"
   );
 });
@@ -184,16 +231,24 @@ function zoneNames(zoneIds: string[]): string {
 
     <template v-else-if="contextEvent.session.value">
       <!-- 第一層：事件選擇 -->
-      <section class="app-card" aria-labelledby="report-kind-title">
+      <section
+        v-if="showKindChooser"
+        class="app-card"
+        aria-labelledby="report-kind-title"
+      >
         <h2 id="report-kind-title" data-typography-role="card-title">
           發生了什麼？
         </h2>
+        <!--
+          2026-09-03：拿掉「或碰水」。水上活動的入口移到首頁之後，這張
+          清單只剩四種損耗，舉一個清單上沒有的例子會讓人以為自己看漏了。
+        -->
         <p class="control-rule-note">
-          請選擇剛才發生的狀況（例如大量流汗或碰水）。
+          請選擇剛才發生的狀況（例如大量流汗或擦毛巾）。
         </p>
         <div class="kind-grid">
           <button
-            v-for="choice in contextEvent.availableChoices.value"
+            v-for="choice in contextEvent.ordinaryChoices.value"
             :key="choice.kind"
             class="kind-option app-card"
             :class="{

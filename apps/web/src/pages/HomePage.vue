@@ -2,6 +2,7 @@
 import type { ActionKind } from "@sunshield/contracts";
 import { computed, nextTick, onMounted, shallowRef, watch } from "vue";
 import { useRouter } from "vue-router";
+import Icon from "../components/icons/Icon.vue";
 import RecentEventsList from "../components/reminder/RecentEventsList.vue";
 import ZoneStatusList from "../components/reminder/ZoneStatusList.vue";
 import type { SecondaryActionKind } from "../features/reminder/reminderPresentation";
@@ -163,6 +164,36 @@ const headlineNote = computed<string | null>(() => {
   if (diff === 0) return "與今天相同";
   return diff > 0 ? "明天比今天高 " + diff : "明天比今天低 " + -diff;
 });
+
+/**
+ * 水上活動的入口（2026-09-03，階段三）。
+ *
+ * **下水／離水從「記錄狀況」的選單搬到這裡。** 那張清單原本混著兩種不同
+ * 的東西：四種損耗把期限拉到事件發生的那一刻（記錄完就到期），下水／離水
+ * 則是開關一段水中區間、改由耐水標示決定期限——連「記錄完接下來要做什麼」
+ * 都相反。
+ *
+ * 階段二把記錄狀況降成補擦流程裡的出口之後更明顯：想記一筆下水得先走
+ * 「記錄補擦 → 現在還不能補擦 → 從清單裡挑下水」，而下水根本不是補擦流程
+ * 的一部分。
+ *
+ * **首頁刻意不判斷「現在在不在水裡」。**
+ *
+ * 第一版讓這顆按鈕跟著投影算出的 `inWater` 換文字（開始水上活動／已離水），
+ * 實機一測就壞了：預設路徑（沒填包裝標示）的 `ruleEligibilityAtApplication`
+ * 是 `identity_unconfirmed`，reducer 的水上區間分支要求 `eligible`，所以
+ * **投影裡完全沒有這段區間的痕跡**——`activeWaterDeadline` 是 null、
+ * `reasonCodes` 也沒有 `WATER_RESISTANCE_UNKNOWN`。按鈕會一直寫「開始水上
+ * 活動」，而帶著 `kind=water_start` 進去又會因為已有區間而找不到對應選項，
+ * 等於**離水永遠按不到**。
+ *
+ * 知道有沒有進行中區間的是 repository（`openWaterInterval`），那是記錄狀況
+ * 那一頁的 controller 才拿得到的東西。所以這裡只送出「使用者要處理水上
+ * 活動」，由那一頁決定現在該給下水還是離水。
+ */
+function handleWaterActivity(): void {
+  void router.push({ name: "reminder-report", query: { kind: "water" } });
+}
 
 const clockPresentation = computed(() => {
   if (session.value === null) return null;
@@ -402,6 +433,20 @@ function handleEndSession(): void {
       </button>
 
       <!--
+        水上活動的入口（2026-09-03，階段三）。
+        文字連結不是按鈕：它不是「你現在該做的事」，是狀態改變時才用得到。
+      -->
+      <button
+        class="text-link home__water"
+        data-typography-role="body"
+        type="button"
+        @click="handleWaterActivity"
+      >
+        <Icon name="context-water" :size="20" />
+        水上活動（下水／離水）
+      </button>
+
+      <!--
         主行動之外的次要動作（查看已存紀錄、處理指引等）。原本只有
         /reminder 的 ReminderPanel 顯示它們，首頁明明已經算出同一份
         presentation 卻只取 actionLabel，等於少了一半的操作。
@@ -601,6 +646,12 @@ function handleEndSession(): void {
   justify-items: start;
   gap: var(--space-3);
   padding: var(--card-padding);
+}
+
+/* 水上活動入口：貼齊左緣、保有可點區高度。 */
+.home__water {
+  justify-self: start;
+  min-height: var(--tap-target);
 }
 
 .shortened-interval {

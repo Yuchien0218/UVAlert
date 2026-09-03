@@ -5,7 +5,7 @@ import type {
   SessionProjection,
   ZoneProjection
 } from "@sunshield/contracts";
-import { shallowMount } from "@vue/test-utils";
+import { flushPromises, shallowMount } from "@vue/test-utils";
 import { shallowReadonly, shallowRef } from "vue";
 import { createMemoryHistory, createRouter } from "vue-router";
 import { beforeEach, describe, expect, it, vi } from "vitest";
@@ -146,7 +146,19 @@ function mockServices(options: Options = {}): void {
 async function mountHome() {
   const router = createRouter({
     history: createMemoryHistory(),
-    routes: [{ path: "/", component: HomePage }]
+    routes: [
+      { path: "/", component: HomePage },
+      /*
+       * 記錄狀況只是個落點，不掛真元件——這裡要驗的是「首頁把人帶去哪、
+       * 帶了什麼 query」，不是那一頁長什麼樣。沒有這條路由的話 router.push
+       * 會丟 "No match"，而那個錯誤跟本次斷言無關。
+       */
+      {
+        path: "/reminder/report",
+        name: "reminder-report",
+        component: { template: "<div />" }
+      }
+    ]
   });
   await router.push("/");
   await router.isReady();
@@ -434,6 +446,62 @@ describe("HomePage", () => {
       await wrapper.vm.$nextTick();
 
       expect(wrapper.vm.$route.path).toBe("/");
+    });
+
+    /*
+     * **階段三（2026-09-03）：水上活動的入口在首頁，不在記錄狀況的選單裡。**
+     *
+     * 那張清單原本混著兩種東西：四種損耗把期限拉到事件發生的那一刻，
+     * 下水／離水則是開關一段水中區間、改由耐水標示決定期限。階段二把記錄
+     * 狀況降成補擦流程的出口之後更明顯——想記一筆下水得先走「記錄補擦 →
+     * 現在還不能補擦 → 從清單挑下水」，而下水根本不是補擦流程的一部分。
+     *
+     * 三條分開守：入口在、文字跟著狀態走、按下去帶對 kind。
+     */
+    it("首頁有水上活動的入口", async () => {
+      mockServices({ session, region: { displayName: "臺北市 大安區" } });
+
+      const wrapper = await mountHome();
+
+      expect(wrapper.find(".home__water").exists()).toBe(true);
+    });
+
+    /*
+     * **首頁刻意不判斷「現在在不在水裡」。**
+     *
+     * 第一版讓按鈕跟著投影算出的 inWater 換文字（開始水上活動／已離水），
+     * 實機一測就壞了：預設路徑（沒填包裝標示）的 eligibility 是
+     * `identity_unconfirmed`，reducer 的水上區間分支要求 `eligible`，所以
+     * **投影裡完全沒有這段區間的痕跡**。按鈕會一直寫「開始水上活動」，
+     * 帶著 `water_start` 進去又因為已有區間而找不到選項——離水永遠按不到。
+     *
+     * 現在只送出「要處理水上活動」，由記錄狀況那一頁（拿得到
+     * `openWaterInterval`）決定給下水還是離水。
+     */
+    it("入口文字不跟著狀態變", async () => {
+      mockServices({
+        session: {
+          ...session,
+          zones: [{ ...zone, reasonCodes: ["WATER_RESISTANCE_UNKNOWN"] }]
+        },
+        region: { displayName: "臺北市 大安區" }
+      });
+
+      const wrapper = await mountHome();
+
+      expect(wrapper.get(".home__water").text()).toContain("水上活動");
+      expect(wrapper.get(".home__water").text()).not.toContain("已離水");
+    });
+
+    it("按下去帶著 kind 進記錄狀況", async () => {
+      mockServices({ session, region: { displayName: "臺北市 大安區" } });
+
+      const wrapper = await mountHome();
+      await wrapper.get(".home__water").trigger("click");
+      // router.push 是非同步的；只等一個 tick 會拿到還沒換過的 route。
+      await flushPromises();
+
+      expect(wrapper.vm.$route.query.kind).toBe("water");
     });
 
     it("結束鈕與倒數在同一列，不各佔一列", async () => {
