@@ -433,13 +433,24 @@ strong {
  * decorative uppercase label. This gives the mono font a job that means
  * something (precision / station-reading) instead of just looking techy.
  */
+/*
+ * 2026-09-04：拿掉 `color` 與 `line-height`。
+ *
+ * **顏色**：讀數要跟它所在的那句話同色。原本寫死 `--text-primary`，於是
+ * 五日預報的「更新時間 9/4 00:15」比同一行的「更新時間」深了一階
+ * （實測值 rgb(46,41,37) 對 rgb(111,90,84)），看起來像另一個元件掉進來。
+ * 需要特定顏色的地方本來就自己指定——首頁 UV 讀數依風險等級上色就是這樣
+ * 寫的；其餘使用點的父層本來就是 `--text-primary`，拿掉之後渲染結果不變。
+ *
+ * **行高**：0.95 是給**獨立的大讀數**用的（那裡要壓掉數字上下的空隙）。
+ * 行內讀數混在句子裡時，它會把那一行的行盒縮短，讓數字看起來浮在行間。
+ * 移到 `--display` 變體，需要的人才拿得到。
+ */
 .stat-figure {
   font-family: var(--font-mono);
   font-variant-numeric: tabular-nums;
   font-weight: 600;
-  line-height: 0.95;
   letter-spacing: var(--letter-spacing-readout);
-  color: var(--text-primary);
 }
 
 /*
@@ -451,6 +462,8 @@ strong {
  */
 .stat-figure--display {
   font-size: clamp(3rem, 15vw, 3.75rem);
+  /* 大讀數要壓掉數字上下的空隙，才不會在區塊裡多出兩條空白。 */
+  line-height: 0.95;
 }
 
 /*

@@ -408,8 +408,16 @@ function getUnavailableMessage(error: UvForecastError): string {
  * 變成 block**——時間值因此被推到下一行，畫面上就是使用者截圖裡的兩行。
  * 外層要 block（它本來就自成一行），裡面那層必須留在行內。
  */
+/*
+ * 「更新時間」自成一行。
+ *
+ * 2026-09-04：補上一個 space-1 的上距。這兩行是**兩件事**——一行說資料
+ * 從哪裡來、一行說它多新——貼著排時讀起來像第一句折行。行距 21px 之間
+ * 再加 4px，剛好讓它們分開又不散開。
+ */
 .uv-forecast__source > span {
   display: block;
+  margin-top: var(--space-1);
   white-space: nowrap;
 }
 
