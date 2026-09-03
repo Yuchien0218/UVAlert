@@ -16,6 +16,7 @@ import {
   GEAR_CATEGORY_REMINDER_EFFECT,
   gearSafetyState
 } from "../../features/product/gearPresentation";
+import { parseSpfInput } from "../../features/product/parseSpfInput";
 
 /**
  * S-12 新增防曬裝備／S-13 編輯防曬裝備的表單本體。
@@ -98,6 +99,7 @@ const usageRating = shallowRef<"good" | "ok" | "bad" | "">("");
  */
 const spfInput = ref("");
 const paGradeInput = ref("");
+
 const snapshotForm = ref<ProductSnapshotFormValue>({
   claimAnswer: "yes",
   waitAnswer: "none",
@@ -242,11 +244,11 @@ function validate(): string | null {
    * 不分品類，所以「先填了 SPF、再把品類改成太陽眼鏡」會被一個**畫面上
    * 根本不存在的欄位**擋住存檔，錯誤訊息還指著看不到的東西。
    */
-  if (showSunscreenFields.value && spfInput.value.trim() !== "") {
-    const parsed = Number(spfInput.value);
-    if (!Number.isFinite(parsed) || parsed <= 0) {
-      return "SPF 請填寫大於 0 的數字，例如 50。";
-    }
+  if (
+    showSunscreenFields.value &&
+    parseSpfInput(spfInput.value) === "invalid"
+  ) {
+    return "SPF 請填寫大於 0 的數字，例如 50。";
   }
   if (showSunscreenFields.value && paGradeInput.value.trim().length > 20) {
     return "PA 標示請控制在 20 個字以內。";
@@ -262,7 +264,9 @@ async function save(): Promise<void> {
   // 避免存下一組看起來會影響倒數、實際不會的資料。
   // SPF／PA 跟其他標示欄位一樣只對 sunscreen 有意義，
   // 非防曬乳品類不保留，避免存下看起來有意義、實際不會被用到的資料。
-  const spf = spfInput.value.trim() === "" ? null : Number(spfInput.value);
+  // validate() 已經擋掉 "invalid"，這裡只會拿到 null 或數字。
+  const parsedSpf = parseSpfInput(spfInput.value);
+  const spf = parsedSpf === "invalid" ? null : parsedSpf;
   const paGrade =
     paGradeInput.value.trim() === "" ? null : paGradeInput.value.trim();
 
@@ -446,12 +450,21 @@ async function remove(): Promise<void> {
                 會直接丟 TypeError 讓儲存靜默失敗（2026-08-24 實測抓到）。
                 text + inputmode 同樣會跳數字鍵盤，也避開滾輪誤改值。
               -->
+              <!--
+                placeholder 補上（2026-09-03）：PA 那欄一直有 `PA++++`，
+                SPF 卻什麼提示都沒有，兩欄並排一邊有一邊沒有。
+
+                值是 `50` 而不是瓶身上的 `50+`：`inputmode="numeric"` 的
+                數字鍵盤**打不出加號**，拿它當範例等於示範一個在手機上做不到
+                的動作。加號改由 `parseSpfInput()` 容錯（貼上或桌機打得出來）。
+              -->
               <input
                 id="gear-spf"
                 v-model="spfInput"
                 type="text"
                 inputmode="numeric"
                 maxlength="4"
+                placeholder="50"
               />
             </div>
             <div>

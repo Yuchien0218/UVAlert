@@ -119,9 +119,9 @@ describe("GearForm 裝備區簡化", () => {
    * 兩個欄位分開守：只守其中一個的話，另一個把條件拿掉仍然會綠。
    */
   it("SPF 的驗證只在防曬乳品類生效", () => {
-    expect(code).toContain(
-      'if (showSunscreenFields.value && spfInput.value.trim() !== "") {'
-    );
+    // 2026-09-03：條件改用 parseSpfInput，但「跟著品類走」這件事不變。
+    expect(code).toContain("showSunscreenFields.value &&");
+    expect(code).toContain('parseSpfInput(spfInput.value) === "invalid"');
   });
 
   it("PA 的驗證只在防曬乳品類生效", () => {
@@ -167,5 +167,32 @@ describe("GearForm 裝備區簡化", () => {
     expect(priceField.slice(0, priceField.indexOf("/>"))).not.toContain(
       "placeholder"
     );
+  });
+});
+
+/*
+ * 2026-09-03（`2026-09-03-setup-gear-form-layout-todo.md` 第四項）。
+ *
+ * SPF 與 PA 兩欄並排，PA 一直有 placeholder、SPF 什麼提示都沒有。
+ */
+describe("SPF 欄位的提示", () => {
+  it("SPF 有 placeholder", () => {
+    // 比對完整屬性，不是 "placeholder" 這個字（CLAUDE.md 坑二）。
+    expect(code).toContain('placeholder="50"');
+  });
+
+  /*
+   * 值是 `50` 而不是瓶身上的 `50+`：這一欄是 `inputmode="numeric"`，
+   * 數字鍵盤打不出加號，拿 `50+` 當範例等於示範一個手機上做不到的動作。
+   * 加號的容錯在 `parseSpfInput()`，不在 placeholder。
+   */
+  it("placeholder 不放數字鍵盤打不出來的加號", () => {
+    expect(code).not.toContain('placeholder="50+"');
+  });
+
+  /* 驗證與儲存共用同一份解析——各自 parse 一次是「存進去的是另一個值」的來源。 */
+  it("驗證與儲存都走 parseSpfInput", () => {
+    expect(code).not.toContain("Number(spfInput.value)");
+    expect(code.match(/parseSpfInput\(spfInput\.value\)/g)?.length).toBe(2);
   });
 });
