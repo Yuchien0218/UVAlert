@@ -81,7 +81,12 @@ export const BODY_ZONE_LABELS: Record<BodyZoneCode, string> = {
 
 const ACTION_LABELS: Record<ActionKind, string> = {
   recalibrate_clock: "重新校準時間",
-  view_conservative_reminder: "查看保守提醒",
+  /*
+   * 2026-09-03：原本是「查看保守提醒」。「保守提醒」是 domain 術語
+   * （conservative reminder），使用者看不懂，而且這顆按鈕實際要回答的是
+   * 上方 body 剛講完的那句「已自動縮短提醒間隔」——直接用問句當標籤。
+   */
+  view_conservative_reminder: "為什麼間隔變短？",
   view_ended_state: "查看本次紀錄",
   switch_protection: "更新防護方式",
   complete_protection_record: "補上防護紀錄",

@@ -120,6 +120,7 @@
 | **裝備詳情從 `/products/:id` 整頁改成清單上的抽屜，該路由移除**（導回清單，不做「導回並自動打開」） | `components/product/GearDetailSheet.vue`、`ProductsPage.vue`、`router/index.ts` | **使用者裁決 2026-09-01** |
 | bottom sheet 內距 20→24px，新增 `--sheet-padding`——**結案 `DESIGN.md` 第六節那條「等裁決」的已知落差**（第四節本來就訂 24px） | `packages/ui/src/styles.css`、`BottomSheet.vue`、`DESIGN.md` 第六節 | **使用者裁決 2026-09-01** |
 | 台灣在地化文案精簡 11 項：離線／時鐘倒數狀態去掉「保守提醒／狀態」、`METHOD_UNKNOWN` 收句、免責切結腔改成正面安全指引、五日預報去掉資料集編號、部位與情境名詞生活化（鼻子／腳背／通勤常曬部位／室內靠窗）、通知權限指引改成 `<ol>` 步驟 | `features/reminder/reminderPresentation.ts`、`features/setup/setupCatalog.ts`、`pages/ReportContextEventPage.vue`、`components/uv/FiveDayUvCard.vue`、`pages/settings/DataSettingsPage.vue`、`pages/settings/NotificationSettingsPage.vue`、`components/region/RegionLocationPanel.vue`（＋ 3 個守門測試同步） | 已完成（2026-09-02） |
+| `view_conservative_reminder` 不再導向 `/help/how-it-works`（那頁仍是 `MULTI_REVIEW`，只顯示「內容正在審查」＝在最需要說明的狀態下給一頁空白）；改成首頁原地展開說明，CTA 標籤由「查看保守提醒」改成「為什麼間隔變短？」 | `helpers/resolveActionRoute.ts`、`pages/HomePage.vue`、`features/reminder/reminderPresentation.ts`（＋ 4 條守門） | 已完成（2026-09-03） |
 | 排版稽核第 2 批（只做低風險、與既有裁決不衝突的）：§7.1 段落鄰近律、§7.2 審查卡文字層級、§7.3 blockquote 間距、§6.1 「裝置測試」空卡併進「通知傳送說明」卡 | `DataSettingsPage.vue`、`ContentUnderReview.vue`、`EducationArticlePage.vue`、`NotificationSettingsPage.vue`（＋ test）、`2026-08-15-…-current.md` §通知設定頁 | 已完成（2026-09-02，PR #100）——§1／§5／§6.2–6.4 不採用、§2／§3／§4／§7.4 待實作，狀態看 `2026-09-02-ui-layout-consistency-audit.md` 文末 |
 
 ### 為什麼裝備詳情值得單獨記一筆
