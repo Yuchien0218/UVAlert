@@ -9,6 +9,7 @@ import { getZoneLabel } from "../features/reminder/reminderPresentation";
 import { suggestsReapplyAfter } from "../features/reminder/createContextEventController";
 import { formatDateTime } from "../helpers/datetime";
 import IconButton from "../components/common/IconButton.vue";
+import IconLead from "../components/common/IconLead.vue";
 import Icon from "../components/icons/Icon.vue";
 
 const { contextEvent } = useWebAppServices();
@@ -167,6 +168,12 @@ function zoneNames(zoneIds: string[]): string {
       "
       class="app-card success-panel"
     >
+      <!--
+        2026-09-03：「已儲存」的訊號從彩色粗上緣改成領銜圖示
+        （`state-success` 的 `<title>` 本來就是「已儲存」）。理由見 app.css
+        的 `.success-panel`。
+      -->
+      <IconLead icon="state-success">
       <h2
         id="report-success-title"
         data-typography-role="section-title"
@@ -174,6 +181,7 @@ function zoneNames(zoneIds: string[]): string {
       >
         已記錄這次狀況
       </h2>
+      </IconLead>
       <p>
         {{ contextEvent.success.value.label }}，{{
           formatDateTime(contextEvent.success.value.occurredAt)

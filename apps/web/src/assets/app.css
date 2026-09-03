@@ -405,11 +405,26 @@ strong {
 }
 
 /* 2026-08-26：流程完成後的共通成功面板。 */
+/*
+ * 2026-09-03：拿掉 `border-top: 0.35rem solid var(--color-saved)`。
+ *
+ * 那是全站唯一的 `0.35rem`（5.5px），也是唯一一條有顏色的粗上緣——
+ * DESIGN.md 第七節的高度階層只有「平面／1px 細邊框／暖色卡片／深色表面／
+ * 浮層」五種，沒有「彩色橫條」這一階。使用者回報這張卡「看起來像預設樣式」。
+ *
+ * 「已儲存」的訊號改由領銜圖示承擔：`state-success`（它的 `<title>` 本來
+ * 就是「已儲存」）＋ `--color-saved`。顏色的語意沒變，只是換成系統裡有
+ * 定義的表達方式；順帶讓一顆一直沒有使用點的圖示上工。
+ */
 .success-panel {
   display: grid;
   gap: var(--space-4);
   padding: var(--card-padding);
-  border-top: 0.35rem solid var(--color-saved);
+}
+
+/* 只染圖示：標題在同一個 IconLead 的插槽裡，不能跟著變色。 */
+.success-panel .icon-lead__icon {
+  color: var(--color-saved);
 }
 
 .success-panel h2,

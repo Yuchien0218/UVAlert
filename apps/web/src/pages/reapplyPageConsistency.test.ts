@@ -236,3 +236,72 @@ describe("不再逐部位指定防曬乳", () => {
     expect(REVIEW).not.toContain("review__groups");
   });
 });
+
+/**
+ * 成功頁（2026-09-03，使用者：「這個卡片樣式好像是預設的？」）。
+ *
+ * `.success-panel` 由記錄補擦、記錄狀況、事件更正三頁共用，所以三頁一起守。
+ */
+describe("成功頁不再用彩色粗上緣", () => {
+  const SUCCESS_PAGES = [
+    "pages/ReapplyPage.vue",
+    "pages/ReportContextEventPage.vue",
+    "pages/EventCorrectionPage.vue"
+  ];
+
+  /*
+   * `0.35rem`（5.5px）是全站唯一一個，也是唯一一條有顏色的粗上緣。
+   * DESIGN.md 第七節的高度階層沒有「彩色橫條」這一階。
+   */
+  it("app.css 不再有那條彩色上緣", () => {
+    expect(APP_CSS).not.toContain("0.35rem");
+    expect(APP_CSS).not.toMatch(
+      /\.success-panel \{[^}]*border-top:[^;]*var\(--color-saved\)/
+    );
+  });
+
+  /*
+   * **反向：「已儲存」的訊號不可以就這樣消失。** 只守上面那條的話，把整條
+   * 邊框刪掉、什麼都不補也是綠的——那時成功頁就沒有任何顏色訊號了。
+   */
+  it("改由 state-success 圖示承擔，並染上 --color-saved", () => {
+    expect(APP_CSS).toMatch(
+      /\.success-panel \.icon-lead__icon \{[^}]*color: var\(--color-saved\);/
+    );
+  });
+
+  it.each(SUCCESS_PAGES)("%s 的成功頁有領銜圖示", (relative) => {
+    expect(read(relative)).toContain('<IconLead icon="state-success">');
+  });
+});
+
+describe("成功頁的文字", () => {
+  /*
+   * 頁首那句「儲存前不會更新提醒。」與正下方的「補擦紀錄已更新」直接矛盾
+   * ——記錄已經寫進去了。成功之後要收起來。
+   */
+  it("成功之後不再說「儲存前不會更新」", () => {
+    expect(PAGE).toContain(
+      "<p v-if=\"reapplication.phase.value !== 'success'\">"
+    );
+  });
+
+  /*
+   * 只有一組時不用項目符號清單——「不同部位用不同防曬乳」拿掉之後這裡
+   * 永遠只有一組，一個項目的清單讀起來像漏了東西。
+   */
+  it("單一分組時用句子不用清單", () => {
+    expect(PAGE).toContain("success-groups__single");
+    expect(PAGE).toContain(
+      "reapplication.success.value.productGroups.length === 1"
+    );
+  });
+
+  /* 卡片結尾的補充說明不該跟主要訊息同一個字級。 */
+  it("更正說明用 supporting，不是 body", () => {
+    const rule = /\.correction-note \{[^}]*\}/.exec(PAGE)?.[0];
+
+    expect(rule).toBeDefined();
+    expect(rule).toContain("font-size: var(--font-size-supporting);");
+  });
+});
