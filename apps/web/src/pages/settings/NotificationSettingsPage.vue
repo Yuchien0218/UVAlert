@@ -106,9 +106,10 @@ async function runTest(): Promise<void> {
         <h1 class="page-heading__title" data-typography-role="page-title">
           通知設定
         </h1>
-        <p>通知皆於本機發出，不經外部伺服器。</p>
       </div>
       <IconButton icon="tool-arrow-left" label="返回更多" @click="goBack" />
+      <!-- 說明橫跨兩欄，不必為圖示鈕讓出寬度（2026-09-03）。 -->
+      <p>通知皆於本機發出，不經外部伺服器。</p>
     </header>
 
     <!-- 裝置支援與權限狀態卡片 -->

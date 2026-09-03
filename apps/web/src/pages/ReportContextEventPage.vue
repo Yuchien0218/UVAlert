@@ -152,9 +152,13 @@ function zoneNames(zoneIds: string[]): string {
       <div>
         <p class="eyebrow">記錄狀況</p>
         <h1 data-typography-role="page-title">記錄這次狀況</h1>
-        <p>記下這次狀況後，相關部位的提醒會更新；確認前不會改變提醒。</p>
       </div>
       <IconButton icon="tool-close" label="返回提醒" @click="cancel" />
+      <!--
+        說明搬出上面那個 div：它在圖示鈕下方，不需要為按鈕讓出寬度。
+        `.flow-heading > p` 讓它橫跨兩欄（2026-09-03）。
+      -->
+      <p>記下這次狀況後，相關部位的提醒會更新；確認前不會改變提醒。</p>
     </header>
 
     <BroadcastLoader

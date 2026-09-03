@@ -307,12 +307,35 @@ strong {
   line-height: var(--line-height-body);
 }
 
-/* 2026-08-26：收斂三個流程頁重複的標題列版型。 */
+/*
+ * 2026-08-26：收斂三個流程頁重複的標題列版型。
+ *
+ * **2026-09-03：說明文字改成橫跨兩欄。**
+ *
+ * 原本是 flex：標題群組（eyebrow ＋ h1 ＋ 說明）一整塊在左、圖示鈕在右。
+ * 圖示鈕只有 44px 高，卻讓**整塊**都少掉一個按鈕的寬度——實測 375px 上
+ * 可用 336px、標題群組只拿到 275px。
+ *
+ * 說明文字在按鈕**下方**，本來就不必讓位；改成 grid 之後它自己一列、
+ * 橫跨兩欄，拿回整個寬度。eyebrow 與 h1 留在第一列，圖示鈕仍然與標題
+ * 同一列（`closeButtonLayout.test.ts` 守的那條規則不變）。
+ *
+ * 為什麼不用衛教文章頁那招 float：那一頁的第一行就是大標，需要「只讓開
+ * 前幾行」；這裡真正被壓到的是說明文字，它整段都在按鈕下方，用 grid 讓
+ * 它跨欄更直接，也不必動 DOM 順序。
+ */
 .flow-heading {
-  display: flex;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
   align-items: start;
-  justify-content: space-between;
-  gap: var(--space-4);
+  gap: var(--space-3) var(--space-4);
+}
+
+/* 說明自成一列、橫跨兩欄——它在按鈕下方，不需要為按鈕讓出寬度。 */
+.flow-heading > p {
+  grid-column: 1 / -1;
+  color: var(--text-body);
+  line-height: var(--line-height-body);
 }
 
 .flow-heading h1,
@@ -329,10 +352,11 @@ strong {
   gap: var(--space-3);
 }
 
-.flow-heading div > p:last-child {
-  color: var(--text-body);
-  line-height: var(--line-height-body);
-}
+/*
+ * 2026-09-03：說明文字搬出 `div` 之後由 `.flow-heading > p` 接手。原本這條
+ * 靠「div 的最後一個 p」認人，搬走之後那個位置會變成 eyebrow——留著會把
+ * eyebrow 染成內文色。
+ */
 
 /*
  * 2026-08-24：flow-heading 版型（ReapplyPage／EventCorrectionPage／
