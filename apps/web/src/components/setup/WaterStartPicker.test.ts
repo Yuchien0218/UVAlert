@@ -1,6 +1,6 @@
 // @vitest-environment happy-dom
 import { mount } from "@vue/test-utils";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import type { WaterStartFormValue } from "../../features/setup/createSetupController";
 import WaterStartPicker from "./WaterStartPicker.vue";
 
@@ -139,6 +139,118 @@ describe("WaterStartPicker", () => {
  * 表單層只是讓它選不到；真正擋住手動打字的是控制器的 validateWaterStart，
  * 那一層另有測試。兩層都要。
  */
+/*
+ * **「現在」不能凍結在掛載那一刻**（2026-09-02）。
+ *
+ * 改動前是 `const referenceNow = new Date()`，於是頁面開著愈久偏得愈多：
+ * 「1 分鐘前」變成「開頁前一分鐘」，`max` 也停在開頁那一刻——**選不了比開頁
+ * 更晚的時間**。
+ *
+ * 用假時鐘把時間往前推，再檢查互動之後有沒有跟上。
+ */
+describe("WaterStartPicker 的現在", () => {
+  /** 把時間往前推 `offsetMs`，回傳還原函式。 */
+  function installClock(offsetMs: number): () => void {
+    const RealDate = globalThis.Date;
+    const base = RealDate.now();
+    class FakeDate extends RealDate {
+      constructor(...args: [] | ConstructorParameters<typeof RealDate>) {
+        if (args.length === 0) super(base + offsetMs);
+        else super(...args);
+      }
+      static now(): number {
+        return base + offsetMs;
+      }
+    }
+    globalThis.Date = FakeDate as unknown as DateConstructor;
+    return () => {
+      globalThis.Date = RealDate;
+    };
+  }
+
+  function withClock(offsetMs: number, run: () => void): void {
+    const restore = installClock(offsetMs);
+    try {
+      run();
+    } finally {
+      restore();
+    }
+  }
+
+  /*
+   * 掛載之後過了十分鐘才按「1 分鐘前」，送出的應該是**按下去前一分鐘**，
+   * 不是開頁前一分鐘。
+   */
+  it("快選用按下去當下的時間，不是掛載時的", async () => {
+    const wrapper = mountPicker();
+    const mountedAt = Date.now();
+
+    withClock(10 * 60_000, () => {
+      void findButton(wrapper, "分鐘前").trigger("click");
+    });
+    await wrapper.vm.$nextTick();
+    const emitted = wrapper.emitted(
+      "update:modelValue"
+    ) as WaterStartFormValue[][];
+    const sent = emitted.at(-1)?.[0];
+
+    const chosen = Date.parse(sent?.activityStartedAt ?? "");
+    // 掛載後十分鐘按下去 → 選到的時間應該在掛載時間之後
+    expect(chosen).toBeGreaterThan(mountedAt);
+  });
+
+  /*
+   * 同理：展開調整面板時 `max` 要是展開當下的現在，否則使用者選不到
+   * 「比開頁更晚」的任何時間。
+   */
+  it("展開調整面板時 max 跟上當下時間", async () => {
+    const wrapper = mountPicker();
+    const mountedAt = Date.now();
+
+    withClock(10 * 60_000, () => {
+      void findButton(wrapper, "調整時間").trigger("click");
+    });
+    await wrapper.vm.$nextTick();
+
+    const max = Date.parse(
+      wrapper.get('input[type="datetime-local"]').attributes("max") ?? ""
+    );
+
+    expect(max).toBeGreaterThan(mountedAt);
+  });
+
+  /*
+   * **反向：沒有互動時不得自己漂移。**
+   *
+   * 這條擋住「乾脆用每秒跳動的 ticker」——那會讓使用者選了「1 分鐘前」之後
+   * 什麼都沒做，畫面卻自己變成「已調整為 2 分鐘前」、選取高亮還跳到另一顆。
+   */
+  /*
+   * **守的是「這個元件沒有計時器」這個決定本身。**
+   *
+   * 第一版想直接觀察漂移：等 60 毫秒再比對文字。那守不住——標籤以分鐘為單位，
+   * 60 毫秒跨不過任何顯示邊界。第二版改成推進假時鐘再強制重繪，也守不住——
+   * Vue 的 computed 會快取，沒有依賴變動就不會重算。兩版都用會漂移的實作實測
+   * 過，照樣全綠。
+   *
+   * 所以改成斷言機制：**掛載時不得建立 interval**。這是實作形狀的斷言，但它
+   * 正好對應那個刻意的取捨——用 ticker 會讓使用者選了「1 分鐘前」之後什麼都
+   * 沒做，畫面卻自己變成「2 分鐘前」、選取高亮還跳到另一顆。
+   *
+   * 跟上面兩條合起來才完整：那兩條證明互動時「現在」會跟上，這條證明沒有
+   * 互動時不會有東西自己跑。
+   */
+  it("不使用計時器，畫面不會自己動", () => {
+    const spy = vi.spyOn(globalThis, "setInterval");
+    try {
+      mountPicker();
+      expect(spy).not.toHaveBeenCalled();
+    } finally {
+      spy.mockRestore();
+    }
+  });
+});
+
 describe("WaterStartPicker 的塗抹時間下限", () => {
   it("塗抹時間比 80 分鐘上限晚時，min 用塗抹時間", async () => {
     const appliedAt = new Date(Date.now() - 10 * 60_000).toISOString();

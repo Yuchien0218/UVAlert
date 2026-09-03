@@ -40,7 +40,32 @@ const value = defineModel<WaterStartFormValue | null>({
  */
 const props = defineProps<{ appliedAt?: string | null }>();
 
-const referenceNow = new Date();
+/**
+ * 這個選擇器的「現在」。
+ *
+ * **2026-09-02：改成在互動當下重新取樣，不再凍結在掛載那一刻。**
+ *
+ * 改動前是 `const referenceNow = new Date()`，於是頁面開著愈久偏得愈多：
+ *
+ * - 「1 分鐘前」實際上是「開頁前一分鐘」，開著十分鐘就變成十一分鐘前
+ * - `max` 停在開頁那一刻，**選不了比開頁更晚的時間**
+ *
+ * **刻意不用 ticker。** `useCurrentTime` 那類每秒跳動的時鐘會讓畫面在使用者
+ * 眼前漂移：選了「1 分鐘前」之後放著不動，過一分鐘就會自己變成「已調整為
+ * 2 分鐘前」、選取高亮還會跳到另一顆——使用者什麼都沒做，畫面卻在變。
+ *
+ * 只在**使用者動作的當下**重新取樣（按快選、展開調整面板），兩個真正壞掉的
+ * 行為就都好了，而且沒有任何東西會自己動。
+ *
+ * 已知的殘留：展開面板之後放很久才選，`max` 會是展開當下的值。那時送出仍有
+ * 控制器的「不能晚於目前時間」把關，不會寫進未來的時間。
+ */
+const referenceNow = shallowRef(new Date());
+
+/** 在使用者動作的當下把「現在」對回真正的現在。 */
+function syncNow(): void {
+  referenceNow.value = new Date();
+}
 const DEFAULT_MINUTES_AGO = 1;
 
 const adjusting = shallowRef(false);
@@ -69,13 +94,15 @@ const isUnknown = computed(() => value.value?.confidence === "unknown");
 const usingDefault = computed(() => {
   const at = selectedAt.value;
   if (at === null) return false;
-  return Math.abs(at.getTime() - (referenceNow.getTime() - 60_000)) < 30_000;
+  return (
+    Math.abs(at.getTime() - (referenceNow.value.getTime() - 60_000)) < 30_000
+  );
 });
 
 const adjustedLabel = computed(() => {
   const at = selectedAt.value;
   if (at === null || usingDefault.value) return null;
-  const minutes = minutesBetween(at, referenceNow);
+  const minutes = minutesBetween(at, referenceNow.value);
   if (minutes < 1) return "剛剛";
   if (minutes < 60) return `${minutes} 分鐘前`;
   const hours = Math.floor(minutes / 60);
@@ -92,7 +119,7 @@ const tooLongAgoNotice = computed(() => {
   const at = selectedAt.value;
   if (at === null) return null;
   return describeTooLongAgo(
-    minutesBetween(at, referenceNow),
+    minutesBetween(at, referenceNow.value),
     WATER_START_MAX_MINUTES_AGO,
     "water_start"
   );
@@ -109,7 +136,8 @@ const tooLongAgoNotice = computed(() => {
  * 會擋，那種前後不一致比擋不住更難懂。
  */
 const earliestSelectable = computed(() => {
-  const cap = referenceNow.getTime() - WATER_START_MAX_MINUTES_AGO * 60_000;
+  const cap =
+    referenceNow.value.getTime() - WATER_START_MAX_MINUTES_AGO * 60_000;
   const applied = props.appliedAt == null ? null : Date.parse(props.appliedAt);
   if (applied === null || !Number.isFinite(applied)) return new Date(cap);
   return new Date(Math.max(cap, Math.ceil(applied / 60_000) * 60_000));
@@ -126,9 +154,10 @@ const earliestLocalValue = computed(() =>
  * 當下等於「擦完就下水」，是那個情境下唯一說得通的解讀。
  */
 function selectDefault(): void {
+  syncNow();
   const selected = new Date(
     Math.max(
-      referenceNow.getTime() - DEFAULT_MINUTES_AGO * 60_000,
+      referenceNow.value.getTime() - DEFAULT_MINUTES_AGO * 60_000,
       earliestSelectable.value.getTime()
     )
   );
@@ -149,11 +178,12 @@ function toggleAdjust(): void {
     adjusting.value = false;
     return;
   }
+  syncNow();
   draftLocalValue.value = toLocalInputValue(
     selectedAt.value ??
       new Date(
         Math.max(
-          referenceNow.getTime() - 60_000,
+          referenceNow.value.getTime() - 60_000,
           earliestSelectable.value.getTime()
         )
       )
