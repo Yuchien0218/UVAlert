@@ -394,7 +394,7 @@ onMounted(async () => {
       class="load-error app-card"
       role="alert"
     >
-      <h2 data-typography-role="section-title">目前無法開始設定</h2>
+      <h2 data-typography-role="card-title">目前無法開始設定</h2>
       <p>
         讀取這台裝置上的設定草稿時發生問題。已經記錄的提醒與裝備不會受影響；請重新整理後再試一次。
       </p>

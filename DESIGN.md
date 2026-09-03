@@ -16,6 +16,7 @@ motion:
 
 colors:
   primary: "#9F5E42"
+  primary-text: "#8A4F38"
   primary-active: "#804536"
   primary-disabled: "#E8D1C5"
   ink: "#2E2925"
@@ -405,6 +406,7 @@ components:
 | Token                              | Hex       | HSL                  | 用途                                                                                                                                                                                                                                                      |
 | ---------------------------------- | --------- | -------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `{colors.primary}` 深杏桃          | `#9F5E42` | `hsl(18, 41%, 44%)`  | 主要行動色。用於主 CTA 與品牌字標；每個決策情境只出現一次                                                                                                                                                                                                 |
+| `{colors.primary-text}`            | `#8A4F38` | `hsl(16, 43%, 38%)`  | **行動色當文字用的版本**。`{colors.primary}` 是為「填色底＋白字」調的，拿來當文字時在卡片上只有 4.37:1（未達 AA）。壓暗後：畫布 5.94、`{colors.surface-soft}` 5.58、`{colors.surface-card}` 5.07。只給文字，不要拿去填色。**`{colors.surface-cream-strong}` 上只有 4.43，連結不要放在那個底上** |
 | `{colors.primary-active}`          | `#804536` | `hsl(12, 41%, 36%)`  | 按下狀態                                                                                                                                                                                                                                                  |
 | `{colors.primary-disabled}`        | `#E8D1C5` | `hsl(21, 43%, 84%)`  | 停用狀態，仍看得出與主色的血緣                                                                                                                                                                                                                            |
 | `{colors.accent-apricot}` 陽光杏桃 | `#E8A477` | `hsl(24, 71%, 69%)`  | **目前沒有落點**（2026-08-31 裁決，與 `{colors.accent-blush}` 同一類）。原寫「插圖筆觸、小面積高光」，但這個 App 沒有插圖（圖示系統是墨咖＋琥珀金的線條），而**它與 `{colors.accent-amber}` 的對比只有 1.07**——兩者在畫面上分不出來，套用只會多一個「像香檳金又不太一樣」的顏色。它唯一站得住的角色（深咖文字的底色，6.85）已由 `{colors.surface-cream-strong}` 承擔。保留色票備用；**要啟用前先解決與 amber 難以區分這件事**。（2026-08-30 已拿掉「倒數進度環」，進度條 2026-08-29 起改用狀態色 `{colors.status-tracking}`／`soon`／`due`） |
@@ -544,6 +546,16 @@ runtime 堆疊：標題走 `"Noto Serif TC Subset", "Noto Serif TC", "Noto Serif
 | `{typography.page-title}`    | 28px | 400  | 1.22 | -0.01em | 每頁唯一主標題、設定流程主標題 — Noto Serif TC |
 | `{typography.section-title}` | 20px | 500  | 1.35 | 0       | 頁面區段、Dialog／Bottom Sheet、文章主要章節   |
 | `{typography.card-title}`    | 18px | 500  | 1.45 | 0       | 卡片標題、欄位群組標題、文章次級標題           |
+
+**兩者怎麼分（2026-09-03 補上判準）**：這個 App 幾乎每個區段都寫成 `<section class="app-card">`，所以「這是區段」與「這是卡片」永遠同時成立，只讀上表會兩邊都覺得有理——實際結果是全站有 16 個卡片標題選了襯線 20px、29 個選了無襯線 18px，同一頁相鄰的兩張卡可能長得不一樣。
+
+判準是**卡片邊界**，不是內容的重要性：
+
+- **標題外面有卡片外框** → `card-title`。頁面區段用卡片呈現時，它就是卡片標題
+- **沒有卡片外框的頁面區段**（`ProductsPage` 的「目前使用中」、`RecentEventsList` 的「最近事件」、衛教頁的「文章」）→ `section-title`
+- **Dialog／Bottom Sheet 的標題** → `section-title`，即使它看起來也像一張卡
+
+襯線 28px 的頁面大標是這個產品的識別；卡片標題也用襯線會稀釋它，所以卡片一律讓給無襯線。守門見 `apps/web/src/assets/cardTitleRole.test.ts`。
 | `{typography.body}`          | 16px | 400  | 1.5  | 0.01em  | 正文、按鈕、輸入內容與一般操作文字             |
 | `{typography.supporting}`    | 14px | 400  | 1.6  | 0.01em  | 欄位標籤、helper text、次要資訊與補充文字      |
 | `{typography.caption}`       | 12px | 500  | 1.5  | 0.01em  | 短註腳、時間戳、eyebrow、badge                 |
@@ -1057,7 +1069,9 @@ B8 遷移期間使用的四個臨時字級別名已移除；目前元件只使�
 >
 > **關鍵修正**：`.button--primary` 原本借用 `--color-tracking`（藍色，那其實是「追蹤中」的狀態色），已改用 `--color-primary`，並補上 active／disabled 狀態。`--color-tracking` 現在只剩狀態色用途。四個元件的「選取／連結／裝飾」用途也一併從 tracking 改為 primary。
 >
-> 對比度實測（暖象牙底）：主要按鈕 4.80:1、文字連結 4.66:1、焦點環 4.66:1、次要文字 5.92:1、標題 12.8–13.2:1，全數通過 WCAG AA。
+> 對比度實測：主要按鈕（白字對 `{colors.primary}`）4.80:1、焦點環 4.66:1、次要文字 5.92:1、標題 12.8–13.2:1，全數通過 WCAG AA。
+>
+> **文字連結要看底色**（2026-09-03 修正）。原本這一行只量了暖象牙畫布，寫成「文字連結 4.66:1，全數通過」——但連結也會長在卡片上，那裡 `{colors.primary}` 只有 **4.37:1，未達 AA 的 4.5**。所以文字連結改用 `{colors.primary-text}`（`#8A4F38`）：畫布 5.94、`{colors.surface-soft}` 5.58、`{colors.surface-card}` 5.07。`{colors.primary}` 保留給填色。
 
 > **2026-08-24 色彩與卡片背景修正**：核對 Claude Design 下游元件庫時發現兩處落差，使用者確認後套用：
 >

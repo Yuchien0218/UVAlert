@@ -308,7 +308,8 @@ const relatedArticles = computed(() =>
 }
 
 .education-article-body :deep(a) {
-  color: var(--color-primary);
+  /* 內文連結也用文字版行動色（2026-09-03），與 `.text-link` 同一個值。 */
+  color: var(--color-primary-text);
   text-underline-offset: 0.2em;
 }
 

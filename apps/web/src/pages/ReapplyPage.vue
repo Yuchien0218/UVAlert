@@ -106,7 +106,7 @@ function zoneNames(zoneIds: string[]): string {
       <IconLead icon="state-success">
       <h2
         id="reapply-success-title"
-        data-typography-role="section-title"
+        data-typography-role="card-title"
         tabindex="-1"
       >
         補擦紀錄已更新

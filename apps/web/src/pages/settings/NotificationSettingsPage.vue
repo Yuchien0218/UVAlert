@@ -117,7 +117,7 @@ async function runTest(): Promise<void> {
       <h2
         id="permission-heading"
         class="status-summary"
-        data-typography-role="section-title"
+        data-typography-role="card-title"
       >
         目前狀態：<strong>{{ statusLabel }}</strong>
       </h2>

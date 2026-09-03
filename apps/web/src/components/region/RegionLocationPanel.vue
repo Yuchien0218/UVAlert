@@ -54,7 +54,7 @@ const errorMessage = computed(() => {
         <h2
           id="location-title"
           class="location-panel__title"
-          data-typography-role="section-title"
+          data-typography-role="card-title"
         >
           使用目前位置
         </h2>
@@ -143,7 +143,6 @@ const errorMessage = computed(() => {
 
 .location-panel__title {
   margin-top: var(--space-1);
-  font-size: var(--font-size-section-title);
 }
 
 .location-panel__body {
