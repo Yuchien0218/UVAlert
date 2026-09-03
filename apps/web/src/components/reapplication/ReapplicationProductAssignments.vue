@@ -90,13 +90,16 @@ function optionLabel(choice: ReapplicationProductChoice): string {
     aria-labelledby="assignment-title"
   >
     <h2 id="assignment-title" data-typography-role="card-title">
-      這次用了哪瓶防曬乳？
+      用了哪瓶防曬乳？
     </h2>
 
     <template v-if="!perZone">
+      <!--
+        2026-09-03：拿掉「這次確認的包裝標示會寫入紀錄」。那是實作細節，
+        而且使用者在這一步做不了任何事去影響它。
+      -->
       <p class="question-card__helper">
-        {{ selectedZones.length }}
-        個部位都會記錄成同一瓶防曬乳。這次確認的包裝標示會寫入紀錄。
+        {{ selectedZones.length }} 個部位都記錄成同一瓶。
       </p>
       <label class="visually-hidden" for="product-shared"
         >全部部位使用的防曬乳</label
