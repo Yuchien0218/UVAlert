@@ -68,7 +68,12 @@ function zoneNames(zoneIds: string[]): string {
       <div>
         <p class="eyebrow">補擦紀錄</p>
         <h1 data-typography-role="page-title">記錄補擦</h1>
-        <p>請確認要記錄的部位、防曬乳與時間；儲存前不會更新提醒。</p>
+        <!--
+          2026-09-03：拿掉「請確認要記錄的部位、防曬乳與時間」。下面每一張卡
+          的標題已經把那三件事各問了一次，頁首再列一遍是同一句話說兩次。
+          留下的是這一頁唯一還沒被說過的事：按下儲存之前什麼都不會變。
+        -->
+        <p>儲存前不會更新提醒。</p>
       </div>
       <IconButton icon="tool-close" label="返回提醒" @click="cancel" />
     </header>
