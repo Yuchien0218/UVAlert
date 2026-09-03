@@ -191,7 +191,7 @@ function makeDraftZone(
     <template v-else>
       <section class="zone-groups app-card">
         <div class="zone-groups__heading">
-          <h2 data-typography-role="section-title">追蹤哪些部位？</h2>
+          <h2 data-typography-role="card-title">追蹤哪些部位？</h2>
           <p>選中的部位會開始補擦倒數。被衣物遮住、不需要提醒的部位不用選。</p>
         </div>
 
@@ -341,7 +341,6 @@ button.text-link {
 
 .zone-groups__heading h2 {
   margin: 0;
-  font-size: var(--font-size-section-title);
 }
 
 .zone-groups__heading p {

@@ -64,12 +64,12 @@ async function install(): Promise<void> {
     </header>
 
     <section v-if="isStandalone" class="install-card app-card" role="status">
-      <h2 data-typography-role="section-title">已安裝</h2>
+      <h2 data-typography-role="card-title">已安裝</h2>
       <p>你已經可以從主畫面開啟防曬晴報員。</p>
     </section>
 
     <section v-else-if="deferredPrompt" class="install-card app-card">
-      <h2 data-typography-role="section-title">可以安裝到這台裝置</h2>
+      <h2 data-typography-role="card-title">可以安裝到這台裝置</h2>
       <p>
         安裝後會在主畫面出現圖示，開啟速度較快；本機資料也較不容易因清除瀏覽器資料而遺失。
       </p>
@@ -79,7 +79,7 @@ async function install(): Promise<void> {
     </section>
 
     <section v-else-if="isIos" class="install-card app-card">
-      <h2 data-typography-role="section-title">用 Safari 加入主畫面</h2>
+      <h2 data-typography-role="card-title">用 Safari 加入主畫面</h2>
       <ol>
         <li>點下方的分享按鈕。</li>
         <li>選擇「加入主畫面」。</li>
@@ -89,7 +89,7 @@ async function install(): Promise<void> {
     </section>
 
     <section v-else class="install-card app-card">
-      <h2 data-typography-role="section-title">從瀏覽器選單安裝</h2>
+      <h2 data-typography-role="card-title">從瀏覽器選單安裝</h2>
       <p>
         開啟瀏覽器選單，尋找「安裝應用程式」或「加入主畫面」。
         找不到時，用一般瀏覽器仍然可以完整使用。
@@ -102,7 +102,7 @@ async function install(): Promise<void> {
     </p>
 
     <section class="limits app-card">
-      <h2 data-typography-role="section-title">需要知道的限制</h2>
+      <h2 data-typography-role="card-title">需要知道的限制</h2>
       <ul>
         <li>不安裝仍可使用核心功能。</li>
         <li>關閉頁面後仍受系統通知限制。</li>
@@ -123,10 +123,10 @@ async function install(): Promise<void> {
   padding: clamp(1.25rem, 5vw, 2rem);
 }
 
+/* 字級／字體由 `data-typography-role="card-title"` 供應，這裡只收邊界。 */
 .install-card h2,
 .limits h2 {
   margin: 0;
-  font-size: var(--font-size-section-title);
 }
 
 .install-card p,

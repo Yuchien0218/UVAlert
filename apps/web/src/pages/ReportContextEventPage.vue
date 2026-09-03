@@ -180,7 +180,7 @@ function zoneNames(zoneIds: string[]): string {
       <IconLead icon="state-success">
       <h2
         id="report-success-title"
-        data-typography-role="section-title"
+        data-typography-role="card-title"
         tabindex="-1"
       >
         已記錄這次狀況

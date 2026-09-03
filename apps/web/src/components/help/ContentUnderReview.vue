@@ -17,7 +17,7 @@ withDefaults(defineProps<Props>(), { requiredReview: null });
 
 <template>
   <section class="under-review app-card" role="status">
-    <h2 data-typography-role="section-title">{{ title }}</h2>
+    <h2 data-typography-role="card-title">{{ title }}</h2>
     <p class="under-review__body">{{ body }}</p>
     <div class="under-review__aside">
       <p v-if="requiredReview" class="under-review__meta">
@@ -38,7 +38,6 @@ withDefaults(defineProps<Props>(), { requiredReview: null });
 
 .under-review h2 {
   margin: 0;
-  font-size: var(--font-size-section-title);
 }
 
 .under-review p {

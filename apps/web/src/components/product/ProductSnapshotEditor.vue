@@ -208,7 +208,7 @@ const waterHasClaim = computed<string>({
       <IconLead icon="feature-session-product">
         <span>
           <span class="session-product__eyebrow">{{ eyebrow }}</span>
-          <h2 data-typography-role="section-title">{{ title }}</h2>
+          <h2 data-typography-role="card-title">{{ title }}</h2>
         </span>
       </IconLead>
       <div>
@@ -685,10 +685,6 @@ const waterHasClaim = computed<string>({
 .session-product h2,
 .session-product p {
   margin: 0;
-}
-
-.session-product h2 {
-  font-size: var(--font-size-section-title);
 }
 
 .session-product p:not(.session-product__eyebrow) {

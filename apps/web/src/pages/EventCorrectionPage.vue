@@ -110,7 +110,7 @@ async function runVoid(): Promise<void> {
       <IconLead icon="state-success">
       <h2
         id="correction-success-title"
-        data-typography-role="section-title"
+        data-typography-role="card-title"
         tabindex="-1"
       >
         {{

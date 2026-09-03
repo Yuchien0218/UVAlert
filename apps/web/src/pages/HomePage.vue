@@ -494,7 +494,7 @@ function handleEndSession(): void {
         class="shortened-interval app-card"
         aria-labelledby="shortened-interval-title"
       >
-        <h2 id="shortened-interval-title" data-typography-role="section-title">
+        <h2 id="shortened-interval-title" data-typography-role="card-title">
           為什麼間隔變短？
         </h2>
         <p>
@@ -514,7 +514,7 @@ function handleEndSession(): void {
         class="product-label app-card"
         aria-labelledby="product-label-title"
       >
-        <h2 id="product-label-title" data-typography-role="section-title">
+        <h2 id="product-label-title" data-typography-role="card-title">
           目前防曬乳的包裝標示
         </h2>
         <ul>
