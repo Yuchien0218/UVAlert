@@ -23,7 +23,21 @@ export type BodyZoneGroupId =
 export interface BodyZoneGroup {
   readonly id: BodyZoneGroupId;
   readonly label: string;
-  readonly description: string;
+  /**
+   * 只有「從標籤推不出來」的群組才有說明（2026-09-03）。
+   *
+   * 改動前十個群組都有一條，其中四條等於重講標籤（「左右手臂」「左右腿部」
+   * 「目前露出的足部」「耳朵保持獨立」），每一條又各佔一行——十行說明把
+   * 這份清單拉得很長。
+   *
+   * 留下來的是三種真的講了新東西的：**這個群組其實是幾個部位**（臉部、
+   * 頸部、肩膀與身體）、**排除範圍**（手背不含手掌）、**跨項規則**
+   * （頭皮／嘴唇不會因為選了臉部而自動加入）。後兩種從標籤完全推不出來，
+   * 拿掉等於把資訊搬到客服。
+   *
+   * 選填而不是填空字串：空字串會讓「沒有說明」跟「說明忘了填」長得一樣。
+   */
+  readonly description?: string;
   readonly zoneCodes: readonly BodyZoneCode[];
 }
 
@@ -45,7 +59,6 @@ export const BODY_ZONE_GROUPS: readonly BodyZoneGroup[] = [
   {
     id: "ears",
     label: "耳朵",
-    description: "耳朵保持獨立，方便個別調整",
     zoneCodes: ["ears"]
   },
   {
@@ -57,7 +70,6 @@ export const BODY_ZONE_GROUPS: readonly BodyZoneGroup[] = [
   {
     id: "arms",
     label: "手臂",
-    description: "左右手臂",
     zoneCodes: ["arms"]
   },
   {
@@ -75,13 +87,11 @@ export const BODY_ZONE_GROUPS: readonly BodyZoneGroup[] = [
   {
     id: "legs",
     label: "腿部",
-    description: "左右腿部",
     zoneCodes: ["legs"]
   },
   {
     id: "feet",
     label: "腳背",
-    description: "目前露出的足部",
     zoneCodes: ["feet"]
   },
   {

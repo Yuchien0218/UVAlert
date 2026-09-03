@@ -211,15 +211,20 @@ function makeDraftZone(
                 )
               "
             />
-            <span>
+            <!--
+              說明接在名稱後面、不自己佔一行（2026-09-03）。十個群組各自
+              一行說明時，這份清單長得要捲很久；而說明的角色是「補充這個
+              名稱」，本來就該貼著名稱讀。
+            -->
+            <span class="zone-group-choice__text">
               <strong>{{ group.label }}</strong>
-              <small>{{ group.description }}</small>
+              <small v-if="group.description">{{ group.description }}</small>
             </span>
           </label>
 
           <label class="zone-group-choice">
             <input v-model="includeCustom" type="checkbox" />
-            <span>
+            <span class="zone-group-choice__text">
               <strong>其他部位</strong>
               <small>自訂文字只儲存在這次提醒中。</small>
             </span>
@@ -350,12 +355,20 @@ button.text-link {
   display: grid;
 }
 
+/*
+ * 2026-09-03：`min-height` 從 4.25rem（68px）降到 tap-target（44px）。
+ *
+ * 那個 68px 是為了「名稱一行、說明一行」留的。說明改成接在名稱後面之後
+ * 多數列只有一行，68px 會在每一列下方留一截空白——十列疊起來就是幾百
+ * 像素的空。仍然不低於 tap-target，可點區沒有變小。
+ */
 .zone-group-choice {
   display: grid;
-  min-height: 4.25rem;
+  min-height: var(--tap-target);
   grid-template-columns: auto minmax(0, 1fr);
   align-items: center;
   gap: var(--space-3);
+  padding: var(--space-2) 0;
   border-bottom: 1px solid var(--border-subtle);
   cursor: pointer;
 }
@@ -366,9 +379,18 @@ button.text-link {
   accent-color: var(--text-primary);
 }
 
-.zone-group-choice strong,
-.zone-group-choice small {
-  display: block;
+/*
+ * 名稱與說明同一行（2026-09-03）。`baseline` 而不是 `center`：兩者字級
+ * 不同，靠中線對齊會讓小字看起來浮在半空中。
+ *
+ * 仍然 `wrap`——窄螢幕上「肩膀與身體 肩膀、身體前側與後側」放不下一行時
+ * 換行即可，不要讓文字溢出或被壓成一欄一字。
+ */
+.zone-group-choice__text {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--space-2);
 }
 
 .zone-group-choice strong {
@@ -377,13 +399,18 @@ button.text-link {
 }
 
 /*
- * 2026-08-30：拿掉自己設的 caption(12px)，改吃 app.css 給 `small` 的
- * supporting(14px)。這裡跟 ContextSelector 的 `.context-suboption small` 是
- * 同一種角色（勾選項底下的說明），先前一個 12px 一個 13px，現在統一。
+ * 字級小一階：supporting(14px) → caption(12px)（2026-09-03 使用者要求）。
+ *
+ * **這是明知的反轉。** 2026-08-30 才把這裡從 caption 改成 supporting，理由
+ * 是「跟 ContextSelector 的 `.context-suboption small` 是同一種角色」。
+ * 那個理由在說明**自己佔一行**時成立；現在它接在名稱後面、跟名稱同一行，
+ * 角色從「底下的說明段」變成「名稱旁的註記」，跟名稱拉開一階才分得出
+ * 主從。ContextSelector 那邊維持 supporting，不跟著改——它仍然是獨立一行。
  */
 .zone-group-choice small {
-  margin-top: var(--space-1);
   color: var(--text-secondary);
+  font-size: var(--font-size-caption);
+  line-height: var(--line-height-body);
 }
 
 .field {
