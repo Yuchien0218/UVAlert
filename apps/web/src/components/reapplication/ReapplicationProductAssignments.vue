@@ -94,7 +94,7 @@ function optionLabel(choice: ReapplicationProductChoice): string {
     </h2>
 
     <template v-if="!perZone">
-      <p class="assignment-section__helper">
+      <p class="question-card__helper">
         {{ selectedZones.length }}
         個部位都會記錄成同一瓶防曬乳。這次確認的包裝標示會寫入紀錄。
       </p>
@@ -134,7 +134,7 @@ function optionLabel(choice: ReapplicationProductChoice): string {
     </template>
 
     <template v-else>
-      <p class="assignment-section__helper">分別選擇各部位實際使用的防曬乳。</p>
+      <p class="question-card__helper">分別選擇各部位實際使用的防曬乳。</p>
       <div
         v-for="zone in selectedZones"
         :key="zone.zoneInstanceId"
@@ -221,10 +221,26 @@ p {
   font-size: var(--font-size-card-title);
 }
 
-.assignment-section__helper {
-  color: var(--text-secondary);
-  line-height: var(--line-height-body);
+/*
+ * 標題→說明收成 stack 系統的 8px（2026-09-03）。
+ *
+ * 這張卡的 grid gap 是 16px，給的是「區塊與區塊之間」；標題與它自己的說明
+ * 之間 DESIGN.md 訂的是 `--space-stack-title-body`。同一頁的另外兩張卡走
+ * `.question-card`，那邊本來就是 8px——實測這裡是 16px，讀起來像說明不屬於
+ * 上面那個標題。
+ *
+ * 用負 margin 抵掉 gap 的差額，與 app.css 的 `.control-rule-note` 同一種做法
+ * （grid gap 沒辦法只針對第一對子代給不同值）。
+ */
+.assignment-section h2 + .question-card__helper {
+  margin-top: calc(var(--space-stack-title-body) - var(--space-4));
 }
+
+/*
+ * 說明文字改用共用的 `.question-card__helper`（2026-09-03）。原本這裡自己
+ * 定了一份，同一頁上就有三種寫法（`question-card__helper`、`section-help`、
+ * 這一個），值一樣但標題與說明之間的間距各不相同。
+ */
 
 .assignment-row {
   display: grid;

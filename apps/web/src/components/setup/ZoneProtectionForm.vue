@@ -373,10 +373,10 @@ button.text-link {
   cursor: pointer;
 }
 
+/* accent-color 2026-09-03 收斂到 app.css 的元素選擇器，這裡只留尺寸。 */
 .zone-group-choice input {
   width: 1.1rem;
   height: 1.1rem;
-  accent-color: var(--text-primary);
 }
 
 /*

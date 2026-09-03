@@ -473,9 +473,11 @@ p {
  * 成功頁的次要動作。刻意**不共用** .submit-actions__cancel——那個名字屬於
  * 送出區，而且該頁的守門測試用它抓「送出區的取消按鈕」，借來用會讓守門
  * 抓到錯的那一顆（實測過：它抓第一個符合的，而成功頁在前面）。
+ *
+ * 2026-09-03：`.submit-actions__cancel` 那一半移到 app.css（記錄補擦那頁
+ * 也要用同一份）。這裡只剩成功頁自己的那一顆。
  */
-.success-panel__skip,
-.submit-actions__cancel {
+.success-panel__skip {
   justify-self: center;
   padding: var(--space-2) 0;
   border: 0;

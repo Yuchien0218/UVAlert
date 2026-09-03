@@ -230,8 +230,15 @@ function zoneNames(zoneIds: string[]): string {
           role="status"
           >正在儲存補擦紀錄</span
         >
+        <!--
+          2026-09-03：`button--quiet` → 文字連結。
+          2026-08-31 的裁決是「次要動作用文字連結，實心／描邊按鈕是主行動
+          的語彙」，記錄狀況那頁已經照做，這頁漏了——兩個並排的流程，取消
+          長得不一樣。
+        -->
         <button
-          class="button button--quiet"
+          class="text-link submit-actions__cancel"
+          data-typography-role="body"
           type="button"
           :disabled="reapplication.phase.value === 'submitting'"
           @click="cancel"

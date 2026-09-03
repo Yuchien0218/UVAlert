@@ -764,7 +764,18 @@ textarea {
   filter: brightness(0.85);
 }
 
-.choice-grid input {
+/*
+ * 勾選類控制項一律用墨色（2026-09-03 收斂成一條）。
+ *
+ * 原本 `accent-color` 寫在兩個地方（這裡的 `.choice-grid input` 與
+ * ZoneProtectionForm 的 `.zone-group-choice input`），第三個地方
+ * ——記錄補擦的 `.zone-choice input`——**漏了**，於是那一頁的 13 個核取方塊
+ * 是瀏覽器預設的亮藍色，在暖象牙底上非常突兀（實測 `accent-color: auto`）。
+ *
+ * 掛在元素選擇器上，新加的勾選控制項不必記得套任何 class。
+ */
+input[type="checkbox"],
+input[type="radio"] {
   accent-color: var(--text-primary);
 }
 
@@ -949,6 +960,30 @@ p.prose-block {
 
 .submit-actions .button {
   width: 100%;
+}
+
+/*
+ * 送出區的「取消」——文字連結，不是等寬按鈕（2026-08-31 裁決：次要動作用
+ * 文字連結，實心／描邊按鈕是主行動的語彙）。
+ *
+ * 2026-09-03 從 ReportContextEventPage 的 scoped style 移出來：記錄補擦那頁
+ * 的取消原本還是 `button--quiet`，兩個並排的流程長得不一樣。留在 scoped 裡
+ * 的話那頁換上這個 class 也吃不到樣式——跟 `.time-option` 那次搬遷同一個
+ * 理由。外觀的其餘部分由 app.css 的 `button.text-link` 提供。
+ */
+/*
+ * 選擇器寫兩次是為了贏過 `button.text-link`（0,1,1）的 `padding: 0`——
+ * 那條把按鈕當文字連結用時的重置。同一個手法在 `.control-rule-note` 也用過。
+ */
+.submit-actions__cancel.submit-actions__cancel {
+  justify-self: center;
+  /*
+   * 可點區補到 44px（2026-09-03）。搬過來時實測只有 24px 高、32px 寬——
+   * DESIGN.md 第十二節訂「所有按鈕與可點擊項目最小 44×44」，文字連結也算。
+   * 這是搬遷前就存在的問題，兩頁一起修好。
+   */
+  min-height: var(--tap-target);
+  padding: var(--space-2) var(--space-4);
 }
 
 @media (min-width: 36rem) {
