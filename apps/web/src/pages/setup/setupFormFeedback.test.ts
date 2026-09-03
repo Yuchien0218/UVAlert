@@ -4,6 +4,7 @@ import { readFileSync } from "node:fs";
 import { mount } from "@vue/test-utils";
 import { describe, expect, it } from "vitest";
 import ApplicationTimePicker from "../../components/setup/ApplicationTimePicker.vue";
+import WaterStartPicker from "../../components/setup/WaterStartPicker.vue";
 
 /**
  * 2026-08-31 第七批（§18.5～§18.7）：`/setup` 的表單回饋。
@@ -79,6 +80,84 @@ describe("塗抹時間的錯誤提示", () => {
   });
 });
 
+/**
+ * 入水時間走同一套（2026-09-03）。
+ *
+ * 這張卡初始是**兩顆都沒選**，helper 又只講「不確定」、沒講要選——而錯誤
+ * 原本只印在頁尾。三件事加起來，使用者按下開始之後看不出哪裡沒填。
+ *
+ * 斷言逐條對著塗抹時間那組寫：同一頁兩個時間輸入不該有兩種出錯方式。
+ */
+describe("入水時間的錯誤提示", () => {
+  function mountPicker(error: string | null) {
+    return mount(WaterStartPicker, {
+      props: { modelValue: null, error },
+      attachTo: document.body
+    });
+  }
+
+  it("沒有錯誤時不顯示警示，也不上紅框", () => {
+    const wrapper = mountPicker(null);
+
+    expect(wrapper.find('[role="alert"]').exists()).toBe(false);
+    expect(wrapper.get("fieldset").classes()).not.toContain(
+      "time-picker--invalid"
+    );
+  });
+
+  it("有錯誤時同時給紅框、警示文字與 aria-describedby", () => {
+    const wrapper = mountPicker("請確認實際入水時間，或選擇不確定。");
+    const fieldset = wrapper.get("fieldset");
+    const alert = wrapper.get('[role="alert"]');
+
+    expect(fieldset.classes()).toContain("time-picker--invalid");
+    expect(alert.text()).toBe("請確認實際入水時間，或選擇不確定。");
+    expect(fieldset.attributes("aria-describedby")).toBe(alert.attributes("id"));
+  });
+
+  it("警示文字排在選項前面", () => {
+    const wrapper = mountPicker("請確認實際入水時間，或選擇不確定。");
+    const html = wrapper.html();
+
+    expect(html.indexOf('role="alert"')).toBeLessThan(
+      html.indexOf("water-start__quick")
+    );
+  });
+
+  /*
+   * **先 blur，再斷言焦點落在「這個」wrapper 裡。**
+   *
+   * 第一版照抄塗抹時間那條，結果拿掉 `ref="defaultButton"` 之後照樣全綠
+   * （2026-09-03 實測）：塗抹時間那條測試先跑，`document` 是共用的，焦點
+   * 還停在**它的**「1 分鐘前」上——文字剛好一模一樣，於是兩條測試互相
+   * 掩護。這正是 CLAUDE.md 記的那種「守空氣」。
+   */
+  it("對外提供 focus()，落點是第一個時間選項", () => {
+    const wrapper = mountPicker("請確認實際入水時間，或選擇不確定。");
+    (document.activeElement as HTMLElement | null)?.blur?.();
+
+    (wrapper.vm as unknown as { focus: () => void }).focus();
+
+    const active = document.activeElement;
+    expect(wrapper.element.contains(active)).toBe(true);
+    expect(active?.textContent?.replace(/\s+/g, "")).toBe("1分鐘前");
+  });
+
+  /*
+   * 卡片本身要先講「要選」，不能只講「不確定也可以」。
+   *
+   * 這是初始狀態唯一的線索——兩顆按鈕都沒選中時，畫面上沒有別的東西
+   * 說明這一欄還沒完成。
+   */
+  it("說明文字先講要選，再講不確定", () => {
+    const helper = mountPicker(null).get(".question-card__helper").text();
+
+    expect(helper).toContain("請選擇實際入水時間");
+    expect(helper).toContain("不確定");
+    expect(helper.indexOf("請選擇")).toBeLessThan(helper.indexOf("不確定"));
+  });
+});
+
 describe("SetupPage 送出失敗時把使用者帶到欄位", () => {
   const SOURCE = strip(
     readFileSync("apps/web/src/pages/setup/SetupPage.vue", "utf8")
@@ -109,6 +188,29 @@ describe("SetupPage 送出失敗時把使用者帶到欄位", () => {
 
   it("錯誤透過 error prop 傳給選擇器", () => {
     expect(SOURCE).toContain(':error="applicationTimeError"');
+  });
+
+  /*
+   * 入水時間那一筆同理。`SetupPage` 原本的註解寫著「其他兩種仍走頁尾」，
+   * 2026-09-03 還掉入水時間這一筆——所以頁尾的清單裡不可以再有它。
+   */
+  it("入水時間的錯誤交給欄位，不再落到頁尾", () => {
+    // 換行寫法不比對（這個 repo 的檔案是 CRLF），只框出那一段分支。
+    const branch = /if \(needsWaterStart\.value && waterStart\.value === null\)[\s\S]*?focusWaterStart\(\);/.exec(
+      SOURCE
+    )?.[0];
+
+    expect(branch, "找不到入水時間的錯誤分支").toBeDefined();
+    expect(branch).toContain("waterStartError.value = localError.value;");
+    expect(branch, "同一句不可以同時留在頁尾").toContain(
+      "localError.value = null;"
+    );
+    expect(branch).toContain("focusWaterStart();");
+    expect(SOURCE).not.toContain("setup.fieldErrors.value.waterStart ?? []");
+  });
+
+  it("入水時間的錯誤透過 error prop 傳給選擇器", () => {
+    expect(SOURCE).toContain(':error="waterStartFieldError"');
   });
 });
 

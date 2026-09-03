@@ -38,7 +38,31 @@ const value = defineModel<WaterStartFormValue | null>({
  * 表單層讓它選不到，控制器層再擋一次手動打字（`validateWaterStart`）。
  * 兩層都要：`min` 只收窄瀏覽器的選擇器，打字繞得過去。
  */
-const props = defineProps<{ appliedAt?: string | null }>();
+const props = defineProps<{
+  appliedAt?: string | null;
+  /**
+   * 這一欄的錯誤；null 代表沒問題。
+   *
+   * **2026-09-03 新增。** 在這之前入水時間的錯誤只印在**頁尾**，離卡片很遠
+   * ——`SetupPage` 的註解本來就記著這筆欠帳（「它們的欄位還沒有各自的錯誤
+   * 位置」）。而這張卡初始是**兩顆都沒選**、也沒有任何一句話說要選，於是
+   * 使用者按下開始之後，唯一的線索出現在畫面另一端。
+   *
+   * 形狀與 `ApplicationTimePicker` 完全相同：紅框 ＋ 選項上方的警示文字 ＋
+   * `aria-describedby` ＋ 對外的 `focus()`。同一頁兩個時間輸入不該有兩種
+   * 出錯方式。
+   */
+  error?: string | null;
+}>();
+
+const errorId = useId();
+const defaultButton = shallowRef<HTMLButtonElement | null>(null);
+
+defineExpose({
+  focus(): void {
+    defaultButton.value?.focus();
+  }
+});
 
 /**
  * 這個選擇器的「現在」。
@@ -204,14 +228,27 @@ function applyAdjustment(): void {
 </script>
 
 <template>
-  <fieldset class="water-start question-card app-card">
+  <fieldset
+    class="water-start question-card app-card"
+    :class="{ 'time-picker--invalid': props.error }"
+    :aria-describedby="props.error ? errorId : undefined"
+  >
     <legend>實際何時開始入水？</legend>
     <p class="question-card__helper">
-      若無法確認，可以選擇不確定；系統會保守處理，不會猜測入水時間。
+      請選擇實際入水時間；若無法確認，可以選擇不確定，系統會保守處理，不會猜測入水時間。
+    </p>
+
+    <!--
+      訊息放在選項**上方**：由上往下讀時，先知道這裡出了什麼事，再看到要
+      操作的東西。理由與排法同 ApplicationTimePicker。
+    -->
+    <p v-if="props.error" :id="errorId" class="time-picker__error" role="alert">
+      {{ props.error }}
     </p>
 
     <div class="water-start__quick">
       <button
+        ref="defaultButton"
         class="time-option app-card"
         :class="{ 'option-selected': usingDefault }"
         type="button"

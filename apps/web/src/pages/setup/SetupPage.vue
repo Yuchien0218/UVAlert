@@ -167,8 +167,44 @@ function focusApplicationTime(): void {
   picker.focus();
 }
 
+/**
+ * 入水時間也走同一套（2026-09-03）。
+ *
+ * 上面那段註解裡「其他兩種仍走頁尾」的欠帳，這裡還掉入水時間那一筆。
+ * 這張卡初始是**兩顆都沒選**，卡片上又沒有一句話說要選——錯誤再印到
+ * 畫面另一端，等於使用者按了開始卻不知道發生什麼事。
+ */
+const waterStartPicker = shallowRef<InstanceType<
+  typeof WaterStartPicker
+> | null>(null);
+
+/** 入水時間那一欄的錯誤；null 代表這一欄目前沒問題。 */
+const waterStartError = shallowRef<string | null>(null);
+
+/* 一選就把紅框收掉，理由同塗抹時間。 */
+watch(waterStart, (value) => {
+  if (value !== null) waterStartError.value = null;
+});
+
+/*
+ * 兩個來源合一：本頁的前端驗證（沒選）與控制器回傳的 `fieldErrors`
+ * （例如入水早於塗抹）。兩者都該落在同一張卡上，不是一個在卡上、
+ * 一個在頁尾。
+ */
+const waterStartFieldError = computed<string | null>(
+  () => waterStartError.value ?? setup.fieldErrors.value.waterStart?.[0] ?? null
+);
+
+function focusWaterStart(): void {
+  const picker = waterStartPicker.value;
+  if (picker === null) return;
+  picker.$el?.scrollIntoView?.({ block: "center", behavior: "smooth" });
+  picker.focus();
+}
+
 async function submit(): Promise<void> {
   applicationTimeError.value = null;
+  waterStartError.value = null;
   localError.value = validateForm();
 
   /*
@@ -180,6 +216,13 @@ async function submit(): Promise<void> {
     applicationTimeError.value = localError.value;
     localError.value = null;
     focusApplicationTime();
+    return;
+  }
+
+  if (needsWaterStart.value && waterStart.value === null) {
+    waterStartError.value = localError.value;
+    localError.value = null;
+    focusWaterStart();
     return;
   }
 
@@ -474,8 +517,10 @@ onMounted(async () => {
           -->
           <WaterStartPicker
             v-if="needsWaterStart"
+            ref="waterStartPicker"
             v-model="waterStart"
             :applied-at="applicationTime"
+            :error="waterStartFieldError"
           />
 
           <ProductEligibilityNotice
@@ -503,8 +548,7 @@ onMounted(async () => {
       <p
         v-for="message in [
           ...(setup.fieldErrors.value.appliedAt ?? []),
-          ...(setup.fieldErrors.value.product ?? []),
-          ...(setup.fieldErrors.value.waterStart ?? [])
+          ...(setup.fieldErrors.value.product ?? [])
         ]"
         :key="message"
         class="form-error"
