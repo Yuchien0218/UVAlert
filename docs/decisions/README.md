@@ -122,6 +122,7 @@
 | 台灣在地化文案精簡 11 項：離線／時鐘倒數狀態去掉「保守提醒／狀態」、`METHOD_UNKNOWN` 收句、免責切結腔改成正面安全指引、五日預報去掉資料集編號、部位與情境名詞生活化（鼻子／腳背／通勤常曬部位／室內靠窗）、通知權限指引改成 `<ol>` 步驟 | `features/reminder/reminderPresentation.ts`、`features/setup/setupCatalog.ts`、`pages/ReportContextEventPage.vue`、`components/uv/FiveDayUvCard.vue`、`pages/settings/DataSettingsPage.vue`、`pages/settings/NotificationSettingsPage.vue`、`components/region/RegionLocationPanel.vue`（＋ 3 個守門測試同步） | 已完成（2026-09-02） |
 | `view_conservative_reminder` 不再導向 `/help/how-it-works`（那頁仍是 `MULTI_REVIEW`，只顯示「內容正在審查」＝在最需要說明的狀態下給一頁空白）；改成首頁原地展開說明，CTA 標籤由「查看保守提醒」改成「為什麼間隔變短？」 | `helpers/resolveActionRoute.ts`、`pages/HomePage.vue`、`features/reminder/reminderPresentation.ts`（＋ 4 條守門） | 已完成（2026-09-03） |
 | 階段二：首頁「剛才有流汗嗎？」提問卡移除，記錄狀況降成補擦流程裡的出口「現在還不能補擦，先記錄狀況」；它在真的是主行動時仍是主 CTA | `pages/HomePage.vue`、`components/reapplication/ReapplyReasonPicker.vue`、`pages/ReapplyPage.vue`（＋ 7 條守門） | 已完成（2026-09-03） |
+| 入水時間的錯誤從頁尾搬到欄位旁（紅框＋警示文字＋`aria-describedby`＋捲動 focus），說明文字改成先講「請選擇實際入水時間」——初始兩顆都沒選時卡片上原本沒有任何線索；`.time-picker--invalid`／`__error` 一併移到 app.css 給兩個選擇器共用 | `WaterStartPicker.vue`、`SetupPage.vue`、`ApplicationTimePicker.vue`、`app.css`（＋ 6 條守門） | 已完成（2026-09-03） |
 | 排版稽核第 2 批（只做低風險、與既有裁決不衝突的）：§7.1 段落鄰近律、§7.2 審查卡文字層級、§7.3 blockquote 間距、§6.1 「裝置測試」空卡併進「通知傳送說明」卡 | `DataSettingsPage.vue`、`ContentUnderReview.vue`、`EducationArticlePage.vue`、`NotificationSettingsPage.vue`（＋ test）、`2026-08-15-…-current.md` §通知設定頁 | 已完成（2026-09-02，PR #100）——§1／§5／§6.2–6.4 不採用、§2／§3／§4／§7.4 待實作，狀態看 `2026-09-02-ui-layout-consistency-audit.md` 文末 |
 
 ### 為什麼裝備詳情值得單獨記一筆

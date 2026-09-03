@@ -271,27 +271,10 @@ function applyAdjustment(): void {
  * 改用共用的 .question-card，這裡只留這張卡特有的東西。
  */
 /*
- * 紅框用 --color-due（「已到期」）。這個 App 只有這一顆紅：到期與錯誤共用
- * 同一個「需要你處理」的語意，再開一顆錯誤紅只會多一個要記的顏色。
- *
- * 邊框不是唯一的訊號——旁邊同時有紅字訊息，所以不違反 SC 1.4.1
- * （不可只用顏色傳達資訊）。
+ * `.time-picker--invalid`／`.time-picker__error` 2026-09-03 移到 app.css。
+ * 入水時間選擇器也要同一套紅框與警示文字，留在 scoped 裡它會完全吃不到
+ * ——理由同 2026-08-31 把 `.time-option`／`.time-adjust` 搬出去那次。
  */
-.time-picker--invalid {
-  border-color: var(--color-due);
-}
-
-/*
- * 這張卡的 grid row-gap 是 0，子元素各自用 margin 拉開（實測）。錯誤訊息
- * 若沿用 `margin: 0`，它的頂線會**貼齊說明文字的底線**——畫出來看之後
- * 讀起來像說明的第三行，而不是一則獨立的警告。
- */
-.time-picker__error {
-  margin: var(--space-3) 0 0;
-  color: var(--color-due);
-  font-weight: 500;
-  line-height: var(--line-height-body);
-}
 
 .time-picker__cap {
   margin: 0;
