@@ -136,6 +136,21 @@ describe("按鈕組在窄螢幕仍然並排", () => {
     expect(narrow, "找不到 31rem 的 media query").toBeDefined();
   });
 
+  /*
+   * **這條才是真正的原因，而且第一版漏掉了。**
+   *
+   * `.recovery-card` 是 `display: grid` ＋ `justify-items: start`，群組會
+   * 縮成內容寬（實測 600px 視窗下卡片欄寬 472px、群組只有 280px）。兩顆
+   * `flex-basis: 10rem` 的按鈕加起來 332px 塞不進去，於是換行——**跟視窗
+   * 多寬無關**。
+   *
+   * 第一版只改 31rem 以下的 media query，所以窄螢幕好了、500–600px 之間
+   * 還是壞的，使用者回報「手機尺寸按鈕還是歪歪的」。
+   */
+  it("按鈕組先拿到整欄寬度", () => {
+    expect(block(".button-group")).toContain("width: 100%;");
+  });
+
   it("不再把按鈕組改成直排", () => {
     // 比對完整宣告：`display: grid` 就是直排那一版。
     expect(narrow).not.toMatch(/\.button-group \{[^}]*display:\s*grid;/);
