@@ -355,7 +355,7 @@ function zoneNames(zoneIds: string[]): string {
         <QuickTimePicker
           heading="實際什麼時候發生？"
           id-prefix="report-time"
-          default-label="剛剛"
+          default-label="1 分鐘前"
           :applied-at="contextEvent.occurredAt.value"
           :reference-now="contextEvent.referenceNow.value"
           :error="contextEvent.fieldErrors.value.occurredAt?.[0]"
