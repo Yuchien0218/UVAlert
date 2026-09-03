@@ -774,10 +774,26 @@ textarea {
   grid-template-columns: minmax(0, 1fr);
 }
 
+/*
+ * 2026-09-03：**不再顯示原生的圓點**（使用者：「前面不要有勾勾符號，其他
+ * 頁面也幫我檢查哪些可以刪除」，接著裁決「改有預設值的那幾組」）。
+ *
+ * 這些選項本來就有選取外觀（`:has(input:checked)`：muted 邊框 ＋ hairline
+ * 底），圓點是同一件事說第二次。全站現在只有一種「選了沒」的訊號。
+ *
+ * **只動 radio，而且只動這一組。** 四個使用點（記錄補擦的原因、記錄狀況的
+ * 下水時間確信度、通知頻率、產品標示問答）都保證**永遠有一項是選的**——
+ * 那個值是不可為空的聯集型別。checkbox 不在裡面：一組都沒勾時整排會變成
+ * 一模一樣的素卡片，看不出是選項，`GearSharePage` 的單一開關同理。
+ *
+ * 欄數跟著從兩欄改回一欄：圓點移出版面之後，內容留在 `auto` 那一欄會縮成
+ * 內容寬，長文字提早折行。
+ */
 .choice-grid label {
+  position: relative;
   display: grid;
   min-height: var(--tap-target);
-  grid-template-columns: auto minmax(0, 1fr);
+  grid-template-columns: minmax(0, 1fr);
   align-items: center;
   gap: var(--space-3);
   padding: var(--space-3);
@@ -788,6 +804,34 @@ textarea {
     background-color var(--duration-fast) var(--ease-out),
     color var(--duration-fast) var(--ease-out),
     border-color var(--duration-fast) var(--ease-out);
+}
+
+/*
+ * 藏起來，不是刪掉——控制項仍在 DOM 裡，鍵盤與螢幕閱讀器完全不受影響
+ * （通知設定那一組還帶著 `role="radiogroup"`）。宣告與 `.screen-reader-only`
+ * 相同；不直接套那個 class 是因為這四處的 radio 分散在 20 幾個標籤裡，
+ * 掛在選擇器上才不會有人新增選項時漏掉。
+ */
+.choice-grid label > input[type="radio"] {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/*
+ * **藏掉原生控制項就必須自己接回焦點框。** 焦點原本畫在那個圓點上，圓點
+ * 不見了，鍵盤使用者就看不出停在哪一項（WCAG SC 2.4.7）。radio 群組是靠
+ * 方向鍵移動的，沒有焦點框等於完全不能用。
+ */
+.choice-grid label:has(> input[type="radio"]:focus-visible) {
+  outline: 0.15rem solid var(--focus-ring);
+  outline-offset: 0.2rem;
 }
 
 /*

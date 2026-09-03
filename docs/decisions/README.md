@@ -135,6 +135,7 @@
 | 首頁結束鈕（叉叉）改成疊在右上角，不再自己佔一欄——它讓整個倒數區塊被壓到 280px（可用 336），正好夠讓「建議優先補擦：手背・預計 15:52」折成兩行 | `HomePage.vue`、`homeCountdownWidth.test.ts` | 已完成（2026-09-03） |
 | `.flow-heading` 五頁的說明文字改成橫跨兩欄（原本整塊被圖示鈕壓窄一個按鈕的寬度：336→275px）；圖示鈕仍與標題同一列 | `app.css`、`ReapplyPage.vue`、`ReportContextEventPage.vue`、`EventCorrectionPage.vue`、`GearSharePage.vue`、`NotificationSettingsPage.vue`（＋ 9 條守門） | 已完成（2026-09-03） |
 | 部位藥丸不再顯示原生核取方塊（選取狀態改由藥丸本身呈現、焦點框自己接回來）；時間快選的預設從「剛剛」改成「1 分鐘前」，送出的值也一起改成 1 | `ZoneSelectorGrid.vue`、`QuickTimePicker.vue`、`ReportContextEventPage.vue`（＋ 6 條守門） | 已完成（2026-09-03） |
+| `.choice-grid` 的選項也拿掉原生圓點（承上，使用者裁決「改有預設值的那幾組」）：四組 radio 都保證永遠有一項是選的；checkbox 與單一開關不動。`ReapplyReasonPicker` 補上永遠佔位的圖示欄以維持文字對齊 | `app.css`、`ReapplyReasonPicker.vue`、`NotificationSettingsPage.vue`、`assets/choiceGridRadio.test.ts`（＋ 9 條守門） | 已完成（2026-09-03） |
 | 衛教分類卡說明縮到 18 字以內，375px 上六張卡全部一行；`text-wrap: balance` 留給更窄的手機（它把 21 字平分成兩行各半寬，反而更空） | `tools/education/content-reader.mjs`、`EducationIndexPage.vue`、`education-content.test.ts` | 已完成（2026-09-03） |
 | 排版稽核 §2：`DESIGN.md` 第二節新增〈深色表面的使用範圍〉（判準是「是不是要被單獨看的主角」），第七／第十節同步；並加白名單守門，未登記的深色表面會紅 | `DESIGN.md`、`assets/darkSurfaceScope.test.ts`（＋ 6 條守門） | 已完成（2026-09-03） |
 | 排版稽核第 2 批（只做低風險、與既有裁決不衝突的）：§7.1 段落鄰近律、§7.2 審查卡文字層級、§7.3 blockquote 間距、§6.1 「裝置測試」空卡併進「通知傳送說明」卡 | `DataSettingsPage.vue`、`ContentUnderReview.vue`、`EducationArticlePage.vue`、`NotificationSettingsPage.vue`（＋ test）、`2026-08-15-…-current.md` §通知設定頁 | 已完成（2026-09-02，PR #100）——§1／§5／§6.2–6.4 不採用、§2／§3／§4／§7.4 待實作，狀態看 `2026-09-02-ui-layout-consistency-audit.md` 文末 |
