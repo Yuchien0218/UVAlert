@@ -132,6 +132,8 @@
 | 記錄補擦頁簡化（使用者裁決）：刪除「不同部位用不同防曬乳」、部位選擇改用共用 chip（與記錄狀況同一個元件）、「建議」badge 拿掉（原本借用狀態色 `--color-tracking`）。整頁 2591→1879px | `ReapplicationZoneSelector.vue`、`ReapplicationProductAssignments.vue`、`ReapplicationReview.vue`（＋ 22 條守門） | 已完成（2026-09-03） |
 | 成功頁不再用 5.5px 彩色上緣（全站唯一的 `0.35rem`），改由 `state-success` 圖示 ＋ `--color-saved` 承擔；成功後收起矛盾的「儲存前不會更新」、單一分組不用清單、更正說明降到 supporting | `app.css`、`ReapplyPage.vue`、`ReportContextEventPage.vue`、`EventCorrectionPage.vue` | 已完成（2026-09-03） |
 | 首頁的水上活動入口改成「情境是水上活動、或有進行中的水中區間」才顯示（從事件流判斷，投影沒有這兩個欄位） | `features/reminder/waterActivityEntry.ts`、`HomePage.vue`（＋ 19 條守門） | 已完成（2026-09-03） |
+| 首頁結束鈕（叉叉）改成疊在右上角，不再自己佔一欄——它讓整個倒數區塊被壓到 280px（可用 336），正好夠讓「建議優先補擦：手背・預計 15:52」折成兩行 | `HomePage.vue`、`homeCountdownWidth.test.ts` | 已完成（2026-09-03） |
+| 衛教分類卡說明縮到 18 字以內，375px 上六張卡全部一行；`text-wrap: balance` 留給更窄的手機（它把 21 字平分成兩行各半寬，反而更空） | `tools/education/content-reader.mjs`、`EducationIndexPage.vue`、`education-content.test.ts` | 已完成（2026-09-03） |
 | 排版稽核 §2：`DESIGN.md` 第二節新增〈深色表面的使用範圍〉（判準是「是不是要被單獨看的主角」），第七／第十節同步；並加白名單守門，未登記的深色表面會紅 | `DESIGN.md`、`assets/darkSurfaceScope.test.ts`（＋ 6 條守門） | 已完成（2026-09-03） |
 | 排版稽核第 2 批（只做低風險、與既有裁決不衝突的）：§7.1 段落鄰近律、§7.2 審查卡文字層級、§7.3 blockquote 間距、§6.1 「裝置測試」空卡併進「通知傳送說明」卡 | `DataSettingsPage.vue`、`ContentUnderReview.vue`、`EducationArticlePage.vue`、`NotificationSettingsPage.vue`（＋ test）、`2026-08-15-…-current.md` §通知設定頁 | 已完成（2026-09-02，PR #100）——§1／§5／§6.2–6.4 不採用、§2／§3／§4／§7.4 待實作，狀態看 `2026-09-02-ui-layout-consistency-audit.md` 文末 |
 
