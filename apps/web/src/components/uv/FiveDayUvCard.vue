@@ -24,16 +24,36 @@ const emit = defineEmits<{
   refresh: [];
 }>();
 
-function formatForecastDate(localDate: string): {
-  weekday: string;
-  date: string;
-} {
+function toLocalDate(localDate: string): Date {
   const [year, month, day] = localDate.split("-").map((part) => Number(part));
-  const date = new Date(year!, month! - 1, day!, 12);
-  return {
-    weekday: formatWeekday(date),
-    date: formatDate(date)
-  };
+  /* 正午：避開日光節約與時區換算把日期推到前後一天。 */
+  return new Date(year!, month! - 1, day!, 12);
+}
+
+/** 今天的本地日期，格式與預報的 `localDate` 相同。 */
+function todayLocalDate(): string {
+  const now = new Date();
+  const month = String(now.getMonth() + 1).padStart(2, "0");
+  const day = String(now.getDate()).padStart(2, "0");
+  return `${now.getFullYear()}-${month}-${day}`;
+}
+
+/**
+ * 卡片上顯示的日子（2026-09-04 使用者要求：「改成今天、週一、週二」）。
+ *
+ * 原本是「9/4」這種月／日。五天全部是月日的話，要先在心裡把數字換算成
+ * 「這是後天」；改成星期之後那一步就不必做了。
+ *
+ * **第一格用「今天」而不是它的星期**：星期名回答的是「哪一天」，而第一格
+ * 使用者真正要問的是「現在」。
+ *
+ * 判斷用日期字串比對，不是用陣列索引——預報可能是昨天存下來、今天離線時
+ * 讀出來的快取，那時第一格並不是今天。
+ */
+function forecastDayLabel(localDate: string): string {
+  return localDate === todayLocalDate()
+    ? "今天"
+    : formatWeekday(toLocalDate(localDate));
 }
 
 function formatUpdatedAt(instant: string): string {
@@ -145,8 +165,16 @@ function getUnavailableMessage(error: UvForecastError): string {
           class="uv-day"
           :class="riskClass(day.riskLevel)"
         >
-          <span class="uv-day__date stat-figure">
-            {{ formatForecastDate(day.localDate).date }}
+          <!--
+            `stat-figure`（等寬數字）拿掉了：這一格現在是「今天／週四」，
+            沒有數字要對齊。完整日期留給螢幕閱讀器——畫面上省掉的脈絡，
+            聽的人本來就沒有旁邊四格可以對照。
+          -->
+          <span class="uv-day__date">
+            <span class="screen-reader-only"
+              >{{ formatDate(toLocalDate(day.localDate)) }}
+            </span>
+            {{ forecastDayLabel(day.localDate) }}
           </span>
           <strong class="uv-day__value stat-figure">
             <span class="screen-reader-only">紫外線指數</span>

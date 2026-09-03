@@ -76,7 +76,18 @@ const uvLabel = computed(() =>
   align-items: center;
   justify-content: space-between;
   gap: var(--space-4);
-  padding: 0 clamp(1rem, 4vw, 2.25rem);
+  /*
+   * 左右留白必須與內容區**逐字相同**（2026-09-04 使用者回報「Logo 太靠左，
+   * 要跟底下元件對齊」）。
+   *
+   * 這裡原本是 `clamp(1rem, 4vw, 2.25rem)`，`AppShell` 的 `main` 是
+   * `clamp(1rem, 5vw, 2.75rem)`——兩個不同的 clamp，於是在每一種寬度下都
+   * 差一點：375px 實測頁首 16、內容 18.75。
+   *
+   * 改成同一個 clamp。**不要只改成某個固定值**——兩邊都會隨寬度變，寫死
+   * 一個數字只會在某一個視窗寬度下剛好對上。
+   */
+  padding: 0 clamp(1rem, 5vw, 2.75rem);
   /*
    * 2026-08-31：拿掉底部的分隔線（使用者要求）。
    *
