@@ -40,8 +40,28 @@ function formatUpdatedAt(instant: string): string {
   return formatMonthDayTime(instant, { timeZone: "Asia/Taipei" });
 }
 
+/**
+ * 等級名稱轉成 class 後綴：`very_high` → `very-high`。
+ *
+ * **2026-09-04：兩個地方共用同一個函式，因為它們曾經漂移。** 卡片外框走
+ * 這裡（有 `replace`），等級藥丸卻在模板裡直接內插 `riskLevel`——於是
+ * `very_high` 產生 `uv-day__level-badge--very_high`，而 CSS 寫的是
+ * `--very-high`。結果「過量級」那一顆完全沒有底色，變成一段裸文字
+ * （實測 `background-color: rgba(0, 0, 0, 0)`）。
+ *
+ * 五個等級裡只有 `very_high` 帶底線，所以另外四個一直是對的——這也是它
+ * 能活這麼久的原因。
+ */
+function riskSuffix(riskLevel: UvRiskLevel): string {
+  return riskLevel.replace("_", "-");
+}
+
 function riskClass(riskLevel: UvRiskLevel): string {
-  return `uv-day--${riskLevel.replace("_", "-")}`;
+  return `uv-day--${riskSuffix(riskLevel)}`;
+}
+
+function levelBadgeClass(riskLevel: UvRiskLevel): string {
+  return `uv-day__level-badge--${riskSuffix(riskLevel)}`;
 }
 
 function getUnavailableMessage(error: UvForecastError): string {
@@ -134,7 +154,7 @@ function getUnavailableMessage(error: UvForecastError): string {
           </strong>
           <span
             class="uv-day__level-badge"
-            :class="`uv-day__level-badge--${day.riskLevel}`"
+            :class="levelBadgeClass(day.riskLevel)"
             :aria-label="`風險等級：${getUvRiskLevelLabel(day.riskLevel)}`"
           >
             {{ getUvRiskLevelLabel(day.riskLevel) }}
