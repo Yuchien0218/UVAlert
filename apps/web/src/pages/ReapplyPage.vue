@@ -10,6 +10,7 @@ import ReapplicationReview from "../components/reapplication/ReapplicationReview
 import { getZoneLabel } from "../features/reminder/reminderPresentation";
 import { formatDateTime } from "../helpers/datetime";
 import IconButton from "../components/common/IconButton.vue";
+import IconLead from "../components/common/IconLead.vue";
 
 const { reapplication } = useWebAppServices();
 const router = useRouter();
@@ -73,7 +74,13 @@ function zoneNames(zoneIds: string[]): string {
           的標題已經把那三件事各問了一次，頁首再列一遍是同一句話說兩次。
           留下的是這一頁唯一還沒被說過的事：按下儲存之前什麼都不會變。
         -->
-        <p>儲存前不會更新提醒。</p>
+        <!--
+          2026-09-03：成功之後這句要收起來。它與正下方的「補擦紀錄已更新」
+          直接矛盾——記錄已經寫進去了，「儲存前不會更新」不再成立。
+        -->
+        <p v-if="reapplication.phase.value !== 'success'">
+          儲存前不會更新提醒。
+        </p>
       </div>
       <IconButton icon="tool-close" label="返回提醒" @click="cancel" />
     </header>
@@ -88,6 +95,12 @@ function zoneNames(zoneIds: string[]): string {
       "
       class="app-card success-panel"
     >
+      <!--
+        2026-09-03：「已儲存」的訊號從彩色粗上緣改成領銜圖示
+        （`state-success` 的 `<title>` 本來就是「已儲存」）。理由見 app.css
+        的 `.success-panel`。
+      -->
+      <IconLead icon="state-success">
       <h2
         id="reapply-success-title"
         data-typography-role="section-title"
@@ -95,12 +108,28 @@ function zoneNames(zoneIds: string[]): string {
       >
         補擦紀錄已更新
       </h2>
+      </IconLead>
       <p>
         已更新 {{ reapplication.success.value.zoneIds.length }} 個部位，{{
           formatDateTime(reapplication.success.value.appliedAt)
         }}。其他未選的部位維持原本狀態。
       </p>
-      <ul class="success-groups">
+      <!--
+        2026-09-03：只有一組時不用清單。「不同部位用不同防曬乳」拿掉之後
+        這裡永遠只有一組，一個項目的項目符號清單讀起來像漏了東西。
+      -->
+      <p
+        v-if="reapplication.success.value.productGroups.length === 1"
+        class="success-groups__single"
+      >
+        <strong>{{
+          reapplication.success.value.productGroups[0]?.displayName
+        }}</strong
+        >：{{
+          zoneNames(reapplication.success.value.productGroups[0]?.zoneIds ?? [])
+        }}
+      </p>
+      <ul v-else class="success-groups">
         <li
           v-for="group in reapplication.success.value.productGroups"
           :key="`${group.displayName}-${group.zoneIds.join('-')}`"
@@ -267,8 +296,18 @@ function zoneNames(zoneIds: string[]): string {
 .submit-error p {
   margin: 0;
 }
+/*
+ * 2026-09-03：body(16px) → supporting(14px)。它是卡片結尾的補充說明，
+ * 跟主要訊息同一個字級會讓兩者讀起來一樣重要。
+ */
 .correction-note {
   color: var(--text-secondary);
+  font-size: var(--font-size-supporting);
+  line-height: var(--line-height-body);
+}
+
+.success-groups__single {
+  margin: 0;
   line-height: var(--line-height-body);
 }
 .success-groups {

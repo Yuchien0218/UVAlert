@@ -8,6 +8,7 @@ import ZoneSelectorGrid from "../components/reminder/ZoneSelectorGrid.vue";
 import { getZoneLabel } from "../features/reminder/reminderPresentation";
 import { formatDateTime } from "../helpers/datetime";
 import IconButton from "../components/common/IconButton.vue";
+import IconLead from "../components/common/IconLead.vue";
 
 /**
  * S-10 更正最近事件。
@@ -100,6 +101,12 @@ async function runVoid(): Promise<void> {
       "
       class="app-card success-panel"
     >
+      <!--
+        2026-09-03：「已儲存」的訊號從彩色粗上緣改成領銜圖示
+        （`state-success` 的 `<title>` 本來就是「已儲存」）。理由見 app.css
+        的 `.success-panel`。
+      -->
+      <IconLead icon="state-success">
       <h2
         id="correction-success-title"
         data-typography-role="section-title"
@@ -111,6 +118,7 @@ async function runVoid(): Promise<void> {
             : "已更正這筆紀錄"
         }}
       </h2>
+      </IconLead>
       <p v-if="eventCorrection.success.value.action === 'void'">
         {{
           eventCorrection.success.value.label

@@ -87,13 +87,21 @@ interface Options {
   session?: SessionProjection | null;
   isEvening?: boolean;
   region?: { displayName: string } | null;
+  /**
+   * 這次提醒的情境。水上活動入口只在情境是水上、或有進行中的水中區間時
+   * 顯示（2026-09-03 裁決），而兩者都只存在於事件流裡——投影沒有這些欄位。
+   */
+  initialContext?: string;
+  contextEvents?: unknown[];
 }
 
 function mockServices(options: Options = {}): void {
   const {
     session: currentSession = null,
     isEvening = false,
-    region = null
+    region = null,
+    initialContext = "outdoor_general",
+    contextEvents = []
   } = options;
 
   vi.mocked(useWebAppServices).mockReturnValue({
@@ -130,7 +138,16 @@ function mockServices(options: Options = {}): void {
     // 2026-08-24：/reminder 併入首頁後，首頁也要讀事件流與產品 snapshot
     // （最近紀錄清單與「展開包裝標示」原地行為）。
     sessionEvents: {
-      stream: shallowReadonly(shallowRef([])),
+      // 事件流是物件不是陣列——`[]` 那份假資料讓水上活動入口的判斷讀不到
+      // `sessionStarted`／`contextEvents`（2026-09-03 補正）。
+      stream: shallowReadonly(
+        shallowRef({
+          sessionStarted: { initialContext },
+          contextEvents,
+          applicationEvents: [],
+          productSafetyEvents: []
+        })
+      ),
       ensureLoaded: vi.fn(async () => undefined),
       refresh: vi.fn(async () => undefined),
       dispose: vi.fn()
@@ -451,15 +468,48 @@ describe("HomePage", () => {
     /*
      * **階段三（2026-09-03）：水上活動的入口在首頁，不在記錄狀況的選單裡。**
      *
-     * 那張清單原本混著兩種東西：四種損耗把期限拉到事件發生的那一刻，
-     * 下水／離水則是開關一段水中區間、改由耐水標示決定期限。階段二把記錄
-     * 狀況降成補擦流程的出口之後更明顯——想記一筆下水得先走「記錄補擦 →
-     * 現在還不能補擦 → 從清單挑下水」，而下水根本不是補擦流程的一部分。
-     *
-     * 三條分開守：入口在、文字跟著狀態走、按下去帶對 kind。
+     * 2026-09-03 追加（使用者回報「選水上活動以外的也會出現」）：只在情境
+     * 是水上活動、或已經有進行中的水中區間時顯示。判斷邏輯本身在
+     * `waterActivityEntry.test.ts` 逐條測，這裡守的是「首頁真的接上了」。
      */
-    it("首頁有水上活動的入口", async () => {
-      mockServices({ session, region: { displayName: "臺北市 大安區" } });
+    it("水上情境時首頁有入口", async () => {
+      mockServices({
+        session,
+        region: { displayName: "臺北市 大安區" },
+        initialContext: "water_active"
+      });
+
+      const wrapper = await mountHome();
+
+      expect(wrapper.find(".home__water").exists()).toBe(true);
+    });
+
+    /* 使用者回報的那個情況。 */
+    it("一般戶外時不顯示入口", async () => {
+      mockServices({
+        session,
+        region: { displayName: "臺北市 大安區" },
+        initialContext: "outdoor_general"
+      });
+
+      const wrapper = await mountHome();
+
+      expect(wrapper.find(".home__water").exists()).toBe(false);
+    });
+
+    /*
+     * **反向：區間開著就一定要顯示。** 只守情境的話，臨時去玩水的人記完
+     * 下水之後就再也關不掉那段區間。
+     */
+    it("一般戶外但區間開著仍然顯示", async () => {
+      mockServices({
+        session,
+        region: { displayName: "臺北市 大安區" },
+        initialContext: "outdoor_general",
+        contextEvents: [
+          { contextType: "water_start", activityIntervalId: "iv-1" }
+        ]
+      });
 
       const wrapper = await mountHome();
 
@@ -472,19 +522,14 @@ describe("HomePage", () => {
      * 第一版讓按鈕跟著投影算出的 inWater 換文字（開始水上活動／已離水），
      * 實機一測就壞了：預設路徑（沒填包裝標示）的 eligibility 是
      * `identity_unconfirmed`，reducer 的水上區間分支要求 `eligible`，所以
-     * **投影裡完全沒有這段區間的痕跡**。按鈕會一直寫「開始水上活動」，
-     * 帶著 `water_start` 進去又因為已有區間而找不到選項——離水永遠按不到。
-     *
-     * 現在只送出「要處理水上活動」，由記錄狀況那一頁（拿得到
-     * `openWaterInterval`）決定給下水還是離水。
+     * **投影裡完全沒有這段區間的痕跡**。現在只送出「要處理水上活動」，
+     * 由記錄狀況那一頁決定給下水還是離水。
      */
     it("入口文字不跟著狀態變", async () => {
       mockServices({
-        session: {
-          ...session,
-          zones: [{ ...zone, reasonCodes: ["WATER_RESISTANCE_UNKNOWN"] }]
-        },
-        region: { displayName: "臺北市 大安區" }
+        session,
+        region: { displayName: "臺北市 大安區" },
+        initialContext: "water_active"
       });
 
       const wrapper = await mountHome();
@@ -494,7 +539,11 @@ describe("HomePage", () => {
     });
 
     it("按下去帶著 kind 進記錄狀況", async () => {
-      mockServices({ session, region: { displayName: "臺北市 大安區" } });
+      mockServices({
+        session,
+        region: { displayName: "臺北市 大安區" },
+        initialContext: "water_active"
+      });
 
       const wrapper = await mountHome();
       await wrapper.get(".home__water").trigger("click");

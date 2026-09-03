@@ -16,6 +16,7 @@ import SessionEndControl from "../components/session/SessionEndControl.vue";
 import { useCurrentTime } from "../composables/useCurrentTime";
 import { buildHomeReminderClockPresentation } from "../features/reminder/homeReminderClockPresentation";
 import { buildReminderPresentation } from "../features/reminder/reminderPresentation";
+import { showsWaterActivityEntry } from "../features/reminder/waterActivityEntry";
 import { useWebAppServices } from "../app/injection";
 import {
   resolveActionDestination,
@@ -191,6 +192,16 @@ const headlineNote = computed<string | null>(() => {
  * 那一頁的 controller 才拿得到的東西。所以這裡只送出「使用者要處理水上
  * 活動」，由那一頁決定現在該給下水還是離水。
  */
+/**
+ * 只在情境是水上活動、或已經有進行中的水中區間時顯示（2026-09-03 裁決）。
+ *
+ * 使用者回報「選水上活動以外的也會出現」。判斷從事件流來，不是投影——
+ * 情境與進行中的區間投影裡都沒有，理由見 `waterActivityEntry.ts`。
+ */
+const showsWaterEntry = computed(() =>
+  showsWaterActivityEntry(sessionEvents.stream.value)
+);
+
 function handleWaterActivity(): void {
   void router.push({ name: "reminder-report", query: { kind: "water" } });
 }
@@ -437,6 +448,7 @@ function handleEndSession(): void {
         文字連結不是按鈕：它不是「你現在該做的事」，是狀態改變時才用得到。
       -->
       <button
+        v-if="showsWaterEntry"
         class="text-link home__water"
         data-typography-role="body"
         type="button"
