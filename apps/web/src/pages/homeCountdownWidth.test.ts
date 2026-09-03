@@ -72,3 +72,81 @@ describe("結束鈕不再佔走倒數的寬度", () => {
     expect(backdrop).toContain("position: fixed;");
   });
 });
+
+/**
+ * 衛教文章頁的大標（2026-09-03，使用者：「大標不要提早換行」「去除大標上面
+ * 的小字」）。
+ *
+ * 同一個病的第二個病例：返回鈕原本與標題並排（`minmax(0, 1fr) auto`），
+ * 大標因此少掉一個按鈕的寬度就開始折行。
+ */
+describe("衛教文章頁的大標拿得到整個寬度", () => {
+  const ARTICLE = strip(
+    readFileSync("apps/web/src/pages/education/EducationArticlePage.vue", "utf8")
+  );
+
+  /** 這裡傳進來的都是單純的 class 名，只需要跳脫開頭那個點。 */
+  function articleRule(className: string): string {
+    const match = new RegExp(`\\.${className} \\{([^}]*)\\}`).exec(ARTICLE);
+    expect(match, `找不到 .${className} 的規則`).not.toBeNull();
+    return match![1]!;
+  }
+
+  it("標題區不再是「內容一欄、箭頭一欄」", () => {
+    expect(articleRule("education-article-header")).not.toContain(
+      "grid-template-columns: minmax(0, 1fr) auto;"
+    );
+  });
+
+  /*
+   * 標題不再包一層 `display: grid` 的 div：grid 容器不會與 float 重疊，
+   * 而且那層在拿掉 eyebrow 之後只剩一個 h1，沒有存在的理由。
+   */
+  it("標題不再包一層 grid", () => {
+    expect(ARTICLE).not.toContain("education-article-header__main");
+  });
+
+  /*
+   * **反向：返回鈕必須還在。** 只守上面兩條的話，把 IconButton 整個刪掉
+   * 也是綠的——那時這一頁就沒有回上一層的出口了。
+   */
+  it("返回鈕仍然在，而且維持在右上", () => {
+    expect(ARTICLE).toContain('icon="tool-arrow-left"');
+    expect(articleRule("education-article-header__back")).toContain(
+      "float: inline-end;"
+    );
+  });
+
+  /*
+   * float 只影響**原始碼上排在它後面**的內容，所以返回鈕必須排在 h1 之前。
+   * 順序寫反的話標題不會繞開它，畫面上會直接壓在一起。
+   */
+  it("返回鈕排在標題之前", () => {
+    expect(ARTICLE.indexOf("education-article-header__back")).toBeLessThan(
+      ARTICLE.indexOf("page-heading__title")
+    );
+  });
+
+  /*
+   * 標題上方的 `primaryQuestion` 拿掉——讀者是從分類頁的卡片點進來的，
+   * 那張卡正面就寫著這個問題。
+   */
+  it("標題上方不再重複那個問題", () => {
+    expect(ARTICLE).not.toContain("article.primaryQuestion");
+  });
+
+  /*
+   * **反向：資料沒有被刪。** 分類頁的卡片仍然顯示它——那裡它是還沒讀過的
+   * 資訊，這裡不是。
+   */
+  it("分類頁的卡片仍然顯示那個問題", () => {
+    const category = strip(
+      readFileSync(
+        "apps/web/src/pages/education/EducationCategoryPage.vue",
+        "utf8"
+      )
+    );
+
+    expect(category).toContain("article.primaryQuestion");
+  });
+});

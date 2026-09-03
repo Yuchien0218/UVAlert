@@ -67,14 +67,24 @@ const relatedArticles = computed(() =>
       螢幕閱讀器讀到時要知道會回到哪裡。
     -->
     <header class="education-article-header">
-      <div class="education-article-header__main">
-        <p class="page-heading__eyebrow">{{ article.primaryQuestion }}</p>
-        <h1 class="page-heading__title" data-typography-role="page-title">
-          {{ article.title }}
-        </h1>
-      </div>
+      <!--
+        2026-09-03：拿掉標題上方的 `primaryQuestion`（使用者要求）。
 
+        讀者是從分類頁的卡片點進來的，**那張卡片正面就寫著這個問題**
+        （`EducationCategoryPage` 仍然顯示它）——落地後在標題上方再看一次
+        是同一句話說兩遍，而且它把大標往下推了一整行。
+
+        資料沒有刪：`primaryQuestion` 仍是 AEO 欄位（`docs/education/README`
+        第 121 行），分類頁的卡片與公開靜態站（`generate-public-site.mjs`）
+        都還在用——那兩個地方它是「還沒讀過的資訊」，這裡不是。
+      -->
+      <!--
+        返回鈕排在標題**之前**，因為它是浮動的——CSS 的 float 只影響原始碼
+        上排在它後面的內容。閱讀順序上也說得通：這顆是這一頁的逃生出口，
+        而且可及名稱帶著目的地（「返回了解今天的 UV」）。
+      -->
       <IconButton
+        class="education-article-header__back"
         icon="tool-arrow-left"
         :label="`返回${category?.title ?? '防曬衛教'}`"
         @click="
@@ -85,6 +95,16 @@ const relatedArticles = computed(() =>
           )
         "
       />
+
+      <!--
+        標題不再包一層 div：那層是 `display: grid`，而 **grid 容器不會與
+        float 重疊**——它會整個縮到浮動元素旁邊，於是每一行都被壓窄，等於
+        float 白做（2026-09-03 實測：三行都是 280px）。拿掉之後 h1 是普通
+        區塊，只有被按鈕擋住的那幾行會縮短。
+      -->
+      <h1 class="page-heading__title" data-typography-role="page-title">
+        {{ article.title }}
+      </h1>
       <!--
         2026-08-31：拿掉這裡的 summary。
 
@@ -150,17 +170,35 @@ const relatedArticles = computed(() =>
 }
 
 /* 標題群組在左、返回鈕在右上角同一列；下方兩列橫跨兩欄。 */
+/*
+ * 返回鈕改用 float（2026-09-03，使用者回報大標「提早換行」並圈出右邊那塊
+ * 空白）。
+ *
+ * 走過的三個版本，記下來免得有人再繞一次：
+ *
+ * 1. `minmax(0, 1fr) auto` 兩欄——箭頭只有 44px 高，卻讓**整個標題區**
+ *    永遠少掉一個按鈕的寬度，每一行都提早折
+ * 2. 重疊（首頁倒數用的那招）——**這裡不行**：首頁第一行是很短的 eyebrow，
+ *    這一頁第一行就是大標，而標題最長 33 個字（「SPF 30 和 SPF 50 差多少？
+ *    數字越高不代表可以越久不補」），第一行一定壓在按鈕底下
+ * 3. 箭頭自成一列——大標每一行都拿得到整個寬度，但**違反 2026-08-31 的
+ *    裁決**：`educationLayout.test.ts` 明文守著「返回鈕必須跟標題同一列」，
+ *    理由是那次「叉叉獨佔一列」的跑版事故
+ *
+ * 所以採用 float：箭頭留在標題那一列（不多佔垂直空間），只有被它擋住的
+ * 那一兩行會縮短，其餘拿回整個寬度。第一行仍然讓開 56px——那是箭頭實際
+ * 佔的位置，除非把它移走，否則消不掉。
+ *
+ * 注意標題**不能**再包一層 `display: grid` 的 div：grid 容器不會與 float
+ * 重疊，會整個縮到旁邊，等於 float 白做（實測三行都變成 280px）。
+ */
 .education-article-header {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
-  align-items: start;
-  gap: var(--space-3);
   max-width: 44rem;
 }
 
-.education-article-header__main {
-  display: grid;
-  gap: var(--space-3);
+.education-article-header__back {
+  float: inline-end;
+  margin-inline-start: var(--space-3);
 }
 
 .education-article-header .page-heading__title {

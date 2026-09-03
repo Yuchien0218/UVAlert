@@ -39,14 +39,30 @@ describe("返回改成右上角的圖示鈕", () => {
   /*
    * 返回鈕必須跟標題同一列——這正是 2026-08-31「叉叉獨佔一列」那三個案例
    * 的根因（`closeButtonLayout.test.ts` 守的是同一件事，只是那裡守的是
-   * `<header>` 裡只有 IconButton 的形狀）。這裡守版型：兩欄。
+   * `<header>` 裡只有 IconButton 的形狀）。
+   *
+   * **2026-09-03：這條原本寫死「兩欄」，現在改成守意圖。** 分類頁維持兩欄；
+   * 文章頁改用 float——兩欄會讓**整個標題區**永遠少掉一個按鈕的寬度，大標
+   * 每一行都提早折（使用者回報並圈出右邊那塊空白）。float 讓箭頭留在同一
+   * 列、只有被它擋住的那幾行縮短。
+   *
+   * 兩種做法都滿足原本的意圖：箭頭沒有自己獨佔一列。
    */
-  it("標題列是兩欄，返回鈕不獨佔一列", () => {
+  it("分類頁的標題列是兩欄", () => {
     expect(read(CATEGORY)).toMatch(
       /\.education-heading \{[^}]*grid-template-columns:\s*minmax\(0, 1fr\) auto;/
     );
-    expect(read(ARTICLE)).toMatch(
-      /\.education-article-header \{[^}]*grid-template-columns:\s*minmax\(0, 1fr\) auto;/
+  });
+
+  it("文章頁的返回鈕浮動在標題那一列，不獨佔一列", () => {
+    const article = read(ARTICLE);
+
+    expect(article).toMatch(
+      /\.education-article-header__back \{[^}]*float:\s*inline-end;/
+    );
+    // 反向：不可以改回「自己一列」——那正是 2026-08-31 的跑版事故。
+    expect(article).not.toMatch(
+      /\.education-article-header \{[^}]*grid-template-columns:\s*minmax\(0, 1fr\);/
     );
   });
 
