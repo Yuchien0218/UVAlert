@@ -146,15 +146,21 @@ const relatedArticles = computed(() =>
       <h2 id="related-title" data-typography-role="section-title">
         同主題延伸閱讀
       </h2>
-      <nav class="education-related-list" aria-label="同主題文章">
-        <RouterLink
-          v-for="related in relatedArticles"
-          :key="related.slug"
-          class="text-link"
-          :to="educationArticlePath(related.slug)"
-        >
-          {{ related.title }}
-        </RouterLink>
+      <!--
+        2026-09-03：改成真的 `<ul>`（使用者要求前面加圓點）。
+        除了圓點之外，`nav > ul` 也讓螢幕閱讀器報得出「幾個項目」。
+      -->
+      <nav aria-label="同主題文章">
+        <ul class="education-related-list">
+          <li v-for="related in relatedArticles" :key="related.slug">
+            <RouterLink
+              class="text-link"
+              :to="educationArticlePath(related.slug)"
+            >
+              {{ related.title }}
+            </RouterLink>
+          </li>
+        </ul>
       </nav>
     </section>
   </article>
@@ -214,11 +220,16 @@ const relatedArticles = computed(() =>
  * 下面，讀起來像副標；靠右之後它退到頁面邊緣，跟返回鈕同一側，讀者的
  * 視線不會把它算進正文。
  */
-.education-article-meta {
-  grid-column: 1 / -1;
-  justify-self: end;
-  text-align: end;
-}
+/*
+ * 「最後查閱」靠左（2026-09-03，使用者要求）。
+ *
+ * **這是推翻 2026-09-01 的「靠右」。** 當時的理由是「它是文章的後設資料，
+ * 靠左會讀起來像副標」——但標題上方的問句拿掉之後，靠右反而變成整個標題
+ * 區唯一一個靠右的東西，比副標更突兀。
+ *
+ * `grid-column`／`justify-self` 一併刪掉：標題列改用 float 之後這個 header
+ * 已經不是 grid，那兩行是失效的殘留。
+ */
 
 .education-article-meta,
 .education-card-kicker {
@@ -281,6 +292,19 @@ const relatedArticles = computed(() =>
 
 .education-article-body :deep(li + li) {
   margin-top: var(--space-2);
+}
+
+/*
+ * 資料來源清單小一階（2026-09-03，使用者要求）。
+ *
+ * **靠「這是一份外部參考連結」來認，不是靠位置。** 產生器沒有給這份清單
+ * 任何 class，而全文 67 個 `<ul>` 裡帶 `target="_blank"` 的正好是 48 個
+ * ——等於 48 篇文章各一份資料來源，沒有第二種東西長這樣（2026-09-03 實測）。
+ *
+ * 內文的清單維持內文字級：那些是文章在講的內容，資料來源是查證用的附錄。
+ */
+.education-article-body :deep(ul:has(a[target="_blank"])) {
+  font-size: var(--font-size-supporting);
 }
 
 .education-article-body :deep(a) {
@@ -364,8 +388,18 @@ const relatedArticles = computed(() =>
   font-size: var(--font-size-section-title);
 }
 
+/*
+ * 2026-09-03：加圓點、字級小一階（使用者要求）。
+ *
+ * 這是文章結束後的「還可以看什麼」，不是正文——比內文小一階（supporting）
+ * 讓它退到正文後面，圓點則讓它讀起來是一份清單而不是幾條散落的連結。
+ */
 .education-related-list {
   display: grid;
   gap: var(--space-3);
+  margin: 0;
+  padding-inline-start: var(--space-6);
+  font-size: var(--font-size-supporting);
+  list-style: disc;
 }
 </style>

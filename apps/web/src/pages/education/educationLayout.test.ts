@@ -84,9 +84,23 @@ describe("衛教分類頁的分隔線", () => {
 });
 
 describe("文章頁的「最後查閱」", () => {
-  it("靠右", () => {
-    expect(read(ARTICLE)).toMatch(
+  /*
+   * **2026-09-03：改回靠左（推翻 2026-09-01 的「靠右」）。**
+   *
+   * 當時靠右的理由是「它是後設資料，靠左會讀起來像副標」。但標題上方的
+   * 問句拿掉之後，靠右變成整個標題區唯一一個靠右的東西，比副標更突兀。
+   *
+   * `justify-self`／`grid-column` 也一併刪掉——標題列改用 float 之後這個
+   * header 已經不是 grid，那兩行是失效的殘留。
+   */
+  it("靠左，而且不再留 grid 的殘留宣告", () => {
+    const article = read(ARTICLE);
+
+    expect(article).not.toMatch(
       /\.education-article-meta \{[^}]*justify-self:\s*end;/
+    );
+    expect(article).not.toMatch(
+      /\.education-article-meta \{[^}]*text-align:\s*end;/
     );
   });
 
@@ -112,6 +126,46 @@ describe("衛教首頁的分類卡說明", () => {
   it("說明文字用 text-wrap: balance 平衡斷行", () => {
     expect(read(INDEX)).toMatch(
       /\.education-category-card small \{[^}]*text-wrap:\s*balance;/
+    );
+  });
+});
+
+/**
+ * 2026-09-03（使用者要求）：延伸閱讀與資料來源「小一個字級、前面加圓點」。
+ *
+ * 兩者都是文章讀完之後的附錄——一個是「還可以看什麼」，一個是「這些說法
+ * 出自哪裡」。與正文同一個字級會讓它們讀起來跟內文一樣重要。
+ */
+describe("附錄的字級與項目符號", () => {
+  it("延伸閱讀是真的清單，有圓點且小一階", () => {
+    const article = read(ARTICLE);
+
+    // 真的 <ul>，不是一堆並排的連結——螢幕閱讀器才報得出項目數。
+    expect(article).toContain('<ul class="education-related-list">');
+    expect(article).toMatch(
+      /\.education-related-list \{[^}]*font-size: var\(--font-size-supporting\);/
+    );
+    expect(article).toMatch(/\.education-related-list \{[^}]*list-style: disc;/);
+  });
+
+  /*
+   * 資料來源靠「這是一份外部參考連結」來認，不是靠位置——產生器沒有給它
+   * class，而全文 67 個 `<ul>` 裡帶 `target="_blank"` 的正好 48 個，等於
+   * 48 篇文章各一份（2026-09-03 實測）。
+   */
+  it("資料來源小一階", () => {
+    expect(read(ARTICLE)).toMatch(
+      /:deep\(ul:has\(a\[target="_blank"\]\)\) \{[^}]*font-size: var\(--font-size-supporting\);/
+    );
+  });
+
+  /*
+   * **反向：正文的清單維持內文字級。** 只守上面那條的話，把整個
+   * `.education-article-body` 的字級調小也是綠的——那時整篇文章都變小了。
+   */
+  it("正文維持內文字級", () => {
+    expect(read(ARTICLE)).toMatch(
+      /\.education-article-body \{[^}]*font-size: var\(--font-size-body\);/
     );
   });
 });
