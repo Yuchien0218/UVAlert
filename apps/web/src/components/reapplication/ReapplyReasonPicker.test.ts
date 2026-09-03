@@ -1,4 +1,5 @@
 // @vitest-environment happy-dom
+import { readFileSync } from "node:fs";
 import { mount } from "@vue/test-utils";
 import { describe, expect, it } from "vitest";
 import type { ReapplyReason } from "../../features/reapplication/createReapplicationController";
@@ -51,6 +52,42 @@ describe("ReapplyReasonPicker", () => {
     expect(mountPicker().find(".choice-grid").exists()).toBe(true);
   });
 
+  /*
+   * **階段二（2026-09-03）：「現在還不能補擦」是這條路的出口。**
+   *
+   * 首頁的「剛才有流汗嗎？」提問卡已移除——`2026-09-02-event-means-reapply.md`
+   * 的原則是「遇到了事件＝需要補擦」，所以記錄狀況從並列的目的地降成這裡的岔出。
+   */
+  it("提供「現在還不能補擦」的出口", () => {
+    const exit = mountPicker().get(".reason-picker__exit");
+
+    expect(exit.text()).toContain("現在還不能補擦");
+  });
+
+  /*
+   * 出口是文字連結，不是 `button--quiet`。
+   *
+   * 2026-08-31 的裁決：次要動作用文字連結，實心按鈕是主行動的語彙。
+   * 這裡的語意是「這條路不適用」，不是一個與補擦並列的選擇。
+   */
+  it("出口是文字連結，不是按鈕", () => {
+    const exit = mountPicker().get(".reason-picker__exit");
+
+    expect(exit.classes()).toContain("text-link");
+    expect(exit.classes()).not.toContain("button--quiet");
+    expect(exit.classes()).not.toContain("button");
+  });
+
+  /* 元件不換頁，只說「使用者想離開」；導航屬於 ReapplyPage。 */
+  it("按下出口只發出事件，不自己導航", async () => {
+    const wrapper = mountPicker();
+
+    await wrapper.get(".reason-picker__exit").trigger("click");
+
+    expect(wrapper.emitted("exit")).toHaveLength(1);
+    expect(wrapper.findComponent({ name: "RouterLink" }).exists()).toBe(false);
+  });
+
   it("選了原因會送出對應的值", async () => {
     const wrapper = mountPicker();
     const sweat = wrapper
@@ -65,5 +102,27 @@ describe("ReapplyReasonPicker", () => {
 
     const emitted = wrapper.emitted("update:modelValue") as unknown[][];
     expect(emitted.at(-1)?.[0]).toBe("heavy_sweat");
+  });
+});
+
+/*
+ * 出口的另一半：`ReapplyPage` 必須把它接到「記錄狀況」。
+ *
+ * 掛載整頁要造一份很大的 services mock，所以這裡掃原始碼。依 CLAUDE.md
+ * 的兩個坑：先剝註解（否則註解裡提到 `reminder-report` 就能讓它假通過），
+ * 並比對**完整的屬性與宣告**，不是名字片段（`@exit` 改名就該紅）。
+ */
+describe("ReapplyPage 接住出口", () => {
+  const source = readFileSync("apps/web/src/pages/ReapplyPage.vue", "utf8")
+    .replace(/<!--[\s\S]*?-->/g, "")
+    .replace(/\/\*[\s\S]*?\*\//g, "")
+    .replace(/^\s*\/\/.*$/gm, "");
+
+  it("把 exit 接到 goToReport", () => {
+    expect(source).toContain('@exit="goToReport"');
+  });
+
+  it("goToReport 導向記錄狀況", () => {
+    expect(source).toContain('router.push({ name: "reminder-report" })');
   });
 });

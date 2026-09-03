@@ -22,6 +22,14 @@ import type { ReapplyReason } from "../../features/reapplication/createReapplica
 
 const model = defineModel<ReapplyReason | null>({ required: true });
 
+/**
+ * 「現在還不能補擦」的出口（階段二，2026-09-03）。
+ *
+ * 元件本身不換頁——導航屬於頁面。這裡只說「使用者想離開這條路」，
+ * 由 `ReapplyPage` 決定去哪。
+ */
+defineEmits<{ exit: [] }>();
+
 interface Choice {
   value: ReapplyReason | null;
   label: string;
@@ -58,6 +66,19 @@ const CHOICES: Choice[] = [
         </span>
       </label>
     </div>
+
+    <!--
+      階段二：記錄狀況從首頁的提問卡降級成這裡的出口。
+      文字連結不是按鈕——這是「這條路不適用」的離開，不是一個並列的選擇。
+    -->
+    <button
+      class="text-link reason-picker__exit"
+      data-typography-role="body"
+      type="button"
+      @click="$emit('exit')"
+    >
+      現在還不能補擦，先記錄狀況
+    </button>
   </fieldset>
 </template>
 
@@ -76,5 +97,11 @@ const CHOICES: Choice[] = [
 
 .reason-picker__label svg {
   flex: none;
+}
+
+/* 出口貼齊卡片左緣，並保有可點區高度。 */
+.reason-picker__exit {
+  justify-self: start;
+  min-height: var(--tap-target);
 }
 </style>

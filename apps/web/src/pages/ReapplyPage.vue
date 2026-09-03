@@ -41,6 +41,15 @@ function cancel(): void {
 function finish(): void {
   void router.push({ name: "home" });
 }
+/**
+ * 「現在還不能補擦」的出口（階段二，2026-09-03）。
+ *
+ * 記錄狀況不再是首頁上與補擦並列的目的地，而是這條路走不通時的岔出——
+ * 「遇到了事件＝需要補擦」是主線，「知道發生了但現在補不了」才是例外。
+ */
+function goToReport(): void {
+  void router.push({ name: "reminder-report" });
+}
 function zoneNames(zoneIds: string[]): string {
   return zoneIds
     .map((zoneId) => {
@@ -129,6 +138,7 @@ function zoneNames(zoneIds: string[]): string {
       <ReapplyReasonPicker
         :model-value="reapplication.reason.value"
         @update:model-value="reapplication.setReason"
+        @exit="goToReport"
       />
       <ReapplicationZoneSelector
         :zones="reapplication.session.value.zones"
