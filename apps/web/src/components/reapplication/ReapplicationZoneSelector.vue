@@ -25,10 +25,9 @@ const emit = defineEmits<{
     class="zone-selector question-card app-card"
     :aria-describedby="error ? 'zone-selection-error' : undefined"
   >
-    <legend>這次實際補擦哪些部位？</legend>
-    <p class="question-card__helper">
-      已預選到期或快到補擦時間的部位，確認後才會更新。
-    </p>
+    <legend>補擦哪些部位？</legend>
+    <!-- 「確認後才會更新」移到頁首說一次就好（2026-09-03）。 -->
+    <p class="question-card__helper">已預選到期或快到補擦時間的部位。</p>
     <!--
       2026-09-03：改用共用的 `.button-group`。這兩顆是短標籤的成對動作，
       跟首頁「繼續設定／重新開始」是同一種形狀；原本的 `.mode-actions`
