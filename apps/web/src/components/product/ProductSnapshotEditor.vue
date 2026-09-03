@@ -193,7 +193,18 @@ const waterHasClaim = computed<string>({
       `IconLead`（40px，圖示與標題同一列）是這個問題既有的答案：圖示與
       標題平起平坐，說明、摘要與按鈕回到整張卡的寬度。
     -->
-    <section class="session-product app-card">
+    <!--
+      2026-09-03（待辦第三＋五項）：標題、四題與 SPF／PA **合成一張卡**。
+
+      改動前這裡是三張各自獨立的 `app-card`，其中第一張**沒有任何控制項**
+      ——只有圖示、eyebrow、標題與一句說明，卻佔了一張完整的卡。三塊講的
+      都是同一件事（這罐的包裝標示），分成三張讀起來像三個不相干的區塊。
+
+      卡片本身 `padding: 0`，各區自己出內距：四題那一段的分隔線要橫貫整張
+      卡，卡片有內距的話線會縮排一截，看起來像沒對齊。
+    -->
+    <section class="label-card app-card">
+      <div class="session-product">
       <IconLead icon="feature-session-product">
         <span>
           <span class="session-product__eyebrow">{{ eyebrow }}</span>
@@ -205,7 +216,7 @@ const waterHasClaim = computed<string>({
           {{ description }}
         </p>
       </div>
-    </section>
+      </div>
 
     <!--
       2026-09-01（使用者裁決：甲）：四題各佔一列，點開才作答。
@@ -217,7 +228,7 @@ const waterHasClaim = computed<string>({
       每一列是 `aria-expanded` ＋ `aria-controls` 的展開控制，chevron 換
       圖示 name 而不是 rotate（DESIGN.md 第五節的展開收合契約）。
     -->
-    <div class="label-questions app-card">
+      <div class="label-questions">
       <div class="label-question">
         <button
           class="label-question__row"
@@ -608,7 +619,19 @@ const waterHasClaim = computed<string>({
           </fieldset>
         </div>
       </template>
-    </div>
+      </div>
+
+      <!--
+        2026-09-03：SPF／PA 收進同一張卡（待辦第五項）。
+
+        它原本自己是一張 `app-card`，那是 2026-08-31 用 slot 把它從「暱稱」
+        卡搬過來時的最小改動，不是版面裁決——它跟上面四題講的是同一件事。
+
+        呼叫端那句「這兩欄不影響補擦倒數」**必須留著**：同一張卡裡上面四題
+        會影響倒數、下面兩欄不會，不講清楚是安全相關的誤解，不只是版面。
+      -->
+      <slot name="identity" />
+    </section>
 
     <aside
       v-if="sunscreenFields && value.claimAnswer !== 'yes'"
@@ -628,17 +651,6 @@ const waterHasClaim = computed<string>({
       </div>
     </aside>
 
-    <!--
-      2026-08-31（選項丙）：純辨識用的欄位（SPF／PA 數值）由呼叫端塞進來。
-      它們**不是**「會影響倒數」的那一組——所以放在所有問題之後，由呼叫端
-      自己標明不影響倒數。收在這裡的理由是：SPF 這個字原本在兩張卡各出現
-      一次（這裡問「有沒有標示」、暱稱卡填「數字是多少」），畫面上看不出
-      差別。
-
-      2026-09-01：不再跟著收合。四題改成逐題展開之後沒有「整組收合」這個
-      狀態了，而這兩欄是兩個輸入框、常駐的成本很小。
-    -->
-    <slot name="identity" />
   </div>
 </template>
 
@@ -692,9 +704,22 @@ const waterHasClaim = computed<string>({
  * 疊在一起會讓「這是四件事」變成「這是四個區塊」，而它們其實是同一份
  * 包裝標示的四個欄位。
  */
+/*
+ * 合併後的整張卡（2026-09-03）。
+ *
+ * `padding: 0` 是刻意的：四題那一段的分隔線要橫貫整張卡，卡片自己有內距
+ * 的話線會兩端各縮排 20px，看起來像沒對齊。各區自己出內距。
+ */
+.label-card {
+  display: grid;
+  padding: 0;
+}
+
 .label-questions {
   display: grid;
   padding: 0;
+  /* 與上方標題區之間的分隔——同一張卡裡的分段，不是另一張卡。 */
+  border-top: 1px solid var(--border-subtle);
 }
 
 .label-question + .label-question {

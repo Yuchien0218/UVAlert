@@ -124,6 +124,7 @@
 | 階段二：首頁「剛才有流汗嗎？」提問卡移除，記錄狀況降成補擦流程裡的出口「現在還不能補擦，先記錄狀況」；它在真的是主行動時仍是主 CTA | `pages/HomePage.vue`、`components/reapplication/ReapplyReasonPicker.vue`、`pages/ReapplyPage.vue`（＋ 7 條守門） | 已完成（2026-09-03） |
 | 入水時間的錯誤從頁尾搬到欄位旁（紅框＋警示文字＋`aria-describedby`＋捲動 focus），說明文字改成先講「請選擇實際入水時間」——初始兩顆都沒選時卡片上原本沒有任何線索；`.time-picker--invalid`／`__error` 一併移到 app.css 給兩個選擇器共用 | `WaterStartPicker.vue`、`SetupPage.vue`、`ApplicationTimePicker.vue`、`app.css`（＋ 6 條守門） | 已完成（2026-09-03） |
 | 待辦第一項：`.time-option` 的文字改置中（三個時間選擇器共用），並在 `DESIGN.md` 第五節訂下「獨立按鈕置中／列靠左」的判準 | `app.css`、`DESIGN.md`、`assets/buttonTextAlignment.test.ts`（＋ 12 條守門） | 已完成（2026-09-03） |
+| 待辦第三＋五項：包裝標示的三張卡合成一張（純標題卡＋四題＋SPF／PA），未確認標示的警示維持卡外獨立 | `ProductSnapshotEditor.vue`、`GearForm.vue`（＋ 9 條守門） | 已完成（2026-09-03） |
 | 排版稽核第 2 批（只做低風險、與既有裁決不衝突的）：§7.1 段落鄰近律、§7.2 審查卡文字層級、§7.3 blockquote 間距、§6.1 「裝置測試」空卡併進「通知傳送說明」卡 | `DataSettingsPage.vue`、`ContentUnderReview.vue`、`EducationArticlePage.vue`、`NotificationSettingsPage.vue`（＋ test）、`2026-08-15-…-current.md` §通知設定頁 | 已完成（2026-09-02，PR #100）——§1／§5／§6.2–6.4 不採用、§2／§3／§4／§7.4 待實作，狀態看 `2026-09-02-ui-layout-consistency-audit.md` 文末 |
 
 ### 為什麼裝備詳情值得單獨記一筆

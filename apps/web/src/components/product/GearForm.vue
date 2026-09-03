@@ -437,7 +437,7 @@ async function remove(): Promise<void> {
         填寫」，「不影響倒數」由這一組自己標明。
       -->
       <template #identity>
-        <div v-if="showSunscreenFields" class="app-card identity-fields">
+        <div v-if="showSunscreenFields" class="identity-fields">
           <p class="field-helper">
             下面兩欄只用來認出是哪一罐，<strong>不影響補擦倒數</strong>。
           </p>
@@ -926,10 +926,16 @@ p {
  * 表面把「純辨識」跟上面「會影響倒數」的問題分開，否則它們會讀成
  * 同一組。
  */
+/*
+ * 2026-09-03：不再是自己一張卡，改成包裝標示那張卡的最後一段
+ * （待辦第五項）。所以留著內距，但改用上緣一條線跟四題分開——同一張卡
+ * 裡的分段，不是另一張卡。
+ */
 .identity-fields {
   display: grid;
   gap: var(--space-3);
   padding: var(--card-padding);
+  border-top: 1px solid var(--border-subtle);
 }
 
 /*

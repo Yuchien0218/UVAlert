@@ -196,3 +196,29 @@ describe("SPF 欄位的提示", () => {
     expect(code.match(/parseSpfInput\(spfInput\.value\)/g)?.length).toBe(2);
   });
 });
+
+/*
+ * 2026-09-03（待辦第五項）：SPF／PA 併進包裝標示卡。
+ */
+describe("SPF／PA 是包裝標示卡的一段，不是另一張卡", () => {
+  it("不再自己套 app-card", () => {
+    expect(code).toContain('class="identity-fields"');
+    expect(code).not.toContain('class="app-card identity-fields"');
+  });
+
+  it("用上緣一條線跟四題分開", () => {
+    const rule = /\.identity-fields \{[^}]*\}/.exec(code)?.[0];
+
+    expect(rule, "找不到 .identity-fields 規則").toBeDefined();
+    expect(rule).toContain("border-top: 1px solid var(--border-subtle);");
+  });
+
+  /*
+   * **這句不能刪。** 同一張卡裡上面四題會影響倒數、下面兩欄不會——
+   * 不講清楚是安全相關的誤解，不只是版面問題。合併之後兩者靠得更近，
+   * 這句話反而更重要。
+   */
+  it("保留「不影響補擦倒數」那句", () => {
+    expect(code).toContain("不影響補擦倒數");
+  });
+});
