@@ -193,7 +193,6 @@ components:
     height: 8px
     rounded: "{rounded.xs}"
   stat-figure:
-    textColor: "{colors.ink}"
     typography: "{typography-cjk.readout}"
   status-card-tracking:
     backgroundColor: "color-mix(in srgb, {colors.status-tracking} 12%, {colors.canvas})"
@@ -717,6 +716,11 @@ Noto Serif TC 是標題的唯一字型，沒有第二層自托管備援——載
 沒有可信期限時**不畫進度條**，而不是畫 0%——空的進度條會被讀成「時間已經用完」。
 
 **`stat-figure`** — 資料讀數樣式。等寬字、`tabular-nums`、字重 600、負字距。用於倒數分鐘、UV 指數、時間戳記。`--display` 變體放大到 `clamp(3rem, 18vw, 4.75rem)` 供主倒數使用。
+
+**顏色與行高由所在的那句話決定，不是這個 class 決定**（2026-09-04 更正）。原本它寫死 `{colors.ink}` 與 `line-height: 0.95`，於是五日預報的「更新時間 9/4 00:15」比同一行的「更新時間」深了一階（實測 `rgb(46,41,37)` 對 `rgb(111,90,84)`），看起來像另一個元件掉進來；0.95 的行高則會把行內讀數所在的那一行行盒縮短。
+
+- **顏色**：需要特定顏色的地方自己指定——首頁 UV 讀數依風險等級上色就是這樣寫的。其餘使用點的父層本來就是 `{colors.ink}`，改動後渲染結果不變
+- **行高**：0.95 移到 `--display`。獨立的大讀數要壓掉數字上下的空隙；行內讀數不要
 
 **`status-card`** ＋ 五種變體 — 用柔和底色傳達急迫程度，純色塊填滿、無左側色條、無陰影。圓角 `{rounded.lg}`，內距 16px。
 
