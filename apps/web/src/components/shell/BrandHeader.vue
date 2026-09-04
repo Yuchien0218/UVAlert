@@ -99,10 +99,18 @@ const uvLabel = computed(() =>
    */
 }
 
+/*
+ * 2026-09-04：補上 `min-height`。
+ *
+ * 這是「回首頁」的連結，每一頁都有，但它的高度一直等於裡面那張 1.6rem
+ * 的 lockup——**實測 26px**，遠低於 `DESIGN.md` 訂的 44px。Logo 只有 26px
+ * 高不必改（那是視覺份量的裁決），但**可以按的範圍**要撐到 44。
+ */
 .brand-header__brand {
   display: inline-flex;
   align-items: center;
   gap: var(--space-3);
+  min-height: var(--tap-target);
   color: var(--text-primary);
   text-decoration: none;
 }
@@ -137,6 +145,7 @@ const uvLabel = computed(() =>
 .brand-header__set-region {
   display: inline-flex;
   align-items: center;
+  min-height: var(--tap-target);
   padding: var(--space-3) 0;
   color: var(--text-secondary);
   font-size: var(--font-size-caption);
@@ -149,12 +158,16 @@ const uvLabel = computed(() =>
  *
  * 顏色不是唯一的載體——等級名稱（低量級／中量級…）本身就是文字，
  * 灰階或色覺差異下仍讀得出來，符合本檔案上方對狀態點的同一條規則。
- * 觸控目標靠 padding 撐到 44px，不寫 min-height（見 DESIGN.md 第十節
- * 2026-08-22 更正：元件覆寫尺寸會蓋掉共用 token）。
+ *
+ * **2026-09-04 更正**：這裡原本寫「觸控目標靠 padding 撐到 44px，不寫
+ * min-height」——**實測只有 42px**（12＋18＋12）。那句話從一開始就不成立。
+ * 改成寫 `min-height: var(--tap-target)`：它引用的正是共用 token，不是
+ * 元件自己發明一個尺寸，所以與第十節那條「不要覆寫共用 token」不衝突。
  */
 .brand-header__uv {
   display: inline-flex;
   align-items: center;
+  min-height: var(--tap-target);
   padding: var(--space-3) 0;
   color: var(--text-secondary);
   font-size: var(--font-size-caption);

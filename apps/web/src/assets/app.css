@@ -527,8 +527,23 @@ strong {
   line-height: var(--line-height-body);
 }
 
+/*
+ * 單一控制項的寬度上限（2026-09-04，稽核第二輪 §3）。
+ *
+ * 內容欄本身有 752px 上限並且置中，那部分是對的；沒有上限的是**控制項**。
+ * 1280px 視窗實測：首頁主 CTA 662px、回饋頁送出鈕與 textarea／select 各
+ * 620px——手機版型直接拉開的樣子。
+ *
+ * 掛在 `.button` 與欄位的元素選擇器上，新加的控制項不必記得套任何 class。
+ * 手機上內容欄比 26rem 窄，所以這條在小螢幕完全不作用，不需要 media
+ * query；`.button` 在 31rem 以下那條 `width: 100%` 也不受影響。
+ *
+ * **不改對齊方式**：拿掉寬度之後控制項落在哪裡由容器決定（多數 grid 是
+ * start）。想置中的地方各自處理，這裡不替它們決定。
+ */
 .button {
   display: inline-flex;
+  max-width: var(--control-max);
   min-height: var(--tap-target);
   align-items: center;
   justify-content: center;
@@ -737,6 +752,8 @@ button.text-link {
 input:not([type="radio"], [type="checkbox"]),
 select,
 textarea {
+  /* 理由同 `.button` 的 max-width——620px 寬的下拉選單不是桌面的設計。 */
+  max-width: var(--control-max);
   min-height: var(--tap-target);
   padding: var(--space-2) var(--space-3);
   border: 1px solid var(--border-strong);
@@ -1019,6 +1036,25 @@ p.prose-block {
   margin-inline: 0;
   color: var(--text-body);
   line-height: var(--line-height-body);
+}
+
+/*
+ * 使用者自己打的字（2026-09-04）。
+ *
+ * 實測：裝備取名 `SuperUltraWaterproofSunscreenSPF50PLUSPAplusplusplus…`
+ * 之後，375px 視窗的頁面寬度變成 **781px**——整頁可以左右捲，頁首、大標、
+ * 主按鈕全部被切掉右半邊。原因是那串字沒有空格，`overflow-wrap: normal`
+ * 不會在詞中間斷，於是它撐開卡片，再撐開整頁。
+ *
+ * **`anywhere` 而不是 `break-word`**：後者不影響 `min-content` 的計算，
+ * 在 flex／grid 版型裡撐開容器的行為照樣發生。這裡要的正是「算寬度時就
+ * 當它可以斷」。
+ *
+ * **只給使用者輸入的字用**，不要掛到全站文字上——`.prose-block` 那條註解
+ * 講過：衛教文章滿是 UV／SPF／WHO 與英文來源標題，在詞中間亂斷會很難讀。
+ */
+.user-text {
+  overflow-wrap: anywhere;
 }
 
 .screen-reader-only {

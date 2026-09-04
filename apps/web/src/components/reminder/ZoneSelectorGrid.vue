@@ -35,7 +35,7 @@ const emit = defineEmits<{
         :disabled="props.locked"
         @change="emit('toggle', zone.zoneInstanceId)"
       />
-      <span>{{ getZoneLabel(zone) }}</span>
+      <span class="user-text">{{ getZoneLabel(zone) }}</span>
     </label>
   </div>
 </template>

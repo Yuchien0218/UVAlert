@@ -236,7 +236,11 @@ function getTimingTone(timingStatus: ZoneProjection["timingStatus"]): ZoneTone {
           :id="`zone-group-${group.status}`"
           class="zone-group__chips"
         >
-          <li v-for="chip in group.chips" :key="chip.id" class="zone-chip">
+          <li
+            v-for="chip in group.chips"
+            :key="chip.id"
+            class="zone-chip user-text"
+          >
             {{ chip.label }}
           </li>
         </ul>

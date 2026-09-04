@@ -46,7 +46,7 @@ const safetyNotice = computed((): string | null =>
           >僅供紀錄</span
         >
       </p>
-      <strong class="gear-item__name">{{ product.displayName }}</strong>
+      <strong class="gear-item__name user-text">{{ product.displayName }}</strong>
       <!--
         購買月份、到期日、個人附註與規格都只在詳情頁——清單的工作是「認出
         是哪一件」，不是把所有欄位攤開（2026-08-31 使用者裁決）。

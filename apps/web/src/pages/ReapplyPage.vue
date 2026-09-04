@@ -123,7 +123,7 @@ function zoneNames(zoneIds: string[]): string {
       -->
       <p
         v-if="reapplication.success.value.productGroups.length === 1"
-        class="success-groups__single"
+        class="success-groups__single user-text"
       >
         <strong>{{
           reapplication.success.value.productGroups[0]?.displayName
@@ -132,7 +132,7 @@ function zoneNames(zoneIds: string[]): string {
           zoneNames(reapplication.success.value.productGroups[0]?.zoneIds ?? [])
         }}
       </p>
-      <ul v-else class="success-groups">
+      <ul v-else class="success-groups user-text">
         <li
           v-for="group in reapplication.success.value.productGroups"
           :key="`${group.displayName}-${group.zoneIds.join('-')}`"

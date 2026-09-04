@@ -416,6 +416,17 @@
    */
 
   --content-max: 47rem;
+  /*
+   * 單一控制項的寬度上限（2026-09-04）。
+   *
+   * 內容欄本身有 --content-max（752px）並且置中，那是對的；問題出在**控制項
+   * 沒有上限**——1280px 視窗下實測：首頁主 CTA 662px、回饋頁的送出鈕與
+   * textarea／select 各 620px。那是手機版型直接拉開的樣子，不是桌面的設計。
+   *
+   * 26rem＝416px，約等於一支大手機的內容寬。手機上內容欄本來就比它窄，
+   * 所以這個上限在小螢幕完全不作用，不需要 media query。
+   */
+  --control-max: 26rem;
   --tap-target: 2.75rem;
   --bottom-nav-height: 4.5rem;
   /*
