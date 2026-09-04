@@ -483,6 +483,115 @@ describe("BrowserRemotePush", () => {
     expect(subscription.unsubscribe).not.toHaveBeenCalled();
   });
 
+  it.each([false, true])(
+    "migrates a legacy persisted revoke with remoteRevoked=%s and completes its owned teardown after reload",
+    async (remoteRevoked) => {
+      const database = new SunshieldDatabase(
+        `push-legacy-revoke-${String(remoteRevoked)}-${crypto.randomUUID()}`
+      );
+      const state = new LocalPushStateRepository(database);
+      const subscription = createSubscription();
+      const fetchMock = vi.fn(
+        async () => new Response(null, { status: 204 })
+      ) as typeof fetch;
+
+      try {
+        await database.table("PushDeliveryState").put({
+          id: "current-device",
+          credentials,
+          intentRevision: 1,
+          pendingIntent: {
+            kind: "revoke",
+            operationId,
+            remoteRevoked,
+            revision: 1
+          }
+        });
+        const adapter = new BrowserRemotePush({
+          ...createHarness({ credentials, subscription }).dependencies,
+          state,
+          fetch: fetchMock
+        });
+
+        await expect(adapter.hydrate()).resolves.toEqual({
+          state: "permission-required",
+          isEnabled: false,
+          needsTeardown: false
+        });
+        expect(fetchMock).toHaveBeenCalledTimes(remoteRevoked ? 0 : 1);
+        if (!remoteRevoked) {
+          const [, request] = vi.mocked(fetchMock).mock.calls[0] ?? [];
+          expect(request?.method).toBe("DELETE");
+          expect(new Headers(request?.headers).get("Authorization")).toBe(
+            `Device ${credentials.deviceId}.${credentials.deviceSecret}`
+          );
+        }
+        expect(subscription.unsubscribe).toHaveBeenCalledOnce();
+        await expect(state.readCredentials()).resolves.toBeNull();
+        await expect(state.readPendingIntent()).resolves.toBeNull();
+      } finally {
+        await database.delete();
+      }
+    }
+  );
+
+  it("retains a legacy revoke when no credential can prove its ownership before a replacement registration", async () => {
+    const database = new SunshieldDatabase(
+      `push-legacy-revoke-unowned-${crypto.randomUUID()}`
+    );
+    const state = new LocalPushStateRepository(database);
+    const replacementCredentials: PushDeviceCredentials = {
+      deviceId: "10000000-0000-4000-8000-000000000002",
+      deviceSecret: "replacement-device-secret"
+    };
+    const replacementSubscription = createSubscription();
+    const fetchMock = vi.fn(
+      async () => new Response(null, { status: 204 })
+    ) as typeof fetch;
+
+    try {
+      await database.table("PushDeliveryState").put({
+        id: "current-device",
+        credentials: null,
+        intentRevision: 1,
+        pendingIntent: {
+          kind: "revoke",
+          operationId,
+          remoteRevoked: false,
+          revision: 1
+        }
+      });
+      await state.writeCredentials(replacementCredentials);
+      const adapter = new BrowserRemotePush({
+        ...createHarness({
+          credentials: replacementCredentials,
+          subscription: replacementSubscription
+        }).dependencies,
+        state,
+        fetch: fetchMock
+      });
+
+      await expect(adapter.hydrate()).resolves.toEqual({
+        state: "schedule-error",
+        isEnabled: false,
+        needsTeardown: true
+      });
+      expect(fetchMock).not.toHaveBeenCalled();
+      expect(replacementSubscription.unsubscribe).not.toHaveBeenCalled();
+      await expect(state.readCredentials()).resolves.toEqual(
+        replacementCredentials
+      );
+      await expect(state.readPendingIntent()).resolves.toMatchObject({
+        kind: "revoke",
+        operationId,
+        remoteRevoked: false,
+        revision: 1
+      });
+    } finally {
+      await database.delete();
+    }
+  });
+
   it("serializes remote writes so an older response cannot win after a newer intent", async () => {
     const requests: Array<{
       body: Record<string, unknown>;

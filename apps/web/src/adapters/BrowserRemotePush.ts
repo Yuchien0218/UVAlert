@@ -264,7 +264,8 @@ export class BrowserRemotePush implements RemotePushPort {
   async #sendRevoke(
     intent: Extract<PendingPushIntent, { kind: "revoke" }>
   ): Promise<BackgroundPushState> {
-    const teardownCredentials = intent.credentialSnapshot ?? null;
+    const teardownCredentials = intent.credentialSnapshot;
+    if (teardownCredentials === undefined) return "schedule-error";
     if (!intent.remoteRevoked) {
       if (teardownCredentials !== null) {
         let response: Response;

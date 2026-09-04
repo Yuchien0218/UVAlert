@@ -80,11 +80,15 @@ export class LocalPushStateRepository implements PushStatePort {
     const intentRevision = Number.isSafeInteger(stored.intentRevision)
       ? stored.intentRevision
       : 0;
-    const pendingIntent =
+    const pendingIntentWithRevision =
       stored.pendingIntent === null ||
       Number.isSafeInteger(stored.pendingIntent.revision)
         ? stored.pendingIntent
         : { ...stored.pendingIntent, revision: Math.max(1, intentRevision) };
+    const pendingIntent = normalizeLegacyRevoke(
+      pendingIntentWithRevision,
+      stored.credentials
+    );
     return {
       ...stored,
       pendingIntent,
@@ -104,6 +108,22 @@ export class LocalPushStateRepository implements PushStatePort {
       }
     );
   }
+}
+
+function normalizeLegacyRevoke(
+  intent: PendingPushIntent | null,
+  credentials: PushDeviceCredentials | null
+): PendingPushIntent | null {
+  if (
+    intent?.kind !== "revoke" ||
+    Object.hasOwn(intent, "credentialSnapshot")
+  ) {
+    return intent;
+  }
+  return {
+    ...intent,
+    credentialSnapshot: credentials ?? undefined
+  };
 }
 
 function sameCredentials(

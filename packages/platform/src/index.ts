@@ -391,8 +391,11 @@ export type PendingPushIntent =
       kind: "revoke";
       operationId: string;
       remoteRevoked: boolean;
-      /** Credentials owned when this teardown intent was created. */
-      credentialSnapshot: PushDeviceCredentials | null;
+      /**
+       * Credentials owned when this teardown intent was created. Missing or
+       * explicit `undefined` is reserved for unresolved legacy records.
+       */
+      credentialSnapshot?: PushDeviceCredentials | null | undefined;
       revision: number;
     };
 
