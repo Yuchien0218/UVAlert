@@ -5,7 +5,10 @@ import type {
   UvForecastError,
   UvForecastPhase
 } from "../../features/uv/createUvForecastController";
-import { getUvRiskLevelLabel } from "../../features/uv/uvForecastRules";
+import {
+  getUvRiskLevelLabel,
+  toLocalDateKey
+} from "../../features/uv/uvForecastRules";
 import {
   formatDate,
   formatMonthDayTime,
@@ -30,14 +33,6 @@ function toLocalDate(localDate: string): Date {
   return new Date(year!, month! - 1, day!, 12);
 }
 
-/** 今天的本地日期，格式與預報的 `localDate` 相同。 */
-function todayLocalDate(): string {
-  const now = new Date();
-  const month = String(now.getMonth() + 1).padStart(2, "0");
-  const day = String(now.getDate()).padStart(2, "0");
-  return `${now.getFullYear()}-${month}-${day}`;
-}
-
 /**
  * 卡片上顯示的日子（2026-09-04 使用者要求：「改成今天、週一、週二」）。
  *
@@ -51,7 +46,7 @@ function todayLocalDate(): string {
  * 讀出來的快取，那時第一格並不是今天。
  */
 function forecastDayLabel(localDate: string): string {
-  return localDate === todayLocalDate()
+  return localDate === toLocalDateKey(new Date())
     ? "今天"
     : formatWeekday(toLocalDate(localDate));
 }
