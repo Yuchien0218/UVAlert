@@ -3,6 +3,7 @@ import type { SessionContext } from "@sunshield/contracts";
 import { computed, shallowRef, watch } from "vue";
 import Icon from "../icons/Icon.vue";
 import DisclosureChevron from "../common/DisclosureChevron.vue";
+import DisclosurePanel from "../common/DisclosurePanel.vue";
 import { CONTEXT_ICONS } from "../../features/setup/setupCatalog";
 
 /**
@@ -109,13 +110,15 @@ function selectDirect(value: SessionContext): void {
   openGroup.value = null;
 }
 
-const activeGroup = computed(() =>
-  groups.find((group) => group.key === openGroup.value)
-);
-
-/** 沒有展開群組時，說明區顯示目前選取情境的說明。 */
+/**
+ * 目前選取情境的說明。
+ *
+ * **刻意與展開狀態無關。** 2026-09-04 之前這裡會在 `openGroup !== null` 時
+ * 回傳 null——但改成高度動畫之後，那會讓說明在收合的當下就變成空字串，
+ * 高度動畫等於在一個空盒子上跑。內容留著、由 `descriptionOpen` 決定要不要
+ * 顯示，收合過程中才有東西可以縮。
+ */
 const selectedDescription = computed(() => {
-  if (openGroup.value !== null) return null;
   const direct = directOptions.find(
     (option) => option.value === selectedContext.value
   );
@@ -128,6 +131,11 @@ const selectedDescription = computed(() => {
   }
   return null;
 });
+
+/** 沒有展開群組、而且真的有說明可講時，才展開說明區。 */
+const descriptionOpen = computed(
+  () => openGroup.value === null && selectedDescription.value !== null
+);
 </script>
 
 <template>
@@ -175,36 +183,52 @@ const selectedDescription = computed(() => {
     </div>
 
     <!--
-      說明與子選項共用同一個展開區——這頁只該有一種展開模式。展開群組時
-      顯示子選項，否則顯示已選情境的說明。
-    -->
-    <div
-      v-if="activeGroup !== undefined"
-      :id="activeGroup.key + '-context-options'"
-      class="context-detail"
-    >
-      <label
-        v-for="option in activeGroup.options"
-        :key="option.value"
-        class="context-suboption"
-        :class="{ 'option-selected': selectedContext === option.value }"
-      >
-        <input
-          v-model="selectedContext"
-          type="radio"
-          name="setup-context"
-          :value="option.value"
-        />
-        <span>
-          <strong>{{ option.label }}</strong>
-          <small>{{ option.description }}</small>
-        </span>
-      </label>
-    </div>
+      2026-09-04：從「一個共用展開區」改成「每個群組各自一個面板」。
 
-    <p v-else-if="selectedDescription" class="context-detail__description">
-      {{ selectedDescription }}
-    </p>
+      原本說明與子選項共用同一個 `v-if` / `v-else-if` 區塊，於是它有三種
+      狀態（子選項／說明／空），高度在 24px、171px、192px、0 之間直接跳，
+      實測從說明切到室內子選項是 **+147px 的瞬跳**。
+
+      共用區沒辦法接 DisclosurePanel：那個元件做的是 0↔內容高度，而這裡是
+      內容高度↔另一個內容高度；而且 `activeGroup` 收合時會變 undefined，
+      模板直接炸。**這是元件結構問題，不是動效問題**——拆開之後每個面板
+      都回到單純的「開／關」，DisclosurePanel 就直接可用了。
+
+      順帶修好一個無障礙問題：`aria-controls` 指的 id 以前只有展開時才存在，
+      現在永遠在 DOM 裡（收合時由 DisclosurePanel 標成 inert）。
+
+      切換群組時會有一個面板收合、另一個展開——那是同一個動作的兩半，不是
+      第十二節規則五要擋的「兩個各自獨立的元素同時動」。
+    -->
+    <DisclosurePanel
+      v-for="group in groups"
+      :key="group.key"
+      :open="openGroup === group.key"
+    >
+      <div :id="group.key + '-context-options'" class="context-detail">
+        <label
+          v-for="option in group.options"
+          :key="option.value"
+          class="context-suboption"
+          :class="{ 'option-selected': selectedContext === option.value }"
+        >
+          <input
+            v-model="selectedContext"
+            type="radio"
+            name="setup-context"
+            :value="option.value"
+          />
+          <span>
+            <strong>{{ option.label }}</strong>
+            <small>{{ option.description }}</small>
+          </span>
+        </label>
+      </div>
+    </DisclosurePanel>
+
+    <DisclosurePanel :open="descriptionOpen">
+      <p class="context-detail__description">{{ selectedDescription }}</p>
+    </DisclosurePanel>
   </fieldset>
 </template>
 
