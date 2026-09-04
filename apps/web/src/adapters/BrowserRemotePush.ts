@@ -180,7 +180,12 @@ export class BrowserRemotePush implements RemotePushPort {
   async disable(): Promise<BackgroundPushState> {
     return this.#enqueue(async () => {
       const pending = await this.#deps.state.readPendingIntent();
-      if (pending?.kind === "revoke") return this.#sendIntent(pending);
+      if (
+        pending?.kind === "revoke" &&
+        pending.credentialSnapshot !== undefined
+      ) {
+        return this.#sendIntent(pending);
+      }
       const credentialSnapshot = await this.#deps.state.readCredentials();
       const intent = await this.#deps.state.replacePendingIntent({
         kind: "revoke",

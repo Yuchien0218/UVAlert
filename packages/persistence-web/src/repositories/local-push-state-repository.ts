@@ -85,10 +85,7 @@ export class LocalPushStateRepository implements PushStatePort {
       Number.isSafeInteger(stored.pendingIntent.revision)
         ? stored.pendingIntent
         : { ...stored.pendingIntent, revision: Math.max(1, intentRevision) };
-    const pendingIntent = normalizeLegacyRevoke(
-      pendingIntentWithRevision,
-      stored.credentials
-    );
+    const pendingIntent = normalizeLegacyRevoke(pendingIntentWithRevision);
     return {
       ...stored,
       pendingIntent,
@@ -111,8 +108,7 @@ export class LocalPushStateRepository implements PushStatePort {
 }
 
 function normalizeLegacyRevoke(
-  intent: PendingPushIntent | null,
-  credentials: PushDeviceCredentials | null
+  intent: PendingPushIntent | null
 ): PendingPushIntent | null {
   if (
     intent?.kind !== "revoke" ||
@@ -122,7 +118,7 @@ function normalizeLegacyRevoke(
   }
   return {
     ...intent,
-    credentialSnapshot: credentials ?? undefined
+    credentialSnapshot: undefined
   };
 }
 

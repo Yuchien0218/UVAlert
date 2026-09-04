@@ -182,6 +182,95 @@ describe("createNotificationController", () => {
     expect(remotePush.flushPendingIntent).toHaveBeenCalledOnce();
   });
 
+  it("lets the user explicitly complete an unresolved legacy opt-out without touching replacement B during hydration", async () => {
+    const database = new SunshieldDatabase(
+      `push-controller-legacy-recovery-${crypto.randomUUID()}`
+    );
+    const state = new LocalPushStateRepository(database);
+    const legacyCredentials: PushDeviceCredentials = {
+      deviceId: "10000000-0000-4000-8000-000000000001",
+      deviceSecret: "legacy-device-secret"
+    };
+    const replacementCredentials: PushDeviceCredentials = {
+      deviceId: "10000000-0000-4000-8000-000000000002",
+      deviceSecret: "replacement-device-secret"
+    };
+    let activeSubscription: PushSubscription | null;
+    const unsubscribe = vi.fn(async () => {
+      activeSubscription = null;
+      return true;
+    });
+    activeSubscription = { unsubscribe } as unknown as PushSubscription;
+    const registration = {
+      pushManager: {
+        getSubscription: vi.fn(async () => activeSubscription)
+      }
+    } as unknown as ServiceWorkerRegistration;
+    const fetchMock = vi.fn(
+      async () => new Response(null, { status: 204 })
+    ) as typeof fetch;
+    let controller: ReturnType<typeof createNotificationController> | undefined;
+
+    try {
+      await database.table("PushDeliveryState").put({
+        id: "current-device",
+        credentials: legacyCredentials,
+        intentRevision: 1,
+        pendingIntent: {
+          kind: "revoke",
+          operationId: "20000000-0000-4000-8000-000000000001",
+          remoteRevoked: false,
+          revision: 1
+        }
+      });
+      await database
+        .table("PushDeliveryState")
+        .update("current-device", { credentials: replacementCredentials });
+      const remotePush = new BrowserRemotePush({
+        state,
+        apiBaseUrl: "https://project.supabase.co/functions/v1/",
+        publicVapidKey: "BEl62iUYgUivxIkv69yViEuiBIa40HI0FCXjV2qfL-FiLJ7x",
+        isSecureContext: () => true,
+        hasServiceWorker: () => true,
+        hasPushManager: () => true,
+        hasNotification: () => true,
+        getPermission: () => "granted",
+        requestPermission: vi.fn(
+          async (): Promise<NotificationPermission> => "granted"
+        ),
+        getRegistration: vi.fn(async () => registration),
+        fetch: fetchMock,
+        isOnline: () => true,
+        createOperationId: vi.fn(() => crypto.randomUUID()),
+        now: () => new Date("2026-08-23T10:00:00.000Z")
+      });
+      controller = createNotificationController({
+        notifications: createNotificationsStub(),
+        remotePush,
+        currentSession: shallowRef<SessionProjection | null>(null),
+        connectivity: shallowRef<ConnectivityStatus>("online"),
+        createOperationId: () => crypto.randomUUID()
+      });
+
+      await vi.waitFor(() =>
+        expect(controller?.backgroundPushState.value).toBe("schedule-error")
+      );
+      expect(fetchMock).not.toHaveBeenCalled();
+      expect(unsubscribe).not.toHaveBeenCalled();
+
+      await controller.disableBackgroundPush();
+
+      expect(controller.backgroundPushState.value).toBe("permission-required");
+      expect(fetchMock).toHaveBeenCalledOnce();
+      expect(unsubscribe).toHaveBeenCalledOnce();
+      await expect(state.readCredentials()).resolves.toBeNull();
+      await expect(state.readPendingIntent()).resolves.toBeNull();
+    } finally {
+      controller?.dispose();
+      await database.delete();
+    }
+  });
+
   it("hydrates an enabled device after reload then replaces and cancels its remote schedule from the latest Session", async () => {
     const { controller, currentSession, remotePush } = createController({
       hydration: { state: "enabled", isEnabled: true, needsTeardown: false }

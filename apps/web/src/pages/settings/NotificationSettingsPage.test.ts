@@ -87,7 +87,7 @@ describe("NotificationSettingsPage", () => {
     }
   );
 
-  it("explains that schedule recovery requires disabling then enabling again", () => {
+  it("explains the informed action that safely completes an unresolved legacy opt-out", () => {
     const services = makeServices({ backgroundPushState: "schedule-error" });
     vi.mocked(useWebAppServices).mockReturnValue(
       services as unknown as WebAppServices
@@ -96,12 +96,13 @@ describe("NotificationSettingsPage", () => {
       global: { plugins: [router], stubs: { Icon: true } }
     });
 
-    expect(wrapper.text()).toContain("請先關閉背景推播，再重新開啟完成設定。");
+    expect(wrapper.text()).toContain("舊版關閉紀錄無法安全確認");
+    expect(wrapper.text()).toContain("系統會以目前裝置設定重新完成關閉");
     expect(wrapper.find('[data-testid="retry-background-push"]').exists()).toBe(
       false
     );
     expect(wrapper.get('[data-testid="disable-background-push"]').text()).toBe(
-      "關閉背景推播"
+      "完成關閉背景推播"
     );
   });
 

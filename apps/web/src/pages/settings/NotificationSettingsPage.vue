@@ -74,7 +74,7 @@ const BACKGROUND_PUSH_DESCRIPTORS: Record<
   },
   "schedule-error": {
     title: "無法依賴背景推播",
-    body: "背景推播設定失效，無法依賴背景推播；本機倒數仍是依據。請先關閉背景推播，再重新開啟完成設定。",
+    body: "背景推播設定失效，或舊版關閉紀錄無法安全確認；本機倒數仍是依據。若要維持關閉，請按下「完成關閉背景推播」，系統會以目前裝置設定重新完成關閉。完成後若想再次使用，可再重新開啟。",
     canEnable: false,
     canDisable: true,
     canRetry: false
@@ -90,6 +90,11 @@ const statusLabel = computed(() => {
 
 const backgroundPushDescriptor = computed(
   () => BACKGROUND_PUSH_DESCRIPTORS[backgroundPushState.value]
+);
+const backgroundPushDisableLabel = computed(() =>
+  backgroundPushState.value === "schedule-error"
+    ? "完成關閉背景推播"
+    : "關閉背景推播"
 );
 
 async function requestPermission(): Promise<void> {
@@ -264,7 +269,7 @@ async function runTest(): Promise<void> {
           :disabled="isBackgroundActionPending"
           @click="disableBackgroundPush"
         >
-          關閉背景推播
+          {{ backgroundPushDisableLabel }}
         </button>
       </div>
       <p class="delivery-note">
