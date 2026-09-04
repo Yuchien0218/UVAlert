@@ -236,7 +236,7 @@ export class BrowserRemotePush implements RemotePushPort {
     }
     if (!response.ok) {
       if (response.status === 401)
-        return this.#recoverInvalidCredential(intent);
+        return this.#recoverInvalidCredential(intent, credentials);
       return retryable(response) ? "pending-sync" : "schedule-error";
     }
     let authoritativeState: "scheduled" | "enabled";
@@ -261,8 +261,10 @@ export class BrowserRemotePush implements RemotePushPort {
   async #sendRevoke(
     intent: Extract<PendingPushIntent, { kind: "revoke" }>
   ): Promise<BackgroundPushState> {
+    let teardownCredentials: PushDeviceCredentials | null = null;
     if (!intent.remoteRevoked) {
       const credentials = await this.#deps.state.readCredentials();
+      teardownCredentials = credentials;
       if (credentials !== null) {
         let response: Response;
         try {
@@ -274,7 +276,7 @@ export class BrowserRemotePush implements RemotePushPort {
           return "pending-sync";
         }
         if (response.status === 401)
-          return this.#recoverInvalidCredential(intent);
+          return this.#recoverInvalidCredential(intent, credentials);
         if (!response.ok)
           return retryable(response) ? "pending-sync" : "schedule-error";
         await this.#deps.state.replacePendingIntent({
@@ -283,38 +285,68 @@ export class BrowserRemotePush implements RemotePushPort {
           remoteRevoked: true
         });
       }
+    } else {
+      teardownCredentials = await this.#deps.state.readCredentials();
     }
 
-    try {
-      const registration = await this.#deps.getRegistration();
-      const subscription = await registration?.pushManager.getSubscription();
-      if (subscription !== null && subscription !== undefined) {
-        const unsubscribed = await subscription.unsubscribe();
-        if (!unsubscribed) return "schedule-error";
+    if (teardownCredentials !== null) {
+      const teardown =
+        await this.#teardownOwnedSubscription(teardownCredentials);
+      if (teardown === "schedule-error") return teardown;
+      if (teardown === "enabled") {
+        await this.#deps.state.clearPendingIntent(intent.operationId);
+        return teardown;
       }
-    } catch {
-      return "schedule-error";
+    } else {
+      try {
+        const registration = await this.#deps.getRegistration();
+        const subscription = await registration?.pushManager.getSubscription();
+        if (subscription !== null && subscription !== undefined) {
+          const unsubscribed = await subscription.unsubscribe();
+          if (!unsubscribed) return "schedule-error";
+        }
+      } catch {
+        return "schedule-error";
+      }
     }
-    await this.#deps.state.clearCredentials();
     await this.#deps.state.clearPendingIntent(intent.operationId);
     return "permission-required";
   }
 
   async #recoverInvalidCredential(
-    intent: PendingPushIntent
+    intent: PendingPushIntent,
+    credentials: PushDeviceCredentials
   ): Promise<BackgroundPushState> {
+    const teardown = await this.#teardownOwnedSubscription(credentials);
+    if (teardown !== "schedule-error") {
+      await this.#deps.state.clearPendingIntent(intent.operationId);
+    }
+    return teardown;
+  }
+
+  async #teardownOwnedSubscription(
+    credentials: PushDeviceCredentials
+  ): Promise<BackgroundPushState> {
+    let subscription: PushSubscription | null | undefined;
     try {
       const registration = await this.#deps.getRegistration();
-      const subscription = await registration?.pushManager.getSubscription();
-      if (subscription !== null && subscription !== undefined) {
-        const unsubscribed = await subscription.unsubscribe();
-        if (!unsubscribed) return "schedule-error";
-      }
+      subscription = await registration?.pushManager.getSubscription();
     } catch {
       return "schedule-error";
     }
-    await this.#deps.state.clearCredentials();
-    await this.#deps.state.clearPendingIntent(intent.operationId);
+
+    const stillOwned =
+      await this.#deps.state.clearCredentialsIfOwned(credentials);
+    if (!stillOwned) return "enabled";
+
+    if (subscription !== null && subscription !== undefined) {
+      try {
+        const unsubscribed = await subscription.unsubscribe();
+        if (!unsubscribed) return "schedule-error";
+      } catch {
+        return "schedule-error";
+      }
+    }
     return "permission-required";
   }
 

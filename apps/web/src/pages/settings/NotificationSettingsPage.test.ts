@@ -63,7 +63,7 @@ describe("NotificationSettingsPage", () => {
     ["enabled", "已啟用背景推播", false, true, false],
     ["scheduled", "已同步下一個補擦提醒", false, true, false],
     ["pending-sync", "等待同步", false, true, true],
-    ["schedule-error", "無法依賴背景推播", false, true, true]
+    ["schedule-error", "無法依賴背景推播", false, true, false]
   ])(
     "renders the %s state with its exact action matrix",
     (backgroundPushState, copy, canEnable, canDisable, canRetry) => {
@@ -86,6 +86,24 @@ describe("NotificationSettingsPage", () => {
       ).toBe(canRetry);
     }
   );
+
+  it("explains that schedule recovery requires disabling then enabling again", () => {
+    const services = makeServices({ backgroundPushState: "schedule-error" });
+    vi.mocked(useWebAppServices).mockReturnValue(
+      services as unknown as WebAppServices
+    );
+    const wrapper = mount(NotificationSettingsPage, {
+      global: { plugins: [router], stubs: { Icon: true } }
+    });
+
+    expect(wrapper.text()).toContain("請先關閉背景推播，再重新開啟完成設定。");
+    expect(wrapper.find('[data-testid="retry-background-push"]').exists()).toBe(
+      false
+    );
+    expect(wrapper.get('[data-testid="disable-background-push"]').text()).toBe(
+      "關閉背景推播"
+    );
+  });
 
   it("delegates background enable, retry, and successful recovery controls", async () => {
     const services = makeServices({

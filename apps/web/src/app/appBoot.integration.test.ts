@@ -56,7 +56,7 @@ describe("App Boot with real IndexedDB projection", () => {
           deviceSecret: "secret-1"
         }),
         writeCredentials: async () => undefined,
-        clearCredentials: async () => undefined,
+        clearCredentialsIfOwned: async () => true,
         readPendingIntent: async () => null,
         replacePendingIntent: async (value) => ({ ...value, revision: 1 }),
         clearPendingIntent: async () => undefined

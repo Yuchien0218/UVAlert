@@ -44,8 +44,16 @@ function createState(initial?: {
     writeCredentials: vi.fn(async (value) => {
       storedCredentials = value;
     }),
-    clearCredentials: vi.fn(async () => {
+    clearCredentialsIfOwned: vi.fn(async (value) => {
+      if (
+        storedCredentials === null ||
+        storedCredentials.deviceId !== value.deviceId ||
+        storedCredentials.deviceSecret !== value.deviceSecret
+      ) {
+        return false;
+      }
       storedCredentials = null;
+      return true;
     }),
     readPendingIntent: vi.fn(async () => pendingIntent),
     replacePendingIntent: vi.fn(async (value: NewPendingPushIntent) => {
@@ -597,6 +605,112 @@ describe("BrowserRemotePush", () => {
     }
   });
 
+  it("preserves a replacement registration when an older tab receives a delayed 401", async () => {
+    const databaseName = `push-credential-ownership-${crypto.randomUUID()}`;
+    const databaseA = new SunshieldDatabase(databaseName);
+    const databaseB = new SunshieldDatabase(databaseName);
+    const stateA = new LocalPushStateRepository(databaseA);
+    const stateB = new LocalPushStateRepository(databaseB);
+    const replacementCredentials: PushDeviceCredentials = {
+      deviceId: "10000000-0000-4000-8000-000000000002",
+      deviceSecret: "replacement-device-secret"
+    };
+    const replacementOperationId = "20000000-0000-4000-8000-000000000002";
+    const oldSubscription = createSubscription();
+    const replacementSubscription = createSubscription();
+    Object.defineProperty(replacementSubscription, "endpoint", {
+      value: "https://push.example.test/subscription/replacement"
+    });
+    Object.defineProperty(replacementSubscription, "toJSON", {
+      value: vi.fn(() => ({
+        endpoint: "https://push.example.test/subscription/replacement",
+        expirationTime: null,
+        keys: { p256dh: "replacement-p256dh", auth: "replacement-auth" }
+      }))
+    });
+    let activeSubscription: PushSubscription | null = oldSubscription;
+    vi.mocked(oldSubscription.unsubscribe).mockImplementation(async () => {
+      if (activeSubscription === oldSubscription) activeSubscription = null;
+      return true;
+    });
+    vi.mocked(replacementSubscription.unsubscribe).mockImplementation(
+      async () => {
+        if (activeSubscription === replacementSubscription) {
+          activeSubscription = null;
+        }
+        return true;
+      }
+    );
+    const registration = {
+      pushManager: {
+        getSubscription: vi.fn(async () => activeSubscription),
+        subscribe: vi.fn(async () => {
+          activeSubscription = replacementSubscription;
+          return replacementSubscription;
+        })
+      }
+    } as unknown as ServiceWorkerRegistration;
+    let releaseOldRequest: (() => void) | undefined;
+    const fetchMock = vi.fn(
+      async (_input: RequestInfo | URL, init?: RequestInit) => {
+        const request = init as RequestInit;
+        const authorization = new Headers(request.headers).get("Authorization");
+        if (
+          request.method === "PUT" &&
+          authorization ===
+            `Device ${credentials.deviceId}.${credentials.deviceSecret}`
+        ) {
+          return new Promise<Response>((resolve) => {
+            releaseOldRequest = () =>
+              resolve(new Response(null, { status: 401 }));
+          });
+        }
+        if (request.method === "DELETE") {
+          return new Response(null, { status: 401 });
+        }
+        if (request.method === "POST") {
+          return new Response(JSON.stringify(replacementCredentials), {
+            status: 201,
+            headers: { "Content-Type": "application/json" }
+          });
+        }
+        return authoritativeScheduleResponse("scheduled");
+      }
+    ) as typeof fetch;
+    const dependencies = {
+      ...createHarness({ credentials }).dependencies,
+      getRegistration: vi.fn(async () => registration),
+      fetch: fetchMock
+    };
+
+    try {
+      await stateA.writeCredentials(credentials);
+      const tabA = new BrowserRemotePush({ ...dependencies, state: stateA });
+      const tabB = new BrowserRemotePush({ ...dependencies, state: stateB });
+
+      const delayedSchedule = tabA.schedule(dueAt, operationId);
+      await vi.waitFor(() => expect(releaseOldRequest).toBeTypeOf("function"));
+
+      await expect(tabB.disable()).resolves.toBe("permission-required");
+      await expect(tabB.enable()).resolves.toBe("enabled");
+      await expect(
+        tabB.schedule("2026-08-30T11:00:00.000Z", replacementOperationId)
+      ).resolves.toBe("scheduled");
+
+      releaseOldRequest?.();
+      await expect(delayedSchedule).resolves.toBe("enabled");
+      await expect(stateB.readCredentials()).resolves.toEqual(
+        replacementCredentials
+      );
+      await expect(stateB.readPendingIntent()).resolves.toBeNull();
+      expect(activeSubscription).toBe(replacementSubscription);
+      expect(replacementSubscription.unsubscribe).not.toHaveBeenCalled();
+    } finally {
+      databaseB.close();
+      await databaseA.delete();
+    }
+  });
+
   it("keeps pending intent for network failures without exposing secrets", async () => {
     const fetchMock = vi.fn(() =>
       Promise.reject(new Error(`network ${credentials.deviceSecret}`))
@@ -658,7 +772,7 @@ describe("BrowserRemotePush", () => {
 
     await expect(adapter.disable()).resolves.toBe("permission-required");
     expect(order).toEqual(["remote-delete", "unsubscribe"]);
-    expect(local.state.clearCredentials).toHaveBeenCalledOnce();
+    expect(local.state.clearCredentialsIfOwned).toHaveBeenCalledOnce();
   });
 
   it("keeps the browser subscription and credentials when backend revocation fails", async () => {
@@ -672,7 +786,7 @@ describe("BrowserRemotePush", () => {
 
     await expect(adapter.disable()).resolves.toBe("pending-sync");
     expect(subscription.unsubscribe).not.toHaveBeenCalled();
-    expect(local.state.clearCredentials).not.toHaveBeenCalled();
+    expect(local.state.clearCredentialsIfOwned).not.toHaveBeenCalled();
   });
 
   it("persists a revoke teardown while offline then completes it after reload", async () => {
@@ -755,6 +869,6 @@ describe("BrowserRemotePush", () => {
     await expect(enabling).resolves.toBe("enabled");
     await expect(disabling).resolves.toBe("permission-required");
     expect(order).toEqual(["register", "remote-delete", "unsubscribe"]);
-    expect(local.state.clearCredentials).toHaveBeenCalledOnce();
+    expect(local.state.clearCredentialsIfOwned).toHaveBeenCalledOnce();
   });
 });

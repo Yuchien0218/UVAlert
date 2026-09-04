@@ -410,7 +410,8 @@ export type RemotePushHydration = {
 export interface PushStatePort {
   readCredentials(): Promise<PushDeviceCredentials | null>;
   writeCredentials(value: PushDeviceCredentials): Promise<void>;
-  clearCredentials(): Promise<void>;
+  /** Atomically clears credentials only while the caller still owns them. */
+  clearCredentialsIfOwned(value: PushDeviceCredentials): Promise<boolean>;
   readPendingIntent(): Promise<PendingPushIntent | null>;
   /** Atomically assigns the next device-wide revision to a remote intent. */
   replacePendingIntent(value: NewPendingPushIntent): Promise<PendingPushIntent>;

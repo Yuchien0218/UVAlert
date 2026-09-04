@@ -67,8 +67,16 @@ describe("createLocalDataController", () => {
       writeCredentials: vi.fn(async (value) => {
         storedCredentials = value;
       }),
-      clearCredentials: vi.fn(async () => {
+      clearCredentialsIfOwned: vi.fn(async (value) => {
+        if (
+          storedCredentials === null ||
+          storedCredentials.deviceId !== value.deviceId ||
+          storedCredentials.deviceSecret !== value.deviceSecret
+        ) {
+          return false;
+        }
         storedCredentials = null;
+        return true;
       }),
       readPendingIntent: vi.fn(async () => pendingIntent),
       replacePendingIntent: vi.fn(async (value) => {
@@ -212,8 +220,16 @@ describe("createLocalDataController", () => {
       writeCredentials: vi.fn(async (value) => {
         storedCredentials = value;
       }),
-      clearCredentials: vi.fn(async () => {
+      clearCredentialsIfOwned: vi.fn(async (value) => {
+        if (
+          storedCredentials === null ||
+          storedCredentials.deviceId !== value.deviceId ||
+          storedCredentials.deviceSecret !== value.deviceSecret
+        ) {
+          return false;
+        }
         storedCredentials = null;
+        return true;
       }),
       readPendingIntent: vi.fn(async () => pendingIntent),
       replacePendingIntent: vi.fn(async (value) => {

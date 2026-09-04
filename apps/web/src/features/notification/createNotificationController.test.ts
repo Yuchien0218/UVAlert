@@ -544,7 +544,7 @@ describe("createNotificationController", () => {
     expect(controller.backgroundPushState.value).toBe("permission-required");
   });
 
-  it("requires a successful disable after enable setup fails", async () => {
+  it("does not disguise teardown as retry after enable setup fails", async () => {
     const { controller, remotePush } = createController();
     remotePush.enable.mockResolvedValueOnce("schedule-error");
 
@@ -553,8 +553,9 @@ describe("createNotificationController", () => {
     await controller.retryBackgroundSync();
 
     expect(remotePush.enable).toHaveBeenCalledOnce();
-    expect(remotePush.disable).toHaveBeenCalledOnce();
-    expect(controller.backgroundPushState.value).toBe("permission-required");
+    expect(remotePush.disable).not.toHaveBeenCalled();
+    expect(remotePush.flushPendingIntent).not.toHaveBeenCalled();
+    expect(controller.backgroundPushState.value).toBe("schedule-error");
   });
 
   it("cancels again after a local schedule settles following dispose", async () => {

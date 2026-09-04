@@ -33,8 +33,16 @@ export class LocalPushStateRepository implements PushStatePort {
     await this.#update((current) => ({ ...current, credentials: value }));
   }
 
-  async clearCredentials(): Promise<void> {
-    await this.#update((current) => ({ ...current, credentials: null }));
+  async clearCredentialsIfOwned(
+    value: PushDeviceCredentials
+  ): Promise<boolean> {
+    let cleared = false;
+    await this.#update((current) => {
+      if (!sameCredentials(current.credentials, value)) return current;
+      cleared = true;
+      return { ...current, credentials: null };
+    });
+    return cleared;
   }
 
   async readPendingIntent(): Promise<PendingPushIntent | null> {
@@ -66,7 +74,8 @@ export class LocalPushStateRepository implements PushStatePort {
   }
 
   async #read(): Promise<PushDeliveryStateRecord> {
-    const stored = await this.#database.PushDeliveryState.get(CURRENT_DEVICE_ID);
+    const stored =
+      await this.#database.PushDeliveryState.get(CURRENT_DEVICE_ID);
     if (stored === undefined) return EMPTY_STATE;
     const intentRevision = Number.isSafeInteger(stored.intentRevision)
       ? stored.intentRevision
@@ -79,10 +88,7 @@ export class LocalPushStateRepository implements PushStatePort {
     return {
       ...stored,
       pendingIntent,
-      intentRevision: Math.max(
-        intentRevision,
-        pendingIntent?.revision ?? 0
-      )
+      intentRevision: Math.max(intentRevision, pendingIntent?.revision ?? 0)
     };
   }
 
@@ -98,4 +104,14 @@ export class LocalPushStateRepository implements PushStatePort {
       }
     );
   }
+}
+
+function sameCredentials(
+  current: PushDeviceCredentials | null,
+  expected: PushDeviceCredentials
+): boolean {
+  return (
+    current?.deviceId === expected.deviceId &&
+    current.deviceSecret === expected.deviceSecret
+  );
 }

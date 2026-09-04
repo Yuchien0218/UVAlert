@@ -32,7 +32,23 @@ describe("LocalPushStateRepository", () => {
       deviceSecret: "secret-a"
     });
 
-    await repository.clearCredentials();
+    await expect(
+      repository.clearCredentialsIfOwned({
+        deviceId: "device-a",
+        deviceSecret: "wrong-secret"
+      })
+    ).resolves.toBe(false);
+    await expect(repository.readCredentials()).resolves.toEqual({
+      deviceId: "device-a",
+      deviceSecret: "secret-a"
+    });
+
+    await expect(
+      repository.clearCredentialsIfOwned({
+        deviceId: "device-a",
+        deviceSecret: "secret-a"
+      })
+    ).resolves.toBe(true);
     await expect(repository.readCredentials()).resolves.toBeNull();
   });
 
@@ -57,7 +73,9 @@ describe("LocalPushStateRepository", () => {
   });
 
   it("assigns a durable monotonic revision when separate tabs replace the device intent", async () => {
-    const database = new SunshieldDatabase(`push-revision-${crypto.randomUUID()}`);
+    const database = new SunshieldDatabase(
+      `push-revision-${crypto.randomUUID()}`
+    );
     databases.push(database);
     const tabA = new LocalPushStateRepository(database);
     const tabB = new LocalPushStateRepository(database);

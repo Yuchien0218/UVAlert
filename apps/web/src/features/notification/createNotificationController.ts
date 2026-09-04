@@ -292,8 +292,7 @@ export function createNotificationController(
     },
 
     async retryBackgroundSync(): Promise<void> {
-      if (requiresDisable) {
-        await performDisable();
+      if (requiresDisable && backgroundPushState.value === "schedule-error") {
         return;
       }
       await flushPendingIntent();

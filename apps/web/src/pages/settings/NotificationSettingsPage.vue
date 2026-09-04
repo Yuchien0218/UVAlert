@@ -74,10 +74,10 @@ const BACKGROUND_PUSH_DESCRIPTORS: Record<
   },
   "schedule-error": {
     title: "無法依賴背景推播",
-    body: "背景推播同步失敗，無法依賴背景推播；本機倒數仍是依據。",
+    body: "背景推播設定失效，無法依賴背景推播；本機倒數仍是依據。請先關閉背景推播，再重新開啟完成設定。",
     canEnable: false,
     canDisable: true,
-    canRetry: true
+    canRetry: false
   }
 };
 
