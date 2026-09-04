@@ -142,7 +142,7 @@ function goBack(): void {
           :confirming="confirmingDelete"
           :pending="busy"
           trigger-label="清除雲端資料"
-          confirm-label="清除雲端資料"
+          confirm-label="確定清除"
           @trigger="deleteCloudData"
           @confirm="deleteCloudData"
           @cancel="confirmingDelete = false"

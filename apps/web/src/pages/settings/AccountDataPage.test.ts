@@ -61,10 +61,21 @@ describe("AccountDataPage", () => {
     expect(deleteButton).toBeDefined();
     await deleteButton!.trigger("click");
     expect(services.cloudSync.deleteAccount).not.toHaveBeenCalled();
+    /*
+     * 2026-09-04：確認鈕改成「確定清除」，不再與觸發鈕同字。
+     *
+     * 這條測試原本也是用同一個字去找第二顆按鈕——連測試都分不出兩顆，
+     * 使用者當然更分不出（回報「我按清除，資料還在」的正是這件事）。
+     */
     const confirmButton = wrapper
       .findAll("button")
-      .find((button) => button.text() === "清除雲端資料");
+      .find((button) => button.text() === "確定清除");
     expect(confirmButton).toBeDefined();
+    expect(
+      wrapper
+        .findAll("button")
+        .some((button) => button.text() === "清除雲端資料")
+    ).toBe(false);
     await confirmButton!.trigger("click");
     expect(services.cloudSync.deleteAccount).toHaveBeenCalledTimes(1);
     expect(services.auth.signOut).toHaveBeenCalledTimes(1);
