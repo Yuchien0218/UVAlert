@@ -65,6 +65,7 @@ const DRILL_DOWN = [
   "pages/SpecialSituationPage.vue",
   "pages/education/EducationArticlePage.vue",
   "pages/education/EducationCategoryPage.vue",
+  "pages/education/EducationIndexPage.vue",
   "pages/help/HelpIndexPage.vue",
   "pages/help/HelpTopicPage.vue",
   "pages/settings/AccountDataPage.vue",
