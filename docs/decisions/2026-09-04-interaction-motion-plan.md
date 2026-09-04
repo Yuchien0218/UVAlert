@@ -1,0 +1,164 @@
+# 切換／點選的互動動效：盤點、裁決與分批實作計畫
+
+日期：2026-09-04
+狀態：**批次 0 已完成（2026-09-04），批次 1–5 未動工。** 第六節是施作順序，一批一個 PR。
+
+---
+
+## 一、為什麼需要這份文件
+
+`DESIGN.md` 第十二節（2026-08-29 重訂的五條動效規則）本身寫得夠好，**問題不在規範，在於落實得非常不平均**。
+
+一個量化的結果：
+
+> 全站有 **20 個 `cursor: pointer` 的可點表面，但只有 8 個地方有任何按壓或 hover 回饋** —— 六成的可點元素按下去完全沒反應。
+
+而且缺回饋的地方，剛好就是點擊次數最多的地方（選部位、選情境、選裝備分類）。
+
+## 二、現況盤點
+
+| 表面 | 現在有什麼 | 缺口 |
+| --- | --- | --- |
+| `.choice-grid label` | 底色／文字／邊框 160ms 過渡 ＋ `:active` 變暗 0.85 | 這組最完整，可當基準 |
+| `.time-option` | 160ms 過渡 ＋ `:active` 0.92 | 變暗檔位與上面不同 |
+| `.button` | 160ms 過渡 ＋ `:active` 0.92 | OK |
+| `.icon-button` | 只有 `:active` 變暗，**沒有 transition** | 按下與放開都是瞬變 |
+| `.zone-chip`（部位藥丸） | **完全沒有** transition、沒有 `:active` | 選取瞬變、按下無回饋 |
+| `.context-tile`（情境磁磚） | **完全沒有** transition、沒有 `:active` | 同上，且選取外觀與全站不一致 |
+| `.category-option`（裝備分類） | 顏色 2026-09-01 已統一，但**沒有 transition** | 選取瞬變 |
+| 底部導覽 | 藥丸底色 160ms 淡入 | 標籤 `font-weight: 700` 瞬間變粗；分頁之間沒有轉場 |
+| 展開收合（chevron） | 換 icon name，瞬間切換 | 沒有交叉淡入；**收合完全沒有動畫**（`v-if` 直接消失） |
+| `BottomSheet` | `<Transition>` 純 opacity 160ms | 進出同速 |
+| `HomeCountdown` | 圖示交叉淡入 ＋ 進度條寬度 320ms ＋ 顏色 450ms | 全站做得最完整的一處，可當範本 |
+| `FiveDayUvCard` `.uv-day` | `:hover` 改 border-color | **它是不可點的 `<li>`** —— 假可點 |
+| `AppNotice`（操作成功） | `role="status"`，無任何進場 | 「已儲存」出現得毫無存在感 |
+
+## 三、四個結構性問題
+
+1. **全站有兩套「已選取」的長相。** 九處走 `.option-selected`（`--color-muted` 邊框 ＋ `--color-hairline` 底），`ContextSelector` 自己一套（`--color-primary` 邊框 ＋ `--color-surface-cream-strong` 底）。`GearForm` 2026-09-01 才因為相同理由被統一過去，`ContextSelector` 是漏掉的那一個。
+2. **按下去沒回饋的地方，剛好是點擊最多的地方**（見第一節的量化結果）。
+3. **換頁的動效是單向的。** `page-stack` 的分層淡入只處理進場，舊頁瞬間消失；而且**返回上一頁也會重跑階梯淡入**，讀起來像「重新載入」而不是「回來了」。
+4. **展開收合缺一半。** `QuickProtectionSummary` 有進場沒離場，其餘四五個展開區塊連進場都沒有。
+
+## 四、裁決（2026-09-04，使用者逐項確認）
+
+| # | 議題 | 裁決 |
+| --- | --- | --- |
+| 1 | `ContextSelector` 的選取外觀 | **統一成 `.option-selected`**（muted 邊框 ＋ hairline 底），`DESIGN.md` 的 `context-option-selected` 一併回寫 |
+| 2 | 收合時的高度塌陷 | **為了連續感，突破「只用 opacity」的規則** |
+| 3 | 按壓變暗的檔位 | **開 `--press-dim` token 進 `DESIGN.md`**；預設值 `0.92`，**但要截圖比對 0.85／0.92 再定案** |
+| 4 | 換頁離場轉場 | **接受多 120–160ms** |
+| 5 | 底部導覽的選取態 | **拿掉字重變化，改成文字換色**（不再用粗體） |
+| 6 | Google Play 的按壓手感 | **A ＋ B 都做**（換緩動曲線＋藥丸橫向展開） |
+| 7 | 第一條流程 | **首頁 → 記錄補擦** |
+
+### 裁決 1 的理由
+
+1. 一比九。
+2. 這個裁決 2026-09-01 已經做過一半（`GearForm`），留著等於只執行一半。
+3. `--color-primary` 是**行動色**。拿它當選取邊框，等於讓「這裡可以按」跟「這個已經選了」共用一個訊號 —— 而情境磁磚本身就是可按的，兩個訊號疊在同一個元素上最容易混淆。
+4. 對比度反而更好：muted 邊框 5.56、primary 4.37（SC 1.4.11 門檻 3:1）。
+
+### 裁決 3 的理由（以及為什麼還要看一眼）
+
+暖象牙 `#FAF5EC` 乘 0.85 約落到 `#D5D0C9` —— 那不是「被按下」，是「變成灰色」。這個配色本來就是低對比設計，暗 15% 會把暖色相壓掉。0.92 也已經是三比一的多數（`.button`／`.icon-button`／`.time-option`）。
+
+**但按壓變暗在低彩度暖色上是典型的「數值看不出來、只有眼睛看得到」**，照 `CLAUDE.md` 的規矩要截圖比對後才定案。
+
+### 裁決 5 的代價（必須記下來）
+
+**這推翻了 2026-08-23 的裁決。** 當時 Claude Design 的下游元件庫明寫「用形狀承載狀態，**不換色** —— 選取態是圖示後面的奶油色藥丸底加粗體標籤，圖示與文字顏色在任何狀態下都一樣」，使用者確認要藥丸版，`DESIGN.md` 也一併回寫了。這段理由現在寫在 `BottomNavigation.vue` 的註解裡，**實作時要一併更新那段註解，不要留下互相矛盾的兩套說法。**
+
+**只換標籤文字的顏色，不換圖示的顏色。** 理由是 nav 圖示是雙色系統：墨咖結構走 `currentColor`、**琥珀金重點寫死在 SVG 裡**。對圖示換色只會換掉一半，變成半邊變色。
+
+**選取態的文字色（2026-09-04 定案）**：未選 `--text-secondary`（muted，對畫布 5.93:1）、選中 `--text-primary`（ink）。走**明暗階不走色相階** —— 不用 `--color-primary-text`，因為那與裁決 1 的理由直接衝突（行動色不當選取訊號）。
+
+## 五、Google Play 的手感拆解
+
+查了 Material 3 的 motion token。那個手感是四件事疊起來的：
+
+| 組成 | 內容 | 處置 |
+| --- | --- | --- |
+| **A. 緩動曲線** | M3 standard `cubic-bezier(0.2, 0, 0, 1)` —— 起步快、尾巴長 | ✅ **做**。不必破任何規則 |
+| **B. 藥丸橫向展開** | 指示器從中心撐開，不是直接淡入 | ✅ **做**。需要 `scaleX`，屬於突破 |
+| **C. Ripple 漣漪** | 從觸點放射的水波 | ❌ **不做** |
+| **D. 圖示 outlined→filled** | 未選空心、選中實心 | ❌ **做不到** |
+
+**A 是差最多的一項，而且最便宜。** 這個專案的 `--ease-out` 是 `cubic-bezier(0.25, 0.46, 0.45, 0.94)`（溫和的 easeOutQuad，幾乎等速）；M3 的起步陡、尾段拖很長。**同樣 160ms、動同樣的東西，換這條曲線就有八成的差別。** 而 `DESIGN.md` 只寫「緩動一律 ease-out」，**沒有規定那顆 token 的數值**，所以加一顆 `--ease-emphasized` 只是補檔位，不是推翻規則。
+
+**C 不做的理由**：漣漪的視覺語言是「擴散的能量」，與規範第一句寫的「情緒基調是**耐心**」直接相衝。
+
+**D 做不到的理由**：nav 圖示沒有 outlined/filled 兩版，要做等於再畫 3 顆圖示，而**幾何真實來源在 Illustrator**，不是改 SVG 能解決的。這是圖示工作，不是動效工作。
+
+參考來源：
+[Material 3 — Easing and duration tokens](https://m3.material.io/styles/motion/easing-and-duration/tokens-specs) ·
+[material-components-android — Motion tokens](https://github.com/material-components/material-components-android/blob/master/docs/theming/Motion.md)
+
+## 六、分批實作順序
+
+一批一個 PR，每批跑 `pnpm check`。**動共用檔（`app.css`／`styles.css`／`DESIGN.md`）前先跑 `ListAgents`** —— 這個 repo 已經因為併行 session 弄丟過工作。
+
+### 批次 0：token 與規則（不動畫面）— ✅ 已完成 2026-09-04
+
+- `DESIGN.md` frontmatter 的 `motion:` 加 `press-dim: 0.92`、`ease-emphasized: cubic-bezier(0.2, 0, 0, 1)`
+- `packages/ui/src/styles.css` 加同兩顆
+- **改寫第十二節第一條**（見第七節）
+- 守門：`packages/ui/src/tokens.test.ts` 會自動比對兩邊，不必另寫
+
+風險低，但會動三個共用檔，所以單獨一批先落地。
+
+**完成紀錄**：兩顆 token 已進 `DESIGN.md` frontmatter 與 `styles.css`；第十二節第一條改寫成原則式（附「已核可的非 opacity 動效」封閉清單），第二條補 `ease-emphasized` 的適用範圍，並新增第六條「可點的東西按下去要有回饋」。`tokens.test.ts` 會自動為每顆新 token 生成一組測試——**已刻意改壞兩顆確認會紅**（2 failed / 141 passed），再還原。畫面零變化。
+
+### 批次 1：觸壓層（第一條流程）
+
+- `.zone-chip`、`.context-tile`、`.category-option` 補 transition ＋ `:active` 用 `--press-dim`
+- `.icon-button` 補 transition
+- `.choice-grid label:active` 的 0.85 → `var(--press-dim)`
+- `.button:active`、`.time-option:active` 改用 token
+- **驗證：截圖比對 0.92 與 0.85，定案裁決 3**
+
+### 批次 2：選取層一致性
+
+- `ContextSelector` 改用 `.option-selected`
+- `DESIGN.md` 的 `context-option-selected` 回寫
+- 守門測試：全站只有一種選取外觀。**寫守門的兩個坑照 `CLAUDE.md`**——掃原始碼前先剝註解、比對完整宣告而不是子字串，而且**寫完先破壞一次確認它會紅**
+
+### 批次 3：底部導覽（Google Play A＋B）
+
+- 拿掉 `font-weight: 700`，標籤改 `--text-secondary` →（選中）`--text-primary`
+- 藥丸改用 `--ease-emphasized`，加 `scaleX` 展開
+- **實作地雷**：`scaleX` 直接加在 `.bottom-nav__icon-wrapper` 上**會把圖示一起縮**。藥丸要拆成獨立的 `::before`，圖示疊在上層（`.icon-button--compact` 已有同樣的 grid cell 疊法可抄）
+- **規則五檢查**：藥丸展開 ＋ 文字換色是兩個元素同時動。要嘛視為同一件事，要嘛錯開 —— 畫出來看再決定
+- 一併更新 `BottomNavigation.vue` 裡 2026-08-23 那段註解
+
+### 批次 4：揭露層
+
+- chevron 兩顆圖示疊 grid cell 交叉淡入 160ms（手法抄 `HomeCountdown`）
+- 展開／收合 opacity 進出，高度用 `interpolate-size: allow-keywords` 做連續（裁決 2）
+- **動工前要查 `interpolate-size` 的瀏覽器支援度並準備 fallback**
+
+### 批次 5：場景層
+
+- `RouterView` 離場轉場 120–160ms（裁決 4）
+- 返回時不跑 `page-stack` 階梯淡入，只單純淡入
+- `AppNotice` 進場 320ms（自己發生的事，不是手指造成的）
+- 拿掉 `.uv-day:hover` 的假可點
+
+## 七、`DESIGN.md` 第十二節第一條的改寫（已於批次 0 完成）
+
+原本的寫法是白名單，而且**這次之後會有三個例外**，「唯一例外」那句話就假了：
+
+> 只用 `opacity`，**唯一例外**是內容進場
+
+已改成原則（實際落地的版本另附「已核可的非 opacity 動效」封閉清單與四項明確禁止）：
+
+> 動效只做兩件事：**讓轉場被看見**（opacity），以及**讓版面的改變是連續的**（高度塌陷、指示器位移）。不做表演 —— 不彈跳、不旋轉、不漣漪、不裝飾性縮放。
+
+這條同時容得下裁決 2 與批次 3 的藥丸，又仍然擋掉 ripple 與彈跳，而且它是**可以拿來判斷新案例的判準**，不是一張會愈長愈長的白名單。
+
+## 八、未定案
+
+1. ~~底部導覽選取態的文字色~~ —— **2026-09-04 已定案**：未選 `--text-secondary`、選中 `--text-primary`。見裁決 5。
+2. **`--press-dim` 的最終值**（0.92 vs 0.85），批次 1 截圖後定案。
+3. **批次 3 的規則五處置**：藥丸與文字要不要錯開。
+4. **`.uv-day` 的 hover**：直接拿掉，還是讓五日卡的某一天可以點開？目前計畫是拿掉。
