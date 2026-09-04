@@ -250,7 +250,7 @@ function goBack(): void {
         <div class="card-prose">
           <p>
             匯出包含裝備、提醒與偏好的 JSON
-            檔案（<strong>不含</strong>定位與裝置識別碼）。
+            檔案（不含定位與裝置識別碼）。
           </p>
           <p class="caution">
             目前<strong>僅支援匯出備份</strong>，匯入還原功能將於後續版本更新。
@@ -716,6 +716,19 @@ dd {
  * `.confirm-note`，裡面的「確定清除／取消」不是根元素，選不到，所以那兩顆
  * 仍是中性色（這個 App 不用整顆紅按鈕）。
  */
+/*
+ * 2026-09-04：這一列不要上緣分隔線（使用者裁決）。
+ *
+ * 分隔線原本的工作是把「標題＋說明＋按鈕」這一組跟上一組分開。標題與說明
+ * 併進按鈕之後這一列只剩一顆按鈕，線就直接畫在按鈕上方——變成一條沒有東西
+ * 可分的線，看起來像多出來的裝飾。
+ *
+ * `padding-top` 留著：分組間距仍然需要，只是不再需要畫出來。
+ */
+.clear-row--danger {
+  border-top: none;
+}
+
 .clear-row--danger > .button {
   color: var(--color-due);
 }

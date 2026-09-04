@@ -114,14 +114,23 @@ const selectedAt = computed(() =>
 
 const isUnknown = computed(() => value.value?.confidence === "unknown");
 
-/** 預設快選是否正在生效——允許幾秒誤差，避免時鐘跳動造成閃爍。 */
-const usingDefault = computed(() => {
-  const at = selectedAt.value;
-  if (at === null) return false;
-  return (
-    Math.abs(at.getTime() - (referenceNow.value.getTime() - 60_000)) < 30_000
-  );
-});
+/**
+ * 「1 分鐘前」快選寫進去的那個時刻。
+ *
+ * 理由與 ApplicationTimePicker 的同名變數完全相同（2026-09-04）：用當下的
+ * 時鐘回推「這個值像不像一分鐘前」，會在 `syncNow()` 把 `referenceNow` 推到
+ * 現在的那一刻自己翻面——使用者只是打開調整面板，選取態卻跳走了。
+ *
+ * 這一支的 `selectDefault` 會把值夾到 `earliestSelectable`（塗抹時間），
+ * 所以存下來的是**實際寫進去的那個字串**，不是重算一次的「一分鐘前」。
+ */
+const defaultPickedValue = shallowRef<string | null>(null);
+
+const usingDefault = computed(
+  () =>
+    value.value?.activityStartedAt != null &&
+    value.value.activityStartedAt === defaultPickedValue.value
+);
 
 const adjustedLabel = computed(() => {
   const at = selectedAt.value;
@@ -185,10 +194,10 @@ function selectDefault(): void {
       earliestSelectable.value.getTime()
     )
   );
-  value.value = {
-    confidence: "confirmed",
-    activityStartedAt: selected.toISOString()
-  };
+  const picked = selected.toISOString();
+  value.value = { confidence: "confirmed", activityStartedAt: picked };
+  /* 記下寫出去的字串，理由同 ApplicationTimePicker 的同名變數。 */
+  defaultPickedValue.value = picked;
   adjusting.value = false;
 }
 
