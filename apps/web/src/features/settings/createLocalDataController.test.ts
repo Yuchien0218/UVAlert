@@ -212,6 +212,7 @@ describe("createLocalDataController", () => {
       kind: "revoke",
       operationId: "revoke-operation",
       remoteRevoked: false,
+      credentialSnapshot: credentials,
       revision: 1
     };
     let online = false;

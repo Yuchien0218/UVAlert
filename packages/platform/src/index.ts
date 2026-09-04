@@ -391,13 +391,20 @@ export type PendingPushIntent =
       kind: "revoke";
       operationId: string;
       remoteRevoked: boolean;
+      /** Credentials owned when this teardown intent was created. */
+      credentialSnapshot: PushDeviceCredentials | null;
       revision: number;
     };
 
 export type NewPendingPushIntent =
   | { kind: "schedule"; dueAt: string; operationId: string }
   | { kind: "cancel"; operationId: string }
-  | { kind: "revoke"; operationId: string; remoteRevoked: boolean };
+  | {
+      kind: "revoke";
+      operationId: string;
+      remoteRevoked: boolean;
+      credentialSnapshot: PushDeviceCredentials | null;
+    };
 
 export type RemotePushHydration = {
   state: BackgroundPushState;

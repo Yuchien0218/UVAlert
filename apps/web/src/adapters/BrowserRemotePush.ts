@@ -68,10 +68,11 @@ export class BrowserRemotePush implements RemotePushPort {
       const pending = await this.#deps.state.readPendingIntent();
       if (pending?.kind === "revoke") {
         const state = await this.#sendIntent(pending);
+        const isEnabled = state === "enabled" || state === "scheduled";
         return {
           state,
-          isEnabled: false,
-          needsTeardown: state !== "permission-required"
+          isEnabled,
+          needsTeardown: !isEnabled && state !== "permission-required"
         };
       }
       const credentials = await this.#deps.state.readCredentials();
@@ -180,10 +181,12 @@ export class BrowserRemotePush implements RemotePushPort {
     return this.#enqueue(async () => {
       const pending = await this.#deps.state.readPendingIntent();
       if (pending?.kind === "revoke") return this.#sendIntent(pending);
+      const credentialSnapshot = await this.#deps.state.readCredentials();
       const intent = await this.#deps.state.replacePendingIntent({
         kind: "revoke",
         operationId: this.#deps.createOperationId(),
-        remoteRevoked: false
+        remoteRevoked: false,
+        credentialSnapshot
       });
       return this.#sendIntent(intent);
     });
@@ -261,32 +264,29 @@ export class BrowserRemotePush implements RemotePushPort {
   async #sendRevoke(
     intent: Extract<PendingPushIntent, { kind: "revoke" }>
   ): Promise<BackgroundPushState> {
-    let teardownCredentials: PushDeviceCredentials | null = null;
+    const teardownCredentials = intent.credentialSnapshot ?? null;
     if (!intent.remoteRevoked) {
-      const credentials = await this.#deps.state.readCredentials();
-      teardownCredentials = credentials;
-      if (credentials !== null) {
+      if (teardownCredentials !== null) {
         let response: Response;
         try {
           response = await this.#deps.fetch(
             `${this.#apiBase}/push-subscription`,
-            authenticatedRequest("DELETE", credentials)
+            authenticatedRequest("DELETE", teardownCredentials)
           );
         } catch {
           return "pending-sync";
         }
         if (response.status === 401)
-          return this.#recoverInvalidCredential(intent, credentials);
+          return this.#recoverInvalidCredential(intent, teardownCredentials);
         if (!response.ok)
           return retryable(response) ? "pending-sync" : "schedule-error";
         await this.#deps.state.replacePendingIntent({
           kind: "revoke",
           operationId: intent.operationId,
-          remoteRevoked: true
+          remoteRevoked: true,
+          credentialSnapshot: teardownCredentials
         });
       }
-    } else {
-      teardownCredentials = await this.#deps.state.readCredentials();
     }
 
     if (teardownCredentials !== null) {
@@ -298,16 +298,9 @@ export class BrowserRemotePush implements RemotePushPort {
         return teardown;
       }
     } else {
-      try {
-        const registration = await this.#deps.getRegistration();
-        const subscription = await registration?.pushManager.getSubscription();
-        if (subscription !== null && subscription !== undefined) {
-          const unsubscribed = await subscription.unsubscribe();
-          if (!unsubscribed) return "schedule-error";
-        }
-      } catch {
-        return "schedule-error";
-      }
+      const currentState = await this.#readCurrentOwnershipState();
+      await this.#deps.state.clearPendingIntent(intent.operationId);
+      return currentState;
     }
     await this.#deps.state.clearPendingIntent(intent.operationId);
     return "permission-required";
@@ -337,7 +330,7 @@ export class BrowserRemotePush implements RemotePushPort {
 
     const stillOwned =
       await this.#deps.state.clearCredentialsIfOwned(credentials);
-    if (!stillOwned) return "enabled";
+    if (!stillOwned) return this.#readCurrentOwnershipState();
 
     if (subscription !== null && subscription !== undefined) {
       try {
@@ -348,6 +341,28 @@ export class BrowserRemotePush implements RemotePushPort {
       }
     }
     return "permission-required";
+  }
+
+  async #readCurrentOwnershipState(): Promise<BackgroundPushState> {
+    for (let attempt = 0; attempt < 2; attempt += 1) {
+      const before = await this.#deps.state.readCredentials();
+      if (before === null) return "permission-required";
+
+      let subscription: PushSubscription | null | undefined;
+      try {
+        const registration = await this.#deps.getRegistration();
+        subscription = await registration?.pushManager.getSubscription();
+      } catch {
+        return "schedule-error";
+      }
+
+      const after = await this.#deps.state.readCredentials();
+      if (!sameCredentials(before, after)) continue;
+      return subscription === null || subscription === undefined
+        ? "schedule-error"
+        : "enabled";
+    }
+    return "schedule-error";
   }
 
   #enqueue<Result>(operation: () => Promise<Result>): Promise<Result> {
@@ -439,6 +454,16 @@ function authenticatedRequest(
 
 function retryable(response: Response): boolean {
   return response.status === 429 || response.status >= 500;
+}
+
+function sameCredentials(
+  left: PushDeviceCredentials | null,
+  right: PushDeviceCredentials | null
+): boolean {
+  return (
+    left?.deviceId === right?.deviceId &&
+    left?.deviceSecret === right?.deviceSecret
+  );
 }
 
 async function readAuthoritativeScheduleState(

@@ -195,13 +195,19 @@ describe("LocalDataRepository 摘要與清除", () => {
         kind: "revoke",
         operationId: "11111111-1111-4111-8111-111111111111",
         remoteRevoked: false,
+        credentialSnapshot: {
+          deviceId: "device-a",
+          deviceSecret: "secret-a"
+        },
         revision: 1
       }
     });
 
     await repository.clearAll();
 
-    await expect(database.PushDeliveryState.get("current-device")).resolves.toEqual({
+    await expect(
+      database.PushDeliveryState.get("current-device")
+    ).resolves.toEqual({
       id: "current-device",
       credentials: { deviceId: "device-a", deviceSecret: "secret-a" },
       intentRevision: 1,
@@ -209,6 +215,10 @@ describe("LocalDataRepository 摘要與清除", () => {
         kind: "revoke",
         operationId: "11111111-1111-4111-8111-111111111111",
         remoteRevoked: false,
+        credentialSnapshot: {
+          deviceId: "device-a",
+          deviceSecret: "secret-a"
+        },
         revision: 1
       }
     });

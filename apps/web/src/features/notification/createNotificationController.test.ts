@@ -7,8 +7,17 @@ import type {
   ConnectivityStatus,
   NotificationPermissionState,
   NotificationPort,
+  PushDeviceCredentials,
   RemotePushPort
 } from "@sunshield/platform";
+import {
+  LocalPushStateRepository,
+  SunshieldDatabase
+} from "@sunshield/persistence-web";
+import {
+  BrowserRemotePush,
+  type BrowserRemotePushDependencies
+} from "../../adapters/BrowserRemotePush";
 import { createNotificationController } from "./createNotificationController";
 
 function createNotificationsStub(
@@ -220,6 +229,102 @@ describe("createNotificationController", () => {
 
     await controller.enableBackgroundPush();
     expect(remotePush.enable).toHaveBeenCalledOnce();
+  });
+
+  it("shows permission-required when a delayed 401 loses ownership to another tab's completed disable", async () => {
+    const databaseName = `push-controller-disable-race-${crypto.randomUUID()}`;
+    const databaseA = new SunshieldDatabase(databaseName);
+    const databaseB = new SunshieldDatabase(databaseName);
+    const stateA = new LocalPushStateRepository(databaseA);
+    const stateB = new LocalPushStateRepository(databaseB);
+    const deviceCredentials: PushDeviceCredentials = {
+      deviceId: "10000000-0000-4000-8000-000000000001",
+      deviceSecret: "device-secret"
+    };
+    const subscription = {
+      unsubscribe: vi.fn(async () => {
+        activeSubscription = null;
+        return true;
+      })
+    } as unknown as PushSubscription;
+    let activeSubscription: PushSubscription | null = subscription;
+    const registration = {
+      pushManager: {
+        getSubscription: vi.fn(async () => activeSubscription)
+      }
+    } as unknown as ServiceWorkerRegistration;
+    let releaseDelayedSchedule: (() => void) | undefined;
+    const fetchMock = vi.fn(
+      async (input: RequestInfo | URL, init?: RequestInit) => {
+        if (String(input).endsWith("/push-schedule")) {
+          return new Promise<Response>((resolve) => {
+            releaseDelayedSchedule = () =>
+              resolve(new Response(null, { status: 401 }));
+          });
+        }
+        if (init?.method === "DELETE") {
+          return new Response(null, { status: 204 });
+        }
+        throw new Error("unexpected push request");
+      }
+    ) as typeof fetch;
+    const commonDependencies: Omit<BrowserRemotePushDependencies, "state"> = {
+      apiBaseUrl: "https://project.supabase.co/functions/v1/",
+      publicVapidKey: "BEl62iUYgUivxIkv69yViEuiBIa40HI0FCXjV2qfL-FiLJ7x",
+      isSecureContext: () => true,
+      hasServiceWorker: () => true,
+      hasPushManager: () => true,
+      hasNotification: () => true,
+      getPermission: () => "granted",
+      requestPermission: vi.fn(
+        async (): Promise<NotificationPermission> => "granted"
+      ),
+      getRegistration: vi.fn(async () => registration),
+      fetch: fetchMock,
+      isOnline: () => true,
+      createOperationId: vi.fn(() => crypto.randomUUID()),
+      now: () => new Date("2026-08-23T10:00:00.000Z")
+    };
+    const currentSession = shallowRef<SessionProjection | null>(sessionWith());
+    const connectivity = shallowRef<ConnectivityStatus>("online");
+    const notifications = createNotificationsStub();
+    let controller: ReturnType<typeof createNotificationController> | undefined;
+
+    try {
+      await stateA.writeCredentials(deviceCredentials);
+      const tabA = new BrowserRemotePush({
+        ...commonDependencies,
+        state: stateA
+      });
+      const tabB = new BrowserRemotePush({
+        ...commonDependencies,
+        state: stateB
+      });
+      controller = createNotificationController({
+        notifications,
+        remotePush: tabA,
+        currentSession,
+        connectivity,
+        createOperationId: () => crypto.randomUUID()
+      });
+      await vi.waitFor(() =>
+        expect(releaseDelayedSchedule).toBeTypeOf("function")
+      );
+
+      await expect(tabB.disable()).resolves.toBe("permission-required");
+      releaseDelayedSchedule?.();
+      await vi.waitFor(() =>
+        expect(controller?.backgroundPushState.value).toBe(
+          "permission-required"
+        )
+      );
+      await expect(stateA.readCredentials()).resolves.toBeNull();
+      expect(activeSubscription).toBeNull();
+    } finally {
+      controller?.dispose();
+      databaseB.close();
+      await databaseA.delete();
+    }
   });
 
   it("keeps hydrated ownership when boot restores the latest Session while hydration is pending", async () => {

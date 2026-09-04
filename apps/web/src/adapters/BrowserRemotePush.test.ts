@@ -456,7 +456,12 @@ describe("BrowserRemotePush", () => {
   it("hydrates an offline persisted revoke as explicit pending teardown", async () => {
     const { adapter, fetchMock, local, subscription } = createHarness({
       credentials,
-      intent: { kind: "revoke", operationId, remoteRevoked: false },
+      intent: {
+        kind: "revoke",
+        operationId,
+        remoteRevoked: false,
+        credentialSnapshot: credentials
+      },
       online: false
     });
 
@@ -472,6 +477,7 @@ describe("BrowserRemotePush", () => {
       kind: "revoke",
       operationId,
       remoteRevoked: false,
+      credentialSnapshot: credentials,
       revision: 1
     });
     expect(subscription.unsubscribe).not.toHaveBeenCalled();
@@ -711,6 +717,204 @@ describe("BrowserRemotePush", () => {
     }
   });
 
+  it("does not tear down a replacement registration when a stale disable captured no credentials", async () => {
+    const databaseName = `push-null-credential-ownership-${crypto.randomUUID()}`;
+    const databaseA = new SunshieldDatabase(databaseName);
+    const databaseB = new SunshieldDatabase(databaseName);
+    const stateA = new LocalPushStateRepository(databaseA);
+    const stateB = new LocalPushStateRepository(databaseB);
+    const replacementCredentials: PushDeviceCredentials = {
+      deviceId: "10000000-0000-4000-8000-000000000002",
+      deviceSecret: "replacement-device-secret"
+    };
+    const oldSubscription = createSubscription();
+    const replacementSubscription = createSubscription();
+    let activeSubscription: PushSubscription | null = oldSubscription;
+    vi.mocked(oldSubscription.unsubscribe).mockImplementation(async () => {
+      if (activeSubscription === oldSubscription) activeSubscription = null;
+      return true;
+    });
+    vi.mocked(replacementSubscription.unsubscribe).mockImplementation(
+      async () => {
+        if (activeSubscription === replacementSubscription) {
+          activeSubscription = null;
+        }
+        return true;
+      }
+    );
+    const registration = {
+      pushManager: {
+        getSubscription: vi.fn(async () => activeSubscription),
+        subscribe: vi.fn(async () => {
+          activeSubscription = replacementSubscription;
+          return replacementSubscription;
+        })
+      }
+    } as unknown as ServiceWorkerRegistration;
+    let announceSnapshotRead!: () => void;
+    const snapshotReadStarted = new Promise<void>((resolve) => {
+      announceSnapshotRead = resolve;
+    });
+    let releaseSnapshotRead!: () => void;
+    const snapshotReadRelease = new Promise<void>((resolve) => {
+      releaseSnapshotRead = resolve;
+    });
+    let firstCredentialRead = true;
+    const staleState: PushStatePort = {
+      readCredentials: vi.fn(async () => {
+        if (!firstCredentialRead) return stateA.readCredentials();
+        firstCredentialRead = false;
+        announceSnapshotRead();
+        await snapshotReadRelease;
+        return null;
+      }),
+      writeCredentials: (value) => stateA.writeCredentials(value),
+      clearCredentialsIfOwned: (value) => stateA.clearCredentialsIfOwned(value),
+      readPendingIntent: () => stateA.readPendingIntent(),
+      replacePendingIntent: (value) => stateA.replacePendingIntent(value),
+      clearPendingIntent: (matchingOperationId) =>
+        stateA.clearPendingIntent(matchingOperationId)
+    };
+    const fetchMock = vi.fn(
+      async (_input: RequestInfo | URL, init?: RequestInit) => {
+        if (init?.method === "POST") {
+          return new Response(JSON.stringify(replacementCredentials), {
+            status: 201,
+            headers: { "Content-Type": "application/json" }
+          });
+        }
+        return new Response(null, { status: 204 });
+      }
+    ) as typeof fetch;
+    const dependencies = {
+      ...createHarness({ credentials: null }).dependencies,
+      getRegistration: vi.fn(async () => registration),
+      fetch: fetchMock
+    };
+
+    try {
+      const staleTab = new BrowserRemotePush({
+        ...dependencies,
+        state: staleState
+      });
+      const replacementTab = new BrowserRemotePush({
+        ...dependencies,
+        state: stateB
+      });
+
+      const staleDisable = staleTab.disable();
+      await snapshotReadStarted;
+      await expect(replacementTab.enable()).resolves.toBe("enabled");
+      releaseSnapshotRead();
+
+      await expect(staleDisable).resolves.toBe("enabled");
+      await expect(stateB.readCredentials()).resolves.toEqual(
+        replacementCredentials
+      );
+      await expect(stateB.readPendingIntent()).resolves.toBeNull();
+      expect(activeSubscription).toBe(replacementSubscription);
+      expect(replacementSubscription.unsubscribe).not.toHaveBeenCalled();
+    } finally {
+      databaseB.close();
+      await databaseA.delete();
+    }
+  });
+
+  it("keeps replacement ownership when a persisted remote-revoked teardown resumes", async () => {
+    const databaseName = `push-persisted-revoke-ownership-${crypto.randomUUID()}`;
+    const databaseA = new SunshieldDatabase(databaseName);
+    const databaseB = new SunshieldDatabase(databaseName);
+    const stateA = new LocalPushStateRepository(databaseA);
+    const stateB = new LocalPushStateRepository(databaseB);
+    const replacementCredentials: PushDeviceCredentials = {
+      deviceId: "10000000-0000-4000-8000-000000000002",
+      deviceSecret: "replacement-device-secret"
+    };
+    const oldSubscription = createSubscription();
+    const replacementSubscription = createSubscription();
+    let activeSubscription: PushSubscription | null = oldSubscription;
+    vi.mocked(oldSubscription.unsubscribe).mockImplementation(async () => {
+      if (activeSubscription === oldSubscription) activeSubscription = null;
+      return true;
+    });
+    vi.mocked(replacementSubscription.unsubscribe).mockImplementation(
+      async () => {
+        if (activeSubscription === replacementSubscription) {
+          activeSubscription = null;
+        }
+        return true;
+      }
+    );
+    const registration = {
+      pushManager: {
+        getSubscription: vi.fn(async () => activeSubscription),
+        subscribe: vi.fn(async () => {
+          activeSubscription = replacementSubscription;
+          return replacementSubscription;
+        })
+      }
+    } as unknown as ServiceWorkerRegistration;
+    const fetchMock = vi.fn(
+      async (_input: RequestInfo | URL, init?: RequestInit) => {
+        if (init?.method === "POST") {
+          return new Response(JSON.stringify(replacementCredentials), {
+            status: 201,
+            headers: { "Content-Type": "application/json" }
+          });
+        }
+        return new Response(null, { status: 204 });
+      }
+    ) as typeof fetch;
+    const dependencies = {
+      ...createHarness({ credentials }).dependencies,
+      getRegistration: vi.fn(async () => registration),
+      fetch: fetchMock
+    };
+
+    try {
+      await stateA.writeCredentials(credentials);
+      const interruptedTab = new BrowserRemotePush({
+        ...dependencies,
+        state: stateA,
+        getRegistration: vi.fn(async () => {
+          throw new Error("registration unavailable");
+        })
+      });
+      await expect(interruptedTab.disable()).resolves.toBe("schedule-error");
+      await expect(stateA.readPendingIntent()).resolves.toEqual(
+        expect.objectContaining({ kind: "revoke", remoteRevoked: true })
+      );
+
+      await expect(stateB.clearCredentialsIfOwned(credentials)).resolves.toBe(
+        true
+      );
+      const replacementTab = new BrowserRemotePush({
+        ...dependencies,
+        state: stateB
+      });
+      await expect(replacementTab.enable()).resolves.toBe("enabled");
+
+      const reloadedStaleTab = new BrowserRemotePush({
+        ...dependencies,
+        state: stateA
+      });
+      await expect(reloadedStaleTab.hydrate()).resolves.toEqual({
+        state: "enabled",
+        isEnabled: true,
+        needsTeardown: false
+      });
+      await expect(stateB.readCredentials()).resolves.toEqual(
+        replacementCredentials
+      );
+      await expect(stateB.readPendingIntent()).resolves.toBeNull();
+      expect(activeSubscription).toBe(replacementSubscription);
+      expect(replacementSubscription.unsubscribe).not.toHaveBeenCalled();
+    } finally {
+      databaseB.close();
+      await databaseA.delete();
+    }
+  });
+
   it("keeps pending intent for network failures without exposing secrets", async () => {
     const fetchMock = vi.fn(() =>
       Promise.reject(new Error(`network ${credentials.deviceSecret}`))
@@ -809,6 +1013,7 @@ describe("BrowserRemotePush", () => {
       kind: "revoke",
       operationId,
       remoteRevoked: false,
+      credentialSnapshot: credentials,
       revision: 1
     });
     expect(local.readCredentials()).toEqual(credentials);
