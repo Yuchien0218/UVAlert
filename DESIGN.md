@@ -954,8 +954,26 @@ Noto Serif TC 是標題的唯一字型，沒有第二層自托管備援——載
 不論哪一種，三條硬性要求：
 
 1. **必須用真實 `button`**，並同時設 `aria-expanded` 與 **`aria-controls`**。少了 `aria-controls`，螢幕閱讀器無法把觸發器跟被控制的區塊關聯起來。
-2. **chevron 用換圖示 name**：收合 `tool-chevron-right`、展開 `tool-chevron-down`。**不要用 `transform: rotate(180deg)`**——那違反第十二節規則一「只用 opacity」，而且系統本來就有這兩個圖示，不需要 `chevron-up`。
-3. **不加淡入淡出**：chevron 是「回應手指的直接操作」，依第十二節規則二該是即時的。交叉淡入留給「自己發生的」狀態變化（例如倒數跨過補擦門檻）。
+2. **chevron 用換圖示，不用旋轉**：收合 `tool-chevron-right`、展開 `tool-chevron-down`。**不要用 `transform: rotate(180deg)`**——那是裝飾性動效，第十二節不允許，而且系統本來就有這兩個圖示，不需要 `chevron-up`。
+3. **一律用共用元件 `DisclosureChevron`**，不要各處各寫一次三元運算。兩顆圖示疊在同一個 grid cell，靠 `opacity` 交叉淡入 `{motion.duration-fast}`。
+4. **內容區用共用元件 `DisclosurePanel`**：高度以 `grid-template-rows: 0fr → 1fr` 連續變化，內容同步淡入淡出。收合時內層帶 `inert`。
+
+> **2026-09-04 修正（推翻 2026-08-29 裁決 2 的第三條）**：原本明訂「chevron **不加淡入淡出**——它是『回應手指的直接操作』，依第十二節規則二該是即時的」。
+>
+> 推翻的理由是那句話**誤讀了自己引用的規則**：第十二節規則二說的是直接操作用 `{motion.duration-fast}`（160ms），**沒有說要 0ms**。「快」跟「瞬間」不是同一件事。而兩顆 chevron 的造型差很多，瞬間切換讀起來是閃了一下。
+>
+> 仍然沒有旋轉——動的只有 `opacity`。
+
+### 收合的高度必須是連續的
+
+**收合時不能只讓內容消失**：下方內容會瞬間往上跳，那個跳動比動畫本身更搶眼。這是第十二節第一條「已核可的非 opacity 動效」裡的高度塌陷。
+
+**實作用 `grid-template-rows: 0fr → 1fr`，不要用 `interpolate-size: allow-keywords`。** 後者只有 Chromium 支援（Chrome/Edge 129+），Firefox 與 Safari 都沒有；這是給台灣使用者的行動優先 PWA，iOS Safari 佔比很高，用它等於多數人看不到。`grid-template-rows` 的支援是 Chrome 107+／Firefox 66+／Safari 16+。
+
+**改用高度動畫就必須自己補回 `v-if` 免費提供的兩件事**，`DisclosurePanel` 已經處理：
+
+- **`inert`**：收合的內容仍在 DOM 裡，如果不 inert，它照樣可以被 Tab 進去、螢幕閱讀器照讀（WCAG SC 2.4.3）。
+- **裁切只在收合期間存在**：`overflow: hidden` 是 `0fr` 成立的前提，但一直開著會裁掉焦點框（`outline` ＋ `outline-offset` 畫在邊界外面，SC 2.4.7）。展開動畫結束後解除。
 
 收合不清除使用者的輸入、選擇或目前狀態。
 

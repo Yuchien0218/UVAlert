@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import type { PrimaryAction, ZoneProjection } from "@sunshield/contracts";
+import DisclosurePanel from "../common/DisclosurePanel.vue";
 import { computed, ref } from "vue";
 import ChevronLink from "../common/ChevronLink.vue";
 import { useCurrentTime } from "../../composables/useCurrentTime";
@@ -231,19 +232,20 @@ function getTimingTone(timingStatus: ZoneProjection["timingStatus"]): ZoneTone {
           {{ group.sharedNotice }}
         </p>
 
-        <ul
-          v-show="isExpanded(group)"
-          :id="`zone-group-${group.status}`"
-          class="zone-group__chips"
-        >
-          <li
-            v-for="chip in group.chips"
-            :key="chip.id"
-            class="zone-chip user-text"
+        <DisclosurePanel :open="isExpanded(group)">
+          <ul
+            :id="`zone-group-${group.status}`"
+            class="zone-group__chips"
           >
-            {{ chip.label }}
-          </li>
-        </ul>
+            <li
+              v-for="chip in group.chips"
+              :key="chip.id"
+              class="zone-chip user-text"
+            >
+              {{ chip.label }}
+            </li>
+          </ul>
+        </DisclosurePanel>
       </div>
     </div>
   </section>

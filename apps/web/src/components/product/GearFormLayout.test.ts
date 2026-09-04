@@ -70,8 +70,12 @@ describe("GearForm 裝備區簡化", () => {
     const toggle = code.slice(code.indexOf('aria-controls="gear-record-fields"'));
     expect(code).toContain(':aria-expanded="recordOpen"');
     expect(code).toContain('aria-controls="gear-record-fields"');
-    // chevron 換圖示 name，不是 transform: rotate
-    expect(toggle.slice(0, 400)).toContain("tool-chevron-right");
+    /*
+     * chevron 不用 transform: rotate。2026-09-04 起改由共用的
+     * DisclosureChevron 承擔（兩顆圖示交叉淡入，仍然沒有旋轉），所以這裡
+     * 比對的是元件而不是圖示 name——name 已經被收進元件裡了。
+     */
+    expect(toggle.slice(0, 400)).toContain("<DisclosureChevron");
     expect(code).not.toMatch(/\.record-toggle[^}]*transform:\s*rotate/);
   });
 

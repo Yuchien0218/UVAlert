@@ -177,11 +177,34 @@ CSS 與 `DESIGN.md`（frontmatter `context-option-selected` ＋ 第五節 prose�
 
 **守門三條**（`BottomNavigation.test.ts`）：不用字重承載選取狀態、標籤走明暗階不借用行動色、藥丸在 `::before` 且圖示疊在其上。**三條各自破壞一次都確認會紅**，而且是各自獨立失敗，沒有互相掩護。第三條守的就是上面那個 bug 的修法。
 
-### 批次 4：揭露層
+### 批次 4：揭露層 — ✅ 已完成 2026-09-04
 
 - chevron 兩顆圖示疊 grid cell 交叉淡入 160ms（手法抄 `HomeCountdown`）
 - 展開／收合 opacity 進出，高度用 `interpolate-size: allow-keywords` 做連續（裁決 2）
 - **動工前要查 `interpolate-size` 的瀏覽器支援度並準備 fallback**
+
+**完成紀錄。**
+
+**`interpolate-size` 查證後否決。** 它只有 Chromium 支援（Chrome/Edge 129+），Firefox 與 Safari 都沒有。這是給台灣使用者的行動優先 PWA，iOS Safari 佔比很高——用它等於多數人看不到動畫。改用 `grid-template-rows: 0fr → 1fr`（Chrome 107+／Firefox 66+／Safari 16+），一樣能動到「內容的自然高度」而不必寫死像素。
+
+收成兩個共用元件而不是各處各寫一次：`DisclosureChevron`（兩顆圖示疊 grid cell 交叉淡入）與 `DisclosurePanel`（高度 ＋ opacity）。
+
+**從 `v-if` 改成常駐 DOM，要自己補回它免費提供的兩件事**——這是這批最容易漏掉的部分：
+
+1. **`inert`**：收合的內容仍在焦點順序與無障礙樹裡，高度是 0、看不見，但 Tab 得進去、螢幕閱讀器照讀（SC 2.4.3）。
+2. **裁切只在收合期間存在**：`overflow: hidden` 是 `0fr` 成立的前提，但一直開著會裁掉焦點框（`outline` ＋ `outline-offset` 畫在邊界外面，SC 2.4.7）。展開動畫跑完就解除。
+
+**推翻了 2026-08-29 裁決 2 的第三條。** 那條明訂「chevron **不加淡入淡出**——它是回應手指的直接操作，依第十二節規則二該是即時的」。推翻的理由是那句話**誤讀了自己引用的規則**：規則二說直接操作用 `--duration-fast`（160ms），**沒有說 0ms**。「快」跟「瞬間」不是同一件事。`DESIGN.md` 第五節已改寫並標明。
+
+**`ContextSelector` 不做高度動畫**（只換 chevron）。它的展開區是**跨群組共用、內容會換的**同一個面板，包進 `DisclosurePanel` 會讓 `activeGroup` 為 undefined 時直接炸掉，而且切換群組也會跟著跑高度動畫。這是元件結構問題，不是動效問題，留給之後單獨處理。
+
+**四條既有守門釘的是舊契約，跟著更新**（不是放寬）：三條把「比對圖示 name」改成「比對元件／狀態類別」——name 已經被收進共用元件裡；一條把「DOM 裡只有一個面板」改成「只有一個面板是展開的」，因為面板現在常駐。
+
+另外修了兩條會**默默失去意義**的測試：`wrapper.get('input[value="yes"]')` 在四個面板都常駐之後會抓到第一題的「有」，而不是測試想操作的那一題。這種誤抓不報錯，只會讓斷言變成空的——已一律改成先鎖定所屬面板。
+
+**新守門六條**（`disclosurePanel.test.ts`）：`data-open`、收合時 `inert`、裁切的解除與恢復時機、只認 `grid-template-rows` 的 `transitionend`、用 `grid-template-rows` 不用 `interpolate-size`、內層有 `min-height: 0`。**四條各自破壞一次確認會紅且互不掩護。**
+
+**驗證的限制**：Browser pane 當時是隱藏的，`requestAnimationFrame` 不推進，所以**過渡的中間過程與截圖都拿不到**（opacity 卡在 0，畫面全白）。停用過渡後量到目標值正確：收合 `0px`／`opacity 0`／`inert`，展開 `602px`／`opacity 1`／非 inert，且外層高度等於內容高度（沒有多出間距）、父層 `grid gap: 12px` 不變。**動畫實際跑起來的樣子沒有目視確認過。**
 
 ### 批次 5：場景層
 

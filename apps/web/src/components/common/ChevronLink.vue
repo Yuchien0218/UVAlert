@@ -2,6 +2,7 @@
 import { computed } from "vue";
 import { RouterLink } from "vue-router";
 import Icon from "../icons/Icon.vue";
+import DisclosureChevron from "./DisclosureChevron.vue";
 
 /**
  * 「文字 ＋ 右側箭頭」的次要入口。
@@ -54,9 +55,11 @@ const props = defineProps<{
 
 const isDisclosure = computed(() => props.controls !== undefined);
 
-const iconName = computed(() =>
-  props.expanded === true ? "tool-chevron-down" : "tool-chevron-right"
-);
+/*
+ * 2026-09-04：展開用的 chevron 交給 DisclosureChevron 交叉淡入，導覽用的
+ * 維持單一 Icon。分開處理而不是一律用 DisclosureChevron：導覽連結永遠是
+ * 右向箭頭，硬套會讓每個入口都多掛一顆看不見的下向圖示。
+ */
 </script>
 
 <template>
@@ -75,7 +78,13 @@ const iconName = computed(() =>
       箭頭一律在最後，且是 flex 的最後一個項目——它是「往這邊」的指向，
       不是圖示。放在文字前面會讀成項目符號。
     -->
-    <Icon class="chevron-link__chevron" :name="iconName" :size="20" />
+    <DisclosureChevron
+      v-if="isDisclosure"
+      class="chevron-link__chevron"
+      :open="expanded === true"
+      :size="20"
+    />
+    <Icon v-else class="chevron-link__chevron" name="tool-chevron-right" :size="20" />
   </component>
 </template>
 

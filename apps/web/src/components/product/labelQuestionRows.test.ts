@@ -45,6 +45,28 @@ function rowFor(wrapper: ReturnType<typeof mountEditor>, name: string) {
   return rows(wrapper).find((row) => row.text().includes(name))!;
 }
 
+/*
+ * 面板全部常駐 DOM 之後（2026-09-04 改用 DisclosurePanel），
+ * `wrapper.get('input[value="yes"]')` 會抓到**第一題**的「有」，而不是測試
+ * 想操作的那一題——四題各自都有 value="yes"／"no" 的選項。這種誤抓不會報錯，
+ * 只會讓斷言默默失去意義，所以一律先鎖定所屬面板再找 input。
+ */
+const panelInput = (
+  wrapper: ReturnType<typeof mountEditor>,
+  panel: string,
+  value: string
+) => wrapper.get(`[id$="-${panel}-panel"] input[value="${value}"]`);
+
+const claimInput = (wrapper: ReturnType<typeof mountEditor>, value: string) =>
+  panelInput(wrapper, "claim", value);
+
+const waterInput = (wrapper: ReturnType<typeof mountEditor>, value: string) =>
+  panelInput(wrapper, "water", value);
+
+/** 展開中的面板。收合的面板仍在 DOM 裡，所以不能用面板總數判斷。 */
+const openPanels = (wrapper: ReturnType<typeof mountEditor>) =>
+  wrapper.findAll('.disclosure[data-open="true"]');
+
 describe("四題各佔一列", () => {
   it("四題都在，收合時每一列都寫著目前狀態", () => {
     const wrapper = mountEditor();
@@ -63,7 +85,7 @@ describe("四題各佔一列", () => {
     const wrapper = mountEditor();
 
     await rowFor(wrapper, "防曬標示").trigger("click");
-    await wrapper.get('input[value="no"]').setValue(true);
+    await claimInput(wrapper, "no").setValue(true);
 
     const row = rowFor(wrapper, "防曬標示");
     expect(row.text()).toContain("沒有");
@@ -98,7 +120,7 @@ describe("四題各佔一列", () => {
     expect(rowFor(wrapper, "防曬標示").attributes("aria-expanded")).toBe(
       "false"
     );
-    expect(wrapper.findAll(".label-question__panel")).toHaveLength(1);
+    expect(openPanels(wrapper)).toHaveLength(1);
   });
 
   /*
@@ -109,7 +131,7 @@ describe("四題各佔一列", () => {
     const wrapper = mountEditor({ collapsible: false });
 
     expect(rowFor(wrapper, "防曬標示").attributes("aria-expanded")).toBe("true");
-    expect(wrapper.findAll(".label-question__panel")).toHaveLength(1);
+    expect(openPanels(wrapper)).toHaveLength(1);
   });
 
   it("aria-controls 指到真的存在的面板", async () => {
@@ -138,7 +160,7 @@ describe("耐水拆成兩層（裁決丙）", () => {
   it("選了「有耐水標示」才出現 40／80，預設 40", async () => {
     const wrapper = mountEditor();
     await openWater(wrapper);
-    await wrapper.get('input[value="yes"]').setValue(true);
+    await waterInput(wrapper, "yes").setValue(true);
 
     expect(wrapper.find(".label-question__minutes").exists()).toBe(true);
     expect(rowFor(wrapper, "耐水標示").text()).toContain("耐水 40 分鐘");
@@ -156,7 +178,7 @@ describe("耐水拆成兩層（裁決丙）", () => {
   it("40／80 緊接在「有耐水標示」下面，不是排在所有選項之後", async () => {
     const wrapper = mountEditor();
     await openWater(wrapper);
-    await wrapper.get('input[value="yes"]').setValue(true);
+    await waterInput(wrapper, "yes").setValue(true);
 
     const html = wrapper.html();
     const parentIndex = html.indexOf("有耐水標示");
@@ -174,7 +196,7 @@ describe("耐水拆成兩層（裁決丙）", () => {
   it("40／80 沿用 choice-grid 的選項外觀", async () => {
     const wrapper = mountEditor();
     await openWater(wrapper);
-    await wrapper.get('input[value="yes"]').setValue(true);
+    await waterInput(wrapper, "yes").setValue(true);
 
     expect(wrapper.get(".label-question__minutes").classes()).toContain(
       "choice-grid"
@@ -188,9 +210,9 @@ describe("耐水拆成兩層（裁決丙）", () => {
   it("兩層是不同的 radio group", async () => {
     const wrapper = mountEditor();
     await openWater(wrapper);
-    await wrapper.get('input[value="yes"]').setValue(true);
+    await waterInput(wrapper, "yes").setValue(true);
 
-    const outer = wrapper.get('input[value="yes"]').attributes("name");
+    const outer = waterInput(wrapper, "yes").attributes("name");
     const inner = wrapper
       .get(".label-question__minutes")
       .get("input")
@@ -225,7 +247,7 @@ describe("耐水拆成兩層（裁決丙）", () => {
   it("分鐘那一排與母選項接成同一張卡", async () => {
     const wrapper = mountEditor();
     await openWater(wrapper);
-    await wrapper.get('input[value="yes"]').setValue(true);
+    await waterInput(wrapper, "yes").setValue(true);
 
     // 母選項下緣去圓角，分鐘那一排去上框線——兩者一起才接得起來。
     expect(wrapper.get(".water-claim-option").classes()).toContain(
@@ -247,7 +269,7 @@ describe("耐水拆成兩層（裁決丙）", () => {
   it("分鐘的文字不重複「耐水」", async () => {
     const wrapper = mountEditor();
     await openWater(wrapper);
-    await wrapper.get('input[value="yes"]').setValue(true);
+    await waterInput(wrapper, "yes").setValue(true);
 
     const text = wrapper.get(".label-question__minutes").text();
     expect(text).toContain("40 分鐘");
@@ -263,7 +285,8 @@ describe("耐水拆成兩層（裁決丙）", () => {
     const wrapper = mountEditor();
     await openWater(wrapper);
 
-    const text = wrapper.get(".label-question__panel").text();
+    // 四個面板都在 DOM 裡，`.label-question__panel` 會抓到第一題。
+    const text = wrapper.get('[id$="-water-panel"]').text();
     expect(text).toContain("沒有耐水標示");
     expect(text).toContain("明確標示不耐水");
   });

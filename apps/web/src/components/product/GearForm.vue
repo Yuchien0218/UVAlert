@@ -3,6 +3,8 @@ import { computed, onMounted, ref, shallowRef, watch } from "vue";
 import type { GearCategory } from "@sunshield/contracts";
 import { useWebAppServices } from "../../app/injection";
 import Icon from "../icons/Icon.vue";
+import DisclosureChevron from "../common/DisclosureChevron.vue";
+import DisclosurePanel from "../common/DisclosurePanel.vue";
 import ProductSnapshotEditor from "./ProductSnapshotEditor.vue";
 import {
   makeSessionOnlyProductSnapshot,
@@ -530,130 +532,129 @@ async function remove(): Promise<void> {
         aria-controls="gear-record-fields"
         @click="recordExpanded = !recordExpanded"
       >
-        <Icon
-          :name="recordOpen ? 'tool-chevron-down' : 'tool-chevron-right'"
-          :size="20"
-        />
+        <DisclosureChevron :open="recordOpen" :size="20" />
         {{ recordOpen ? "收合購買紀錄" : "補上購買紀錄（選填）" }}
       </button>
 
-      <div v-show="recordOpen" id="gear-record-fields" class="record-fields">
-      <div class="field-pair">
-        <div>
-          <label for="gear-purchase">購買月份</label>
-          <input id="gear-purchase" v-model="purchaseMonth" type="month" />
-        </div>
-        <div>
-          <label for="gear-expiry">
-            到期日
-            <span v-if="affectsCountdown(gearCategory)" class="affects-badge">
-              會影響倒數
-            </span>
-          </label>
-          <input id="gear-expiry" v-model="expiryDate" type="date" />
-        </div>
-      </div>
-      <p v-if="affectsCountdown(gearCategory)" class="field-helper">
-        逾期後將禁止建立補擦倒數。
-      </p>
-
-      <div class="field-pair">
-        <div>
-          <label for="gear-price">購入價格</label>
-          <!--
-            刻意不用 type="number"，理由同上方 SPF 欄位：v-model 對 number
-            input 會自動轉型，空字串會變成 undefined。
-          -->
-          <input
-            id="gear-price"
-            v-model="priceTwd"
-            type="text"
-            inputmode="numeric"
-            maxlength="7"
-          />
-        </div>
-        <div>
-          <label for="gear-rating">使用評價</label>
-          <select id="gear-rating" v-model="usageRating">
-            <option value="">未評價</option>
-            <option value="good">好用</option>
-            <option value="ok">普通</option>
-            <option value="bad">不好用</option>
-          </select>
-        </div>
-      </div>
-
-      <!--
-        2026-09-01：尺寸與顏色（分享卡要印，使用者裁決）。
-
-        **只對有這個概念的品類顯示**：防曬衣物與其他裝備有尺寸與顏色、
-        太陽眼鏡只有顏色、**防曬乳兩者都沒有**——它的識別資訊是 SPF／PA。
-        限制做在表單層而不是 schema 層：schema 不該假設使用者的分類習慣，
-        而且欄位是選填的，硬擋只會讓資料進不來。
-
-        自由文字而不是 S／M／L／XL：歐碼、數字碼、Free Size 都真實存在。
-      -->
-      <div v-if="showsSize || showsColor" class="field-pair">
-        <div v-if="showsSize">
-          <label for="gear-size">尺寸</label>
-          <input id="gear-size" v-model="size" type="text" maxlength="20" />
-        </div>
-        <div v-if="showsColor">
-          <label for="gear-color">顏色</label>
-          <input id="gear-color" v-model="color" type="text" maxlength="20" />
-        </div>
-      </div>
-
-      <!--
-        2026-09-02：防曬乳的容量／劑型／防護機制（使用者裁決）。
-
-        **放在「我的紀錄」而不是「包裝標示」卡**，即使這三項都印在瓶身上。
-        判準是「會不會影響倒數」——它們都不會，所以跟價格、尺寸同一層。
-        放進包裝標示那組會改到 `ProductLabelSnapshotV1`，而
-        `snapshotFingerprint` 是由 snapshot 算出來的，加欄位會讓既有產品的
-        fingerprint 全部變掉，等於每一罐都變成「另一罐」。
-      -->
-      <template v-if="showsSunscreenSpecs">
+      <DisclosurePanel :open="recordOpen">
+        <div id="gear-record-fields" class="record-fields">
         <div class="field-pair">
           <div>
-            <label for="gear-volume">包裝容量</label>
+            <label for="gear-purchase">購買月份</label>
+            <input id="gear-purchase" v-model="purchaseMonth" type="month" />
+          </div>
+          <div>
+            <label for="gear-expiry">
+              到期日
+              <span v-if="affectsCountdown(gearCategory)" class="affects-badge">
+                會影響倒數
+              </span>
+            </label>
+            <input id="gear-expiry" v-model="expiryDate" type="date" />
+          </div>
+        </div>
+        <p v-if="affectsCountdown(gearCategory)" class="field-helper">
+          逾期後將禁止建立補擦倒數。
+        </p>
+
+        <div class="field-pair">
+          <div>
+            <label for="gear-price">購入價格</label>
+            <!--
+              刻意不用 type="number"，理由同上方 SPF 欄位：v-model 對 number
+              input 會自動轉型，空字串會變成 undefined。
+            -->
             <input
-              id="gear-volume"
-              v-model="volume"
+              id="gear-price"
+              v-model="priceTwd"
               type="text"
-              maxlength="20"
-              placeholder="60ml"
+              inputmode="numeric"
+              maxlength="7"
             />
           </div>
           <div>
-            <label for="gear-formulation">劑型</label>
-            <select id="gear-formulation" v-model="formulation">
-              <option value="">未填寫</option>
-              <option value="lotion">乳液</option>
-              <option value="gel">凝膠／水感</option>
-              <option value="cream">霜狀</option>
-              <option value="spray">噴霧</option>
-              <option value="stick">防曬棒</option>
+            <label for="gear-rating">使用評價</label>
+            <select id="gear-rating" v-model="usageRating">
+              <option value="">未評價</option>
+              <option value="good">好用</option>
+              <option value="ok">普通</option>
+              <option value="bad">不好用</option>
             </select>
           </div>
         </div>
 
-        <label for="gear-protection-type">防護機制</label>
-        <select id="gear-protection-type" v-model="protectionType">
-          <option value="">未填寫</option>
-          <option value="physical">物理性</option>
-          <option value="chemical">化學性</option>
-          <option value="hybrid">混合型</option>
-        </select>
-        <p class="field-helper">
-          依包裝標示填寫，不從膚感推測。這三項只是紀錄，不影響補擦倒數。
-        </p>
-      </template>
+        <!--
+          2026-09-01：尺寸與顏色（分享卡要印，使用者裁決）。
 
-      <label for="gear-note">備註</label>
-      <textarea id="gear-note" v-model="note" maxlength="500" rows="3" />
-      <p class="field-helper">勿填寫個人醫療、用藥或敏感個資。</p>
-      </div>
+          **只對有這個概念的品類顯示**：防曬衣物與其他裝備有尺寸與顏色、
+          太陽眼鏡只有顏色、**防曬乳兩者都沒有**——它的識別資訊是 SPF／PA。
+          限制做在表單層而不是 schema 層：schema 不該假設使用者的分類習慣，
+          而且欄位是選填的，硬擋只會讓資料進不來。
+
+          自由文字而不是 S／M／L／XL：歐碼、數字碼、Free Size 都真實存在。
+        -->
+        <div v-if="showsSize || showsColor" class="field-pair">
+          <div v-if="showsSize">
+            <label for="gear-size">尺寸</label>
+            <input id="gear-size" v-model="size" type="text" maxlength="20" />
+          </div>
+          <div v-if="showsColor">
+            <label for="gear-color">顏色</label>
+            <input id="gear-color" v-model="color" type="text" maxlength="20" />
+          </div>
+        </div>
+
+        <!--
+          2026-09-02：防曬乳的容量／劑型／防護機制（使用者裁決）。
+
+          **放在「我的紀錄」而不是「包裝標示」卡**，即使這三項都印在瓶身上。
+          判準是「會不會影響倒數」——它們都不會，所以跟價格、尺寸同一層。
+          放進包裝標示那組會改到 `ProductLabelSnapshotV1`，而
+          `snapshotFingerprint` 是由 snapshot 算出來的，加欄位會讓既有產品的
+          fingerprint 全部變掉，等於每一罐都變成「另一罐」。
+        -->
+        <template v-if="showsSunscreenSpecs">
+          <div class="field-pair">
+            <div>
+              <label for="gear-volume">包裝容量</label>
+              <input
+                id="gear-volume"
+                v-model="volume"
+                type="text"
+                maxlength="20"
+                placeholder="60ml"
+              />
+            </div>
+            <div>
+              <label for="gear-formulation">劑型</label>
+              <select id="gear-formulation" v-model="formulation">
+                <option value="">未填寫</option>
+                <option value="lotion">乳液</option>
+                <option value="gel">凝膠／水感</option>
+                <option value="cream">霜狀</option>
+                <option value="spray">噴霧</option>
+                <option value="stick">防曬棒</option>
+              </select>
+            </div>
+          </div>
+
+          <label for="gear-protection-type">防護機制</label>
+          <select id="gear-protection-type" v-model="protectionType">
+            <option value="">未填寫</option>
+            <option value="physical">物理性</option>
+            <option value="chemical">化學性</option>
+            <option value="hybrid">混合型</option>
+          </select>
+          <p class="field-helper">
+            依包裝標示填寫，不從膚感推測。這三項只是紀錄，不影響補擦倒數。
+          </p>
+        </template>
+
+        <label for="gear-note">備註</label>
+        <textarea id="gear-note" v-model="note" maxlength="500" rows="3" />
+        <p class="field-helper">勿填寫個人醫療、用藥或敏感個資。</p>
+        </div>
+      </DisclosurePanel>
     </section>
 
     <p v-if="localError" class="form-error" role="alert">{{ localError }}</p>

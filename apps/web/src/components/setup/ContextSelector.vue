@@ -2,6 +2,7 @@
 import type { SessionContext } from "@sunshield/contracts";
 import { computed, shallowRef, watch } from "vue";
 import Icon from "../icons/Icon.vue";
+import DisclosureChevron from "../common/DisclosureChevron.vue";
 import { CONTEXT_ICONS } from "../../features/setup/setupCatalog";
 
 /**
@@ -165,10 +166,8 @@ const selectedDescription = computed(() => {
       >
         <Icon :name="group.icon" :size="32" />
         <strong>{{ group.label }}</strong>
-        <Icon
-          :name="
-            openGroup === group.key ? 'tool-chevron-down' : 'tool-chevron-right'
-          "
+        <DisclosureChevron
+          :open="openGroup === group.key"
           class="context-tile__chevron"
           :size="16"
         />

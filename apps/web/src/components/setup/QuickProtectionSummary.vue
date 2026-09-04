@@ -1,5 +1,7 @@
 <script setup lang="ts">
 import Icon from "../icons/Icon.vue";
+import DisclosureChevron from "../common/DisclosureChevron.vue";
+import DisclosurePanel from "../common/DisclosurePanel.vue";
 import type { SessionContext, SetupDraftZoneV1 } from "@sunshield/contracts";
 import { computed, shallowRef, useId, watch } from "vue";
 import {
@@ -56,8 +58,8 @@ const zoneLabels = computed(() =>
       @click="expanded = !expanded"
     >
       <h2 data-typography-role="card-title">{{ preset.label }}</h2>
-      <Icon
-        :name="expanded ? 'tool-chevron-down' : 'tool-chevron-right'"
+      <DisclosureChevron
+        :open="expanded"
         :size="20"
         class="quick-protection__toggle"
       />
@@ -79,27 +81,29 @@ const zoneLabels = computed(() =>
       3 刪掉——下方主要 CTA 就寫著「開始防曬提醒」，而塗抹時間卡本身也在
       同一個畫面上。它在重述畫面上已經看得到的流程。
     -->
-    <div v-if="expanded" :id="detailsId" class="quick-protection__details">
-      <p class="quick-protection__zones">{{ zoneLabels.join("、") }}</p>
-      <div class="quick-protection__actions">
-        <button
-          v-if="pending"
-          class="button button--primary"
-          type="button"
-          @click="$emit('accept')"
-        >
-          使用這組並繼續
-        </button>
-        <button
-          class="button button--quiet"
-          type="button"
-          @click="$emit('adjust')"
-        >
-          <Icon name="tool-edit" :size="16" />
-          調整要提醒的部位
-        </button>
+    <DisclosurePanel :open="expanded">
+      <div :id="detailsId" class="quick-protection__details">
+        <p class="quick-protection__zones">{{ zoneLabels.join("、") }}</p>
+        <div class="quick-protection__actions">
+          <button
+            v-if="pending"
+            class="button button--primary"
+            type="button"
+            @click="$emit('accept')"
+          >
+            使用這組並繼續
+          </button>
+          <button
+            class="button button--quiet"
+            type="button"
+            @click="$emit('adjust')"
+          >
+            <Icon name="tool-edit" :size="16" />
+            調整要提醒的部位
+          </button>
+        </div>
       </div>
-    </div>
+    </DisclosurePanel>
   </section>
 </template>
 
@@ -166,7 +170,6 @@ const zoneLabels = computed(() =>
   display: grid;
   gap: var(--space-3);
   padding: 0;
-  animation: quickProtectionFadeIn var(--duration-base) var(--ease-out);
 }
 
 .quick-protection__zones {
@@ -186,17 +189,6 @@ const zoneLabels = computed(() =>
  * 2026-08-24：原本叫 slideDown、帶 translateY(-0.5rem)，但 DESIGN.md
  * 第十二節明訂動畫「只用 opacity，不用位移或縮放」。改成純淡入。
  */
-@keyframes quickProtectionFadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(var(--motion-rise));
-  }
-  to {
-    opacity: 1;
-    transform: none;
-  }
-}
-
 @media (max-width: 31rem) {
   .quick-protection__header {
     gap: var(--space-3);

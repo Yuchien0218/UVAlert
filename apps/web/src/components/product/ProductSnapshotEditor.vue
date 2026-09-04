@@ -1,5 +1,7 @@
 <script setup lang="ts">
 import Icon from "../icons/Icon.vue";
+import DisclosureChevron from "../common/DisclosureChevron.vue";
+import DisclosurePanel from "../common/DisclosurePanel.vue";
 import IconLead from "../common/IconLead.vue";
 import { computed, shallowRef, useId } from "vue";
 import type { ProductSnapshotFormValue } from "../../features/setup/productSnapshot";
@@ -249,66 +251,63 @@ const waterHasClaim = computed<string>({
           <span class="label-question__answer">{{
             answers.claim ?? "尚未填寫"
           }}</span>
-          <Icon
+          <DisclosureChevron
             class="label-question__chevron"
-            :name="
-              openQuestion === 'claim'
-                ? 'tool-chevron-down'
-                : 'tool-chevron-right'
-            "
+            :open="openQuestion === 'claim'"
             :size="20"
           />
         </button>
 
-        <fieldset
-          v-if="openQuestion === 'claim'"
-          :id="`${groupPrefix}-claim-panel`"
-          class="label-question__panel"
-        >
-          <legend>
-            {{
-              otherTopicalOnly
-                ? "這瓶防曬乳有明確的防曬或 SPF 標示嗎？"
-                : "包裝有明確的防曬或 SPF 標示嗎？"
-            }}
-          </legend>
-          <p class="question-card__helper">
-            請確認包裝上是否有 SPF、PA
-            等防曬標示；僅有品牌、成分或「天然」宣稱，無法確認這是防曬乳。
-          </p>
-          <div class="choice-grid choice-grid--row">
-            <label>
-              <input
-                v-model="value.claimAnswer"
-                type="radio"
-                :name="groupNames.claim"
-                value="yes"
-                @change="markTouched('claim')"
-              />
-              <span>有</span>
-            </label>
-            <label>
-              <input
-                v-model="value.claimAnswer"
-                type="radio"
-                :name="groupNames.claim"
-                value="no"
-                @change="markTouched('claim')"
-              />
-              <span>沒有</span>
-            </label>
-            <label>
-              <input
-                v-model="value.claimAnswer"
-                type="radio"
-                :name="groupNames.claim"
-                value="unknown"
-                @change="markTouched('claim')"
-              />
-              <span>不確定或看不清楚</span>
-            </label>
-          </div>
-        </fieldset>
+        <DisclosurePanel :open="openQuestion === 'claim'">
+          <fieldset
+            :id="`${groupPrefix}-claim-panel`"
+            class="label-question__panel"
+          >
+            <legend>
+              {{
+                otherTopicalOnly
+                  ? "這瓶防曬乳有明確的防曬或 SPF 標示嗎？"
+                  : "包裝有明確的防曬或 SPF 標示嗎？"
+              }}
+            </legend>
+            <p class="question-card__helper">
+              請確認包裝上是否有 SPF、PA
+              等防曬標示；僅有品牌、成分或「天然」宣稱，無法確認這是防曬乳。
+            </p>
+            <div class="choice-grid choice-grid--row">
+              <label>
+                <input
+                  v-model="value.claimAnswer"
+                  type="radio"
+                  :name="groupNames.claim"
+                  value="yes"
+                  @change="markTouched('claim')"
+                />
+                <span>有</span>
+              </label>
+              <label>
+                <input
+                  v-model="value.claimAnswer"
+                  type="radio"
+                  :name="groupNames.claim"
+                  value="no"
+                  @change="markTouched('claim')"
+                />
+                <span>沒有</span>
+              </label>
+              <label>
+                <input
+                  v-model="value.claimAnswer"
+                  type="radio"
+                  :name="groupNames.claim"
+                  value="unknown"
+                  @change="markTouched('claim')"
+                />
+                <span>不確定或看不清楚</span>
+              </label>
+            </div>
+          </fieldset>
+        </DisclosurePanel>
       </div>
 
       <!--
@@ -329,71 +328,68 @@ const waterHasClaim = computed<string>({
             <span class="label-question__answer">{{
               answers.wait ?? "尚未填寫"
             }}</span>
-            <Icon
+            <DisclosureChevron
               class="label-question__chevron"
-              :name="
-                openQuestion === 'wait'
-                  ? 'tool-chevron-down'
-                  : 'tool-chevron-right'
-              "
+              :open="openQuestion === 'wait'"
               :size="20"
             />
           </button>
 
-          <fieldset
-            v-if="openQuestion === 'wait'"
-            :id="`${groupPrefix}-wait-panel`"
-            class="label-question__panel"
-          >
-            <legend>包裝怎麼寫擦上後的等待時間？</legend>
-            <p class="question-card__helper">
-              只填包裝上可確認的內容；看不清楚時請選擇「不確定」。
-            </p>
-            <div class="choice-grid choice-grid--row">
-              <label>
+          <DisclosurePanel :open="openQuestion === 'wait'">
+            <fieldset
+              :id="`${groupPrefix}-wait-panel`"
+              class="label-question__panel"
+            >
+              <legend>包裝怎麼寫擦上後的等待時間？</legend>
+              <p class="question-card__helper">
+                只填包裝上可確認的內容；看不清楚時請選擇「不確定」。
+              </p>
+              <div class="choice-grid choice-grid--row">
+                <label>
+                  <input
+                    v-model="value.waitAnswer"
+                    type="radio"
+                    :name="groupNames.wait"
+                    value="none"
+                    @change="markTouched('wait')"
+                  />
+                  <span>沒有這項說明</span>
+                </label>
+                <label>
+                  <input
+                    v-model="value.waitAnswer"
+                    type="radio"
+                    :name="groupNames.wait"
+                    value="explicit"
+                    @change="markTouched('wait')"
+                  />
+                  <span>有明確分鐘數</span>
+                </label>
+                <label>
+                  <input
+                    v-model="value.waitAnswer"
+                    type="radio"
+                    :name="groupNames.wait"
+                    value="unknown"
+                    @change="markTouched('wait')"
+                  />
+                  <span>不確定</span>
+                </label>
+              </div>
+              <label v-if="value.waitAnswer === 'explicit'" class="number-field">
+                <span>等待分鐘數</span>
                 <input
-                  v-model="value.waitAnswer"
-                  type="radio"
-                  :name="groupNames.wait"
-                  value="none"
-                  @change="markTouched('wait')"
+                  v-model.number="value.waitMinutes"
+                  class="stat-figure"
+                  type="number"
+                  min="1"
+                  max="240"
+                  inputmode="numeric"
+                  @input="markTouched('wait')"
                 />
-                <span>沒有這項說明</span>
               </label>
-              <label>
-                <input
-                  v-model="value.waitAnswer"
-                  type="radio"
-                  :name="groupNames.wait"
-                  value="explicit"
-                  @change="markTouched('wait')"
-                />
-                <span>有明確分鐘數</span>
-              </label>
-              <label>
-                <input
-                  v-model="value.waitAnswer"
-                  type="radio"
-                  :name="groupNames.wait"
-                  value="unknown"
-                  @change="markTouched('wait')"
-                />
-                <span>不確定</span>
-              </label>
-            </div>
-            <label v-if="value.waitAnswer === 'explicit'" class="number-field">
-              <span>等待分鐘數</span>
-              <input
-                v-model.number="value.waitMinutes"
-                class="stat-figure"
-                type="number"
-                min="1"
-                max="240"
-                inputmode="numeric"
-                @input="markTouched('wait')"
-              />
-            </label>
-          </fieldset>
+            </fieldset>
+          </DisclosurePanel>
         </div>
 
         <div class="label-question">
@@ -408,74 +404,71 @@ const waterHasClaim = computed<string>({
             <span class="label-question__answer">{{
               answers.interval ?? "尚未填寫"
             }}</span>
-            <Icon
+            <DisclosureChevron
               class="label-question__chevron"
-              :name="
-                openQuestion === 'interval'
-                  ? 'tool-chevron-down'
-                  : 'tool-chevron-right'
-              "
+              :open="openQuestion === 'interval'"
               :size="20"
             />
           </button>
 
-          <fieldset
-            v-if="openQuestion === 'interval'"
-            :id="`${groupPrefix}-interval-panel`"
-            class="label-question__panel"
-          >
-            <legend>包裝有寫較短的補擦間隔嗎？</legend>
-            <p class="question-card__helper">
-              如果包裝有明確分鐘數，提醒會採用這個較短的間隔。
-            </p>
-            <div class="choice-grid choice-grid--row">
-              <label>
-                <input
-                  v-model="value.intervalAnswer"
-                  type="radio"
-                  :name="groupNames.interval"
-                  value="none"
-                  @change="markTouched('interval')"
-                />
-                <span>沒有明確分鐘數</span>
-              </label>
-              <label>
-                <input
-                  v-model="value.intervalAnswer"
-                  type="radio"
-                  :name="groupNames.interval"
-                  value="explicit"
-                  @change="markTouched('interval')"
-                />
-                <span>有明確分鐘數</span>
-              </label>
-              <label>
-                <input
-                  v-model="value.intervalAnswer"
-                  type="radio"
-                  :name="groupNames.interval"
-                  value="unknown"
-                  @change="markTouched('interval')"
-                />
-                <span>不確定</span>
-              </label>
-            </div>
-            <label
-              v-if="value.intervalAnswer === 'explicit'"
-              class="number-field"
+          <DisclosurePanel :open="openQuestion === 'interval'">
+            <fieldset
+              :id="`${groupPrefix}-interval-panel`"
+              class="label-question__panel"
             >
-              <span>補擦分鐘數</span>
-              <input
-                v-model.number="value.intervalMinutes"
-                class="stat-figure"
-                type="number"
-                min="1"
-                max="1440"
-                inputmode="numeric"
-                @input="markTouched('interval')"
-              />
-            </label>
-          </fieldset>
+              <legend>包裝有寫較短的補擦間隔嗎？</legend>
+              <p class="question-card__helper">
+                如果包裝有明確分鐘數，提醒會採用這個較短的間隔。
+              </p>
+              <div class="choice-grid choice-grid--row">
+                <label>
+                  <input
+                    v-model="value.intervalAnswer"
+                    type="radio"
+                    :name="groupNames.interval"
+                    value="none"
+                    @change="markTouched('interval')"
+                  />
+                  <span>沒有明確分鐘數</span>
+                </label>
+                <label>
+                  <input
+                    v-model="value.intervalAnswer"
+                    type="radio"
+                    :name="groupNames.interval"
+                    value="explicit"
+                    @change="markTouched('interval')"
+                  />
+                  <span>有明確分鐘數</span>
+                </label>
+                <label>
+                  <input
+                    v-model="value.intervalAnswer"
+                    type="radio"
+                    :name="groupNames.interval"
+                    value="unknown"
+                    @change="markTouched('interval')"
+                  />
+                  <span>不確定</span>
+                </label>
+              </div>
+              <label
+                v-if="value.intervalAnswer === 'explicit'"
+                class="number-field"
+              >
+                <span>補擦分鐘數</span>
+                <input
+                  v-model.number="value.intervalMinutes"
+                  class="stat-figure"
+                  type="number"
+                  min="1"
+                  max="1440"
+                  inputmode="numeric"
+                  @input="markTouched('interval')"
+                />
+              </label>
+            </fieldset>
+          </DisclosurePanel>
         </div>
 
         <div v-if="waterContext" class="label-question">
@@ -490,13 +483,9 @@ const waterHasClaim = computed<string>({
             <span class="label-question__answer">{{
               answers.water ?? "尚未填寫"
             }}</span>
-            <Icon
+            <DisclosureChevron
               class="label-question__chevron"
-              :name="
-                openQuestion === 'water'
-                  ? 'tool-chevron-down'
-                  : 'tool-chevron-right'
-              "
+              :open="openQuestion === 'water'"
               :size="20"
             />
           </button>
@@ -508,123 +497,124 @@ const waterHasClaim = computed<string>({
             「耐水 40 分鐘」與「耐水 80 分鐘」其實是同一個答案的兩種程度，
             所以先問有沒有標示，答有才出現分鐘數。
           -->
-          <fieldset
-            v-if="openQuestion === 'water'"
-            :id="`${groupPrefix}-water-panel`"
-            class="label-question__panel"
-          >
-            <legend>包裝上的耐水標示</legend>
-            <p class="question-card__helper">
-              只依照包裝標示選擇，不從產品名稱或使用感推測。
-            </p>
-            <!--
-              **第二層緊接在「有耐水標示」下面，不是排在四個選項之後。**
+          <DisclosurePanel :open="openQuestion === 'water'">
+            <fieldset
+              :id="`${groupPrefix}-water-panel`"
+              class="label-question__panel"
+            >
+              <legend>包裝上的耐水標示</legend>
+              <p class="question-card__helper">
+                只依照包裝標示選擇，不從產品名稱或使用感推測。
+              </p>
+              <!--
+                **第二層緊接在「有耐水標示」下面，不是排在四個選項之後。**
 
-              第一版把 40／80 放在整組選項的最後，畫出來看之後發現讀成了
-              「六個並列的選項」——縮排根本救不了，因為中間隔著三個同層級
-              的選項。任何 DOM 或數值斷言對這件事都是綠的（CLAUDE.md
-              「有些問題只有畫出來看才找得到」）。
+                第一版把 40／80 放在整組選項的最後，畫出來看之後發現讀成了
+                「六個並列的選項」——縮排根本救不了，因為中間隔著三個同層級
+                的選項。任何 DOM 或數值斷言對這件事都是綠的（CLAUDE.md
+                「有些問題只有畫出來看才找得到」）。
 
-              radio group 被拆成兩個 `<div>`，但 `name` 相同，所以單選行為
-              不受影響。
+                radio group 被拆成兩個 `<div>`，但 `name` 相同，所以單選行為
+                不受影響。
 
-              **2026-09-01 第二次調整（使用者要求「旁邊有一條顏色怪怪的，
-              字也分兩行」）：改成與母選項接成同一張卡。**
+                **2026-09-01 第二次調整（使用者要求「旁邊有一條顏色怪怪的，
+                字也分兩行」）：改成與母選項接成同一張卡。**
 
-              前一版靠「縮排＋左側一條連接線」表示層級。那條線在畫面上是一
-              段沒有來由的色塊——它不圍住任何東西，只是浮在旁邊；而縮排又把
-              兩個選項擠窄，「耐水 40 分鐘」因此折成兩行。
+                前一版靠「縮排＋左側一條連接線」表示層級。那條線在畫面上是一
+                段沒有來由的色塊——它不圍住任何東西，只是浮在旁邊；而縮排又把
+                兩個選項擠窄，「耐水 40 分鐘」因此折成兩行。
 
-              現在改成**用包含關係取代連接線**：母選項的下緣拿掉圓角與框線，
-              分鐘那一排直接續在下面、共用同一組邊框與底色，讀起來就是同一
-              張卡的第二段。層級不需要另一個圖形來說明。
+                現在改成**用包含關係取代連接線**：母選項的下緣拿掉圓角與框線，
+                分鐘那一排直接續在下面、共用同一組邊框與底色，讀起來就是同一
+                張卡的第二段。層級不需要另一個圖形來說明。
 
-              文字也一起縮短成「40 分鐘」——母選項已經寫了「有耐水標示」，
-              再重複一次「耐水」正是把字擠到第二行的原因。
-            -->
-            <div class="choice-grid choice-grid--row">
-              <label
-                class="water-claim-option"
-                :class="{
-                  'water-claim-option--joined': waterHasClaim === 'yes'
-                }"
-              >
-                <input
-                  v-model="waterHasClaim"
-                  type="radio"
-                  :name="groupNames.waterResistance"
-                  value="yes"
-                />
-                <span>有耐水標示</span>
-              </label>
+                文字也一起縮短成「40 分鐘」——母選項已經寫了「有耐水標示」，
+                再重複一次「耐水」正是把字擠到第二行的原因。
+              -->
+              <div class="choice-grid choice-grid--row">
+                <label
+                  class="water-claim-option"
+                  :class="{
+                    'water-claim-option--joined': waterHasClaim === 'yes'
+                  }"
+                >
+                  <input
+                    v-model="waterHasClaim"
+                    type="radio"
+                    :name="groupNames.waterResistance"
+                    value="yes"
+                  />
+                  <span>有耐水標示</span>
+                </label>
 
-              <div
-                v-if="waterHasClaim === 'yes'"
-                class="choice-grid label-question__minutes"
-              >
+                <div
+                  v-if="waterHasClaim === 'yes'"
+                  class="choice-grid label-question__minutes"
+                >
+                  <label>
+                    <input
+                      v-model="value.waterResistance"
+                      type="radio"
+                      :name="`${groupNames.waterResistance}-minutes`"
+                      value="40"
+                      @change="markTouched('water')"
+                    />
+                    <span>
+                      <span class="stat-figure" data-water-resistance="40"
+                        >40</span
+                      >
+                      分鐘
+                    </span>
+                  </label>
+                  <label>
+                    <input
+                      v-model="value.waterResistance"
+                      type="radio"
+                      :name="`${groupNames.waterResistance}-minutes`"
+                      value="80"
+                      @change="markTouched('water')"
+                    />
+                    <span>
+                      <span class="stat-figure" data-water-resistance="80"
+                        >80</span
+                      >
+                      分鐘
+                    </span>
+                  </label>
+                </div>
+              </div>
+
+              <div class="choice-grid choice-grid--row">
                 <label>
                   <input
-                    v-model="value.waterResistance"
+                    v-model="waterHasClaim"
                     type="radio"
-                    :name="`${groupNames.waterResistance}-minutes`"
-                    value="40"
-                    @change="markTouched('water')"
+                    :name="groupNames.waterResistance"
+                    value="no_claim"
                   />
-                  <span>
-                    <span class="stat-figure" data-water-resistance="40"
-                      >40</span
-                    >
-                    分鐘
-                  </span>
+                  <span>沒有耐水標示</span>
                 </label>
                 <label>
                   <input
-                    v-model="value.waterResistance"
+                    v-model="waterHasClaim"
                     type="radio"
-                    :name="`${groupNames.waterResistance}-minutes`"
-                    value="80"
-                    @change="markTouched('water')"
+                    :name="groupNames.waterResistance"
+                    value="not_water_resistant"
                   />
-                  <span>
-                    <span class="stat-figure" data-water-resistance="80"
-                      >80</span
-                    >
-                    分鐘
-                  </span>
+                  <span>明確標示不耐水</span>
+                </label>
+                <label>
+                  <input
+                    v-model="waterHasClaim"
+                    type="radio"
+                    :name="groupNames.waterResistance"
+                    value="unknown"
+                  />
+                  <span>不確定或看不清楚</span>
                 </label>
               </div>
-            </div>
-
-            <div class="choice-grid choice-grid--row">
-              <label>
-                <input
-                  v-model="waterHasClaim"
-                  type="radio"
-                  :name="groupNames.waterResistance"
-                  value="no_claim"
-                />
-                <span>沒有耐水標示</span>
-              </label>
-              <label>
-                <input
-                  v-model="waterHasClaim"
-                  type="radio"
-                  :name="groupNames.waterResistance"
-                  value="not_water_resistant"
-                />
-                <span>明確標示不耐水</span>
-              </label>
-              <label>
-                <input
-                  v-model="waterHasClaim"
-                  type="radio"
-                  :name="groupNames.waterResistance"
-                  value="unknown"
-                />
-                <span>不確定或看不清楚</span>
-              </label>
-            </div>
-          </fieldset>
+            </fieldset>
+          </DisclosurePanel>
         </div>
       </template>
       </div>

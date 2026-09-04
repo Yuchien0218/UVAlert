@@ -86,9 +86,17 @@ describe("ProductSnapshotEditor", () => {
       }
     }
 
-    // 第二層的 40／80 要選了「有耐水標示」才出現。
+    /*
+     * 第二層的 40／80 要選了「有耐水標示」才出現。
+     *
+     * 2026-09-04：必須先鎖定耐水面板再找 input——四個面板改用 DisclosurePanel
+     * 之後一直都在 DOM 裡（收合是高度動畫不是 v-if），裸的
+     * `input[value="yes"]` 會抓到第一題的「有」，測試會默默失去意義。
+     */
     await openQuestion(wrapper, "耐水標示");
-    await wrapper.get('input[value="yes"]').setValue(true);
+    await wrapper
+      .get('[id$="-water-panel"] input[value="yes"]')
+      .setValue(true);
     for (const input of wrapper.findAll('input[type="radio"]')) {
       groupNames.add(input.attributes("name"));
     }

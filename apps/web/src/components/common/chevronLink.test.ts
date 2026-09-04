@@ -49,6 +49,11 @@ function vueFiles(dir: string, out: string[] = []): string[] {
  * 回來判斷它屬於哪一種，而不是默默地又長出第四種樣子。
  */
 const CHEVRON_OUTSIDE_COMPONENT = [
+  /*
+   * 2026-09-04：這是共用的展開 chevron 本體（兩顆圖示交叉淡入），跟
+   * ChevronLink 是同一類東西——收斂的目的地，不是漏改的使用點。
+   */
+  "components/common/DisclosureChevron.vue",
   "components/product/GearForm.vue",
   "components/product/GearListItem.vue",
   "components/product/ProductSnapshotEditor.vue",
@@ -91,19 +96,57 @@ describe("ChevronLink", () => {
     expect(button.attributes("aria-controls")).toBe("panel-1");
   });
 
-  /* chevron 換的是圖示 name，不是 transform: rotate（DESIGN.md 第五節）。 */
-  it("展開時箭頭朝下，收合時朝右", () => {
+  /*
+   * chevron 換的是圖示 name，不是 transform: rotate（DESIGN.md 第五節）。
+   *
+   * 2026-09-04：展開用法改走 DisclosureChevron——**兩顆圖示同時在 DOM 裡**、
+   * 靠 opacity 交叉淡入，所以不能再用「文字裡有沒有某個 name」判斷方向，
+   * 那兩個 name 永遠都在。改成看 is-open 這個狀態類別。
+   *
+   * 導覽用法（沒有 controls）維持單一 Icon，仍然只有右向。
+   */
+  const iconStub = {
+    props: ["name"],
+    template: "<i>{{ name }}</i>"
+  };
+
+  it("展開用法用交叉淡入的 chevron，靠 is-open 表示方向", () => {
     const closed = mount(ChevronLink, {
-      props: { expanded: false },
-      global: { stubs: { Icon: { props: ["name"], template: "<i>{{ name }}</i>" } } }
+      props: { expanded: false, controls: "panel-1" },
+      global: { stubs: { Icon: iconStub } }
     });
     const open = mount(ChevronLink, {
-      props: { expanded: true },
-      global: { stubs: { Icon: { props: ["name"], template: "<i>{{ name }}</i>" } } }
+      props: { expanded: true, controls: "panel-1" },
+      global: { stubs: { Icon: iconStub } }
     });
 
-    expect(closed.text()).toContain("tool-chevron-right");
-    expect(open.text()).toContain("tool-chevron-down");
+    // 兩顆都在，方向由 is-open 決定。
+    for (const wrapper of [closed, open]) {
+      expect(wrapper.text()).toContain("tool-chevron-right");
+      expect(wrapper.text()).toContain("tool-chevron-down");
+    }
+
+    expect(closed.get(".disclosure-chevron").classes()).not.toContain("is-open");
+    expect(open.get(".disclosure-chevron").classes()).toContain("is-open");
+  });
+
+  /*
+   * 導覽連結永遠是右向箭頭，不該多掛一顆看不見的下向圖示。
+   */
+  it("導覽用法只有一顆右向箭頭", () => {
+    const wrapper = mount(ChevronLink, {
+      props: { to: "/forecast" },
+      global: {
+        stubs: {
+          Icon: iconStub,
+          RouterLink: { props: ["to"], template: '<a :href="to"><slot /></a>' }
+        }
+      }
+    });
+
+    expect(wrapper.text()).toContain("tool-chevron-right");
+    expect(wrapper.text()).not.toContain("tool-chevron-down");
+    expect(wrapper.find(".disclosure-chevron").exists()).toBe(false);
   });
 
   /*
