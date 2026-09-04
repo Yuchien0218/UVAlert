@@ -163,6 +163,8 @@ components:
   bottom-nav:
     backgroundColor: "{colors.canvas}"
     textColor: "{colors.body-strong}"
+    labelColor: "{colors.muted}"
+    labelColorActive: "{colors.ink}"
     activePillColor: "{colors.surface-card}"
     typography: "{typography.nav-label}"
     height: 64px
@@ -659,11 +661,28 @@ Noto Serif TC 是標題的唯一字型，沒有第二層自托管備援——載
 
 **`bottom-nav`** — 固定在底部的三項導覽：**提醒**、**裝備**、**更多**。高度 64px，背景 `{colors.canvas}`。
 
-> **2026-08-23 修正**：選取態原本規定「未選取文字 `{colors.muted}`、選取態 `{colors.primary}`」——是換色。但 Claude Design 的下游元件庫（`components/navigation/BottomNav.jsx`／`.prompt.md`）實際做的是**用形狀承載狀態，不換色**：選取態是圖示後面的奶油色藥丸底（`{colors.surface-card}`）加粗體（700）標籤，圖示與文字顏色（`{colors.body-strong}`）在任何狀態下都一樣，沒有頂部指示條。兩份文件曾經互相矛盾，使用者確認採用藥丸版，本節文字回寫為準。這也更符合本文件其他地方的一貫哲學——用形狀而非純色承載狀態（例如部位狀態用格數計量表，不單靠顏色）。
+圖示在上、文字在下，標籤使用 `{typography.nav-label}`（12px，字重 500，**兩種狀態都一樣**）。三項是固定的——不新增衛教專用入口，也不保留獨立「首頁」入口。
 
-圖示在上、文字在下，標籤使用 `{typography.nav-label}`（12px）。**未選取沿用 token 的字重 500，選取態加粗到 700。** 三項是固定的——不新增衛教專用入口，也不保留獨立「首頁」入口。
+**選取態＝藥丸底 ＋ 標籤變深**：
 
-> **2026-08-30 更正**：這裡原本寫「未選取 400／選取 700」，與第三節 `{typography.nav-label}` 的字重 `500` 直接衝突，而程式碼各取一半——`.bottom-nav__item` 沒有自己設 `font-weight`，實測繼承 token 的 **500**；`.router-link-exact-active` 則寫死 **700**。改成描述實作現況（未選取 500），兩處不再打架。700 是這份文件唯一允許的量表外字重，理由是選取態需要比 500 更明確的對比，且它只作用在拉丁與中文 UI 標籤、不碰襯線標題。
+| 元素   | 未選取                | 選取態                                       |
+| ------ | --------------------- | -------------------------------------------- |
+| 藥丸   | 不顯示                | `{colors.surface-card}`，從 `scaleX(0.4)` 橫向展開到滿 |
+| 標籤   | `{colors.muted}`      | `{colors.ink}`                               |
+| 圖示   | `{colors.body-strong}` | `{colors.body-strong}`（**不變**）           |
+| 字重   | 500                   | 500（**不變**）                              |
+
+沒有頂部指示條。
+
+> **2026-09-04 修正（推翻 2026-08-23）**：原本是「用形狀承載狀態，**不換色**」——藥丸底 ＋ **粗體 700** 標籤，圖示與文字顏色兩態相同。那是 Claude Design 下游元件庫的做法，2026-08-23 使用者確認後回寫進本節。
+>
+> 現在改成**拿掉粗體、標籤換色**。粗體切換的問題是它是瞬變的字重跳動——字會微幅改變寬度，讀起來是「文字抖了一下」而不是「這一項被選中了」。連帶地，**700 不再是本文件允許的量表外字重**，全站字重回到第三節的量表之內。
+>
+> **只換標籤，不換圖示。** `nav-*` 圖示是雙色系統：墨咖結構走 `currentColor`、琥珀金重點寫死在 SVG 裡。對圖示換色只會換掉墨咖那一半，變成半邊變色。
+>
+> 顏色走**明暗階不走色相階**（`{colors.muted}` → `{colors.ink}`），不用 `{colors.primary}`——primary 是行動色，拿它當選取訊號等於讓「這裡可以按」跟「這個已經選了」共用一個訊號。這與同日 `context-option-selected` 的裁決同一個理由。
+>
+> 藥丸的橫向展開見第十二節第一條的「已核可的非 opacity 動效」，緩動用 `{motion.ease-emphasized}`。
 
 **`global-status-banner`** — 承載跨頁的系統狀態：「通知未開啟」「背景通知尚未完成」「目前離線」「背景通知已恢復」。背景 `{colors.surface-soft}`，圓角 `{rounded.md}`。這類狀態**永不阻擋**本機倒數與手動操作，因此樣式是提示而非警示——不使用任何警示底色。（系統沒有獨立的 error token，見第二節；警示強度上限是 `{colors.status-due}` 的柔和底色卡。）
 

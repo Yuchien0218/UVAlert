@@ -1,5 +1,6 @@
 // @vitest-environment happy-dom
 
+import { readFileSync } from "node:fs";
 import { mount } from "@vue/test-utils";
 import { createMemoryHistory, createRouter } from "vue-router";
 import { beforeEach, describe, expect, it, vi } from "vitest";
@@ -154,6 +155,55 @@ describe("BottomNavigation", () => {
     expect(badge.attributes("aria-hidden")).toBe("true");
     expect(wrapper.get('a[href="/"]').attributes("aria-label")).toBe(
       "提醒（有部位建議現在補擦）"
+    );
+  });
+});
+
+/*
+ * 選取態的外觀守門（2026-09-04）。
+ *
+ * 這個裁決已經翻過兩次——2026-08-23 從「換色」改成「藥丸＋粗體、不換色」，
+ * 2026-09-04 又改成「藥丸＋標籤換色、不用字重」。翻兩次的東西最容易被下一
+ * 個人「順手改回去」，所以把現行結論釘住。
+ *
+ * 掃原始碼前先剝註解——否則上面那段解釋文字裡的 `font-weight` 會讓測試
+ * 自己判自己違規（CLAUDE.md 坑一）。
+ */
+describe("下排導覽的選取態", () => {
+  const source = readFileSync(
+    "apps/web/src/components/shell/BottomNavigation.vue",
+    "utf8"
+  )
+    .replace(/<!--[\s\S]*?-->/g, "")
+    .replace(/\/\*[\s\S]*?\*\//g, "")
+    .replace(/^\s*\/\/.*$/gm, "");
+
+  it("不用字重承載選取狀態", () => {
+    expect(source).not.toMatch(/font-weight/);
+  });
+
+  /*
+   * **比對完整宣告而不是找 token 名字**（CLAUDE.md 坑二）：只找
+   * `--text-primary` 的話，同檔案別處合法地用到它就會誤判成通過。
+   */
+  it("標籤兩態走明暗階，不借用行動色", () => {
+    expect(source).toContain("color: var(--text-secondary);");
+    expect(source).toContain("color: var(--text-primary);");
+    expect(source).not.toContain("var(--color-primary)");
+  });
+
+  /*
+   * 藥丸必須畫在 ::before 上：scaleX 直接加在 wrapper 會連圖示一起縮。
+   * 而圖示必須是已定位元素，否則藥丸的背景會蓋掉它——實測過，那個 bug
+   * 任何數值斷言都抓不到（svg 仍是 24×24、visible、opacity 1），只有截圖
+   * 看得出來。所以這裡守的是「當初怎麼修好的」。
+   */
+  it("藥丸在 ::before 上，且圖示疊在藥丸之上", () => {
+    expect(source).toMatch(
+      /\.bottom-nav__icon-wrapper::before\s*\{[^}]*transform:\s*scaleX\(/
+    );
+    expect(source).toMatch(
+      /\.bottom-nav__icon-wrapper\s*>\s*\*\s*\{[^}]*position:\s*relative;/
     );
   });
 });

@@ -155,13 +155,27 @@
 
 CSS 與 `DESIGN.md`（frontmatter `context-option-selected` ＋ 第五節 prose）一併回寫。實機驗證計算值：選取態 `rgb(231,216,207)`／`rgb(111,90,84)` ＝ hairline／muted，未選取不變。
 
-### 批次 3：底部導覽（Google Play A＋B）
+### 批次 3：底部導覽（Google Play A＋B）— ✅ 已完成 2026-09-04
 
 - 拿掉 `font-weight: 700`，標籤改 `--text-secondary` →（選中）`--text-primary`
 - 藥丸改用 `--ease-emphasized`，加 `scaleX` 展開
 - **實作地雷**：`scaleX` 直接加在 `.bottom-nav__icon-wrapper` 上**會把圖示一起縮**。藥丸要拆成獨立的 `::before`，圖示疊在上層（`.icon-button--compact` 已有同樣的 grid cell 疊法可抄）
 - **規則五檢查**：藥丸展開 ＋ 文字換色是兩個元素同時動。要嘛視為同一件事，要嘛錯開 —— 畫出來看再決定
 - 一併更新 `BottomNavigation.vue` 裡 2026-08-23 那段註解
+
+**完成紀錄。**
+
+落地：拿掉 `font-weight: 700`；標籤 `--text-secondary` →（選中）`--text-primary`，**圖示色兩態不變**；藥丸移到 `::before`，用 `--ease-emphasized` 從 `scaleX(0.4)` 展開到 1 並同步淡入。`DESIGN.md` 的 `bottom-nav` frontmatter 與第五節 prose 一併回寫（含「700 不再是允許的量表外字重」）。
+
+**規則五（一次只有一個元素在動）的處置**：藥丸展開與標籤換色視為**同一件事**，同時跑、同樣的 duration 與 easing。規則五的來源是 `BroadcastLoader` 那種兩個**互相獨立**的元素各動各的；這裡是同一個導覽項的單一狀態改變，錯開反而會讀成兩件事。
+
+**踩到一個只有截圖看得到的 bug。** `scaleX` 拆到 `::before` 之後，選取那一項的**圖示整個不見了**，只剩一顆空藥丸——藥丸的背景蓋掉了圖示。
+
+值得記的是它有多難抓：實測 svg 仍然是 `24×24`、`visibility: visible`、`opacity: 1`、`color` 正確、`getBoundingClientRect()` 位置正確、`childCount` 正確。**DOM 全對、數值全對，只有畫面是錯的。**
+
+原因是我抄 `.icon-button--compact` 的 grid-area 1/1 疊法時漏了一個前提：**那裡的 `::before` 只有邊框、背景是透明的**，所以從來沒有東西可以蓋。加上 `position: relative` 讓圖示成為已定位元素、排在未定位的 `::before` 背景之後才修好。不能用負的 z-index——`.bottom-nav` 有 `z-index` 所以是一個堆疊脈絡，藥丸會沉到它的 background 底下直接消失。
+
+**守門三條**（`BottomNavigation.test.ts`）：不用字重承載選取狀態、標籤走明暗階不借用行動色、藥丸在 `::before` 且圖示疊在其上。**三條各自破壞一次都確認會紅**，而且是各自獨立失敗，沒有互相掩護。第三條守的就是上面那個 bug 的修法。
 
 ### 批次 4：揭露層
 
@@ -192,5 +206,5 @@ CSS 與 `DESIGN.md`（frontmatter `context-option-selected` ＋ 第五節 prose�
 
 1. ~~底部導覽選取態的文字色~~ —— **2026-09-04 已定案**：未選 `--text-secondary`、選中 `--text-primary`。見裁決 5。
 2. **`--press-dim` 的最終值**（0.92 vs 0.85），批次 1 截圖後定案。
-3. **批次 3 的規則五處置**：藥丸與文字要不要錯開。
+3. ~~批次 3 的規則五處置~~ —— **2026-09-04 已定案**：視為同一件事，同時跑。
 4. **`.uv-day` 的 hover**：直接拿掉，還是讓五日卡的某一天可以點開？目前計畫是拿掉。
