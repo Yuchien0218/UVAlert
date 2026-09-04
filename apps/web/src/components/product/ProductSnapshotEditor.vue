@@ -211,7 +211,15 @@ const waterHasClaim = computed<string>({
           <h2 data-typography-role="card-title">{{ title }}</h2>
         </span>
       </IconLead>
-      <div>
+      <!--
+        2026-09-04：`description` 可以是空字串，那時整段不渲染。
+
+        呼叫端有一個分支已經沒有話要說（防曬乳那一支的「請依包裝標示
+        填寫。」被刪掉了——標題「防曬乳規格確認」已經講完同一件事）。
+        沒有這個 `v-if` 的話會留下一個空的 `<p>`，用空元素撐出間距正是
+        2026-08-29 B9 §5 明文禁止的事。
+      -->
+      <div v-if="description !== ''">
         <p>
           {{ description }}
         </p>
