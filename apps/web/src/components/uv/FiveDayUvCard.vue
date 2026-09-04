@@ -300,14 +300,24 @@ function getUnavailableMessage(error: UvForecastError): string {
   border-radius: var(--radius-md);
   background: var(--surface-primary);
   text-align: center;
-  /* 只有 border-color 會變（:hover 與 uv-day--* 等級色）；all 會連帶動到
-     之後新增的任何屬性，見 DESIGN.md 第十二節。 */
+  /*
+   * 只有 border-color 會變（uv-day--* 等級色）；all 會連帶動到之後新增的
+   * 任何屬性，見 DESIGN.md 第十二節。
+   */
   transition: border-color var(--duration-fast) var(--ease-out);
 }
 
-.uv-day:hover {
-  border-color: var(--text-secondary);
-}
+/*
+ * 2026-09-04 拿掉 `.uv-day:hover { border-color: var(--text-secondary) }`。
+ *
+ * 兩個問題：
+ *
+ *   1. **它是假的可點提示。** 這是 <li>，沒有 click、沒有連結、沒有
+ *      cursor: pointer——滑過會亮起來，按下去什麼都不會發生。
+ *   2. **它會蓋掉資訊。** `.uv-day:hover` 的特異性 (0,2,0) 高過
+ *      `.uv-day--low` 那組 (0,1,0)，所以滑過的那一天**風險等級的邊框色
+ *      會被中性灰換掉**——邊框在這裡是承載等級的，不是裝飾。
+ */
 
 .uv-day--low {
   border-color: var(--color-uvi-low);

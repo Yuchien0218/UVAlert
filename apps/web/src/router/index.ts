@@ -264,10 +264,40 @@ export function createAppRouter(
     return true;
   });
 
+  /*
+   * 「這次是往前還是返回」——寫成 <html data-nav-direction>，讓 CSS 判斷
+   * 要不要跑 page-stack 的階梯淡入（2026-09-04）。
+   *
+   * 返回時重跑階梯淡入會讀成「重新載入」而不是「回來了」：使用者剛剛才
+   * 看過那一頁，內容一格一格再長一次，讀起來像它剛被建立出來。
+   *
+   * **自己維護一個路徑堆疊，不讀 history.state.position。** 那個欄位只有
+   * `createWebHistory` 有；`createMemoryHistory` 的 `state.position` 永遠是
+   * `null`（實測），拿它判斷會讓方向永遠是 forward，而且是**靜默**降級——
+   * 測試環境用的正是記憶體 history，等於這段邏輯完全沒被驗證過。
+   *
+   * 也不用 popstate 事件：那個抓不到程式呼叫的 `router.back()`。
+   *
+   * 已知取捨：A → B → A 這種「用連結回到剛剛看過的頁」會被判成返回。那不
+   * 影響正確性——使用者確實是回到剛看過的畫面，不跑階梯反而更合適。
+   */
+  const visited: string[] = [];
+
   router.afterEach((to) => {
     const title =
       typeof to.meta.title === "string" ? to.meta.title : "Sunshield";
     globalThis.document.title = `${title}｜防曬晴報員`;
+
+    const isBack = visited[visited.length - 2] === to.fullPath;
+    if (isBack) {
+      visited.pop();
+    } else {
+      visited.push(to.fullPath);
+    }
+
+    globalThis.document.documentElement.dataset.navDirection = isBack
+      ? "back"
+      : "forward";
   });
 
   return router;

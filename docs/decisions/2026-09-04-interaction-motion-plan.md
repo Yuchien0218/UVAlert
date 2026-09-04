@@ -1,7 +1,7 @@
 # 切換／點選的互動動效：盤點、裁決與分批實作計畫
 
 日期：2026-09-04
-狀態：**批次 0 已完成（2026-09-04），批次 1–5 未動工。** 第六節是施作順序，一批一個 PR。
+狀態：**批次 0–5 全部完成（2026-09-04）。** 第六節是施作順序與各批的完成紀錄，一批一個 PR。
 
 ---
 
@@ -206,12 +206,30 @@ CSS 與 `DESIGN.md`（frontmatter `context-option-selected` ＋ 第五節 prose�
 
 **驗證的限制**：Browser pane 當時是隱藏的，`requestAnimationFrame` 不推進，所以**過渡的中間過程與截圖都拿不到**（opacity 卡在 0，畫面全白）。停用過渡後量到目標值正確：收合 `0px`／`opacity 0`／`inert`，展開 `602px`／`opacity 1`／非 inert，且外層高度等於內容高度（沒有多出間距）、父層 `grid gap: 12px` 不變。**動畫實際跑起來的樣子沒有目視確認過。**
 
-### 批次 5：場景層
+### 批次 5：場景層 — ✅ 已完成 2026-09-04
 
 - `RouterView` 離場轉場 120–160ms（裁決 4）
 - 返回時不跑 `page-stack` 階梯淡入，只單純淡入
 - `AppNotice` 進場 320ms（自己發生的事，不是手指造成的）
 - 拿掉 `.uv-day:hover` 的假可點
+
+**完成紀錄。**
+
+四項全部落地：`App.vue` 加 `<Transition name="page" mode="out-in">`（只定義離場，進場仍交給 `page-stack`，兩邊都寫會疊在一起）；返回改成整頁單純淡入；`AppNotice` 補 320ms 進場（「自己發生的事」用 base 不用 fast）；`.uv-day:hover` 移除。
+
+**`.uv-day:hover` 不只是假提示，它還會蓋掉資訊。** `.uv-day:hover` 的特異性 (0,2,0) 高過 `.uv-day--low` 那組 (0,1,0)，所以滑過的那一天**風險等級的邊框色會被中性灰換掉**——邊框在那裡是承載等級的，不是裝飾。
+
+**方向判斷踩到一個會靜默降級的坑。** 第一版讀 `history.state.position`，因為 vue-router 每次 push 會遞增它。實測發現**那個欄位只有 `createWebHistory` 有**，`createMemoryHistory().state.position` 永遠是 `null`——而測試環境用的正是記憶體 history。也就是說：正式環境會動、測試環境永遠是 forward、而且**測試會全綠**，因為斷言不知道自己在測一個永遠不變的值。改成自己維護路徑堆疊，兩種 history 都成立。
+
+已知取捨：`A → B → A` 這種用連結回到剛看過的頁會被判成返回。實測確認過，不影響正確性——使用者確實是回到剛看過的畫面，不跑階梯反而更合適。
+
+**守門八條**：三條在 `router/index.test.ts`（往前是 forward、返回是 back、返回之後再往前要回到 forward），五條在 `assets/sceneMotion.test.ts`（hover 白名單、`.uv-day` 無 hover、離場轉場、返回不跑階梯、提示用 base 時距）。
+
+方向那三條**兩個方向都破壞過**：永遠 forward 會紅、永遠 back 也會紅。只守一邊的話，一個永遠寫 back 的實作會讓返回之後的每次換頁都失去階梯淡入，而測試照樣全綠。
+
+hover 那條用**白名單**而不是自動判斷：hover 該不該存在是每次都要想一下的事，多一個就讓它紅一次，逼人回來判斷是不是又一個假提示。
+
+**這批是實機驗證的**（Browser pane 這次跑得動）：往前三次都是 forward、瀏覽器返回變 back；第三個子區塊的計算值 back 是 `page-stack-plain-fade-in` / delay `0s`，forward 是 `page-stack-fade-in` / delay `0.16s`。
 
 ## 七、`DESIGN.md` 第十二節第一條的改寫（已於批次 0 完成）
 
@@ -230,4 +248,4 @@ CSS 與 `DESIGN.md`（frontmatter `context-option-selected` ＋ 第五節 prose�
 1. ~~底部導覽選取態的文字色~~ —— **2026-09-04 已定案**：未選 `--text-secondary`、選中 `--text-primary`。見裁決 5。
 2. **`--press-dim` 的最終值**（0.92 vs 0.85），批次 1 截圖後定案。
 3. ~~批次 3 的規則五處置~~ —— **2026-09-04 已定案**：視為同一件事，同時跑。
-4. **`.uv-day` 的 hover**：直接拿掉，還是讓五日卡的某一天可以點開？目前計畫是拿掉。
+4. ~~`.uv-day` 的 hover~~ —— **2026-09-04 已拿掉**。查證時另外發現它會蓋掉風險等級的邊框色，不只是假提示。

@@ -188,3 +188,59 @@ describe("createAppRouter", () => {
     expect(router.currentRoute.value.name).toBe("home");
   });
 });
+
+/**
+ * 換頁方向寫進 <html data-nav-direction>（2026-09-04）。
+ *
+ * CSS 靠它決定要不要跑 page-stack 的階梯淡入——返回時重跑階梯會讀成
+ * 「重新載入」而不是「回來了」。判斷邏輯放在 router 裡，所以這裡守的是
+ * 邏輯本身，不是樣式。
+ */
+describe("換頁方向", () => {
+  const direction = (): string | undefined =>
+    globalThis.document.documentElement.dataset.navDirection;
+
+  async function makeRouter() {
+    const router = createAppRouter(makeReadyBoot(), createMemoryHistory());
+    await router.push("/");
+    await router.isReady();
+    return router;
+  }
+
+  it("往前推進標成 forward", async () => {
+    const router = await makeRouter();
+
+    await router.push("/more");
+    expect(direction()).toBe("forward");
+
+    await router.push("/install");
+    expect(direction()).toBe("forward");
+  });
+
+  it("返回標成 back", async () => {
+    const router = await makeRouter();
+    await router.push("/more");
+    await router.push("/install");
+
+    router.back();
+    await vi.waitUntil(() => direction() === "back", { timeout: 1000 });
+    expect(direction()).toBe("back");
+  });
+
+  /*
+   * **返回之後再往前推進，要回到 forward。** 只守「返回會變 back」的話，
+   * 一個永遠寫 back 的實作也會過——那會讓返回之後的每一次換頁都失去階梯
+   * 淡入。方向是雙向的，兩邊都要守。
+   */
+  it("返回之後再往前推進，回到 forward", async () => {
+    const router = await makeRouter();
+    await router.push("/more");
+    await router.push("/install");
+
+    router.back();
+    await vi.waitUntil(() => direction() === "back", { timeout: 1000 });
+
+    await router.push("/feedback");
+    expect(direction()).toBe("forward");
+  });
+});
