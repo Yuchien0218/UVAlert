@@ -618,10 +618,18 @@ dd {
   line-height: var(--line-height-body);
 }
 
+/*
+ * 2026-09-04：值與標籤同色（使用者要求）。
+ *
+ * 原本標籤是 `--text-secondary`、值是繼承來的 `--text-primary`，同一列
+ * 兩種深度。這是一張「陳述現況」的表，不是要人比較大小的數據——整列同色
+ * 讀起來才是一句話的兩半。顏色寫在 `dl` 上，`dt`／`dd` 都不再各自指定。
+ */
 .summary-grid {
   display: grid;
   width: 100%;
   margin: 0;
+  color: var(--text-secondary);
 }
 
 /*
@@ -645,17 +653,6 @@ dd {
 /* 2026-08-31：標籤不得被值壓縮。這一列也是 flex + space-between，跟
    ProductDetailPage 的 .spec-row 同一個形狀——那裡的 dt 就是因為少了
    flex-shrink 被擠成一行一個字。目前的值都很短所以還沒發生，先擋住。 */
-/*
- * 2026-09-04：值與標籤同色（使用者要求）。
- *
- * 原本標籤是 `--text-secondary`、值是繼承來的 `--text-primary`，同一列
- * 兩種深度。這是一張「陳述現況」的表，不是要人比較大小的數據——整列同色
- * 讀起來才是一句話的兩半。顏色寫在 `dl` 上，`dt`／`dd` 都不再各自指定。
- */
-.summary-grid {
-  color: var(--text-secondary);
-}
-
 .summary-grid dt {
   flex: 0 0 auto;
 }
