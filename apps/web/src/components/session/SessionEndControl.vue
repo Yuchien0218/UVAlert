@@ -44,7 +44,7 @@ function getErrorMessage(error: SessionEndError): string {
     case "state_changed":
       return "提醒狀態已在其他畫面更新，請確認最新狀態後再試一次。";
     case "persistence_error":
-      return "目前無法儲存停止操作，這次提醒仍在運作。請再試一次。";
+      return "目前無法儲存停止操作，這次提醒仍在運作，可以再試一次。";
     case "refresh_failed":
       return "提醒已提交結束，但畫面更新失敗。請重新整理確認最新狀態。";
     case "validation_error":

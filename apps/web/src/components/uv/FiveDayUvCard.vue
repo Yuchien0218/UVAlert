@@ -120,11 +120,24 @@ function getUnavailableMessage(error: UvForecastError): string {
     </div>
 
     <div v-else-if="phase === 'no_region'" class="uv-forecast__state">
-      <span>
-        請先
-        <RouterLink class="text-link" to="/region">設定地區</RouterLink>
-        ，才能查看五日 UV 預報。
-      </span>
+      <!--
+        2026-09-04：拿掉尾巴「，才能查看五日 UV 預報」——h1 已經是
+        「五日 UV 預報」，這句話在同一個畫面把它又說了一次。
+
+        連結本身必須留著：它是空狀態的主行動，而且下方的
+        `.forecast-region` 是「目前地區」的常駐控制列，兩者角色不同。
+        （這顆連結曾經是 `#outdoor-context` 頁內錨點，點了沒反應，
+        已有守門釘著）
+      -->
+      <!--
+        連結前後不留換行：Vue 會把它們壓成空格，中文行內連結
+        被撠開成「請先 設定地區 。」，句號前面會浮一個空隙。
+      -->
+      <span
+        >請先<RouterLink class="text-link" to="/region"
+          >設定地區</RouterLink
+        >。</span
+      >
     </div>
 
     <div

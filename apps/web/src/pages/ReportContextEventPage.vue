@@ -376,7 +376,7 @@ function zoneNames(zoneIds: string[]): string {
           contextEvent.error.value === "state_changed"
             ? "提醒狀態已改變，請返回提醒頁重新確認後再記錄一次。"
             : contextEvent.error.value === "persistence"
-              ? "資料沒有儲存，這次狀況尚未記錄。輸入仍會保留，可以再試一次。"
+              ? "沒有儲存，輸入仍會保留，可以再試一次。"
               : "這次狀況尚未記錄，請確認後再試一次。"
         }}
       </p>

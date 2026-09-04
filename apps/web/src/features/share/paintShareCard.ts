@@ -281,7 +281,7 @@ export async function paintShareCard(
 
   return await new Promise<Blob>((resolve, reject) => {
     canvas.toBlob((blob) => {
-      if (blob === null) reject(new Error("圖片產生失敗，請再試一次。"));
+      if (blob === null) reject(new Error("圖片產生失敗，可以再試一次。"));
       else resolve(blob);
     }, "image/png");
   });

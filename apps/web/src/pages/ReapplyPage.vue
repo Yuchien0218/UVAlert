@@ -219,7 +219,7 @@ function zoneNames(zoneIds: string[]): string {
         <p>
           {{
             reapplication.error.value === "persistence"
-              ? "補擦紀錄尚未儲存。草稿仍保留，請再試一次。"
+              ? "補擦紀錄尚未儲存，草稿仍保留，可以再試一次。"
               : reapplication.error.value === "product_changed"
                 ? "防曬乳標示已變更，請重新讀取並確認防曬乳後再提交。"
                 : reapplication.error.value === "state_changed"

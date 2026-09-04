@@ -35,7 +35,6 @@ onMounted(() => {
       <h1 class="page-heading__title" data-typography-role="page-title">
         五日 UV 預報
       </h1>
-      <p class="page-heading__body">顯示設定地區預報。</p>
     </header>
 
     <FiveDayUvCard
