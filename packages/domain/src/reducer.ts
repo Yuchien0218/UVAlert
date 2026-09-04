@@ -31,7 +31,14 @@ import {
 import { validateWaterIntervals } from "./water";
 
 const GENERAL_MAX_MINUTES = 120;
-const SOON_WINDOW_MS = 30 * 60_000;
+/**
+ * 「快到補擦時間」提前多久開始（2026-09-04 使用者裁決：30 → 20 分鐘）。
+ *
+ * 這個值決定 `reapply_soon`，也就是首頁倒數轉成橘色、部位清單展開成
+ * 「快到補擦時間」那一刻。改短是因為 30 分鐘的預警期太長——橘色出現之後
+ * 還要再等半小時才真的到期，警示色待在畫面上太久就失去警示的作用。
+ */
+const SOON_WINDOW_MS = 20 * 60_000;
 
 type EffectiveStream = Omit<
   SessionEventStreamV1,
