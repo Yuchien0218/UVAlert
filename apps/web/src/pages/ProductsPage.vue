@@ -107,22 +107,38 @@ function editGear(productId: string): void {
 
       **沒有使用中的裝備時不出現**——沒東西可分享。
     -->
-    <header class="page-heading gear-heading">
-      <div>
-        <h1 class="page-heading__title" data-typography-role="page-title">
-          我的防曬裝備
-        </h1>
-        <p>
-          清單儲存於本機。只有防曬乳支援補擦倒數，其他裝備僅供紀錄。
-        </p>
-      </div>
+    <!--
+      2026-09-04：改用共用的 `.page-heading--with-exit`，說明因此橫跨兩欄。
+
+      這是 #130／#137 修過的同一個坑的第三個病例：標題與說明包在同一個
+      `<div>` 裡當左欄，於是**說明也跟著少掉圖示鈕的寬度**。實測 375px：
+      可用 336、說明只拿到 320——第一行提早斷在「⋯補擦倒數，」，右邊留下
+      一塊空白（使用者圈的正是那裡）。分享鈕沒出現時那一欄仍在，所以空的
+      時候也一樣窄。
+    -->
+    <header class="page-heading page-heading--with-exit">
+      <h1 class="page-heading__title" data-typography-role="page-title">
+        我的防曬裝備
+      </h1>
       <IconButton
         v-if="current.length > 0"
         icon="tool-share"
         label="分享我的防曬裝備"
         @click="shareGear"
       />
+      <p>清單儲存於本機。只有防曬乳支援補擦倒數，其他裝備僅供紀錄。</p>
     </header>
+
+    <!--
+      2026-09-04：標題區與清單之間補一條線（使用者：「使用中／收納中與上面
+      那區的區隔太弱」）。
+
+      量出來的原因是**間距完全一樣**：`.page-stack` 的 gap 是 20px，標題區
+      到「使用中」是 20，「使用中」到新增鈕也是 20——標題區沒有任何訊號說
+      它是上一層。做法沿用衛教分類頁 2026-09-01 的
+      `education-heading__rule`，不是新發明的分隔。
+    -->
+    <hr class="gear-section-rule" />
 
 
     <BroadcastLoader
@@ -265,16 +281,7 @@ p {
 }
 
 /* 標題群組在左、分享鈕在右上角同一列——跟 .flow-heading 同一套版型。 */
-.gear-heading {
-  grid-template-columns: minmax(0, 1fr) auto;
-  align-items: start;
-  gap: var(--space-4);
-}
 
-.gear-heading > div {
-  display: grid;
-  gap: var(--space-2);
-}
 
 .page-heading p {
   color: var(--text-body);

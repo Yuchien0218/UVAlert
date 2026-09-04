@@ -429,19 +429,21 @@ function goBack(): void {
       </p>
 
       <!--
-        2026-09-04：**字級沒有動**。
+        2026-09-04：狀態列降到 `supporting`（使用者裁決）。
 
-        使用者回報「字大小不一樣」，實測「跨裝置同步」與「目前使用免登入
-        模式」**完全相同**（都是 card-title 18/500）。看起來怪的是「一個
-        區塊裡有兩個同級標題」，不是某個字級跑掉。
+        量測起點是「字大小不一樣」這個回報——實測兩者**完全相同**（都是
+        card-title 18/500）。真正的問題是**一個區塊裡有兩個同級標題**：
+        群組標題「跨裝置同步」與狀態列「目前使用免登入模式」長得一樣重。
 
-        降階需要裁決，這次刻意不做：2026-09-02 才把這三個狀態從 16px 拉到
-        18px（理由是「差一階剛好落在看得出不一樣、但看不出為什麼的區間」），
-        而且 `typographyRoles.test.ts` 訂了 h3 只能是 card-title——要降階
-        等於同時推翻那個裁決與那條系統規則。這次只動版面與文案。
+        **一次降到 supporting（14px ＋ 次要色），不是回到 16px。**
+        2026-09-02 那次正是因為「18 對 16 差一階，看得出不一樣卻看不出
+        為什麼」才把它從 16 拉到 18；18 對 14 才是看得出意圖的差距。
+
+        `<h3>` 保留——降的是視覺層級，不是文件結構。連帶放寬了
+        `typographyRoles.test.ts` 的 h3 規則（只多開 supporting 一個）。
       -->
       <div v-if="!signedIn" class="sync-block">
-        <h3 class="sync-block__title" data-typography-role="card-title">
+        <h3 class="sync-block__title" data-typography-role="supporting">
           目前使用免登入模式
         </h3>
         <p>不登入也不影響本機倒數與資料。</p>
@@ -456,7 +458,7 @@ function goBack(): void {
       </div>
 
       <div v-else-if="syncDisabled" class="sync-block">
-        <h3 class="sync-block__title" data-typography-role="card-title">
+        <h3 class="sync-block__title" data-typography-role="supporting">
           同步已停止
         </h3>
         <p>雲端資料仍保留；重新開啟同步前，不會再讀取或上傳雲端資料。</p>
@@ -466,7 +468,7 @@ function goBack(): void {
       </div>
 
       <div v-else class="sync-block">
-        <h3 class="sync-block__title" data-typography-role="card-title">
+        <h3 class="sync-block__title" data-typography-role="supporting">
           先看同步內容
         </h3>
         <p>確認後才會上傳或下載；遇到版本不同時，系統不會自動覆蓋任何一邊。</p>
@@ -734,9 +736,11 @@ dd {
   justify-self: end;
 }
 
+/* 狀態列：比群組標題輕一階，顏色也跟著降——它回答「現在是哪一種狀態」。 */
 .sync-block__title {
   margin: 0;
-  line-height: var(--line-height-card-title);
+  color: var(--text-secondary);
+  line-height: var(--line-height-body);
 }
 
 .sync-block p {
