@@ -175,7 +175,7 @@ const showsSize = computed(
 );
 const showsColor = computed(() => gearCategory.value !== "sunscreen");
 
-/* 容量／劑型／防護機制是防曬乳才有的概念。 */
+/* 容量／劑型／防曬原理是防曬乳才有的概念。 */
 const showsSunscreenSpecs = computed(
   () => gearCategory.value === "sunscreen"
 );
@@ -540,7 +540,6 @@ async function remove(): Promise<void> {
     -->
     <section class="app-card" aria-labelledby="gear-record-title">
       <h2 id="gear-record-title" data-typography-role="card-title">我的紀錄</h2>
-      <p class="field-helper">選填項目，僅儲存於本機。</p>
 
       <!--
         揭露契約（DESIGN.md 第五節）：真的 <button>、aria-expanded ＋
@@ -555,7 +554,7 @@ async function remove(): Promise<void> {
         @click="recordExpanded = !recordExpanded"
       >
         <DisclosureChevron :open="recordOpen" :size="20" />
-        {{ recordOpen ? "收合購買紀錄" : "補上購買紀錄（選填）" }}
+        {{ recordOpen ? "收合紀錄" : "補上紀錄（選填）" }}
       </button>
 
       <DisclosurePanel :open="recordOpen">
@@ -566,17 +565,25 @@ async function remove(): Promise<void> {
             <input id="gear-purchase" v-model="purchaseMonth" type="month" />
           </div>
           <div>
-            <label for="gear-expiry">
-              到期日
-              <span v-if="affectsCountdown(gearCategory)" class="affects-badge">
-                會影響倒數
-              </span>
-            </label>
+            <label for="gear-expiry">到期日</label>
             <input id="gear-expiry" v-model="expiryDate" type="date" />
           </div>
         </div>
+        <!--
+          2026-09-04：拿掉標籤旁的「會影響倒數」徽章（使用者裁決：則一顯示）。
+
+          徽章與下面這句在講同一件事，而且徽章擠在右欄標籤的尾巴、貼著卡片
+          右緣，看起來像浮在半空的一顆晶片。
+
+          留下來的是說明那句，因為它多說了「會怎樣」——徽章只答得出「哪個
+          欄位」。反過來把主詞補進句子裡，一句話同時回答兩個問題，這也順便
+          解掉「這句放在兩欄下面，看起來像在講購買月份」的歧義。
+
+          代價：`--color-amber` 因此又沒有任何引用（見
+          docs/decisions/2026-08-30-unused-declaration-audit.md）。
+        -->
         <p v-if="affectsCountdown(gearCategory)" class="field-helper">
-          逾期後將禁止建立補擦倒數。
+          超過到期日就不能建立補擦倒數。
         </p>
 
         <div class="field-pair">
@@ -627,7 +634,7 @@ async function remove(): Promise<void> {
         </div>
 
         <!--
-          2026-09-02：防曬乳的容量／劑型／防護機制（使用者裁決）。
+          2026-09-02：防曬乳的容量／劑型／防曬原理（使用者裁決）。
 
           **放在「我的紀錄」而不是「包裝標示」卡**，即使這三項都印在瓶身上。
           判準是「會不會影響倒數」——它們都不會，所以跟價格、尺寸同一層。
@@ -660,16 +667,13 @@ async function remove(): Promise<void> {
             </div>
           </div>
 
-          <label for="gear-protection-type">防護機制</label>
+          <label for="gear-protection-type">防曬原理</label>
           <select id="gear-protection-type" v-model="protectionType">
             <option value="">未填寫</option>
             <option value="physical">物理性</option>
             <option value="chemical">化學性</option>
             <option value="hybrid">混合型</option>
           </select>
-          <p class="field-helper">
-            依包裝標示填寫，不從膚感推測。這三項只是紀錄，不影響補擦倒數。
-          </p>
         </template>
 
         <label for="gear-note">備註</label>
@@ -917,40 +921,6 @@ p {
  * 位置。GearForm.test.ts 有守門測試釘住它。
  */
 
-/*
- * inline-block + nowrap 缺一不可：欄位改成兩欄並排後寬度減半，
- * 原本的 inline span 一換行邊框就從中間斷開（「會」留在框內、
- * 「影響倒數」跑到框外）。改成整塊不可分割，放不下就整顆換行。
- */
-/*
- * 2026-08-30：套用 --color-amber。DESIGN.md 第二節指定它的用途是「徽章、
- * SPF 標記、陽光母題」，但它先前是全站唯一從未被引用的 accent 之一（見
- * 2026-08-30-unused-declaration-audit.md）。這顆徽章標的正是「這個欄位
- * 會影響補擦倒數」，在 SPF／到期日旁邊，是那個用途最貼的落點。
- *
- * **底色而不是文字色**：amber 當文字放在畫布上只有 2.07:1，遠低於 AA 的
- * 4.5；深咖文字放在 amber 底上是 6.41:1。這與 DESIGN.md 對同族的
- * accent-apricot 寫的「此色上必須用深咖文字」是同一條規則。
- *
- * 邊框一併移除——有實底色之後再加深色邊框會變成兩層框。
- */
-.affects-badge {
-  display: inline-block;
-  padding: 0 var(--space-2);
-  border-radius: var(--radius-pill);
-  background: var(--color-amber);
-  color: var(--text-primary);
-  font-size: var(--font-size-caption);
-  white-space: nowrap;
-}
-
-.field-pair label {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: var(--space-2);
-}
-
 .field-pair {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -965,9 +935,11 @@ p {
 }
 
 /*
- * 兩欄的 label 行數不一定相同（到期日多一顆「會影響倒數」徽章，
- * 窄欄時會掉成兩行）。把輸入框推到欄底，兩個框才會對齊——否則
- * 修好徽章反而換來輸入框高低不齊。
+ * 兩欄的 label 行數不一定相同（窄欄時長標籤會掉成兩行）。把輸入框推到
+ * 欄底，兩個框才會對齊——否則修好標籤反而換來輸入框高低不齊。
+ *
+ * 2026-09-04 徽章移除後兩欄標籤都是單行，這條變成純保險；留著是因為
+ * 標籤字串隨時可能變長，而那時畫面上只會「有一點歪」，不會有人發現。
  */
 .field-pair > div > input {
   margin-top: auto;

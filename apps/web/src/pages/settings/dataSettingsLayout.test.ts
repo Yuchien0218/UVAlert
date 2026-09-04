@@ -146,3 +146,27 @@ describe("概況表的值", () => {
   });
 });
 
+/**
+ * 2026-09-04：「清除全部本機資料」的標題併進按鈕（使用者裁決）。
+ */
+describe("清除全部的紅字", () => {
+  /*
+   * 標題併進按鈕之後，紅字必須跟著搬——否則全站最危險的那顆按鈕會跟
+   * 「清除草稿」長得一模一樣。
+   */
+  it("紅字落在觸發按鈕上", () => {
+    expect(SOURCE).toMatch(
+      /\.clear-row--danger > \.button \{[^}]*color: var\(--color-due\);/
+    );
+  });
+
+  /*
+   * **反向：不是整顆紅按鈕。** 只守上面那條的話，改成紅底白字也會過，而
+   * 那與 GearDetailSheet 的既有裁決（「這個 App 不用整顆紅按鈕」）相反。
+   */
+  it("不是整顆紅按鈕", () => {
+    const rule = /\.clear-row--danger > \.button \{([^}]*)\}/.exec(SOURCE)?.[1] ?? "";
+
+    expect(rule).not.toContain("background");
+  });
+});

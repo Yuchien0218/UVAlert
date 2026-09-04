@@ -78,6 +78,18 @@ const emit = defineEmits<{
 </template>
 
 <style scoped>
+/*
+ * **slot 內容必須是區塊元素，不能是裸文字。**
+ *
+ * 這裡是 grid，所以 slot 傳進來的每一段裸文字都會被包成一個匿名 grid
+ * item，item 之間再吃一次 gap。2026-09-04 實測：一句「…都會消失且
+ * <strong>無法復原</strong>，之後…」被拆成三塊、中間各 12px，逗號掉到
+ * 行首——DOM 正確、文案正確，只有排版是錯的。
+ *
+ * 不改成一般流排版是因為 gap 正是這裡要的東西（段落與按鈕列之間、清單
+ * 與段落之間）。守門在 DataSettingsPage.test.ts：掛載後檢查
+ * `.confirm-note` 底下沒有非空白的裸文字節點。
+ */
 .confirm-note {
   display: grid;
   gap: var(--space-3);

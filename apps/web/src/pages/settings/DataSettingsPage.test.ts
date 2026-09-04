@@ -172,3 +172,73 @@ describe("DataSettingsPage 的合併結果", () => {
     expect(scope.text()).toContain("雲端");
   });
 });
+
+/*
+ * 2026-09-04 使用者截圖標註：清除區的警示框排版跑掉、「清除全部」那一列
+ * 把同一件事講三次。
+ */
+describe("清除區的警示框", () => {
+  const mountPage = () => {
+    useServices("signed_out", "idle", SUMMARY_FIXTURE);
+    return mount(DataSettingsPage, { global: { stubs: { RouterLink: true } } });
+  };
+
+  const triggerFor = (
+    wrapper: ReturnType<typeof mountPage>,
+    label: string
+  ) => {
+    const button = wrapper.findAll("button").find((it) => it.text() === label);
+    expect(button, `找不到「${label}」按鈕`).toBeDefined();
+    return button!;
+  };
+
+  /*
+   * **根因是排版不是文案。** `.confirm-note` 是 grid，所以 slot 傳進來的每
+   * 一段裸文字都會被包成一個匿名 grid item，item 之間再吃一次 12px 的 gap。
+   * 實機上「…都會消失且／無法復原／，之後建立提醒…」被切成三塊，逗號掉到
+   * 行首。
+   *
+   * 這條只能掛載之後檢查 DOM——問題出在 slot 內容的**節點型別**，掃原始碼
+   * 字串看不到。
+   */
+  it("警示內容不會被 grid 切成好幾塊", async () => {
+    const wrapper = mountPage();
+
+    for (const label of ["清除裝備與提醒紀錄", "清除全部本機資料"]) {
+      await triggerFor(wrapper, label).trigger("click");
+
+      const note = wrapper.get(".confirm-note").element;
+      const bare = [...note.childNodes].filter(
+        (node) => node.nodeType === 3 && (node.textContent ?? "").trim() !== ""
+      );
+
+      expect(
+        bare.map((node) => node.textContent?.trim()),
+        `「${label}」的警示框有裸文字節點`
+      ).toEqual([]);
+    }
+  });
+
+  /* 那一句仍然要說完「無法復原」——精簡掉的只有結尾的「確定嗎？」。 */
+  it("裝備與提醒的警示是完整的一段", async () => {
+    const wrapper = mountPage();
+    await triggerFor(wrapper, "清除裝備與提醒紀錄").trigger("click");
+
+    const note = wrapper.get(".confirm-note");
+    expect(note.findAll("p")).toHaveLength(1);
+    expect(note.get("p").text()).toContain("無法復原");
+  });
+
+  /*
+   * 「清除全部」那一列原本是紅色標題＋說明＋按鈕，三個地方講同一件事。
+   * 併進按鈕之後，說明句不可以再出現，按鈕要講完整的動作名稱。
+   */
+  it("清除全部只剩一顆講完整名稱的按鈕", () => {
+    const wrapper = mountPage();
+
+    expect(wrapper.text()).not.toContain("清除本機資料，重置為初始狀態。");
+    expect(wrapper.findAll("button").map((it) => it.text())).toContain(
+      "清除全部本機資料"
+    );
+  });
+});

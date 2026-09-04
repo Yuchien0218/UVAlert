@@ -366,21 +366,29 @@ function goBack(): void {
               條件。清除全部的警示本來就有這句，這一則原本沒有。
             -->
             <template #warning>
-              裝備清單與已結束的提醒都會消失且<strong>無法復原</strong>，之後建立提醒需要重新填寫包裝標示。確定嗎？
+              <p>
+                裝備清單與已結束的提醒會消失，<strong>無法復原</strong>；之後建立提醒要重新填寫包裝標示。
+              </p>
             </template>
           </ConfirmAction>
         </div>
 
-        <!-- 清除全部 -->
+        <!--
+          清除全部。
+
+          2026-09-04：標題與說明併進按鈕（使用者裁決）。原本一列講三次同一
+          件事——紅色標題「清除全部本機資料」、說明「清除本機資料，重置為
+          初始狀態。」、按鈕「清除全部」。說明那句只是把標題換句話說，而
+          按鈕自己講完整的動作名稱之後，標題也沒有剩下的資訊。
+
+          紅字跟著搬到按鈕上，與 GearDetailSheet 的「刪除這件防曬裝備」同一
+          套：危險動作用 --color-due 的**文字**，不用整顆紅按鈕。
+        -->
         <div class="clear-row clear-row--danger">
-          <div>
-            <strong>清除全部本機資料</strong>
-            <p>清除本機資料，重置為初始狀態。</p>
-          </div>
           <ConfirmAction
             :confirming="confirming === 'all'"
             :pending="busy"
-            trigger-label="清除全部"
+            trigger-label="清除全部本機資料"
             confirm-label="確定清除"
             @trigger="confirming = 'all'"
             @confirm="runClear('all')"
@@ -398,11 +406,9 @@ function goBack(): void {
                 </li>
                 <li>設定草稿、地區與顯示偏好、氣象快取</li>
               </ul>
-              <p>
-                已安裝的 PWA 不會被移除，但重新開啟時會是全新狀態。
-                <template v-if="!localData.hasExportedThisVisit.value">
-                  你這次還沒有匯出，清除後無法復原。
-                </template>
+              <p>已安裝的 PWA 不會被移除，但重新開啟時會是全新狀態。</p>
+              <p v-if="!localData.hasExportedThisVisit.value">
+                你這次還沒有匯出，清除後無法復原。
               </p>
             </template>
           </ConfirmAction>
@@ -683,6 +689,19 @@ dd {
   line-height: var(--line-height-body);
 }
 
+/*
+ * 危險動作的紅字。
+ *
+ * 2026-09-04 標題併進按鈕之後，這條選到的是**觸發按鈕**——ConfirmAction
+ * 觸發態的根元素就是那顆 <button>，scoped 屬性會落在它身上。確認態的根是
+ * `.confirm-note`，裡面的「確定清除／取消」不是根元素，選不到，所以那兩顆
+ * 仍是中性色（這個 App 不用整顆紅按鈕）。
+ */
+.clear-row--danger > .button {
+  color: var(--color-due);
+}
+
+/* 警示清單裡的「目前進行中的提醒」——那是這串裡最嚴重的一項。 */
 .clear-row--danger strong {
   color: var(--color-due);
 }
