@@ -163,7 +163,11 @@ export class BrowserRemotePush implements RemotePushPort {
     dueAt: string,
     operationId: string
   ): Promise<BackgroundPushState> {
-    const intent: NewPendingPushIntent = { kind: "schedule", dueAt, operationId };
+    const intent: NewPendingPushIntent = {
+      kind: "schedule",
+      dueAt,
+      operationId
+    };
     return this.#enqueue(() => this.#persistSessionIntent(intent));
   }
 
@@ -235,8 +239,14 @@ export class BrowserRemotePush implements RemotePushPort {
         return this.#recoverInvalidCredential(intent);
       return retryable(response) ? "pending-sync" : "schedule-error";
     }
+    let authoritativeState: "scheduled" | "enabled";
+    try {
+      authoritativeState = await readAuthoritativeScheduleState(response);
+    } catch {
+      return "schedule-error";
+    }
     await this.#deps.state.clearPendingIntent(intent.operationId);
-    return intent.kind === "schedule" ? "scheduled" : "enabled";
+    return authoritativeState;
   }
 
   async #persistSessionIntent(
@@ -397,4 +407,23 @@ function authenticatedRequest(
 
 function retryable(response: Response): boolean {
   return response.status === 429 || response.status >= 500;
+}
+
+async function readAuthoritativeScheduleState(
+  response: Response
+): Promise<"scheduled" | "enabled"> {
+  const body = (await response.json()) as unknown;
+  if (typeof body !== "object" || body === null || Array.isArray(body)) {
+    throw new Error("PUSH_SCHEDULE_RESPONSE_INVALID");
+  }
+  const value = body as Record<string, unknown>;
+  if (value.state === "cancelled") return "enabled";
+  if (
+    value.state === "scheduled" &&
+    typeof value.dueAt === "string" &&
+    Number.isFinite(Date.parse(value.dueAt))
+  ) {
+    return "scheduled";
+  }
+  throw new Error("PUSH_SCHEDULE_RESPONSE_INVALID");
 }

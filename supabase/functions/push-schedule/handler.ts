@@ -35,13 +35,13 @@ export type PushScheduleDependencies = {
     deviceId: string;
     dueAt: string;
     operationId: string;
-    intentRevision: number;
+    intentRevision: number | null;
     now: string;
   }): Promise<StoredScheduleState>;
   cancelSchedule(input: {
     deviceId: string;
     operationId: string;
-    intentRevision: number;
+    intentRevision: number | null;
     now: string;
   }): Promise<StoredScheduleState>;
   reportError(code: string): void;
@@ -91,9 +91,13 @@ export function createPushScheduleHandler(
           action: "schedule";
           dueAt: string;
           operationId: string;
-          intentRevision: number;
+          intentRevision: number | null;
         }
-      | { action: "cancel"; operationId: string; intentRevision: number };
+      | {
+          action: "cancel";
+          operationId: string;
+          intentRevision: number | null;
+        };
     try {
       parsed =
         request.method === "PUT"
@@ -116,7 +120,8 @@ export function createPushScheduleHandler(
           parsed.action === "schedule" ? "scheduled" : "cancelled";
         if (
           stored.state !== requestedState ||
-          stored.intentRevision !== parsed.intentRevision
+          (parsed.intentRevision !== null &&
+            stored.intentRevision !== parsed.intentRevision)
         ) {
           return failure(409, "OPERATION_CONFLICT", "操作代碼已用於其他要求");
         }

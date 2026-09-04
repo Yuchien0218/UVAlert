@@ -6,6 +6,10 @@ import type {
   PushStatePort
 } from "@sunshield/platform";
 import {
+  LocalPushStateRepository,
+  SunshieldDatabase
+} from "@sunshield/persistence-web";
+import {
   BrowserRemotePush,
   type BrowserRemotePushDependencies
 } from "./BrowserRemotePush";
@@ -45,7 +49,10 @@ function createState(initial?: {
     }),
     readPendingIntent: vi.fn(async () => pendingIntent),
     replacePendingIntent: vi.fn(async (value: NewPendingPushIntent) => {
-      pendingIntent = { ...value, revision: ++nextRevision } as PendingPushIntent;
+      pendingIntent = {
+        ...value,
+        revision: ++nextRevision
+      } as PendingPushIntent;
       return pendingIntent;
     }),
     clearPendingIntent: vi.fn(async (matchingOperationId) => {
@@ -72,6 +79,18 @@ function createSubscription() {
     }),
     unsubscribe: vi.fn(async () => true)
   } as unknown as PushSubscription;
+}
+
+function authoritativeScheduleResponse(
+  state: "scheduled" | "cancelled",
+  authoritativeDueAt: string | null = state === "scheduled" ? dueAt : null
+) {
+  return new Response(
+    JSON.stringify(
+      state === "scheduled" ? { state, dueAt: authoritativeDueAt } : { state }
+    ),
+    { status: 200, headers: { "Content-Type": "application/json" } }
+  );
 }
 
 function createHarness(
@@ -117,10 +136,9 @@ function createHarness(
           headers: { "Content-Type": "application/json" }
         });
       }
-      return new Response(JSON.stringify({ state: "scheduled" }), {
-        status: 200,
-        headers: { "Content-Type": "application/json" }
-      });
+      return authoritativeScheduleResponse(
+        init?.method === "DELETE" ? "cancelled" : "scheduled"
+      );
     }) as typeof fetch);
   const dependencies: BrowserRemotePushDependencies = {
     state: local.state,
@@ -267,12 +285,54 @@ describe("BrowserRemotePush", () => {
     expect(local.readIntent()).toBeNull();
   });
 
+  it("reports the authoritative cancellation when an older schedule is rejected", async () => {
+    const { adapter, local } = createHarness({
+      credentials,
+      fetch: vi.fn(async () =>
+        authoritativeScheduleResponse("cancelled")
+      ) as typeof fetch
+    });
+
+    await expect(adapter.schedule(dueAt, operationId)).resolves.toBe("enabled");
+    expect(local.readIntent()).toBeNull();
+  });
+
+  it("reports the authoritative schedule when an older cancellation is rejected", async () => {
+    const { adapter, local } = createHarness({
+      credentials,
+      fetch: vi.fn(async () =>
+        authoritativeScheduleResponse("scheduled")
+      ) as typeof fetch
+    });
+
+    await expect(adapter.cancel(operationId)).resolves.toBe("scheduled");
+    expect(local.readIntent()).toBeNull();
+  });
+
+  it("does not settle an intent from a malformed successful response", async () => {
+    const { adapter, local } = createHarness({
+      credentials,
+      fetch: vi.fn(
+        async () =>
+          new Response(JSON.stringify({ state: "unknown" }), {
+            status: 200,
+            headers: { "Content-Type": "application/json" }
+          })
+      ) as typeof fetch
+    });
+
+    await expect(adapter.schedule(dueAt, operationId)).resolves.toBe(
+      "schedule-error"
+    );
+    expect(local.readIntent()).toMatchObject({ operationId, revision: 1 });
+  });
+
   it("replaces the latest offline intent and flushes it after reconnect", async () => {
     let online = false;
     const { state, readIntent } = createState({ credentials });
     const fetchMock = vi.fn(
       async (_input: RequestInfo | URL, _init?: RequestInit) =>
-        new Response(null, { status: 200 })
+        authoritativeScheduleResponse("cancelled")
     ) as typeof fetch;
     const adapter = new BrowserRemotePush({
       ...createHarness({ credentials }).dependencies,
@@ -309,7 +369,7 @@ describe("BrowserRemotePush", () => {
         kind: "cancel",
         operationId: replacement
       });
-      return new Response(null, { status: 200 });
+      return authoritativeScheduleResponse("scheduled");
     });
     const adapter = new BrowserRemotePush({
       ...createHarness({ credentials }).dependencies,
@@ -332,7 +392,7 @@ describe("BrowserRemotePush", () => {
     });
     const fetchMock = vi.fn(
       async (_input: RequestInfo | URL, _init?: RequestInit) =>
-        new Response(null, { status: 200 })
+        authoritativeScheduleResponse("cancelled")
     ) as typeof fetch;
     const adapter = new BrowserRemotePush({
       ...createHarness({ credentials }).dependencies,
@@ -353,7 +413,10 @@ describe("BrowserRemotePush", () => {
     const replacementOperationId = "20000000-0000-4000-8000-000000000002";
     const { state, readIntent } = createState({ credentials });
     const fetchMock = vi.fn(
-      async () => new Response(null, { status: 200 })
+      async (_input: RequestInfo | URL, init?: RequestInit) =>
+        authoritativeScheduleResponse(
+          init?.method === "DELETE" ? "cancelled" : "scheduled"
+        )
     ) as typeof fetch;
     const adapter = new BrowserRemotePush({
       ...createHarness({ credentials }).dependencies,
@@ -432,19 +495,106 @@ describe("BrowserRemotePush", () => {
       intentRevision: 1
     });
 
-    requests[0]?.resolve(new Response(null, { status: 200 }));
+    requests[0]?.resolve(authoritativeScheduleResponse("scheduled"));
     await vi.waitFor(() => expect(requests).toHaveLength(2));
     expect(requests[1]?.body).toEqual({
       operationId: replacement,
       intentRevision: 2
     });
-    requests[1]?.resolve(new Response(null, { status: 200 }));
+    requests[1]?.resolve(authoritativeScheduleResponse("cancelled"));
 
     await expect(Promise.all([first, second])).resolves.toEqual([
       "scheduled",
       "enabled"
     ]);
     expect(local.readIntent()).toBeNull();
+  });
+
+  it("keeps two database connections and adapters aligned with the authoritative late response", async () => {
+    const databaseName = `push-two-tabs-${crypto.randomUUID()}`;
+    const databaseA = new SunshieldDatabase(databaseName);
+    const databaseB = new SunshieldDatabase(databaseName);
+    const stateA = new LocalPushStateRepository(databaseA);
+    const stateB = new LocalPushStateRepository(databaseB);
+    const operationB = "20000000-0000-4000-8000-000000000002";
+    const operationC = "20000000-0000-4000-8000-000000000003";
+    let remote: {
+      revision: number;
+      state: "scheduled" | "cancelled";
+      dueAt: string | null;
+    } = { revision: 0, state: "cancelled", dueAt: null };
+    let releaseFirstRequest: (() => void) | undefined;
+
+    const applyAtServer = (init: RequestInit) => {
+      const body = JSON.parse(String(init.body)) as {
+        dueAt?: string;
+        intentRevision: number;
+      };
+      if (body.intentRevision > remote.revision) {
+        remote =
+          init.method === "DELETE"
+            ? {
+                revision: body.intentRevision,
+                state: "cancelled",
+                dueAt: null
+              }
+            : {
+                revision: body.intentRevision,
+                state: "scheduled",
+                dueAt: body.dueAt ?? null
+              };
+      }
+      return authoritativeScheduleResponse(remote.state, remote.dueAt);
+    };
+    const fetchMock = vi.fn(
+      async (_input: RequestInfo | URL, init?: RequestInit) => {
+        const request = init as RequestInit;
+        const body = JSON.parse(String(request.body)) as {
+          operationId: string;
+        };
+        if (body.operationId === operationId) {
+          return new Promise<Response>((resolve) => {
+            releaseFirstRequest = () => resolve(applyAtServer(request));
+          });
+        }
+        return applyAtServer(request);
+      }
+    ) as typeof fetch;
+
+    try {
+      await stateA.writeCredentials(credentials);
+      const tabA = new BrowserRemotePush({
+        ...createHarness({ credentials }).dependencies,
+        state: stateA,
+        fetch: fetchMock
+      });
+      const tabB = new BrowserRemotePush({
+        ...createHarness({ credentials }).dependencies,
+        state: stateB,
+        fetch: fetchMock
+      });
+
+      const olderSchedule = tabA.schedule(dueAt, operationId);
+      await vi.waitFor(() =>
+        expect(releaseFirstRequest).toBeTypeOf("function")
+      );
+      await expect(
+        tabB.schedule("2026-08-30T11:00:00.000Z", operationB)
+      ).resolves.toBe("scheduled");
+      await expect(tabB.cancel(operationC)).resolves.toBe("enabled");
+
+      releaseFirstRequest?.();
+      await expect(olderSchedule).resolves.toBe("enabled");
+      expect(remote).toEqual({
+        revision: 3,
+        state: "cancelled",
+        dueAt: null
+      });
+      await expect(stateA.readPendingIntent()).resolves.toBeNull();
+    } finally {
+      databaseB.close();
+      await databaseA.delete();
+    }
   });
 
   it("keeps pending intent for network failures without exposing secrets", async () => {

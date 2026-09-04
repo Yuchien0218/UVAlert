@@ -1,6 +1,6 @@
 begin;
 
-select plan(33);
+select plan(40);
 
 select has_function(
   'public',
@@ -31,6 +31,36 @@ select function_privs_are(
   'service_role',
   array['EXECUTE'],
   'service role executes schedule operations'
+);
+select has_function(
+  'public',
+  'apply_push_schedule_operation',
+  array['uuid', 'uuid', 'text', 'timestamp with time zone', 'timestamp with time zone'],
+  'pre-revision compatibility operation remains available during rollout'
+);
+select ok(
+  not has_function_privilege(
+    'anon',
+    'public.apply_push_schedule_operation(uuid,uuid,text,timestamptz,timestamptz)',
+    'execute'
+  ),
+  'anon cannot execute the compatibility operation'
+);
+select ok(
+  not has_function_privilege(
+    'authenticated',
+    'public.apply_push_schedule_operation(uuid,uuid,text,timestamptz,timestamptz)',
+    'execute'
+  ),
+  'authenticated cannot execute the compatibility operation'
+);
+select function_privs_are(
+  'public',
+  'apply_push_schedule_operation',
+  array['uuid', 'uuid', 'text', 'timestamp with time zone', 'timestamp with time zone'],
+  'service_role',
+  array['EXECUTE'],
+  'service role executes the compatibility operation'
 );
 
 insert into public.push_subscriptions (
@@ -262,6 +292,9 @@ insert into public.push_subscriptions (
 ), (
   '10000000-0000-4000-8000-000000000025', 'hash-25', 'https://push.example/25', 'key-25', 'auth-25', 'active',
   '2026-08-30 09:00Z', '2026-08-30 09:00Z', '2026-08-30 09:00Z'
+), (
+  '10000000-0000-4000-8000-000000000026', 'hash-26', 'https://push.example/26', 'key-26', 'auth-26', 'active',
+  '2026-08-30 09:00Z', '2026-08-30 09:00Z', '2026-08-30 09:00Z'
 );
 select is(
   (
@@ -332,6 +365,45 @@ select is(
   (select status from public.push_schedules where device_id = '10000000-0000-4000-8000-000000000025'),
   'cancelled',
   'an older revision arriving after cancellation cannot recreate the schedule'
+);
+
+-- A database-first rollout must keep the old Edge Function operational, but
+-- once a revision-aware request has arrived the compatibility path may only
+-- return the authoritative state and must never overwrite it.
+select lives_ok(
+  $$select * from public.apply_push_schedule_operation(
+    '10000000-0000-4000-8000-000000000026',
+    '20000000-0000-4000-8000-000000000032',
+    'schedule',
+    '2026-08-30 10:30Z',
+    '2026-08-30 10:00Z'
+  )$$,
+  'the pre-revision Edge Function can schedule after the migration lands'
+);
+create temporary table transition_cancel as
+select * from public.apply_push_schedule_operation(
+  '10000000-0000-4000-8000-000000000026',
+  '20000000-0000-4000-8000-000000000033',
+  'cancel',
+  null,
+  '2026-08-30 10:05Z',
+  1
+);
+select results_eq(
+  $$select state from public.apply_push_schedule_operation(
+    '10000000-0000-4000-8000-000000000026',
+    '20000000-0000-4000-8000-000000000034',
+    'schedule',
+    '2026-08-30 11:00Z',
+    '2026-08-30 10:06Z'
+  )$$,
+  array['cancelled'::text],
+  'a delayed compatibility write returns the revision-aware authoritative state'
+);
+select is(
+  (select status from public.push_schedules where device_id = '10000000-0000-4000-8000-000000000026'),
+  'cancelled',
+  'a delayed compatibility write cannot overwrite revision-aware state'
 );
 
 select * from finish();

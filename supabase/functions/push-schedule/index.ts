@@ -32,19 +32,22 @@ function createProductionDependencies(): PushScheduleDependencies {
     operationId: string;
     action: "schedule" | "cancel";
     dueAt: string | null;
-    intentRevision: number;
+    intentRevision: number | null;
     now: string;
   }): Promise<StoredScheduleState> {
+    const parameters = {
+      p_device_id: input.deviceId,
+      p_operation_id: input.operationId,
+      p_action: input.action,
+      p_due_at: input.dueAt,
+      p_now: input.now,
+      ...(input.intentRevision === null
+        ? {}
+        : { p_intent_revision: input.intentRevision })
+    };
     const { data, error } = await requireClient().rpc(
       "apply_push_schedule_operation",
-      {
-        p_device_id: input.deviceId,
-        p_operation_id: input.operationId,
-        p_action: input.action,
-        p_due_at: input.dueAt,
-        p_now: input.now,
-        p_intent_revision: input.intentRevision
-      }
+      parameters
     );
     if (error !== null || !Array.isArray(data) || data.length !== 1) {
       throw new Error("PUSH_SCHEDULE_OPERATION_FAILED");
@@ -60,7 +63,8 @@ function createProductionDependencies(): PushScheduleDependencies {
       state: row.state as "scheduled" | "cancelled",
       dueAt: typeof row.due_at === "string" ? row.due_at : null,
       operationId: row.operation_id,
-      intentRevision: Number(row.intent_revision)
+      intentRevision:
+        input.intentRevision === null ? 0 : Number(row.intent_revision)
     };
   }
 
@@ -122,7 +126,7 @@ function createProductionDependencies(): PushScheduleDependencies {
     async readSchedule(deviceId) {
       const { data, error } = await requireClient()
         .from("push_schedules")
-        .select("status,due_at,last_operation_id")
+        .select("status,due_at,last_operation_id,last_intent_revision")
         .eq("device_id", deviceId)
         .maybeSingle();
       if (error !== null) throw new Error("PUSH_SCHEDULE_READ_FAILED");

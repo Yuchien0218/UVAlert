@@ -131,7 +131,11 @@ describe("push schedule request contract", () => {
   it("accepts a timezone-aware due time inside the server window", async () => {
     await expect(
       parsePushScheduleRequest(
-        request({ dueAt: "2026-08-30T10:30:00+00:00", operationId, intentRevision }),
+        request({
+          dueAt: "2026-08-30T10:30:00+00:00",
+          operationId,
+          intentRevision
+        }),
         now
       )
     ).resolves.toEqual({
@@ -141,11 +145,30 @@ describe("push schedule request contract", () => {
     });
   });
 
+  it("accepts the pre-revision schedule and cancel bodies during deployment transition", async () => {
+    await expect(
+      parsePushScheduleRequest(
+        request({ dueAt: "2026-08-30T10:30:00Z", operationId }),
+        now
+      )
+    ).resolves.toEqual({
+      dueAt: "2026-08-30T10:30:00.000Z",
+      operationId,
+      intentRevision: null
+    });
+    await expect(
+      parsePushScheduleCancelRequest(request({ operationId }))
+    ).resolves.toEqual({ operationId, intentRevision: null });
+  });
+
   it.each(["2026-08-30T09:50:00.000Z", "2026-08-31T10:00:00.000Z"])(
     "accepts the inclusive server-time boundary %s",
     async (dueAt) => {
       await expect(
-        parsePushScheduleRequest(request({ dueAt, operationId, intentRevision }), now)
+        parsePushScheduleRequest(
+          request({ dueAt, operationId, intentRevision }),
+          now
+        )
       ).resolves.toEqual({ dueAt, operationId, intentRevision });
     }
   );

@@ -7,12 +7,12 @@ export type PushSubscriptionInput = {
 export type PushScheduleRequest = {
   dueAt: string;
   operationId: string;
-  intentRevision: number;
+  intentRevision: number | null;
 };
 
 export type PushScheduleCancelRequest = {
   operationId: string;
-  intentRevision: number;
+  intentRevision: number | null;
 };
 
 export type PushContractErrorReason =
@@ -49,11 +49,14 @@ export async function parsePushScheduleRequest(
   const value = await readJsonBody(request);
   if (
     !isPlainObject(value) ||
-    !hasExactKeys(value, ["dueAt", "operationId", "intentRevision"]) ||
+    !hasOneExactKeySet(value, [
+      ["dueAt", "operationId"],
+      ["dueAt", "operationId", "intentRevision"]
+    ]) ||
     typeof value.dueAt !== "string" ||
     !hasTimezone(value.dueAt) ||
     !isUuid(value.operationId) ||
-    !isPositiveSafeInteger(value.intentRevision)
+    ("intentRevision" in value && !isPositiveSafeInteger(value.intentRevision))
   ) {
     throw new PushContractError("SCHEDULE_INVALID");
   }
@@ -69,7 +72,8 @@ export async function parsePushScheduleRequest(
   return {
     dueAt: new Date(dueTime).toISOString(),
     operationId: value.operationId.toLowerCase(),
-    intentRevision: value.intentRevision
+    intentRevision:
+      "intentRevision" in value ? (value.intentRevision as number) : null
   };
 }
 
@@ -79,15 +83,19 @@ export async function parsePushScheduleCancelRequest(
   const value = await readJsonBody(request);
   if (
     !isPlainObject(value) ||
-    !hasExactKeys(value, ["operationId", "intentRevision"]) ||
+    !hasOneExactKeySet(value, [
+      ["operationId"],
+      ["operationId", "intentRevision"]
+    ]) ||
     !isUuid(value.operationId) ||
-    !isPositiveSafeInteger(value.intentRevision)
+    ("intentRevision" in value && !isPositiveSafeInteger(value.intentRevision))
   ) {
     throw new PushContractError("SCHEDULE_INVALID");
   }
   return {
     operationId: value.operationId.toLowerCase(),
-    intentRevision: value.intentRevision
+    intentRevision:
+      "intentRevision" in value ? (value.intentRevision as number) : null
   };
 }
 
@@ -235,6 +243,13 @@ function hasExactKeys(
   );
 }
 
+function hasOneExactKeySet(
+  value: Record<string, unknown>,
+  expectedSets: readonly (readonly string[])[]
+): boolean {
+  return expectedSets.some((expected) => hasExactKeys(value, expected));
+}
+
 function isValidKey(
   value: unknown,
   minimumLength: number,
@@ -249,11 +264,7 @@ function isValidKey(
 }
 
 function isPositiveSafeInteger(value: unknown): value is number {
-  return (
-    typeof value === "number" &&
-    Number.isSafeInteger(value) &&
-    value > 0
-  );
+  return typeof value === "number" && Number.isSafeInteger(value) && value > 0;
 }
 
 function hasTimezone(value: string): boolean {
