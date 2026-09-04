@@ -261,11 +261,25 @@ const selectedDescription = computed(() => {
  * 直接寫在 .context-tile 上，不再像改版前那樣本地寫一份 background、再
  * 靠共用的 .option-selected 蓋回來——那個特異性衝突 2026-08-24 已經修過
  * 一次，不要再製造第二次。
+ *
+ * 2026-09-04：值改成共用那組（muted 邊框 ＋ hairline 底）。這裡是全站
+ * **最後一個**自己刻選取樣式的地方——2026-09-01 統一裝備分類時漏掉了它，
+ * 於是那次裁決只執行了一半。理由與當時完全相同：
+ *
+ *   1. 一比九。
+ *   2. --color-primary 是**行動色**。拿它當選取邊框，等於讓「這裡可以按」
+ *      跟「這個已經選了」共用一個訊號——而情境磁磚本身就是可按的，兩個
+ *      訊號疊在同一個元素上最容易混淆。
+ *   3. 邊框對比反而更好（muted 5.56 vs primary 4.37，SC 1.4.11 門檻 3:1）。
+ *
+ * 為什麼 2026-09-01 的守門沒抓到：selectedOptionStyle.test.ts 當時比對的是
+ * 字面上的 `:has(input:checked)`，而這裡寫的是 `:has(.context-tile__input:checked)`，
+ * 而且 `:has()` 與 `{` 之間還隔著第二個選擇器。守門同日已放寬成能涵蓋這兩種寫法。
  */
 .context-tile:has(.context-tile__input:checked),
 .context-tile--active {
-  border-color: var(--color-primary);
-  background: var(--color-surface-cream-strong);
+  border-color: var(--color-muted);
+  background: var(--color-hairline);
 }
 
 .context-tile strong {

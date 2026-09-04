@@ -133,11 +133,27 @@
 
 在 `/products/new` 實機驗證：按壓態明顯深於未選與已選兩種靜止態。`pnpm check` 全過。
 
-### 批次 2：選取層一致性
+### 批次 2：選取層一致性 — ✅ 已完成 2026-09-04
 
 - `ContextSelector` 改用 `.option-selected`
 - `DESIGN.md` 的 `context-option-selected` 回寫
 - 守門測試：全站只有一種選取外觀。**寫守門的兩個坑照 `CLAUDE.md`**——掃原始碼前先剝註解、比對完整宣告而不是子字串，而且**寫完先破壞一次確認它會紅**
+
+**完成紀錄——守門測試原本就存在，而且它守了空氣。**
+
+原本以為要新寫守門，結果 `apps/web/src/assets/selectedOptionStyle.test.ts` 2026-09-01 就寫好了，而且註解、剝註解、比對完整宣告全都做對了。**但它從來沒抓到 `ContextSelector`**——也就是唯一還沒統一的那一個。
+
+兩個洞疊在一起：
+
+1. pattern 只認字面上的 `:has(input:checked)`，認不得 `:has(.context-tile__input:checked)` 這種帶 class 的寫法。
+2. pattern 要求 `:has()` 後面**緊接** `{`，於是 `:has(…:checked),
+.context-tile--active {` 這種多重選擇器直接滑掉。
+
+放寬成 `/:has\([^)]*:checked\)[^{}]*\{([^}]*)\}/`（`[^{}]*` 不跨區塊，不會誤吞下一條規則）之後，測試數從 3 條變 4 條，`ContextSelector` 才進到守備範圍。**改壞驗證過會紅**，再還原。
+
+這是 `CLAUDE.md`「守門可能全綠但守空氣」的又一個實例，而且是**寫得很用心的守門**仍然漏掉——漏的不是紀律，是比對範圍。
+
+CSS 與 `DESIGN.md`（frontmatter `context-option-selected` ＋ 第五節 prose）一併回寫。實機驗證計算值：選取態 `rgb(231,216,207)`／`rgb(111,90,84)` ＝ hairline／muted，未選取不變。
 
 ### 批次 3：底部導覽（Google Play A＋B）
 

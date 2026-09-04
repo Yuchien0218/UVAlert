@@ -278,9 +278,9 @@ components:
     rounded: "{rounded.md}"
     padding: 16px
   context-option-selected:
-    backgroundColor: "{colors.surface-cream-strong}"
+    backgroundColor: "{colors.hairline}"
     textColor: "{colors.ink}"
-    borderColor: "{colors.primary}"
+    borderColor: "{colors.muted}"
     rounded: "{rounded.md}"
   bottom-sheet:
     backgroundColor: "{colors.canvas}"
@@ -801,7 +801,9 @@ Noto Serif TC 是標題的唯一字型，沒有第二層自托管備援——載
 
 > **2026-08-29 更正**：先前寫「兩步驟設定流程（步驟 1 情境、步驟 2 塗抹時間與部位）」，但 `/setup/context` 與 `/setup/timing` 已於 2026-08-24 合併成單頁 `/setup`（理由是「減少跳轉的疲倦感」，見 `docs/decisions/2026-08-15-redesign-sitemap-userflow-current.md` §2.2）。步驟指示器隨之失去對象。
 
-**`context-option`** ／ **`context-option-selected`** — 情境選項。未選取：`{colors.canvas}` 底、`{colors.hairline}` 邊框。已選取：`{colors.surface-cream-strong}` 底、`{colors.primary}` 邊框。選取態同時有底色與邊框變化，不只靠顏色。
+**`context-option`** ／ **`context-option-selected`** — 情境選項。未選取：`{colors.canvas}` 底、`{colors.hairline}` 邊框。已選取：`{colors.hairline}` 底、`{colors.muted}` 邊框——**與全站所有選項共用同一組值**（見上面的「已選取的外觀只有一組」）。選取態同時有底色與邊框變化，不只靠顏色。
+
+2026-09-04 從 `{colors.surface-cream-strong}` 底 ＋ `{colors.primary}` 邊框改過來。情境磁磚是 2026-09-01 統一選取外觀時漏掉的最後一個，理由與當時相同：`{colors.primary}` 是**行動色**，拿它當選取邊框會讓「這裡可以按」跟「這個已經選了」共用訊號，而磁磚本身就是可按的。邊框對比反而變好（5.56 vs 4.37）。
 
 **`bottom-sheet`** — 需要在流程中調整細節時使用（如部位防護調整）。面板使用不透明的 `--surface-overlay`、頂角 `--radius-sheet`、內距 20px，搭配 `--overlay-backdrop` 遮罩。用 sheet 而非新頁面，維持流程不中斷。共通實作位於 `components/common/BottomSheet.vue`，並透過 `useOverlay` 統一 Escape 關閉、Tab 焦點循環、背景 inert、捲動鎖與關閉後焦點還原。
 

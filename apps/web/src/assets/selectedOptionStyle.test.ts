@@ -5,6 +5,9 @@ import { describe, expect, it } from "vitest";
 /**
  * 2026-09-01：「已選取」只有一種長相（使用者要求統一）。
  *
+ * 2026-09-04 補：這條守門當初漏掉了 `ContextSelector`（原因見下方迴圈的
+ * 註解），所以「統一」實際上只做了一半。CSS 與比對範圍同日一起修好。
+ *
  * 使用者在同一個表單裡看到兩種選中樣式：裝備分類卡是 `--color-primary`
  * 邊框 ＋ `--color-surface-cream-strong` 底，其餘九個使用點與所有
  * `.choice-grid` 走 app.css 的 `--color-muted` 邊框 ＋ `--color-hairline` 底。
@@ -47,17 +50,31 @@ describe("已選取的外觀只有一組值", () => {
   });
 
   /*
-   * 每個自己寫 `:has(input:checked)` 的地方都必須落在同一組值上。
+   * 每個自己寫「選中」樣式的地方都必須落在同一組值上。
    *
    * **比對完整的宣告**（`border-color: var(--color-primary);`）而不是只找
    * token 名字：只找名字的話，同一個檔案在別處合法地用 --color-primary
    * （例如按鈕）就會誤判（CLAUDE.md 坑二的反面）。
+   *
+   * 2026-09-04 放寬比對範圍——**這條守門原本漏掉了 ContextSelector**，而它
+   * 正是全站最後一個沒統一的地方，等於 2026-09-01 全綠但守了空氣。兩個洞：
+   *
+   *   1. 只認字面上的 `input:checked`，認不得 `.context-tile__input:checked`
+   *      這種帶 class 的寫法。
+   *   2. 要求 `:has()` 後面**緊接** `{`，於是
+   *      `:has(…:checked),
+.context-tile--active {` 這種多重選擇器直接滑掉。
+   *
+   * 現在的 pattern 允許 `:has()` 到 `{` 之間還有其他選擇器（`[^{}]*` 不跨
+   * 區塊，所以不會誤吞下一條規則），選擇器內部也放寬成任意 `…:checked`。
    */
   for (const file of discover(sourceRoot).filter(
     (path) => path !== sharedRules && path !== thisTest
   )) {
     const source = strip(readFileSync(file, "utf8"));
-    const blocks = [...source.matchAll(/:has\(input:checked\)\s*\{([^}]*)\}/g)];
+    const blocks = [
+      ...source.matchAll(/:has\([^)]*:checked\)[^{}]*\{([^}]*)\}/g)
+    ];
     if (blocks.length === 0) continue;
 
     it(`${file} 的選取樣式沿用共用那組值`, () => {
