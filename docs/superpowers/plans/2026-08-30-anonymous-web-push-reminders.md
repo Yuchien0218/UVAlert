@@ -852,7 +852,7 @@ git commit -m "docs: document anonymous push deployment"
 - Consumes all local implementation tasks.
 - Produces a reviewed, deployable commit set; does not mutate production.
 
-- [ ] **Step 1: Run all focused Push tests together**
+- [x] **Step 1: Run all focused Push tests together**
 
 ```powershell
 & '.\node_modules\.bin\vitest.CMD' run packages/persistence-web/src/repositories/local-push-state-repository.test.ts supabase/functions/_shared/push-auth.test.ts supabase/functions/_shared/push-contracts.test.ts supabase/functions/push-subscription/index.test.ts supabase/functions/push-schedule/index.test.ts supabase/functions/push-dispatch/pushSender.test.ts supabase/functions/push-dispatch/index.test.ts apps/web/src/adapters/BrowserRemotePush.test.ts apps/web/src/service-worker-push.test.ts apps/web/src/features/notification/createNotificationController.test.ts apps/web/src/pages/settings/NotificationSettingsPage.test.ts
@@ -860,7 +860,9 @@ git commit -m "docs: document anonymous push deployment"
 
 Expected: all listed files PASS.
 
-- [ ] **Step 2: Run database reset and pgTAP**
+Evidence (2026-09-05, commit `0c804cc`): 11 files, 180 tests PASS.
+
+- [x] **Step 2: Run database reset and pgTAP**
 
 ```powershell
 supabase db reset
@@ -869,7 +871,9 @@ supabase test db
 
 Expected: all existing and anonymous Push database tests PASS.
 
-- [ ] **Step 3: Run repository gates**
+Evidence (2026-09-05, commit `0c804cc`): 4 files, 162 pgTAP tests PASS.
+
+- [x] **Step 3: Run repository gates**
 
 ```powershell
 pnpm check
@@ -878,17 +882,25 @@ pnpm build
 
 Expected: typecheck, all tests, ESLint, Stylelint and production build exit 0. Record existing chunk/canonical warnings precisely instead of claiming warning-free output.
 
-- [ ] **Step 4: Run secret and bundle scans**
+Evidence (2026-09-05, commit `0c804cc`): `pnpm check` exit 0 (111 files, 1,223 tests; typecheck, ESLint and Stylelint PASS); `pnpm build` exit 0. Existing warnings remain for chunks over 500 kB and missing `VITE_PUBLIC_SITE_URL`, whose local canonical/sitemap fallback is `http://localhost:4173`.
+
+- [x] **Step 4: Run secret and bundle scans**
 
 Search tracked files and built assets for the test secret markers and private environment variable names. The production bundle may contain `VITE_PUSH_PUBLIC_KEY`'s value but must not contain private VAPID key, device pepper, dispatcher secret or service-role key.
 
-- [ ] **Step 5: Perform final whole-scope independent review**
+Evidence (2026-09-05, commit `0c804cc`): production bundle contains none of the private variable names or test-secret markers. Tracked documentation matches only environment-variable references and explicit `replace-in-secure-shell` placeholders.
+
+- [x] **Step 5: Perform final whole-scope independent review**
 
 Review from merge-base through current HEAD across security, correctness, privacy, concurrency, offline behavior, UI truthfulness and deployment reproducibility. Resolve every finding or record an explicit blocker; a clean per-Task review does not replace this whole-scope review.
 
-- [ ] **Step 6: Commit only verified review fixes**
+Evidence (2026-09-05): final whole-scope findings were resolved through scoped fix/re-review rounds. The final legacy ownership and recovery re-review for `cf418cd..0c804cc` reports CLEAN (Critical 0, Important 0, Minor 0).
+
+- [x] **Step 6: Commit only verified review fixes**
 
 Use a scoped commit message describing the actual defect, rerun its focused tests, then rerun any affected full gate. Do not create an empty closeout commit.
+
+Evidence: review fixes are captured in scoped commits through `0c804cc`; this checklist update records current verification evidence and does not claim production deployment or device smoke testing.
 
 ---
 
