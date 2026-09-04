@@ -244,6 +244,15 @@ const selectedDescription = computed(() => {
   color: var(--text-primary);
   text-align: center;
   cursor: pointer;
+  transition:
+    background-color var(--duration-fast) var(--ease-out),
+    border-color var(--duration-fast) var(--ease-out),
+    filter var(--duration-fast) var(--ease-out);
+}
+
+/* 2026-09-04：原本 transition 與 :active 都沒有，選取瞬變、按下無回饋。 */
+.context-tile:active {
+  filter: brightness(var(--press-dim));
 }
 
 /*
@@ -305,6 +314,16 @@ const selectedDescription = computed(() => {
   border: 1px solid var(--border-strong);
   border-radius: var(--radius-sm);
   cursor: pointer;
+  transition:
+    background-color var(--duration-fast) var(--ease-out),
+    border-color var(--duration-fast) var(--ease-out),
+    filter var(--duration-fast) var(--ease-out);
+}
+
+/* 同 .context-tile，但這顆沒有自己的底色，所以按壓要補底（見 app.css）。 */
+.context-suboption:active {
+  background-color: var(--color-hairline);
+  filter: brightness(var(--press-dim));
 }
 
 .context-suboption:has(input:focus-visible) {

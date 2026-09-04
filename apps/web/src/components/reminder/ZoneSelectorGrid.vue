@@ -57,6 +57,22 @@ const emit = defineEmits<{
   border-radius: var(--radius-pill);
   min-height: var(--tap-target);
   cursor: pointer;
+  transition:
+    background-color var(--duration-fast) var(--ease-out),
+    border-color var(--duration-fast) var(--ease-out),
+    filter var(--duration-fast) var(--ease-out);
+}
+
+/*
+ * 2026-09-04：這顆原本 transition 與 :active 都沒有——選取是瞬變、按下
+ * 完全沒回饋，而它是記錄補擦時點最多次的東西。
+ *
+ * 鎖定時 input 是 disabled 的，所以按壓回饋要排除掉，否則會回應一個
+ * 按不動的東西。
+ */
+.zone-chip:not(.zone-chip--locked):active {
+  background-color: var(--color-hairline);
+  filter: brightness(var(--press-dim));
 }
 
 /*

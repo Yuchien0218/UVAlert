@@ -109,13 +109,29 @@
 
 **完成紀錄**：兩顆 token 已進 `DESIGN.md` frontmatter 與 `styles.css`；第十二節第一條改寫成原則式（附「已核可的非 opacity 動效」封閉清單），第二條補 `ease-emphasized` 的適用範圍，並新增第六條「可點的東西按下去要有回饋」。`tokens.test.ts` 會自動為每顆新 token 生成一組測試——**已刻意改壞兩顆確認會紅**（2 failed / 141 passed），再還原。畫面零變化。
 
-### 批次 1：觸壓層（第一條流程）
+### 批次 1：觸壓層（第一條流程）— ✅ 已完成 2026-09-04
 
 - `.zone-chip`、`.context-tile`、`.category-option` 補 transition ＋ `:active` 用 `--press-dim`
 - `.icon-button` 補 transition
 - `.choice-grid label:active` 的 0.85 → `var(--press-dim)`
 - `.button:active`、`.time-option:active` 改用 token
 - **驗證：截圖比對 0.92 與 0.85，定案裁決 3**
+
+**完成紀錄與一個推翻原設計的發現。**
+
+裁決 3 定案 **0.92**：三檔並排（0.92／0.88／0.85）比對後，0.85 會讓已選取藥丸整個轉成灰紫、暖色相消失，0.92 在有填色的表面上已經清楚可辨且保得住暖調。
+
+**但比 0.92／0.85 更關鍵的是：原本的做法在這個專案根本沒作用。**
+
+`filter: brightness()` 只能把已經畫出來的像素變暗，而這些可點表面**幾乎全都沒有自己的底色**——`.icon-button`、未選取的部位藥丸、`.button--quiet`、`.choice-grid` 選項、裝備分類、`.context-suboption` 全是透明的，直接坐在畫布上。沒有填色可暗，brightness 就只動到 1px 邊框與文字。**截圖並排確認：透明藥丸套 0.92 與完全沒套，螢幕上分不出來。**
+
+這代表 `.icon-button` 那個「按下去變暗」從寫下來的那天起就是無效的，而不是 2026-09-04 才壞掉。
+
+修正成兩件事一起做：透明表面補 `--color-hairline` 底，有填色的表面（primary 按鈕、已選取狀態）由 brightness 負責。`DESIGN.md` 第六條已改寫成這個兩段式規則。
+
+實際落地七處：`.button`、`.icon-button`（順帶補上它從來沒有的 `transition`）、`.choice-grid label`、`.time-option`、`.zone-chip`、`.context-tile`／`.context-suboption`、`.category-option`。鎖定的部位藥丸與停用的裝備分類用 `:not()` 排除——它們的 input 是 disabled，不該回應。
+
+在 `/products/new` 實機驗證：按壓態明顯深於未選與已選兩種靜止態。`pnpm check` 全過。
 
 ### 批次 2：選取層一致性
 

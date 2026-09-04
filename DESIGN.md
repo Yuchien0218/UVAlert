@@ -1265,9 +1265,18 @@ B8 遷移期間使用的四個臨時字級別名已移除；目前元件只使�
 
 #### 六、可點的東西按下去要有回饋
 
-所有 `cursor: pointer` 的表面在 `:active` 時用 `filter: brightness({motion.press-dim})`，而且**一定要有 `transition`**。只寫 `:active` 不寫過渡的話，按下與放開都是瞬變，讀起來是閃爍而不是回饋——`.icon-button` 2026-09-04 前就是這個狀況。
+所有 `cursor: pointer` 的表面在 `:active` 時同時做兩件事，而且**一定要有 `transition`**：
 
-`{motion.press-dim}` 定在 0.92 而不是更暗的值：`{colors.canvas}` 乘 0.85 約落到 `#D5D0C9`，那不是「被按下」，是「變成灰色」。這套配色本來就是低對比設計，暗 15% 會把暖色相整個壓掉。
+```css
+background-color: var(--color-hairline);   /* 透明表面靠這個 */
+filter: brightness(var(--press-dim));       /* 有填色的表面靠這個 */
+```
+
+**兩件事缺一不可，因為這些表面幾乎全都是透明的。** `filter: brightness()` 只能把已經畫出來的像素變暗——沒有填色可暗，它就只動到 1px 的邊框與文字。2026-09-04 截圖並排比對確認：**透明藥丸套 0.92 與完全沒套，螢幕上分不出來**。`.icon-button`、未選取的部位藥丸、`.button--quiet`、`.choice-grid` 選項、裝備分類全都屬於這一類。反過來，`{colors.primary}` 按鈕與已選取狀態有自己的底色，那裡是 brightness 在生效。有填色的表面不要再蓋 hairline 底，會蓋掉它自己的顏色。
+
+只寫 `:active` 不寫 `transition` 的話，按下與放開都是瞬變，讀起來是閃爍而不是回饋——`.icon-button` 2026-09-04 前就是這個狀況。
+
+`{motion.press-dim}` 定在 0.92 而不是更暗的值：`{colors.canvas}` 乘 0.85 約落到 `#D5D0C9`，那不是「被按下」，是「變成灰色」。同日三檔並排比對（0.92／0.88／0.85）確認 0.85 會讓已選取藥丸整個轉成灰紫，暖色相消失；0.92 在有填色的表面上已經清楚可辨，且保得住暖調。
 
 **2026-09-04 盤點：全站 20 個 `cursor: pointer` 的表面只有 8 個有任何按壓回饋**，而缺回饋的剛好是點擊最頻繁的那幾個（選部位、選情境、選裝備分類）。逐項施作順序見 `docs/decisions/2026-09-04-interaction-motion-plan.md`。
 

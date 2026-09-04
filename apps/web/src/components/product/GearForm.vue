@@ -804,6 +804,19 @@ p {
   text-align: center;
   font-size: var(--font-size-caption);
   cursor: pointer;
+  transition:
+    background-color var(--duration-fast) var(--ease-out),
+    border-color var(--duration-fast) var(--ease-out),
+    filter var(--duration-fast) var(--ease-out);
+}
+
+/*
+ * 2026-09-04：顏色 2026-09-01 已統一，但 transition 與 :active 一直是缺的。
+ * disabled 的分類排除按壓回饋——它有 cursor: not-allowed，不該回應。
+ */
+.category-option:not(.category-option--disabled):active {
+  background-color: var(--color-hairline);
+  filter: brightness(var(--press-dim));
 }
 
 /*

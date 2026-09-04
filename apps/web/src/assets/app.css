@@ -564,8 +564,21 @@ strong {
     filter var(--duration-fast) var(--ease-out);
 }
 
+/*
+ * 按壓回饋為什麼是「底色 ＋ 變暗」兩件事（2026-09-04 實測後修正）：
+ *
+ * 這些可點表面**幾乎全都沒有自己的底色**（透明，直接坐在畫布上），而
+ * `filter: brightness()` 只能把已經畫出來的像素變暗——沒有填色可暗，
+ * 它就只動到 1px 的邊框與文字，螢幕上**看不出來**。截圖並排比對過：
+ * 透明藥丸套 0.92 與沒套完全分不出來。
+ *
+ * 所以透明表面按下時補一層 `--color-hairline` 底；有填色的表面
+ * （primary 按鈕、已選取狀態）則由 brightness 負責。兩條規則疊在一起，
+ * 任何一種表面都至少有一個會生效。
+ */
 .button:active {
-  filter: brightness(0.92);
+  background-color: var(--color-hairline);
+  filter: brightness(var(--press-dim));
 }
 
 /* 行動色是 --color-primary，不是 --color-tracking（那是「追蹤中」狀態色）。 */
@@ -695,10 +708,18 @@ button.text-link {
   background: transparent;
   color: var(--text-primary);
   cursor: pointer;
+  /*
+   * 2026-09-04：原本只有 :active 的 filter，**沒有 transition**——按下與
+   * 放開都是瞬變，讀起來是閃爍而不是回饋。`.button` 一直都有，這裡是漏的。
+   */
+  transition:
+    background-color var(--duration-fast) var(--ease-out),
+    filter var(--duration-fast) var(--ease-out);
 }
 
 .icon-button:active {
-  filter: brightness(0.92);
+  background-color: var(--color-hairline);
+  filter: brightness(var(--press-dim));
 }
 
 /*
@@ -881,7 +902,8 @@ textarea {
   transition:
     background-color var(--duration-fast) var(--ease-out),
     color var(--duration-fast) var(--ease-out),
-    border-color var(--duration-fast) var(--ease-out);
+    border-color var(--duration-fast) var(--ease-out),
+    filter var(--duration-fast) var(--ease-out);
 }
 
 /*
@@ -921,8 +943,14 @@ textarea {
   background-color: var(--color-hairline-soft);
 }
 
+/*
+ * 2026-09-04：0.85 → var(--press-dim)（0.92）。全站四處按壓變暗原本各自
+ * 寫死，只有這裡是 0.85。收斂到 0.92 的理由見 packages/ui/src/styles.css
+ * 的 --press-dim 註解——0.85 在暖象牙底上會讀成「變成灰色」而不是「被按下」。
+ */
 .choice-grid label:active {
-  filter: brightness(0.85);
+  background-color: var(--color-hairline);
+  filter: brightness(var(--press-dim));
 }
 
 /*
@@ -1204,7 +1232,8 @@ p.prose-block {
   text-align: center;
   transition:
     background-color var(--duration-fast) var(--ease-out),
-    border-color var(--duration-fast) var(--ease-out);
+    border-color var(--duration-fast) var(--ease-out),
+    filter var(--duration-fast) var(--ease-out);
 }
 
 /* 理由同 .choice-grid label:hover——避免 hover 跟已選取同色。 */
@@ -1213,7 +1242,8 @@ p.prose-block {
 }
 
 .time-option:active {
-  filter: brightness(0.92);
+  background-color: var(--color-hairline);
+  filter: brightness(var(--press-dim));
 }
 
 /*
