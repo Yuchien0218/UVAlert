@@ -39,6 +39,13 @@ import { parseSpfInput } from "../../features/product/parseSpfInput";
 const props = defineProps<{ productId: string | null }>();
 const emit = defineEmits<{
   saved: [];
+  /**
+   * 編輯模式下找不到那件裝備（網址帶了不存在的 id）。
+   *
+   * 由呼叫端決定怎麼處理——這個元件同時被獨立頁與設定流程的 sheet 使用，
+   * 「該導去哪裡」是路由的事，不是表單的事。
+   */
+  notFound: [];
 }>();
 
 const { productSettings } = useWebAppServices();
@@ -188,7 +195,22 @@ const canRestore = computed(
 onMounted(async () => {
   await productSettings.ensureLoaded();
   const record = existing.value;
-  if (record === null) return;
+
+  /*
+   * 2026-09-04：網址帶了不存在的 id 時要說出來。
+   *
+   * 在這之前 `/products/<任意亂碼>/edit` 會渲染出一張完整的「編輯防曬裝備」
+   * 表單，欄位全空、而且「儲存」是可以按的——等於用一個不存在的 id 開一張
+   * 空表單。對照組是 `/products/<任意亂碼>`（詳情），它會導回清單。同一個
+   * 不存在的 id，兩種處置。
+   *
+   * 注意 record === null 同時涵蓋「還沒選 id」與「id 找不到」，所以要用
+   * props.productId 分辨：新增模式本來就沒有 record，那是正常的。
+   */
+  if (record === null) {
+    if (props.productId !== null) emit("notFound");
+    return;
+  }
   gearCategory.value = record.gearCategory;
   displayName.value = record.displayName;
   purchaseMonth.value = record.purchaseMonth ?? "";

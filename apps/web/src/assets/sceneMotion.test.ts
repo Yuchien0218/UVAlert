@@ -106,3 +106,50 @@ describe("換頁與通知的進出場", () => {
     );
   });
 });
+
+/**
+ * 換頁的時間預算（2026-09-04）。
+ *
+ * 使用者回報換頁「太慢、看起來很卡」。算過一次時間軸才發現最後一塊要到
+ * **1050ms** 才定下來——0.4s 階梯延遲 ＋ 0.45s 動畫，再加上離場那 0.2s。
+ * 整頁超過一秒。
+ *
+ * 這裡守的不是「有沒有動畫」，是**動畫沒有慢慢長回去**。
+ */
+describe("換頁的時間預算", () => {
+  const css = strip(readFileSync(SHARED, "utf8"));
+
+  /* 進場是「內容進場」，用 base（320ms）不是 slow（450ms）。 */
+  it("階梯淡入用 base 時長", () => {
+    expect(css).toMatch(
+      /\.page-stack > \*\s*\{[^}]*animation:\s*page-stack-fade-in var\(--duration-base\)/
+    );
+  });
+
+  /*
+   * **階梯只給前三塊。** 第四塊以後通常在摺線以下，使用者捲到那裡時動畫早就
+   * 播完了——那段延遲不是在做層次，只是在拖慢前面看得到的部分。
+   *
+   * 比對完整宣告：只檢查「有沒有 nth-child」的話，把延遲加回去仍然會綠。
+   */
+  it("階梯只到第三塊，而且步進是 0.04s", () => {
+    expect(css).toContain("animation-delay: 0.04s;");
+    expect(css).toMatch(
+      /\.page-stack > \*:nth-child\(n \+ 3\)\s*\{[^}]*animation-delay:\s*0\.08s;/
+    );
+    // 舊的長階梯不能回來。
+    expect(css).not.toContain("animation-delay: 0.24s;");
+    expect(css).not.toContain("animation-delay: 0.32s;");
+    expect(css).not.toContain("animation-delay: 0.4s;");
+  });
+
+  /*
+   * 離場用加速曲線。減速曲線會把大部分的不透明度變化拖到尾段，同樣 160ms
+   * 卻讀起來像舊頁賴著不走——這是「感覺很卡」裡跟時長無關的那一半。
+   */
+  it("離場用加速曲線，不是減速", () => {
+    expect(css).toMatch(
+      /\.page-leave-active\s*\{[^}]*var\(--duration-fast\) var\(--ease-accelerate\)/
+    );
+  });
+});

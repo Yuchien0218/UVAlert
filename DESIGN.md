@@ -13,6 +13,7 @@ motion:
   ease-out: cubic-bezier(0.25, 0.46, 0.45, 0.94)
   ease-in-out: cubic-bezier(0.65, 0, 0.35, 1)
   ease-emphasized: cubic-bezier(0.2, 0, 0, 1)
+  ease-accelerate: cubic-bezier(0.3, 0, 0.8, 0.15)
   motion-rise: 4px
   press-dim: 0.92
 
@@ -1276,6 +1277,8 @@ B8 遷移期間使用的四個臨時字級別名已移除；目前元件只使�
 **直接操作放慢會讀成延遲；自己發生的事沒有人在等，慢一點才安靜。**
 
 緩動一律 `{motion.ease-out}`；需要對稱進出的循環動畫（loader）用 `{motion.ease-in-out}`，循環長度用 `{motion.duration-loader-cycle}`。
+
+**離場用 `{motion.ease-accelerate}`（2026-09-04 新增）。** 離場是「東西要走了」，用減速曲線會讓它拖著不走——大部分的不透明度變化拖到尾段才發生，讀起來像卡住。加速曲線把變化集中在前段，**時長不變但感覺俐落很多**。進場維持 `{motion.ease-out}`：進場是「東西要來了」，減速收尾才穩。
 
 **直接操作的選取指示器用 `{motion.ease-emphasized}`（2026-09-04 新增）。** 它是 Material 3 的 standard 曲線，起步快、尾段長；`{motion.ease-out}` 是溫和的 easeOutQuad，中段幾乎等速。**同樣 160ms 動同樣的東西，換這條曲線就是「有回應」與「沒感覺」的差別。** 只給直接操作用——內容進場與 loader 是「自己發生的事」，強減速會讓它們讀起來很急。
 

@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import { computed } from "vue";
+import { useRouter } from "vue-router";
 import EducationSeoHead from "../../components/education/EducationSeoHead.vue";
+import IconButton from "../../components/common/IconButton.vue";
 import IconLead from "../../components/common/IconLead.vue";
 import {
   educationCategories,
@@ -9,6 +11,8 @@ import {
   educationCategoryPath
 } from "../../features/education/educationContent";
 import { educationCategoryIcon } from "../../features/education/educationCategoryIcons";
+
+const router = useRouter();
 
 const categoryCards = computed(() =>
   educationCategories.map((category) => {
@@ -69,11 +73,33 @@ const robots = computed(() =>
       page-type="CollectionPage"
     />
 
+    <!--
+      2026-09-04：補上返回出口。
+
+      衛教首頁是 hideNavigation 的頁面，在這之前它**沒有任何頂端出口**——
+      唯一的出路是品牌 logo，而那會回到 `/`，不是使用者來的 `/more`。
+      它的兩個子頁（分類、文章）2026-09-03 就補上箭頭了，首頁是當時漏掉的。
+
+      箭頭而不是叉叉：這裡是往上一層走，沒有東西被放棄
+      （`docs/decisions/2026-09-02-secondary-page-exit-rule.md`）。
+
+      版型抄 EducationCategoryPage 的 `.education-heading`：標題群組在左、
+      出口在右上角同一列。
+    -->
     <header class="page-heading education-hero">
-      <p class="page-heading__eyebrow">防曬生活編輯部</p>
-      <h1 class="page-heading__title" data-typography-role="page-title">
-        防曬衛教
-      </h1>
+      <div class="education-hero__main">
+        <p class="page-heading__eyebrow">防曬生活編輯部</p>
+        <h1 class="page-heading__title" data-typography-role="page-title">
+          防曬衛教
+        </h1>
+      </div>
+
+      <IconButton
+        icon="tool-arrow-left"
+        label="返回更多"
+        @click="router.push('/more')"
+      />
+
       <p class="page-heading__body">
         提供實用情境與官方指引。本專區為一般衛教資訊，不能取代專業醫療診斷。
       </p>
@@ -160,8 +186,24 @@ const robots = computed(() =>
   gap: var(--page-stack-gap-prose);
 }
 
+/*
+ * 2026-09-04：加了右上角的返回出口，所以要變成兩欄——標題群組在左、
+ * 出口在右。說明文字跨滿整列，不要被擠成窄長條。
+ * 同 EducationCategoryPage 的 `.education-heading`。
+ */
 .education-hero {
   max-width: 42rem;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: start;
+}
+
+.education-hero__main {
+  display: grid;
+  gap: var(--space-3);
+}
+
+.education-hero .page-heading__body {
+  grid-column: 1 / -1;
 }
 
 .education-section-heading {

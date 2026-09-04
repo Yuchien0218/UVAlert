@@ -42,6 +42,16 @@ function handleSaved(): void {
       紀錄。GearForm 存檔後會建立新紀錄並設成目前使用中的
       snapshot（saveProduct 對 sunscreen 品類的既有行為）。
     -->
-    <GearForm :product-id="null" @saved="handleSaved" />
+    <!--
+      這裡的 product-id 恆為 null（設定流程只會新增，不會編輯），所以
+      notFound 實務上不會發生。仍然接起來：GearForm 把它宣告成必要 emit，
+      而「哪天有人在這裡傳了 id」不該是靜默壞掉的那條路。關掉 sheet 是這個
+      情境下唯一合理的處置——沒有東西可以編輯。
+    -->
+    <GearForm
+      :product-id="null"
+      @saved="handleSaved"
+      @not-found="emit('close')"
+    />
   </BottomSheet>
 </template>

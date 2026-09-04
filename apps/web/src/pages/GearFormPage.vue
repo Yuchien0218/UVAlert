@@ -39,6 +39,15 @@ async function handleSaved(): Promise<void> {
 function handleCancel(): void {
   void router.back();
 }
+
+/*
+ * 網址帶了不存在的裝備 id——導回清單，跟 `/products/:id` 的處置一致
+ * （router/index.ts 那條 redirect）。用 replace 不用 push：那個網址不該
+ * 留在返回堆疊裡，否則按返回會再撞一次同一個空表單。
+ */
+async function handleNotFound(): Promise<void> {
+  await router.replace({ name: "products" });
+}
 </script>
 
 <template>
@@ -62,7 +71,11 @@ function handleCancel(): void {
       <p>資料預設儲存於本機，且支援雲端同步功能。</p>
     </header>
 
-    <GearForm :product-id="productId" @saved="handleSaved" />
+    <GearForm
+      :product-id="productId"
+      @saved="handleSaved"
+      @not-found="handleNotFound"
+    />
   </div>
 </template>
 

@@ -185,7 +185,15 @@ describe("元件 emit 有人接", () => {
         )) {
           const emitName = emitMatch[1]!;
           if (OPTIONAL_EMITS.has(emitName)) continue;
+          /*
+           * 2026-09-04：也要認 kebab-case。Vue 的模板兩種寫法都收
+           * （`@notFound` 與 `@not-found`），但這裡原本只比對 camelCase——
+           * 於是一個**確實接了**的 `@not-found` 會被報成沒接。誤判比漏判
+           * 更糟：它會逼下一個人去「修」一段本來就對的程式碼。
+           */
+          const kebab = emitName.replace(/[A-Z]/g, (c) => `-${c.toLowerCase()}`);
           if (attributes.includes(`@${emitName}`)) continue;
+          if (attributes.includes(`@${kebab}`)) continue;
           offenders.push(`<${componentName}> 的 @${emitName}`);
         }
       }
