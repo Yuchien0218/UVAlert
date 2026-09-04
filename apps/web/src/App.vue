@@ -23,8 +23,10 @@ import AppShell from "./components/shell/AppShell.vue";
  * hook 負責宣告結束——而 `setTimeout` 在隱藏的文件裡照樣會觸發。CSS 淡出仍然
  * 由 `.page-leave-active` 負責，這裡只是保證它一定會被收掉。
  *
- * 緩衝 40ms：class 從 `leave-from` 換成 `leave-to` 本身要等一個影格，
- * 抓剛好 160ms 有機會在淡出還差一點時就把元素拔掉。
+ * **它是保底，不是時長。** 可見時由 `transitionend` 先放行（160ms），這個
+ * 計時器只在隱藏文件下生效。緩衝 40ms 是因為 class 從 `leave-from` 換成
+ * `leave-to` 本身要等一個影格，抓剛好 160ms 有機會在淡出還差一點時就把元素
+ * 拔掉。
  *
  * ## 試過但不能用的兩個做法（不要再走一次）
  *
@@ -38,8 +40,24 @@ import AppShell from "./components/shell/AppShell.vue";
  */
 const LEAVE_TIMEOUT_MS = 200;
 
-function finishLeave(_element: Element, done: () => void): void {
-  globalThis.setTimeout(done, LEAVE_TIMEOUT_MS);
+/**
+ * 誰先到算誰：CSS 轉場結束就立刻放行，計時器只是隱藏文件下的保底。
+ *
+ * 2026-09-04 修正：原本只有計時器，於是**可見時也要等滿 200ms**——但 CSS
+ * 淡出 160ms 就結束了，中間 40ms 是舊頁已經全透明、新頁還沒掛的純空窗。
+ * 使用者回報「看起來很卡」，這 40ms 是其中一段。
+ */
+function finishLeave(element: Element, done: () => void): void {
+  const timer = globalThis.setTimeout(done, LEAVE_TIMEOUT_MS);
+
+  element.addEventListener(
+    "transitionend",
+    () => {
+      globalThis.clearTimeout(timer);
+      done();
+    },
+    { once: true }
+  );
 }
 </script>
 

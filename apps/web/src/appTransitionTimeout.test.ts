@@ -68,6 +68,20 @@ describe("換頁的離場不依賴 transitionend", () => {
     expect(timeout).toBeLessThanOrEqual(fade + 100);
   });
 
+  /*
+   * **計時器是保底，不是時長。**
+   *
+   * 只有計時器的話，可見時也要等滿 200ms——但 CSS 淡出 160ms 就結束了，
+   * 中間 40ms 是舊頁已經全透明、新頁還沒掛的純空窗。使用者回報「看起來很卡」
+   * 的其中一段就是它。所以要監聽 transitionend 搶先放行，並把計時器清掉
+   * （不清的話 done 會被呼叫兩次）。
+   */
+  it("可見時由 transitionend 先放行，並清掉保底計時器", () => {
+    expect(APP).toMatch(/addEventListener\(\s*"transitionend"/);
+    expect(APP).toMatch(/clearTimeout\(timer\)/);
+    expect(APP).toContain("{ once: true }");
+  });
+
   /* 動畫本身仍然在 CSS 裡，hook 只負責宣告結束。 */
   it("淡出仍由 CSS 負責，用的是同一顆 token", () => {
     expect(SHARED_CSS).toMatch(

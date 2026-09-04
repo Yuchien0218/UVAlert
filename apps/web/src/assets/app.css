@@ -65,8 +65,21 @@
  * 規則。fill-mode: backwards 讓元素在自己的 delay 期間維持 opacity: 0，
  * 不會先閃一下滿版內容才淡出重來。
  */
+/*
+ * 2026-09-04：時長從 slow（450ms）降到 base（320ms），階梯步進從 0.08s 砍成
+ * 0.04s，而且**只給前三塊**。
+ *
+ * 起因是使用者回報換頁「太慢、看起來很卡」。實際算一次時間軸才發現最後一塊
+ * 要到 **1050ms** 才定下來（0.4s 延遲 ＋ 0.45s 動畫，再加上離場的 0.2s）。
+ * 整頁超過一秒。
+ *
+ * 三塊之後不再累加延遲的理由：**第四塊以後通常在摺線以下**，使用者捲到那裡
+ * 時動畫早就播完了——那段延遲不是在做層次，只是在拖慢前面看得到的部分。
+ *
+ * 階梯的用意是「內容依序到位」，不是「內容慢慢到位」。三塊足夠讀出順序。
+ */
 .page-stack > * {
-  animation: page-stack-fade-in var(--duration-slow) var(--ease-out) backwards;
+  animation: page-stack-fade-in var(--duration-base) var(--ease-out) backwards;
 }
 
 .page-stack > *:nth-child(1) {
@@ -74,23 +87,11 @@
 }
 
 .page-stack > *:nth-child(2) {
+  animation-delay: 0.04s;
+}
+
+.page-stack > *:nth-child(n + 3) {
   animation-delay: 0.08s;
-}
-
-.page-stack > *:nth-child(3) {
-  animation-delay: 0.16s;
-}
-
-.page-stack > *:nth-child(4) {
-  animation-delay: 0.24s;
-}
-
-.page-stack > *:nth-child(5) {
-  animation-delay: 0.32s;
-}
-
-.page-stack > *:nth-child(n + 6) {
-  animation-delay: 0.4s;
 }
 
 /*
@@ -100,8 +101,12 @@
  * 只有離場有 transition：App.vue 的 <Transition mode="out-in"> 會等離場
  * 跑完才掛新頁，所以進場那一側不需要再定義，否則會跟階梯淡入疊在一起。
  */
+/*
+ * 離場用 --ease-accelerate 而不是 --ease-out。**時長沒變，感覺差很多**：
+ * 減速曲線會把大部分的不透明度變化拖到尾段，讀起來像舊頁賴著不走。
+ */
 .page-leave-active {
-  transition: opacity var(--duration-fast) var(--ease-out);
+  transition: opacity var(--duration-fast) var(--ease-accelerate);
 }
 
 .page-leave-to {
