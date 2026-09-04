@@ -321,7 +321,7 @@ async function save(): Promise<void> {
   if (!saved) {
     // 儲存失敗時保留表單，不返回列表（S-12）。
     localError.value =
-      "資料沒有儲存，這件裝備尚未寫入。輸入仍會保留，可以再試一次。";
+      "沒有儲存，輸入仍會保留，可以再試一次。";
     return;
   }
 

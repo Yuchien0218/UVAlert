@@ -478,7 +478,7 @@ onMounted(async () => {
         class="form-error"
         role="status"
       >
-        設定內容目前無法儲存；畫面內容仍會保留，你可以再試一次。
+        設定目前無法儲存；輸入仍會保留，可以再試一次。
       </p>
 
       <!-- 選好情境才揭露後半段，避免整頁一次攤開。 -->
@@ -601,7 +601,7 @@ onMounted(async () => {
         setup.submitError.value === "active_session_conflict"
           ? "另一個提醒已經開始；請先查看目前提醒。"
           : setup.submitError.value === "persistence_error"
-            ? "資料沒有完整儲存，因此這次提醒尚未開始。畫面輸入仍會保留，可以再試一次。"
+            ? "沒有完整儲存，這次提醒尚未開始。輸入仍會保留，可以再試一次。"
             : "部分資料需要重新確認，請返回相應步驟修改。"
       }}
     </p>

@@ -64,7 +64,11 @@ describe("FiveDayUvCard", () => {
     });
 
     expect(wrapper.text()).toContain("設定地區");
-    expect(wrapper.text()).toContain("才能查看五日 UV 預報");
+    /*
+     * 2026-09-04：尾巴「，才能查看五日 UV 預報」已拿掉——h1 已經是
+     * 「五日 UV 預報」，同一個畫面不要說兩次。這裡改守「不要又長回來」。
+     */
+    expect(wrapper.text()).not.toContain("才能查看五日 UV 預報");
     expect(wrapper.findAll(".uv-day")).toHaveLength(0);
   });
 

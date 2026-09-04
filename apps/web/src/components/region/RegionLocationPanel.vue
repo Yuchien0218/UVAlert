@@ -35,7 +35,7 @@ const errorMessage = computed(() => {
     case "boundary_ambiguous":
       return "目前位置可能接近行政區邊界，請手動確認地區。";
     case "storage_error":
-      return "目前無法儲存地區設定，請再試一次。";
+      return "目前無法儲存地區設定，可以再試一次。";
     case "invalid_region":
       return "找不到這個行政區，請重新選擇。";
     case null:

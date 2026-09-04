@@ -273,7 +273,7 @@ function goBack(): void {
           v-if="localData.error.value === 'export_failed'"
           kind="error"
         >
-          匯出沒有完成，檔案沒有產生。本機資料沒有任何變動，可以再試一次。
+          匯出沒有完成，本機資料沒有任何變動，可以再試一次。
         </AppNotice>
       </section>
 

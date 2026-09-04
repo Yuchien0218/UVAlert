@@ -205,7 +205,7 @@ async function runVoid(): Promise<void> {
               : eventCorrection.error.value === "state_changed"
                 ? "提醒狀態已經改變，請返回提醒頁重新確認後再更正一次。"
                 : eventCorrection.error.value === "persistence"
-                  ? "資料沒有儲存，這次更正尚未寫入。輸入仍會保留，可以再試一次。"
+                  ? "沒有儲存，輸入仍會保留，可以再試一次。"
                   : "這次更正沒有送出，原本的紀錄維持不變。"
           }}
         </p>
