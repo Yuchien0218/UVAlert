@@ -503,7 +503,7 @@ onMounted(async () => {
         <template v-if="hasConfirmedProtection">
           <!-- 夜間只是說明，不阻擋建立。 -->
           <p v-if="isNight" class="night-notice" role="status">
-            現在是夜間，這個時段紫外線通常很低。仍然可以建立提醒——如果你正要夜間出發或想先設定好，直接繼續即可。
+            現在是夜間，這個時段紫外線通常很低，仍然可以繼續建立提醒。
           </p>
 
           <ApplicationTimePicker
