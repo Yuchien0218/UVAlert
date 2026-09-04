@@ -74,12 +74,30 @@ describe("返回改成右上角的圖示鈕", () => {
 });
 
 describe("衛教分類頁的分隔線", () => {
-  it("標題區與文章清單之間有一條線", () => {
+  /*
+   * **2026-09-04：從獨立的 `<hr>` 改成標題區自己的下緣。**
+   *
+   * `<hr>` 是 `.page-stack` 的子元素，上下各吃一整份 stack gap——實測
+   * 32 ＋ 1 ＋ 32 ＝ **65px 的帶裡只有 1px 是內容**，而且上下相等，那條線
+   * 不屬於上面也不屬於下面（使用者：「加了水平線之後這一區很空」）。
+   */
+  it("標題區的下緣就是那條線", () => {
     const source = read(CATEGORY);
-    expect(source).toContain('<hr class="education-heading__rule" />');
+
     expect(source).toMatch(
-      /\.education-heading__rule \{[^}]*border-top:\s*1px solid var\(--border-subtle\);/
+      /\.education-heading \{[^}]*border-bottom:\s*1px solid var\(--border-subtle\);/
     );
+    expect(source).not.toContain("<hr");
+  });
+
+  /*
+   * **反向：上緣要比下緣近。** 只守上面那條的話，`padding-bottom` 留成
+   * stack gap 的大小也會過——那時線又回到「上下一樣遠」，等於沒改。
+   */
+  it("線貼著標題區，不是浮在兩段中間", () => {
+    const rule = /\.education-heading \{([^}]*)\}/.exec(read(CATEGORY))?.[1] ?? "";
+
+    expect(rule).toContain("padding-bottom: var(--space-4);");
   });
 });
 

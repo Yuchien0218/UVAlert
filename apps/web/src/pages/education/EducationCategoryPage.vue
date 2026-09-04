@@ -79,15 +79,6 @@ const robots = computed(() =>
       <p class="page-heading__body">{{ category.description }}</p>
     </header>
 
-    <!--
-      2026-09-01：標題區與文章清單之間補一條分隔線（使用者指定位置）。
-
-      這一頁上半是「你在哪一個主題」、下半是「這個主題有哪些文章」，中間
-      沒有任何分界，讀起來像同一段。線的用法跟首頁 UV 帶狀區一致：不是每個
-      區塊各自畫一條，而是只在真正的轉折處畫。
-    -->
-    <hr class="education-heading__rule" />
-
     <section aria-labelledby="category-articles-title">
       <div class="education-section-heading">
         <h2 id="category-articles-title" data-typography-role="section-title">
@@ -127,9 +118,29 @@ const robots = computed(() =>
  * 與 `.flow-heading`（裝備詳情、三個流程頁）同一套版型，只是這裡的左欄
  * 是 eyebrow ＋ IconLead 兩層，所以自己包一個 div。
  */
+/*
+ * 2026-09-01：這一頁上半是「你在哪一個主題」、下半是「這個主題有哪些
+ * 文章」，中間沒有任何分界，讀起來像同一段——所以有一條線。線的用法跟
+ * 首頁 UV 帶狀區一致：只在真正的轉折處畫，不是每個區塊各畫一條。
+ */
+/*
+ * **2026-09-04：從獨立的 `<hr>` 改成上一段的下緣。**
+ *
+ * `<hr>` 是 `.page-stack` 的子元素，所以它上下**各吃一整份 stack gap**——
+ * 實測衛教分類頁是 32 ＋ 1 ＋ 32 ＝ **65px 的帶裡只有 1px 是內容**，而且
+ * 上下相等：那條線不屬於上面也不屬於下面，讀起來就是一條浮在空中的線
+ * （使用者：「加了水平線之後這一區很空」）。
+ *
+ * 改成標題區自己的 `border-bottom` 之後，線與它所結束的那一段綁在一起，
+ * 上緣的間距縮成 `--space-4`、下緣仍是 stack gap——**不對稱正是重點**。
+ * 這也回到 repo 既有的做法：`.clear-row`、`.identity-fields` 都是
+ * `border-top`，不是 `<hr>`。
+ */
 .education-heading {
   grid-template-columns: minmax(0, 1fr) auto;
   align-items: start;
+  padding-bottom: var(--space-4);
+  border-bottom: 1px solid var(--border-subtle);
 }
 
 .education-heading__main {
@@ -140,18 +151,6 @@ const robots = computed(() =>
 .education-heading__body,
 .education-heading .page-heading__body {
   grid-column: 1 / -1;
-}
-
-/*
- * 分隔線沿用全站唯一的線色與粗細。`.page-stack` 已經在區塊之間給了間距，
- * 所以這裡不再加 margin——加了會變成「線的上下比其他區塊更空」。
- */
-.education-heading__rule {
-  width: 100%;
-  height: 0;
-  margin: 0;
-  border: 0;
-  border-top: 1px solid var(--border-subtle);
 }
 
 .education-review-note {

@@ -129,17 +129,6 @@ function editGear(productId: string): void {
       <p>清單儲存於本機。只有防曬乳支援補擦倒數，其他裝備僅供紀錄。</p>
     </header>
 
-    <!--
-      2026-09-04：標題區與清單之間補一條線（使用者：「使用中／收納中與上面
-      那區的區隔太弱」）。
-
-      量出來的原因是**間距完全一樣**：`.page-stack` 的 gap 是 20px，標題區
-      到「使用中」是 20，「使用中」到新增鈕也是 20——標題區沒有任何訊號說
-      它是上一層。做法沿用衛教分類頁 2026-09-01 的
-      `education-heading__rule`，不是新發明的分隔。
-    -->
-    <hr class="gear-section-rule" />
-
 
     <BroadcastLoader
       v-if="productSettings.phase.value === 'loading'"
@@ -221,22 +210,24 @@ function editGear(productId: string): void {
         </button>
 
         <!--
-          2026-09-01：「使用中」與「收納中」之間補一條分隔線（使用者指定
-          位置）。
-
-          這兩段是**兩種不同的東西**——會用於新提醒的，與不會的。中間隔著
-          一顆主要 CTA，沒有線的時候「新增裝備」看起來像屬於下面那一段。
-          線的用法跟首頁 UV 帶狀區、衛教分類頁一致：只在真正的轉折處畫，
-          不是每個區塊各畫一條。
-        -->
-        <hr v-if="past.length > 0" class="gear-section-rule" />
-
-        <!--
           「收納中」取代原本的「過去紀錄」（2026-08-23 裁決）。「過去紀錄」
           語氣像是被淘汰，容易讓人以為裝備被刪除了；「收納中」中性得多，
           也符合這些裝備仍可從編輯頁恢復使用的事實。
+
+          上緣那條線是 2026-09-01 使用者指定的位置：這兩段是**兩種不同的
+          東西**——會用於新提醒的，與不會的；中間還隔著一顆主要 CTA，沒有
+          線的時候「新增裝備」看起來像屬於下面這一段。
+
+          2026-09-04 從獨立的 `<hr>` 改成這一段自己的上緣（理由見
+          `.gear-past` 的註解）。條件不必再寫一次——線跟著這個 section 的
+          `v-if`，沒有收納中的裝備時整段都不在，也就不會出現一條下面什麼
+          都沒有的線。
         -->
-        <section v-if="past.length > 0" aria-labelledby="gear-past-title">
+        <section
+          v-if="past.length > 0"
+          class="gear-past"
+          aria-labelledby="gear-past-title"
+        >
           <div class="gear-section-heading">
             <h2 id="gear-past-title" data-typography-role="section-title">
               收納中
@@ -308,11 +299,27 @@ section {
 }
 
 /* 值與衛教分類頁那條一致——全站的分隔線只有一種粗細與顏色。 */
-.gear-section-rule {
-  width: 100%;
-  height: 0;
-  margin: 0;
-  border: 0;
+/*
+ * **2026-09-04：從獨立的 `<hr>` 改成上一段的下緣。**
+ *
+ * `<hr>` 是 `.page-stack` 的子元素，所以它上下**各吃一整份 stack gap**——
+ * 實測衛教分類頁是 32 ＋ 1 ＋ 32 ＝ **65px 的帶裡只有 1px 是內容**，而且
+ * 上下相等：那條線不屬於上面也不屬於下面，讀起來就是一條浮在空中的線
+ * （使用者：「加了水平線之後這一區很空」）。
+ *
+ * 改成標題區自己的 `border-bottom` 之後，線與它所結束的那一段綁在一起，
+ * 上緣的間距縮成 `--space-4`、下緣仍是 stack gap——**不對稱正是重點**。
+ * 這也回到 repo 既有的做法：`.clear-row`、`.identity-fields` 都是
+ * `border-top`，不是 `<hr>`。
+ */
+.page-heading--with-exit {
+  padding-bottom: var(--space-4);
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+/* 同上，只是這一條標的是「會用於新提醒」與「不會」之間的轉折。 */
+.gear-past {
+  padding-top: var(--space-4);
   border-top: 1px solid var(--border-subtle);
 }
 

@@ -577,21 +577,6 @@ function goBack(): void {
 </template>
 
 <style scoped>
-/*
- * 區塊標題的圖示錨點。跟 MorePage 卡片列同一種排法：圖示與標題同列、
- * 垂直置中。flex: none 不是保險——flex 子項預設可壓縮，圖示被壓縮就是
- * 變形（跟 IconLead 那條註解同一個理由）。
- */
-.section-heading {
-  display: flex;
-  align-items: center;
-  gap: var(--space-3);
-}
-
-.section-heading svg {
-  flex: none;
-}
-
 .page-heading {
   display: grid;
   gap: var(--space-2);

@@ -100,9 +100,28 @@ const contextSettled = computed(() => context.value !== null);
  * 「這個要去哪裡改」。
  */
 const editingContext = shallowRef(false);
+
+/**
+ * 選好情境之後、選擇器還在收尾的那一小段。
+ *
+ * 少了這個旗標就沒有辦法延後——`contextSettled` 一旦為真，選擇器立刻消失。
+ * 實測那是約 400px 的內容硬切成一行 39px 的摘要（使用者：「選項收合的很
+ * 突然」）。真正的收合時間點由 `ContextSelector` 自己決定，它收乾淨之後發
+ * `settled`。
+ *
+ * **儲存不受影響**：下面那個 watch 照樣立刻存檔，這裡延後的只有畫面。
+ */
+const contextSettling = shallowRef(false);
+
 const showContextSelector = computed(
-  () => !contextSettled.value || editingContext.value
+  () =>
+    !contextSettled.value || editingContext.value || contextSettling.value
 );
+
+function handleContextSettled(): void {
+  contextSettling.value = false;
+  editingContext.value = false;
+}
 
 watch(
   () => setup.draft.value?.initialContext ?? null,
@@ -126,7 +145,7 @@ watch(selectedContext, async (value, previous) => {
   if (value === null || value === previous) return;
   if (value === context.value) return;
   localError.value = null;
-  editingContext.value = false;
+  contextSettling.value = true;
   try {
     await setup.ensureLoaded();
     if (await setup.saveContext(value)) {
@@ -438,7 +457,11 @@ onMounted(async () => {
     </section>
 
     <template v-else>
-      <ContextSelector v-if="showContextSelector" v-model="selectedContext" />
+      <ContextSelector
+        v-if="showContextSelector"
+        v-model="selectedContext"
+        @settled="handleContextSettled"
+      />
 
       <!--
         2026-08-31：摘要列補上情境圖示（使用者要求）。
