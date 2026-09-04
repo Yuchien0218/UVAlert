@@ -82,8 +82,16 @@ export function createAppRouter(
        * 把剛拿掉的那一層路由再加回來，而這件事沒有人會分享連結。
        */
       {
+        /*
+         * 2026-09-04：redirect 從 `{ name: "products" }` 改成字串路徑。
+         *
+         * 具名目標會把 `:id` 這個參數一起帶過去，而 `products` 這條路由不吃
+         * 參數，vue-router 因此每次都印
+         * `[Vue Router warn]: Discarded invalid param(s) "id" when navigating`。
+         * 行為本來就正確，只是一直在丟警告。
+         */
         path: "/products/:id",
-        redirect: { name: "products" }
+        redirect: "/products"
       },
       {
         path: "/products",
