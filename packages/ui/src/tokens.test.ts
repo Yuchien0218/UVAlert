@@ -75,6 +75,7 @@ const SPACING_MAP: Record<string, string> = {
  */
 const LAYOUT_MAP: Record<string, string> = {
   "content-max": "--content-max",
+  "control-max": "--control-max",
   "tap-target": "--tap-target"
   // 左右留白（page-gutter）2026-08-26 從 frontmatter 移除——它是流動的
   // clamp() 不是 token，只留在 §12 prose。

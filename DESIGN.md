@@ -150,6 +150,7 @@ spacing:
 
 layout:
   content-max: 752px
+  control-max: 416px
   tap-target: 44px
 
 components:
