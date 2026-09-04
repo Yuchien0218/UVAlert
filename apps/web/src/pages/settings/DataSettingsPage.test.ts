@@ -268,3 +268,67 @@ describe("同步區的說明不重複", () => {
     expect(wrapper.text()).toContain("不登入不影響本機倒數與資料");
   });
 });
+
+/**
+ * 2026-09-05：清除卡三列都收成「說明（如果有）＋一顆講完整動作名稱的按鈕」。
+ */
+describe("清除卡的三列", () => {
+  /*
+   * 有草稿、也有進行中的提醒——這樣三列的按鈕都是可按的，兩句但書也都會
+   * 渲染。用預設的 fixture（`hasSetupDraft: false`）的話第一列會停用成
+   * 「沒有草稿可以清除」，測到的就不是這裡要守的東西。
+   */
+  const mountPage = () => {
+    useServices("signed_out", "idle", { ...SUMMARY_FIXTURE, hasSetupDraft: true });
+    return mount(DataSettingsPage, { global: { stubs: { RouterLink: true } } });
+  };
+
+  /*
+   * 改動前三列都是「標題 ＋ 一顆講同樣話的按鈕」，其中「清除裝備與提醒
+   * 紀錄」那一列的標題與按鈕**逐字相同**——DOM 實測就是
+   * `清除裝備與提醒紀錄清除裝備與提醒紀錄`。
+   */
+  it("每一列只有一顆按鈕在講動作名稱", () => {
+    const wrapper = mountPage();
+    const rows = wrapper.findAll(".clear-row");
+
+    expect(rows).toHaveLength(3);
+    for (const row of rows) {
+      const buttons = row.findAll("button");
+      expect(buttons).toHaveLength(1);
+      expect(row.text().split(buttons[0]!.text()).length - 1).toBe(1);
+    }
+  });
+
+  it("按鈕各自講完整的動作名稱", () => {
+    const labels = mountPage()
+      .findAll(".clear-row button")
+      .map((button) => button.text());
+
+    expect(labels).toEqual([
+      "清除設定草稿",
+      "清除裝備與提醒紀錄",
+      "清除全部本機資料"
+    ]);
+  });
+
+  /*
+   * **反向：兩句但書要留著。** 它們不是重述——一句講「只刪掉哪一種」，
+   * 一句講「進行中的提醒不會被刪」，都是標題與按鈕沒有涵蓋的例外。
+   * 少了這條，把整個 `<div>` 連同 `<p>` 一起刪掉也會過上面兩條。
+   */
+  it("兩句但書仍然在，而且排在按鈕上面", () => {
+    const rows = mountPage().findAll(".clear-row");
+
+    expect(rows[0]!.text()).toContain("只刪除還沒建立提醒的設定進度");
+    expect(rows[1]!.text()).toContain("進行中的提醒");
+
+    for (const index of [0, 1]) {
+      const row = rows[index]!;
+      const note = row.get("p").text();
+      expect(row.text().indexOf(note)).toBeLessThan(
+        row.text().indexOf(row.get("button").text())
+      );
+    }
+  });
+});

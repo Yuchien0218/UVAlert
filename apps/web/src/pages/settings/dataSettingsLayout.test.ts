@@ -106,7 +106,7 @@ describe("停用的「清除草稿」要說明原因", () => {
    */
   it("沒有草稿時按鈕本身說明原因", () => {
     expect(SOURCE).toContain("沒有草稿可以清除");
-    expect(SOURCE).toContain("summary.hasSetupDraft ? '清除草稿'");
+    expect(SOURCE).toContain("summary.hasSetupDraft ? '清除設定草稿'");
   });
 
   /*

@@ -310,13 +310,21 @@ function goBack(): void {
           已經寫著「未儲存草稿：無」，那是**另一張卡**的一列，讀者不會自己
           把兩件事連起來。所以在按鈕旁邊直接講。
         -->
+        <!--
+          2026-09-05：標題併進按鈕（延續 09-04 對「清除全部」那一列的處置）。
+
+          三列原本都是「標題 ＋ 一顆講同樣話的按鈕」——「清除裝備與提醒紀錄」
+          那一列的標題與按鈕文字**逐字相同**，DOM 實測就是
+          `清除裝備與提醒紀錄清除裝備與提醒紀錄`。按鈕自己講完整的動作名稱
+          之後，標題沒有剩下的資訊。
+
+          留下來的 `<p>` 都不是重述：一句講「只刪掉哪一種」，一句講「進行中
+          的提醒不會被刪」。它們排在按鈕**上面**——先讀到但書，再按。
+        -->
         <div class="clear-row">
-          <div>
-            <strong>清除設定草稿</strong>
-            <p v-if="summary.hasSetupDraft">
-              只刪除還沒建立提醒的設定進度。
-            </p>
-          </div>
+          <p v-if="summary.hasSetupDraft">
+            只刪除還沒建立提醒的設定進度。
+          </p>
           <!--
             2026-09-04：「目前沒有草稿可以清除。」從說明段落移到按鈕上。
 
@@ -329,7 +337,7 @@ function goBack(): void {
             :pending="busy"
             :trigger-disabled="!summary.hasSetupDraft"
             :trigger-label="
-              summary.hasSetupDraft ? '清除草稿' : '沒有草稿可以清除'
+              summary.hasSetupDraft ? '清除設定草稿' : '沒有草稿可以清除'
             "
             confirm-label="確定清除"
             @trigger="confirming = 'drafts'"
@@ -338,19 +346,19 @@ function goBack(): void {
           />
         </div>
 
-        <!-- 清除裝備與提醒紀錄 -->
+        <!--
+          清除裝備與提醒紀錄。
+
+          2026-09-04：拿掉「刪除所有防曬裝備與已結束的提醒紀錄。」——它逐字
+          重述了標題。剩下這句只在有進行中提醒時出現，講的是標題沒有涵蓋的
+          例外，不是重述。
+
+          2026-09-05：標題也拿掉了，理由見上一列。
+        -->
         <div class="clear-row">
-          <div>
-            <strong>清除裝備與提醒紀錄</strong>
-            <!--
-              2026-09-04：拿掉「刪除所有防曬裝備與已結束的提醒紀錄。」——
-              它逐字重述了上面的標題。剩下這句只在有進行中提醒時出現，講的
-              是標題沒有涵蓋的例外，不是重述。
-            -->
-            <p v-if="summary.hasActiveSession">
-              進行中的提醒<strong>不會</strong>被刪除；要結束它請到提醒頁明確結束，或使用下方的清除全部。
-            </p>
-          </div>
+          <p v-if="summary.hasActiveSession">
+            進行中的提醒<strong>不會</strong>被刪除；要結束它請到提醒頁明確結束，或使用下方的清除全部。
+          </p>
           <ConfirmAction
             :confirming="confirming === 'history'"
             :pending="busy"
@@ -681,11 +689,6 @@ dd {
   width: 100%;
   padding-top: var(--space-4);
   border-top: 1px solid var(--border-strong);
-}
-
-.clear-row div > strong {
-  display: block;
-  line-height: 1.4;
 }
 
 .clear-row p {
