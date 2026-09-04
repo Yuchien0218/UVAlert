@@ -279,16 +279,12 @@ function goBack(): void {
           <Icon name="tool-delete" :size="32" />
           <span>清除本機資料</span>
         </h2>
-        <p class="caution">
-          清除後<strong>無法還原</strong>，如需備份請先匯出資料。
-        </p>
-
         <AppNotice v-if="localData.notice.value?.kind === 'cleared'" kind="ok">
           {{
             localData.notice.value.scope === "drafts"
               ? "設定草稿已清除。"
               : localData.notice.value.scope === "history"
-                ? "裝備與已結束的提醒歷史已清除。"
+                ? "裝備與提醒紀錄已清除。"
                 : "這台裝置上的資料已全部清除。"
           }}
         </AppNotice>
@@ -310,48 +306,60 @@ function goBack(): void {
         <div class="clear-row">
           <div>
             <strong>清除設定草稿</strong>
-            <p>
-              {{
-                summary.hasSetupDraft
-                  ? "只刪除還沒建立提醒的設定進度。"
-                  : "目前沒有草稿可以清除。"
-              }}
+            <p v-if="summary.hasSetupDraft">
+              只刪除還沒建立提醒的設定進度。
             </p>
           </div>
+          <!--
+            2026-09-04：「目前沒有草稿可以清除。」從說明段落移到按鈕上。
+
+            那句話原本是為了解釋「按鈕為什麼是淡的」（2026-09-01 使用者回報
+            「有個按鈕顏色比較淡」）。但解釋放在按鈕**旁邊**，讀者仍要自己
+            把兩件事連起來；直接寫在按鈕上，停用的原因就是按鈕本身在說。
+          -->
           <ConfirmAction
             :confirming="confirming === 'drafts'"
             :pending="busy"
             :trigger-disabled="!summary.hasSetupDraft"
-            trigger-label="清除草稿"
-            confirm-label="清除設定草稿"
+            :trigger-label="
+              summary.hasSetupDraft ? '清除草稿' : '沒有草稿可以清除'
+            "
+            confirm-label="確定清除"
             @trigger="confirming = 'drafts'"
             @confirm="runClear('drafts')"
             @cancel="confirming = null"
           />
         </div>
 
-        <!-- 清除裝備與歷史 -->
+        <!-- 清除裝備與提醒紀錄 -->
         <div class="clear-row">
           <div>
-            <strong>清除裝備與歷史</strong>
-            <p>
-              刪除所有防曬裝備與已結束的提醒紀錄。
-              <template v-if="summary.hasActiveSession">
-                進行中的提醒<strong>不會</strong>被刪除；要結束它請到提醒頁明確結束，或使用下方的清除全部。
-              </template>
+            <strong>清除裝備與提醒紀錄</strong>
+            <!--
+              2026-09-04：拿掉「刪除所有防曬裝備與已結束的提醒紀錄。」——
+              它逐字重述了上面的標題。剩下這句只在有進行中提醒時出現，講的
+              是標題沒有涵蓋的例外，不是重述。
+            -->
+            <p v-if="summary.hasActiveSession">
+              進行中的提醒<strong>不會</strong>被刪除；要結束它請到提醒頁明確結束，或使用下方的清除全部。
             </p>
           </div>
           <ConfirmAction
             :confirming="confirming === 'history'"
             :pending="busy"
-            trigger-label="清除裝備與歷史"
-            confirm-label="清除裝備與歷史"
+            trigger-label="清除裝備與提醒紀錄"
+            confirm-label="確定清除"
             @trigger="confirming = 'history'"
             @confirm="runClear('history')"
             @cancel="confirming = null"
           >
+            <!--
+              「無法復原」補在這裡：區段層級那句「清除後無法還原，如需備份
+              請先匯出資料。」依使用者指示刪掉了，但那是動作前必須知道的
+              條件。清除全部的警示本來就有這句，這一則原本沒有。
+            -->
             <template #warning>
-              裝備清單與已結束的提醒都會消失，之後建立提醒需要重新填寫包裝標示。確定嗎？
+              裝備清單與已結束的提醒都會消失且<strong>無法復原</strong>，之後建立提醒需要重新填寫包裝標示。確定嗎？
             </template>
           </ConfirmAction>
         </div>
@@ -366,7 +374,7 @@ function goBack(): void {
             :confirming="confirming === 'all'"
             :pending="busy"
             trigger-label="清除全部"
-            confirm-label="清除全部本機資料"
+            confirm-label="確定清除"
             @trigger="confirming = 'all'"
             @confirm="runClear('all')"
             @cancel="confirming = null"
@@ -626,10 +634,6 @@ dd {
 .caution {
   color: var(--text-body);
   line-height: var(--line-height-body);
-}
-
-.caution strong {
-  color: var(--text-primary);
 }
 
 .clear-row {
