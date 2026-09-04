@@ -137,9 +137,20 @@ const hasValue = computed(() => props.uvi !== null && props.riskLevel !== null);
   font-size: var(--font-size-caption);
 }
 
+/*
+ * 2026-09-04：`flex-end` → `baseline`（使用者畫線指出這一列底部沒對齊）。
+ *
+ * `flex-end` 對齊的是**盒子**的下緣，三個盒子確實都收在同一條線上（實測
+ * 都是 196.4）。但「五日預報 ›」是 `ChevronLink`，它有 44px 的觸控高度而
+ * 文字在裡面垂直置中——盒子貼齊底部時，那行字反而被抬高約 8px。畫面上就
+ * 是使用者圈的那個落差。
+ *
+ * `baseline` 對齊的是**文字**，44px 的空高不再參與；讀數、等級與連結三段
+ * 字坐在同一條基線上。
+ */
 .uv-headline__value {
   display: flex;
-  align-items: flex-end;
+  align-items: baseline;
   gap: var(--space-2);
 }
 

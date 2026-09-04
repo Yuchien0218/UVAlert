@@ -36,10 +36,24 @@ const typographyProperties = [
   "letter-spacing"
 ] as const;
 
+/**
+ * `h3` 從 2026-09-04 起也可以是 `supporting`。
+ *
+ * 起因是本機資料頁的同步狀態列（「目前使用免登入模式」）：它是 `<h3>`，
+ * 但畫面上緊接在群組標題「跨裝置同步」下面，兩者同為 card-title 18/500
+ * ——**一個區塊裡兩個同級標題**，使用者回報「這一區排版很亂」。
+ *
+ * 降階是使用者裁決的，而且刻意一次降到 supporting（14px）而不是回到 16px：
+ * 2026-09-02 那次正是因為「18 對 16 差一階，看得出不一樣卻看不出為什麼」
+ * 才把它從 16 拉到 18。18 對 14 是看得出意圖的差距。
+ *
+ * **`h3` 仍然只有這兩個選項**：允許 supporting 不等於放行 body／caption，
+ * 那會讓標題掉進內文的字級。
+ */
 const allowedHeadingRolesByTag = {
   h1: ["page-title"],
   h2: ["section-title", "card-title"],
-  h3: ["card-title"]
+  h3: ["card-title", "supporting"]
 } as const;
 
 const allowedComponentExceptions = new Set([

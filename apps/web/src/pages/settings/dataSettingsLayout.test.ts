@@ -17,10 +17,17 @@ const SOURCE = readFileSync(
 
 describe("同步區的標題字級", () => {
   /*
-   * 改動前「跨裝置同步」18px、「目前使用免登入模式」16px——差一階，剛好
-   * 落在「看得出不一樣、但看不出為什麼」的區間。
+   * **2026-09-04：改成比群組標題低一階（使用者裁決）。**
    *
-   * 兩件事分開守：三塊狀態都要是 h3，而且都要標成 card-title。只守其中
+   * 2026-09-02 曾把這三塊從 16px 拉到 18px，理由是「差一階剛好落在看得出
+   * 不一樣、但看不出為什麼的區間」。那次拉平之後的實際結果是**一個區塊裡
+   * 兩個同級標題**——群組標題「跨裝置同步」與狀態列一樣重，使用者回報
+   * 「這一區排版很亂」。
+   *
+   * 這次一次降到 `supporting`（14px），不是回頭走 16px：18 對 14 是看得出
+   * 意圖的差距，18 對 16 才是當初被否決的那種曖昧差距。
+   *
+   * 兩件事分開守：三塊狀態都要是 h3，而且都要標成 supporting。只守其中
    * 一件的話，改成 h3 但忘了標 role（字級掉回 body）也會過。
    */
   it("三個同步狀態都是 h3", () => {
@@ -28,15 +35,25 @@ describe("同步區的標題字級", () => {
     expect(titles).toHaveLength(3);
   });
 
-  it("三個同步狀態都走 card-title，與「跨裝置同步」同級", () => {
+  it("三個同步狀態走 supporting，比「跨裝置同步」低一階", () => {
     const titles = [
       ...SOURCE.matchAll(
-        /<h3 class="sync-block__title" data-typography-role="card-title">/g
+        /<h3 class="sync-block__title" data-typography-role="supporting">/g
       )
     ];
     expect(titles).toHaveLength(3);
     expect(SOURCE).toContain(
       '<h2 id="sync-group-title" data-typography-role="card-title">'
+    );
+  });
+
+  /*
+   * **反向：顏色也要跟著降。** 只降字級的話，14px 的深色文字仍然像個標題
+   * ——那是 2026-09-02 想避免的「看得出不一樣、看不出為什麼」。
+   */
+  it("狀態列用次要文字色", () => {
+    expect(SOURCE).toMatch(
+      /\.sync-block__title \{[^}]*color: var\(--text-secondary\);/
     );
   });
 
