@@ -254,7 +254,7 @@ async function runTest(): Promise<void> {
             :checked="reminderFrequencyMinutes === null"
             @change="setFrequency(null)"
           />
-          只提醒一次
+          提醒一次
         </label>
         <label>
           <input
@@ -263,7 +263,7 @@ async function runTest(): Promise<void> {
             :checked="reminderFrequencyMinutes === 5"
             @change="setFrequency(5)"
           />
-          每 5 分鐘再提醒一次
+          每 5 分鐘
         </label>
         <label>
           <input
@@ -272,12 +272,9 @@ async function runTest(): Promise<void> {
             :checked="reminderFrequencyMinutes === 15"
             @change="setFrequency(15)"
           />
-          每 15 分鐘再提醒一次
+          每 15 分鐘
         </label>
       </div>
-      <p class="delivery-note">
-        此限制與單次提醒相同：需保持瀏覽器分頁開啟才會送達。
-      </p>
     </section>
   </div>
 </template>
