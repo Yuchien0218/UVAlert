@@ -411,6 +411,13 @@ async function remove(): Promise<void> {
       <p class="field-helper">即使同名，系統會視為不同裝備。</p>
     </section>
 
+    <!--
+      2026-09-04：防曬乳那一支不再給 `description`（使用者劃掉「請依包裝
+      標示填寫。」）。標題「防曬乳規格確認」＋ eyebrow「包裝標示」已經說完
+      同一件事，第三次講只是佔一行。
+
+      衣物那一支留著：它講的是「這裡為什麼沒有倒數相關欄位」，標題沒有涵蓋。
+    -->
     <ProductSnapshotEditor
       v-if="needsLabelFields"
       v-model="snapshotForm"
@@ -422,7 +429,7 @@ async function remove(): Promise<void> {
       title="防曬乳規格確認"
       :description="
         showSunscreenFields
-          ? '請依包裝標示填寫。'
+          ? ''
           : '衣物只需要確認身分；沒有會影響倒數的標示欄位。'
       "
     >
@@ -438,8 +445,13 @@ async function remove(): Promise<void> {
       -->
       <template #identity>
         <div v-if="showSunscreenFields" class="identity-fields">
+          <!--
+            2026-09-04：刪掉「只用來認出是哪一罐」（使用者劃掉）。
+            兩個欄位各自標著「選填」，用途不必再解釋一次；真正必須留著
+            的是「不影響倒數」——那是使用者填之前會想知道的事。
+          -->
           <p class="field-helper">
-            下面兩欄只用來認出是哪一罐，<strong>不影響補擦倒數</strong>。
+            SPF 與 PA <strong>不影響補擦倒數</strong>。
           </p>
           <div class="field-pair">
             <div>
@@ -835,10 +847,22 @@ p {
  * 白白比上面的 legend 與格子多縮 12px，卻看不出為什麼要縮。改用實際
  * 存在的 surface-soft，讓內距有對應的底色支撐。
  */
+/*
+ * 2026-09-04：底色從 `--color-surface-soft` 換成 `--color-surface-card`
+ * （使用者：「提醒區底色跟卡片一樣」）。
+ *
+ * `--surface-primary`（卡片底）就是 `--color-surface-soft`，所以這一塊
+ * 原本與旁邊的卡片同色——看起來像一張沒有標題的卡片，而不是一句提示。
+ * surface-card 是系統裡「深一階的表面」，不必發明新語意；`--text-secondary`
+ * 在它上面是 5.05:1，仍然過 AA。
+ *
+ * 刻意不用狀態色（例如 tracking-soft）：這是一句陳述「接下來會發生什麼」
+ * 的提示，不是某個部位現在的狀態。狀態色留給真的狀態。
+ */
 .category-effect {
   padding: var(--space-3);
   border-radius: var(--radius-sm);
-  background: var(--color-surface-soft);
+  background: var(--color-surface-card);
   color: var(--text-secondary);
   line-height: var(--line-height-body);
 }

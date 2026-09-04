@@ -305,10 +305,21 @@ async function runTest(): Promise<void> {
   font-size: var(--font-size-card-title);
 }
 
+/*
+ * 2026-09-04：底色從 `--surface-soft` 換成 `--color-surface-card`
+ * （使用者：「這頁排版怪怪的，是不是沒套 token」）。
+ *
+ * 根因量出來是**看不見的框**：`--surface-soft` 正是卡片自己的底色，所以
+ * 這個框只做了一件事——把文字往內縮 12px。實測卡片標題起於 41px、框裡的
+ * 文字起於 53px，中間沒有任何可見的理由。
+ *
+ * 換成深一階的表面之後，內縮有底色支撐；跟 `GearForm` 的 `.category-effect`
+ * 是同一天、同一個判斷。
+ */
 .note-box {
   padding: var(--space-3);
   border-radius: var(--radius-sm);
-  background: var(--surface-soft);
+  background: var(--color-surface-card);
   color: var(--text-secondary);
   font-size: var(--font-size-supporting);
   line-height: var(--line-height-body);
@@ -345,10 +356,17 @@ async function runTest(): Promise<void> {
   gap: var(--space-2);
 }
 
+/*
+ * 內距與 `.note-box` 對齊（2026-09-04）。
+ *
+ * 原本一個 16px、一個 12px，於是同一頁上有三種左緣：卡片標題 41、
+ * note-box 的文字 53、這個框的文字 58。三種內縮沒有任何一種是刻意的
+ * 層級，只是各寫各的。
+ */
 .delivery-emphasis {
   display: grid;
   gap: var(--space-2);
-  padding: var(--space-4);
+  padding: var(--space-3);
   border: 1px solid var(--border-strong);
   border-radius: var(--radius-sm);
 }
