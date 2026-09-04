@@ -139,3 +139,64 @@ describe("HomeCountdown 的水上活動提示", () => {
     ).toBe("true");
   });
 });
+
+/**
+ * 到期時進度條填滿（2026-09-04 使用者裁決）。
+ *
+ * `progressPercent` 是**剩餘**比例，到期剛好 0——實測那一刻 fill 寬度是
+ * 0px，整條變成空的軌道，看起來像「還沒開始」而不是「時間到了」。到期是
+ * 這個 App 存在的理由，最大的那條顏色訊號不該在那一刻消失。
+ */
+describe("到期時的進度條", () => {
+  const duePresentation: HomeReminderClockPresentation = {
+    ...basePresentation,
+    tone: "due",
+    title: "建議全面補擦",
+    remainingMinutes: 0,
+    progress: 0,
+    progressPercent: 0,
+    ariaLabel: "距離補擦還有 0 分鐘。"
+  };
+
+  function mountWith(presentation: HomeReminderClockPresentation) {
+    return mount(HomeCountdown, {
+      props: { presentation },
+      global: { stubs: { Icon: true, Transition: false } }
+    });
+  }
+
+  it("填滿而不是歸零", () => {
+    const fill = mountWith(duePresentation).get(".countdown__fill");
+
+    expect(fill.attributes("style")).toContain("width: 100%");
+  });
+
+  /*
+   * **反向：其他狀態仍然照剩餘比例畫。** 只守上面那條的話，把寬度寫死
+   * 100% 也是綠的——那時進度條永遠是滿的，等於沒有進度條。
+   */
+  it("未到期時仍照剩餘比例", () => {
+    const fill = mountWith(basePresentation).get(".countdown__fill");
+
+    expect(fill.attributes("style")).toContain("width: 40%");
+  });
+
+  /*
+   * 滿的條配上 `aria-valuenow="0"` 對螢幕閱讀器是矛盾的——畫面說滿、
+   * 語意說零。到期時它不再是進度條，改由下面那句「建議全面補擦」承擔。
+   */
+  it("到期時不再宣告成 progressbar", () => {
+    const track = mountWith(duePresentation).get(".countdown__track");
+
+    expect(track.attributes("role")).toBeUndefined();
+    expect(track.attributes("aria-hidden")).toBe("true");
+  });
+
+  it("未到期時仍然是 progressbar 且報得出數值", () => {
+    const track = mountWith(basePresentation).get(".countdown__track");
+
+    expect(track.attributes("role")).toBe("progressbar");
+    expect(track.attributes("aria-valuenow")).toBe("40");
+    expect(track.attributes("aria-label")).toContain("82 分鐘");
+  });
+});

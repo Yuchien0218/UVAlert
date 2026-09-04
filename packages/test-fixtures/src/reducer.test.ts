@@ -251,24 +251,32 @@ describe("P0 reminder reducer fixed vectors", () => {
     expect(zone.zoneTimerStartedAt).toBe("2026-07-29T10:00:00.000Z");
   });
 
-  it("TV-003 剩餘 30 分鐘為 reapply_soon", () => {
+  /*
+   * 「快到補擦時間」的門檻是 **20 分鐘**（2026-09-04 使用者裁決，原本 30）。
+   *
+   * 兩條測試夾住邊界的兩側：剛好 20 分鐘要進 soon、21 分鐘還不能。只守
+   * 其中一邊的話，把窗口改成 24 小時或 0 都還會有一條是綠的。
+   *
+   * 塗抹 10:00 ＋ 間隔 90 分鐘 → 到期 11:30。
+   */
+  it("TV-003 剩餘 20 分鐘為 reapply_soon", () => {
     const snapshot = makeProductSnapshot({
       reapplicationIntervalStatus: "explicit_minutes",
       reapplicationIntervalMinutes: 90
     });
     expect(
-      firstZone(makeStream({ snapshot }), "2026-07-29T11:00:00.000Z")
+      firstZone(makeStream({ snapshot }), "2026-07-29T11:10:00.000Z")
         .timingStatus
     ).toBe("reapply_soon");
   });
 
-  it("距到期超過 30 分鐘時仍為 tracking", () => {
+  it("距到期超過 20 分鐘時仍為 tracking", () => {
     const snapshot = makeProductSnapshot({
       reapplicationIntervalStatus: "explicit_minutes",
       reapplicationIntervalMinutes: 90
     });
     expect(
-      firstZone(makeStream({ snapshot }), "2026-07-29T10:59:00.000Z")
+      firstZone(makeStream({ snapshot }), "2026-07-29T11:09:00.000Z")
         .timingStatus
     ).toBe("tracking");
   });

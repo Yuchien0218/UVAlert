@@ -34,6 +34,33 @@ const props = defineProps<{
 /** 沒有可信期限時 progressPercent 為 null，此時不畫進度條而不是畫 0%。 */
 const hasProgress = computed(() => props.presentation.progressPercent !== null);
 
+/**
+ * 到期時進度條**填滿**，不是歸零（2026-09-04 使用者裁決）。
+ *
+ * `progressPercent` 是**剩餘**比例，所以時間愈少條愈短，到期時剛好 0——
+ * 實測那一刻 `fill` 寬度是 0px，整條變成空的軌道。到期是這個 App 存在的
+ * 理由，而畫面上最大的那條顏色訊號偏偏在那一刻消失，看起來像「還沒開始」
+ * 而不是「時間到了」。
+ *
+ * 填滿之後語意從「還剩多少」翻成「已經超時」，那條線從消失變成最醒目的
+ * 東西。這一刻它不再是進度條，所以 `role="progressbar"` 也一併拿掉——
+ * 宣告一個 0% 的進度條、畫面上卻是滿的，對螢幕閱讀器是矛盾的。到期的
+ * 訊息由下面那句「建議全面補擦」承擔。
+ */
+const isDue = computed(() => props.presentation.tone === "due");
+
+const trackAttrs = computed<Record<string, string>>(() =>
+  isDue.value
+    ? { "aria-hidden": "true" }
+    : {
+        role: "progressbar",
+        "aria-valuenow": String(props.presentation.progressPercent ?? 0),
+        "aria-valuemin": "0",
+        "aria-valuemax": "100",
+        "aria-label": `距離補擦還有 ${props.presentation.remainingMinutes} 分鐘`
+      }
+);
+
 const toneClass = computed(() => `countdown--${props.presentation.tone}`);
 
 /**
@@ -84,18 +111,10 @@ const stateIcon = computed(() => STATE_ICON[props.presentation.tone]);
       說明與按鈕之間，視覺上讀起來像按鈕的裝飾條。它描述的是倒數，貼著
       它描述的數字才對。
     -->
-    <div
-      v-if="hasProgress"
-      class="countdown__track"
-      role="progressbar"
-      :aria-valuenow="presentation.progressPercent ?? 0"
-      aria-valuemin="0"
-      aria-valuemax="100"
-      :aria-label="`距離補擦還有 ${presentation.remainingMinutes} 分鐘`"
-    >
+    <div v-if="hasProgress" class="countdown__track" v-bind="trackAttrs">
       <div
         class="countdown__fill"
-        :style="{ width: `${presentation.progressPercent}%` }"
+        :style="{ width: isDue ? '100%' : `${presentation.progressPercent}%` }"
       />
     </div>
 
