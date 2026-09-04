@@ -94,7 +94,7 @@ function goBack(): void {
       <div v-else-if="deferredPrompt">
         <h2 data-typography-role="card-title">可以安裝到這台裝置</h2>
         <p>
-          安裝後會在主畫面出現圖示，開啟速度較快；本機資料也較不容易因清除瀏覽器資料而遺失。
+          安裝後會在主畫面出現圖示、開啟更快，本機紀錄也比較不會因為清除瀏覽器資料而消失。
         </p>
         <button class="button button--primary" type="button" @click="install">
           安裝到手機
