@@ -242,3 +242,29 @@ describe("清除區的警示框", () => {
     );
   });
 });
+
+/**
+ * 2026-09-04（方案 A）：「不登入不影響本機倒數與資料」從未登入區塊搬到群組
+ * 說明——它在三種同步狀態下都成立，本來就屬於群組層。
+ */
+describe("同步區的說明不重複", () => {
+  /*
+   * **掛載後數次數，不是掃原始碼。** 搬家的風險是「搬上去了但下面沒刪」，
+   * 那在原始碼裡是兩個不同的字串（原句有「也」），掃字串抓不到；畫面上
+   * 卻是同一件事連著講兩次。
+   */
+  it("「不登入」的保證整頁只出現一次", () => {
+    useServices();
+    const wrapper = shallowMount(DataSettingsPage);
+
+    expect(wrapper.text().split("不登入").length - 1).toBe(1);
+  });
+
+  /* 反向：不可以連同群組說明一起弄丟——那句是免登入模式的核心承諾。 */
+  it("那句保證仍然在頁面上", () => {
+    useServices();
+    const wrapper = shallowMount(DataSettingsPage);
+
+    expect(wrapper.text()).toContain("不登入不影響本機倒數與資料");
+  });
+});
