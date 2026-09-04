@@ -58,7 +58,7 @@ describe("App Boot with real IndexedDB projection", () => {
         writeCredentials: async () => undefined,
         clearCredentials: async () => undefined,
         readPendingIntent: async () => null,
-        replacePendingIntent: async () => undefined,
+        replacePendingIntent: async (value) => ({ ...value, revision: 1 }),
         clearPendingIntent: async () => undefined
       },
       configuredApiBaseUrl: " https://api.example.test/v1/ ",

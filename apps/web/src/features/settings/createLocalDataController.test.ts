@@ -72,7 +72,8 @@ describe("createLocalDataController", () => {
       }),
       readPendingIntent: vi.fn(async () => pendingIntent),
       replacePendingIntent: vi.fn(async (value) => {
-        pendingIntent = value;
+        pendingIntent = { ...value, revision: 1 } as PendingPushIntent;
+        return pendingIntent;
       }),
       clearPendingIntent: vi.fn(async (operationId) => {
         if (pendingIntent?.operationId === operationId) pendingIntent = null;
@@ -202,7 +203,8 @@ describe("createLocalDataController", () => {
     let pendingIntent: PendingPushIntent | null = {
       kind: "revoke",
       operationId: "revoke-operation",
-      remoteRevoked: false
+      remoteRevoked: false,
+      revision: 1
     };
     let online = false;
     const state: PushStatePort = {
@@ -215,7 +217,8 @@ describe("createLocalDataController", () => {
       }),
       readPendingIntent: vi.fn(async () => pendingIntent),
       replacePendingIntent: vi.fn(async (value) => {
-        pendingIntent = value;
+        pendingIntent = { ...value, revision: 1 } as PendingPushIntent;
+        return pendingIntent;
       }),
       clearPendingIntent: vi.fn(async (operationId) => {
         if (pendingIntent?.operationId === operationId) pendingIntent = null;

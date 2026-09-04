@@ -385,6 +385,16 @@ export type PushDeviceCredentials = {
 };
 
 export type PendingPushIntent =
+  | { kind: "schedule"; dueAt: string; operationId: string; revision: number }
+  | { kind: "cancel"; operationId: string; revision: number }
+  | {
+      kind: "revoke";
+      operationId: string;
+      remoteRevoked: boolean;
+      revision: number;
+    };
+
+export type NewPendingPushIntent =
   | { kind: "schedule"; dueAt: string; operationId: string }
   | { kind: "cancel"; operationId: string }
   | { kind: "revoke"; operationId: string; remoteRevoked: boolean };
@@ -402,7 +412,8 @@ export interface PushStatePort {
   writeCredentials(value: PushDeviceCredentials): Promise<void>;
   clearCredentials(): Promise<void>;
   readPendingIntent(): Promise<PendingPushIntent | null>;
-  replacePendingIntent(value: PendingPushIntent): Promise<void>;
+  /** Atomically assigns the next device-wide revision to a remote intent. */
+  replacePendingIntent(value: NewPendingPushIntent): Promise<PendingPushIntent>;
   clearPendingIntent(operationId: string): Promise<void>;
 }
 

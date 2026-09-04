@@ -9,6 +9,7 @@ export type StoredScheduleState = {
   state: "scheduled" | "cancelled";
   dueAt: string | null;
   operationId: string;
+  intentRevision: number;
 };
 
 type AuthenticationResult =
@@ -34,11 +35,13 @@ export type PushScheduleDependencies = {
     deviceId: string;
     dueAt: string;
     operationId: string;
+    intentRevision: number;
     now: string;
   }): Promise<StoredScheduleState>;
   cancelSchedule(input: {
     deviceId: string;
     operationId: string;
+    intentRevision: number;
     now: string;
   }): Promise<StoredScheduleState>;
   reportError(code: string): void;
@@ -84,8 +87,13 @@ export function createPushScheduleHandler(
     }
 
     let parsed:
-      | { action: "schedule"; dueAt: string; operationId: string }
-      | { action: "cancel"; operationId: string };
+      | {
+          action: "schedule";
+          dueAt: string;
+          operationId: string;
+          intentRevision: number;
+        }
+      | { action: "cancel"; operationId: string; intentRevision: number };
     try {
       parsed =
         request.method === "PUT"
@@ -106,7 +114,10 @@ export function createPushScheduleHandler(
       if (stored?.operationId === parsed.operationId) {
         const requestedState =
           parsed.action === "schedule" ? "scheduled" : "cancelled";
-        if (stored.state !== requestedState) {
+        if (
+          stored.state !== requestedState ||
+          stored.intentRevision !== parsed.intentRevision
+        ) {
           return failure(409, "OPERATION_CONFLICT", "操作代碼已用於其他要求");
         }
         return scheduleResponse(stored);
@@ -118,11 +129,13 @@ export function createPushScheduleHandler(
               deviceId: authentication.deviceId,
               dueAt: parsed.dueAt,
               operationId: parsed.operationId,
+              intentRevision: parsed.intentRevision,
               now: nowIso
             })
           : await dependencies.cancelSchedule({
               deviceId: authentication.deviceId,
               operationId: parsed.operationId,
+              intentRevision: parsed.intentRevision,
               now: nowIso
             });
       return scheduleResponse(result);

@@ -7,10 +7,12 @@ export type PushSubscriptionInput = {
 export type PushScheduleRequest = {
   dueAt: string;
   operationId: string;
+  intentRevision: number;
 };
 
 export type PushScheduleCancelRequest = {
   operationId: string;
+  intentRevision: number;
 };
 
 export type PushContractErrorReason =
@@ -47,10 +49,11 @@ export async function parsePushScheduleRequest(
   const value = await readJsonBody(request);
   if (
     !isPlainObject(value) ||
-    !hasExactKeys(value, ["dueAt", "operationId"]) ||
+    !hasExactKeys(value, ["dueAt", "operationId", "intentRevision"]) ||
     typeof value.dueAt !== "string" ||
     !hasTimezone(value.dueAt) ||
-    !isUuid(value.operationId)
+    !isUuid(value.operationId) ||
+    !isPositiveSafeInteger(value.intentRevision)
   ) {
     throw new PushContractError("SCHEDULE_INVALID");
   }
@@ -65,7 +68,8 @@ export async function parsePushScheduleRequest(
   }
   return {
     dueAt: new Date(dueTime).toISOString(),
-    operationId: value.operationId.toLowerCase()
+    operationId: value.operationId.toLowerCase(),
+    intentRevision: value.intentRevision
   };
 }
 
@@ -75,12 +79,16 @@ export async function parsePushScheduleCancelRequest(
   const value = await readJsonBody(request);
   if (
     !isPlainObject(value) ||
-    !hasExactKeys(value, ["operationId"]) ||
-    !isUuid(value.operationId)
+    !hasExactKeys(value, ["operationId", "intentRevision"]) ||
+    !isUuid(value.operationId) ||
+    !isPositiveSafeInteger(value.intentRevision)
   ) {
     throw new PushContractError("SCHEDULE_INVALID");
   }
-  return { operationId: value.operationId.toLowerCase() };
+  return {
+    operationId: value.operationId.toLowerCase(),
+    intentRevision: value.intentRevision
+  };
 }
 
 async function readJsonBody(request: Request): Promise<unknown> {
@@ -237,6 +245,14 @@ function isValidKey(
     value.length >= minimumLength &&
     value.length <= maximumLength &&
     base64UrlPattern.test(value)
+  );
+}
+
+function isPositiveSafeInteger(value: unknown): value is number {
+  return (
+    typeof value === "number" &&
+    Number.isSafeInteger(value) &&
+    value > 0
   );
 }
 

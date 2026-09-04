@@ -11,6 +11,7 @@ const nextOperationId = "20000000-0000-4000-8000-000000000002";
 const authorization = `Device ${deviceId}.AAECAwQFBgcICQoLDA0ODxAREhMUFRYXGBkaGxwdHh8`;
 const now = new Date("2026-08-30T10:00:00.000Z");
 const dueAt = "2026-08-30T10:30:00.000Z";
+const intentRevision = 7;
 
 function makeDependencies(
   overrides: Partial<PushScheduleDependencies> = {}
@@ -26,12 +27,14 @@ function makeDependencies(
     upsertSchedule: vi.fn(async (input) => ({
       state: "scheduled",
       dueAt: input.dueAt,
-      operationId: input.operationId
+      operationId: input.operationId,
+      intentRevision: input.intentRevision
     })),
     cancelSchedule: vi.fn(async (input) => ({
       state: "cancelled",
       dueAt: null,
-      operationId: input.operationId
+      operationId: input.operationId,
+      intentRevision: input.intentRevision
     })),
     reportError: vi.fn(),
     ...overrides
@@ -51,7 +54,10 @@ function request(
   return new Request("https://api.test/push-schedule", {
     method,
     headers,
-    body: body === undefined ? undefined : JSON.stringify(body)
+    body:
+      body === undefined
+        ? undefined
+        : JSON.stringify({ ...body, intentRevision: body.intentRevision ?? intentRevision })
   });
 }
 
@@ -69,7 +75,7 @@ describe("anonymous push schedule handler", () => {
   it("PUT schedules one due time using server time and device identity", async () => {
     const dependencies = makeDependencies();
     const response = await createPushScheduleHandler(dependencies)(
-      request("PUT", { dueAt, operationId })
+      request("PUT", { dueAt, operationId, intentRevision })
     );
 
     expect(response.status).toBe(200);
@@ -81,6 +87,7 @@ describe("anonymous push schedule handler", () => {
       deviceId,
       dueAt,
       operationId,
+      intentRevision,
       now: now.toISOString()
     });
   });
@@ -91,7 +98,8 @@ describe("anonymous push schedule handler", () => {
       stored = {
         state: "scheduled" as const,
         dueAt: input.dueAt,
-        operationId: input.operationId
+        operationId: input.operationId,
+        intentRevision: input.intentRevision
       };
       return stored;
     });
@@ -141,7 +149,8 @@ describe("anonymous push schedule handler", () => {
       stored = {
         state: "cancelled" as const,
         dueAt: null,
-        operationId: input.operationId
+        operationId: input.operationId,
+        intentRevision: input.intentRevision
       };
       return stored;
     });
@@ -170,6 +179,7 @@ describe("anonymous push schedule handler", () => {
     expect(dependencies.cancelSchedule).toHaveBeenCalledWith({
       deviceId,
       operationId,
+      intentRevision,
       now: now.toISOString()
     });
   });

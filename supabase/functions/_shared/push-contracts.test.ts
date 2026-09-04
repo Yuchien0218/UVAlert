@@ -126,16 +126,18 @@ describe("push subscription request contract", () => {
 describe("push schedule request contract", () => {
   const now = new Date("2026-08-30T10:00:00.000Z");
   const operationId = "20000000-0000-4000-8000-000000000001";
+  const intentRevision = 1;
 
   it("accepts a timezone-aware due time inside the server window", async () => {
     await expect(
       parsePushScheduleRequest(
-        request({ dueAt: "2026-08-30T10:30:00+00:00", operationId }),
+        request({ dueAt: "2026-08-30T10:30:00+00:00", operationId, intentRevision }),
         now
       )
     ).resolves.toEqual({
       dueAt: "2026-08-30T10:30:00.000Z",
-      operationId
+      operationId,
+      intentRevision
     });
   });
 
@@ -143,8 +145,8 @@ describe("push schedule request contract", () => {
     "accepts the inclusive server-time boundary %s",
     async (dueAt) => {
       await expect(
-        parsePushScheduleRequest(request({ dueAt, operationId }), now)
-      ).resolves.toEqual({ dueAt, operationId });
+        parsePushScheduleRequest(request({ dueAt, operationId, intentRevision }), now)
+      ).resolves.toEqual({ dueAt, operationId, intentRevision });
     }
   );
 
@@ -163,8 +165,8 @@ describe("push schedule request contract", () => {
 
   it("accepts only an operation id for cancellation", async () => {
     await expect(
-      parsePushScheduleCancelRequest(request({ operationId }))
-    ).resolves.toEqual({ operationId });
+      parsePushScheduleCancelRequest(request({ operationId, intentRevision }))
+    ).resolves.toEqual({ operationId, intentRevision });
     await expect(
       parsePushScheduleCancelRequest(
         request({ operationId, dueAt: "2026-08-30T10:30:00Z" })

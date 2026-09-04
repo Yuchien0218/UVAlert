@@ -1,5 +1,6 @@
 import type {
   BackgroundPushState,
+  NewPendingPushIntent,
   PendingPushIntent,
   PushDeviceCredentials,
   PushStatePort,
@@ -162,12 +163,12 @@ export class BrowserRemotePush implements RemotePushPort {
     dueAt: string,
     operationId: string
   ): Promise<BackgroundPushState> {
-    const intent: PendingPushIntent = { kind: "schedule", dueAt, operationId };
+    const intent: NewPendingPushIntent = { kind: "schedule", dueAt, operationId };
     return this.#enqueue(() => this.#persistSessionIntent(intent));
   }
 
   async cancel(operationId: string): Promise<BackgroundPushState> {
-    const intent: PendingPushIntent = { kind: "cancel", operationId };
+    const intent: NewPendingPushIntent = { kind: "cancel", operationId };
     return this.#enqueue(() => this.#persistSessionIntent(intent));
   }
 
@@ -175,12 +176,11 @@ export class BrowserRemotePush implements RemotePushPort {
     return this.#enqueue(async () => {
       const pending = await this.#deps.state.readPendingIntent();
       if (pending?.kind === "revoke") return this.#sendIntent(pending);
-      const intent: PendingPushIntent = {
+      const intent = await this.#deps.state.replacePendingIntent({
         kind: "revoke",
         operationId: this.#deps.createOperationId(),
         remoteRevoked: false
-      };
-      await this.#deps.state.replacePendingIntent(intent);
+      });
       return this.#sendIntent(intent);
     });
   }
@@ -199,11 +199,10 @@ export class BrowserRemotePush implements RemotePushPort {
       intent.kind === "schedule" &&
       new Date(intent.dueAt).getTime() <= this.#deps.now().getTime()
     ) {
-      const cancel: PendingPushIntent = {
+      const cancel = await this.#deps.state.replacePendingIntent({
         kind: "cancel",
         operationId: this.#deps.createOperationId()
-      };
-      await this.#deps.state.replacePendingIntent(cancel);
+      });
       return this.#sendIntent(cancel);
     }
     const credentials = await this.#deps.state.readCredentials();
@@ -216,8 +215,15 @@ export class BrowserRemotePush implements RemotePushPort {
         authenticatedJsonRequest(
           intent.kind === "schedule" ? "PUT" : "DELETE",
           intent.kind === "schedule"
-            ? { dueAt: intent.dueAt, operationId: intent.operationId }
-            : { operationId: intent.operationId },
+            ? {
+                dueAt: intent.dueAt,
+                operationId: intent.operationId,
+                intentRevision: intent.revision
+              }
+            : {
+                operationId: intent.operationId,
+                intentRevision: intent.revision
+              },
           credentials
         )
       );
@@ -234,12 +240,12 @@ export class BrowserRemotePush implements RemotePushPort {
   }
 
   async #persistSessionIntent(
-    intent: Exclude<PendingPushIntent, { kind: "revoke" }>
+    intent: Exclude<NewPendingPushIntent, { kind: "revoke" }>
   ): Promise<BackgroundPushState> {
     const pending = await this.#deps.state.readPendingIntent();
     if (pending?.kind === "revoke") return this.#sendIntent(pending);
-    await this.#deps.state.replacePendingIntent(intent);
-    return this.#sendIntent(intent);
+    const persisted = await this.#deps.state.replacePendingIntent(intent);
+    return this.#sendIntent(persisted);
   }
 
   async #sendRevoke(
@@ -262,7 +268,8 @@ export class BrowserRemotePush implements RemotePushPort {
         if (!response.ok)
           return retryable(response) ? "pending-sync" : "schedule-error";
         await this.#deps.state.replacePendingIntent({
-          ...intent,
+          kind: "revoke",
+          operationId: intent.operationId,
           remoteRevoked: true
         });
       }

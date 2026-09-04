@@ -1,17 +1,17 @@
 begin;
 
-select plan(29);
+select plan(33);
 
 select has_function(
   'public',
   'apply_push_schedule_operation',
-  array['uuid', 'uuid', 'text', 'timestamp with time zone', 'timestamp with time zone'],
+  array['uuid', 'uuid', 'text', 'timestamp with time zone', 'timestamp with time zone', 'bigint'],
   'atomic push schedule operation exists'
 );
 select ok(
   not has_function_privilege(
     'anon',
-    'public.apply_push_schedule_operation(uuid,uuid,text,timestamptz,timestamptz)',
+    'public.apply_push_schedule_operation(uuid,uuid,text,timestamptz,timestamptz,bigint)',
     'execute'
   ),
   'anon cannot apply schedule operations'
@@ -19,7 +19,7 @@ select ok(
 select ok(
   not has_function_privilege(
     'authenticated',
-    'public.apply_push_schedule_operation(uuid,uuid,text,timestamptz,timestamptz)',
+    'public.apply_push_schedule_operation(uuid,uuid,text,timestamptz,timestamptz,bigint)',
     'execute'
   ),
   'authenticated cannot apply schedule operations'
@@ -27,7 +27,7 @@ select ok(
 select function_privs_are(
   'public',
   'apply_push_schedule_operation',
-  array['uuid', 'uuid', 'text', 'timestamp with time zone', 'timestamp with time zone'],
+  array['uuid', 'uuid', 'text', 'timestamp with time zone', 'timestamp with time zone', 'bigint'],
   'service_role',
   array['EXECUTE'],
   'service role executes schedule operations'
@@ -47,7 +47,8 @@ select * from public.apply_push_schedule_operation(
   '20000000-0000-4000-8000-000000000021',
   'schedule',
   '2026-08-30 10:30Z',
-  '2026-08-30 10:00Z'
+  '2026-08-30 10:00Z',
+  1
 );
 
 select is((select state from first_schedule), 'scheduled', 'schedule operation returns scheduled');
@@ -84,7 +85,8 @@ select * from public.apply_push_schedule_operation(
   '20000000-0000-4000-8000-000000000021',
   'schedule',
   '2026-08-30 10:30Z',
-  '2026-08-30 10:05Z'
+  '2026-08-30 10:05Z',
+  1
 );
 
 select ok((select replayed from replayed_schedule), 'same schedule operation is replayed');
@@ -112,7 +114,8 @@ select is(
       '20000000-0000-4000-8000-000000000022',
       'schedule',
       '2026-08-30 11:00Z',
-      '2026-08-30 10:10Z'
+      '2026-08-30 10:10Z',
+      2
     )
   ),
   '2026-08-30 11:00Z'::timestamptz,
@@ -146,7 +149,8 @@ select * from public.apply_push_schedule_operation(
   '20000000-0000-4000-8000-000000000023',
   'cancel',
   null,
-  '2026-08-30 10:15Z'
+  '2026-08-30 10:15Z',
+  3
 );
 
 select is((select state from first_cancel), 'cancelled', 'cancel returns cancelled');
@@ -183,7 +187,8 @@ select ok(
       '20000000-0000-4000-8000-000000000023',
       'cancel',
       null,
-      '2026-08-30 10:20Z'
+      '2026-08-30 10:20Z',
+      3
     )
   ),
   'same cancel operation is replayed'
@@ -202,7 +207,8 @@ select is(
       '20000000-0000-4000-8000-000000000024',
       'cancel',
       null,
-      '2026-08-30 10:20Z'
+      '2026-08-30 10:20Z',
+      1
     )
   ),
   'cancelled',
@@ -227,20 +233,21 @@ select is(
       '20000000-0000-4000-8000-000000000025',
       'schedule',
       '2026-08-30 10:30Z',
-      '2026-08-30 10:00Z'
+      '2026-08-30 10:00Z',
+      1
     )
   ),
   0::bigint,
   'revoked subscription cannot schedule'
 );
 select throws_ok(
-  $$select public.apply_push_schedule_operation('10000000-0000-4000-8000-000000000021', '20000000-0000-4000-8000-000000000026', 'unknown', null, '2026-08-30 10:00Z')$$,
+  $$select public.apply_push_schedule_operation('10000000-0000-4000-8000-000000000021', '20000000-0000-4000-8000-000000000026', 'unknown', null, '2026-08-30 10:00Z', 4)$$,
   '22023',
   null,
   'unknown schedule action is rejected'
 );
 select throws_ok(
-  $$select public.apply_push_schedule_operation('10000000-0000-4000-8000-000000000021', '20000000-0000-4000-8000-000000000027', 'schedule', '2026-08-31 10:00:01Z', '2026-08-30 10:00Z')$$,
+  $$select public.apply_push_schedule_operation('10000000-0000-4000-8000-000000000021', '20000000-0000-4000-8000-000000000027', 'schedule', '2026-08-31 10:00:01Z', '2026-08-30 10:00Z', 4)$$,
   '22023',
   null,
   'database rejects due time outside the server window'
@@ -252,6 +259,9 @@ insert into public.push_subscriptions (
 ) values (
   '10000000-0000-4000-8000-000000000024', 'hash-24', 'https://push.example/24', 'key-24', 'auth-24', 'active',
   '2026-05-01Z', '2026-05-01Z', '2026-05-01Z'
+), (
+  '10000000-0000-4000-8000-000000000025', 'hash-25', 'https://push.example/25', 'key-25', 'auth-25', 'active',
+  '2026-08-30 09:00Z', '2026-08-30 09:00Z', '2026-08-30 09:00Z'
 );
 select is(
   (
@@ -261,7 +271,8 @@ select is(
       '20000000-0000-4000-8000-000000000028',
       'schedule',
       '2026-08-30 10:30Z',
-      '2026-08-30 10:00Z'
+      '2026-08-30 10:00Z',
+      1
     )
   ),
   'scheduled',
@@ -271,6 +282,56 @@ select public.cleanup_push_data('2026-08-30 12:00Z');
 select ok(
   exists (select 1 from public.push_subscriptions where device_id = '10000000-0000-4000-8000-000000000024'),
   '90-day cleanup preserves a subscription that used authenticated scheduling'
+);
+
+-- A delayed write from another tab must never recreate a reminder after the
+-- shared device has persisted a newer cancellation intent.
+select is(
+  (
+    select state
+    from public.apply_push_schedule_operation(
+      '10000000-0000-4000-8000-000000000025',
+      '20000000-0000-4000-8000-000000000029',
+      'schedule',
+      '2026-08-30 10:30Z',
+      '2026-08-30 10:00Z',
+      1
+    )
+  ),
+  'scheduled',
+  'first device intent is scheduled'
+);
+create temporary table newer_cancel as
+select * from public.apply_push_schedule_operation(
+  '10000000-0000-4000-8000-000000000025',
+  '20000000-0000-4000-8000-000000000030',
+  'cancel',
+  null,
+  '2026-08-30 10:05Z',
+  2
+);
+select is(
+  (select state from newer_cancel),
+  'cancelled',
+  'a newer device intent cancels the schedule'
+);
+create temporary table delayed_schedule as
+select * from public.apply_push_schedule_operation(
+  '10000000-0000-4000-8000-000000000025',
+  '20000000-0000-4000-8000-000000000031',
+  'schedule',
+  '2026-08-30 11:00Z',
+  '2026-08-30 10:06Z',
+  1
+);
+select ok(
+  not (select applied from delayed_schedule),
+  'the atomic gate rejects a delayed older revision'
+);
+select is(
+  (select status from public.push_schedules where device_id = '10000000-0000-4000-8000-000000000025'),
+  'cancelled',
+  'an older revision arriving after cancellation cannot recreate the schedule'
 );
 
 select * from finish();

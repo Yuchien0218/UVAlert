@@ -1,5 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
 import type {
+  NewPendingPushIntent,
   PendingPushIntent,
   PushDeviceCredentials,
   PushStatePort
@@ -19,10 +20,21 @@ const publicVapidKey = "BEl62iUYgUivxIkv69yViEuiBIa40HI0FCXjV2qfL-FiLJ7x";
 
 function createState(initial?: {
   credentials?: PushDeviceCredentials | null | undefined;
-  intent?: PendingPushIntent | null | undefined;
+  intent?: PendingPushIntent | NewPendingPushIntent | null | undefined;
 }) {
   let storedCredentials = initial?.credentials ?? null;
-  let pendingIntent = initial?.intent ?? null;
+  let nextRevision =
+    initial?.intent !== undefined &&
+    initial.intent !== null &&
+    "revision" in initial.intent
+      ? initial.intent.revision
+      : initial?.intent
+        ? 1
+        : 0;
+  let pendingIntent =
+    initial?.intent === undefined || initial.intent === null
+      ? null
+      : ({ ...initial.intent, revision: nextRevision } as PendingPushIntent);
   const state: PushStatePort = {
     readCredentials: vi.fn(async () => storedCredentials),
     writeCredentials: vi.fn(async (value) => {
@@ -32,8 +44,9 @@ function createState(initial?: {
       storedCredentials = null;
     }),
     readPendingIntent: vi.fn(async () => pendingIntent),
-    replacePendingIntent: vi.fn(async (value) => {
-      pendingIntent = value;
+    replacePendingIntent: vi.fn(async (value: NewPendingPushIntent) => {
+      pendingIntent = { ...value, revision: ++nextRevision } as PendingPushIntent;
+      return pendingIntent;
     }),
     clearPendingIntent: vi.fn(async (matchingOperationId) => {
       if (pendingIntent?.operationId === matchingOperationId) {
@@ -64,7 +77,7 @@ function createSubscription() {
 function createHarness(
   options: {
     credentials?: PushDeviceCredentials | null;
-    intent?: PendingPushIntent | null;
+    intent?: PendingPushIntent | NewPendingPushIntent | null;
     subscription?: PushSubscription | null;
     permission?: NotificationPermission;
     online?: boolean;
@@ -229,7 +242,11 @@ describe("BrowserRemotePush", () => {
       "https://project.supabase.co/functions/v1/push-schedule"
     );
     expect(request?.method).toBe("PUT");
-    expect(JSON.parse(String(request?.body))).toEqual({ dueAt, operationId });
+    expect(JSON.parse(String(request?.body))).toEqual({
+      dueAt,
+      operationId,
+      intentRevision: 1
+    });
     expect(local.readIntent()).toBeNull();
   });
 
@@ -243,7 +260,10 @@ describe("BrowserRemotePush", () => {
     });
     const [, request] = vi.mocked(fetchMock).mock.calls[0] ?? [];
     expect(request?.method).toBe("DELETE");
-    expect(JSON.parse(String(request?.body))).toEqual({ operationId });
+    expect(JSON.parse(String(request?.body))).toEqual({
+      operationId,
+      intentRevision: 1
+    });
     expect(local.readIntent()).toBeNull();
   });
 
@@ -266,7 +286,11 @@ describe("BrowserRemotePush", () => {
     );
     const replacement = "20000000-0000-4000-8000-000000000002";
     await expect(adapter.cancel(replacement)).resolves.toBe("pending-sync");
-    expect(readIntent()).toEqual({ kind: "cancel", operationId: replacement });
+    expect(readIntent()).toEqual({
+      kind: "cancel",
+      operationId: replacement,
+      revision: 2
+    });
 
     online = true;
     await expect(adapter.flushPendingIntent()).resolves.toBe("enabled");
@@ -296,7 +320,8 @@ describe("BrowserRemotePush", () => {
     await expect(adapter.flushPendingIntent()).resolves.toBe("scheduled");
     expect(local.readIntent()).toEqual({
       kind: "cancel",
-      operationId: replacement
+      operationId: replacement,
+      revision: 2
     });
   });
 
@@ -375,7 +400,8 @@ describe("BrowserRemotePush", () => {
     expect(local.readIntent()).toEqual({
       kind: "revoke",
       operationId,
-      remoteRevoked: false
+      remoteRevoked: false,
+      revision: 1
     });
     expect(subscription.unsubscribe).not.toHaveBeenCalled();
   });
@@ -400,11 +426,18 @@ describe("BrowserRemotePush", () => {
     const first = adapter.schedule(dueAt, operationId);
     const second = adapter.cancel(replacement);
     await vi.waitFor(() => expect(requests).toHaveLength(1));
-    expect(requests[0]?.body).toEqual({ dueAt, operationId });
+    expect(requests[0]?.body).toEqual({
+      dueAt,
+      operationId,
+      intentRevision: 1
+    });
 
     requests[0]?.resolve(new Response(null, { status: 200 }));
     await vi.waitFor(() => expect(requests).toHaveLength(2));
-    expect(requests[1]?.body).toEqual({ operationId: replacement });
+    expect(requests[1]?.body).toEqual({
+      operationId: replacement,
+      intentRevision: 2
+    });
     requests[1]?.resolve(new Response(null, { status: 200 }));
 
     await expect(Promise.all([first, second])).resolves.toEqual([
@@ -425,7 +458,8 @@ describe("BrowserRemotePush", () => {
     expect(local.readIntent()).toEqual({
       kind: "schedule",
       dueAt,
-      operationId
+      operationId,
+      revision: 1
     });
   });
 
@@ -510,7 +544,8 @@ describe("BrowserRemotePush", () => {
     expect(local.readIntent()).toEqual({
       kind: "revoke",
       operationId,
-      remoteRevoked: false
+      remoteRevoked: false,
+      revision: 1
     });
     expect(local.readCredentials()).toEqual(credentials);
 

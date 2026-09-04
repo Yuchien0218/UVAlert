@@ -51,7 +51,32 @@ describe("LocalPushStateRepository", () => {
 
     await expect(repository.readPendingIntent()).resolves.toEqual({
       kind: "cancel",
+      operationId: "22222222-2222-4222-8222-222222222222",
+      revision: 2
+    });
+  });
+
+  it("assigns a durable monotonic revision when separate tabs replace the device intent", async () => {
+    const database = new SunshieldDatabase(`push-revision-${crypto.randomUUID()}`);
+    databases.push(database);
+    const tabA = new LocalPushStateRepository(database);
+    const tabB = new LocalPushStateRepository(database);
+
+    const older = await tabA.replacePendingIntent({
+      kind: "schedule",
+      dueAt: "2026-08-30T10:30:00.000Z",
+      operationId: "11111111-1111-4111-8111-111111111111"
+    });
+    const newer = await tabB.replacePendingIntent({
+      kind: "cancel",
       operationId: "22222222-2222-4222-8222-222222222222"
+    });
+
+    expect(older).toMatchObject({ revision: 1 });
+    expect(newer).toMatchObject({ revision: 2 });
+    await expect(tabA.readPendingIntent()).resolves.toMatchObject({
+      kind: "cancel",
+      revision: 2
     });
   });
 
@@ -70,7 +95,8 @@ describe("LocalPushStateRepository", () => {
     await expect(repository.readPendingIntent()).resolves.toEqual({
       kind: "schedule",
       dueAt: "2026-08-30T10:30:00.000Z",
-      operationId: newerOperationId
+      operationId: newerOperationId,
+      revision: 1
     });
 
     await repository.clearPendingIntent(newerOperationId);
@@ -91,7 +117,8 @@ describe("LocalPushStateRepository", () => {
 
     await expect(repository.readPendingIntent()).resolves.toEqual({
       kind: "cancel",
-      operationId: "33333333-3333-4333-8333-333333333333"
+      operationId: "33333333-3333-4333-8333-333333333333",
+      revision: 1
     });
   });
 });

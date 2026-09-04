@@ -1,4 +1,5 @@
 import type {
+  NewPendingPushIntent,
   PendingPushIntent,
   PushDeviceCredentials,
   PushStatePort
@@ -13,7 +14,8 @@ const CURRENT_DEVICE_ID = "current-device" as const;
 const EMPTY_STATE: PushDeliveryStateRecord = {
   id: CURRENT_DEVICE_ID,
   credentials: null,
-  pendingIntent: null
+  pendingIntent: null,
+  intentRevision: 0
 };
 
 export class LocalPushStateRepository implements PushStatePort {
@@ -39,8 +41,20 @@ export class LocalPushStateRepository implements PushStatePort {
     return (await this.#read()).pendingIntent;
   }
 
-  async replacePendingIntent(value: PendingPushIntent): Promise<void> {
-    await this.#update((current) => ({ ...current, pendingIntent: value }));
+  async replacePendingIntent(
+    value: NewPendingPushIntent
+  ): Promise<PendingPushIntent> {
+    let persisted: PendingPushIntent | undefined;
+    await this.#update((current) => {
+      const revision = current.intentRevision + 1;
+      persisted = { ...value, revision } as PendingPushIntent;
+      return {
+        ...current,
+        pendingIntent: persisted,
+        intentRevision: revision
+      };
+    });
+    return persisted!;
   }
 
   async clearPendingIntent(operationId: string): Promise<void> {
@@ -52,10 +66,24 @@ export class LocalPushStateRepository implements PushStatePort {
   }
 
   async #read(): Promise<PushDeliveryStateRecord> {
-    return (
-      (await this.#database.PushDeliveryState.get(CURRENT_DEVICE_ID)) ??
-      EMPTY_STATE
-    );
+    const stored = await this.#database.PushDeliveryState.get(CURRENT_DEVICE_ID);
+    if (stored === undefined) return EMPTY_STATE;
+    const intentRevision = Number.isSafeInteger(stored.intentRevision)
+      ? stored.intentRevision
+      : 0;
+    const pendingIntent =
+      stored.pendingIntent === null ||
+      Number.isSafeInteger(stored.pendingIntent.revision)
+        ? stored.pendingIntent
+        : { ...stored.pendingIntent, revision: Math.max(1, intentRevision) };
+    return {
+      ...stored,
+      pendingIntent,
+      intentRevision: Math.max(
+        intentRevision,
+        pendingIntent?.revision ?? 0
+      )
+    };
   }
 
   async #update(

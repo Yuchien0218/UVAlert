@@ -32,6 +32,7 @@ function createProductionDependencies(): PushScheduleDependencies {
     operationId: string;
     action: "schedule" | "cancel";
     dueAt: string | null;
+    intentRevision: number;
     now: string;
   }): Promise<StoredScheduleState> {
     const { data, error } = await requireClient().rpc(
@@ -41,7 +42,8 @@ function createProductionDependencies(): PushScheduleDependencies {
         p_operation_id: input.operationId,
         p_action: input.action,
         p_due_at: input.dueAt,
-        p_now: input.now
+        p_now: input.now,
+        p_intent_revision: input.intentRevision
       }
     );
     if (error !== null || !Array.isArray(data) || data.length !== 1) {
@@ -57,7 +59,8 @@ function createProductionDependencies(): PushScheduleDependencies {
     return {
       state: row.state as "scheduled" | "cancelled",
       dueAt: typeof row.due_at === "string" ? row.due_at : null,
-      operationId: row.operation_id
+      operationId: row.operation_id,
+      intentRevision: Number(row.intent_revision)
     };
   }
 
@@ -127,7 +130,8 @@ function createProductionDependencies(): PushScheduleDependencies {
       return {
         state: data.status === "cancelled" ? "cancelled" : "scheduled",
         dueAt: data.status === "cancelled" ? null : data.due_at,
-        operationId: data.last_operation_id
+        operationId: data.last_operation_id,
+        intentRevision: Number(data.last_intent_revision)
       };
     },
     upsertSchedule(input) {

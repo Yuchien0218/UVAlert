@@ -85,6 +85,8 @@ export type PushDeliveryStateRecord = {
   id: "current-device";
   credentials: PushDeviceCredentials | null;
   pendingIntent: PendingPushIntent | null;
+  /** Never decreases, even after the latest intent has settled. */
+  intentRevision: number;
 };
 
 export class SunshieldDatabase extends Dexie {
@@ -163,6 +165,10 @@ export class SunshieldDatabase extends Dexie {
     });
 
     this.version(4).stores({
+      PushDeliveryState: "&id"
+    });
+
+    this.version(5).stores({
       PushDeliveryState: "&id"
     });
   }
