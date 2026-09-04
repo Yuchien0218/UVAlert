@@ -129,6 +129,22 @@ describe("NotificationSettingsPage", () => {
       services.notifications.setReminderFrequencyMinutes
     ).toHaveBeenCalledWith(15);
 
+    /*
+     * 選項文案（2026-09-04 使用者裁決）：三個選項精簡成「提醒一次／
+     * 每 5 分鐘／每 15 分鐘」。原本是「只提醒一次／每 5 分鐘再提醒一次／
+     * 每 15 分鐘再提醒一次」——「再提醒一次」在區塊標題「再次提醒頻率」
+     * 底下重複了三次。
+     */
+    expect(
+      options.map((option) => option.element.parentElement?.textContent?.trim())
+    ).toEqual(["提醒一次", "每 5 分鐘", "每 15 分鐘"]);
+
+    /*
+     * 底部那句「此限制與單次提醒相同：需保持瀏覽器分頁開啟才會送達。」
+     * 刪掉——同一頁上方的「通知限制」框已經說過同一件事。
+     */
+    expect(wrapper.text()).not.toContain("此限制與單次提醒相同");
+
     expect(wrapper.text()).toContain("送出測試通知");
     await wrapper.get("button.button--quiet").trigger("click");
     expect(services.notifications.sendTestNotification).toHaveBeenCalledOnce();
