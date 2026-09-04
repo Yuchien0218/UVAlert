@@ -10,7 +10,7 @@ import ChevronLink from "../../components/common/ChevronLink.vue";
 import ConfirmAction from "../../components/common/ConfirmAction.vue";
 import EmptyStateCard from "../../components/common/EmptyStateCard.vue";
 import BroadcastLoader from "../../components/feedback/BroadcastLoader.vue";
-import { formatDateTime } from "../../helpers/datetime";
+import { formatMonthDayTime } from "../../helpers/datetime";
 
 /**
  * S-19 本機資料與隱私。
@@ -48,8 +48,15 @@ onMounted(() => {
   void auth.refresh();
 });
 
+/**
+ * 這兩列的時間用「9/4 00:11」的短格式（2026-09-04）。
+ *
+ * 原本是 `formatDateTime`，也就是「2026/9/4 上午12:11:20」——16 個字擠在
+ * 右欄那 64px 裡，實測折成兩行。這一列的問題是「多久以前更新的」，年份與
+ * 秒數都不影響答案；短格式也跟五日預報卡的「更新時間 9/4 00:15」一致。
+ */
 function formatTime(value: string | null): string {
-  return value === null ? "沒有紀錄" : formatDateTime(value);
+  return value === null ? "沒有紀錄" : formatMonthDayTime(value);
 }
 
 async function runClear(scope: ClearScope): Promise<void> {
@@ -421,11 +428,23 @@ function goBack(): void {
         登入 Google 帳號可跨裝置同步提醒、裝備與設定。
       </p>
 
+      <!--
+        2026-09-04：**字級沒有動**。
+
+        使用者回報「字大小不一樣」，實測「跨裝置同步」與「目前使用免登入
+        模式」**完全相同**（都是 card-title 18/500）。看起來怪的是「一個
+        區塊裡有兩個同級標題」，不是某個字級跑掉。
+
+        降階需要裁決，這次刻意不做：2026-09-02 才把這三個狀態從 16px 拉到
+        18px（理由是「差一階剛好落在看得出不一樣、但看不出為什麼的區間」），
+        而且 `typographyRoles.test.ts` 訂了 h3 只能是 card-title——要降階
+        等於同時推翻那個裁決與那條系統規則。這次只動版面與文案。
+      -->
       <div v-if="!signedIn" class="sync-block">
         <h3 class="sync-block__title" data-typography-role="card-title">
           目前使用免登入模式
         </h3>
-        <p>本機倒數與資料不會因為沒有登入而受影響。</p>
+        <p>不登入也不影響本機倒數與資料。</p>
         <button class="button button--quiet" type="button" @click="signIn">
           使用 Google 登入同步
         </button>
@@ -626,9 +645,19 @@ dd {
 /* 2026-08-31：標籤不得被值壓縮。這一列也是 flex + space-between，跟
    ProductDetailPage 的 .spec-row 同一個形狀——那裡的 dt 就是因為少了
    flex-shrink 被擠成一行一個字。目前的值都很短所以還沒發生，先擋住。 */
+/*
+ * 2026-09-04：值與標籤同色（使用者要求）。
+ *
+ * 原本標籤是 `--text-secondary`、值是繼承來的 `--text-primary`，同一列
+ * 兩種深度。這是一張「陳述現況」的表，不是要人比較大小的數據——整列同色
+ * 讀起來才是一句話的兩半。顏色寫在 `dl` 上，`dt`／`dd` 都不再各自指定。
+ */
+.summary-grid {
+  color: var(--text-secondary);
+}
+
 .summary-grid dt {
   flex: 0 0 auto;
-  color: var(--text-secondary);
 }
 
 .caution {
@@ -703,6 +732,7 @@ dd {
  * 階層不再靠字級表達，改靠位置與那一段 lead 文字——這是刻意的取捨。
  */
 /* 出口靠右，與其他區塊「這裡還有別的可以看」的入口一致。 */
+/* 靠右是 2026-09-01 的使用者要求，不動。 */
 .sync-group__more {
   justify-self: end;
 }
