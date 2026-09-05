@@ -39,13 +39,6 @@
     <text x="104" y="118" fill="#6F5A54" font-family="'Noto Sans TC', sans-serif" font-size="13" lang="zh-Hant-TW">36px / 18px</text>
     <text x="0" y="130" fill="#2E2925" font-family="'Noto Sans TC', sans-serif" font-size="17" lang="zh-Hant-TW">收藏</text>
   </g>
-  <g data-icon-cell="tool-sign-out" transform="translate(314 364)">
-    <g transform="scale(4)"><path fill="none" stroke="#33291F" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" d="M15.73 9.36A5.8 5.8 0 1 1 8.27 9.36"/> <path fill="none" stroke="#33291F" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" d="M12 5.2V12"/></g>
-    <g transform="translate(104 62) scale(1.5)"><path fill="none" stroke="#33291F" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" d="M15.73 9.36A5.8 5.8 0 1 1 8.27 9.36"/> <path fill="none" stroke="#33291F" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" d="M12 5.2V12"/></g>
-    <g transform="translate(150 74) scale(0.75)"><path fill="none" stroke="#33291F" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" d="M15.73 9.36A5.8 5.8 0 1 1 8.27 9.36"/> <path fill="none" stroke="#33291F" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" d="M12 5.2V12"/></g>
-    <text x="104" y="118" fill="#6F5A54" font-family="'Noto Sans TC', sans-serif" font-size="13" lang="zh-Hant-TW">36px / 18px</text>
-    <text x="0" y="130" fill="#2E2925" font-family="'Noto Sans TC', sans-serif" font-size="17" lang="zh-Hant-TW">登出</text>
-  </g>
   <text x="64" y="602" fill="#2E2925" font-family="'Noto Sans TC', sans-serif" font-size="25" font-weight="500" lang="zh-Hant-TW">功能型（雙色／單色混合）</text>
   <g data-icon-cell="feature-uv-forecast" transform="translate(64 648)">
     <g transform="scale(4)"><circle cx="12" cy="11.8" r="3.7" fill="#C1832E"/> <path d="M12 5.8L12 3.6" fill="none" stroke="#33291F" stroke-width="2.5" stroke-linecap="round"/> <path d="M17.2 8.8L19.1 7.7" fill="none" stroke="#33291F" stroke-width="2.5" stroke-linecap="round"/> <path d="M17.2 14.8L19.1 15.9" fill="none" stroke="#33291F" stroke-width="2.5" stroke-linecap="round"/> <path d="M12 17.8L12 20" fill="none" stroke="#33291F" stroke-width="2.5" stroke-linecap="round"/> <path d="M6.8 14.8L4.9 15.9" fill="none" stroke="#33291F" stroke-width="2.5" stroke-linecap="round"/> <path d="M6.8 8.8L4.9 7.7" fill="none" stroke="#33291F" stroke-width="2.5" stroke-linecap="round"/></g>

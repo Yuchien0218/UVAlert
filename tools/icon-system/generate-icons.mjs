@@ -171,7 +171,7 @@ export const ICONS = Object.freeze([
   { id: "tool-delete", group: "tool", label: "刪除", board: "new" },
   { id: "tool-share", group: "tool", label: "分享", board: "new" },
   { id: "tool-favorite", group: "tool", label: "收藏", board: "new" },
-  { id: "tool-sign-out", group: "tool", label: "登出", board: "new" },
+  { id: "tool-sign-out", group: "tool", label: "登出" },
 
   // ---- 功能型（綁定特定元件，取代最後一批 @lucide/vue）----
   // 單色或雙色依「會不會被放進按鈕／狀態列」而定：需要繼承外層語意色的
