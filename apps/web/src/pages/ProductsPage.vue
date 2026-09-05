@@ -146,6 +146,7 @@ function editGear(productId: string): void {
       <!-- 完全沒有裝備 -->
       <EmptyStateCard
         v-if="!hasAnyGear"
+        icon="nav-gear"
         title="還沒有任何裝備"
         body="把常用的防曬乳與裝備記在這裡，建立提醒時就不必重填包裝標示。也可以先不儲存防曬乳，直接建立提醒。"
       >

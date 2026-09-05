@@ -51,6 +51,7 @@ function goBack(): void {
 
     <EmptyStateCard
       v-else
+      icon="more-about"
       title="目前沒有可查看的內容"
       body="內容正在審查中，完成前暫不提供。這不影響提醒功能。"
       role="status"
