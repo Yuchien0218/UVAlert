@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { useRouter } from "vue-router";
+import Icon from "../../components/icons/Icon.vue";
 import IconButton from "../../components/common/IconButton.vue";
 import { computed, onMounted, shallowRef } from "vue";
 import { useWebAppServices } from "../../app/injection";
@@ -98,7 +99,10 @@ function goBack(): void {
 
     <template v-else>
       <section class="app-card account-card">
-        <h2 data-typography-role="card-title">同步狀態</h2>
+        <h2 class="section-heading" data-typography-role="card-title">
+          <Icon name="tool-refresh" :size="32" />
+          <span>同步狀態</span>
+        </h2>
         <p v-if="syncDisabled">同步已停止；雲端資料保留中。</p>
         <p v-else>同步已開啟；每次同步前會先顯示預覽。</p>
         <button
@@ -120,7 +124,10 @@ function goBack(): void {
       </section>
 
       <section class="app-card account-card">
-        <h2 data-typography-role="card-title">登出</h2>
+        <h2 class="section-heading" data-typography-role="card-title">
+          <Icon name="tool-sign-out" :size="32" />
+          <span>登出</span>
+        </h2>
         <p>登出不會清除本機資料或雲端資料。</p>
         <button
           class="button button--quiet"
@@ -133,7 +140,10 @@ function goBack(): void {
       </section>
 
       <section class="app-card account-card account-card--danger">
-        <h2 data-typography-role="card-title">清除 UVAlert 雲端資料</h2>
+        <h2 class="section-heading" data-typography-role="card-title">
+          <Icon name="tool-delete" :size="32" />
+          <span>清除 UVAlert 雲端資料</span>
+        </h2>
         <p>
           會刪除 UVAlert 雲端同步資料與 UVAlert 登入；不會刪除 Google
           帳號。本機提醒與本機資料不受影響。
