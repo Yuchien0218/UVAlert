@@ -916,7 +916,7 @@ Evidence: review fixes are captured in scoped commits through `0c804cc`; this ch
 - Consumes user-confirmed project ref `ykfdnltaqpdytmrszbbk` only after a fresh read-only verification that it remains the intended project.
 - Produces deployed subscription, schedule and dispatcher endpoints plus Vercel bundle with the public VAPID key.
 
-- [ ] **Step 1: Read-only production preflight**
+- [x] **Step 1: Read-only production preflight**
 
 ```powershell
 supabase projects list
@@ -928,7 +928,7 @@ vercel project ls
 
 Confirm the exact Supabase and Vercel projects before mutation. Verify required secret environment variables are nonblank without printing their values.
 
-- [ ] **Step 2: Inspect migration dry run**
+- [x] **Step 2: Inspect migration dry run**
 
 ```powershell
 supabase link --project-ref $env:UVALERT_SUPABASE_PROJECT_REF
@@ -937,11 +937,11 @@ supabase db push --dry-run
 
 Expected: only the intended anonymous push migration is pending. Stop on destructive or unrelated changes.
 
-- [ ] **Step 3: Set Function secrets and Vault values securely**
+- [x] **Step 3: Set Function secrets and Vault values securely**
 
 Set the five Function secrets from the secure shell. Use parameterized SQL or Dashboard secret entry for Vault; command output must not contain their values. Verify only secret names and updated timestamps.
 
-- [ ] **Step 4: Apply migration and deploy Functions**
+- [x] **Step 4: Apply migration and deploy Functions**
 
 ```powershell
 supabase db push
@@ -952,7 +952,7 @@ supabase functions deploy push-dispatch --project-ref $env:UVALERT_SUPABASE_PROJ
 
 Expected: migration succeeds; all three Functions ACTIVE; only these three have the planned custom JWT boundary.
 
-- [ ] **Step 5: Verify Cron without sending to a real user**
+- [x] **Step 5: Verify Cron without sending to a real user**
 
 Confirm each named Cron job exists once. Invoke dispatcher with an empty due queue and verify HTTP 200, zero claimed, no secrets in logs, and a successful `cron.job_run_details` entry.
 
@@ -960,7 +960,7 @@ Confirm each named Cron job exists once. Invoke dispatcher with an empty due que
 
 Set `VITE_PUSH_PUBLIC_KEY` as public Config for Production and explicitly approved Preview environments. Deploy from monorepo root because Vercel project root is `apps/web`. Confirm deployment metadata identifies the intended commit.
 
-- [ ] **Step 7: Verify production API security boundaries**
+- [x] **Step 7: Verify production API security boundaries**
 
 Check CORS preflight from `https://uv-alert-web.vercel.app`, invalid credential responses, invalid timestamp rejection, dispatcher rejection without its secret, and direct anon table access denial. Do not print real credentials in terminal output.
 
