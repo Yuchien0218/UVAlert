@@ -956,7 +956,7 @@ Expected: migration succeeds; all three Functions ACTIVE; only these three have 
 
 Confirm each named Cron job exists once. Invoke dispatcher with an empty due queue and verify HTTP 200, zero claimed, no secrets in logs, and a successful `cron.job_run_details` entry.
 
-- [ ] **Step 6: Configure Vercel public key and deploy intended commit**
+- [x] **Step 6: Configure Vercel public key and deploy intended commit**
 
 Set `VITE_PUSH_PUBLIC_KEY` as public Config for Production and explicitly approved Preview environments. Deploy from monorepo root because Vercel project root is `apps/web`. Confirm deployment metadata identifies the intended commit.
 
@@ -983,35 +983,69 @@ After smoke testing in Task 11, update `docs/backend/preview-deployment.md` and 
 - Consumes deployed production URL, Function versions, Cron run evidence and actual devices.
 - Produces truthful, dated completion status.
 
+**2026-09-05 desktop Chrome intermediate evidence:** production deployment
+`https://uv-alert-m7zrv66ly-yuu15.vercel.app` (commit `9bfd667`, aliased to
+`https://uv-alert-web.vercel.app`) successfully enabled background push. The
+settings page showed `已啟用背景推播`, the browser console had no push warning or
+error, and Supabase Unified Logs recorded `POST /rest/v1/push_subscriptions` HTTP
+`201` at 21:15:03 Asia/Taipei. This proves browser-to-backend subscription
+registration only. A second Windows Chrome run at 21:50 then received the fixed
+`該補擦防曬乳了` notification after all UVAlert tabs were manually closed, and
+clicking it opened the reminder page. The current production deployment is
+`dpl_BEwaUyTL1qhr1oTmWCXGU9r82VGX` at commit `a51471d`. Desktop cancellation and
+replacement and offline recovery now pass; Android/iOS and a longer exactly-once
+observation remain open.
+
 - [ ] **Step 1: Android Chrome smoke test**
 
 Enable background push, start a short controlled reminder, close the tab, receive exactly one「該補擦防曬乳了」notification, tap it, and confirm UVAlert opens with the local current Session. Record OS/browser versions and timestamp without recording subscription data.
 
-- [ ] **Step 2: Desktop smoke test**
+- [x] **Step 2: Desktop smoke test**
 
 Repeat on Windows or macOS with a supported browser. Confirm closing the tab still allows push and cancellation prevents the old notification.
+
+- [x] Windows Chrome receives the fixed notification after all UVAlert tabs are closed.
+- [x] Clicking the notification opens the reminder page.
+- [x] A 21:55 schedule was confirmed synchronized, ended before 21:53, and produced no notification through 21:56.
 
 - [ ] **Step 3: iPhone/iPad Home Screen smoke test**
 
 If a device is available, install UVAlert to the Home Screen, launch from the icon, enable push and repeat the closed-app test. If unavailable, leave this checkbox unchecked and record `尚未驗證：缺少可用 iPhone/iPad 實機`; do not infer support from simulator or documentation.
 
-- [ ] **Step 4: Cancellation and replacement smoke test**
+- [x] **Step 4: Cancellation and replacement smoke test**
 
 Create a reminder, change the next due time, and verify only the replacement is delivered. Then create another, complete/stop/end before due time and verify the cancelled reminder is not delivered.
 
-- [ ] **Step 5: Offline recovery smoke test**
+- [x] Changing the due time delivers only the replacement: the 22:23 old due time was replaced by 22:26; Supabase showed one pending row for 22:26 at 22:17:48, no notification arrived at 22:23, and the replacement arrived at 22:26.
+- [x] Ending before the due time prevents the cancelled reminder.
+
+- [x] **Step 5: Offline recovery smoke test**
 
 Go offline, create or change a reminder, verify UI shows pending sync, reconnect before due time, confirm scheduled state, close the tab and receive the notification. Repeat with an already expired due time and confirm no stale push is created.
 
-- [ ] **Step 6: Retest existing core behavior**
+- [x] A 22:48 reminder created under Chrome DevTools Network offline showed pending sync, changed to `已同步下一個補擦提醒` after reconnect, and delivered after all UVAlert tabs were closed.
+- [x] Reconnecting after the 22:48 due time did not create a stale backend send: Supabase recorded `cancelled` at 22:53:43 with `attempt_count=0` and `sent_at=null`. The notification observed on the device was the intentional local overdue fallback, not Web Push.
+
+- [x] **Step 6: Retest existing core behavior**
 
 With push denied and with an unsupported harness, confirm setup, local countdown, reapplication, stop and end remain usable. Confirm local notification fallback still works while the tab is alive.
 
-- [ ] **Step 7: Record exact evidence and mark checkboxes truthfully**
+- [x] Focused automated regression on 2026-09-05 passed 5 files / 114 tests covering browser notification and remote-push adapters, notification controller behavior, notification settings, and app boot integration.
+- [x] Production Windows Chrome was changed to site-notification `blocked`; `/settings/notifications` correctly reported `通知已被拒絕` and explained how to解除封鎖.
+- [x] With permission still blocked, production setup accepted the confirmed application time, created a running Session with local status/events, and allowed the Session to be ended and the reminder page to remain usable.
+- [x] Existing automated adapter/controller coverage verifies the unsupported-capability and live-tab local fallback paths. The blocked-permission smoke intentionally did not expect an OS notification, because a browser-level denial prevents it from being displayed.
+
+- [x] **Step 7: Record exact evidence and mark checkboxes truthfully**
 
 Record Supabase project ref, migration version, three Function versions, Cron names and latest success, Vercel deployment/commit, production URL, verification time and each platform result. Mark only completed Steps `- [x]`; preserve open mobile/platform limitations.
 
-- [ ] **Step 8: Final documentation commit**
+- [x] Supabase project `ykfdnltaqpdytmrszbbk`; push migrations `20260830000200`–`20260830000400` are remote, and the complete local/remote list matches through `20260904000000`.
+- [x] Fresh CLI evidence at 2026-09-05 23:07 Asia/Taipei: `push-subscription`, `push-schedule`, and `push-dispatch` are each ACTIVE version 1 with the planned `verify_jwt=false` boundary.
+- [x] Fresh read-only SQL evidence: `uvalert-push-dispatch` job id 1 latest run id 745 succeeded at 2026-09-05 15:07 UTC; `uvalert-push-cleanup` job id 2 latest run id 34 succeeded at 2026-09-05 03:17 UTC.
+- [x] Vercel production deployment `dpl_BEwaUyTL1qhr1oTmWCXGU9r82VGX`, commit `a51471d`, is aliased to `https://uv-alert-web.vercel.app` and served the desktop smoke flows.
+- [x] Windows Chrome desktop, cancellation/replacement, offline recovery, local fallback, and denied-permission degradation results are recorded; Android Chrome and iPhone/iPad Home Screen remain explicitly unchecked for lack of current device evidence.
+
+- [x] **Step 8: Final documentation commit**
 
 ```powershell
 git add -- docs/backend/preview-deployment.md docs/superpowers/plans/2026-08-30-anonymous-web-push-reminders.md docs/superpowers/plans/README.md
