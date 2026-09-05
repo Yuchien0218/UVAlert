@@ -131,7 +131,10 @@ export class BrowserRemotePush implements RemotePushPort {
       const existing = await this.#deps.state.readCredentials();
       if (hadExistingSubscription && existing === null) {
         const unsubscribed = await subscription.unsubscribe();
-        if (!unsubscribed) return "schedule-error";
+        if (!unsubscribed) {
+          const remaining = await registration.pushManager.getSubscription();
+          if (remaining !== null) return "schedule-error";
+        }
         subscription = await registration.pushManager.subscribe({
           userVisibleOnly: true,
           applicationServerKey: urlBase64ToUint8Array(

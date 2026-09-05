@@ -252,6 +252,24 @@ describe("BrowserRemotePush", () => {
     expect(vi.mocked(fetchMock).mock.calls[0]?.[1]?.method).toBe("POST");
   });
 
+  it("rechecks a stale subscription when unsubscribe reports false before registering a new device", async () => {
+    const existingSubscription = createSubscription();
+    vi.mocked(existingSubscription.unsubscribe).mockResolvedValue(false);
+    const { adapter, dependencies, fetchMock, subscribe } = createHarness({
+      credentials: null,
+      subscription: existingSubscription
+    });
+    const registration = await dependencies.getRegistration();
+    vi.mocked(registration!.pushManager.getSubscription)
+      .mockResolvedValueOnce(existingSubscription)
+      .mockResolvedValueOnce(null);
+
+    await expect(adapter.enable()).resolves.toBe("enabled");
+    expect(existingSubscription.unsubscribe).toHaveBeenCalledOnce();
+    expect(subscribe).toHaveBeenCalledOnce();
+    expect(vi.mocked(fetchMock).mock.calls[0]?.[1]?.method).toBe("POST");
+  });
+
   it("persists then schedules one remote due time", async () => {
     const { adapter, fetchMock, local } = createHarness({ credentials });
 
