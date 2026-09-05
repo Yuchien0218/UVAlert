@@ -21,18 +21,32 @@ const strip = (source: string): string =>
 const LIST = strip(readFileSync("apps/web/src/pages/ProductsPage.vue", "utf8"));
 
 describe("裝備清單的分隔線", () => {
-  it("使用中與收納中之間有一條線", () => {
-    expect(LIST).toContain('<hr v-if="past.length > 0" class="gear-section-rule" />');
+  /*
+   * **2026-09-04：兩條線都從 `<hr>` 改成相鄰區塊自己的邊。**
+   *
+   * `<hr>` 是 `.page-stack` 的子元素，上下各吃一整份 stack gap，於是線與
+   * 兩邊等距——它不屬於任何一段（使用者：「加了水平線之後這一區很空」）。
+   */
+  it("使用中與收納中之間那條線是收納中那一段的上緣", () => {
     expect(LIST).toMatch(
-      /\.gear-section-rule \{[^}]*border-top:\s*1px solid var\(--border-subtle\);/
+      /\.gear-past \{[^}]*border-top:\s*1px solid var\(--border-subtle\);/
     );
+    expect(LIST).toContain('class="gear-past"');
   });
 
   /*
    * 沒有收納中的裝備時不畫線——一條下面什麼都沒有的線，讀起來像內容沒載入
-   * 完。條件與那個 section 的 v-if 綁在一起。
+   * 完。改成 border 之後這件事是白送的：線跟著那個 section 的 v-if，
+   * 整段不在就沒有線，不必再維護第二個一模一樣的條件。
    */
-  it("沒有收納中的裝備時不畫線", () => {
-    expect(LIST).toContain('v-if="past.length > 0" class="gear-section-rule"');
+  it("沒有收納中的裝備時整段都不在，所以也沒有線", () => {
+    expect(LIST).toMatch(
+      /<section\s+v-if="past\.length > 0"\s+class="gear-past"/
+    );
+  });
+
+  /* 頁面裡不該再有任何獨立的 `<hr>`。 */
+  it("不再用 <hr> 畫分隔", () => {
+    expect(LIST).not.toContain("<hr");
   });
 });

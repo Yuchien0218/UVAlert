@@ -111,14 +111,33 @@ const minutesAgo = computed(() => {
   return Math.round((referenceNow.value.getTime() - at.getTime()) / 60_000);
 });
 
-/** 預設快選是否正在生效——允許幾秒誤差，避免時鐘跳動造成閃爍。 */
-const usingDefault = computed(() => {
-  const at = selectedAt.value;
-  if (at === null) return false;
-  return (
-    Math.abs(at.getTime() - (referenceNow.value.getTime() - 60_000)) < 30_000
-  );
-});
+/**
+ * 「1 分鐘前」快選寫進去的那個值。
+ *
+ * **2026-09-04：選取態改成記住「誰寫的」，不再拿現在的時間反推。**
+ *
+ * 改動前是 `|value - (referenceNow - 60s)| < 30s`——用當下的時鐘回推「這個
+ * 值看起來像不像一分鐘前」。問題是 `syncNow()` 會在使用者**打開調整面板**
+ * 時把 `referenceNow` 推到現在，而 `value` 沒有跟著動，於是同一個值突然被
+ * 判成「不是快選給的」。
+ *
+ * 實測（2026-09-04）：按「1 分鐘前」→ 等 36 秒 → 按「調整時間」，
+ * 選取態自己跳到「調整時間」那一顆，下面還冒出「已調整為 2 分鐘前」——
+ * **使用者只是打開面板，什麼都沒有選。**
+ *
+ * 這正是 2026-09-02 那段註解裡「刻意不用 ticker」想避免的畫面
+ * （「使用者什麼都沒做，畫面卻在變」）；`syncNow()` 只是把同一個跳變延後
+ * 到下一次互動才發生，沒有消掉它。
+ *
+ * 改成比對值本身之後，選取態只會因為使用者按了按鈕而改變。還原草稿時
+ * 這裡是 null，於是顯示「已調整為 N 分鐘前」——那是誠實的：存下來的就是
+ * 一個固定時刻，現在確實是 N 分鐘前。
+ */
+const defaultPickedValue = shallowRef<string | null>(null);
+
+const usingDefault = computed(
+  () => value.value !== null && value.value === defaultPickedValue.value
+);
 
 /**
  * 超過上限時的提示（2026-08-31 裁決 #9）。
@@ -157,7 +176,23 @@ const adjustedLabel = computed(() => {
 
 function selectDefault(): void {
   syncNow();
-  value.value = isoFor(DEFAULT_MINUTES_AGO);
+  const picked = isoFor(DEFAULT_MINUTES_AGO);
+  value.value = picked;
+  /*
+   * 記下**寫出去的那個字串**，不要讀 `value.value` 回來——`defineModel` 的
+   * 值是從 prop 讀的，父層還沒回寫時它仍是舊值（測試裡直接讀會拿到 null）。
+   */
+  defaultPickedValue.value = picked;
+  /*
+   * 2026-09-04：收掉調整面板。
+   *
+   * 改動前按「1 分鐘前」不會關掉展開中的手動輸入，畫面上同時有「已選 1
+   * 分鐘前」與一個攤開的 datetime-local ——看起來像還有一步沒做完，而那個
+   * 輸入框裡的值也已經不是生效中的選擇了。
+   *
+   * WaterStartPicker 的 selectDefault 本來就有這一行，這裡是漏掉。
+   */
+  adjusting.value = false;
 }
 
 function toggleAdjust(): void {

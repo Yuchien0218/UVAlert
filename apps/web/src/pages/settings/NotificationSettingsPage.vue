@@ -2,7 +2,9 @@
 import { computed, shallowRef } from "vue";
 import { useRouter } from "vue-router";
 import { useWebAppServices } from "../../app/injection";
+import Icon from "../../components/icons/Icon.vue";
 import IconButton from "../../components/common/IconButton.vue";
+import InlineLoader from "../../components/feedback/InlineLoader.vue";
 
 /**
  * 通知設定頁（Wireframe 10–11 / Sitemap §2.4）。
@@ -40,6 +42,23 @@ const statusLabel = computed(() => {
  * 「如何開啟」只展開步驟說明，不嘗試直接開啟瀏覽器設定——網頁做不到
  * 這件事（2026-08-23 使用者確認的裁決）。
  */
+/**
+ * 狀態卡的圖示。
+ *
+ * **這一顆刻意跟著狀態變**，不是固定的裝飾。加圖示的判準是「這張卡要不要
+ * 被掃讀」（DESIGN.md 第八節 32 檔位），而這張卡回答的就是「現在是哪一
+ * 種狀態」——三種狀態各有自己的圖示，才真的幫得上掃讀；固定一顆鈴鐺只是
+ * 在標題前面多一個裝飾。
+ *
+ * 不支援與被拒絕合用 `state-notification-off`：對使用者來說結果一樣（現在
+ * 收不到通知），差別在下面的說明段落，那裡本來就分開講。
+ */
+const statusIcon = computed(() => {
+  if (!isSupported.value || isDenied.value) return "state-notification-off";
+  if (isGranted.value) return "more-notifications";
+  return "state-notification-pending";
+});
+
 const showDeniedSteps = shallowRef(false);
 
 async function requestPermission(): Promise<void> {
@@ -114,12 +133,18 @@ async function runTest(): Promise<void> {
 
     <!-- 裝置支援與權限狀態卡片 -->
     <section class="app-card" aria-labelledby="permission-heading">
+      <!--
+        文字包在 <span> 裡：`.section-heading` 是 flex，不包的話「目前狀態：」
+        與 `<strong>` 會變成兩個 flex item，中間被 gap 撐開 12px——一句話被
+        切成兩半。這與 DataSettingsPage 三張卡的寫法一致。
+      -->
       <h2
         id="permission-heading"
-        class="status-summary"
+        class="section-heading"
         data-typography-role="card-title"
       >
-        目前狀態：<strong>{{ statusLabel }}</strong>
+        <Icon :name="statusIcon" :size="32" />
+        <span>目前狀態：<strong>{{ statusLabel }}</strong></span>
       </h2>
 
       <div v-if="!isSupported" class="note-box" role="status">
@@ -175,10 +200,11 @@ async function runTest(): Promise<void> {
     <section class="app-card" aria-labelledby="delivery-heading">
       <h2
         id="delivery-heading"
-        class="settings-card-heading"
+        class="section-heading"
         data-typography-role="card-title"
       >
-        通知傳送說明
+        <Icon name="more-about" :size="32" />
+        <span>通知傳送說明</span>
       </h2>
       <p class="delivery-note">
         <strong>單一提醒原則</strong
@@ -209,6 +235,7 @@ async function runTest(): Promise<void> {
           :disabled="testResult === 'sending'"
           @click="runTest"
         >
+          <InlineLoader v-if="testResult === 'sending'" />
           {{ testResult === "sending" ? "傳送中…" : "送出測試通知" }}
         </button>
         <p v-if="testResult === 'sent'" class="delivery-note" role="status">
@@ -223,10 +250,11 @@ async function runTest(): Promise<void> {
     <section v-if="isGranted" class="app-card" aria-labelledby="repeat-heading">
       <h2
         id="repeat-heading"
-        class="settings-card-heading"
+        class="section-heading"
         data-typography-role="card-title"
       >
-        再次提醒頻率
+        <Icon name="tool-refresh" :size="32" />
+        <span>再次提醒頻率</span>
       </h2>
       <!--
         2026-09-02：改用共用的 `.choice-grid`（排版稽核 §3）。
@@ -295,16 +323,19 @@ async function runTest(): Promise<void> {
   padding: var(--card-padding);
 }
 
-.status-summary {
-  margin: 0;
-  font-size: var(--font-size-section-title);
-}
-
-.settings-card-heading {
-  margin: 0;
-  font-size: var(--font-size-card-title);
-}
-
+/*
+ * 2026-09-05：`.status-summary` 與 `.settings-card-heading` 整組刪掉，
+ * 三個 h2 改用共用的 `.section-heading`。
+ *
+ * 那兩個類別**全部是死宣告**：`margin: 0` 由 styles.css 的 `h1,h2,h3`
+ * 提供；`font-size` 由 `[data-typography-role]` 提供，而角色選擇器
+ * （`body [data-typography-role][data-typography-role]`，特異度 0-2-1）
+ * 勝過 scoped 類別（0-2-0）。
+ *
+ * 危險的是 `.status-summary` 宣告的是 `--font-size-section-title`（20px）
+ * 而不是卡片標題的 18px——**讀檔案的人會以為這一張的標題比另外兩張大**，
+ * 實測三個都是 18px。宣告與畫面不一致的死碼比單純的死碼更糟。
+ */
 /*
  * 2026-09-04：底色從 `--surface-soft` 換成 `--color-surface-card`
  * （使用者：「這頁排版怪怪的，是不是沒套 token」）。

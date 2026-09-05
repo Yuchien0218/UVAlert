@@ -5,6 +5,7 @@ import { computed, shallowRef } from "vue";
 import type { FeedbackType } from "@sunshield/contracts";
 import { useFeedbackController } from "../app/injection";
 import AppNotice from "../components/common/AppNotice.vue";
+import InlineLoader from "../components/feedback/InlineLoader.vue";
 
 const feedback = useFeedbackController();
 const feedbackType = shallowRef<FeedbackType>("bug");
@@ -74,6 +75,7 @@ function goBack(): void {
         />
       </label>
       <button class="button button--primary" type="submit" :disabled="busy">
+        <InlineLoader v-if="busy" />
         {{ busy ? "送出中…" : "送出" }}
       </button>
       <AppNotice v-if="feedback.state.value.status === 'submitted'" kind="ok">

@@ -172,3 +172,163 @@ describe("DataSettingsPage 的合併結果", () => {
     expect(scope.text()).toContain("雲端");
   });
 });
+
+/*
+ * 2026-09-04 使用者截圖標註：清除區的警示框排版跑掉、「清除全部」那一列
+ * 把同一件事講三次。
+ */
+describe("清除區的警示框", () => {
+  const mountPage = () => {
+    useServices("signed_out", "idle", SUMMARY_FIXTURE);
+    return mount(DataSettingsPage, { global: { stubs: { RouterLink: true } } });
+  };
+
+  const triggerFor = (
+    wrapper: ReturnType<typeof mountPage>,
+    label: string
+  ) => {
+    const button = wrapper.findAll("button").find((it) => it.text() === label);
+    expect(button, `找不到「${label}」按鈕`).toBeDefined();
+    return button!;
+  };
+
+  /*
+   * **根因是排版不是文案。** `.confirm-note` 是 grid，所以 slot 傳進來的每
+   * 一段裸文字都會被包成一個匿名 grid item，item 之間再吃一次 12px 的 gap。
+   * 實機上「…都會消失且／無法復原／，之後建立提醒…」被切成三塊，逗號掉到
+   * 行首。
+   *
+   * 這條只能掛載之後檢查 DOM——問題出在 slot 內容的**節點型別**，掃原始碼
+   * 字串看不到。
+   */
+  it("警示內容不會被 grid 切成好幾塊", async () => {
+    const wrapper = mountPage();
+
+    for (const label of ["清除裝備與提醒紀錄", "清除全部本機資料"]) {
+      await triggerFor(wrapper, label).trigger("click");
+
+      const note = wrapper.get(".confirm-note").element;
+      const bare = [...note.childNodes].filter(
+        (node) => node.nodeType === 3 && (node.textContent ?? "").trim() !== ""
+      );
+
+      expect(
+        bare.map((node) => node.textContent?.trim()),
+        `「${label}」的警示框有裸文字節點`
+      ).toEqual([]);
+    }
+  });
+
+  /* 那一句仍然要說完「無法復原」——精簡掉的只有結尾的「確定嗎？」。 */
+  it("裝備與提醒的警示是完整的一段", async () => {
+    const wrapper = mountPage();
+    await triggerFor(wrapper, "清除裝備與提醒紀錄").trigger("click");
+
+    const note = wrapper.get(".confirm-note");
+    expect(note.findAll("p")).toHaveLength(1);
+    expect(note.get("p").text()).toContain("無法復原");
+  });
+
+  /*
+   * 「清除全部」那一列原本是紅色標題＋說明＋按鈕，三個地方講同一件事。
+   * 併進按鈕之後，說明句不可以再出現，按鈕要講完整的動作名稱。
+   */
+  it("清除全部只剩一顆講完整名稱的按鈕", () => {
+    const wrapper = mountPage();
+
+    expect(wrapper.text()).not.toContain("清除本機資料，重置為初始狀態。");
+    expect(wrapper.findAll("button").map((it) => it.text())).toContain(
+      "清除全部本機資料"
+    );
+  });
+});
+
+/**
+ * 2026-09-04（方案 A）：「不登入不影響本機倒數與資料」從未登入區塊搬到群組
+ * 說明——它在三種同步狀態下都成立，本來就屬於群組層。
+ */
+describe("同步區的說明不重複", () => {
+  /*
+   * **掛載後數次數，不是掃原始碼。** 搬家的風險是「搬上去了但下面沒刪」，
+   * 那在原始碼裡是兩個不同的字串（原句有「也」），掃字串抓不到；畫面上
+   * 卻是同一件事連著講兩次。
+   */
+  it("「不登入」的保證整頁只出現一次", () => {
+    useServices();
+    const wrapper = shallowMount(DataSettingsPage);
+
+    expect(wrapper.text().split("不登入").length - 1).toBe(1);
+  });
+
+  /* 反向：不可以連同群組說明一起弄丟——那句是免登入模式的核心承諾。 */
+  it("那句保證仍然在頁面上", () => {
+    useServices();
+    const wrapper = shallowMount(DataSettingsPage);
+
+    expect(wrapper.text()).toContain("不登入不影響本機倒數與資料");
+  });
+});
+
+/**
+ * 2026-09-05：清除卡三列都收成「說明（如果有）＋一顆講完整動作名稱的按鈕」。
+ */
+describe("清除卡的三列", () => {
+  /*
+   * 有草稿、也有進行中的提醒——這樣三列的按鈕都是可按的，兩句但書也都會
+   * 渲染。用預設的 fixture（`hasSetupDraft: false`）的話第一列會停用成
+   * 「沒有草稿可以清除」，測到的就不是這裡要守的東西。
+   */
+  const mountPage = () => {
+    useServices("signed_out", "idle", { ...SUMMARY_FIXTURE, hasSetupDraft: true });
+    return mount(DataSettingsPage, { global: { stubs: { RouterLink: true } } });
+  };
+
+  /*
+   * 改動前三列都是「標題 ＋ 一顆講同樣話的按鈕」，其中「清除裝備與提醒
+   * 紀錄」那一列的標題與按鈕**逐字相同**——DOM 實測就是
+   * `清除裝備與提醒紀錄清除裝備與提醒紀錄`。
+   */
+  it("每一列只有一顆按鈕在講動作名稱", () => {
+    const wrapper = mountPage();
+    const rows = wrapper.findAll(".clear-row");
+
+    expect(rows).toHaveLength(3);
+    for (const row of rows) {
+      const buttons = row.findAll("button");
+      expect(buttons).toHaveLength(1);
+      expect(row.text().split(buttons[0]!.text()).length - 1).toBe(1);
+    }
+  });
+
+  it("按鈕各自講完整的動作名稱", () => {
+    const labels = mountPage()
+      .findAll(".clear-row button")
+      .map((button) => button.text());
+
+    expect(labels).toEqual([
+      "清除設定草稿",
+      "清除裝備與提醒紀錄",
+      "清除全部本機資料"
+    ]);
+  });
+
+  /*
+   * **反向：兩句但書要留著。** 它們不是重述——一句講「只刪掉哪一種」，
+   * 一句講「進行中的提醒不會被刪」，都是標題與按鈕沒有涵蓋的例外。
+   * 少了這條，把整個 `<div>` 連同 `<p>` 一起刪掉也會過上面兩條。
+   */
+  it("兩句但書仍然在，而且排在按鈕上面", () => {
+    const rows = mountPage().findAll(".clear-row");
+
+    expect(rows[0]!.text()).toContain("只刪除還沒建立提醒的設定進度");
+    expect(rows[1]!.text()).toContain("進行中的提醒");
+
+    for (const index of [0, 1]) {
+      const row = rows[index]!;
+      const note = row.get("p").text();
+      expect(row.text().indexOf(note)).toBeLessThan(
+        row.text().indexOf(row.get("button").text())
+      );
+    }
+  });
+});

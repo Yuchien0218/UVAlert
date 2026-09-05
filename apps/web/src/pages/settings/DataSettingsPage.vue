@@ -10,6 +10,7 @@ import ChevronLink from "../../components/common/ChevronLink.vue";
 import ConfirmAction from "../../components/common/ConfirmAction.vue";
 import EmptyStateCard from "../../components/common/EmptyStateCard.vue";
 import BroadcastLoader from "../../components/feedback/BroadcastLoader.vue";
+import InlineLoader from "../../components/feedback/InlineLoader.vue";
 import { formatMonthDayTime } from "../../helpers/datetime";
 
 /**
@@ -250,7 +251,7 @@ function goBack(): void {
         <div class="card-prose">
           <p>
             匯出包含裝備、提醒與偏好的 JSON
-            檔案（<strong>不含</strong>定位與裝置識別碼）。
+            檔案（不含定位與裝置識別碼）。
           </p>
           <p class="caution">
             目前<strong>僅支援匯出備份</strong>，匯入還原功能將於後續版本更新。
@@ -262,6 +263,7 @@ function goBack(): void {
           :disabled="busy"
           @click="localData.exportData"
         >
+          <InlineLoader v-if="busy" />
           {{ busy ? "處理中…" : "匯出本機資料" }}
         </button>
 
@@ -310,13 +312,21 @@ function goBack(): void {
           已經寫著「未儲存草稿：無」，那是**另一張卡**的一列，讀者不會自己
           把兩件事連起來。所以在按鈕旁邊直接講。
         -->
+        <!--
+          2026-09-05：標題併進按鈕（延續 09-04 對「清除全部」那一列的處置）。
+
+          三列原本都是「標題 ＋ 一顆講同樣話的按鈕」——「清除裝備與提醒紀錄」
+          那一列的標題與按鈕文字**逐字相同**，DOM 實測就是
+          `清除裝備與提醒紀錄清除裝備與提醒紀錄`。按鈕自己講完整的動作名稱
+          之後，標題沒有剩下的資訊。
+
+          留下來的 `<p>` 都不是重述：一句講「只刪掉哪一種」，一句講「進行中
+          的提醒不會被刪」。它們排在按鈕**上面**——先讀到但書，再按。
+        -->
         <div class="clear-row">
-          <div>
-            <strong>清除設定草稿</strong>
-            <p v-if="summary.hasSetupDraft">
-              只刪除還沒建立提醒的設定進度。
-            </p>
-          </div>
+          <p v-if="summary.hasSetupDraft">
+            只刪除還沒建立提醒的設定進度。
+          </p>
           <!--
             2026-09-04：「目前沒有草稿可以清除。」從說明段落移到按鈕上。
 
@@ -329,7 +339,7 @@ function goBack(): void {
             :pending="busy"
             :trigger-disabled="!summary.hasSetupDraft"
             :trigger-label="
-              summary.hasSetupDraft ? '清除草稿' : '沒有草稿可以清除'
+              summary.hasSetupDraft ? '清除設定草稿' : '沒有草稿可以清除'
             "
             confirm-label="確定清除"
             @trigger="confirming = 'drafts'"
@@ -338,19 +348,19 @@ function goBack(): void {
           />
         </div>
 
-        <!-- 清除裝備與提醒紀錄 -->
+        <!--
+          清除裝備與提醒紀錄。
+
+          2026-09-04：拿掉「刪除所有防曬裝備與已結束的提醒紀錄。」——它逐字
+          重述了標題。剩下這句只在有進行中提醒時出現，講的是標題沒有涵蓋的
+          例外，不是重述。
+
+          2026-09-05：標題也拿掉了，理由見上一列。
+        -->
         <div class="clear-row">
-          <div>
-            <strong>清除裝備與提醒紀錄</strong>
-            <!--
-              2026-09-04：拿掉「刪除所有防曬裝備與已結束的提醒紀錄。」——
-              它逐字重述了上面的標題。剩下這句只在有進行中提醒時出現，講的
-              是標題沒有涵蓋的例外，不是重述。
-            -->
-            <p v-if="summary.hasActiveSession">
-              進行中的提醒<strong>不會</strong>被刪除；要結束它請到提醒頁明確結束，或使用下方的清除全部。
-            </p>
-          </div>
+          <p v-if="summary.hasActiveSession">
+            進行中的提醒<strong>不會</strong>被刪除；要結束它請到提醒頁明確結束，或使用下方的清除全部。
+          </p>
           <ConfirmAction
             :confirming="confirming === 'history'"
             :pending="busy"
@@ -366,21 +376,29 @@ function goBack(): void {
               條件。清除全部的警示本來就有這句，這一則原本沒有。
             -->
             <template #warning>
-              裝備清單與已結束的提醒都會消失且<strong>無法復原</strong>，之後建立提醒需要重新填寫包裝標示。確定嗎？
+              <p>
+                裝備清單與已結束的提醒會消失，<strong>無法復原</strong>；之後建立提醒要重新填寫包裝標示。
+              </p>
             </template>
           </ConfirmAction>
         </div>
 
-        <!-- 清除全部 -->
+        <!--
+          清除全部。
+
+          2026-09-04：標題與說明併進按鈕（使用者裁決）。原本一列講三次同一
+          件事——紅色標題「清除全部本機資料」、說明「清除本機資料，重置為
+          初始狀態。」、按鈕「清除全部」。說明那句只是把標題換句話說，而
+          按鈕自己講完整的動作名稱之後，標題也沒有剩下的資訊。
+
+          紅字跟著搬到按鈕上，與 GearDetailSheet 的「刪除這件防曬裝備」同一
+          套：危險動作用 --color-due 的**文字**，不用整顆紅按鈕。
+        -->
         <div class="clear-row clear-row--danger">
-          <div>
-            <strong>清除全部本機資料</strong>
-            <p>清除本機資料，重置為初始狀態。</p>
-          </div>
           <ConfirmAction
             :confirming="confirming === 'all'"
             :pending="busy"
-            trigger-label="清除全部"
+            trigger-label="清除全部本機資料"
             confirm-label="確定清除"
             @trigger="confirming = 'all'"
             @confirm="runClear('all')"
@@ -398,11 +416,9 @@ function goBack(): void {
                 </li>
                 <li>設定草稿、地區與顯示偏好、氣象快取</li>
               </ul>
-              <p>
-                已安裝的 PWA 不會被移除，但重新開啟時會是全新狀態。
-                <template v-if="!localData.hasExportedThisVisit.value">
-                  你這次還沒有匯出，清除後無法復原。
-                </template>
+              <p>已安裝的 PWA 不會被移除，但重新開啟時會是全新狀態。</p>
+              <p v-if="!localData.hasExportedThisVisit.value">
+                你這次還沒有匯出，清除後無法復原。
               </p>
             </template>
           </ConfirmAction>
@@ -424,8 +440,28 @@ function goBack(): void {
       <h2 id="sync-group-title" data-typography-role="card-title">
         跨裝置同步
       </h2>
+      <!--
+        2026-09-04（方案 A）：把「不登入也不影響本機倒數與資料。」從未登入
+        區塊搬上來，與這句併成一句。
+
+        **這句話在三種狀態下都成立**（未登入／同步已停止／已登入），所以它
+        本來就屬於群組層，不屬於「未登入」那一塊。
+
+        真正要修的是字級的 V 字形：改動前是 18 → 16 → **14** → 16，
+        「目前使用免登入模式」是這一段的小標題，卻比它自己下面那句解釋更小
+        （14 vs 16）也更淡（#6F5A54 vs #5A4540）——標題比內文輕，眼睛會把它
+        讀成註腳，於是下面那句反而看起來像標題。這是使用者說「不整齊」的
+        主因，而且是 2026-09-04 稍早把 h3 從 18 降到 14 的副作用：那次只比了
+        它與「跨裝置同步」的關係，沒比它與自己下面那句的關係。
+
+        併句之後 sync-block 裡只剩「狀態標題 ＋ 按鈕」，字級變成
+        18 → 16 → 14 → 按鈕，單調遞減。
+
+        順帶解掉孤兒行：改動前第一行 322/336 排滿、第二行只剩「與設定。」
+        四個字（48px，14% 的行寬）。
+      -->
       <p class="sync-group__lead">
-        登入 Google 帳號可跨裝置同步提醒、裝備與設定。
+        登入 Google 帳號可跨裝置同步提醒、裝備與設定；不登入不影響本機倒數與資料。
       </p>
 
       <!--
@@ -446,7 +482,6 @@ function goBack(): void {
         <h3 class="sync-block__title" data-typography-role="supporting">
           目前使用免登入模式
         </h3>
-        <p>不登入也不影響本機倒數與資料。</p>
         <button class="button button--quiet" type="button" @click="signIn">
           使用 Google 登入同步
         </button>
@@ -479,6 +514,7 @@ function goBack(): void {
           :disabled="syncBusy"
           @click="prepare"
         >
+          <InlineLoader v-if="syncBusy" />
           {{ syncBusy ? "讀取中…" : "查看同步預覽" }}
         </button>
 
@@ -499,6 +535,7 @@ function goBack(): void {
               :disabled="syncBusy"
               @click="confirmSync"
             >
+              <InlineLoader v-if="syncBusy" />
               {{ syncBusy ? "同步中…" : "同步這些資料" }}
             </button>
             <button
@@ -552,21 +589,6 @@ function goBack(): void {
 </template>
 
 <style scoped>
-/*
- * 區塊標題的圖示錨點。跟 MorePage 卡片列同一種排法：圖示與標題同列、
- * 垂直置中。flex: none 不是保險——flex 子項預設可壓縮，圖示被壓縮就是
- * 變形（跟 IconLead 那條註解同一個理由）。
- */
-.section-heading {
-  display: flex;
-  align-items: center;
-  gap: var(--space-3);
-}
-
-.section-heading svg {
-  flex: none;
-}
-
 .page-heading {
   display: grid;
   gap: var(--space-2);
@@ -673,16 +695,37 @@ dd {
   border-top: 1px solid var(--border-strong);
 }
 
-.clear-row div > strong {
-  display: block;
-  line-height: 1.4;
-}
-
 .clear-row p {
   color: var(--text-secondary);
   line-height: var(--line-height-body);
 }
 
+/*
+ * 危險動作的紅字。
+ *
+ * 2026-09-04 標題併進按鈕之後，這條選到的是**觸發按鈕**——ConfirmAction
+ * 觸發態的根元素就是那顆 <button>，scoped 屬性會落在它身上。確認態的根是
+ * `.confirm-note`，裡面的「確定清除／取消」不是根元素，選不到，所以那兩顆
+ * 仍是中性色（這個 App 不用整顆紅按鈕）。
+ */
+/*
+ * 2026-09-04：這一列不要上緣分隔線（使用者裁決）。
+ *
+ * 分隔線原本的工作是把「標題＋說明＋按鈕」這一組跟上一組分開。標題與說明
+ * 併進按鈕之後這一列只剩一顆按鈕，線就直接畫在按鈕上方——變成一條沒有東西
+ * 可分的線，看起來像多出來的裝飾。
+ *
+ * `padding-top` 留著：分組間距仍然需要，只是不再需要畫出來。
+ */
+.clear-row--danger {
+  border-top: none;
+}
+
+.clear-row--danger > .button {
+  color: var(--color-due);
+}
+
+/* 警示清單裡的「目前進行中的提醒」——那是這串裡最嚴重的一項。 */
 .clear-row--danger strong {
   color: var(--color-due);
 }
@@ -710,6 +753,22 @@ dd {
   line-height: var(--line-height-body);
 }
 
+/*
+ * 2026-09-04（方案 A）：分組間距。
+ *
+ * 改動前 `.sync-group` 與 `.sync-block` 的 gap 都是 var(--space-3)，於是
+ * 標題、說明、狀態、按鈕、出口五個元素**完全等距**——讀起來是五條平行的
+ * 線，不是「一個標題＋一段說明＋一個動作」。
+ *
+ * 這裡補的是 gap 之上的一段，讓「標題＋說明」與「狀態＋動作」之間、以及
+ * 「動作」與「出口」之間各拉開一階（12 + 8 = 20）。不直接把 gap 調大是
+ * 因為標題與它自己的 lead 要維持貼近。
+ */
+.sync-block,
+.sync-group__more {
+  margin-block-start: var(--space-2);
+}
+
 .sync-block {
   display: grid;
   gap: var(--space-3);
@@ -730,10 +789,22 @@ dd {
  *
  * 階層不再靠字級表達，改靠位置與那一段 lead 文字——這是刻意的取捨。
  */
-/* 出口靠右，與其他區塊「這裡還有別的可以看」的入口一致。 */
-/* 靠右是 2026-09-01 的使用者要求，不動。 */
+/*
+ * 出口的對齊。
+ *
+ * **2026-09-04 推翻 2026-09-01 的「靠右」（使用者裁決 C）。**
+ *
+ * 靠右原本的理由是「跟五日預報那顆一樣，都是『這裡還有別的可以看』」。
+ * 但那顆在一張卡的**標題列右端**，右邊界是它自己那一列的邊界；這一顆
+ * 排在一疊左對齊的內容底下，實測整段由上往下的右緣是
+ * 90 → 322/48 → 127 → 336（按鈕滿版）→ **173 靠右**，
+ * 再往下的「返回更多」又靠左——三個互動元素三種對齊。
+ *
+ * 寫成明確的 start 而不是刪掉整條規則：`.sync-group` 有
+ * `justify-items: start`，靠繼承的話下次有人動那一行就會靜默改掉這裡。
+ */
 .sync-group__more {
-  justify-self: end;
+  justify-self: start;
 }
 
 /* 狀態列：比群組標題輕一階，顏色也跟著降——它回答「現在是哪一種狀態」。 */

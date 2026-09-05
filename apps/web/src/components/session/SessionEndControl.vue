@@ -2,6 +2,7 @@
 import { shallowRef, useTemplateRef } from "vue";
 import { useOverlay } from "../../composables/useOverlay";
 import IconButton from "../common/IconButton.vue";
+import InlineLoader from "../feedback/InlineLoader.vue";
 import type {
   SessionEndError,
   SessionEndPhase
@@ -109,6 +110,7 @@ const { closeFromBackdrop } = useOverlay({
               :disabled="phase === 'ending'"
               @click="confirmEnd"
             >
+              <InlineLoader v-if="phase === 'ending'" />
               {{ phase === "ending" ? "正在結束…" : "結束本次提醒" }}
             </button>
             <button

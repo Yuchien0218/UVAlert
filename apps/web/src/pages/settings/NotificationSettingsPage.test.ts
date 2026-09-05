@@ -257,3 +257,101 @@ describe("NotificationSettingsPage", () => {
     expect(wrapper.text()).not.toContain("背景通知");
   });
 });
+
+/**
+ * 2026-09-05：三張並列的卡補上標題圖示。
+ *
+ * 判準是 DESIGN.md 第八節 32 檔位的用法規則——「這張卡要不要被掃讀」。
+ * 這一頁三張卡彼此並列（狀態／傳送說明／再次提醒頻率），符合。
+ */
+describe("卡片標題的圖示", () => {
+  const mountWith = (
+    permission: "default" | "granted" | "denied",
+    isSupported = true
+  ) => {
+    const router = createRouter({
+      history: createMemoryHistory(),
+      routes: [
+        {
+          path: "/settings/notifications",
+          name: "settings-notifications",
+          component: NotificationSettingsPage
+        },
+        { path: "/more", name: "more", component: { template: "<div />" } }
+      ]
+    });
+    vi.mocked(useWebAppServices).mockReturnValue(
+      makeServices({ permission, isSupported }) as unknown as WebAppServices
+    );
+    return mount(NotificationSettingsPage, {
+      global: { plugins: [router], stubs: { Icon: true } }
+    });
+  };
+
+  const headingIcons = (wrapper: ReturnType<typeof mountWith>) =>
+    wrapper
+      .findAll("h2.section-heading icon-stub")
+      .map((icon) => icon.attributes("name"));
+
+  /*
+   * 三張都要有，而且都走共用的 `.section-heading`——這一頁原本自己刻了
+   * `.status-summary` 與 `.settings-card-heading` 兩個類別，兩個都是死宣告
+   * （margin 由 h1,h2,h3 提供、font-size 由 typography role 提供）。
+   *
+   * `.status-summary` 更糟：它宣告的是 section-title（20px）而不是卡片標題
+   * 的 18px，**讀檔案的人會以為這張卡的標題比另外兩張大**，實測三個都是
+   * 18px。宣告與畫面不一致的死碼比單純的死碼更糟。
+   */
+  it("三張卡的標題都是 .section-heading，各帶一顆 32px 圖示", () => {
+    const wrapper = mountWith("granted");
+
+    expect(wrapper.findAll("h2.section-heading")).toHaveLength(3);
+    expect(headingIcons(wrapper)).toHaveLength(3);
+    expect(
+      wrapper
+        .findAll("h2.section-heading icon-stub")
+        .map((icon) => icon.attributes("size"))
+    ).toEqual(["32", "32", "32"]);
+  });
+
+  /*
+   * **狀態卡那一顆刻意跟著狀態變。** 加圖示的理由是幫忙掃讀，而這張卡回答
+   * 的就是「現在是哪一種狀態」——固定一顆鈴鐺只是在標題前面多一個裝飾。
+   */
+  it("狀態卡的圖示跟著權限狀態換", () => {
+    expect(headingIcons(mountWith("granted"))[0]).toBe("more-notifications");
+    expect(headingIcons(mountWith("denied"))[0]).toBe("state-notification-off");
+    expect(headingIcons(mountWith("default"))[0]).toBe(
+      "state-notification-pending"
+    );
+    expect(headingIcons(mountWith("default", false))[0]).toBe(
+      "state-notification-off"
+    );
+  });
+
+  /*
+   * **反向：另外兩張是固定的。** 少了這條，「三顆都跟著狀態變」也會過上面
+   * 那條——那時「通知傳送說明」的圖示會隨權限跳來跳去，而它跟權限無關。
+   */
+  it("另外兩張的圖示與狀態無關", () => {
+    for (const permission of ["granted", "default"] as const) {
+      const icons = headingIcons(mountWith(permission));
+      expect(icons.slice(1)).toEqual(
+        permission === "granted"
+          ? ["more-about", "tool-refresh"]
+          : ["more-about"]
+      );
+    }
+  });
+
+  /*
+   * 標題文字要包在 <span> 裡：`.section-heading` 是 flex，不包的話
+   * 「目前狀態：」與 `<strong>` 會變成兩個 flex item，中間被 gap 撐開
+   * 12px——一句話被切成兩半。
+   */
+  it("狀態那一句沒有被 flex gap 切開", () => {
+    const heading = mountWith("granted").get("h2.section-heading");
+
+    expect(heading.get("span").text()).toBe("目前狀態：通知已開啟");
+  });
+});

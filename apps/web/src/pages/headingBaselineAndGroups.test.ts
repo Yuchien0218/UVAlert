@@ -73,12 +73,14 @@ describe("裝備頁的標題區", () => {
    * 標題區沒有任何訊號說它是上一層。
    */
   it("標題區下面有一條分隔線", () => {
-    const template = PRODUCTS.slice(
-      PRODUCTS.indexOf("</header>"),
-      PRODUCTS.indexOf("aria-labelledby=\"gear-current-title\"")
+    /*
+     * 2026-09-04：線改成標題區自己的下緣（`<hr>` 上下各吃一整份 stack gap，
+     * 於是與兩邊等距、不屬於任何一段）。守的東西沒變——標題區與清單之間
+     * 仍然要有一條可見的界線。
+     */
+    expect(PRODUCTS).toMatch(
+      /\.page-heading--with-exit \{[^}]*border-bottom:\s*1px solid var\(--border-subtle\);/
     );
-
-    expect(template).toContain('<hr class="gear-section-rule" />');
   });
 
   /*
@@ -86,6 +88,8 @@ describe("裝備頁的標題區", () => {
    * 標的是「會用於新提醒」與「不會」的轉折。
    */
   it("使用中與收納中之間的線也還在", () => {
-    expect(PRODUCTS).toContain('v-if="past.length > 0" class="gear-section-rule"');
+    expect(PRODUCTS).toMatch(
+      /\.gear-past \{[^}]*border-top:\s*1px solid var\(--border-subtle\);/
+    );
   });
 });

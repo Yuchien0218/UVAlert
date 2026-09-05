@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { SessionContext } from "@sunshield/contracts";
-import { computed, shallowRef, watch } from "vue";
+import { computed, onBeforeUnmount, shallowRef, watch } from "vue";
 import Icon from "../icons/Icon.vue";
 import DisclosureChevron from "../common/DisclosureChevron.vue";
 import DisclosurePanel from "../common/DisclosurePanel.vue";
@@ -26,6 +26,21 @@ import { CONTEXT_ICONS } from "../../features/setup/setupCatalog";
 const selectedContext = defineModel<SessionContext | null>({
   required: true
 });
+
+/**
+ * 選好了、而且已經收乾淨——外層可以把這個選擇器換成一行摘要了。
+ *
+ * **為什麼要由這個元件說「可以收了」，而不是外層自己決定。**
+ *
+ * 改動前 `SetupPage` 一偵測到 `selectedContext` 變了就在同一個 tick 把整個
+ * 選擇器從 DOM 拿掉。實測（2026-09-04，瀏覽器）：點「水上活動」→ 點
+ * 「準備下水」，畫面上四個揭露面板瞬間只剩一個——**約 400px 的內容硬切成
+ * 一行 39px 的摘要，零過渡**。使用者的原話是「選項收合的很突然」。
+ *
+ * 收合的時間點只有這個元件知道（哪個面板開著、它的高度動畫跑完了沒），
+ * 所以由它發事件，外層照著收。
+ */
+const emit = defineEmits<{ settled: [] }>();
 
 type GroupKey = "indoor" | "water";
 
@@ -98,7 +113,65 @@ watch(selectedContext, (context) => {
 });
 
 function toggleGroup(key: GroupKey): void {
+  clearSettleTimer();
+  settling.value = false;
   openGroup.value = openGroup.value === key ? null : key;
+}
+
+/**
+ * 選好之後的兩段停頓，加起來剛好是 `--duration-base`。
+ *
+ * 1. **`--duration-fast` 讓選取態畫得出來。** 改動前是 0ms——外層在同一個
+ *    tick 就把整個選擇器拿掉，使用者根本來不及看到自己點中了哪一顆。
+ * 2. **再一個 `--duration-fast` 讓展開中的子選項面板自己收合完**
+ *    （`DisclosurePanel` 的高度動畫就是這個長度）。收到一半被抽掉，等於
+ *    那個動畫沒有存在過。
+ *
+ * 選「一般戶外」這類直接情境時群組是**立刻**收的（留著會讀成兩個都選了，
+ * 見 `selectDirect`），那一段收合與第 1 段同時跑，所以不必再等第 2 段。
+ */
+const PICK_FEEDBACK_MS = 160;
+const PANEL_COLLAPSE_MS = 160;
+
+/**
+ * 正在收尾。
+ *
+ * 這段期間不再展開任何東西——否則說明區會在「群組收合」與「元件被移除」
+ * 之間搶進來展開 160ms 再消失，那是一次沒有人看得懂的閃動。
+ */
+const settling = shallowRef(false);
+
+let settleTimer: ReturnType<typeof setTimeout> | undefined;
+
+function clearSettleTimer(): void {
+  if (settleTimer !== undefined) clearTimeout(settleTimer);
+  settleTimer = undefined;
+}
+
+function scheduleSettle(collapseAfterFeedback: boolean): void {
+  clearSettleTimer();
+  settling.value = true;
+  settleTimer = setTimeout(() => {
+    if (!collapseAfterFeedback) {
+      settleTimer = undefined;
+      emit("settled");
+      return;
+    }
+    openGroup.value = null;
+    settleTimer = setTimeout(() => {
+      settleTimer = undefined;
+      emit("settled");
+    }, PANEL_COLLAPSE_MS);
+  }, PICK_FEEDBACK_MS);
+}
+
+/* 元件先被拿掉時要把計時器一起收掉，不要對著已卸載的元件發事件。 */
+onBeforeUnmount(clearSettleTimer);
+
+/** 選子選項：先讓選取態停留一下，再收合它所在的那個面板。 */
+function selectSub(value: SessionContext): void {
+  selectedContext.value = value;
+  scheduleSettle(true);
 }
 
 /**
@@ -107,7 +180,13 @@ function toggleGroup(key: GroupKey): void {
  */
 function selectDirect(value: SessionContext): void {
   selectedContext.value = value;
+  /*
+   * 這裡的收合是**立刻**的，不等停頓——使用者選的是另一個大類，留著展開中
+   * 的子選項會讀成兩個都選了。那段收合動畫與「讓選取態畫出來」的停頓同時
+   * 跑，所以 `scheduleSettle(false)`：等一段就好，不用再等第二段。
+   */
   openGroup.value = null;
+  scheduleSettle(false);
 }
 
 /**
@@ -132,9 +211,17 @@ const selectedDescription = computed(() => {
   return null;
 });
 
-/** 沒有展開群組、而且真的有說明可講時，才展開說明區。 */
+/**
+ * 沒有展開群組、而且真的有說明可講時，才展開說明區。
+ *
+ * `settling` 也要擋：收尾期間展開說明，等於讓它現身 160ms 再跟著整個元件
+ * 一起消失。
+ */
 const descriptionOpen = computed(
-  () => openGroup.value === null && selectedDescription.value !== null
+  () =>
+    !settling.value &&
+    openGroup.value === null &&
+    selectedDescription.value !== null
 );
 </script>
 
@@ -213,10 +300,11 @@ const descriptionOpen = computed(
           :class="{ 'option-selected': selectedContext === option.value }"
         >
           <input
-            v-model="selectedContext"
             type="radio"
             name="setup-context"
             :value="option.value"
+            :checked="selectedContext === option.value"
+            @change="selectSub(option.value)"
           />
           <span>
             <strong>{{ option.label }}</strong>
