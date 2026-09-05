@@ -81,3 +81,50 @@ describe("AccountDataPage", () => {
     expect(services.auth.signOut).toHaveBeenCalledTimes(1);
   });
 });
+
+/**
+ * 2026-09-05：登入後的三張卡補上標題圖示。
+ *
+ * 判準是 DESIGN.md 第八節 32 檔位的用法規則——「這張卡要不要被掃讀」。
+ * 這一頁登入後有三張並列的卡（同步狀態／登出／清除雲端資料），符合。
+ *
+ * 這一頁先前卡在**沒有適合「登出」的圖示**：最通用的「箭頭出框」在這個
+ * repo 已經是 `tool-download`（匯出），而兩者會出現在相鄰的設定頁。
+ * 新繪的 `tool-sign-out` 用電源符號避開，見 signOutIcon.test.ts。
+ */
+describe("帳號頁的卡片標題圖示", () => {
+  const mountSignedIn = () => {
+    vi.mocked(useWebAppServices).mockReturnValue(
+      makeServices() as unknown as WebAppServices
+    );
+    return shallowMount(AccountDataPage, {
+      global: { stubs: { ConfirmAction: false } }
+    });
+  };
+
+  it("三張卡各帶一顆 32px 圖示", () => {
+    const headings = mountSignedIn().findAll("h2.section-heading");
+
+    expect(headings).toHaveLength(3);
+    expect(
+      headings.map((heading) => heading.find("icon-stub").attributes("name"))
+    ).toEqual(["tool-refresh", "tool-sign-out", "tool-delete"]);
+    expect(
+      headings.map((heading) => heading.find("icon-stub").attributes("size"))
+    ).toEqual(["32", "32", "32"]);
+  });
+
+  /*
+   * **標題文字要包在 <span> 裡。** `.section-heading` 是 flex，不包的話
+   * 多個文字節點會被 gap 撐開——與 NotificationSettingsPage 同一個理由。
+   */
+  it("標題文字包在 span 裡", () => {
+    const headings = mountSignedIn().findAll("h2.section-heading");
+
+    expect(headings.map((heading) => heading.get("span").text())).toEqual([
+      "同步狀態",
+      "登出",
+      "清除 UVAlert 雲端資料"
+    ]);
+  });
+});

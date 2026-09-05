@@ -346,6 +346,12 @@ export const ICONS = {
     body: `<title>收藏</title>
   <path d="M5.8 3.9H18.2A0.9 0.9 0 0 1 19.1 4.8V20.1L12 15.5L4.9 20.1V4.8A0.9 0.9 0 0 1 5.8 3.9Z" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>`
   },
+  "tool-sign-out": {
+    viewBox: "0 0 24 24",
+    title: "登出",
+    body: `<title>登出</title>
+  <path fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" d="M15.73 9.36A5.8 5.8 0 1 1 8.27 9.36"/> <path fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" d="M12 5.2V12"/>`
+  },
   "feature-uv-forecast": {
     viewBox: "0 0 24 24",
     title: "五日 UV 預報",
