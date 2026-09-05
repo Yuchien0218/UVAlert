@@ -235,6 +235,30 @@ describe("BrowserRemotePush", () => {
     expect(local.state.writeCredentials).toHaveBeenCalledWith(credentials);
   });
 
+  it("calls a browser fetch dependency with the global object as its receiver", async () => {
+    const warning = vi.spyOn(console, "warn").mockImplementation(() => undefined);
+    const browserFetch = vi.fn(function (this: unknown) {
+      if (this !== globalThis) {
+        throw new TypeError("Illegal invocation");
+      }
+      return Promise.resolve(
+        new Response(JSON.stringify(credentials), {
+          status: 201,
+          headers: { "Content-Type": "application/json" }
+        })
+      );
+    }) as unknown as typeof fetch;
+    const { adapter } = createHarness({
+      credentials: null,
+      subscription: null,
+      fetch: browserFetch
+    });
+    warning.mockClear();
+
+    await expect(adapter.enable()).resolves.toBe("enabled");
+    expect(warning).not.toHaveBeenCalled();
+  });
+
   it("reuses an existing subscription and credentials through authenticated PUT", async () => {
     const subscription = createSubscription();
     const { adapter, subscribe, fetchMock } = createHarness({

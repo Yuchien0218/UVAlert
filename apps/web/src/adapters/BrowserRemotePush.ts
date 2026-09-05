@@ -36,6 +36,7 @@ export class BrowserRemotePush implements RemotePushPort {
   readonly #deps: BrowserRemotePushDependencies;
   readonly #apiBase: string;
   readonly #publicVapidKey: string | undefined;
+  readonly #fetch: typeof fetch;
   #transport: Promise<void> = Promise.resolve();
 
   constructor(dependencies: BrowserRemotePushDependencies) {
@@ -44,6 +45,7 @@ export class BrowserRemotePush implements RemotePushPort {
     this.#publicVapidKey = readConfiguredEnvironmentValue(
       dependencies.publicVapidKey
     );
+    this.#fetch = dependencies.fetch.bind(globalThis);
   }
 
   isSupported(): boolean {
@@ -153,7 +155,7 @@ export class BrowserRemotePush implements RemotePushPort {
       stage = "serialize";
       const payload = subscriptionPayload(subscription);
       stage = "register-backend";
-      const response = await this.#deps.fetch(
+      const response = await this.#fetch(
         `${this.#apiBase}/push-subscription`,
         existing === null
           ? jsonRequest("POST", payload)
@@ -238,7 +240,7 @@ export class BrowserRemotePush implements RemotePushPort {
 
     let response: Response;
     try {
-      response = await this.#deps.fetch(
+      response = await this.#fetch(
         `${this.#apiBase}/push-schedule`,
         authenticatedJsonRequest(
           intent.kind === "schedule" ? "PUT" : "DELETE",
@@ -291,7 +293,7 @@ export class BrowserRemotePush implements RemotePushPort {
       if (teardownCredentials !== null) {
         let response: Response;
         try {
-          response = await this.#deps.fetch(
+          response = await this.#fetch(
             `${this.#apiBase}/push-subscription`,
             authenticatedRequest("DELETE", teardownCredentials)
           );
