@@ -32,6 +32,30 @@ const optionAt = (wrapper: ReturnType<typeof mountPicker>, index: number) =>
 const isSelected = (wrapper: ReturnType<typeof mountPicker>, index: number) =>
   optionAt(wrapper, index).classes().includes("option-selected");
 
+/**
+ * 把一個時刻轉成 `datetime-local` 要的本機字串。
+ *
+ * **2026-09-05：不可以在測試裡寫死 `"2026-09-04T09:30"`。**
+ *
+ * `vi.setSystemTime()` 設的是**絕對時刻**，而 `datetime-local` 的值是用
+ * **執行環境的時區**解讀的。寫死字面量的話，這條測試就綁在作者的時區上：
+ * 在 UTC+8 是「30 分鐘前」（綠），在 CI 的 UTC 下那個輸入比假時鐘還晚
+ * 7.5 小時，`minutesAgo` 變成負數、標籤變成「剛剛」（紅）。
+ *
+ * 這正是 2026-09-05 讓 CI 紅掉的原因——本機全綠、CI 一條紅，而本機的
+ * `pnpm check` 看不出來。用 `TZ=UTC pnpm vitest run` 可以在本機重現。
+ *
+ * 改成從假時鐘往回算，並且用與元件 `toLocalInputValue` 相同的本機 getter
+ * ——兩邊都走本機時區，差值就與時區無關了。
+ */
+function localInputValue(date: Date): string {
+  const pad = (part: number): string => String(part).padStart(2, "0");
+  return (
+    `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}` +
+    `T${pad(date.getHours())}:${pad(date.getMinutes())}`
+  );
+}
+
 describe("按「1 分鐘前」要收掉展開中的調整面板", () => {
   /*
    * 改動前按下去只寫值、不碰 `adjusting`，於是畫面同時有「已選 1 分鐘前」
@@ -118,7 +142,9 @@ describe("選取態不會因為時鐘往前走就自己翻面", () => {
 
     await optionAt(wrapper, 0).trigger("click");
     await optionAt(wrapper, 1).trigger("click");
-    await wrapper.get(".time-adjust input").setValue("2026-09-04T09:30");
+    await wrapper
+      .get(".time-adjust input")
+      .setValue(localInputValue(new Date(Date.now() - 30 * 60_000)));
     await wrapper.get(".time-adjust .button--primary").trigger("click");
 
     expect(isSelected(wrapper, 0)).toBe(false);
