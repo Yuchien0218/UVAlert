@@ -115,12 +115,15 @@ export class BrowserRemotePush implements RemotePushPort {
     }
     if (permission !== "granted") return "permission-required";
 
+    let stage = "registration";
     try {
       const registration = await this.#deps.getRegistration();
       if (registration === null) return "unsupported";
+      stage = "get-subscription";
       let subscription = await registration.pushManager.getSubscription();
       const hadExistingSubscription = subscription !== null;
       if (subscription === null) {
+        stage = "subscribe";
         subscription = await registration.pushManager.subscribe({
           userVisibleOnly: true,
           applicationServerKey: urlBase64ToUint8Array(
@@ -130,11 +133,16 @@ export class BrowserRemotePush implements RemotePushPort {
       }
       const existing = await this.#deps.state.readCredentials();
       if (hadExistingSubscription && existing === null) {
+        stage = "unsubscribe";
         const unsubscribed = await subscription.unsubscribe();
         if (!unsubscribed) {
           const remaining = await registration.pushManager.getSubscription();
-          if (remaining !== null) return "schedule-error";
+          if (remaining !== null) {
+            reportEnableFailure(stage, new Error("SUBSCRIPTION_STILL_ACTIVE"));
+            return "schedule-error";
+          }
         }
+        stage = "subscribe";
         subscription = await registration.pushManager.subscribe({
           userVisibleOnly: true,
           applicationServerKey: urlBase64ToUint8Array(
@@ -142,23 +150,28 @@ export class BrowserRemotePush implements RemotePushPort {
           )
         });
       }
+      stage = "serialize";
+      const payload = subscriptionPayload(subscription);
+      stage = "register-backend";
       const response = await this.#deps.fetch(
         `${this.#apiBase}/push-subscription`,
         existing === null
-          ? jsonRequest("POST", subscriptionPayload(subscription))
+          ? jsonRequest("POST", payload)
           : authenticatedJsonRequest(
               "PUT",
-              subscriptionPayload(subscription),
+              payload,
               existing
             )
       );
       if (!response.ok) return "schedule-error";
       if (existing === null) {
+        stage = "read-credentials";
         const created = await readCreatedCredentials(response);
         await this.#deps.state.writeCredentials(created);
       }
       return "enabled";
-    } catch {
+    } catch (error) {
+      reportEnableFailure(stage, error);
       return "schedule-error";
     }
   }
@@ -463,6 +476,14 @@ function authenticatedRequest(
 
 function retryable(response: Response): boolean {
   return response.status === 429 || response.status >= 500;
+}
+
+function reportEnableFailure(stage: string, error: unknown): void {
+  console.warn("[push] enable failed", {
+    stage,
+    name: error instanceof Error ? error.name : "UnknownError",
+    message: error instanceof Error ? error.message : "Unknown push error"
+  });
 }
 
 function sameCredentials(

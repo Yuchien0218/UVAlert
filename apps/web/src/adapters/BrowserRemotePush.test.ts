@@ -198,6 +198,24 @@ describe("BrowserRemotePush", () => {
     expect(subscribe).not.toHaveBeenCalled();
   });
 
+  it("reports a sanitized stage when browser subscription creation fails", async () => {
+    const warning = vi.spyOn(console, "warn").mockImplementation(() => undefined);
+    const { adapter, subscribe } = createHarness({
+      credentials: null,
+      subscription: null
+    });
+    vi.mocked(subscribe).mockRejectedValue(
+      new DOMException("Registration failed - push service error", "AbortError")
+    );
+
+    await expect(adapter.enable()).resolves.toBe("schedule-error");
+    expect(warning).toHaveBeenCalledWith("[push] enable failed", {
+      stage: "subscribe",
+      name: "AbortError",
+      message: "Registration failed - push service error"
+    });
+  });
+
   it("subscribes and registers a new anonymous device", async () => {
     const { adapter, subscribe, fetchMock, local } = createHarness({
       credentials: null,
