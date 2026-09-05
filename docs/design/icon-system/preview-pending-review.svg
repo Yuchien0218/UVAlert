@@ -175,4 +175,11 @@
     <text x="104" y="118" fill="#6F5A54" font-family="'Noto Sans TC', sans-serif" font-size="13" lang="zh-Hant-TW">36px / 18px</text>
     <text x="0" y="130" fill="#2E2925" font-family="'Noto Sans TC', sans-serif" font-size="17" lang="zh-Hant-TW">重置</text>
   </g>
+  <g data-icon-cell="tool-sign-out" transform="translate(564 1636)">
+    <g transform="scale(4)"><path fill="none" stroke="#33291F" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" d="M15.73 9.36A5.8 5.8 0 1 1 8.27 9.36"/> <path fill="none" stroke="#33291F" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" d="M12 5.2V12"/></g>
+    <g transform="translate(104 62) scale(1.5)"><path fill="none" stroke="#33291F" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" d="M15.73 9.36A5.8 5.8 0 1 1 8.27 9.36"/> <path fill="none" stroke="#33291F" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" d="M12 5.2V12"/></g>
+    <g transform="translate(150 74) scale(0.75)"><path fill="none" stroke="#33291F" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" d="M15.73 9.36A5.8 5.8 0 1 1 8.27 9.36"/> <path fill="none" stroke="#33291F" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" d="M12 5.2V12"/></g>
+    <text x="104" y="118" fill="#6F5A54" font-family="'Noto Sans TC', sans-serif" font-size="13" lang="zh-Hant-TW">36px / 18px</text>
+    <text x="0" y="130" fill="#2E2925" font-family="'Noto Sans TC', sans-serif" font-size="17" lang="zh-Hant-TW">登出</text>
+  </g>
 </svg>

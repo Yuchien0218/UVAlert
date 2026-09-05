@@ -44,9 +44,9 @@
 
 | 預覽板                                                     | 內容                                   | 狀態             |
 | ---------------------------------------------------------- | -------------------------------------- | ---------------- |
-| [`preview-confirmed.svg`](preview-confirmed.svg)           | 導覽 3、狀態 11、更多頁 6、衛教 6      | 已確認，不再變動 |
-| [`preview-pending-review.svg`](preview-pending-review.svg) | 情境 4、事件 4、裝備 6、工具 10        | 待確認           |
-| [`preview-new-icons.svg`](preview-new-icons.svg)           | 新繪 16（2026-08-29 起，跨 tool／feature） | 待確認           |
+| [`preview-confirmed.svg`](preview-confirmed.svg)           | 導覽 3、狀態 12、更多頁 6、衛教 6      | 已確認，不再變動 |
+| [`preview-pending-review.svg`](preview-pending-review.svg) | 情境 4、事件 4、裝備 6、工具 11        | 待確認           |
+| [`preview-new-icons.svg`](preview-new-icons.svg)           | 新繪 12（2026-08-29 那批，跨 tool／feature） | 待確認           |
 
 每個圖示同時呈現 96px、36px 與 18px，方便同時判斷造型與小尺寸辨識度。
 
@@ -124,7 +124,7 @@
 | `tool-refresh`       | 重新整理 | `RefreshCw`                  |
 | `tool-reset`         | 重置     | `RotateCcw`                  |
 
-工具型 16 個中，前 10 個對應原本的 Lucide 通用圖示；接著 5 個（`tool-loading` 載入中／`tool-edit` 編輯／`tool-delete` 刪除／`tool-share` 分享／`tool-favorite` 收藏）是 2026-08-29 補的；`tool-sign-out`（登出）是 2026-09-05 補的，見第十節。目前只有 `tool-edit` 已在快速防護摘要中使用；`tool-loading` 的原定用途已由 `InlineLoader` 取代，是否保留尚未裁決，其餘三個是裝備詳情頁預先備好的。
+工具型 16 個中，前 10 個對應原本的 Lucide 通用圖示；接著 5 個（`tool-loading` 載入中／`tool-edit` 編輯／`tool-delete` 刪除／`tool-share` 分享／`tool-favorite` 收藏）是 2026-08-29 補的；`tool-sign-out`（登出）是 2026-09-05 補的，造型經使用者確認後已拿掉 `board: "new"`，歸位到工具組的板（見第十節）。目前只有 `tool-edit` 已在快速防護摘要中使用；`tool-loading` 的原定用途已由 `InlineLoader` 取代，是否保留尚未裁決，其餘三個是裝備詳情頁預先備好的。
 
 工具型刻意是**單色**：它們會出現在按鈕、連結、狀態列等各種語意情境裡，必須繼承外層顏色，不能帶琥珀金。
 
