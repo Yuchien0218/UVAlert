@@ -1,5 +1,40 @@
 # UVAlert Vercel 部署狀態
 
+## 2026-09-05 匿名背景推播中繼驗證
+
+**驗證時間**：2026-09-05 21:15–23:07（Asia/Taipei）
+
+**程式 commit**：`a51471d`
+
+**Vercel deployment**：`dpl_BEwaUyTL1qhr1oTmWCXGU9r82VGX`／`https://uv-alert-pag62ta2w-yuu15.vercel.app`（`Ready`，已 alias 至 `https://uv-alert-web.vercel.app`）
+
+**Supabase project ref**：`ykfdnltaqpdytmrszbbk`
+
+**Push migrations**：遠端已套用 `20260830000200`、`20260830000300`、`20260830000400`，完整 migration 清單同步至 `20260904000000`。
+
+**Push Functions（2026-09-05 23:07 即時查核）**：`push-subscription` version 1／ACTIVE、`push-schedule` version 1／ACTIVE、`push-dispatch` version 1／ACTIVE；三者 `verify_jwt=false`。
+
+**Cron（2026-09-05 23:07 即時查核）**：
+
+- `uvalert-push-dispatch`：job id 1、每分鐘；latest run id 745，`succeeded`，2026-09-05 15:07:00 UTC。
+- `uvalert-push-cleanup`：job id 2、每日 03:17 UTC；latest run id 34，`succeeded`，2026-09-05 03:17:00 UTC。
+
+- Windows Chrome 已在正式網址成功啟用背景推播；設定頁顯示「已啟用背景推播」，瀏覽器沒有 push warning/error。
+- Supabase Unified Logs 於 21:15:03 記錄 `POST /rest/v1/push_subscriptions` HTTP `201`，確認匿名裝置訂閱已寫入後端。
+- 先前的 browser `fetch` receiver 錯誤已由 `9bfd667` 修正；完整驗證通過 182 個測試檔、2489 項測試，typecheck、ESLint、Stylelint 與 production build 皆通過。
+- `a51471d` 另修正同一個長駐 Setup controller 在成功提交後無法建立下一份草稿；正式站已驗證結束提醒後可再次進入完整設定流程。
+- Windows Chrome 於 21:50 在所有 UVAlert 分頁關閉後收到固定文案「該補擦防曬乳了」，點擊後正確開啟提醒頁。Windows 原先的通知顯示設定曾阻擋第一輪肉眼確認；開啟後，本機測試通知與第二輪背景通知均可見。
+- Supabase 在 21:34:01 的第一輪排程已有 `sent` 與 `last_push_succeeded_at` 證據；21:50 第二輪完成實際 closed-tab 顯示與 notification click 驗證。
+- Desktop 取消測試通過：21:55 排程先確認同步，於 21:53 前結束提醒，觀察至 21:56 未收到舊通知。
+- Desktop 排程取代測試通過：先建立 22:23 舊排程，再以有效的防曬乳補擦紀錄取代為 22:26；Supabase 於 22:17:48 確認同一裝置僅保留 `due_at=2026-09-05 14:26:00+00`、`status=pending` 的單一排程。實際觀察為 22:23 未通知、22:26 收到新通知。
+- 取代測試前一次更正使用了「不建立倒數」的防曬乳紀錄，因此只取消舊排程、未產生新 `dueAt`；該輪列為無效前置，不計為推播失敗。
+- Desktop 離線恢復測試通過：於 Chrome DevTools Network offline 時建立 22:48 排程，前端顯示等待同步；恢復連線後顯示「已同步下一個補擦提醒」，關閉 UVAlert 分頁後於 22:48 收到通知。
+- 過期恢復測試也通過後端條件：22:48 排程在已過期後恢復連線，Supabase 於 22:53:43 將它記為 `cancelled`，`attempt_count=0`、`sent_at=null`，沒有建立或補送過期 Web Push。實機當時看到的通知來自前端本機 fallback，其既有契約是將已到期提醒立即顯示；不得誤記為後端 Push。
+- Desktop 拒絕權限降級測試通過：Windows Chrome 將正式站通知設為「封鎖」後，通知設定頁正確顯示「通知已被拒絕」與解除封鎖說明；在權限仍被拒絕時，仍可確認塗抹時間、開始提醒、看到進行中狀態與最近事件、結束提醒並回到可操作的提醒頁。
+- 同輪 focused regression 通過 5 個測試檔、114 項測試，涵蓋 browser notification／remote-push adapters、notification controller、通知設定頁與 app boot integration。瀏覽器權限為 blocked 時不把「未顯示 OS 通知」列為失敗，因為這正是瀏覽器拒絕權限的預期結果；unsupported capability 與分頁存活時的 local fallback 由上述自動化契約驗證。
+- 封鎖測試完成後已重新載入權限狀態，正式站顯示「通知已開啟」；舊背景訂閱先依介面安全完成關閉，再重新註冊，最後顯示「已啟用背景推播」。
+- Desktop 較長的 exactly-once 觀察，以及 Android、iPhone/iPad 實機仍待 Task 11 驗證，不宣告整體完成。
+
 ## 2026-08-30 Production 現況
 
 **驗證時間**：2026-08-30 16:14（Asia/Taipei）
