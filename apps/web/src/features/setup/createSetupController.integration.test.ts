@@ -164,6 +164,14 @@ describe("SetupDraft to StartSession transaction", () => {
       presetDecision: "accepted",
       suggestedPresetVersion: "BODY_ZONE_PRESET_V3@1"
     });
+
+    await controller.ensureLoaded();
+
+    expect(controller.draft.value).toMatchObject({
+      initialContext: null,
+      zones: [],
+      applications: []
+    });
   });
 
   it("Setup 只輸入時間時使用產品頁保存的目前產品 snapshot", async () => {

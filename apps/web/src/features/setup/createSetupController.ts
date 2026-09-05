@@ -613,6 +613,11 @@ export function createSetupController(
     applicationTimeState.value = null;
     waterStartState.value = null;
     pendingCommand = null;
+    // `useSetup()` keeps this controller alive across route changes. After a
+    // successful submit the old draft is gone, so the next visit to `/setup`
+    // must load again and create a fresh draft instead of treating the null
+    // state as already loaded.
+    loaded = false;
     await dependencies.boot.refresh();
     phaseState.value = "ready";
     return result;
