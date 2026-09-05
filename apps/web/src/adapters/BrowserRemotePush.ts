@@ -479,11 +479,13 @@ function retryable(response: Response): boolean {
 }
 
 function reportEnableFailure(stage: string, error: unknown): void {
-  console.warn("[push] enable failed", {
-    stage,
-    name: error instanceof Error ? error.name : "UnknownError",
-    message: error instanceof Error ? error.message : "Unknown push error"
-  });
+  console.warn(
+    `[push] enable failed ${JSON.stringify({
+      stage,
+      name: error instanceof Error ? error.name : "UnknownError",
+      message: error instanceof Error ? error.message : "Unknown push error"
+    })}`
+  );
 }
 
 function sameCredentials(

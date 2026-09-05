@@ -209,11 +209,9 @@ describe("BrowserRemotePush", () => {
     );
 
     await expect(adapter.enable()).resolves.toBe("schedule-error");
-    expect(warning).toHaveBeenCalledWith("[push] enable failed", {
-      stage: "subscribe",
-      name: "AbortError",
-      message: "Registration failed - push service error"
-    });
+    expect(warning).toHaveBeenCalledWith(
+      '[push] enable failed {"stage":"subscribe","name":"AbortError","message":"Registration failed - push service error"}'
+    );
   });
 
   it("subscribes and registers a new anonymous device", async () => {
