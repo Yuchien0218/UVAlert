@@ -10,6 +10,7 @@ import ChevronLink from "../../components/common/ChevronLink.vue";
 import ConfirmAction from "../../components/common/ConfirmAction.vue";
 import EmptyStateCard from "../../components/common/EmptyStateCard.vue";
 import BroadcastLoader from "../../components/feedback/BroadcastLoader.vue";
+import InlineLoader from "../../components/feedback/InlineLoader.vue";
 import { formatMonthDayTime } from "../../helpers/datetime";
 
 /**
@@ -262,6 +263,7 @@ function goBack(): void {
           :disabled="busy"
           @click="localData.exportData"
         >
+          <InlineLoader v-if="busy" />
           {{ busy ? "處理中…" : "匯出本機資料" }}
         </button>
 
@@ -512,6 +514,7 @@ function goBack(): void {
           :disabled="syncBusy"
           @click="prepare"
         >
+          <InlineLoader v-if="syncBusy" />
           {{ syncBusy ? "讀取中…" : "查看同步預覽" }}
         </button>
 
@@ -532,6 +535,7 @@ function goBack(): void {
               :disabled="syncBusy"
               @click="confirmSync"
             >
+              <InlineLoader v-if="syncBusy" />
               {{ syncBusy ? "同步中…" : "同步這些資料" }}
             </button>
             <button

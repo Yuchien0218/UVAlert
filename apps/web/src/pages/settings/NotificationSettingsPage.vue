@@ -4,6 +4,7 @@ import { useRouter } from "vue-router";
 import { useWebAppServices } from "../../app/injection";
 import Icon from "../../components/icons/Icon.vue";
 import IconButton from "../../components/common/IconButton.vue";
+import InlineLoader from "../../components/feedback/InlineLoader.vue";
 
 /**
  * 通知設定頁（Wireframe 10–11 / Sitemap §2.4）。
@@ -234,6 +235,7 @@ async function runTest(): Promise<void> {
           :disabled="testResult === 'sending'"
           @click="runTest"
         >
+          <InlineLoader v-if="testResult === 'sending'" />
           {{ testResult === "sending" ? "傳送中…" : "送出測試通知" }}
         </button>
         <p v-if="testResult === 'sent'" class="delivery-note" role="status">

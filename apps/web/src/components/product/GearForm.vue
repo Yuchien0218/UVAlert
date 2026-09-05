@@ -5,6 +5,7 @@ import { useWebAppServices } from "../../app/injection";
 import Icon from "../icons/Icon.vue";
 import DisclosureChevron from "../common/DisclosureChevron.vue";
 import DisclosurePanel from "../common/DisclosurePanel.vue";
+import InlineLoader from "../feedback/InlineLoader.vue";
 import ProductSnapshotEditor from "./ProductSnapshotEditor.vue";
 import {
   makeSessionOnlyProductSnapshot,
@@ -691,6 +692,7 @@ async function remove(): Promise<void> {
       :disabled="productSettings.phase.value === 'saving'"
       @click="save"
     >
+      <InlineLoader v-if="productSettings.phase.value === 'saving'" />
       {{ productSettings.phase.value === "saving" ? "儲存中…" : "儲存" }}
     </button>
 

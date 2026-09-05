@@ -4,6 +4,7 @@ import { useRoute, useRouter } from "vue-router";
 import { useWebAppServices } from "../app/injection";
 import QuickTimePicker from "../components/common/QuickTimePicker.vue";
 import BroadcastLoader from "../components/feedback/BroadcastLoader.vue";
+import InlineLoader from "../components/feedback/InlineLoader.vue";
 import ZoneSelectorGrid from "../components/reminder/ZoneSelectorGrid.vue";
 import { getZoneLabel } from "../features/reminder/reminderPresentation";
 import { formatDateTime } from "../helpers/datetime";
@@ -217,6 +218,9 @@ async function runVoid(): Promise<void> {
             :disabled="eventCorrection.phase.value === 'submitting'"
             @click="eventCorrection.submitReplace"
           >
+            <InlineLoader
+              v-if="eventCorrection.phase.value === 'submitting'"
+            />
             {{
               eventCorrection.phase.value === "submitting"
                 ? "更正中…"

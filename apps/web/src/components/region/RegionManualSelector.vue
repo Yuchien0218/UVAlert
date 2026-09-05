@@ -2,6 +2,7 @@
 import { computed, nextTick, shallowRef, useTemplateRef } from "vue";
 import type { RegionPhase } from "../../features/region/createRegionController";
 import type { RegionDirectoryEntry } from "../../features/region/TaiwanRegionResolver";
+import InlineLoader from "../feedback/InlineLoader.vue";
 
 interface Props {
   directory: readonly RegionDirectoryEntry[];
@@ -147,6 +148,7 @@ async function save(): Promise<void> {
       :disabled="phase === 'saving'"
       @click="save"
     >
+      <InlineLoader v-if="phase === 'saving'" />
       {{ phase === "saving" ? "正在儲存…" : "儲存這個地區" }}
     </button>
   </section>

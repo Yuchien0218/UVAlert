@@ -6,6 +6,7 @@ import type {
 } from "../../features/region/createRegionController";
 import type { RegionSelection } from "@sunshield/contracts";
 import Icon from "../icons/Icon.vue";
+import InlineLoader from "../feedback/InlineLoader.vue";
 
 interface Props {
   phase: RegionPhase;
@@ -74,6 +75,7 @@ const errorMessage = computed(() => {
       :disabled="phase === 'locating' || phase === 'saving'"
       @click="emit('locate')"
     >
+      <InlineLoader v-if="phase === 'locating'" />
       {{ phase === "locating" ? "正在取得位置…" : "使用目前位置" }}
     </button>
 
@@ -100,6 +102,7 @@ const errorMessage = computed(() => {
         :disabled="phase === 'saving'"
         @click="emit('confirm')"
       >
+        <InlineLoader v-if="phase === 'saving'" />
         {{ phase === "saving" ? "正在儲存…" : "確認並使用此地區" }}
       </button>
       <button

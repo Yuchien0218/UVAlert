@@ -4,6 +4,7 @@ import { useRoute, useRouter } from "vue-router";
 import { useWebAppServices } from "../app/injection";
 import QuickTimePicker from "../components/common/QuickTimePicker.vue";
 import BroadcastLoader from "../components/feedback/BroadcastLoader.vue";
+import InlineLoader from "../components/feedback/InlineLoader.vue";
 import ZoneSelectorGrid from "../components/reminder/ZoneSelectorGrid.vue";
 import { getZoneLabel } from "../features/reminder/reminderPresentation";
 import { suggestsReapplyAfter } from "../features/reminder/createContextEventController";
@@ -395,6 +396,7 @@ function zoneNames(zoneIds: string[]): string {
           :disabled="contextEvent.phase.value === 'submitting'"
           @click="contextEvent.submit"
         >
+          <InlineLoader v-if="contextEvent.phase.value === 'submitting'" />
           {{ contextEvent.phase.value === "submitting" ? "記錄中…" : submitLabel }}
         </button>
         <button

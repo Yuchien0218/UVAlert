@@ -19,14 +19,23 @@
  *
  * 這顆**沒有**像 `BroadcastLoader` 那樣延遲 0.25 秒出現。那個延遲是為了
  * 避免快取命中時閃一下；但這裡是使用者剛按下按鈕，立即回饋比避免閃動重要。
+ *
+ * ---
+ *
+ * **2026-09-05：改成純裝飾（`aria-hidden`），並移除 `label` prop。**
+ *
+ * 這顆的出現位置**永遠**是「按鈕內、旁邊就有忙碌文字」——按鈕自己已經從
+ * 「儲存」變成「儲存中…」。原本的 `role="img"` ＋ `aria-label="處理中"`
+ * 等於把同一件事播報兩次；`ReapplyPage` 那顆按鈕旁邊還有一個
+ * `role="status"` 的「正在儲存補擦紀錄」，會變成三次。
+ *
+ * 同一天把它接到 13 顆按鈕上，這個重複會被放大 13 倍，所以在接之前先修。
+ * 判準與 `GearSharePage` 對「儲存圖片」左邊那顆圖示的處置一致：**按鈕本身
+ * 就有可見文字，螢幕閱讀器讀那句就夠了。**
+ *
+ * `label` prop 一併移除——沒有任何呼叫端傳過它（`SetupPage` 是
+ * `<InlineLoader v-if="…" />`），留著只會讓下一個人以為它還有作用。
  */
-interface Props {
-  label?: string;
-}
-
-withDefaults(defineProps<Props>(), {
-  label: "處理中"
-});
 
 /**
  * 間隔遞減，跟 BroadcastLoader 同一組值。custom property 也刻意共用
@@ -41,7 +50,7 @@ const segments = [
 </script>
 
 <template>
-  <svg class="inline-loader" viewBox="0 0 21 8" role="img" :aria-label="label">
+  <svg class="inline-loader" viewBox="0 0 21 8" aria-hidden="true">
     <rect
       v-for="segment in segments"
       :key="segment.x"

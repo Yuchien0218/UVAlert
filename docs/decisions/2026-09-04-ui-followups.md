@@ -503,3 +503,75 @@ L 項只做了「搬家」（把 `.section-heading` 搬進 `app.css`），這一
 
 `EmptyStateCard` 的 `titleTag="h1"` **沒有任何頁面在用**，只有它自己的測試在用。元件註解裡提到的 `ProductDetailPage`「找不到這件裝備」現在不走這個元件。屬於既有狀況，這一輪沒動。
 
+---
+
+# 第六輪（2026-09-05，Logo 動畫的兩個問題）
+
+## P. `InlineLoader` 補到 13 顆按鈕（已完成）
+
+使用者問「之前做的 Logo 動畫可以用在專案嗎」。查證結果：**它已經在用了**——`BroadcastLoader.vue`（播報印記的射線依序亮起）用在 5 個頁面的整頁載入。`broadcast-loader-charge` 這個 keyframe 只出現在三個 session 的逐字稿裡，所以專案裡的 Logo 動畫就只有這一個，沒有躺在某處沒接上的版本。
+
+**但它的雙胞胎 `InlineLoader` 只接了 1 處。**
+
+`InlineLoader` 是同一個掃描節奏攤平成一排，專門放在按鈕裡（16px 時射線只剩不到 1px，會糊成髒點，所以不能直接縮 `BroadcastLoader`）。它的顏色用 `currentColor`，元件註解明說是「因為它會出現在主要按鈕（深底淺字）與次要按鈕（淺底深字）兩種情境」——**設計時就預期會用在多處，實際只接了 `SetupPage` 一處**，另外 14 顆按鈕在用純文字「…」。
+
+### 同一個坑的第三次
+
+| 輪次 | 工具 | 症狀 |
+| --- | --- | --- |
+| 09-04 | `.section-heading` | 鎖在單一頁面的 scoped style |
+| 09-05 | `IconLead size="hero"` | 檔位說是給空狀態的，空狀態沒用它 |
+| **這一輪** | `InlineLoader` | 為多處按鈕設計，只接一處 |
+
+三次都是「工具做好了、規則也寫了，但沒接上」。所以這次補守門：掃出所有帶「…」忙碌文字的按鈕，除了具名例外，每一顆都必須有 `InlineLoader`。
+
+### 唯一的例外：`GearSharePage`
+
+那顆「儲存圖片」左邊已經有一顆 20px 的 `more-install` 圖示，而 2026-09-02 的註解寫著「產生中時圖示不換掉：文字已經從『儲存圖片』變成『產生中…』，圖示跟著抽換只會讓按鈕在點下去的瞬間跳一下」。
+
+再塞一顆 loader 進去會變成「圖示 ＋ loader ＋ 文字」，而且**正好製造那段註解想避免的寬度跳動**。
+
+例外清單有一條**反向守門**釘著：例外裡的檔案必須真的沒有接。少了它，例外會變成一張只增不減的清單——某天 `GearSharePage` 改版接上了，這裡卻還掛著「刻意不加」，下一個人會照著把剛加好的東西拿掉。
+
+### 順帶修的無障礙問題
+
+接之前先把 `InlineLoader` 改成**純裝飾**（`aria-hidden="true"`，移除 `role="img"` 與 `label` prop）。
+
+它的出現位置永遠是「按鈕內、旁邊就有忙碌文字」——按鈕自己已經從「儲存」變成「儲存中…」。原本的 `aria-label="處理中"` 等於把同一件事播報兩次；`ReapplyPage` 那顆旁邊還有一個 `role="status"` 的「正在儲存補擦紀錄」，會變成三次。**接到 13 顆按鈕之後這個重複會被放大 13 倍，所以在接之前先修。**
+
+判準與 `GearSharePage` 對圖示的處置一致：按鈕本身就有可見文字，螢幕閱讀器讀那句就夠了。`label` prop 沒有任何呼叫端傳過，一併移除。
+
+### 實測
+
+在 `/region` 覆寫 `navigator.geolocation.getCurrentPosition` 讓它永不回呼，把按鈕釘在 `locating`：
+
+- 按鈕文字「正在取得位置…」，loader 存在、`aria-hidden="true"`、`role` 為 null
+- 20.8 × 8 px，三段膠囊的動畫都是 `running`
+- **按鈕高度 45px，與平常一致**——沒有撐高、沒有換行（截圖確認）
+
+## Q. PWA 啟動畫面**不能**換成動畫（技術限制）
+
+使用者問：「打開手機上的捷徑會出現靜態的 LOGO，這邊可以換成動的嗎？」
+
+那個畫面是 **Android／Chrome 依 manifest 自動合成的 splash screen**：`background_color: #faf5ec`（與截圖底色完全吻合）＋ `icons` 裡的 512 圖示置中。`index.html` 裡**沒有**任何 `apple-touch-startup-image` 或自製載入畫面，`<div id="app">` 是空的。
+
+**不能做成動畫，這是平台限制不是我們的程式碼：**
+
+1. **Android／Chrome**：splash 由瀏覽器／OS 在網頁執行**之前**畫出來。manifest 規格只吃 `background_color`、`theme_color`、`icons`、`name`，**沒有任何動畫欄位**
+2. **iOS／Safari**：`apple-touch-startup-image` 指定的是**靜態圖片**，同樣不能動
+3. 根本原因：那一刻**JavaScript 還沒開始執行**，任何動畫都放不進去
+
+### 可以做的替代方案（未實作，待裁決）
+
+splash 消失**之後**、Vue 掛載完成**之前**那一段是我們的。現在的流程是：
+
+```
+[OS splash：靜態 logo]  →  [空白，Vue 掛載中]  →  [首頁]
+```
+
+可以在 `index.html` 的 `<div id="app">` 裡直接寫一段 inline 的播報動畫（純 HTML＋SVG＋CSS，不需要 JS），Vue 掛載時會自動取代它。觀感上會變成「靜態 logo → 動態播報 → 首頁」的連續過場。
+
+**但取捨要先講清楚**：本機優先的啟動通常只有幾十毫秒，那個動畫會**閃一下就消失**——正是 `BroadcastLoader` 加 0.25 秒延遲要避免的東西。只有冷啟動與慢裝置才看得到。要做的話應該先實測啟動耗時再決定。
+
+**已經做對的一點**：manifest 的 `background_color` 與首頁底色都是 `#faf5ec`，所以 splash 換到 App 沒有色塊跳動。
+

@@ -11,6 +11,7 @@ import { getZoneLabel } from "../features/reminder/reminderPresentation";
 import { formatDateTime } from "../helpers/datetime";
 import IconButton from "../components/common/IconButton.vue";
 import IconLead from "../components/common/IconLead.vue";
+import InlineLoader from "../components/feedback/InlineLoader.vue";
 
 const { reapplication } = useWebAppServices();
 const router = useRouter();
@@ -254,6 +255,7 @@ function zoneNames(zoneIds: string[]): string {
           :disabled="reapplication.phase.value === 'submitting'"
           @click="reapplication.submit"
         >
+          <InlineLoader v-if="reapplication.phase.value === 'submitting'" />
           {{
             reapplication.phase.value === "submitting"
               ? "儲存中…"
