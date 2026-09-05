@@ -6,6 +6,7 @@ import type {
 } from "../../features/region/createRegionController";
 import type { RegionSelection } from "@sunshield/contracts";
 import Icon from "../icons/Icon.vue";
+import InlineLoader from "../feedback/InlineLoader.vue";
 
 interface Props {
   phase: RegionPhase;
@@ -35,7 +36,7 @@ const errorMessage = computed(() => {
     case "boundary_ambiguous":
       return "目前位置可能接近行政區邊界，請手動確認地區。";
     case "storage_error":
-      return "目前無法儲存地區設定，請再試一次。";
+      return "目前無法儲存地區設定，可以再試一次。";
     case "invalid_region":
       return "找不到這個行政區，請重新選擇。";
     case null:
@@ -54,7 +55,7 @@ const errorMessage = computed(() => {
         <h2
           id="location-title"
           class="location-panel__title"
-          data-typography-role="section-title"
+          data-typography-role="card-title"
         >
           使用目前位置
         </h2>
@@ -63,7 +64,7 @@ const errorMessage = computed(() => {
     </div>
 
     <p class="location-panel__body">
-      按下按鈕後，系統會短暫取得位置，用來配對所在行政區。位置不會被儲存或用於分析；你也可以手動選擇或略過。
+      僅短暫定位以配對行政區，不儲存或分析位置資訊，可手動選擇或略過設定。
     </p>
 
     <button
@@ -74,6 +75,7 @@ const errorMessage = computed(() => {
       :disabled="phase === 'locating' || phase === 'saving'"
       @click="emit('locate')"
     >
+      <InlineLoader v-if="phase === 'locating'" />
       {{ phase === "locating" ? "正在取得位置…" : "使用目前位置" }}
     </button>
 
@@ -88,11 +90,11 @@ const errorMessage = computed(() => {
         確認所在行政區
       </h3>
       <p>
-        系統配對為 <strong>{{ candidate.displayName }}</strong>
+        目前定位在 <strong>{{ candidate.displayName }}</strong>
         <template v-if="approximateAccuracyMeters !== null">
-          ，這次定位精度約 {{ approximateAccuracyMeters }} 公尺
+          （誤差約 {{ approximateAccuracyMeters }} 公尺）
         </template>
-        。請確認後再儲存。
+        ，請確認是否正確。
       </p>
       <button
         class="button button--primary"
@@ -100,6 +102,7 @@ const errorMessage = computed(() => {
         :disabled="phase === 'saving'"
         @click="emit('confirm')"
       >
+        <InlineLoader v-if="phase === 'saving'" />
         {{ phase === "saving" ? "正在儲存…" : "確認並使用此地區" }}
       </button>
       <button
@@ -143,7 +146,6 @@ const errorMessage = computed(() => {
 
 .location-panel__title {
   margin-top: var(--space-1);
-  font-size: var(--font-size-section-title);
 }
 
 .location-panel__body {

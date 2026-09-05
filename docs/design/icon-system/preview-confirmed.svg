@@ -1,7 +1,7 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1120 1626" role="img">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1120 2120" role="img">
   <title>防曬晴報員 圖示系統 — 已確認</title>
   <desc>每個圖示同時呈現 96px、36px 與 18px 三種尺寸。</desc>
-  <rect width="1120" height="1626" fill="#FAF5EC"/>
+  <rect width="1120" height="2120" fill="#FAF5EC"/>
   <text x="64" y="62" fill="#2E2925" font-family="'Noto Serif TC', serif" font-size="32" font-weight="500" letter-spacing="0.5" lang="zh-Hant-TW">圖示系統 — 已確認</text>
   <text x="64" y="108" fill="#2E2925" font-family="'Noto Sans TC', sans-serif" font-size="25" font-weight="500" lang="zh-Hant-TW">下排導覽（雙色）</text>
   <g data-icon-cell="nav-reminder" transform="translate(64 154)">
@@ -103,6 +103,13 @@
     <text x="104" y="118" fill="#6F5A54" font-family="'Noto Sans TC', sans-serif" font-size="13" lang="zh-Hant-TW">36px / 18px</text>
     <text x="0" y="130" fill="#2E2925" font-family="'Noto Sans TC', sans-serif" font-size="17" lang="zh-Hant-TW">標示尚未確認</text>
   </g>
+  <g data-icon-cell="state-night" transform="translate(814 858)">
+    <g transform="scale(4)"><path stroke="#C1832E" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M17.7,4.3v4.2M15.6,6.4h4.2"/> <path fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" stroke="#33291F" d="M8.9,4.7c-4.4,1.6-6.6,6.4-5,10.8,1.6,4.4,6.4,6.6,10.8,5,2.3-.9,4.1-2.7,5-5-4.4,1.6-9.2-.6-10.8-5-.7-1.9-.7-3.9,0-5.8Z"/></g>
+    <g transform="translate(104 62) scale(1.5)"><path stroke="#C1832E" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M17.7,4.3v4.2M15.6,6.4h4.2"/> <path fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" stroke="#33291F" d="M8.9,4.7c-4.4,1.6-6.6,6.4-5,10.8,1.6,4.4,6.4,6.6,10.8,5,2.3-.9,4.1-2.7,5-5-4.4,1.6-9.2-.6-10.8-5-.7-1.9-.7-3.9,0-5.8Z"/></g>
+    <g transform="translate(150 74) scale(0.75)"><path stroke="#C1832E" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M17.7,4.3v4.2M15.6,6.4h4.2"/> <path fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" stroke="#33291F" d="M8.9,4.7c-4.4,1.6-6.6,6.4-5,10.8,1.6,4.4,6.4,6.6,10.8,5,2.3-.9,4.1-2.7,5-5-4.4,1.6-9.2-.6-10.8-5-.7-1.9-.7-3.9,0-5.8Z"/></g>
+    <text x="104" y="118" fill="#6F5A54" font-family="'Noto Sans TC', sans-serif" font-size="13" lang="zh-Hant-TW">36px / 18px</text>
+    <text x="0" y="130" fill="#2E2925" font-family="'Noto Sans TC', sans-serif" font-size="17" lang="zh-Hant-TW">夜間</text>
+  </g>
   <text x="64" y="1096" fill="#2E2925" font-family="'Noto Sans TC', sans-serif" font-size="25" font-weight="500" lang="zh-Hant-TW">更多頁卡片（雙色）</text>
   <g data-icon-cell="more-notifications" transform="translate(64 1142)">
     <g transform="scale(4)"><g transform="translate(0 -0.2)"><path d="M6.6 15.8V10.2A5.4 5.4 0 0 1 17.4 10.2V15.8Z" fill="none" stroke="#33291F" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M4.8 15.8H19.2" fill="none" stroke="#33291F" stroke-width="2.5" stroke-linecap="round"/><circle cx="12" cy="19" r="1.8" fill="#C1832E"/></g></g>
@@ -145,5 +152,48 @@
     <g transform="translate(150 74) scale(0.75)"><circle cx="12" cy="12" r="8.5" fill="none" stroke="#33291F" stroke-width="2.5"/><circle cx="12" cy="8" r="1.5" fill="#C1832E"/><path d="M12 11.75V16.25" fill="none" stroke="#33291F" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></g>
     <text x="104" y="118" fill="#6F5A54" font-family="'Noto Sans TC', sans-serif" font-size="13" lang="zh-Hant-TW">36px / 18px</text>
     <text x="0" y="130" fill="#2E2925" font-family="'Noto Sans TC', sans-serif" font-size="17" lang="zh-Hant-TW">說明與關於</text>
+  </g>
+  <text x="64" y="1590" fill="#2E2925" font-family="'Noto Sans TC', sans-serif" font-size="25" font-weight="500" lang="zh-Hant-TW">衛教分類（雙色）</text>
+  <g data-icon-cell="education-uv-basics" transform="translate(64 1636)">
+    <g transform="scale(4)"><g transform="translate(-0.25 -0.25)"><circle cx="10.6" cy="10.6" r="2.4" fill="#C1832E"/><circle cx="10.6" cy="10.6" r="6" fill="none" stroke="#33291F" stroke-width="2.5"/><path d="M15 15L20 20" fill="none" stroke="#33291F" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></g></g>
+    <g transform="translate(104 62) scale(1.5)"><g transform="translate(-0.25 -0.25)"><circle cx="10.6" cy="10.6" r="2.4" fill="#C1832E"/><circle cx="10.6" cy="10.6" r="6" fill="none" stroke="#33291F" stroke-width="2.5"/><path d="M15 15L20 20" fill="none" stroke="#33291F" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></g></g>
+    <g transform="translate(150 74) scale(0.75)"><g transform="translate(-0.25 -0.25)"><circle cx="10.6" cy="10.6" r="2.4" fill="#C1832E"/><circle cx="10.6" cy="10.6" r="6" fill="none" stroke="#33291F" stroke-width="2.5"/><path d="M15 15L20 20" fill="none" stroke="#33291F" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></g></g>
+    <text x="104" y="118" fill="#6F5A54" font-family="'Noto Sans TC', sans-serif" font-size="13" lang="zh-Hant-TW">36px / 18px</text>
+    <text x="0" y="130" fill="#2E2925" font-family="'Noto Sans TC', sans-serif" font-size="17" lang="zh-Hant-TW">了解今天的 UV</text>
+  </g>
+  <g data-icon-cell="education-before-going-out" transform="translate(314 1636)">
+    <g transform="scale(4)"><g transform="translate(1.55 0)"><circle cx="8.4" cy="12" r="1.5" fill="#C1832E"/><path d="M16.9 4.2H4.1V19.8H16.9V4.2Z" fill="none" stroke="#33291F" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></g></g>
+    <g transform="translate(104 62) scale(1.5)"><g transform="translate(1.55 0)"><circle cx="8.4" cy="12" r="1.5" fill="#C1832E"/><path d="M16.9 4.2H4.1V19.8H16.9V4.2Z" fill="none" stroke="#33291F" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></g></g>
+    <g transform="translate(150 74) scale(0.75)"><g transform="translate(1.55 0)"><circle cx="8.4" cy="12" r="1.5" fill="#C1832E"/><path d="M16.9 4.2H4.1V19.8H16.9V4.2Z" fill="none" stroke="#33291F" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></g></g>
+    <text x="104" y="118" fill="#6F5A54" font-family="'Noto Sans TC', sans-serif" font-size="13" lang="zh-Hant-TW">36px / 18px</text>
+    <text x="0" y="130" fill="#2E2925" font-family="'Noto Sans TC', sans-serif" font-size="17" lang="zh-Hant-TW">出門前準備</text>
+  </g>
+  <g data-icon-cell="education-reapply" transform="translate(564 1636)">
+    <g transform="scale(4)"><circle fill="none" stroke-width="2.5" stroke="#33291F" cx="12" cy="12" r="8"/> <path fill="none" stroke-width="2.5" stroke="#C1832E" stroke-linecap="round" stroke-linejoin="round" d="M11.9,12h4"/> <path fill="none" stroke-width="2.5" stroke="#33291F" stroke-linecap="round" stroke-linejoin="round" d="M11.9,12v-4.6"/></g>
+    <g transform="translate(104 62) scale(1.5)"><circle fill="none" stroke-width="2.5" stroke="#33291F" cx="12" cy="12" r="8"/> <path fill="none" stroke-width="2.5" stroke="#C1832E" stroke-linecap="round" stroke-linejoin="round" d="M11.9,12h4"/> <path fill="none" stroke-width="2.5" stroke="#33291F" stroke-linecap="round" stroke-linejoin="round" d="M11.9,12v-4.6"/></g>
+    <g transform="translate(150 74) scale(0.75)"><circle fill="none" stroke-width="2.5" stroke="#33291F" cx="12" cy="12" r="8"/> <path fill="none" stroke-width="2.5" stroke="#C1832E" stroke-linecap="round" stroke-linejoin="round" d="M11.9,12h4"/> <path fill="none" stroke-width="2.5" stroke="#33291F" stroke-linecap="round" stroke-linejoin="round" d="M11.9,12v-4.6"/></g>
+    <text x="104" y="118" fill="#6F5A54" font-family="'Noto Sans TC', sans-serif" font-size="13" lang="zh-Hant-TW">36px / 18px</text>
+    <text x="0" y="130" fill="#2E2925" font-family="'Noto Sans TC', sans-serif" font-size="17" lang="zh-Hant-TW">外出中的補擦</text>
+  </g>
+  <g data-icon-cell="education-sweat-and-water" transform="translate(814 1636)">
+    <g transform="scale(4)"><path fill="#C1832E" stroke-width="0" d="M12,4.6c-2.7,3.3-2.9,5.3-2.9,6.7s1.3,2.9,2.9,2.9,2.9-1.3,2.9-2.9-.1-3.4-2.9-6.7Z"/> <path fill="none" stroke="#33291F" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4.2,17c1.3-1.1,2.6-1.1,3.9,0,1.3,1.1,2.6,1.1,3.9,0s2.6-1.1,3.9,0c1.3,1.1,2.6,1.1,3.9,0"/></g>
+    <g transform="translate(104 62) scale(1.5)"><path fill="#C1832E" stroke-width="0" d="M12,4.6c-2.7,3.3-2.9,5.3-2.9,6.7s1.3,2.9,2.9,2.9,2.9-1.3,2.9-2.9-.1-3.4-2.9-6.7Z"/> <path fill="none" stroke="#33291F" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4.2,17c1.3-1.1,2.6-1.1,3.9,0,1.3,1.1,2.6,1.1,3.9,0s2.6-1.1,3.9,0c1.3,1.1,2.6,1.1,3.9,0"/></g>
+    <g transform="translate(150 74) scale(0.75)"><path fill="#C1832E" stroke-width="0" d="M12,4.6c-2.7,3.3-2.9,5.3-2.9,6.7s1.3,2.9,2.9,2.9,2.9-1.3,2.9-2.9-.1-3.4-2.9-6.7Z"/> <path fill="none" stroke="#33291F" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4.2,17c1.3-1.1,2.6-1.1,3.9,0,1.3,1.1,2.6,1.1,3.9,0s2.6-1.1,3.9,0c1.3,1.1,2.6,1.1,3.9,0"/></g>
+    <text x="104" y="118" fill="#6F5A54" font-family="'Noto Sans TC', sans-serif" font-size="13" lang="zh-Hant-TW">36px / 18px</text>
+    <text x="0" y="130" fill="#2E2925" font-family="'Noto Sans TC', sans-serif" font-size="17" lang="zh-Hant-TW">流汗或碰水後</text>
+  </g>
+  <g data-icon-cell="education-after-sun-care" transform="translate(64 1846)">
+    <g transform="scale(4)"><path stroke="#C1832E" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M17.7,4.3v4.2M15.6,6.4h4.2"/> <path fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" stroke="#33291F" d="M8.9,4.7c-4.4,1.6-6.6,6.4-5,10.8,1.6,4.4,6.4,6.6,10.8,5,2.3-.9,4.1-2.7,5-5-4.4,1.6-9.2-.6-10.8-5-.7-1.9-.7-3.9,0-5.8Z"/></g>
+    <g transform="translate(104 62) scale(1.5)"><path stroke="#C1832E" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M17.7,4.3v4.2M15.6,6.4h4.2"/> <path fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" stroke="#33291F" d="M8.9,4.7c-4.4,1.6-6.6,6.4-5,10.8,1.6,4.4,6.4,6.6,10.8,5,2.3-.9,4.1-2.7,5-5-4.4,1.6-9.2-.6-10.8-5-.7-1.9-.7-3.9,0-5.8Z"/></g>
+    <g transform="translate(150 74) scale(0.75)"><path stroke="#C1832E" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M17.7,4.3v4.2M15.6,6.4h4.2"/> <path fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" stroke="#33291F" d="M8.9,4.7c-4.4,1.6-6.6,6.4-5,10.8,1.6,4.4,6.4,6.6,10.8,5,2.3-.9,4.1-2.7,5-5-4.4,1.6-9.2-.6-10.8-5-.7-1.9-.7-3.9,0-5.8Z"/></g>
+    <text x="104" y="118" fill="#6F5A54" font-family="'Noto Sans TC', sans-serif" font-size="13" lang="zh-Hant-TW">36px / 18px</text>
+    <text x="0" y="130" fill="#2E2925" font-family="'Noto Sans TC', sans-serif" font-size="17" lang="zh-Hant-TW">回家後與皮膚照顧</text>
+  </g>
+  <g data-icon-cell="education-special-situations" transform="translate(314 1846)">
+    <g transform="scale(4)"><path fill="#C1832E" stroke-width="0" d="M7.6,5.6h10.7l-2,4,2,4H7.6v-8Z"/> <path fill="none" stroke="#33291F" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M7.6,4.1v16"/></g>
+    <g transform="translate(104 62) scale(1.5)"><path fill="#C1832E" stroke-width="0" d="M7.6,5.6h10.7l-2,4,2,4H7.6v-8Z"/> <path fill="none" stroke="#33291F" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M7.6,4.1v16"/></g>
+    <g transform="translate(150 74) scale(0.75)"><path fill="#C1832E" stroke-width="0" d="M7.6,5.6h10.7l-2,4,2,4H7.6v-8Z"/> <path fill="none" stroke="#33291F" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M7.6,4.1v16"/></g>
+    <text x="104" y="118" fill="#6F5A54" font-family="'Noto Sans TC', sans-serif" font-size="13" lang="zh-Hant-TW">36px / 18px</text>
+    <text x="0" y="130" fill="#2E2925" font-family="'Noto Sans TC', sans-serif" font-size="17" lang="zh-Hant-TW">特殊情況</text>
   </g>
 </svg>

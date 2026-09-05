@@ -40,10 +40,26 @@ describe("resolveActionRoute", () => {
     });
   });
 
-  it("view_conservative_reminder 導向 S-16 運作說明", () => {
-    // 時鐘不可信且離線時的落點；規格指定 S-16，不是 placeholder。
-    expect(resolveActionRoute("view_conservative_reminder")).toEqual({
+  /*
+   * **2026-09-03：不得再導向 `/help/how-it-works`。**
+   *
+   * 那頁的兩則主題都還是 `MULTI_REVIEW`，畫面上只有「內容正在審查」。
+   * 時鐘不可信又離線時把使用者送去一頁空白，等於在最需要說明的狀態下什麼
+   * 都不說——所以改成原地展開。
+   *
+   * 兩個方向分開守：這條守「不會跳到審查中的頁面」，
+   * 下一條守「原地行為確實是說明」。
+   */
+  it("view_conservative_reminder 不導向仍在審查的說明頁", () => {
+    expect(resolveActionRoute("view_conservative_reminder")).not.toEqual({
       name: "help-how-it-works"
+    });
+  });
+
+  it("view_conservative_reminder 是原地說明，不換頁", () => {
+    expect(resolveActionDestination("view_conservative_reminder")).toEqual({
+      kind: "in_place",
+      behavior: "explain_shortened_interval"
     });
   });
 

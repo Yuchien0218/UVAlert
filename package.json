@@ -18,11 +18,13 @@
     "education:generate": "node tools/education/generate-content.mjs",
     "region-data:build": "node tools/region-data/build-region-data.mjs",
     "region-data:verify": "node tools/region-data/build-region-data.mjs --verify",
+    "county-outlines:build": "node --max-old-space-size=4096 tools/region-data/build-county-outlines.mjs",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "lint": "eslint . && pnpm lint:css",
     "lint:css": "stylelint \"{packages,apps}/**/*.{css,vue}\"",
-    "check": "pnpm typecheck && pnpm test && pnpm lint"
+    "check": "pnpm typecheck && pnpm test && pnpm lint",
+    "audit:unused": "node tools/audit/unused-declarations.mjs"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",

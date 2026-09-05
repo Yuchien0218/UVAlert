@@ -3,6 +3,8 @@ import type { SessionProjection } from "@sunshield/contracts";
 import { computed } from "vue";
 import { useCurrentTime } from "../../composables/useCurrentTime";
 import { formatTime } from "../../helpers/datetime";
+import Icon from "../icons/Icon.vue";
+import ZoneScopeBadge from "../common/ZoneScopeBadge.vue";
 
 /**
  * 夜間、且提醒仍在進行時的首屏（wireframe 09）。
@@ -40,10 +42,17 @@ const startedAt = computed<number | null>(() => {
   return starts.length === 0 ? null : Math.min(...starts);
 });
 
-const trackedZoneCount = computed(
-  () =>
-    props.session.zones.filter((zone) => zone.zoneTimerStartedAt !== null)
-      .length
+/*
+ * 2026-08-31：從「8 個追蹤部位」改成 `ZoneScopeBadge`（使用者要求統一）。
+ *
+ * 那個 8 就是全部位——跟最近事件 2026-08-31 的裁決是同一件事：**報一個
+ * 數字沒有告訴讀者任何事**。現在跟最近事件走同一段規則，涵蓋全部時顯示
+ * 「全部位」膠囊，只涵蓋一部分時顯示實際名稱。
+ */
+const trackedZoneIds = computed(() =>
+  props.session.zones
+    .filter((zone) => zone.zoneTimerStartedAt !== null)
+    .map((zone) => zone.zoneInstanceId)
 );
 
 const elapsedLabel = computed<string | null>(() => {
@@ -67,14 +76,28 @@ const startedLabel = computed<string | null>(() => {
 
 <template>
   <section class="night-session" data-testid="home-night-session">
-    <p class="night-session__eyebrow">提醒仍在進行</p>
+    <!--
+      2026-08-31：eyebrow 前面補上月亮（使用者要求）。
+
+      這一段的整個前提是「現在是夜間」，但畫面上原本沒有任何東西說出這件事
+      ——只有一句「現在不需要防曬」，讀者得自己推。圖示放在 eyebrow 這一列
+      而不是內文旁邊：它修飾的是**整個狀態**，不是那一句話。
+
+      20px 是行內記號的檔位（DESIGN.md 第八節）；旁邊就有文字，所以維持
+      decorative，不重複播報。
+    -->
+    <p class="night-session__eyebrow">
+      <Icon name="state-night" :size="20" />
+      提醒仍在進行
+    </p>
 
     <p v-if="elapsedLabel !== null" class="stat-figure night-session__figure">
       {{ elapsedLabel }}
     </p>
 
     <p v-if="startedLabel !== null" class="night-session__meta">
-      自 {{ startedLabel }} 開始・{{ trackedZoneCount }} 個追蹤部位
+      <span>自 {{ startedLabel }} 開始</span>
+      <ZoneScopeBadge :zone-ids="trackedZoneIds" :zones="session.zones" />
     </p>
 
     <p class="night-session__body">
@@ -90,6 +113,9 @@ const startedLabel = computed<string | null>(() => {
 }
 
 .night-session__eyebrow {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
   margin: 0;
   color: var(--text-secondary);
   font-size: var(--font-size-caption);
@@ -100,7 +126,16 @@ const startedLabel = computed<string | null>(() => {
   font-size: clamp(2.25rem, 11vw, 2.75rem);
 }
 
+/*
+ * 原本是「自 16:54 開始・8 個追蹤部位」一整句。膠囊有自己的內距與底色，
+ * 塞進一句話裡會被「・」擠歪，所以改成 flex 兩個項目，用 gap 取代那個
+ * 全形間隔號。
+ */
 .night-session__meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
   margin: 0;
   color: var(--text-secondary);
   font-size: var(--font-size-body);

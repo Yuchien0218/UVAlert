@@ -54,6 +54,12 @@ function makeDependencies(options: {
   apiFailure?: boolean;
 }) {
   const api = {
+    /* 地圖資料在這組測試裡沒有落點，給一個永遠失敗的 stub 就夠——
+       控制器對它的失敗是靜默處理（不改 phase），那條路徑由地圖自己的
+       測試守。 */
+    getNationwideForecast: vi.fn(async () => {
+      throw new Error("not used");
+    }),
     getFiveDayForecast: vi.fn(async () => {
       if (options.apiFailure) throw new Error("offline");
       return options.apiForecast ?? makeFiveDayUvForecast();

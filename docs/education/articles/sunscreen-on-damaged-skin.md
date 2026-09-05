@@ -39,5 +39,3 @@ App 可以允許使用者暫停或記錄「受傷部位暫不塗抹」，但不�
 - [FDA：Labeling and Effectiveness Testing: Sunscreen Drug Products](https://www.fda.gov/regulatory-information/search-fda-guidance-documents/labeling-and-effectiveness-testing-sunscreen-drug-products-over-counter-human-use-small-entity)（「不要用於受損或破皮皮膚」的產品標示；查閱 2026-08-16）
 - [衛生福利部食品藥物管理署：正確使用化粧品須知（PDF）](https://www.fda.gov.tw/tc/includes/GetFile.ashx?id=f637608154367822493)（皮膚不適時停止、清洗與避免摩擦；查閱 2026-08-16）
 - [AAD：How to treat a sunburn](https://www.aad.org/public/everyday-care/injured-skin/burns/treat-sunburn)（曬傷與水泡的一般照護；查閱 2026-08-16）
-
-本文為一般衛教草稿，尚未完成 UVAlert 專業審閱。

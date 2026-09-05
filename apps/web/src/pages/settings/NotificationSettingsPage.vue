@@ -2,12 +2,13 @@
 import type { BackgroundPushState } from "@sunshield/platform";
 import { computed, shallowRef } from "vue";
 import { useRouter } from "vue-router";
-import Icon from "../../components/icons/Icon.vue";
 import { useWebAppServices } from "../../app/injection";
+import IconButton from "../../components/common/IconButton.vue";
+import InlineLoader from "../../components/feedback/InlineLoader.vue";
+import Icon from "../../components/icons/Icon.vue";
 
 const { notifications } = useWebAppServices();
 const router = useRouter();
-
 const permission = computed(() => notifications.permission.value);
 const isSupported = computed(() => notifications.isSupported);
 const isGranted = computed(() => permission.value === "granted");
@@ -85,9 +86,13 @@ const statusLabel = computed(() => {
   if (!isSupported.value) return "這個瀏覽器不支援通知";
   if (isGranted.value) return "通知已開啟";
   if (isDenied.value) return "通知已被拒絕";
-  return "還沒開啟通知";
+  return "未開啟";
 });
-
+const statusIcon = computed(() => {
+  if (!isSupported.value || isDenied.value) return "state-notification-off";
+  if (isGranted.value) return "more-notifications";
+  return "state-notification-pending";
+});
 const backgroundPushDescriptor = computed(
   () => BACKGROUND_PUSH_DESCRIPTORS[backgroundPushState.value]
 );
@@ -100,7 +105,6 @@ const backgroundPushDisableLabel = computed(() =>
 async function requestPermission(): Promise<void> {
   await notifications.requestPermission();
 }
-
 async function enableBackgroundPush(): Promise<void> {
   isBackgroundActionPending.value = true;
   try {
@@ -109,7 +113,6 @@ async function enableBackgroundPush(): Promise<void> {
     isBackgroundActionPending.value = false;
   }
 }
-
 async function disableBackgroundPush(): Promise<void> {
   isBackgroundActionPending.value = true;
   try {
@@ -118,7 +121,6 @@ async function disableBackgroundPush(): Promise<void> {
     isBackgroundActionPending.value = false;
   }
 }
-
 async function retryBackgroundSync(): Promise<void> {
   isBackgroundActionPending.value = true;
   try {
@@ -127,38 +129,29 @@ async function retryBackgroundSync(): Promise<void> {
     isBackgroundActionPending.value = false;
   }
 }
-
 function goBack(): void {
   void router.push({ name: "more" });
 }
 
 type TestResult = "idle" | "sending" | "sent" | "failed";
 const testResult = shallowRef<TestResult>("idle");
-
 async function runTest(): Promise<void> {
   testResult.value = "sending";
-  const sent = await notifications.sendTestNotification();
-  testResult.value = sent ? "sent" : "failed";
+  testResult.value = (await notifications.sendTestNotification())
+    ? "sent"
+    : "failed";
 }
 </script>
 
 <template>
   <div class="page-stack notification-settings-page">
-    <header class="detail-header">
-      <button
-        class="icon-button"
-        type="button"
-        aria-label="返回更多"
-        @click="goBack"
-      >
-        <Icon name="tool-close" :size="24" />
-      </button>
-    </header>
-
-    <header class="page-heading">
-      <h1 class="page-heading__title" data-typography-role="page-title">
-        通知設定
-      </h1>
+    <header class="flow-heading">
+      <div>
+        <h1 class="page-heading__title" data-typography-role="page-title">
+          通知設定
+        </h1>
+      </div>
+      <IconButton icon="tool-arrow-left" label="返回更多" @click="goBack" />
       <p>
         在防曬即將失效或該補擦時接收提醒。本機倒數是提醒依據，背景推播僅是選用的輔助送達方式。
       </p>
@@ -167,10 +160,13 @@ async function runTest(): Promise<void> {
     <section class="app-card" aria-labelledby="permission-heading">
       <h2
         id="permission-heading"
-        class="status-summary"
-        data-typography-role="section-title"
+        class="section-heading"
+        data-typography-role="card-title"
       >
-        目前狀態：<strong>{{ statusLabel }}</strong>
+        <Icon :name="statusIcon" :size="32" />
+        <span
+          >目前狀態：<strong>{{ statusLabel }}</strong></span
+        >
       </h2>
       <div v-if="!isSupported" class="note-box" role="status">
         <p>目前使用的瀏覽器或環境不支援本機通知功能。</p>
@@ -189,15 +185,15 @@ async function runTest(): Promise<void> {
           如何開啟
         </button>
         <div v-if="showDeniedSteps" id="denied-steps" class="note-box">
-          <p>
-            開啟位置依瀏覽器而異，通常在網址列左側的鎖頭或資訊圖示裡找到「網站設定」或「權限」，把通知改為允許；也可以到瀏覽器的「設定
-            → 隱私權與安全性 → 網站設定 →
-            通知」找到本網站調整。若系統整體關閉了通知，還需要到作業系統的通知設定裡一併打開。
-          </p>
+          <ol class="steps-list">
+            <li>點擊網址列左側的「鎖頭」或「資訊」圖示。</li>
+            <li>找到「權限」，將「通知」改為「允許」。</li>
+            <li>若仍無法接收，請檢查手機或電腦作業系統的通知設定。</li>
+          </ol>
         </div>
       </div>
       <div v-else-if="!isGranted" class="action-box">
-        <p>開啟通知後，App 會在下一個補擦時間點前發送提醒。</p>
+        <p>開啟後將於下次補擦前發送提醒。</p>
         <button
           class="button button--primary"
           type="button"
@@ -207,17 +203,17 @@ async function runTest(): Promise<void> {
         </button>
       </div>
       <div v-else class="note-box" role="status">
-        <p>已開啟補擦提醒。當有活動中的防曬提醒時，系統會在到期時間提醒。</p>
+        <p>已開啟補擦提醒。當有活動中的防曬提醒時，系統會在到期前發出通知。</p>
       </div>
     </section>
 
     <section class="app-card" aria-labelledby="background-push-heading">
       <h2
         id="background-push-heading"
-        class="settings-card-heading"
+        class="section-heading"
         data-typography-role="card-title"
       >
-        背景推播
+        <Icon name="more-notifications" :size="32" /><span>背景推播</span>
       </h2>
       <div
         class="delivery-emphasis"
@@ -284,10 +280,10 @@ async function runTest(): Promise<void> {
     <section class="app-card" aria-labelledby="delivery-heading">
       <h2
         id="delivery-heading"
-        class="settings-card-heading"
+        class="section-heading"
         data-typography-role="card-title"
       >
-        通知傳送說明
+        <Icon name="more-about" :size="32" /><span>通知傳送說明</span>
       </h2>
       <p class="delivery-note">
         <strong>單一提醒原則</strong
@@ -299,30 +295,23 @@ async function runTest(): Promise<void> {
           分頁仍開啟時，本機提醒可作為倒數的輔助；背景送達則需另行啟用上方的背景推播。
         </p>
       </div>
-    </section>
-
-    <section v-if="isGranted" class="app-card" aria-labelledby="test-heading">
-      <h2
-        id="test-heading"
-        class="settings-card-heading"
-        data-typography-role="card-title"
-      >
-        裝置測試
-      </h2>
-      <button
-        class="button button--quiet"
-        type="button"
-        :disabled="testResult === 'sending'"
-        @click="runTest"
-      >
-        {{ testResult === "sending" ? "傳送中…" : "送出測試通知" }}
-      </button>
-      <p v-if="testResult === 'sent'" class="delivery-note" role="status">
-        已送出，請查看系統通知。
-      </p>
-      <p v-if="testResult === 'failed'" class="form-error" role="alert">
-        測試通知傳送失敗，請確認瀏覽器通知權限。
-      </p>
+      <div v-if="isGranted" class="delivery-test">
+        <button
+          class="button button--quiet"
+          type="button"
+          :disabled="testResult === 'sending'"
+          @click="runTest"
+        >
+          <InlineLoader v-if="testResult === 'sending'" />
+          {{ testResult === "sending" ? "傳送中…" : "送出測試通知" }}
+        </button>
+        <p v-if="testResult === 'sent'" class="delivery-note" role="status">
+          已送出，請查看系統通知。
+        </p>
+        <p v-if="testResult === 'failed'" class="form-error" role="alert">
+          測試通知傳送失敗，請確認瀏覽器通知權限。
+        </p>
+      </div>
     </section>
   </div>
 </template>
@@ -332,27 +321,15 @@ async function runTest(): Promise<void> {
   display: grid;
   gap: var(--page-stack-gap-compact);
 }
-.detail-header {
-  display: flex;
-  justify-content: flex-end;
-}
 .app-card {
   display: grid;
   gap: var(--space-3);
-  padding: var(--space-5);
-}
-.status-summary {
-  margin: 0;
-  font-size: var(--font-size-section-title);
-}
-.settings-card-heading {
-  margin: 0;
-  font-size: var(--font-size-card-title);
+  padding: var(--card-padding);
 }
 .note-box {
   padding: var(--space-3);
   border-radius: var(--radius-sm);
-  background: var(--surface-soft);
+  background: var(--color-surface-card);
   color: var(--text-secondary);
   font-size: var(--font-size-supporting);
   line-height: var(--line-height-body);
@@ -361,7 +338,16 @@ async function runTest(): Promise<void> {
 .action-box p {
   margin: 0;
 }
-.action-box,
+.steps-list {
+  display: grid;
+  gap: var(--space-2);
+  margin: 0;
+  padding-left: var(--space-4);
+}
+.action-box {
+  display: grid;
+  gap: var(--space-3);
+}
 .action-row {
   display: flex;
   flex-wrap: wrap;
@@ -373,10 +359,15 @@ async function runTest(): Promise<void> {
   font-size: var(--font-size-supporting);
   line-height: var(--line-height-body);
 }
+.delivery-test {
+  display: grid;
+  justify-items: start;
+  gap: var(--space-2);
+}
 .delivery-emphasis {
   display: grid;
   gap: var(--space-2);
-  padding: var(--space-4);
+  padding: var(--space-3);
   border: 1px solid var(--border-strong);
   border-radius: var(--radius-sm);
 }

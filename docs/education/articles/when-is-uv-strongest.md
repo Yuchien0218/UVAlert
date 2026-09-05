@@ -41,5 +41,3 @@ lastReviewed: 2026-08-16
 - [中央氣象署：紫外線指數預報服務](https://www.cwa.gov.tw/Data/knowledge/announce/service13.pdf)（臺灣 UV 分級、每日最大值與中午前後高峰；查閱 2026-08-16）
 - [WHO：Radiation: The ultraviolet (UV) index](https://www.who.int/news-room/questions-and-answers/item/radiation-the-ultraviolet-%28uv%29-index)（每日 UV 高峰與 UVI 的用途；查閱 2026-08-16）
 - [WHO：Ultraviolet radiation](https://www.who.int/news-room/fact-sheets/detail/ultraviolet-radiation)（時段、遮蔭與整合防護；查閱 2026-08-16）
-
-本文為一般衛教草稿，尚未完成 UVAlert 專業審閱。

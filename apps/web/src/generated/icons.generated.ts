@@ -94,6 +94,12 @@ export const ICONS = {
     body: `<title>標示尚未確認</title>
   <circle cx="12" cy="12" r="8.5" fill="none" stroke="currentColor" stroke-width="2.5"/><path d="M9.6 9.8A2.4 2.4 0 1 1 12 12.2V13.5" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/><circle cx="12" cy="16.4" r="1.25" fill="currentColor"/>`
   },
+  "state-night": {
+    viewBox: "0 0 24 24",
+    title: "夜間",
+    body: `<title>夜間</title>
+  <path stroke="#C1832E" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M17.7,4.3v4.2M15.6,6.4h4.2"/> <path fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" stroke="currentColor" d="M8.9,4.7c-4.4,1.6-6.6,6.4-5,10.8,1.6,4.4,6.4,6.6,10.8,5,2.3-.9,4.1-2.7,5-5-4.4,1.6-9.2-.6-10.8-5-.7-1.9-.7-3.9,0-5.8Z"/>`
+  },
   "more-notifications": {
     viewBox: "0 0 24 24",
     title: "通知設定",
@@ -340,6 +346,12 @@ export const ICONS = {
     body: `<title>收藏</title>
   <path d="M5.8 3.9H18.2A0.9 0.9 0 0 1 19.1 4.8V20.1L12 15.5L4.9 20.1V4.8A0.9 0.9 0 0 1 5.8 3.9Z" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>`
   },
+  "tool-sign-out": {
+    viewBox: "0 0 24 24",
+    title: "登出",
+    body: `<title>登出</title>
+  <path fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" d="M15.73 9.36A5.8 5.8 0 1 1 8.27 9.36"/> <path fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" d="M12 5.2V12"/>`
+  },
   "feature-uv-forecast": {
     viewBox: "0 0 24 24",
     title: "五日 UV 預報",
@@ -375,6 +387,12 @@ export const ICONS = {
     title: "取得目前位置",
     body: `<title>取得目前位置</title>
   <path d="M4.6 11.6L19.4 4.6L12.4 19.4L11.6 11.6Z" fill="currentColor" stroke="currentColor" stroke-width="2.5" stroke-linejoin="round"/>`
+  },
+  "feature-share": {
+    viewBox: "0 0 24 24",
+    title: "分享我的防曬裝備",
+    body: `<title>分享我的防曬裝備</title>
+  <path d="M8.6 9.4H6.3A2.3 2.3 0 0 0 4 11.7V17.8A2.3 2.3 0 0 0 6.3 20.1H17.7A2.3 2.3 0 0 0 20 17.8V11.7A2.3 2.3 0 0 0 17.7 9.4H15.4" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/> <path d="M12 13.9V4.2" fill="none" stroke="#C1832E" stroke-width="2.5" stroke-linecap="round"/> <path d="M8.3 7.9L12 4.2L15.7 7.9" fill="none" stroke="#C1832E" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>`
   }
 } as const satisfies Record<string, IconEntry>;
 

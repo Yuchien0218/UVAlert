@@ -3,10 +3,14 @@ import {
   CwaMappingError,
   CwaUpstreamError,
   mapCwaForecast,
+  mapCwaNationwideForecast,
+  NATIONWIDE_CACHE_KEY,
   parseCachedForecast,
+  parseCachedNationwide,
   parseRegionCode,
   type CwaFetchResult,
-  type UvForecastPayload
+  type UvForecastPayload,
+  type UvNationwidePayload
 } from "../_shared/cwa.ts";
 import { errorResponse, jsonResponse, toResponse } from "../_shared/http.ts";
 
@@ -48,11 +52,25 @@ export function createForecastHandler(
       );
     }
 
+    /*
+     * scope=nationwide 回傳全臺各縣市「今日」的 UV，供 /forecast 的分布地圖
+     * 使用。它與五日預報共用同一次上游抓取——fetchCwaDataset() 本來就抓整份
+     * 資料集（沒有地點參數），22 個縣市的值一直都在同一個回應裡，只是先前
+     * 被濾掉了。**所以這個新端點不會增加 CWA 的用量。**
+     */
+    const searchParams = new URL(request.url).searchParams;
+    const nationwide = searchParams.get("scope") === "nationwide";
+
     let regionCode: string;
     try {
-      regionCode = parseRegionCode(
-        new URL(request.url).searchParams.get("regionCode")
-      );
+      /*
+       * 全臺模式用全 0 當快取鍵。這是刻意的：parseRegionCode() 明文拒絕
+       * /^0{8}$/，所以這個鍵永遠不可能跟任何真實行政區碰撞，也不可能由
+       * 一般查詢路徑產生出來。
+       */
+      regionCode = nationwide
+        ? NATIONWIDE_CACHE_KEY
+        : parseRegionCode(searchParams.get("regionCode"));
     } catch (error) {
       return toResponse(
         errorResponse({
@@ -93,7 +111,11 @@ export function createForecastHandler(
     const now = dependencies.now();
     if (cached !== null && Date.parse(cached.usable_until) > now.getTime()) {
       try {
-        return jsonResponse(parseCachedForecast(cached.payload));
+        return jsonResponse(
+          nationwide
+            ? parseCachedNationwide(cached.payload)
+            : parseCachedForecast(cached.payload)
+        );
       } catch {
         // Ignore malformed cache and replace it with validated upstream data.
       }
@@ -118,11 +140,13 @@ export function createForecastHandler(
       );
     }
 
-    let forecast: UvForecastPayload;
+    let forecast: UvForecastPayload | UvNationwidePayload;
     if (upstream.status === 304 && cached !== null) {
       try {
         forecast = {
-          ...parseCachedForecast(cached.payload),
+          ...(nationwide
+            ? parseCachedNationwide(cached.payload)
+            : parseCachedForecast(cached.payload)),
           fetchedAt: now.toISOString(),
           usableUntil: new Date(
             now.getTime() + 6 * 60 * 60 * 1000
@@ -139,11 +163,16 @@ export function createForecastHandler(
       }
     } else {
       try {
-        forecast = mapCwaForecast(upstream.payload, {
-          regionCode,
-          fetchedAt: now.toISOString(),
-          now: now.toISOString()
-        });
+        forecast = nationwide
+          ? mapCwaNationwideForecast(upstream.payload, {
+              fetchedAt: now.toISOString(),
+              now: now.toISOString()
+            })
+          : mapCwaForecast(upstream.payload, {
+              regionCode,
+              fetchedAt: now.toISOString(),
+              now: now.toISOString()
+            });
       } catch (error) {
         const isClientDataError =
           error instanceof CwaMappingError &&

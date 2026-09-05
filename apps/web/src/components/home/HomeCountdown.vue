@@ -34,6 +34,33 @@ const props = defineProps<{
 /** 沒有可信期限時 progressPercent 為 null，此時不畫進度條而不是畫 0%。 */
 const hasProgress = computed(() => props.presentation.progressPercent !== null);
 
+/**
+ * 到期時進度條**填滿**，不是歸零（2026-09-04 使用者裁決）。
+ *
+ * `progressPercent` 是**剩餘**比例，所以時間愈少條愈短，到期時剛好 0——
+ * 實測那一刻 `fill` 寬度是 0px，整條變成空的軌道。到期是這個 App 存在的
+ * 理由，而畫面上最大的那條顏色訊號偏偏在那一刻消失，看起來像「還沒開始」
+ * 而不是「時間到了」。
+ *
+ * 填滿之後語意從「還剩多少」翻成「已經超時」，那條線從消失變成最醒目的
+ * 東西。這一刻它不再是進度條，所以 `role="progressbar"` 也一併拿掉——
+ * 宣告一個 0% 的進度條、畫面上卻是滿的，對螢幕閱讀器是矛盾的。到期的
+ * 訊息由下面那句「建議全面補擦」承擔。
+ */
+const isDue = computed(() => props.presentation.tone === "due");
+
+const trackAttrs = computed<Record<string, string>>(() =>
+  isDue.value
+    ? { "aria-hidden": "true" }
+    : {
+        role: "progressbar",
+        "aria-valuenow": String(props.presentation.progressPercent ?? 0),
+        "aria-valuemin": "0",
+        "aria-valuemax": "100",
+        "aria-label": `距離補擦還有 ${props.presentation.remainingMinutes} 分鐘`
+      }
+);
+
 const toneClass = computed(() => `countdown--${props.presentation.tone}`);
 
 /**
@@ -53,39 +80,67 @@ const stateIcon = computed(() => STATE_ICON[props.presentation.tone]);
   <section class="countdown" :class="toneClass" data-testid="home-countdown">
     <p class="countdown__eyebrow">補擦倒數</p>
 
+    <!--
+      2026-08-31：狀態圖示從說明那一行搬到讀數旁邊，並從 20px 放大到 32px。
+
+      使用者回報「提醒頁太空」「圖示都太小了」。20px 的圖示夾在 16px 的
+      說明文字裡，讀起來是標點符號而不是狀態——而狀態切換（時間跨過補擦
+      門檻）是這個 App 最重要的一刻。放在讀數旁邊，它才跟它描述的東西同一
+      個量級。
+
+      仍然只有一顆，不是兩個位置各放一顆：同一件事講兩次會稀釋掉它。
+    -->
     <div class="countdown__value">
+      <Transition name="countdown-state" mode="out-in">
+        <Icon
+          :key="presentation.tone"
+          :name="stateIcon"
+          :size="32"
+          class="countdown__state-icon"
+        />
+      </Transition>
       <span class="stat-figure stat-figure--display countdown__figure">
         {{ presentation.remainingMinutes }}
       </span>
       <span class="countdown__unit">分鐘</span>
     </div>
 
+    <!--
+      2026-08-30：進度條移到讀數正下方，排在說明文字之前。
+      原本順序是 讀數 → 說明 → 進度條 →（頁面的）主行動按鈕，進度條夾在
+      說明與按鈕之間，視覺上讀起來像按鈕的裝飾條。它描述的是倒數，貼著
+      它描述的數字才對。
+    -->
+    <div v-if="hasProgress" class="countdown__track" v-bind="trackAttrs">
+      <div
+        class="countdown__fill"
+        :style="{ width: isDue ? '100%' : `${presentation.progressPercent}%` }"
+      />
+    </div>
+
     <p class="countdown__detail">
-      <Transition name="countdown-state" mode="out-in">
-        <Icon
-          :key="presentation.tone"
-          :name="stateIcon"
-          :size="20"
-          class="countdown__state-icon"
-        />
-      </Transition>
       <span>{{ presentation.title }}・{{ presentation.timeLabel }}</span>
     </p>
 
-    <div
-      v-if="hasProgress"
-      class="countdown__track"
-      role="progressbar"
-      :aria-valuenow="presentation.progressPercent ?? 0"
-      aria-valuemin="0"
-      aria-valuemax="100"
-      :aria-label="`距離補擦還有 ${presentation.remainingMinutes} 分鐘`"
-    >
-      <div
-        class="countdown__fill"
-        :style="{ width: `${presentation.progressPercent}%` }"
-      />
-    </div>
+    <!--
+      2026-08-31：水上活動進行中時，倒數底下多一道波浪與一句說明。
+
+      **這是波浪在整個 App 裡唯一的非衛教用途**（使用者裁決）。它不是裝飾：
+      這段時間的倒數是照防曬乳的耐水標示在算，不是一般的補擦間隔——規則
+      不一樣，而畫面上原本沒有任何地方說得出這件事。
+
+      文案寫「耐水規則」而不是「耐水標示」：標示沒說耐水多久時（reducer 的
+      WATER_RESISTANCE_UNKNOWN）這裡一樣會出現，那時並沒有一個標示數字可以
+      依據——規則仍然適用，只是結果是「不計時」，細節由「各部位狀態」的
+      「抗水標示不明」那一則負責說明。
+
+      波浪與文字一起出現，不單獨承載資訊（DESIGN.md 第十一節「不要單靠
+      顏色／圖形傳達狀態」）。波浪本身 aria-hidden，文字才是無障礙的內容。
+    -->
+    <p v-if="presentation.inWater" class="countdown__water">
+      <span class="wave-divider countdown__water-wave" aria-hidden="true" />
+      水上活動進行中，補擦時間改依耐水規則計算。
+    </p>
   </section>
 </template>
 
@@ -121,12 +176,36 @@ const stateIcon = computed(() => STATE_ICON[props.presentation.tone]);
   font-size: var(--font-size-body);
 }
 
+.countdown__water {
+  display: grid;
+  justify-items: start;
+  gap: var(--space-2);
+  margin: 0;
+  color: var(--text-secondary);
+  font-size: var(--font-size-caption);
+  line-height: var(--line-height-body);
+}
+
+/* 這裡的波浪比衛教長文那條窄一些——它是行內的標記，不是章節分隔。 */
+.countdown__water-wave {
+  width: 4rem;
+}
+
 /*
  * 圖示繼承 --tone-color。狀態圖示是單色的（icon-system README 第二節），
  * 就是為了這種情境——一份幾何走遍所有狀態，顏色由外層語意色決定。
  */
 .countdown__state-icon {
   flex: none;
+  /*
+   * 讀數是 display 級的大字，字框比數字本身高出一截（上緣留給沒有出現的
+   * 注音與拉丁字母 ascender）。整列是 align-items: flex-end，圖示會貼齊
+   * 字框底部，看起來就偏低——往上推 8px 之後圖示中心對到數字的視覺中心。
+   *
+   * 實測（瀏覽器量的，不是估的）：圖示中心 155px、數字字框中心 150px、
+   * 數字本身的中心約 151px。
+   */
+  margin-bottom: 0.5rem;
   color: var(--tone-color, var(--color-tracking));
   transition: color var(--duration-slow) var(--ease-out);
 }

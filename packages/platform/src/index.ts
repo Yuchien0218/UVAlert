@@ -3,6 +3,7 @@ import type {
   ApplicationEventV1,
   EndSessionCommandV1,
   FiveDayUvForecast,
+  NationwideUvForecast,
   ProductLabelSnapshotV1,
   GearCategory,
   ProductCatalogRecordV1,
@@ -101,6 +102,20 @@ export interface ContextEventContext {
   session: SessionProjection;
   /** null 代表沒有可關閉的水上區間，此時不得顯示離水事件。 */
   openWaterInterval: OpenWaterInterval | null;
+  /**
+   * 這個 Session 裡，每一種情境事件**最後一次**記錄時選了哪些部位。
+   *
+   * 2026-08-31 新增（使用者裁決乙）。流汗／擦毛巾／明顯摩擦三種原本一律
+   * 不預選——每記錄一次就要重新勾八個部位一遍。有了這份歷史之後，第二次
+   * 以後可以沿用上次的選擇。
+   *
+   * **是「預設值」不是「規則」**：使用者仍然可以改，畫面上勾選狀態也看得
+   * 見。所以用歷史當預設是安全的——它不會替使用者宣告任何他沒看到的事。
+   *
+   * 從事件流推導，不另外存一份：已經解析過更正鏈（resolveEventCorrectionLeaves），
+   * 所以被更正掉的事件不會被拿來當預設。
+   */
+  lastZoneIdsByKind: Record<string, string[]>;
 }
 
 /** S-10 更正表單需要的 target 描述。 */
@@ -166,7 +181,46 @@ export interface SaveProductInput {
   purchaseMonth?: string | null;
   expiryDate?: string | null;
   note?: string | null;
+  /** 2026-08-30：純紀錄，不進 reducer。 */
+  priceTwd?: number | null;
+  /** 2026-08-30：純紀錄，不進 reducer。 */
+  usageRating?: "good" | "ok" | "bad" | null;
+  /** 2026-09-01：純紀錄，不進 reducer。自由文字。 */
+  size?: string | null;
+  /** 2026-09-01：純紀錄，不進 reducer。自由文字，只印字不做色塊。 */
+  color?: string | null;
+  /** 2026-09-02：純紀錄，不進 reducer。 */
+  volume?: string | null;
+  /** 2026-09-02：純紀錄，不進 reducer。 */
+  formulation?: "lotion" | "gel" | "cream" | "spray" | "stick" | null;
+  /** 2026-09-02：純紀錄，不進 reducer。 */
+  protectionType?: "physical" | "chemical" | "hybrid" | null;
   now: string;
+}
+
+/**
+ * 把檔案交給系統分享（Web Share API level 2）。
+ *
+ * 走 port 而不是在元件裡直接碰 `navigator`：這個 repo 的依賴方向是單向的，
+ * 瀏覽器 API 一律由 `apps/web/src/adapters/` 實作。分享卡的測試因此不必
+ * mock 全域物件，給一個假的 port 就好。
+ *
+ * `canShareFiles()` 是同步的：畫面要在按下去**之前**就決定顯示「分享」還是
+ * 只顯示「儲存圖片」，不能等 Promise。
+ */
+export interface SharePort {
+  canShareFiles(file: File): boolean;
+  /**
+   * 呼叫系統分享。
+   *
+   * 回傳值刻意分成三種而不是 boolean：**使用者按取消不是錯誤**，不該跳出
+   * 「分享失敗」。Web Share API 對取消與失敗都是 reject，差別在 error.name
+   * 是不是 AbortError，判斷留在 adapter 裡。
+   */
+  shareFile(
+    file: File,
+    title: string
+  ): Promise<"shared" | "cancelled" | "failed">;
 }
 
 /** S-19 本機資料管理的清單摘要。 */
@@ -268,6 +322,13 @@ export interface DeviceGeolocationPort {
 
 export interface UvForecastApiPort {
   getFiveDayForecast(regionCode: string): Promise<FiveDayUvForecast>;
+  /**
+   * 全臺各縣市今日的 UV，供分布地圖使用。
+   *
+   * 與五日預報共用同一次上游抓取（見 contracts 的 NationwideUvForecast），
+   * 所以呼叫它不會增加 CWA 的用量。
+   */
+  getNationwideForecast(): Promise<NationwideUvForecast>;
 }
 
 export interface UvForecastSnapshotPort {

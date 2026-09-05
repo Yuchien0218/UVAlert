@@ -1,4 +1,7 @@
 <script setup lang="ts">
+import { useRouter } from "vue-router";
+import Icon from "../../components/icons/Icon.vue";
+import IconButton from "../../components/common/IconButton.vue";
 import { computed, onMounted, shallowRef } from "vue";
 import { useWebAppServices } from "../../app/injection";
 import AppNotice from "../../components/common/AppNotice.vue";
@@ -63,18 +66,27 @@ async function deleteCloudData(): Promise<void> {
     busy.value = false;
   }
 }
+const router = useRouter();
+
+/*
+ * 頂端的返回出口（2026-09-03，稽核 §G：下鑽頁一律有頂端箭頭）。
+ * 直接回「更多」，不用 history.back——這一頁也可能是從網址列直接打開的。
+ */
+function goBack(): void {
+  void router.push({ name: "more" });
+}
 </script>
 
 <template>
   <div class="page-stack">
-    <header class="page-heading">
+    <header class="page-heading page-heading--with-exit">
       <h1 class="page-heading__title" data-typography-role="page-title">
         登入與雲端資料
       </h1>
       <p class="page-heading__body">
-        這裡只管理 UVAlert 的雲端資料；清除不會刪除你的 Google
-        帳號，也不會清除這台裝置的本機提醒。
+        此處僅管理雲端同步資料，清除不會影響 Google 帳號與本機現有提醒。
       </p>
+      <IconButton icon="tool-arrow-left" label="返回更多" @click="goBack" />
     </header>
 
     <section v-if="!signedIn" class="app-card account-card">
@@ -87,7 +99,10 @@ async function deleteCloudData(): Promise<void> {
 
     <template v-else>
       <section class="app-card account-card">
-        <h2 data-typography-role="card-title">同步狀態</h2>
+        <h2 class="section-heading" data-typography-role="card-title">
+          <Icon name="tool-refresh" :size="32" />
+          <span>同步狀態</span>
+        </h2>
         <p v-if="syncDisabled">同步已停止；雲端資料保留中。</p>
         <p v-else>同步已開啟；每次同步前會先顯示預覽。</p>
         <button
@@ -109,7 +124,10 @@ async function deleteCloudData(): Promise<void> {
       </section>
 
       <section class="app-card account-card">
-        <h2 data-typography-role="card-title">登出</h2>
+        <h2 class="section-heading" data-typography-role="card-title">
+          <Icon name="tool-sign-out" :size="32" />
+          <span>登出</span>
+        </h2>
         <p>登出不會清除本機資料或雲端資料。</p>
         <button
           class="button button--quiet"
@@ -122,7 +140,10 @@ async function deleteCloudData(): Promise<void> {
       </section>
 
       <section class="app-card account-card account-card--danger">
-        <h2 data-typography-role="card-title">清除 UVAlert 雲端資料</h2>
+        <h2 class="section-heading" data-typography-role="card-title">
+          <Icon name="tool-delete" :size="32" />
+          <span>清除 UVAlert 雲端資料</span>
+        </h2>
         <p>
           會刪除 UVAlert 雲端同步資料與 UVAlert 登入；不會刪除 Google
           帳號。本機提醒與本機資料不受影響。
@@ -131,7 +152,7 @@ async function deleteCloudData(): Promise<void> {
           :confirming="confirmingDelete"
           :pending="busy"
           trigger-label="清除雲端資料"
-          confirm-label="清除雲端資料"
+          confirm-label="確定清除"
           @trigger="deleteCloudData"
           @confirm="deleteCloudData"
           @cancel="confirmingDelete = false"
@@ -145,9 +166,6 @@ async function deleteCloudData(): Promise<void> {
 
     <AppNotice v-if="notice" kind="ok">{{ notice }}</AppNotice>
     <AppNotice v-if="error" kind="error">{{ error }}</AppNotice>
-    <RouterLink class="text-link text-link--muted" to="/more"
-      >返回更多</RouterLink
-    >
   </div>
 </template>
 
@@ -156,7 +174,7 @@ async function deleteCloudData(): Promise<void> {
   display: grid;
   gap: var(--space-3);
   justify-items: start;
-  padding: var(--space-5);
+  padding: var(--card-padding);
 }
 .account-card h2,
 .account-card p {

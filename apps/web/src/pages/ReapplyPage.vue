@@ -2,13 +2,16 @@
 import { nextTick, onMounted, watch } from "vue";
 import { useRouter } from "vue-router";
 import { useWebAppServices } from "../app/injection";
-import Icon from "../components/icons/Icon.vue";
 import ReapplicationZoneSelector from "../components/reapplication/ReapplicationZoneSelector.vue";
+import ReapplyReasonPicker from "../components/reapplication/ReapplyReasonPicker.vue";
 import ReapplicationProductAssignments from "../components/reapplication/ReapplicationProductAssignments.vue";
 import QuickTimePicker from "../components/common/QuickTimePicker.vue";
 import ReapplicationReview from "../components/reapplication/ReapplicationReview.vue";
 import { getZoneLabel } from "../features/reminder/reminderPresentation";
 import { formatDateTime } from "../helpers/datetime";
+import IconButton from "../components/common/IconButton.vue";
+import IconLead from "../components/common/IconLead.vue";
+import InlineLoader from "../components/feedback/InlineLoader.vue";
 
 const { reapplication } = useWebAppServices();
 const router = useRouter();
@@ -40,6 +43,15 @@ function cancel(): void {
 function finish(): void {
   void router.push({ name: "home" });
 }
+/**
+ * 「現在還不能補擦」的出口（階段二，2026-09-03）。
+ *
+ * 記錄狀況不再是首頁上與補擦並列的目的地，而是這條路走不通時的岔出——
+ * 「遇到了事件＝需要補擦」是主線，「知道發生了但現在補不了」才是例外。
+ */
+function goToReport(): void {
+  void router.push({ name: "reminder-report" });
+}
 function zoneNames(zoneIds: string[]): string {
   return zoneIds
     .map((zoneId) => {
@@ -58,16 +70,23 @@ function zoneNames(zoneIds: string[]): string {
       <div>
         <p class="eyebrow">補擦紀錄</p>
         <h1 data-typography-role="page-title">記錄補擦</h1>
-        <p>請確認要記錄的部位、防曬乳與時間；儲存前不會更新提醒。</p>
+        <!--
+          2026-09-03：拿掉「請確認要記錄的部位、防曬乳與時間」。下面每一張卡
+          的標題已經把那三件事各問了一次，頁首再列一遍是同一句話說兩次。
+          留下的是這一頁唯一還沒被說過的事：按下儲存之前什麼都不會變。
+        -->
       </div>
-      <button
-        class="icon-button"
-        type="button"
-        aria-label="返回提醒"
-        @click="cancel"
-      >
-        <Icon name="tool-close" :size="24" />
-      </button>
+      <IconButton icon="tool-close" label="返回提醒" @click="cancel" />
+      <!--
+        2026-09-03：成功之後這句要收起來。它與正下方的「補擦紀錄已更新」
+        直接矛盾——記錄已經寫進去了，「儲存前不會更新」不再成立。
+
+        同日搬出上面那個 div：說明在圖示鈕下方，不必為按鈕讓出寬度，
+        `.flow-heading > p` 讓它橫跨兩欄。
+      -->
+      <p v-if="reapplication.phase.value !== 'success'">
+        儲存前不會更新提醒。
+      </p>
     </header>
 
     <p v-if="reapplication.phase.value === 'loading'" role="status">
@@ -80,19 +99,41 @@ function zoneNames(zoneIds: string[]): string {
       "
       class="app-card success-panel"
     >
+      <!--
+        2026-09-03：「已儲存」的訊號從彩色粗上緣改成領銜圖示
+        （`state-success` 的 `<title>` 本來就是「已儲存」）。理由見 app.css
+        的 `.success-panel`。
+      -->
+      <IconLead icon="state-success">
       <h2
         id="reapply-success-title"
-        data-typography-role="section-title"
+        data-typography-role="card-title"
         tabindex="-1"
       >
         補擦紀錄已更新
       </h2>
+      </IconLead>
       <p>
         已更新 {{ reapplication.success.value.zoneIds.length }} 個部位，{{
           formatDateTime(reapplication.success.value.appliedAt)
         }}。其他未選的部位維持原本狀態。
       </p>
-      <ul class="success-groups">
+      <!--
+        2026-09-03：只有一組時不用清單。「不同部位用不同防曬乳」拿掉之後
+        這裡永遠只有一組，一個項目的項目符號清單讀起來像漏了東西。
+      -->
+      <p
+        v-if="reapplication.success.value.productGroups.length === 1"
+        class="success-groups__single user-text"
+      >
+        <strong>{{
+          reapplication.success.value.productGroups[0]?.displayName
+        }}</strong
+        >：{{
+          zoneNames(reapplication.success.value.productGroups[0]?.zoneIds ?? [])
+        }}
+      </p>
+      <ul v-else class="success-groups user-text">
         <li
           v-for="group in reapplication.success.value.productGroups"
           :key="`${group.displayName}-${group.zoneIds.join('-')}`"
@@ -126,10 +167,20 @@ function zoneNames(zoneIds: string[]): string {
     </section>
 
     <template v-else-if="reapplication.session.value">
+      <!--
+        「為什麼補擦？」放在最前面（2026-09-02，事件＝需要補擦 階段一）。
+
+        排在部位之前是刻意的：原因是這次補擦的脈絡，先講脈絡再問細節，
+        跟記錄狀況那頁「發生了什麼？→ 影響哪些部位？」同一個順序。
+      -->
+      <ReapplyReasonPicker
+        :model-value="reapplication.reason.value"
+        @update:model-value="reapplication.setReason"
+        @exit="goToReport"
+      />
       <ReapplicationZoneSelector
         :zones="reapplication.session.value.zones"
         :selected-zone-ids="reapplication.selectedZoneIds.value"
-        :suggested-zone-ids="reapplication.suggestedZoneIds.value"
         :error="reapplication.fieldErrors.value.zones?.[0]"
         @suggested="reapplication.selectSuggested"
         @all="reapplication.selectAll"
@@ -169,7 +220,7 @@ function zoneNames(zoneIds: string[]): string {
         <p>
           {{
             reapplication.error.value === "persistence"
-              ? "補擦紀錄尚未儲存。草稿仍保留，請再試一次。"
+              ? "補擦紀錄尚未儲存，草稿仍保留，可以再試一次。"
               : reapplication.error.value === "product_changed"
                 ? "防曬乳標示已變更，請重新讀取並確認防曬乳後再提交。"
                 : reapplication.error.value === "state_changed"
@@ -204,6 +255,7 @@ function zoneNames(zoneIds: string[]): string {
           :disabled="reapplication.phase.value === 'submitting'"
           @click="reapplication.submit"
         >
+          <InlineLoader v-if="reapplication.phase.value === 'submitting'" />
           {{
             reapplication.phase.value === "submitting"
               ? "儲存中…"
@@ -216,8 +268,15 @@ function zoneNames(zoneIds: string[]): string {
           role="status"
           >正在儲存補擦紀錄</span
         >
+        <!--
+          2026-09-03：`button--quiet` → 文字連結。
+          2026-08-31 的裁決是「次要動作用文字連結，實心／描邊按鈕是主行動
+          的語彙」，記錄狀況那頁已經照做，這頁漏了——兩個並排的流程，取消
+          長得不一樣。
+        -->
         <button
-          class="button button--quiet"
+          class="text-link submit-actions__cancel"
+          data-typography-role="body"
           type="button"
           :disabled="reapplication.phase.value === 'submitting'"
           @click="cancel"
@@ -237,13 +296,23 @@ function zoneNames(zoneIds: string[]): string {
   display: grid;
   justify-items: start;
   gap: var(--space-3);
-  padding: var(--space-5);
+  padding: var(--card-padding);
 }
 .submit-error p {
   margin: 0;
 }
+/*
+ * 2026-09-03：body(16px) → supporting(14px)。它是卡片結尾的補充說明，
+ * 跟主要訊息同一個字級會讓兩者讀起來一樣重要。
+ */
 .correction-note {
   color: var(--text-secondary);
+  font-size: var(--font-size-supporting);
+  line-height: var(--line-height-body);
+}
+
+.success-groups__single {
+  margin: 0;
   line-height: var(--line-height-body);
 }
 .success-groups {

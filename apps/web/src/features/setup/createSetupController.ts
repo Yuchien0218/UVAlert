@@ -335,6 +335,57 @@ export function createSetupController(
     });
   }
 
+  /**
+   * 入水時間的驗證。
+   *
+   * **抽成一份是必要的，不是整理癖。** 這段原本在 `savePendingTiming` 與
+   * 送出流程各寫了一次，兩份逐字相同——2026-09-02 要補「不能早於塗抹時間」
+   * 時，只改一邊就會變成兩種行為，而且錯的那一邊是使用者真的按下去的那條。
+   *
+   * 回傳錯誤訊息陣列，沒問題時回傳 null。
+   */
+  function validateWaterStart(
+    waterStart: WaterStartFormValue | null,
+    appliedAtMs: number,
+    trustedNow: Date,
+    nowLabel: string
+  ): string[] | null {
+    if (waterStart === null) {
+      return ["請確認實際入水時間，或選擇不確定。"];
+    }
+    if (waterStart.confidence !== "confirmed") return null;
+
+    const startedAt = waterStart.activityStartedAt;
+    if (startedAt === null) {
+      return [`入水時間不能晚於${nowLabel}。`];
+    }
+
+    const startedAtMs = Date.parse(startedAt);
+    if (!Number.isFinite(startedAtMs) || startedAtMs > trustedNow.getTime()) {
+      return [`入水時間不能晚於${nowLabel}。`];
+    }
+
+    /*
+     * **入水不得早於塗抹**（2026-09-02，使用者回報）。
+     *
+     * 兩個欄位原本各有各的上限（塗抹 120 分、入水 80 分），但沒有人比較它們
+     * 的先後。實測可以填「塗抹 4 分鐘前 ＋ 入水 59 分鐘前」而毫無阻攔——那在
+     * 物理上不可能：這次提醒用的防曬乳 4 分鐘前才擦，不可能在那之前 55 分鐘
+     * 就已經下水。
+     *
+     * 後果不只是資料難看：耐水區間的起點會落在一段「還沒擦防曬」的時間上，
+     * 耐水扣減因此算在不存在的保護上。
+     *
+     * `appliedAtMs` 無效時不檢查——那時已經有 appliedAt 自己的錯誤訊息，再多
+     * 一句只會讓使用者不知道該先修哪一個。
+     */
+    if (Number.isFinite(appliedAtMs) && startedAtMs < appliedAtMs) {
+      return ["入水時間不能早於塗抹時間，請重新確認。"];
+    }
+
+    return null;
+  }
+
   async function savePendingTiming(input: TimingDraftInput): Promise<boolean> {
     const draft = requireDraft();
     const fieldErrors: Record<string, string[]> = {};
@@ -350,15 +401,13 @@ export function createSetupController(
     }
 
     if (draft.initialContext === "water_active") {
-      if (input.waterStart === null) {
-        fieldErrors.waterStart = ["請確認實際入水時間，或選擇不確定。"];
-      } else if (
-        input.waterStart.confidence === "confirmed" &&
-        (input.waterStart.activityStartedAt === null ||
-          Date.parse(input.waterStart.activityStartedAt) > trustedNow.getTime())
-      ) {
-        fieldErrors.waterStart = ["入水時間不能晚於目前時間。"];
-      }
+      const waterErrors = validateWaterStart(
+        input.waterStart,
+        appliedAtMs,
+        trustedNow,
+        "目前時間"
+      );
+      if (waterErrors !== null) fieldErrors.waterStart = waterErrors;
     }
 
     if (Object.keys(fieldErrors).length > 0) {
@@ -433,15 +482,13 @@ export function createSetupController(
     // 領域層的 StartSessionCommand 本來就允許 applicationGroup 為 null。
 
     if (draft.initialContext === "water_active") {
-      if (input.waterStart === null) {
-        fieldErrors.waterStart = ["請確認實際入水時間，或選擇不確定。"];
-      } else if (
-        input.waterStart.confidence === "confirmed" &&
-        (input.waterStart.activityStartedAt === null ||
-          Date.parse(input.waterStart.activityStartedAt) > trustedNow.getTime())
-      ) {
-        fieldErrors.waterStart = ["入水時間不能晚於目前可信時間。"];
-      }
+      const waterErrors = validateWaterStart(
+        input.waterStart,
+        appliedAtMs,
+        trustedNow,
+        "目前可信時間"
+      );
+      if (waterErrors !== null) fieldErrors.waterStart = waterErrors;
     }
 
     if (Object.keys(fieldErrors).length > 0) {
@@ -479,6 +526,18 @@ export function createSetupController(
     });
   }
 
+  /**
+   * 丟棄草稿並清空所有狀態。
+   *
+   * **2026-08-30 起沒有 UI 呼叫者。** `/setup` 右上角原本的「取消設定」
+   * 改成了「回上一頁」，離開不再刪草稿（裁決見
+   * docs/decisions/2026-08-30-pending-decisions.md 第二節）；使用者要丟掉
+   * 草稿改走回復卡的「重新開始」，那條路徑用的是 `restartDraft()`。
+   *
+   * 保留這支 API 沒有問題，但**接上任何按鈕之前先確認那個按鈕的文案是
+   * 破壞性的**——「回上一頁」「返回」這類導航字眼配上刪除行為，正是這次
+   * 裁決要避免的。
+   */
   async function cancel(): Promise<void> {
     const draftId = draftState.value?.id;
     draftState.value = null;
@@ -746,7 +805,14 @@ function issuesToFieldErrors(
   return fieldErrors;
 }
 
-class SetupValidationError extends Error {
+/**
+ * 設定流程的驗證錯誤。
+ *
+ * 2026-08-31 改為 export：`SetupPage.vue` 需要分辨「草稿不存在」與「其他
+ * 儲存失敗」，才能給出不同的下一步。在那之前它只能用同一句話涵蓋至少
+ * 三種完全不同的失敗，使用者問「為什麼」時答不出來。
+ */
+export class SetupValidationError extends Error {
   readonly fieldErrors: Record<string, string[]>;
 
   constructor(fieldErrors: Record<string, string[]>) {

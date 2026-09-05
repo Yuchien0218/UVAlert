@@ -28,6 +28,19 @@ const dateFormatter = new Intl.DateTimeFormat("zh-TW", {
   day: "numeric"
 });
 
+/**
+ * 帶年份的日期。
+ *
+ * `formatDate` 刻意只有月／日——App 裡的日期都在「今天前後幾天」的脈絡
+ * 中，年份是多餘的噪音。**分享圖不一樣**：圖會被存下來、被轉傳，看到它的
+ * 人沒有那個脈絡，隔年再看到「9/2」就分不出是哪一年的清單。
+ */
+const fullDateFormatter = new Intl.DateTimeFormat("zh-TW", {
+  year: "numeric",
+  month: "numeric",
+  day: "numeric"
+});
+
 export function formatDateTime(value: DateTimeInput): string {
   return dateTimeFormatter.format(toDate(value));
 }
@@ -56,6 +69,11 @@ export function formatWeekday(value: DateTimeInput): string {
 
 export function formatDate(value: DateTimeInput): string {
   return dateFormatter.format(toDate(value));
+}
+
+/** 帶年份的日期，給會離開 App 脈絡的內容用（目前只有分享圖）。 */
+export function formatFullDate(value: DateTimeInput): string {
+  return fullDateFormatter.format(toDate(value));
 }
 
 function toDate(value: DateTimeInput): Date {

@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import Icon from "../icons/Icon.vue";
 import type { SetupSaveStatus } from "../../features/setup/createSetupController";
+import IconButton from "../common/IconButton.vue";
 
 /**
  * 設定流程的外框：工具列（儲存狀態＋取消）、標題、內容、底部行動區。
@@ -22,49 +23,58 @@ withDefaults(defineProps<Props>(), {
 });
 
 defineEmits<{
-  cancel: [];
+  back: [];
 }>();
 </script>
 
 <template>
   <section class="setup-shell" :aria-busy="busy">
-    <div class="setup-shell__toolbar">
-      <span />
+    <!--
+      2026-08-31：返回鈕與標題合併成同一列。
 
-      <span v-if="saveStatus === 'saved'" class="setup-shell__save-status">
-        <Icon name="state-online" :size="20" />
-        草稿已儲存
-      </span>
+      原本工具列是**獨立的一列**（min-height 44px），底下再隔 --space-8
+      才是標題——在窄螢幕上儲存狀態是隱藏的，所以那一列幾乎全空，等於
+      標題上方憑空多出約 76px 的空白（使用者實測回報）。
+
+      這跟 GearFormPage 的 form-heading 是同一個問題與同一個解法：標題與
+      按鈕同列、說明橫跨兩欄。草稿儲存狀態改放在說明下方，它是短暫的
+      回饋，不需要自己佔一列。
+    -->
+    <header class="setup-shell__heading">
+      <h1 class="setup-shell__title" data-typography-role="page-title">
+        {{ title }}
+      </h1>
+
+      <IconButton
+        class="setup-shell__back"
+        icon="tool-arrow-left"
+        label="回上一頁"
+        :disabled="busy"
+        @click="$emit('back')"
+      />
+
+      <p class="setup-shell__description">{{ description }}</p>
+
+      <!--
+        2026-08-31：儲存成功不再顯示（使用者裁決）。
+
+        使用者回報「草稿已儲存位置怪怪的」。位置確實怪——它夾在頁面說明與
+        第一個操作區塊之間，是一條誰也不屬於的狀態行。但搬去哪裡都還是怪，
+        因為根本問題是**它在報告一件預期會發生的事**：草稿本來就會存，
+        存成功不是消息。常駐一條綠字的代價是每個使用者、每一次進這頁都要
+        先讀一行與決策無關的字。
+
+        **失敗仍然常駐。** 那是使用者需要知道、而且會改變行為的事（可能要
+        重試或換網路）。不對稱是刻意的：預期內的結果安靜，意外要出聲。
+      -->
       <span
-        v-else-if="saveStatus === 'error'"
+        v-if="saveStatus === 'error'"
         class="setup-shell__save-status setup-shell__save-status--error"
         role="status"
       >
         <Icon name="state-offline" :size="20" />
         草稿未儲存
       </span>
-
-      <!--
-        2026-08-24：改成只有圖示的圓形叉叉，跟記錄補擦／記錄狀況／更正
-        紀錄三頁的右上角一致（那三頁本來就是 .icon-button）。文字標籤移到
-        aria-label，螢幕閱讀器仍讀得到「取消設定」。
-      -->
-      <button
-        class="icon-button"
-        type="button"
-        aria-label="取消設定"
-        :disabled="busy"
-        @click="$emit('cancel')"
-      >
-        <Icon name="tool-close" :size="24" />
-      </button>
-    </div>
-
-    <header class="setup-shell__heading">
-      <h1 class="setup-shell__title" data-typography-role="page-title">
-        {{ title }}
-      </h1>
-      <p class="setup-shell__description">{{ description }}</p>
     </header>
 
     <div class="setup-shell__content">
@@ -83,22 +93,24 @@ defineEmits<{
   gap: var(--space-8);
 }
 
-.setup-shell__toolbar {
+.setup-shell__heading {
   display: grid;
-  min-height: var(--tap-target);
-  grid-template-columns: 1fr auto 1fr;
+  grid-template-columns: minmax(0, 1fr) auto;
+  /* 返回鈕的中心對齊標題那一列的中線，不是整塊的頂端。 */
   align-items: center;
-  gap: var(--space-3);
+  column-gap: var(--space-4);
+  row-gap: var(--space-3);
 }
 
-/* 取消鈕改用共用的 .icon-button，這裡只負責把它推到最右並處理停用態。 */
-.setup-shell__toolbar .icon-button {
-  justify-self: end;
-}
-
-.setup-shell__toolbar .icon-button:disabled {
+.setup-shell__back:disabled {
   cursor: wait;
   opacity: 0.55;
+}
+
+/* 說明與儲存狀態橫跨兩欄，拿回被按鈕吃掉的那一段寬度。 */
+.setup-shell__description,
+.setup-shell__save-status {
+  grid-column: 1 / -1;
 }
 
 .setup-shell__save-status {
@@ -112,11 +124,6 @@ defineEmits<{
 
 .setup-shell__save-status--error {
   color: var(--color-due);
-}
-
-.setup-shell__heading {
-  display: grid;
-  gap: var(--space-3);
 }
 
 .setup-shell__title {
@@ -152,14 +159,6 @@ defineEmits<{
 }
 
 @media (max-width: 31rem) {
-  .setup-shell__toolbar {
-    grid-template-columns: 1fr auto;
-  }
-
-  .setup-shell__save-status {
-    display: none;
-  }
-
   .setup-shell__actions {
     display: grid;
   }

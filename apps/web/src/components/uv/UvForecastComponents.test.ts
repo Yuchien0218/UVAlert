@@ -19,7 +19,7 @@ const router = createRouter({
 });
 
 describe("FiveDayUvCard", () => {
-  it("顯示五個白日時段、來源與地區預報限制", () => {
+  it("顯示五個白日時段與來源，免責文案不重複", () => {
     const forecast = makeFiveDayUvForecast();
     const wrapper = mount(FiveDayUvCard, {
       props: {
@@ -40,9 +40,15 @@ describe("FiveDayUvCard", () => {
     );
     expect(wrapper.text()).toContain("臺北市中正區");
     expect(wrapper.text()).toContain("過量級");
-    expect(wrapper.text()).toContain("F-D0047-091");
-    expect(wrapper.text()).toContain("不是即時測站觀測");
-    expect(wrapper.text()).toContain("不會延長或縮短");
+    expect(wrapper.text()).toContain("日間紫外線預報");
+    /*
+     * 2026-08-31：免責文案移到 ForecastPage（卡片與頁面原本各有一份幾乎
+     * 一樣的，使用者回饋重複）。守門跟著搬到 ForecastPage.test.ts，**沒有
+     * 直接刪掉**——那是安全文案，不能變成沒人守。
+     *
+     * 這裡改守「卡片裡不再有第二份」，方向與那邊互補。
+     */
+    expect(wrapper.text()).not.toContain("不影響補擦倒數");
   });
 
   it("沒有地區時不顯示任何 UV 數字", () => {
@@ -58,7 +64,11 @@ describe("FiveDayUvCard", () => {
     });
 
     expect(wrapper.text()).toContain("設定地區");
-    expect(wrapper.text()).toContain("才能查看五日 UV 預報");
+    /*
+     * 2026-09-04：尾巴「，才能查看五日 UV 預報」已拿掉——h1 已經是
+     * 「五日 UV 預報」，同一個畫面不要說兩次。這裡改守「不要又長回來」。
+     */
+    expect(wrapper.text()).not.toContain("才能查看五日 UV 預報");
     expect(wrapper.findAll(".uv-day")).toHaveLength(0);
   });
 

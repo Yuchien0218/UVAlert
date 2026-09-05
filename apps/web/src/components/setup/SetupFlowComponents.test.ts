@@ -85,16 +85,69 @@ describe("SetupStepShell", () => {
     expect(wrapper.text()).toContain("開始防曬提醒");
     expect(wrapper.text()).toContain("測試說明");
     /*
-     * 2026-08-24：取消鈕改成只有圖示的叉叉（跟其他頁的右上角一致），
-     * 「取消」兩個字移到 aria-label，所以不再出現在 text() 裡。
+     * 2026-08-24：按鈕改成只有圖示，文字移到 aria-label，所以不再出現在
+     * text() 裡。
+     *
+     * 2026-08-30：語意由「取消設定」改成「回上一頁」，行為也跟著改成
+     * 不刪草稿。這條斷言守的是**文案與行為的一致性**——如果有人把
+     * aria-label 改回「取消設定」之類的破壞性字眼，卻沒有同步恢復刪除
+     * 草稿的行為，這裡會紅。裁決見
+     * docs/decisions/2026-08-30-pending-decisions.md 第二節。
      */
     expect(wrapper.get(".icon-button").attributes("aria-label")).toBe(
-      "取消設定"
+      "回上一頁"
     );
+
+    /*
+     * 2026-08-31：返回鈕與標題**同一列**（使用者回報標題上方空掉一大塊）。
+     *
+     * 先前它在一個獨立的工具列 div 裡，那個 div 在窄螢幕上幾乎全空卻仍佔
+     * 44px，加上 --space-8 的間距，等於標題上方憑空多出約 76px。
+     *
+     * 守三件事：舊的工具列不得復活、按鈕在標題區裡、按鈕排在標題之後。
+     * DOM 順序同時決定鍵盤 Tab 的先後。
+     */
+    expect(wrapper.find(".setup-shell__toolbar").exists()).toBe(false);
+
+    const heading = wrapper.get(".setup-shell__heading");
+    expect(heading.find(".icon-button").exists()).toBe(true);
+
+    const children = [...heading.element.children];
+    expect(
+      children.findIndex((node) => node.classList.contains("icon-button"))
+    ).toBeGreaterThan(
+      children.findIndex((node) => node.tagName.toLowerCase() === "h1")
+    );
+    expect(
+      wrapper.get(".icon-button").classes("icon-button--compact")
+    ).toBe(true);
 
     expect(wrapper.text()).not.toContain("步驟");
     expect(wrapper.find('[role="progressbar"]').exists()).toBe(false);
     expect(wrapper.find("a").exists()).toBe(false);
+  });
+
+  /*
+   * 2026-08-30：守「按鈕發的是導航事件，不是取消事件」。
+   *
+   * 這條看起來瑣碎，但它守的是一件會靜默壞掉的事：`defineEmits` 換成
+   * `back` 之後，父層若還寫 `@cancel`，Vue 不會報錯也不會警告——按鈕
+   * 就只是沒反應。反過來，若有人為了「順便讓它也能取消」把 cancel 加
+   * 回來，這裡會提醒他先讀第二節的裁決。
+   */
+  it("返回鈕發出 back 而不是 cancel", async () => {
+    const wrapper = mount(SetupStepShell, {
+      props: {
+        title: "開始防曬提醒",
+        description: "測試說明",
+        saveStatus: "idle"
+      }
+    });
+
+    await wrapper.get(".icon-button").trigger("click");
+
+    expect(wrapper.emitted("back")).toHaveLength(1);
+    expect(wrapper.emitted("cancel")).toBeUndefined();
   });
 
   it("儲存狀態為 error 時提示草稿未儲存", () => {
@@ -137,7 +190,7 @@ describe("QuickProtectionSummary", () => {
      * 另外守住 preset 名稱仍然看得到——去掉外框之後它是唯一的標題。
      */
     expect(wrapper.text()).not.toContain("快速提醒（推薦）");
-    expect(wrapper.text()).toContain("通勤常見追蹤部位");
+    expect(wrapper.text()).toContain("通勤常曬部位");
     expect(wrapper.text()).toContain("使用這組並繼續");
     await findButton(wrapper, "使用這組並繼續").trigger("click");
     expect(wrapper.emitted("accept")).toHaveLength(1);

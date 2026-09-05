@@ -52,5 +52,3 @@ UPF、UV400 與「100% UV 防護」的標示制度可能依市場與產品類型
 - [AAD：What to wear to protect your skin from the sun](https://www.aad.org/public/everyday-care/sun-protection/shade-clothing-sunscreen/what-to-wear-protect-skin-from-sun)（UPF、衣物、帽子、眼鏡與腳部遮蔽；查閱 2026-08-16）
 - [WHO：Radiation: Protecting against skin cancer](https://www.who.int/news-room/questions-and-answers/item/radiation-protecting-against-skin-cancer)（寬邊帽、衣物、眼鏡、遮蔭與反射環境；查閱 2026-08-16）
 - [CDC：Sun Safety Facts](https://www.cdc.gov/skin-cancer/sun-safety/)（遮蔭、衣物、帽子與眼鏡的組合防護；查閱 2026-08-16）
-
-本文為一般衛教草稿，尚未完成 UVAlert 專業審閱。

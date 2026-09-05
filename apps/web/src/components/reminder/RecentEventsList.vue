@@ -2,8 +2,9 @@
 import { ref, computed } from "vue";
 import type { ZoneProjection } from "@sunshield/contracts";
 import type { SessionEventStreamV1 } from "@sunshield/contracts";
-import { getZoneLabel } from "../../features/reminder/reminderPresentation";
 import { formatMonthDayTime, formatTime } from "../../helpers/datetime";
+import ChevronLink from "../common/ChevronLink.vue";
+import ZoneScopeBadge from "../common/ZoneScopeBadge.vue";
 
 interface Props {
   zones: ZoneProjection[];
@@ -143,20 +144,13 @@ function formatEventTime(date: Date): string {
   return formatTime(date);
 }
 
-function getZoneNames(zoneIds: string[], zones: ZoneProjection[]): string {
-  if (zoneIds.length === 0) return "";
-  if (
-    zoneIds.length === zones.filter((z) => z.trackingStatus === "active").length
-  ) {
-    return `${zones.filter((z) => z.trackingStatus === "active").length} 個部位`;
-  }
-  return zoneIds
-    .map((id) => {
-      const zone = zones.find((z) => z.zoneInstanceId === id);
-      return zone ? getZoneLabel(zone) : id;
-    })
-    .join("、");
-}
+/*
+ * 2026-08-31：事件影響的部位（右欄）搬進 `ZoneScopeBadge`。
+ *
+ * 「涵蓋全部就寫『全部位』、部分就寫名稱」原本只有這一頁做，夜間首頁
+ * 仍在寫「8 個追蹤部位」。規則只有一份實作之後兩處自動一致——使用者的
+ * 原話是「文字樣式、文字內容、數值都要統一」。
+ */
 </script>
 
 <template>
@@ -190,35 +184,73 @@ function getZoneNames(zoneIds: string[], zones: ZoneProjection[]): string {
         >
           <span class="event-time">{{ formatEventTime(event.time) }}</span>
           <span class="event-label">{{ event.label }}</span>
-          <span class="event-zones">{{
-            getZoneNames(event.zoneIds, zones)
-          }}</span>
+          <ZoneScopeBadge
+            class="event-zones"
+            :zone-ids="event.zoneIds"
+            :zones="zones"
+          />
         </component>
       </template>
     </div>
 
-    <!-- 展開／收合控制 -->
+    <!--
+      2026-08-31：展開鈕從滿寬的 quiet 按鈕改成文字＋箭頭（使用者要求：
+      「想變得跟提醒進行中類似」）。
+
+      那顆滿寬按鈕在畫面上比它要展開的內容還醒目——一筆事件的收合控制，
+      份量不該大過事件本身。改成跟 ZoneStatusList 的 `.zone-group__toggle`
+      同一種樣子：文字在左、箭頭在右，箭頭換圖示 name 而不是 rotate
+      （DESIGN.md 第五節的展開收合契約）。
+
+      2026-08-31 第二次調整（使用者要求「改到最近事件的最後、文字縮短」）：
+
+      **縮短成「更多 1 筆」，不縮成純箭頭。** 使用者原本要求「刪除文字只要
+      `>` 符號」，實測下來不能做：裸箭頭沒有可及名稱（螢幕閱讀器只會讀到
+      「按鈕」）、命中區從 44px 掉到 20px（過不了 SC 2.5.5）、而且看不出
+      按下去會發生什麼。縮短是使用者第二輪確認的折衷。
+
+      **視覺上接成清單的最後一列，但 DOM 仍在 `#recent-events-list` 外面。**
+      移進去的話 `aria-controls` 會指向自己所在的容器——那等於宣告「這個
+      按鈕會展開包含它自己的區域」，是騙人的。用 `.event-row` 的欄位節奏
+      對齊即可，讀者看到的是最後一列，輔助技術拿到的關係仍然正確。
+    -->
     <div v-if="displayEvents.length > 1" class="expand-control">
-      <button
-        class="button button--quiet"
-        type="button"
-        :aria-expanded="isExpanded"
-        aria-controls="recent-events-list"
+      <ChevronLink
+        :expanded="isExpanded"
+        controls="recent-events-list"
+        :label="
+          isExpanded
+            ? '收合事件清單'
+            : `展開其他 ${displayEvents.length - 1} 筆事件`
+        "
         @click="isExpanded = !isExpanded"
       >
-        {{
-          isExpanded ? "收合" : `查看其他 ${displayEvents.length - 1} 筆事件`
-        }}
-      </button>
+        {{ isExpanded ? "收合" : `更多 ${displayEvents.length - 1} 筆` }}
+      </ChevronLink>
     </div>
   </section>
 </template>
 
 <style scoped>
+/*
+ * 2026-08-31：拿掉區塊分隔線（使用者要求，與頁首那條同一批）。
+ *
+ * 區塊之間本來就靠標題與留白分開；線是第二套分隔機制，兩套同時存在會
+ * 讓頁面看起來比實際更破碎。padding-top 留著——那是區塊之間的呼吸，
+ * 不是線的附屬品。
+ */
+/*
+ * 2026-08-31：上緣加回分隔線（使用者指定位置）。
+ *
+ * 這跟同一天把提醒頁分隔線全部拿掉不衝突，理由與 UV 區塊那兩條相同：
+ * 拿掉的是「每個區塊各自在上緣畫一條」的零散做法；現在只有兩個位置有線
+ * ——UV 帶狀區的上下緣，以及這裡。它分開的是「你現在的狀態」與「你做過
+ * 什麼」，那是首頁最大的一個轉折。
+ */
 .events-section {
   display: grid;
   gap: var(--space-4);
-  padding-top: var(--space-4);
+  padding-top: var(--space-5);
   border-top: 1px solid var(--border-subtle);
 }
 
@@ -227,9 +259,15 @@ function getZoneNames(zoneIds: string[], zones: ZoneProjection[]): string {
   gap: var(--space-2);
 }
 
+/*
+ * 2026-08-31：拿掉 --text-secondary（使用者要求統一）。
+ *
+ * 「最近事件」與「各部位狀態」是首頁下半部兩個平行的區塊標題，但一個是
+ * 深咖、一個是次要灰——同一個層級用兩種顏色，讀起來像其中一個比較不重要。
+ * 兩者現在都走 section-title 的預設顏色。
+ */
 #events-title {
   margin: 0;
-  color: var(--text-secondary);
 }
 
 /*
@@ -293,15 +331,20 @@ button.event-row:hover .event-label {
   font-weight: 500;
 }
 
+/* 顏色、膠囊與 nowrap 都在 ZoneScopeBadge 裡；這裡只管它在這一列的位置。 */
 .event-zones {
-  color: var(--text-secondary);
   text-align: right;
-  white-space: nowrap;
 }
 
+/*
+ * 接成清單的最後一列：跟 `.event-row` 用同一個縱向節奏（padding 與
+ * 列距），所以視覺上它就是清單的一部分，而不是清單下面另外一個東西。
+ * 大小與命中區仍然由 ChevronLink 決定，這裡不碰。
+ */
 .expand-control {
   display: grid;
   justify-items: start;
-  padding-top: var(--space-2);
+  margin-top: calc(var(--space-1) * -1);
+  padding: var(--space-2) 0;
 }
 </style>

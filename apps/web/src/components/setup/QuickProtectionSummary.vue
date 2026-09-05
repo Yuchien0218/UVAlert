@@ -1,5 +1,7 @@
 <script setup lang="ts">
 import Icon from "../icons/Icon.vue";
+import DisclosureChevron from "../common/DisclosureChevron.vue";
+import DisclosurePanel from "../common/DisclosurePanel.vue";
 import type { SessionContext, SetupDraftZoneV1 } from "@sunshield/contracts";
 import { computed, shallowRef, useId, watch } from "vue";
 import {
@@ -56,40 +58,52 @@ const zoneLabels = computed(() =>
       @click="expanded = !expanded"
     >
       <h2 data-typography-role="card-title">{{ preset.label }}</h2>
-      <Icon
-        :name="expanded ? 'tool-chevron-down' : 'tool-chevron-right'"
+      <DisclosureChevron
+        :open="expanded"
         :size="20"
         class="quick-protection__toggle"
       />
     </button>
 
-    <div v-if="expanded" :id="detailsId" class="quick-protection__details">
-      <p class="quick-protection__summary">{{ preset.summary }}</p>
-      <p class="quick-protection__zones">
-        這次會套用到：{{ zoneLabels.join("、") }}
-      </p>
-      <p class="quick-protection__note">
-        確認實際塗抹時間後，才會建立正式提醒。
-      </p>
-      <div class="quick-protection__actions">
-        <button
-          v-if="pending"
-          class="button button--primary"
-          type="button"
-          @click="$emit('accept')"
-        >
-          使用這組並繼續
-        </button>
-        <button
-          class="button button--quiet"
-          type="button"
-          @click="$emit('adjust')"
-        >
-          <Icon name="tool-edit" :size="16" />
-          調整要提醒的部位
-        </button>
+    <!--
+      2026-08-31：三段收成一段（使用者要求「精簡文字，現在文字量太多」）。
+
+      展開後原本是：
+
+        1. `preset.summary`   臉部、耳朵、頸部、手臂、手背
+        2. 這次會套用到：…    額頭、鼻子與雙頰、臉部下半部、耳朵、前頸…
+        3. 確認實際塗抹時間後，才會建立正式提醒。
+
+      **1 與 2 是同一份資訊的兩種寫法**（預設組合的簡稱 vs 實際會建立的
+      部位全名）。留全名那一份：簡稱好讀，但讀者在這裡要判斷的是「等一下
+      真的會被提醒的是哪些」，那只有全名答得出來。
+
+      3 刪掉——下方主要 CTA 就寫著「開始防曬提醒」，而塗抹時間卡本身也在
+      同一個畫面上。它在重述畫面上已經看得到的流程。
+    -->
+    <DisclosurePanel :open="expanded">
+      <div :id="detailsId" class="quick-protection__details">
+        <p class="quick-protection__zones">{{ zoneLabels.join("、") }}</p>
+        <div class="quick-protection__actions">
+          <button
+            v-if="pending"
+            class="button button--primary"
+            type="button"
+            @click="$emit('accept')"
+          >
+            使用這組並繼續
+          </button>
+          <button
+            class="button button--quiet"
+            type="button"
+            @click="$emit('adjust')"
+          >
+            <Icon name="tool-edit" :size="16" />
+            調整要提醒的部位
+          </button>
+        </div>
       </div>
-    </div>
+    </DisclosurePanel>
   </section>
 </template>
 
@@ -99,7 +113,7 @@ const zoneLabels = computed(() =>
  * 但 --color-soon 的語意是「即將到期」，這區講的是「這是推薦的部位組合」，
  * 完全不同的事——DESIGN.md 第二節明訂狀態色不得與裝飾用法混淆。
  *
- * SetupProcessBanner 2026-08-23 已經因為同一個理由把 --color-soon 換掉
+ * SetupProcessBanner（2026-08-31 已移除）當時也因為同一個理由把 --color-soon 換掉
  * （「同一個顏色會讓使用者把該去完成設定跟該去補擦搞混」），這一處是當時
  * 漏掉的。改用共用的 .app-card，跟同頁其他區塊一致。
  */
@@ -138,9 +152,7 @@ const zoneLabels = computed(() =>
 }
 
 .quick-protection__header h2,
-.quick-protection__summary,
-.quick-protection__zones,
-.quick-protection__note {
+.quick-protection__zones {
   margin: 0;
 }
 
@@ -158,28 +170,12 @@ const zoneLabels = computed(() =>
   display: grid;
   gap: var(--space-3);
   padding: 0;
-  animation: quickProtectionFadeIn var(--duration-base) var(--ease-out);
-}
-
-.quick-protection__summary {
-  color: var(--text-secondary);
-  font-size: var(--font-size-supporting);
-  line-height: var(--line-height-body);
 }
 
 .quick-protection__zones {
   font-size: var(--font-size-supporting);
   color: var(--text-secondary);
   line-height: var(--line-height-body);
-}
-
-/*
- * 2026-08-25：這是說明／標籤角色，DESIGN.md 對應的 CJK 行高是 1.5。
- */
-.quick-protection__note {
-  color: var(--text-secondary);
-  font-size: var(--font-size-supporting);
-  line-height: var(--line-height-caption);
 }
 
 .quick-protection__actions {
@@ -193,17 +189,6 @@ const zoneLabels = computed(() =>
  * 2026-08-24：原本叫 slideDown、帶 translateY(-0.5rem)，但 DESIGN.md
  * 第十二節明訂動畫「只用 opacity，不用位移或縮放」。改成純淡入。
  */
-@keyframes quickProtectionFadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(var(--motion-rise));
-  }
-  to {
-    opacity: 1;
-    transform: none;
-  }
-}
-
 @media (max-width: 31rem) {
   .quick-protection__header {
     gap: var(--space-3);

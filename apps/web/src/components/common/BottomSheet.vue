@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { useTemplateRef } from "vue";
 import { useOverlay } from "../../composables/useOverlay";
-import Icon from "../icons/Icon.vue";
+import IconButton from "./IconButton.vue";
 
 interface Props {
   open: boolean;
@@ -54,14 +54,11 @@ const { closeFromBackdrop } = useOverlay({
             >
               {{ title }}
             </h2>
-            <button
-              class="icon-button"
-              type="button"
-              aria-label="關閉"
+            <IconButton
+              icon="tool-close"
+              label="關閉"
               @click="close"
-            >
-              <Icon name="tool-close" :size="24" />
-            </button>
+            />
           </header>
 
           <div class="bottom-sheet__body">
@@ -105,7 +102,8 @@ const { closeFromBackdrop } = useOverlay({
   align-items: start;
   justify-content: space-between;
   gap: var(--space-4);
-  padding: var(--space-5);
+  /* 2026-09-01：sheet 用 --sheet-padding（24px），照 DESIGN.md 第四節。 */
+  padding: var(--sheet-padding);
   border-bottom: 1px solid var(--border-subtle);
 }
 
@@ -118,8 +116,8 @@ const { closeFromBackdrop } = useOverlay({
   min-height: 0;
   overflow-y: auto;
   overscroll-behavior: contain;
-  padding: var(--space-5) var(--space-5)
-    max(var(--space-5), env(safe-area-inset-bottom));
+  padding: var(--sheet-padding) var(--sheet-padding)
+    max(var(--sheet-padding), env(safe-area-inset-bottom));
 }
 
 .bottom-sheet__footer {

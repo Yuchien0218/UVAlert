@@ -62,7 +62,7 @@ function secondary(...kinds: SecondaryActionKind[]): SecondaryAction[] {
 
 export const BODY_ZONE_LABELS: Record<BodyZoneCode, string> = {
   face_forehead: "額頭",
-  face_nose_cheeks: "鼻部與雙頰",
+  face_nose_cheeks: "鼻子與雙頰",
   face_lower: "臉部下半部",
   ears: "耳朵",
   lips: "嘴唇",
@@ -81,7 +81,12 @@ export const BODY_ZONE_LABELS: Record<BodyZoneCode, string> = {
 
 const ACTION_LABELS: Record<ActionKind, string> = {
   recalibrate_clock: "重新校準時間",
-  view_conservative_reminder: "查看保守提醒",
+  /*
+   * 2026-09-03：原本是「查看保守提醒」。「保守提醒」是 domain 術語
+   * （conservative reminder），使用者看不懂，而且這顆按鈕實際要回答的是
+   * 上方 body 剛講完的那句「已自動縮短提醒間隔」——直接用問句當標籤。
+   */
+  view_conservative_reminder: "為什麼間隔變短？",
   view_ended_state: "查看本次紀錄",
   switch_protection: "更新防護方式",
   complete_protection_record: "補上防護紀錄",
@@ -254,13 +259,13 @@ function buildUntimedPresentation(options: {
     const online = connectivity === "online";
     return {
       ...base,
-      eyebrow: online ? "時間需要重新確認" : "目前無法校準時間",
+      eyebrow: online ? "時間需要重新確認" : "目前無法校對時間",
       title: "裝置時間可能不正確",
       body: online
-        ? "為避免錯誤延長提醒，請重新連線校準。目前採較短的保守狀態。"
-        : "目前離線，無法確認可信時間。系統不會因此延長期限，請查看保守提醒。",
-      timeLabel: "保守提醒",
-      ariaLabel: "裝置時間可能不正確，目前使用保守提醒。",
+        ? "請重新連線校對時間。離線期間系統已自動縮短提醒間隔以維護防護安全。"
+        : "目前離線無法校對時間，系統已自動縮短提醒間隔以維護防護安全。",
+      timeLabel: "已縮短間隔",
+      ariaLabel: "裝置時間可能不正確，系統已自動縮短提醒間隔。",
       // 時鐘不可信時使用者要確認的是「我已經記了什麼」，資料就在本頁下方，
       // 離開頁面反而失去脈絡——所以是原地錨點而不是換頁。
       secondaryActions: secondary("view_saved_records")
@@ -281,7 +286,7 @@ function buildUntimedPresentation(options: {
       ...base,
       eyebrow: "防護方式不確定",
       title: `請確認${zoneLabel}目前的防護方式`,
-      body: "防護方式尚未確認，目前會採用保守提醒，暫不顯示補擦倒數。確認防護方式後，即可建立對應的提醒時間。",
+      body: "防護方式尚未確認，暫不顯示補擦倒數。確認後即可開始計時。",
       timeLabel: "未計時",
       ariaLabel: `${zoneLabel}防護方式不確定。`
     };
@@ -321,14 +326,30 @@ function buildUntimedPresentation(options: {
       secondaryActions: secondary("update_protection_record")
     };
   }
+  /*
+   * 2026-08-31 修文案。
+   *
+   * 原本寫「無法計算可信時間」「防曬乳的標示尚未確認，暫時無法建立補擦
+   * 倒數」——那在 2026-08-30 之後是**錯的**。那天的規則改動把
+   * `identity_unconfirmed` 從「擋住一般期限」改成「用 120 分鐘保守預設」
+   * （reducer.ts 的 GENERAL_DEADLINE_BLOCKERS），理由是產品標示只會讓間隔
+   * 變短，沒有標示時的值本來就是 120，擋住並沒有比較保守、只是什麼都不給。
+   *
+   * 所以「標示未確認」**不會是**倒數不存在的原因。這一段只在該部位因為
+   * 別的緣故本來就沒有時間型提醒時才走到（這個函式整段的 tone 是
+   * untimed），文案不能把標示講成罪魁禍首。
+   *
+   * 改成只講一件真的事：補上標示會讓間隔改依標示計算。不提「無法倒數」，
+   * 也不在這裡重複 120 分鐘——那是別的部位正在跑的事，這裡沒在跑。
+   */
   if (reasons.has("PRODUCT_IDENTITY_UNKNOWN")) {
     return {
       ...base,
-      eyebrow: "無法計算可信時間",
-      title: `${zoneLabel}使用的防曬乳身分尚未確認`,
-      body: "防曬乳的標示尚未確認，暫時無法建立補擦倒數。",
+      eyebrow: "需要補上防曬乳標示",
+      title: `${zoneLabel}使用的防曬乳標示尚未確認`,
+      body: "補上包裝標示後，這個部位的補擦間隔會改依標示計算。",
       timeLabel: "未計時",
-      ariaLabel: `${zoneLabel}使用的防曬乳身分尚未確認。`,
+      ariaLabel: `${zoneLabel}使用的防曬乳標示尚未確認。`,
       secondaryActions: secondary("update_protection_record")
     };
   }
@@ -348,7 +369,7 @@ function buildUntimedPresentation(options: {
       ...base,
       eyebrow: "請依防曬乳標示等待",
       title: `${zoneLabel}仍在防曬乳標示的等待時間內`,
-      body: `依包裝標示等待至 ${absoluteTime}。期間請搭配衣物或遮蔭；等待結束不代表系統已確認防護效果，也不代表可以放心待在陽光下。`,
+      body: `建議依包裝標示等待至 ${absoluteTime}。等待期間可搭配帽子、長袖或待在陰涼處。`,
       timeLabel: absoluteTime,
       ariaLabel: `${zoneLabel}仍在防曬乳標示的等待時間內，標示等待至 ${absoluteTime}。`
     };
@@ -389,7 +410,7 @@ function buildUntimedPresentation(options: {
       ...base,
       eyebrow: "本次提醒已結束",
       title: "本次提醒已結束",
-      body: "結束不代表已完成補擦，也不代表防護完成或可以放心待在陽光下。需要時可以重新開始新的提醒。",
+      body: "本次提醒已結束。若仍在戶外，請記得補擦防曬或移至陰涼處。",
       timeLabel: "已結束",
       ariaLabel: "本次提醒已結束。"
     };

@@ -2,12 +2,14 @@
 import { computed, nextTick, onMounted, shallowRef, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { useWebAppServices } from "../app/injection";
-import Icon from "../components/icons/Icon.vue";
 import QuickTimePicker from "../components/common/QuickTimePicker.vue";
 import BroadcastLoader from "../components/feedback/BroadcastLoader.vue";
+import InlineLoader from "../components/feedback/InlineLoader.vue";
 import ZoneSelectorGrid from "../components/reminder/ZoneSelectorGrid.vue";
 import { getZoneLabel } from "../features/reminder/reminderPresentation";
 import { formatDateTime } from "../helpers/datetime";
+import IconButton from "../components/common/IconButton.vue";
+import IconLead from "../components/common/IconLead.vue";
 
 /**
  * S-10 更正最近事件。
@@ -77,18 +79,16 @@ async function runVoid(): Promise<void> {
       <div>
         <p class="eyebrow">更正紀錄</p>
         <h1 data-typography-role="page-title">更正這筆紀錄</h1>
-        <p>
-          原本的紀錄會保留下來，你會在後面新增一筆更正。送出前不會改變目前提醒。
-        </p>
       </div>
-      <button
-        class="icon-button"
-        type="button"
-        aria-label="返回提醒"
+      <IconButton
+        icon="tool-close"
+        label="返回提醒"
         @click="back"
-      >
-        <Icon name="tool-close" :size="24" />
-      </button>
+      />
+      <!-- 說明橫跨兩欄，不必為圖示鈕讓出寬度（2026-09-03）。 -->
+      <p>
+        原本的紀錄會保留下來，你會在後面新增一筆更正。送出前不會改變目前提醒。
+      </p>
     </header>
 
     <BroadcastLoader
@@ -103,9 +103,15 @@ async function runVoid(): Promise<void> {
       "
       class="app-card success-panel"
     >
+      <!--
+        2026-09-03：「已儲存」的訊號從彩色粗上緣改成領銜圖示
+        （`state-success` 的 `<title>` 本來就是「已儲存」）。理由見 app.css
+        的 `.success-panel`。
+      -->
+      <IconLead icon="state-success">
       <h2
         id="correction-success-title"
-        data-typography-role="section-title"
+        data-typography-role="card-title"
         tabindex="-1"
       >
         {{
@@ -114,6 +120,7 @@ async function runVoid(): Promise<void> {
             : "已更正這筆紀錄"
         }}
       </h2>
+      </IconLead>
       <p v-if="eventCorrection.success.value.action === 'void'">
         {{
           eventCorrection.success.value.label
@@ -199,7 +206,7 @@ async function runVoid(): Promise<void> {
               : eventCorrection.error.value === "state_changed"
                 ? "提醒狀態已經改變，請返回提醒頁重新確認後再更正一次。"
                 : eventCorrection.error.value === "persistence"
-                  ? "資料沒有儲存，這次更正尚未寫入。輸入仍會保留，可以再試一次。"
+                  ? "沒有儲存，輸入仍會保留，可以再試一次。"
                   : "這次更正沒有送出，原本的紀錄維持不變。"
           }}
         </p>
@@ -211,6 +218,9 @@ async function runVoid(): Promise<void> {
             :disabled="eventCorrection.phase.value === 'submitting'"
             @click="eventCorrection.submitReplace"
           >
+            <InlineLoader
+              v-if="eventCorrection.phase.value === 'submitting'"
+            />
             {{
               eventCorrection.phase.value === "submitting"
                 ? "更正中…"
@@ -271,7 +281,7 @@ async function runVoid(): Promise<void> {
 .app-card {
   display: grid;
   gap: var(--space-4);
-  padding: var(--space-5);
+  padding: var(--card-padding);
 }
 
 h1,

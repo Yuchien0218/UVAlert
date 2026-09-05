@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { useRouter } from "vue-router";
+import IconButton from "../components/common/IconButton.vue";
 import { computed, onMounted, onUnmounted, shallowRef } from "vue";
 
 /**
@@ -49,85 +51,128 @@ async function install(): Promise<void> {
       ? "已開始安裝。完成後可從主畫面開啟。"
       : "已取消安裝。你仍然可以用瀏覽器繼續使用。";
 }
+const router = useRouter();
+
+/*
+ * 頂端的返回出口（2026-09-03，稽核 §G：下鑽頁一律有頂端箭頭）。
+ * 直接回「更多」，不用 history.back——這一頁也可能是從網址列直接打開的。
+ */
+function goBack(): void {
+  void router.push({ name: "more" });
+}
 </script>
 
 <template>
   <div class="page-stack">
-    <header class="page-heading">
+    <header class="page-heading page-heading--with-exit">
       <h1 class="page-heading__title" data-typography-role="page-title">
         安裝到手機
       </h1>
       <p class="page-heading__body">
-        安裝後資料較不容易因關閉瀏覽器分頁而遺失。<strong>不安裝也可以正常使用</strong>。
+        本站採用 PWA 技術，可建立手機主畫面捷徑隨開即用。
       </p>
+      <IconButton icon="tool-arrow-left" label="返回更多" @click="goBack" />
     </header>
 
-    <section v-if="isStandalone" class="install-card app-card" role="status">
-      <h2 data-typography-role="section-title">已安裝</h2>
-      <p>你已經可以從主畫面開啟防曬晴報員。</p>
-    </section>
+    <!--
+      2026-09-04：狀態與限制併成同一張卡（使用者要求）。
 
-    <section v-else-if="deferredPrompt" class="install-card app-card">
-      <h2 data-typography-role="section-title">可以安裝到這台裝置</h2>
-      <p>
-        安裝後會在主畫面出現圖示，開啟速度較快；本機資料也較不容易因清除瀏覽器資料而遺失。
+      這一頁只有兩張卡，而且講的是同一件事的兩面——「這台裝置現在能不能
+      裝、怎麼裝」與「裝或不裝各有什麼限制」。分成兩張時它們一樣寬、一樣
+      的底色、一樣的標題層級，讀起來像兩個不相干的區塊，中間那道 16px 的
+      縫是唯一的差別。
+
+      併成一張之後用一條 hairline 分隔內部的兩段：層級由分隔線承擔，不再
+      由「是不是另一張卡」承擔。
+    -->
+    <section class="install-card app-card">
+      <div v-if="isStandalone" role="status">
+        <h2 data-typography-role="card-title">已安裝</h2>
+        <p>你已經可以從主畫面開啟防曬晴報員。</p>
+      </div>
+
+      <div v-else-if="deferredPrompt">
+        <h2 data-typography-role="card-title">可以安裝到這台裝置</h2>
+        <p>
+          安裝後會在主畫面出現圖示、開啟更快，本機紀錄也比較不會因為清除瀏覽器資料而消失。
+        </p>
+        <button class="button button--primary" type="button" @click="install">
+          安裝到手機
+        </button>
+      </div>
+
+      <div v-else-if="isIos">
+        <h2 data-typography-role="card-title">用 Safari 加入主畫面</h2>
+        <ol>
+          <li>點下方的分享按鈕。</li>
+          <li>選擇「加入主畫面」。</li>
+          <li>點「新增」。</li>
+        </ol>
+        <p class="install-card__note">選單名稱可能因裝置與瀏覽器版本不同。</p>
+      </div>
+
+      <div v-else>
+        <h2 data-typography-role="card-title">從瀏覽器選單安裝</h2>
+        <p>
+          開啟瀏覽器選單，尋找「安裝應用程式」或「加入主畫面」。
+          找不到時，用一般瀏覽器仍然可以完整使用。
+        </p>
+        <p class="install-card__note">選單名稱可能因裝置與瀏覽器版本不同。</p>
+      </div>
+
+      <p v-if="promptResult" class="install-result" role="status">
+        {{ promptResult }}
       </p>
-      <button class="button button--primary" type="button" @click="install">
-        安裝到手機
-      </button>
+
+      <hr class="install-card__rule" />
+
+      <div class="limits">
+        <h2 data-typography-role="card-title">需要知道的限制</h2>
+        <ul>
+          <li>不安裝仍可使用核心功能。</li>
+          <li>關閉頁面後仍受系統通知限制。</li>
+          <li>清除快取或解除安裝，可能一併移除本機紀錄。</li>
+        </ul>
+      </div>
     </section>
-
-    <section v-else-if="isIos" class="install-card app-card">
-      <h2 data-typography-role="section-title">用 Safari 加入主畫面</h2>
-      <ol>
-        <li>點下方的分享按鈕。</li>
-        <li>選擇「加入主畫面」。</li>
-        <li>點「新增」。</li>
-      </ol>
-      <p class="install-card__note">選單名稱可能因裝置與瀏覽器版本不同。</p>
-    </section>
-
-    <section v-else class="install-card app-card">
-      <h2 data-typography-role="section-title">從瀏覽器選單安裝</h2>
-      <p>
-        開啟瀏覽器選單，尋找「安裝應用程式」或「加入主畫面」。
-        找不到時，用一般瀏覽器仍然可以完整使用。
-      </p>
-      <p class="install-card__note">選單名稱可能因裝置與瀏覽器版本不同。</p>
-    </section>
-
-    <p v-if="promptResult" class="install-result" role="status">
-      {{ promptResult }}
-    </p>
-
-    <section class="limits app-card">
-      <h2 data-typography-role="section-title">需要知道的限制</h2>
-      <ul>
-        <li>不安裝仍可使用全部核心功能。</li>
-        <li>安裝不會讓系統在關閉頁面後保證送出通知。</li>
-        <li>清除網站資料或解除安裝，可能一併移除這台裝置上的本機資料。</li>
-      </ul>
-    </section>
-
-    <RouterLink class="text-link text-link--muted" to="/more"
-      >返回更多</RouterLink
-    >
   </div>
 </template>
 
 <style scoped>
-.install-card,
-.limits {
+/*
+ * 卡片本身只負責內距與段落之間的節奏；`.limits` 與狀態區都是它的內部
+ * 分段，各自再用同一個 gap 排自己的內容（2026-09-04 併卡）。
+ */
+.install-card {
   display: grid;
   justify-items: start;
-  gap: var(--space-3);
+  gap: var(--space-4);
   padding: clamp(1.25rem, 5vw, 2rem);
 }
 
+.install-card > div {
+  display: grid;
+  justify-items: start;
+  gap: var(--space-3);
+  width: 100%;
+}
+
+/*
+ * 卡片內部的分隔線。層級由這條線承擔，不再由「是不是另一張卡」承擔——
+ * 沿用衛教分類頁 `.education-heading__rule` 的做法，不另立第二種分隔。
+ */
+.install-card__rule {
+  width: 100%;
+  height: 0;
+  margin: 0;
+  border: 0;
+  border-top: 1px solid var(--border-subtle);
+}
+
+/* 字級／字體由 `data-typography-role="card-title"` 供應，這裡只收邊界。 */
 .install-card h2,
 .limits h2 {
   margin: 0;
-  font-size: var(--font-size-section-title);
 }
 
 .install-card p,
@@ -150,6 +195,7 @@ async function install(): Promise<void> {
 }
 
 .install-result {
+  width: 100%;
   margin: 0;
   padding: var(--space-4);
   border-radius: var(--radius-sm);

@@ -181,6 +181,26 @@ export const ExpiryDateSchema = z
   .string()
   .regex(/^\d{4}-\d{2}-\d{2}$/, "到期日格式須為 YYYY-MM-DD");
 
+/**
+ * 產品目錄紀錄的 schema 版本。
+ *
+ * **2026-08-30 新增 `priceTwd` 與 `usageRating`、2026-09-01 新增 `size` 與
+ * `color` 時，都刻意「不」升版。**
+ * 規格草案原本推論「`schemaVersion` 是 `z.literal()`，不升版舊紀錄反而會
+ * 過不了」——實際查證後那個推論是反的，而且升版才是危險的那一邊：
+ *
+ * - **不升版**：兩個新欄位都有 `.default(null)`，1.1.0 的舊紀錄少了它們
+ *   仍然解析得過，Zod 會補上 null。
+ * - **升版**：`LocalProductCatalogRepository.#normalize()` 對「schemaVersion
+ *   不等於當前版本」的紀錄會套用一組寫死的預設值——`gearCategory` 強制
+ *   改成 `"sunscreen"`，`purchaseMonth`／`expiryDate`／`note`／`archivedAt`
+ *   全部清成 null。那段 migration 是為 1.0.0（沒有品類欄位）寫的，升到
+ *   1.2.0 會讓完整的 1.1.0 紀錄走進去，**使用者存的太陽眼鏡會變成防曬乳、
+ *   購買月份與備註會被清空**。
+ *
+ * 要升版必須先改 `#normalize` 成逐版遷移，那是另一件工作。
+ * `product-catalog.test.ts` 有守門測試釘住這個決定。
+ */
 export const PRODUCT_CATALOG_RECORD_VERSION = "1.1.0" as const;
 
 export const ProductCatalogRecordV1Schema = z.object({
@@ -201,6 +221,75 @@ export const ProductCatalogRecordV1Schema = z.object({
   expiryDate: ExpiryDateSchema.nullable().default(null),
   /** 備忘，不進 reducer。 */
   note: z.string().trim().max(500).nullable().default(null),
+  /**
+   * 買多少錢，新台幣整數。不進 reducer。
+   *
+   * 2026-08-30 裁決不記幣別——加幣別等於要處理匯率與顯示格式，與「附加
+   * 價值的小紀錄」不相稱。
+   */
+  priceTwd: z.number().int().nonnegative().nullable().default(null),
+  /**
+   * 好不好用，三檔。不進 reducer。
+   *
+   * 2026-08-30 裁決用三檔而不是自由文字：自由文字無法排序或篩選，等於
+   * 還是只有 `note`。刻意不做五星評分——這是「好不好用」的備忘，不是
+   * 評分網站。
+   */
+  usageRating: z.enum(["good", "ok", "bad"]).nullable().default(null),
+  /**
+   * 尺寸。不進 reducer。
+   *
+   * **自由文字而不是 S／M／L／XL enum**（2026-09-01 使用者裁決）：歐碼、
+   * 數字碼、Free Size 都真實存在，enum 會擋掉使用者手上的實際標示。跟
+   * `usageRating` 選三檔 enum 的理由相反是刻意的——那個要能排序與篩選，
+   * 這個只是照抄吊牌。
+   *
+   * 只對「有尺寸這個概念」的品類有意義（防曬衣物、其他裝備）。防曬乳與
+   * 太陽眼鏡的表單不顯示這一欄——限制在表單層，不在 schema 層，因為
+   * schema 不該假設使用者的分類習慣。
+   */
+  size: z.string().trim().max(20).nullable().default(null),
+  /**
+   * 顏色。不進 reducer。
+   *
+   * 同樣是自由文字，而且**只印字不做色塊**（2026-09-01 使用者裁決）：
+   * 「霧灰藍」這種描述沒辦法對應到一個色碼，硬要色塊就得限定色票，
+   * 那會變成另一件事。
+   */
+  color: z.string().trim().max(20).nullable().default(null),
+  /**
+   * 包裝容量（照抄標示，例如「60ml」「50g」）。不進 reducer。
+   *
+   * **為什麼放在目錄紀錄而不是 `ProductLabelSnapshotV1`。** 容量確實印在
+   * 包裝上，直覺會想放進「包裝標示」那一組。但 snapshot 是**進 reducer 的
+   * 那一層**，而且 `snapshotFingerprint` 是由它算出來的——加一個欄位會讓
+   * 所有既有產品的 fingerprint 變掉，等於每一罐都變成「另一罐」。
+   *
+   * 判準是「會不會影響倒數」，不是「印不印在瓶身上」。這三個新欄位都不會，
+   * 所以跟 priceTwd／size／color 同一層。
+   */
+  volume: z.string().trim().max(20).nullable().default(null),
+  /**
+   * 劑型。不進 reducer。
+   *
+   * 用 enum 而不是自由文字（跟 size 的判斷相反）：劑型是**有限且穩定**的
+   * 分類，使用者不需要照抄任何標示；enum 之後才能拿來篩選「我的噴霧有
+   * 哪些」。size 是照抄吊牌，所以才必須自由文字。
+   */
+  formulation: z
+    .enum(["lotion", "gel", "cream", "spray", "stick"])
+    .nullable()
+    .default(null),
+  /**
+   * 防護機制。不進 reducer。
+   *
+   * 三檔而不是逐項成分：這是「敏弱肌挑得出來」需要的粒度，列成分表就變成
+   * 產品資料庫了（2026-09-02 使用者裁決的取捨）。
+   */
+  protectionType: z
+    .enum(["physical", "chemical", "hybrid"])
+    .nullable()
+    .default(null),
   /** 「過去用過」的時間戳，不進 reducer。 */
   archivedAt: z.string().datetime({ offset: true }).nullable().default(null),
   createdAt: z.string().datetime({ offset: true }),

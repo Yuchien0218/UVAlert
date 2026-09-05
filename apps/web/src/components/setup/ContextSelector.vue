@@ -1,7 +1,10 @@
 <script setup lang="ts">
 import type { SessionContext } from "@sunshield/contracts";
-import { computed, shallowRef, watch } from "vue";
+import { computed, onBeforeUnmount, shallowRef, watch } from "vue";
 import Icon from "../icons/Icon.vue";
+import DisclosureChevron from "../common/DisclosureChevron.vue";
+import DisclosurePanel from "../common/DisclosurePanel.vue";
+import { CONTEXT_ICONS } from "../../features/setup/setupCatalog";
 
 /**
  * 情境選擇：四格 icon-first，說明與子選項在格子下方展開。
@@ -24,6 +27,21 @@ const selectedContext = defineModel<SessionContext | null>({
   required: true
 });
 
+/**
+ * 選好了、而且已經收乾淨——外層可以把這個選擇器換成一行摘要了。
+ *
+ * **為什麼要由這個元件說「可以收了」，而不是外層自己決定。**
+ *
+ * 改動前 `SetupPage` 一偵測到 `selectedContext` 變了就在同一個 tick 把整個
+ * 選擇器從 DOM 拿掉。實測（2026-09-04，瀏覽器）：點「水上活動」→ 點
+ * 「準備下水」，畫面上四個揭露面板瞬間只剩一個——**約 400px 的內容硬切成
+ * 一行 39px 的摘要，零過渡**。使用者的原話是「選項收合的很突然」。
+ *
+ * 收合的時間點只有這個元件知道（哪個面板開著、它的高度動畫跑完了沒），
+ * 所以由它發事件，外層照著收。
+ */
+const emit = defineEmits<{ settled: [] }>();
+
 type GroupKey = "indoor" | "water";
 
 const directOptions = [
@@ -31,13 +49,13 @@ const directOptions = [
     value: "outdoor_general",
     label: "一般戶外",
     description: "通勤、散步或一般外出。",
-    icon: "context-outdoor"
+    icon: CONTEXT_ICONS.outdoor_general
   },
   {
     value: "outdoor_exercise",
     label: "戶外運動",
     description: "跑步、騎車或其他較大量活動。",
-    icon: "context-exercise"
+    icon: CONTEXT_ICONS.outdoor_exercise
   }
 ] as const;
 
@@ -45,7 +63,7 @@ const groups = [
   {
     key: "indoor" as GroupKey,
     label: "室內活動",
-    icon: "context-indoor",
+    icon: CONTEXT_ICONS.indoor_away,
     options: [
       {
         value: "indoor_window",
@@ -62,7 +80,7 @@ const groups = [
   {
     key: "water" as GroupKey,
     label: "水上活動",
-    icon: "context-water",
+    icon: CONTEXT_ICONS.water_preparing,
     options: [
       {
         value: "water_preparing",
@@ -95,7 +113,65 @@ watch(selectedContext, (context) => {
 });
 
 function toggleGroup(key: GroupKey): void {
+  clearSettleTimer();
+  settling.value = false;
   openGroup.value = openGroup.value === key ? null : key;
+}
+
+/**
+ * 選好之後的兩段停頓，加起來剛好是 `--duration-base`。
+ *
+ * 1. **`--duration-fast` 讓選取態畫得出來。** 改動前是 0ms——外層在同一個
+ *    tick 就把整個選擇器拿掉，使用者根本來不及看到自己點中了哪一顆。
+ * 2. **再一個 `--duration-fast` 讓展開中的子選項面板自己收合完**
+ *    （`DisclosurePanel` 的高度動畫就是這個長度）。收到一半被抽掉，等於
+ *    那個動畫沒有存在過。
+ *
+ * 選「一般戶外」這類直接情境時群組是**立刻**收的（留著會讀成兩個都選了，
+ * 見 `selectDirect`），那一段收合與第 1 段同時跑，所以不必再等第 2 段。
+ */
+const PICK_FEEDBACK_MS = 160;
+const PANEL_COLLAPSE_MS = 160;
+
+/**
+ * 正在收尾。
+ *
+ * 這段期間不再展開任何東西——否則說明區會在「群組收合」與「元件被移除」
+ * 之間搶進來展開 160ms 再消失，那是一次沒有人看得懂的閃動。
+ */
+const settling = shallowRef(false);
+
+let settleTimer: ReturnType<typeof setTimeout> | undefined;
+
+function clearSettleTimer(): void {
+  if (settleTimer !== undefined) clearTimeout(settleTimer);
+  settleTimer = undefined;
+}
+
+function scheduleSettle(collapseAfterFeedback: boolean): void {
+  clearSettleTimer();
+  settling.value = true;
+  settleTimer = setTimeout(() => {
+    if (!collapseAfterFeedback) {
+      settleTimer = undefined;
+      emit("settled");
+      return;
+    }
+    openGroup.value = null;
+    settleTimer = setTimeout(() => {
+      settleTimer = undefined;
+      emit("settled");
+    }, PANEL_COLLAPSE_MS);
+  }, PICK_FEEDBACK_MS);
+}
+
+/* 元件先被拿掉時要把計時器一起收掉，不要對著已卸載的元件發事件。 */
+onBeforeUnmount(clearSettleTimer);
+
+/** 選子選項：先讓選取態停留一下，再收合它所在的那個面板。 */
+function selectSub(value: SessionContext): void {
+  selectedContext.value = value;
+  scheduleSettle(true);
 }
 
 /**
@@ -104,16 +180,24 @@ function toggleGroup(key: GroupKey): void {
  */
 function selectDirect(value: SessionContext): void {
   selectedContext.value = value;
+  /*
+   * 這裡的收合是**立刻**的，不等停頓——使用者選的是另一個大類，留著展開中
+   * 的子選項會讀成兩個都選了。那段收合動畫與「讓選取態畫出來」的停頓同時
+   * 跑，所以 `scheduleSettle(false)`：等一段就好，不用再等第二段。
+   */
   openGroup.value = null;
+  scheduleSettle(false);
 }
 
-const activeGroup = computed(() =>
-  groups.find((group) => group.key === openGroup.value)
-);
-
-/** 沒有展開群組時，說明區顯示目前選取情境的說明。 */
+/**
+ * 目前選取情境的說明。
+ *
+ * **刻意與展開狀態無關。** 2026-09-04 之前這裡會在 `openGroup !== null` 時
+ * 回傳 null——但改成高度動畫之後，那會讓說明在收合的當下就變成空字串，
+ * 高度動畫等於在一個空盒子上跑。內容留著、由 `descriptionOpen` 決定要不要
+ * 顯示，收合過程中才有東西可以縮。
+ */
 const selectedDescription = computed(() => {
-  if (openGroup.value !== null) return null;
   const direct = directOptions.find(
     (option) => option.value === selectedContext.value
   );
@@ -126,6 +210,19 @@ const selectedDescription = computed(() => {
   }
   return null;
 });
+
+/**
+ * 沒有展開群組、而且真的有說明可講時，才展開說明區。
+ *
+ * `settling` 也要擋：收尾期間展開說明，等於讓它現身 160ms 再跟著整個元件
+ * 一起消失。
+ */
+const descriptionOpen = computed(
+  () =>
+    !settling.value &&
+    openGroup.value === null &&
+    selectedDescription.value !== null
+);
 </script>
 
 <template>
@@ -164,10 +261,8 @@ const selectedDescription = computed(() => {
       >
         <Icon :name="group.icon" :size="32" />
         <strong>{{ group.label }}</strong>
-        <Icon
-          :name="
-            openGroup === group.key ? 'tool-chevron-down' : 'tool-chevron-right'
-          "
+        <DisclosureChevron
+          :open="openGroup === group.key"
           class="context-tile__chevron"
           :size="16"
         />
@@ -175,36 +270,53 @@ const selectedDescription = computed(() => {
     </div>
 
     <!--
-      說明與子選項共用同一個展開區——這頁只該有一種展開模式。展開群組時
-      顯示子選項，否則顯示已選情境的說明。
-    -->
-    <div
-      v-if="activeGroup !== undefined"
-      :id="activeGroup.key + '-context-options'"
-      class="context-detail"
-    >
-      <label
-        v-for="option in activeGroup.options"
-        :key="option.value"
-        class="context-suboption"
-        :class="{ 'option-selected': selectedContext === option.value }"
-      >
-        <input
-          v-model="selectedContext"
-          type="radio"
-          name="setup-context"
-          :value="option.value"
-        />
-        <span>
-          <strong>{{ option.label }}</strong>
-          <small>{{ option.description }}</small>
-        </span>
-      </label>
-    </div>
+      2026-09-04：從「一個共用展開區」改成「每個群組各自一個面板」。
 
-    <p v-else-if="selectedDescription" class="context-detail__description">
-      {{ selectedDescription }}
-    </p>
+      原本說明與子選項共用同一個 `v-if` / `v-else-if` 區塊，於是它有三種
+      狀態（子選項／說明／空），高度在 24px、171px、192px、0 之間直接跳，
+      實測從說明切到室內子選項是 **+147px 的瞬跳**。
+
+      共用區沒辦法接 DisclosurePanel：那個元件做的是 0↔內容高度，而這裡是
+      內容高度↔另一個內容高度；而且 `activeGroup` 收合時會變 undefined，
+      模板直接炸。**這是元件結構問題，不是動效問題**——拆開之後每個面板
+      都回到單純的「開／關」，DisclosurePanel 就直接可用了。
+
+      順帶修好一個無障礙問題：`aria-controls` 指的 id 以前只有展開時才存在，
+      現在永遠在 DOM 裡（收合時由 DisclosurePanel 標成 inert）。
+
+      切換群組時會有一個面板收合、另一個展開——那是同一個動作的兩半，不是
+      第十二節規則五要擋的「兩個各自獨立的元素同時動」。
+    -->
+    <DisclosurePanel
+      v-for="group in groups"
+      :key="group.key"
+      :open="openGroup === group.key"
+    >
+      <div :id="group.key + '-context-options'" class="context-detail">
+        <label
+          v-for="option in group.options"
+          :key="option.value"
+          class="context-suboption"
+          :class="{ 'option-selected': selectedContext === option.value }"
+        >
+          <input
+            type="radio"
+            name="setup-context"
+            :value="option.value"
+            :checked="selectedContext === option.value"
+            @change="selectSub(option.value)"
+          />
+          <span>
+            <strong>{{ option.label }}</strong>
+            <small>{{ option.description }}</small>
+          </span>
+        </label>
+      </div>
+    </DisclosurePanel>
+
+    <DisclosurePanel :open="descriptionOpen">
+      <p class="context-detail__description">{{ selectedDescription }}</p>
+    </DisclosurePanel>
   </fieldset>
 </template>
 
@@ -243,6 +355,15 @@ const selectedDescription = computed(() => {
   color: var(--text-primary);
   text-align: center;
   cursor: pointer;
+  transition:
+    background-color var(--duration-fast) var(--ease-out),
+    border-color var(--duration-fast) var(--ease-out),
+    filter var(--duration-fast) var(--ease-out);
+}
+
+/* 2026-09-04：原本 transition 與 :active 都沒有，選取瞬變、按下無回饋。 */
+.context-tile:active {
+  filter: brightness(var(--press-dim));
 }
 
 /*
@@ -251,11 +372,25 @@ const selectedDescription = computed(() => {
  * 直接寫在 .context-tile 上，不再像改版前那樣本地寫一份 background、再
  * 靠共用的 .option-selected 蓋回來——那個特異性衝突 2026-08-24 已經修過
  * 一次，不要再製造第二次。
+ *
+ * 2026-09-04：值改成共用那組（muted 邊框 ＋ hairline 底）。這裡是全站
+ * **最後一個**自己刻選取樣式的地方——2026-09-01 統一裝備分類時漏掉了它，
+ * 於是那次裁決只執行了一半。理由與當時完全相同：
+ *
+ *   1. 一比九。
+ *   2. --color-primary 是**行動色**。拿它當選取邊框，等於讓「這裡可以按」
+ *      跟「這個已經選了」共用一個訊號——而情境磁磚本身就是可按的，兩個
+ *      訊號疊在同一個元素上最容易混淆。
+ *   3. 邊框對比反而更好（muted 5.56 vs primary 4.37，SC 1.4.11 門檻 3:1）。
+ *
+ * 為什麼 2026-09-01 的守門沒抓到：selectedOptionStyle.test.ts 當時比對的是
+ * 字面上的 `:has(input:checked)`，而這裡寫的是 `:has(.context-tile__input:checked)`，
+ * 而且 `:has()` 與 `{` 之間還隔著第二個選擇器。守門同日已放寬成能涵蓋這兩種寫法。
  */
 .context-tile:has(.context-tile__input:checked),
 .context-tile--active {
-  border-color: var(--color-primary);
-  background: var(--color-surface-cream-strong);
+  border-color: var(--color-muted);
+  background: var(--color-hairline);
 }
 
 .context-tile strong {
@@ -304,6 +439,16 @@ const selectedDescription = computed(() => {
   border: 1px solid var(--border-strong);
   border-radius: var(--radius-sm);
   cursor: pointer;
+  transition:
+    background-color var(--duration-fast) var(--ease-out),
+    border-color var(--duration-fast) var(--ease-out),
+    filter var(--duration-fast) var(--ease-out);
+}
+
+/* 同 .context-tile，但這顆沒有自己的底色，所以按壓要補底（見 app.css）。 */
+.context-suboption:active {
+  background-color: var(--color-hairline);
+  filter: brightness(var(--press-dim));
 }
 
 .context-suboption:has(input:focus-visible) {

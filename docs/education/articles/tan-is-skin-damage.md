@@ -33,5 +33,3 @@ lastReviewed: 2026-08-16
 
 - [CDC：Reducing Risk for Skin Cancer](https://www.cdc.gov/skin-cancer/prevention/index.html)（UV 後膚色改變代表傷害；查閱 2026-08-16）
 - [MedlinePlus：Tanning](https://medlineplus.gov/tanning.html)（底曬不能預防曬傷與 UV 風險；查閱 2026-08-16）
-
-本文為一般衛教草稿，尚未完成 UVAlert 專業審閱。

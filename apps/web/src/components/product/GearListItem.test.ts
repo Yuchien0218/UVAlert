@@ -45,6 +45,13 @@ function makeProduct(
     purchaseMonth: null,
     expiryDate: null,
     note: null,
+    priceTwd: null,
+    usageRating: null,
+    size: null,
+    color: null,
+    volume: null,
+    formulation: null,
+    protectionType: null,
     currentSnapshot: baseSnapshot,
     snapshotFingerprint: fingerprintProductLabelSnapshot(baseSnapshot),
     createdAt: "2026-08-24T00:00:00.000Z",
@@ -53,61 +60,75 @@ function makeProduct(
   };
 }
 
-function summaryOf(product: ProductCatalogRecordV1): string {
-  const wrapper = mount(GearListItem, {
-    props: { product },
-    global: { stubs: { Icon: true } }
-  });
-  return wrapper.get(".gear-item__summary").text();
-}
+describe("GearListItem 收合狀態", () => {
+  /*
+   * 2026-08-31 使用者裁決：清單收合前只留名稱，以圖示為主。
+   *
+   * 原本這裡有三條測試守著 SPF／PA／補擦間隔的摘要——那些**規格已經從
+   * 清單移到詳情頁**，所以改守「不再顯示」。其中「不重複 PA 前綴」那條
+   * 的回歸保護沒有消失：ProductDetailPage.test.ts 仍然斷言不出現 PAPA，
+   * 而 PA 的組字現在只發生在那一頁。
+   */
+  function mountItem(product: ProductCatalogRecordV1) {
+    return mount(GearListItem, {
+      props: { product },
+      global: { stubs: { Icon: true } }
+    });
+  }
 
-describe("GearListItem 摘要", () => {
-  it("有 SPF 與 PA 時顯示真實規格，且不重複 PA 前綴", () => {
-    const summary = summaryOf(
+  it("顯示名稱與品類", () => {
+    const wrapper = mountItem(makeProduct());
+
+    expect(wrapper.get(".gear-item__name").text()).toBe("測試防曬乳");
+    expect(wrapper.get(".gear-item__category").text()).toContain("防曬乳");
+  });
+
+  it("不再顯示規格", () => {
+    const wrapper = mountItem(
       makeProduct({
-        currentSnapshot: {
-          ...baseSnapshot,
-          spf: 50,
-          paGrade: "PA++++"
-        }
+        currentSnapshot: { ...baseSnapshot, spf: 50, paGrade: "PA++++" }
       })
     );
 
-    expect(summary).toContain("SPF 50");
-    expect(summary).toContain("PA++++");
-    expect(summary).not.toContain("PAPA");
+    expect(wrapper.text()).not.toContain("SPF");
+    expect(wrapper.text()).not.toContain("PA++++");
+    expect(wrapper.text()).not.toContain("補擦間隔");
   });
 
-  it("有補擦間隔時一併顯示", () => {
-    const summary = summaryOf(
+  /*
+   * 那句品類固定說明對每一張同品類的卡都一樣（重複度 100%、資訊量 0），
+   * 正是使用者說「文字太多」的來源。
+   */
+  it("不再顯示品類的固定說明", () => {
+    const wrapper = mountItem(makeProduct());
+
+    expect(wrapper.text()).not.toContain("會建立補擦倒數；到期");
+  });
+
+  /*
+   * 購買月份、到期日、個人附註都只在詳情頁。分開守是因為它們來自不同
+   * 欄位——只斷言其中一個的話，另外兩個被加回來仍然會綠。
+   */
+  it("不再顯示購買月份、到期日與個人附註", () => {
+    const wrapper = mountItem(
       makeProduct({
-        currentSnapshot: { ...baseSnapshot, spf: 50, paGrade: null }
+        purchaseMonth: "2026-05",
+        expiryDate: "2028-05-01",
+        note: "清爽好推"
       })
     );
 
-    expect(summary).toContain("SPF 50");
-    expect(summary).toContain("補擦間隔 120 分鐘");
+    expect(wrapper.text()).not.toContain("2026");
+    expect(wrapper.text()).not.toContain("2028-05-01");
+    expect(wrapper.text()).not.toContain("清爽好推");
   });
 
-  it("沒有任何規格時落回品類的提醒效果說明，不編造資料", () => {
-    const summary = summaryOf(
-      makeProduct({
-        currentSnapshot: {
-          ...baseSnapshot,
-          spf: null,
-          paGrade: null,
-          reapplicationIntervalStatus: "no_numeric_interval",
-          reapplicationIntervalMinutes: null
-        }
-      })
-    );
-
-    expect(summary).toContain("會建立補擦倒數");
-    expect(summary).not.toContain("SPF");
-  });
-
+  /*
+   * **安全狀態是唯一保留的說明。** 被封鎖的裝備必須在清單上就看得出來，
+   * 不能等使用者點進詳情頁才知道——規格則是「進去看」也不遲。
+   */
   it("安全狀態被封鎖時，摘要改講封鎖原因而不是規格", () => {
-    const summary = summaryOf(
+    const summary = mountItem(
       makeProduct({
         currentSnapshot: {
           ...baseSnapshot,
@@ -116,7 +137,7 @@ describe("GearListItem 摘要", () => {
           ruleEligibilityAtApplication: "abnormal_reported"
         }
       })
-    );
+    ).get(".gear-item__summary").text();
 
     expect(summary).toContain("回報過異常");
     expect(summary).not.toContain("SPF 50");

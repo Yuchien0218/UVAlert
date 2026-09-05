@@ -68,6 +68,19 @@ export const ICONS = Object.freeze([
   { id: "state-success", group: "state", label: "已儲存" },
   { id: "state-warning", group: "state", label: "警告" },
   { id: "state-unverified", group: "state", label: "標示尚未確認" },
+  /*
+   * 2026-08-31：夜間。**幾何刻意與 `education-after-sun-care` 相同**
+   * （使用者指定「用這個」）。
+   *
+   * 沒有直接引用那顆的 id，而是登記成獨立的一顆，理由是語意不同：在衛教頁
+   * 它是「回家後與皮膚照顧」這個分類，在首頁它是「現在是夜間」這個狀態。
+   * 共用同一個 id 的話，之後任何一邊要調整幾何都會連動到另一邊——而它們
+   * 沒有理由永遠長一樣。名字分開、圖形暫時相同，是可以分岔的狀態。
+   *
+   * twoTone：琥珀金那一下是月亮旁的星芒，不是重點色裝飾——夜間圖示少了它
+   * 就只剩一個彎鉤。
+   */
+  { id: "state-night", group: "state", label: "夜間", twoTone: true },
 
   // ---- 更多頁卡片（雙色）----
   { id: "more-notifications", group: "more", label: "通知設定", twoTone: true },
@@ -158,6 +171,7 @@ export const ICONS = Object.freeze([
   { id: "tool-delete", group: "tool", label: "刪除", board: "new" },
   { id: "tool-share", group: "tool", label: "分享", board: "new" },
   { id: "tool-favorite", group: "tool", label: "收藏", board: "new" },
+  { id: "tool-sign-out", group: "tool", label: "登出" },
 
   // ---- 功能型（綁定特定元件，取代最後一批 @lucide/vue）----
   // 單色或雙色依「會不會被放進按鈕／狀態列」而定：需要繼承外層語意色的
@@ -203,7 +217,21 @@ export const ICONS = Object.freeze([
     twoTone: true,
     board: "new"
   },
-  { id: "feature-locate", group: "feature", label: "取得目前位置", board: "new" }
+  { id: "feature-locate", group: "feature", label: "取得目前位置", board: "new" },
+  // 分享頁的領銜圖示。跟 `tool-share`（節點＋連線）刻意不同型：那顆是
+  // 按鈕裡的動作，這張是頁面主題「把卡片送出去」，所以用開口盒＋向上
+  // 箭頭，40px 下兩者不會被誤認成同一個東西。
+  //
+  // 琥珀金放在箭頭而不是盒子：箭頭才是「分享」這個語意本身，盒子只是
+  // 被分享的東西。而且箭頭是描邊不是填色，沒有 feature-protection-summary
+  // 那個「內部沒面積、縮小就看不見」的問題。
+  {
+    id: "feature-share",
+    group: "feature",
+    label: "分享我的防曬裝備",
+    twoTone: true,
+    board: "new"
+  }
 ]);
 
 function escapeXml(value) {
@@ -352,7 +380,13 @@ const GROUP_TITLES = Object.freeze({
   feature: "功能型（雙色／單色混合）"
 });
 
-export const CONFIRMED_GROUPS = Object.freeze(["nav", "state", "more"]);
+// 2026-08-30：衛教 6 個由使用者確認，從待確認板移到已確認板。
+export const CONFIRMED_GROUPS = Object.freeze([
+  "nav",
+  "state",
+  "more",
+  "education"
+]);
 /** 新板依 group 排序，但成員由 board: "new" 決定，不是由 group 決定。 */
 export const NEW_BOARD_GROUPS = Object.freeze(["state", "tool", "feature"]);
 
@@ -360,7 +394,6 @@ export const PENDING_GROUPS = Object.freeze([
   "context",
   "event",
   "gear",
-  "education",
   "tool",
   "feature"
 ]);

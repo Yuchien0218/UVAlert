@@ -1,7 +1,8 @@
 <script setup lang="ts">
 import { shallowRef, useTemplateRef } from "vue";
-import Icon from "../icons/Icon.vue";
 import { useOverlay } from "../../composables/useOverlay";
+import IconButton from "../common/IconButton.vue";
+import InlineLoader from "../feedback/InlineLoader.vue";
 import type {
   SessionEndError,
   SessionEndPhase
@@ -44,7 +45,7 @@ function getErrorMessage(error: SessionEndError): string {
     case "state_changed":
       return "提醒狀態已在其他畫面更新，請確認最新狀態後再試一次。";
     case "persistence_error":
-      return "目前無法儲存停止操作，這次提醒仍在運作。請再試一次。";
+      return "目前無法儲存停止操作，這次提醒仍在運作，可以再試一次。";
     case "refresh_failed":
       return "提醒已提交結束，但畫面更新失敗。請重新整理確認最新狀態。";
     case "validation_error":
@@ -69,14 +70,11 @@ const { closeFromBackdrop } = useOverlay({
     畫面份量，確認改用彈窗呈現。
   -->
   <div class="session-end">
-    <button
-      class="icon-button"
-      type="button"
-      aria-label="結束這次提醒"
+    <IconButton
+      icon="tool-close"
+      label="結束這次提醒"
       @click="openConfirmation"
-    >
-      <Icon name="tool-close" :size="24" />
-    </button>
+    />
 
     <Teleport to="body">
       <div
@@ -112,6 +110,7 @@ const { closeFromBackdrop } = useOverlay({
               :disabled="phase === 'ending'"
               @click="confirmEnd"
             >
+              <InlineLoader v-if="phase === 'ending'" />
               {{ phase === "ending" ? "正在結束…" : "結束本次提醒" }}
             </button>
             <button
@@ -154,6 +153,10 @@ const { closeFromBackdrop } = useOverlay({
   inset: 0;
   display: grid;
   place-items: center;
+  /*
+   * 這裡刻意**不是** --card-padding：它是 backdrop 與視窗邊緣的留白，
+   * 不是任何表面的內距。調整卡片鬆緊時不應該連帶動到它。
+   */
   padding: var(--space-5);
   background: var(--overlay-backdrop);
 }
@@ -162,7 +165,7 @@ const { closeFromBackdrop } = useOverlay({
   display: grid;
   gap: var(--space-3);
   width: min(100%, 24rem);
-  padding: var(--space-5);
+  padding: var(--card-padding);
   border: 1px solid var(--border-subtle);
   border-radius: var(--radius-lg);
   background: var(--surface-overlay);

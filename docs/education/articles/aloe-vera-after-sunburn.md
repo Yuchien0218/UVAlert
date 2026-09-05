@@ -35,5 +35,3 @@ lastReviewed: 2026-08-16
 
 - [AAD：How to treat sunburn](https://www.aad.org/public/everyday-care/injured-skin/burns/treat-sunburn)（含蘆薈／大豆保濕、補水與遮蔽；查閱 2026-08-16）
 - [NHS：Sunburn](https://www.nhs.uk/conditions/sunburn/)（曬傷居家照護及應避免事項；查閱 2026-08-16）
-
-本文為一般衛教草稿，尚未完成 UVAlert 專業審閱。

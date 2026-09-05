@@ -2,6 +2,7 @@ import type {
   GearCategory,
   ProductCatalogRecordV1
 } from "@sunshield/contracts";
+import type { IconName } from "../../generated/icons.generated";
 
 export const GEAR_CATEGORY_LABELS: Record<GearCategory, string> = {
   sunscreen: "防曬乳",
@@ -11,13 +12,35 @@ export const GEAR_CATEGORY_LABELS: Record<GearCategory, string> = {
 };
 
 /**
+ * 每個品類對應的圖示。
+ *
+ * **2026-08-31 收斂。** 這張表原本**逐字複製在 GearForm.vue 與
+ * GearListItem.vue 兩個檔案裡**，GearForm 的註解甚至寫著「跟
+ * GearListItem.vue 用同一組品類圖示對應」——用註解交代兩份要一致，就是
+ * 「這裡遲早會漂移」的自白。兩份當時剛好同值，那是運氣不是機制。
+ *
+ * 放在這裡而不是新開一個檔案：`GEAR_CATEGORY_LABELS` 就在上面，兩者是
+ * 同一種東西（品類 → 呈現用的常數），拆開反而讓人不知道該去哪找。
+ *
+ * 圖示挑選 2026-08-23 與 Claude Design 元件庫同步過。`gear-hat` 與
+ * `gear-umbrella` 刻意不在這裡：品類只有四個，那兩顆對應不到任何一個
+ * （#10 的裁決讓裝備清單只留名稱，帽子與傘沒有獨立品類）。
+ */
+export const GEAR_CATEGORY_ICONS: Record<GearCategory, IconName> = {
+  sunscreen: "gear-sunscreen",
+  clothing: "gear-clothing",
+  eyewear: "gear-sunglasses",
+  other_gear: "gear-other"
+};
+
+/**
  * 每個品類對提醒的實際影響。
  *
  * 這段文字是本次擴充最主要的安全防線：使用者記錄一副墨鏡時，
  * 不得讓人以為提醒行為會因此改變（S-11）。
  */
 export const GEAR_CATEGORY_REMINDER_EFFECT: Record<GearCategory, string> = {
-  sunscreen: "會建立補擦倒數；到期、耐水、補擦間隔與擦上後等待時間會納入計算。",
+  sunscreen: "防曬乳將依設定，自動建立補擦倒數。",
   clothing: "被衣物遮住時不倒數，也不會自己產生補擦時間。",
   eyewear: "只做紀錄，不會影響補擦倒數。",
   other_gear: "只做紀錄，不會影響補擦倒數。"

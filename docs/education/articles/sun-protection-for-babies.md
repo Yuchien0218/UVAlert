@@ -33,5 +33,3 @@ FDA 建議先詢問醫療專業人員；AAD 則表示，在衣物和遮蔭無法
 
 - [FDA：Should You Put Sunscreen on Infants? Not Usually](https://www.fda.gov/consumers/consumer-updates/should-you-put-sunscreen-infants-not-usually)（6 個月以下遮蔭、衣物與先諮詢；查閱 2026-08-16）
 - [AAD：Infant sun protection](https://www.aad.org/public/everyday-care/sun-protection/shade-clothing-sunscreen/infant-sun-protection)（嬰兒遮蔽與小範圍防曬；查閱 2026-08-16）
-
-本文為一般衛教草稿，尚未完成 UVAlert 專業審閱。

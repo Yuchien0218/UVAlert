@@ -121,7 +121,87 @@ SessionEventStreamV1（事件）→ packages/domain reducer → SessionProjectio
 
 琥珀金 `#C1832E` 是圖示重點色，**不是**品牌主色；要填 primary token 時用 `#9F5E42`。
 
-目前 App icon／favicon 已套用新 Logo，但 `packages/ui/src/styles.css` 與 `manifest.webmanifest` 仍是舊的中性灰階——icon 換了不等於配色換了。文件裡若出現「配色尚未定案」「icon 尚未套用」，先確認日期與出處。
+**2026-08-30 更正：配色已經全部套用完畢，這段原本寫「仍是舊的中性灰階」，已不成立。** 逐項查證過：
+
+- `packages/ui/src/styles.css`：完整暖色票（canvas `#FAF5EC`、primary `#9F5E42`…），2026-08-22 就套用了
+- `manifest.webmanifest`：`theme_color`／`background_color` 都是 `#faf5ec`
+- App icon／favicon：2026-08-22 的 `8355d11` 已換成播報印記
+- `BrandHeader` 的橫式 lockup：2026-08-30 換成裁掉留白的新版
+
+文件裡若出現「配色尚未定案」「icon 尚未套用」「仍是灰階」，那是過期敘述，以程式碼為準。
+
+## 守門測試：兩個會讓它「全綠但守空氣」的坑
+
+這個 repo 有不少守門測試是**掃原始碼字串**（比對 `.vue`／`.css` 的內容），而不是掛載元件。那類測試有兩個固定的失敗模式，2026-08-30 一天之內各踩了兩次以上。
+
+**寫完守門一定要先破壞一次，確認它真的會紅。** 全綠不等於守得住。
+
+### 坑一：沒有剝註解，於是註解本身就能讓測試通過（或誤判）
+
+掃原始碼時註解也算數，後果有兩種方向：
+
+- **假通過**：測試要求「畫面上要有 X」，而你只是在註解裡提到 X，測試就綠了
+- **假失敗**：測試禁止用某個舊 token，而你在註解裡寫「不要用這個舊 token，理由是…」，測試就紅了——等於禁止在程式碼裡解釋規則
+
+三個實例都在 2026-08-30：`GearFormLayout.test.ts`（新守門差點假通過）、`typographyRoles.test.ts`（既有守門把解釋性註解判成違規）、`tools/audit/unused-declarations.mjs`（第一版把註解裡提到的名稱算成「有使用」）。
+
+所以掃描前一律先剝：
+
+```js
+const strip = (source) =>
+  source
+    .replace(/<!--[\s\S]*?-->/g, "")
+    .replace(/\/\*[\s\S]*?\*\//g, "")
+    .replace(/^\s*\/\/.*$/gm, "");
+```
+
+剝掉之後守門強度不變——真正的使用仍然抓得到，只有解釋文字不再參與判定。
+
+### 坑二：`toContain` 比子字串，改個名字就滑過去了
+
+`expect(code).toContain("category-effect")` 會被 `category-effect-REMOVED` 滿足。2026-08-30 實測：把 class 改名之後測試依然全綠，那條守門等於不存在。
+
+**比對完整的屬性或宣告**，不要只比對名字片段：
+
+```js
+expect(code).toContain('class="category-effect"');
+```
+
+### 另外：兩個案例可能互相掩護
+
+同一天還有一次：兩條測試各自只變動「一個條件」，於是拿掉任一個條件都還是綠的——因為每條測試都被**另一個**條件擋住了。守多重條件時，要有把變因拆開的案例（固定 A 變 B、固定 B 變 A），否則守的是「A 或 B」而不是「A 且 B」。
+
+## 有些問題只有「畫出來看」才找得到
+
+守門測試那一段講的是「測試可能守空氣」。**這一段講的是更前面一層：有些東西根本不在測試看得到的維度裡。**
+
+2026-08-31 做全臺 UV 分布地圖時，單元測試全綠、typecheck 過、lint 過，畫面上卻是壞的。三個問題全是截圖看出來的：
+
+| 現象 | 根因 |
+| ---- | ---- |
+| 每個縣市變成一塊馬賽克 | 資料是「同縣市所有鄉鎮的環」，用畫布色描邊等於把 368 條鄉鎮界全畫出來 |
+| 縣市內部出現白色細縫 | 相鄰鄉鎮各自獨立簡化，共用邊被推到不同位置——所以也**不能**完全不描邊 |
+| 台灣只佔畫布右邊六成 | 金門在東經 118.3，本島最西的澎湖是 119.5 |
+
+前兩點合起來才是完整規則（**描邊顏色必須與填色相同**），缺任何一邊都會壞。而「`<path>` 有 22 個」「`aria-hidden` 是 true」這類斷言，對三者都是綠的。
+
+同一天還有一個更便宜的例子：`ProductDetailPage` 的 `dt` 被擠成一行一個字。DOM 正確、文字正確、測試正確，**只有寬度是錯的**。
+
+**所以：只要改動會影響「長什麼樣子」，就要真的看一眼。** 這個 repo 有 preview 工具，成本是一次 `computer{action:"screenshot"}`。
+
+可以用測量代替截圖的情況（更快也更精確）：
+
+```js
+// 元素被壓縮成幾行？
+const range = document.createRange();
+range.selectNodeContents(element);
+range.getClientRects().length;
+
+// 內容佔畫布多少比例、有沒有偏移？
+const box = svgGroup.getBBox();
+```
+
+**但幾何與構圖要用眼睛。** 上面那三個問題，任何一種數值斷言都抓不到——它們是「看起來不對」，不是「數字不對」。
 
 ## Session 衛生（這個 repo 的已知痛點）
 
@@ -137,6 +217,32 @@ SessionEventStreamV1（事件）→ packages/domain reducer → SessionProjectio
 2. `ListAgents` 確認沒有其他 session 正在那個路徑工作
 
 只做第 1 項不夠——另一個 session 可能正好在你檢查之後、移除之前寫入。
+
+### 共用 working tree：分支是「誰的」，不是「哪個目錄的」
+
+2026-09-02 一天內兩次，都是因為多個 session 共用**同一個 working tree**——不是各自的 worktree。共用時 `git checkout` 是全域的，你切分支等於幫別人也切了。
+
+**事故一：在 `main` 上就直接 commit。** 忘了先開分支，做完才發現。內容與 `origin/main` 相同才救得回來（`git reset --hard origin/main`），有實質差異的話就得手動搬。
+
+**事故二：commit 落在別人的分支上。** 另一個 session 先 checkout 了自己的 `polish/...`，我沒看就開始做，commit 因此長在他們的分支頂端，而且他們還有 5 個未 commit 的檔案在同一個 tree 裡。
+
+第二種不能用 `reset --hard` 救——那會連別人未 commit 的檔案一起清掉。正確做法是**只動 ref，不動檔案**：
+
+```bash
+git branch -f feat/my-work <my-commit-sha>
+```
+
+```bash
+git checkout feat/my-work
+```
+
+```bash
+git branch -f polish/their-work origin/main
+```
+
+中間那個 `checkout` 指向同一個 commit，所以工作目錄零變動，別人未 commit 的檔案原封不動。做完要主動告訴對方你動過他們的分支 ref。
+
+**所以動手前先 `git branch --show-current`**，不要假設它還停在你上次離開的地方。`ListAgents` 看得到誰在跑，但看不到誰剛剛切了分支。
 
 ### 其他
 

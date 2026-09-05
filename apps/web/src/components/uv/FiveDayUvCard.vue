@@ -5,7 +5,10 @@ import type {
   UvForecastError,
   UvForecastPhase
 } from "../../features/uv/createUvForecastController";
-import { getUvRiskLevelLabel } from "../../features/uv/uvForecastRules";
+import {
+  getUvRiskLevelLabel,
+  toLocalDateKey
+} from "../../features/uv/uvForecastRules";
 import {
   formatDate,
   formatMonthDayTime,
@@ -24,24 +27,56 @@ const emit = defineEmits<{
   refresh: [];
 }>();
 
-function formatForecastDate(localDate: string): {
-  weekday: string;
-  date: string;
-} {
+function toLocalDate(localDate: string): Date {
   const [year, month, day] = localDate.split("-").map((part) => Number(part));
-  const date = new Date(year!, month! - 1, day!, 12);
-  return {
-    weekday: formatWeekday(date),
-    date: formatDate(date)
-  };
+  /* 正午：避開日光節約與時區換算把日期推到前後一天。 */
+  return new Date(year!, month! - 1, day!, 12);
+}
+
+/**
+ * 卡片上顯示的日子（2026-09-04 使用者要求：「改成今天、週一、週二」）。
+ *
+ * 原本是「9/4」這種月／日。五天全部是月日的話，要先在心裡把數字換算成
+ * 「這是後天」；改成星期之後那一步就不必做了。
+ *
+ * **第一格用「今天」而不是它的星期**：星期名回答的是「哪一天」，而第一格
+ * 使用者真正要問的是「現在」。
+ *
+ * 判斷用日期字串比對，不是用陣列索引——預報可能是昨天存下來、今天離線時
+ * 讀出來的快取，那時第一格並不是今天。
+ */
+function forecastDayLabel(localDate: string): string {
+  return localDate === toLocalDateKey(new Date())
+    ? "今天"
+    : formatWeekday(toLocalDate(localDate));
 }
 
 function formatUpdatedAt(instant: string): string {
   return formatMonthDayTime(instant, { timeZone: "Asia/Taipei" });
 }
 
+/**
+ * 等級名稱轉成 class 後綴：`very_high` → `very-high`。
+ *
+ * **2026-09-04：兩個地方共用同一個函式，因為它們曾經漂移。** 卡片外框走
+ * 這裡（有 `replace`），等級藥丸卻在模板裡直接內插 `riskLevel`——於是
+ * `very_high` 產生 `uv-day__level-badge--very_high`，而 CSS 寫的是
+ * `--very-high`。結果「過量級」那一顆完全沒有底色，變成一段裸文字
+ * （實測 `background-color: rgba(0, 0, 0, 0)`）。
+ *
+ * 五個等級裡只有 `very_high` 帶底線，所以另外四個一直是對的——這也是它
+ * 能活這麼久的原因。
+ */
+function riskSuffix(riskLevel: UvRiskLevel): string {
+  return riskLevel.replace("_", "-");
+}
+
 function riskClass(riskLevel: UvRiskLevel): string {
-  return `uv-day--${riskLevel.replace("_", "-")}`;
+  return `uv-day--${riskSuffix(riskLevel)}`;
+}
+
+function levelBadgeClass(riskLevel: UvRiskLevel): string {
+  return `uv-day__level-badge--${riskSuffix(riskLevel)}`;
 }
 
 function getUnavailableMessage(error: UvForecastError): string {
@@ -64,18 +99,14 @@ function getUnavailableMessage(error: UvForecastError): string {
   <section
     id="five-day-uv"
     class="uv-forecast"
-    aria-labelledby="five-day-uv-title"
+    aria-label="未來五日 UV 預報"
   >
+    <!--
+      2026-08-31：拿掉卡片自己的 h2。這張卡只用在 /forecast，而那一頁的
+      h1 已經是「五日 UV 預報」——兩個標題講同一件事，使用者回饋重複。
+      無障礙名稱改用 aria-label 掛在 section 上，語意不受影響。
+    -->
     <div class="uv-forecast__heading">
-      <div>
-        <h2
-          id="five-day-uv-title"
-          class="uv-forecast__title"
-          data-typography-role="section-title"
-        >
-          未來 5 天 UV 預報
-        </h2>
-      </div>
       <Icon name="feature-uv-forecast" :size="24" />
     </div>
 
@@ -89,11 +120,24 @@ function getUnavailableMessage(error: UvForecastError): string {
     </div>
 
     <div v-else-if="phase === 'no_region'" class="uv-forecast__state">
-      <span>
-        請先
-        <RouterLink class="text-link" to="/region">設定地區</RouterLink>
-        ，才能查看五日 UV 預報。
-      </span>
+      <!--
+        2026-09-04：拿掉尾巴「，才能查看五日 UV 預報」——h1 已經是
+        「五日 UV 預報」，這句話在同一個畫面把它又說了一次。
+
+        連結本身必須留著：它是空狀態的主行動，而且下方的
+        `.forecast-region` 是「目前地區」的常駐控制列，兩者角色不同。
+        （這顆連結曾經是 `#outdoor-context` 頁內錨點，點了沒反應，
+        已有守門釘著）
+      -->
+      <!--
+        連結前後不留換行：Vue 會把它們壓成空格，中文行內連結
+        被撠開成「請先 設定地區 。」，句號前面會浮一個空隙。
+      -->
+      <span
+        >請先<RouterLink class="text-link" to="/region"
+          >設定地區</RouterLink
+        >。</span
+      >
     </div>
 
     <div
@@ -129,8 +173,16 @@ function getUnavailableMessage(error: UvForecastError): string {
           class="uv-day"
           :class="riskClass(day.riskLevel)"
         >
-          <span class="uv-day__date stat-figure">
-            {{ formatForecastDate(day.localDate).date }}
+          <!--
+            `stat-figure`（等寬數字）拿掉了：這一格現在是「今天／週四」，
+            沒有數字要對齊。完整日期留給螢幕閱讀器——畫面上省掉的脈絡，
+            聽的人本來就沒有旁邊四格可以對照。
+          -->
+          <span class="uv-day__date">
+            <span class="screen-reader-only"
+              >{{ formatDate(toLocalDate(day.localDate)) }}
+            </span>
+            {{ forecastDayLabel(day.localDate) }}
           </span>
           <strong class="uv-day__value stat-figure">
             <span class="screen-reader-only">紫外線指數</span>
@@ -138,7 +190,7 @@ function getUnavailableMessage(error: UvForecastError): string {
           </strong>
           <span
             class="uv-day__level-badge"
-            :class="`uv-day__level-badge--${day.riskLevel}`"
+            :class="levelBadgeClass(day.riskLevel)"
             :aria-label="`風險等級：${getUvRiskLevelLabel(day.riskLevel)}`"
           >
             {{ getUvRiskLevelLabel(day.riskLevel) }}
@@ -146,18 +198,21 @@ function getUnavailableMessage(error: UvForecastError): string {
         </li>
       </ol>
 
+      <!--
+        2026-08-31：更新時間不再換行（使用者要求）。
+
+        原本「更新時間」與時間值是兩個巢狀的 span，時間那層用 stat-figure
+        （等寬數字），兩者之間有換行機會，實測就是斷成兩行。改成同一個
+        span 並禁止在中間斷行——「更新時間 9/1 14:23」是一個詞組。
+      -->
       <p class="uv-forecast__source">
-        {{ forecast.sourceDisplayName }}・F-D0047-091・白日時段
-        <span>
+        {{ forecast.sourceDisplayName }}・日間紫外線預報
+        <span class="uv-forecast__updated">
           更新時間
-          <span class="uv-forecast__updated-at stat-figure stat-figure--inline">
-            {{ formatUpdatedAt(forecast.fetchedAt) }}
-          </span>
+          <span class="uv-forecast__updated-at stat-figure">{{
+            formatUpdatedAt(forecast.fetchedAt)
+          }}</span>
         </span>
-      </p>
-      <p class="uv-forecast__note">
-        這是依地區提供的預報，不是即時測站觀測；UV
-        高低不會延長或縮短你的補擦計時。
       </p>
     </template>
   </section>
@@ -243,7 +298,6 @@ function getUnavailableMessage(error: UvForecastError): string {
 }
 
 .uv-day {
-  position: relative;
   display: grid;
   grid-template-rows: auto 1fr auto;
   justify-items: center;
@@ -254,14 +308,24 @@ function getUnavailableMessage(error: UvForecastError): string {
   border-radius: var(--radius-md);
   background: var(--surface-primary);
   text-align: center;
-  /* 只有 border-color 會變（:hover 與 uv-day--* 等級色）；all 會連帶動到
-     之後新增的任何屬性，見 DESIGN.md 第十二節。 */
+  /*
+   * 只有 border-color 會變（uv-day--* 等級色）；all 會連帶動到之後新增的
+   * 任何屬性，見 DESIGN.md 第十二節。
+   */
   transition: border-color var(--duration-fast) var(--ease-out);
 }
 
-.uv-day:hover {
-  border-color: var(--text-secondary);
-}
+/*
+ * 2026-09-04 拿掉 `.uv-day:hover { border-color: var(--text-secondary) }`。
+ *
+ * 兩個問題：
+ *
+ *   1. **它是假的可點提示。** 這是 <li>，沒有 click、沒有連結、沒有
+ *      cursor: pointer——滑過會亮起來，按下去什麼都不會發生。
+ *   2. **它會蓋掉資訊。** `.uv-day:hover` 的特異性 (0,2,0) 高過
+ *      `.uv-day--low` 那組 (0,1,0)，所以滑過的那一天**風險等級的邊框色
+ *      會被中性灰換掉**——邊框在這裡是承載等級的，不是裝飾。
+ */
 
 .uv-day--low {
   border-color: var(--color-uvi-low);
@@ -283,10 +347,17 @@ function getUnavailableMessage(error: UvForecastError): string {
   border-color: var(--color-uvi-extreme);
 }
 
+/*
+ * 2026-08-31：日期改回正常流排，置中。
+ *
+ * 原本是 position: absolute 貼在右上角，於是三個元素讀起來不是一個由上
+ * 到下的層級（日期 → 數字 → 等級），而是「一個浮在角落的日期」加「兩個
+ * 置中的東西」——數字看起來也因此偏離卡片的視覺中心。使用者回饋「框框內
+ * 的日期／UV 指數／等級排版要調整」指的就是這個。
+ *
+ * 尺寸關係不變：日期最小、數字最大、等級居中。
+ */
 .uv-day__date {
-  position: absolute;
-  top: var(--space-2);
-  right: var(--space-2);
   color: var(--text-secondary);
   font-size: var(--font-size-caption);
   font-weight: 500;
@@ -348,8 +419,24 @@ function getUnavailableMessage(error: UvForecastError): string {
   line-height: var(--line-height-caption);
 }
 
-.uv-forecast__source span {
+/*
+ * 2026-08-31：改成 `> span`（直接子代）。
+ *
+ * 原本是後代選擇器，所以「更新時間」外層與裡面那層 stat-figure **兩個都
+ * 變成 block**——時間值因此被推到下一行，畫面上就是使用者截圖裡的兩行。
+ * 外層要 block（它本來就自成一行），裡面那層必須留在行內。
+ */
+/*
+ * 「更新時間」自成一行。
+ *
+ * 2026-09-04：補上一個 space-1 的上距。這兩行是**兩件事**——一行說資料
+ * 從哪裡來、一行說它多新——貼著排時讀起來像第一句折行。行距 21px 之間
+ * 再加 4px，剛好讓它們分開又不散開。
+ */
+.uv-forecast__source > span {
   display: block;
+  margin-top: var(--space-1);
+  white-space: nowrap;
 }
 
 @media (max-width: 24rem) {
@@ -363,8 +450,6 @@ function getUnavailableMessage(error: UvForecastError): string {
   }
 
   .uv-day__date {
-    top: var(--space-1);
-    right: var(--space-1);
     font-size: 0.7rem;
   }
 

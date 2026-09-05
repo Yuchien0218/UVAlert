@@ -58,11 +58,40 @@ export function createAppRouter(
         component: () => import("../pages/GearFormPage.vue"),
         meta: { title: "編輯防曬裝備", hideNavigation: true }
       },
+      /*
+       * 靜態的 /products/share 必須排在 /products/:id 前面。vue-router 的
+       * 排名本來就讓靜態片段贏過參數，但**順序讀起來要是對的**——把它排在
+       * 後面等於要求每個讀這份路由表的人都記得那條排名規則。
+       */
       {
+        path: "/products/share",
+        name: "product-share",
+        component: () => import("../pages/GearSharePage.vue"),
+        meta: { title: "分享我的防曬裝備", hideNavigation: true }
+      },
+      /*
+       * 2026-09-01：裝備詳情從整頁改成清單上的抽屜（使用者裁決），
+       * `ProductDetailPage.vue` 已刪除。
+       *
+       * **舊網址導回清單而不是留一個 404。** 這個路徑沒有任何內部連結指過
+       * 來（改動前唯一的入口是 `ProductsPage.openGear`），但可能還躺在某人
+       * 的瀏覽記錄或已安裝 PWA 的分頁裡；把他們丟到「找不到頁面」比直接
+       * 帶回清單糟。
+       *
+       * 不做「導回清單並自動打開那件裝備」：那需要把抽屜狀態接進網址，等於
+       * 把剛拿掉的那一層路由再加回來，而這件事沒有人會分享連結。
+       */
+      {
+        /*
+         * 2026-09-04：redirect 從 `{ name: "products" }` 改成字串路徑。
+         *
+         * 具名目標會把 `:id` 這個參數一起帶過去，而 `products` 這條路由不吃
+         * 參數，vue-router 因此每次都印
+         * `[Vue Router warn]: Discarded invalid param(s) "id" when navigating`。
+         * 行為本來就正確，只是一直在丟警告。
+         */
         path: "/products/:id",
-        name: "product-detail",
-        component: () => import("../pages/ProductDetailPage.vue"),
-        meta: { title: "防曬裝備詳情", hideNavigation: true }
+        redirect: "/products"
       },
       {
         path: "/products",
@@ -243,10 +272,40 @@ export function createAppRouter(
     return true;
   });
 
+  /*
+   * 「這次是往前還是返回」——寫成 <html data-nav-direction>，讓 CSS 判斷
+   * 要不要跑 page-stack 的階梯淡入（2026-09-04）。
+   *
+   * 返回時重跑階梯淡入會讀成「重新載入」而不是「回來了」：使用者剛剛才
+   * 看過那一頁，內容一格一格再長一次，讀起來像它剛被建立出來。
+   *
+   * **自己維護一個路徑堆疊，不讀 history.state.position。** 那個欄位只有
+   * `createWebHistory` 有；`createMemoryHistory` 的 `state.position` 永遠是
+   * `null`（實測），拿它判斷會讓方向永遠是 forward，而且是**靜默**降級——
+   * 測試環境用的正是記憶體 history，等於這段邏輯完全沒被驗證過。
+   *
+   * 也不用 popstate 事件：那個抓不到程式呼叫的 `router.back()`。
+   *
+   * 已知取捨：A → B → A 這種「用連結回到剛剛看過的頁」會被判成返回。那不
+   * 影響正確性——使用者確實是回到剛看過的畫面，不跑階梯反而更合適。
+   */
+  const visited: string[] = [];
+
   router.afterEach((to) => {
     const title =
       typeof to.meta.title === "string" ? to.meta.title : "Sunshield";
     globalThis.document.title = `${title}｜防曬晴報員`;
+
+    const isBack = visited[visited.length - 2] === to.fullPath;
+    if (isBack) {
+      visited.pop();
+    } else {
+      visited.push(to.fullPath);
+    }
+
+    globalThis.document.documentElement.dataset.navDirection = isBack
+      ? "back"
+      : "forward";
   });
 
   return router;

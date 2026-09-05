@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed } from "vue";
-import { useRoute } from "vue-router";
+import { useRoute, useRouter } from "vue-router";
+import IconButton from "../../components/common/IconButton.vue";
 import EducationArticleSummary from "../../components/education/EducationArticleSummary.vue";
 import EducationSeoHead from "../../components/education/EducationSeoHead.vue";
 import EducationNotFoundPage from "./EducationNotFoundPage.vue";
@@ -13,6 +14,7 @@ import {
 } from "../../features/education/educationContent";
 
 const route = useRoute();
+const router = useRouter();
 const slug = computed(() => String(route.params.slug ?? ""));
 const article = computed(() => findEducationArticle(slug.value));
 const category = computed(() =>
@@ -53,38 +55,71 @@ const relatedArticles = computed(() =>
       ]"
     />
 
+    <!--
+      2026-09-01：返回從左上角的文字連結改成右上角的圖示鈕（使用者要求，
+      與衛教分類頁同一批）。
+
+      「← 了解今天的 UV」原本自己佔一列，右邊什麼都沒有——跟 2026-08-31
+      那三個「叉叉獨佔一列」是同一個版型問題。返回目的地不變（回到這篇
+      文章所屬的分類），只是換成圖示並跟標題同列。
+
+      可及名稱帶上分類名（「返回了解今天的 UV」），不是泛用的「返回」——
+      螢幕閱讀器讀到時要知道會回到哪裡。
+    -->
     <header class="education-article-header">
-      <RouterLink
-        class="text-link"
-        :to="
-          category === undefined
-            ? '/education'
-            : educationCategoryPath(category.slug)
+      <!--
+        2026-09-03：拿掉標題上方的 `primaryQuestion`（使用者要求）。
+
+        讀者是從分類頁的卡片點進來的，**那張卡片正面就寫著這個問題**
+        （`EducationCategoryPage` 仍然顯示它）——落地後在標題上方再看一次
+        是同一句話說兩遍，而且它把大標往下推了一整行。
+
+        資料沒有刪：`primaryQuestion` 仍是 AEO 欄位（`docs/education/README`
+        第 121 行），分類頁的卡片與公開靜態站（`generate-public-site.mjs`）
+        都還在用——那兩個地方它是「還沒讀過的資訊」，這裡不是。
+      -->
+      <!--
+        返回鈕排在標題**之前**，因為它是浮動的——CSS 的 float 只影響原始碼
+        上排在它後面的內容。閱讀順序上也說得通：這顆是這一頁的逃生出口，
+        而且可及名稱帶著目的地（「返回了解今天的 UV」）。
+      -->
+      <IconButton
+        class="education-article-header__back"
+        icon="tool-arrow-left"
+        :label="`返回${category?.title ?? '防曬衛教'}`"
+        @click="
+          router.push(
+            category === undefined
+              ? '/education'
+              : educationCategoryPath(category.slug)
+          )
         "
-      >
-        ← {{ category?.title ?? "防曬衛教" }}
-      </RouterLink>
-      <p class="page-heading__eyebrow">{{ article.primaryQuestion }}</p>
+      />
+
+      <!--
+        標題不再包一層 div：那層是 `display: grid`，而 **grid 容器不會與
+        float 重疊**——它會整個縮到浮動元素旁邊，於是每一行都被壓窄，等於
+        float 白做（2026-09-03 實測：三行都是 280px）。拿掉之後 h1 是普通
+        區塊，只有被按鈕擋住的那幾行會縮短。
+      -->
       <h1 class="page-heading__title" data-typography-role="page-title">
         {{ article.title }}
       </h1>
-      <p class="education-article-summary prose-block">
-        {{ article.summary }}
-      </p>
+      <!--
+        2026-08-31：拿掉這裡的 summary。
+
+        它與下方的「先說結論」（takeawayHtml）講的是同一件事，只是換句話
+        說——使用者回報「文章內重複顯示摘要」。留下 takeaway 而不是 summary，
+        因為 takeaway 是**文章自己寫的結論段落**（產生器從 ## 先說結論 抽
+        出來的），summary 則是給清單卡片與 <meta description> 用的簡介。
+
+        summary 沒有被刪除，只是不在這一頁重複：educationSeo.ts 仍然用它當
+        meta description，分類頁與首頁的卡片也還在顯示。
+      -->
       <p class="education-article-meta">
-        最後查閱：{{ article.lastReviewed }} ·
-        {{ article.publishable ? "已發布" : "專業審閱中" }}
+        最後查閱：{{ article.lastReviewed }}
       </p>
     </header>
-
-    <aside
-      v-if="!article.publishable"
-      class="education-review-note"
-      role="note"
-    >
-      這篇文章目前是整理中的衛教草稿，尚未完成 UVAlert
-      專業審閱；內容僅供閱讀，不代表個人化醫療建議。
-    </aside>
 
     <!--
       文章的「先說結論」段落。
@@ -106,18 +141,26 @@ const relatedArticles = computed(() =>
       class="education-related"
       aria-labelledby="related-title"
     >
+      <hr class="wave-divider education-related__divider" />
+
       <h2 id="related-title" data-typography-role="section-title">
         同主題延伸閱讀
       </h2>
-      <nav class="education-related-list" aria-label="同主題文章">
-        <RouterLink
-          v-for="related in relatedArticles"
-          :key="related.slug"
-          class="text-link"
-          :to="educationArticlePath(related.slug)"
-        >
-          {{ related.title }}
-        </RouterLink>
+      <!--
+        2026-09-03：改成真的 `<ul>`（使用者要求前面加圓點）。
+        除了圓點之外，`nav > ul` 也讓螢幕閱讀器報得出「幾個項目」。
+      -->
+      <nav aria-label="同主題文章">
+        <ul class="education-related-list">
+          <li v-for="related in relatedArticles" :key="related.slug">
+            <RouterLink
+              class="text-link"
+              :to="educationArticlePath(related.slug)"
+            >
+              {{ related.title }}
+            </RouterLink>
+          </li>
+        </ul>
       </nav>
     </section>
   </article>
@@ -132,10 +175,36 @@ const relatedArticles = computed(() =>
   gap: var(--page-stack-gap-prose);
 }
 
+/* 標題群組在左、返回鈕在右上角同一列；下方兩列橫跨兩欄。 */
+/*
+ * 返回鈕改用 float（2026-09-03，使用者回報大標「提早換行」並圈出右邊那塊
+ * 空白）。
+ *
+ * 走過的三個版本，記下來免得有人再繞一次：
+ *
+ * 1. `minmax(0, 1fr) auto` 兩欄——箭頭只有 44px 高，卻讓**整個標題區**
+ *    永遠少掉一個按鈕的寬度，每一行都提早折
+ * 2. 重疊（首頁倒數用的那招）——**這裡不行**：首頁第一行是很短的 eyebrow，
+ *    這一頁第一行就是大標，而標題最長 33 個字（「SPF 30 和 SPF 50 差多少？
+ *    數字越高不代表可以越久不補」），第一行一定壓在按鈕底下
+ * 3. 箭頭自成一列——大標每一行都拿得到整個寬度，但**違反 2026-08-31 的
+ *    裁決**：`educationLayout.test.ts` 明文守著「返回鈕必須跟標題同一列」，
+ *    理由是那次「叉叉獨佔一列」的跑版事故
+ *
+ * 所以採用 float：箭頭留在標題那一列（不多佔垂直空間），只有被它擋住的
+ * 那一兩行會縮短，其餘拿回整個寬度。第一行仍然讓開 56px——那是箭頭實際
+ * 佔的位置，除非把它移走，否則消不掉。
+ *
+ * 注意標題**不能**再包一層 `display: grid` 的 div：grid 容器不會與 float
+ * 重疊，會整個縮到旁邊，等於 float 白做（實測三行都變成 280px）。
+ */
 .education-article-header {
-  display: grid;
-  gap: var(--space-3);
   max-width: 44rem;
+}
+
+.education-article-header__back {
+  float: inline-end;
+  margin-inline-start: var(--space-3);
 }
 
 .education-article-header .page-heading__title {
@@ -144,12 +213,23 @@ const relatedArticles = computed(() =>
   max-width: 24em;
 }
 
-.education-article-summary {
-  margin: 0;
-  color: var(--text-body);
-  font-size: var(--font-size-body);
-  line-height: var(--line-height-body);
-}
+/*
+ * 2026-09-01：「最後查閱」靠右（使用者要求）。
+ *
+ * 它是**這篇文章的後設資料**，不是內文的第一句話。靠左時它緊接在標題
+ * 下面，讀起來像副標；靠右之後它退到頁面邊緣，跟返回鈕同一側，讀者的
+ * 視線不會把它算進正文。
+ */
+/*
+ * 「最後查閱」靠左（2026-09-03，使用者要求）。
+ *
+ * **這是推翻 2026-09-01 的「靠右」。** 當時的理由是「它是文章的後設資料，
+ * 靠左會讀起來像副標」——但標題上方的問句拿掉之後，靠右反而變成整個標題
+ * 區唯一一個靠右的東西，比副標更突兀。
+ *
+ * `grid-column`／`justify-self` 一併刪掉：標題列改用 float 之後這個 header
+ * 已經不是 grid，那兩行是失效的殘留。
+ */
 
 .education-article-meta,
 .education-card-kicker {
@@ -181,6 +261,19 @@ const relatedArticles = computed(() =>
   line-height: var(--line-height-section-title);
 }
 
+/*
+ * 2026-09-01：正文第一個標題不要再自己加上距（使用者回報「間距距離很奇怪」）。
+ *
+ * `--prose-heading-gap-before` 是**段落之間**要的呼吸——它假設上面有一段
+ * 內文。但正文的第一個元素上面是「先說結論」那張卡，而卡片與正文之間
+ * `.page-stack` 已經給了一次間距，兩個疊起來就是實測畫面上那一大塊空白。
+ *
+ * 同理處理任何「第一個子元素」：段落、清單也一樣不該自己撐開頂端。
+ */
+.education-article-body :deep(> :first-child) {
+  margin-top: 0;
+}
+
 .education-article-body :deep(h3) {
   margin: var(--prose-subheading-gap-before) 0 var(--prose-heading-gap-after);
   font-size: var(--font-size-card-title);
@@ -201,29 +294,41 @@ const relatedArticles = computed(() =>
   margin-top: var(--space-2);
 }
 
+/*
+ * 資料來源清單小一階（2026-09-03，使用者要求）。
+ *
+ * **靠「這是一份外部參考連結」來認，不是靠位置。** 產生器沒有給這份清單
+ * 任何 class，而全文 67 個 `<ul>` 裡帶 `target="_blank"` 的正好是 48 個
+ * ——等於 48 篇文章各一份資料來源，沒有第二種東西長這樣（2026-09-03 實測）。
+ *
+ * 內文的清單維持內文字級：那些是文章在講的內容，資料來源是查證用的附錄。
+ */
+.education-article-body :deep(ul:has(a[target="_blank"])) {
+  font-size: var(--font-size-supporting);
+}
+
 .education-article-body :deep(a) {
-  color: var(--color-primary);
+  /* 內文連結也用文字版行動色（2026-09-03），與 `.text-link` 同一個值。 */
+  color: var(--color-primary-text);
   text-underline-offset: 0.2em;
 }
 
+/*
+ * 引用區塊的外距對齊內文段落節奏。相鄰的 <p>（bottom 為
+ * --prose-paragraph-gap）與 blockquote 在一般流裡邊距會折疊，取較大值——
+ * 原本 --space-5 讓引用前後比段落間多出一截；改用 --space-4 收斂到接近
+ * 內文呼吸（2026-09-02 排版稽核 §7.3）。
+ */
 .education-article-body :deep(blockquote) {
-  margin: var(--space-5) 0;
+  margin-block: var(--space-4);
   padding-left: var(--space-4);
   border-left: 0.2rem solid var(--border-subtle);
   color: var(--text-secondary);
 }
 
+/* 波浪本體在 app.css 的 .wave-divider；這裡只補內文那條自己的外距。 */
 .education-article-body :deep(hr) {
-  width: 7.5rem;
-  height: 0.5rem;
   margin: var(--space-10) auto;
-  border: 0;
-  background-color: var(--text-secondary);
-  opacity: 0.55;
-  mask-image: var(--mask-wave-divider);
-  mask-position: center;
-  mask-repeat: no-repeat;
-  mask-size: 100% 100%;
 }
 
 .education-article-body :deep(hr + p) {
@@ -268,8 +373,15 @@ const relatedArticles = computed(() =>
 
 .education-related {
   max-width: 44rem;
-  padding-top: var(--space-6);
-  border-top: 1px solid var(--border-subtle);
+}
+
+/*
+ * 2026-08-31：橫跨整段的 1px 直線換成置中的波浪，跟內文那條同一種語言。
+ * 用真的 <hr class="wave-divider"> 而不是 ::before——共用類別才吃得到，
+ * 而且它在語意上確實是一條分隔線。
+ */
+.education-related__divider {
+  margin: 0 auto var(--space-6);
 }
 
 .education-related h2 {
@@ -277,8 +389,29 @@ const relatedArticles = computed(() =>
   font-size: var(--font-size-section-title);
 }
 
+/*
+ * 2026-09-03：加圓點、字級小一階（使用者要求）。
+ *
+ * 這是文章結束後的「還可以看什麼」，不是正文——比內文小一階（supporting）
+ * 讓它退到正文後面，圓點則讓它讀起來是一份清單而不是幾條散落的連結。
+ */
 .education-related-list {
   display: grid;
   gap: var(--space-3);
+  margin: 0;
+  padding-inline-start: var(--space-6);
+  font-size: var(--font-size-supporting);
+  list-style: disc;
+}
+
+/*
+ * 2026-09-03：不要粗體（使用者要求）。
+ *
+ * `.text-link` 的 500 是給**行動**用的（「改為填寫完整的包裝標示」那種），
+ * 這裡是一份可以瀏覽的清單，不是要你現在按的東西。用 supporting 的字重，
+ * 跟它的字級是同一個角色。
+ */
+.education-related-list .text-link {
+  font-weight: var(--font-weight-supporting);
 }
 </style>

@@ -2,6 +2,7 @@
 import { computed, nextTick, shallowRef, useTemplateRef } from "vue";
 import type { RegionPhase } from "../../features/region/createRegionController";
 import type { RegionDirectoryEntry } from "../../features/region/TaiwanRegionResolver";
+import InlineLoader from "../feedback/InlineLoader.vue";
 
 interface Props {
   directory: readonly RegionDirectoryEntry[];
@@ -147,6 +148,7 @@ async function save(): Promise<void> {
       :disabled="phase === 'saving'"
       @click="save"
     >
+      <InlineLoader v-if="phase === 'saving'" />
       {{ phase === "saving" ? "正在儲存…" : "儲存這個地區" }}
     </button>
   </section>
@@ -190,16 +192,10 @@ async function save(): Promise<void> {
   font-weight: 500;
 }
 
+/* 只留寬度，其餘欄位外觀用 app.css 的共用宣告。 */
 .manual-region__field select,
 .manual-region__field input {
   width: 100%;
-  min-height: var(--tap-target);
-  padding: var(--space-3);
-  border: 1px solid var(--border-subtle);
-  border-radius: var(--radius-sm);
-  background: var(--surface-primary);
-  color: var(--text-primary);
-  font: inherit;
 }
 
 .manual-region__field select[aria-invalid="true"] {

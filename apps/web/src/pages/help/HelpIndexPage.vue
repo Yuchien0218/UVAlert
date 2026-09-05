@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { useRouter } from "vue-router";
+import IconButton from "../../components/common/IconButton.vue";
 import { computed } from "vue";
 import EmptyStateCard from "../../components/common/EmptyStateCard.vue";
 import { listPublishableTopics } from "../../features/help/helpTopics";
@@ -12,17 +14,27 @@ import { listPublishableTopics } from "../../features/help/helpTopics";
  */
 
 const topics = computed(() => listPublishableTopics());
+const router = useRouter();
+
+/*
+ * 頂端的返回出口（2026-09-03，稽核 §G：下鑽頁一律有頂端箭頭）。
+ * 直接回「更多」，不用 history.back——這一頁也可能是從網址列直接打開的。
+ */
+function goBack(): void {
+  void router.push({ name: "more" });
+}
 </script>
 
 <template>
   <div class="page-stack">
-    <header class="page-heading">
+    <header class="page-heading page-heading--with-exit">
       <h1 class="page-heading__title" data-typography-role="page-title">
         常見問題
       </h1>
       <p class="page-heading__body">
         這些內容說明防曬乳、提醒時間與使用限制。閱讀不會修改目前的提醒狀態。
       </p>
+      <IconButton icon="tool-arrow-left" label="返回更多" @click="goBack" />
     </header>
 
     <nav v-if="topics.length > 0" class="topic-list" aria-label="說明主題">
@@ -39,14 +51,11 @@ const topics = computed(() => listPublishableTopics());
 
     <EmptyStateCard
       v-else
+      icon="more-about"
       title="目前沒有可查看的內容"
       body="內容正在審查中，完成前暫不提供。這不影響提醒功能。"
       role="status"
     />
-
-    <RouterLink class="text-link text-link--muted" to="/more"
-      >返回更多</RouterLink
-    >
   </div>
 </template>
 
@@ -60,7 +69,7 @@ const topics = computed(() => listPublishableTopics());
   display: grid;
   min-height: var(--tap-target);
   gap: var(--space-2);
-  padding: var(--space-5);
+  padding: var(--card-padding);
   color: inherit;
   text-decoration: none;
 }

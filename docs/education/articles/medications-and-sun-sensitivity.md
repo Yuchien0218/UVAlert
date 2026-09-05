@@ -36,5 +36,3 @@ lastReviewed: 2026-08-16
 
 - [FDA：The Sun and Your Medicine](https://www.fda.gov/drugs/special-features/sun-and-your-medicine)（藥物光敏感、標示與專業諮詢；查閱 2026-08-16）
 - [MedlinePlus：Drug-induced photosensitivity](https://medlineplus.gov/ency/article/000131.htm)（光敏感反應與照護概念；查閱 2026-08-16）
-
-本文為一般衛教草稿，尚未完成 UVAlert 專業審閱。

@@ -14,6 +14,31 @@ export interface HomeReminderClockPresentation {
   progress: number | null;
   progressPercent: number | null;
   ariaLabel: string;
+  /**
+   * 目前是否有進行中的水上活動。
+   *
+   * 2026-08-31 新增（使用者裁決：波浪只用在這裡）。
+   *
+   * **兩種情況都算**，因為它們都代表「現在在水裡」：
+   *
+   * 1. `activeWaterDeadline` 還沒過期——防曬乳標示有耐水分鐘數，倒數照
+   *    那個算
+   * 2. `reasonCodes` 含 `WATER_RESISTANCE_UNKNOWN`——標示沒說耐水多久，
+   *    reducer 只能記下「不知道」
+   *
+   * 第一版只判斷第 1 種，**畫面實測才發現漏了第 2 種**：拿一件沒有填包裝
+   * 標示的防曬乳記錄「游泳／下水」，事件流看得到入水、首頁卻完全沒有反應
+   * ——而那正是最需要提示的情況（連系統都不知道還能撐多久）。單元測試對
+   * 這件事是綠的，因為測試資料是我自己捏的。
+   *
+   * 兩個訊號都來自 reducer 的同一段（reducer.ts 第 735 行起的水上區間
+   * 分支），所以 `WATER_RESISTANCE_UNKNOWN` 一定隱含「有進行中的水上
+   * 區間」，不會誤報。
+   *
+   * 不另外從 `openWaterInterval` 拉一條路進來：那是 repository 層的東西，
+   * 而首頁這裡拿得到的是投影。同一件事有兩個來源就會有兩種答案。
+   */
+  inWater: boolean;
 }
 
 type TimedZone = {
@@ -77,6 +102,14 @@ export function buildHomeReminderClockPresentation(
     now.getTime()
   );
   const tone = getTone(earliest.zone, remainingMs);
+  const inWater = session.zones.some((zone) => {
+    if (zone.trackingStatus !== "active") return false;
+    if (zone.reasonCodes.includes("WATER_RESISTANCE_UNKNOWN")) return true;
+    return (
+      zone.activeWaterDeadline !== null &&
+      Date.parse(zone.activeWaterDeadline) > now.getTime()
+    );
+  });
   const title = buildTitle(scope, zoneLabel, tone);
   const absoluteTime = formatTime(earliest.dueAt);
 
@@ -88,6 +121,7 @@ export function buildHomeReminderClockPresentation(
     remainingMinutes,
     progress,
     progressPercent: progress === null ? null : Math.round(progress * 100),
+    inWater,
     ariaLabel: buildAriaLabel(
       scope,
       zoneLabel,

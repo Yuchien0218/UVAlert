@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { computed } from "vue";
 import { useRoute, useRouter } from "vue-router";
-import Icon from "../components/icons/Icon.vue";
 import GearForm from "../components/product/GearForm.vue";
+import IconButton from "../components/common/IconButton.vue";
 
 /**
  * S-12 新增防曬裝備／S-13 編輯防曬裝備的獨立頁殼。
@@ -39,30 +39,43 @@ async function handleSaved(): Promise<void> {
 function handleCancel(): void {
   void router.back();
 }
+
+/*
+ * 網址帶了不存在的裝備 id——導回清單，跟 `/products/:id` 的處置一致
+ * （router/index.ts 那條 redirect）。用 replace 不用 push：那個網址不該
+ * 留在返回堆疊裡，否則按返回會再撞一次同一個空表單。
+ */
+async function handleNotFound(): Promise<void> {
+  await router.replace({ name: "products" });
+}
 </script>
 
 <template>
   <div class="page-stack gear-form-page">
+    <!--
+      2026-08-31：標題與叉叉同列、說明獨立成一列。
+      原本是 flex ＋ 一個包住標題與說明的 <div>，叉叉貼齊整塊的頂端——
+      於是 44px 的按鈕把**整段說明**的可用寬度都吃掉，說明因此提早換行；
+      叉叉也停在說明那一塊的上緣，跟標題對不齊。拆成兩列之後說明拿回整個
+      寬度，叉叉也真的落在標題的水平中線上。
+    -->
     <header class="form-heading">
-      <div>
-        <h1 class="page-heading__title" data-typography-role="page-title">
-          {{ isEdit ? "編輯防曬裝備" : "新增防曬裝備" }}
-        </h1>
-        <p>
-          資料會先儲存在這台裝置；若已開啟同步，之後也可以同步到雲端。非必要欄位可以稍後再補。
-        </p>
-      </div>
-      <button
-        class="icon-button"
-        type="button"
-        aria-label="取消"
+      <h1 class="page-heading__title" data-typography-role="page-title">
+        {{ isEdit ? "編輯防曬裝備" : "新增防曬裝備" }}
+      </h1>
+      <IconButton
+        icon="tool-close"
+        label="取消"
         @click="handleCancel"
-      >
-        <Icon name="tool-close" :size="24" />
-      </button>
+      />
+      <p>資料預設儲存於本機，且支援雲端同步功能。</p>
     </header>
 
-    <GearForm :product-id="productId" @saved="handleSaved" />
+    <GearForm
+      :product-id="productId"
+      @saved="handleSaved"
+      @not-found="handleNotFound"
+    />
   </div>
 </template>
 
@@ -74,13 +87,16 @@ p {
 
 /* 關閉控制項用 app.css 的共用 .icon-button，不在這裡另寫一份。 */
 .form-heading {
-  display: flex;
-  align-items: start;
-  justify-content: space-between;
-  gap: var(--space-4);
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  /* 叉叉的中心對齊標題那一列的中線，不是整塊的頂端。 */
+  align-items: center;
+  column-gap: var(--space-4);
 }
 
 .form-heading p {
+  /* 說明橫跨兩欄，拿回被按鈕吃掉的那 44px。 */
+  grid-column: 1 / -1;
   margin-top: var(--space-3);
   color: var(--text-body);
   line-height: var(--line-height-body);

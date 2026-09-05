@@ -13,6 +13,40 @@
   --mask-wave-divider: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 8'%3E%3Cpath d='M1 4C11 0 19 8 29 4S47 0 57 4s18 4 28 0 18-4 34 0' fill='none' stroke='%23000' stroke-linecap='round' stroke-width='2'/%3E%3C/svg%3E");
 }
 
+/*
+ * 波浪分隔線。
+ *
+ * **2026-08-31 從 EducationArticlePage 的 :deep(hr) 抽成全域規則。**
+ * 原本波浪只用在內文那條 hr，同一頁的「同主題延伸閱讀」卻是 1px 直線
+ * ——同一篇文章裡兩種分隔語言，讀起來像其中一條是別人加的。
+ *
+ * 波浪承載的不是「換一段」，是**語氣的轉折**：從「教你怎麼做」轉到
+ * 「這篇文章不負責什麼」（文章限制／資料來源），以及從文章正文轉到延伸
+ * 閱讀。直線做不到這件事，所以不是把兩者都改成直線，是都改成波浪。
+ *
+ * **只用在衛教長文裡，不當通用分隔元素。** 一旦到處撒就退回裝飾了；而且
+ * 波浪在這個 App 的其他地方已經有語意（水：入水時間、耐水時間、水上
+ * 活動），拿去當通用裝飾會稀釋掉那個意義。
+ *
+ * 兩個選擇器共用同一份宣告，不是各寫一次：`.education-article-body hr`
+ * 是 markdown 產生器輸出的，掛不上 class；`.wave-divider` 給模板自己
+ * 放的那一條。外距各自不同，所以留在各自的地方。
+ *
+ * 用遮罩不用 SVG 內嵌顏色，顏色才能吃 token（見上面 --mask-wave-divider）。
+ */
+.wave-divider,
+.education-article-body hr {
+  width: 7.5rem;
+  height: 0.5rem;
+  border: 0;
+  background-color: var(--text-secondary);
+  opacity: 0.55;
+  mask-image: var(--mask-wave-divider);
+  mask-position: center;
+  mask-repeat: no-repeat;
+  mask-size: 100% 100%;
+}
+
 #app {
   min-height: 100vh;
   min-height: 100svh;
@@ -31,8 +65,21 @@
  * 規則。fill-mode: backwards 讓元素在自己的 delay 期間維持 opacity: 0，
  * 不會先閃一下滿版內容才淡出重來。
  */
+/*
+ * 2026-09-04：時長從 slow（450ms）降到 base（320ms），階梯步進從 0.08s 砍成
+ * 0.04s，而且**只給前三塊**。
+ *
+ * 起因是使用者回報換頁「太慢、看起來很卡」。實際算一次時間軸才發現最後一塊
+ * 要到 **1050ms** 才定下來（0.4s 延遲 ＋ 0.45s 動畫，再加上離場的 0.2s）。
+ * 整頁超過一秒。
+ *
+ * 三塊之後不再累加延遲的理由：**第四塊以後通常在摺線以下**，使用者捲到那裡
+ * 時動畫早就播完了——那段延遲不是在做層次，只是在拖慢前面看得到的部分。
+ *
+ * 階梯的用意是「內容依序到位」，不是「內容慢慢到位」。三塊足夠讀出順序。
+ */
 .page-stack > * {
-  animation: page-stack-fade-in var(--duration-slow) var(--ease-out) backwards;
+  animation: page-stack-fade-in var(--duration-base) var(--ease-out) backwards;
 }
 
 .page-stack > *:nth-child(1) {
@@ -40,23 +87,55 @@
 }
 
 .page-stack > *:nth-child(2) {
+  animation-delay: 0.04s;
+}
+
+.page-stack > *:nth-child(n + 3) {
   animation-delay: 0.08s;
 }
 
-.page-stack > *:nth-child(3) {
-  animation-delay: 0.16s;
+/*
+ * 換頁的離場（2026-09-04，裁決 4）。進場交給上面的 page-stack 階梯淡入，
+ * 這裡只負責「舊頁怎麼走」——在這之前舊頁是瞬間消失的。
+ *
+ * 只有離場有 transition：App.vue 的 <Transition mode="out-in"> 會等離場
+ * 跑完才掛新頁，所以進場那一側不需要再定義，否則會跟階梯淡入疊在一起。
+ */
+/*
+ * 離場用 --ease-accelerate 而不是 --ease-out。**時長沒變，感覺差很多**：
+ * 減速曲線會把大部分的不透明度變化拖到尾段，讀起來像舊頁賴著不走。
+ */
+.page-leave-active {
+  transition: opacity var(--duration-fast) var(--ease-accelerate);
 }
 
-.page-stack > *:nth-child(4) {
-  animation-delay: 0.24s;
+.page-leave-to {
+  opacity: 0;
 }
 
-.page-stack > *:nth-child(5) {
-  animation-delay: 0.32s;
+/*
+ * 返回時不跑階梯淡入（2026-09-04）。
+ *
+ * 使用者剛剛才看過那一頁，內容一格一格再長一次會讀成「重新載入」而不是
+ * 「回來了」。返回改成整頁一起、單純淡入，時距也縮到「回應手指的」那一檔
+ * ——返回是直接操作，不是自己發生的事。
+ *
+ * 方向由 router 寫在 <html data-nav-direction> 上。特異性 (0,3,0) 蓋得過
+ * 上面 nth-child 那組 (0,2,0)。
+ */
+:root[data-nav-direction="back"] .page-stack > * {
+  animation-name: page-stack-plain-fade-in;
+  animation-duration: var(--duration-fast);
+  animation-delay: 0s;
 }
 
-.page-stack > *:nth-child(n + 6) {
-  animation-delay: 0.4s;
+@keyframes page-stack-plain-fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 
 /*
@@ -189,9 +268,96 @@ body
   font-size: var(--font-size-nav-label);
 }
 
+/*
+ * 2026-08-30：`<small>` 補上字級，否則會落到瀏覽器預設的 `font-size: smaller`
+ * （≈0.8125em＝13px），而 13px 不在 12／14／16／18／20／28 的量表上。稽核
+ * 實測全站 8 處 `<small>` 有 7 處是 13px，見
+ * docs/decisions/2026-08-30-ui-audit-findings.md 第二節。
+ *
+ * 選 supporting（14px）而不是 caption：這些 `<small>` 幾乎都是卡片與選項的
+ * 說明文字，對應 DESIGN.md 第五節「欄位標籤、helper text、次要資訊與補充
+ * 文字」。真正的 badge 用途（caption）由元件自己覆寫。
+ *
+ * 用標籤選擇器而不是逐處加 class，是為了讓之後新寫的 `<small>` 也自動落在
+ * 量表上；`[data-typography-role]` 的特異性更高，顯式標角色時仍然贏。
+ */
+small {
+  font-size: var(--font-size-supporting);
+}
+
+/*
+ * 2026-08-30：`<strong>` 補上字重，跟上面的 `<small>` 是同一種問題。
+ *
+ * 沒有全域規則時 `<strong>` 落到瀏覽器預設的 `font-weight: bold`（700），
+ * 而 DESIGN.md 第三節訂的是「內文段落維持字重 400，**標籤與強調短語
+ * 500**」，字型也只載入 400／500／600 三個字重。實測 `/settings/data`：
+ * 8 個 `<strong>` 全部渲染成 700。
+ *
+ * 全站 19 個檔案用到 `<strong>`，其中 11 個完全沒有覆寫字重——那 11 個
+ * 就是 700。逐處補 class 只會漏掉下一個新寫的，所以補在標籤上。
+ *
+ * 已經自己寫 500 的 scoped 規則（`.entry strong` 等）特異性更高，不受
+ * 影響；需要 600 的地方（`.status-card__label`）也一樣。
+ *
+ * 2026-08-30 補上 `--font-weight-emphasis`。它刻意**不是**第八個 typography
+ * 角色——那七個角色各自帶完整五欄，而強調短語只改字重、其餘繼承上下文。
+ * 也沒有借用 `--font-weight-caption`：值同為 500，但 caption 指的是短註腳、
+ * 時間戳、eyebrow、badge，不是行內強調。
+ */
+strong {
+  font-weight: var(--font-weight-emphasis);
+}
+
 .page-heading {
   display: grid;
   gap: var(--space-3);
+}
+
+/*
+ * 下鑽頁的頂端返回鈕（2026-09-03，稽核 §G）。
+ *
+ * `2026-09-02-secondary-page-exit-rule.md` 定了「叉叉／箭頭怎麼選」，但明講
+ * **「哪些頁面該有頂端出口」不在該次範圍**。稽核量到的現況是三個設定頁三種
+ * 組合（通知設定只有頂端箭頭、本機資料與帳號資料只有頁尾連結）。
+ *
+ * 裁決：**下鑽頁一律有頂端箭頭，頁尾連結留給長頁面**——頂端出口不必捲到底
+ * 才找得到。實測 375×812 的頁高：問題回報 831、安裝 812、常見問題 812、
+ * 特殊狀況 812、帳號資料 812，全部一屏內；只有本機資料與隱私 2064 需要
+ * 頁尾也留一個。
+ *
+ * 版型沿用 `.flow-heading`：標題與箭頭同一列，其餘（說明段落）橫跨兩欄。
+ * 這裡不改成直接套 `.flow-heading`，因為 `.page-heading` 的標題有
+ * `max-width: 18em` 與較緊的行高，那是頁面大標自己的規格。
+ */
+.page-heading--with-exit {
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: start;
+  column-gap: var(--space-4);
+}
+
+/*
+ * 只有標題要為箭頭讓出寬度，其餘（說明段落）橫跨兩欄。
+ *
+ * 這是 2026-09-03 `.flow-heading` 那次修過的同一個坑：說明在箭頭**下方**，
+ * 本來就不必讓位。實測 375px，讓位的話「免登入即可回報，僅會收到此表單的
+ * 內容。」會多折一行，只為第二行留兩個字。
+ */
+.page-heading--with-exit > * {
+  grid-column: 1 / -1;
+}
+
+.page-heading--with-exit > .page-heading__title {
+  grid-column: 1;
+}
+
+/*
+ * 箭頭固定在第一列右側。它寫在標題**後面**，所以要明確指定 row——
+ * 否則自動排版會把它放到標題的下一列，變成 2026-08-31 修過的「圖示鈕
+ * 獨佔一列」。
+ */
+.page-heading--with-exit > .icon-button {
+  grid-column: 2;
+  grid-row: 1;
 }
 
 .page-heading__eyebrow {
@@ -233,12 +399,70 @@ body
   line-height: var(--line-height-body);
 }
 
-/* 2026-08-26：收斂三個流程頁重複的標題列版型。 */
-.flow-heading {
+/*
+ * 卡片標題的圖示錨點：32px 圖示與標題同列、垂直置中。跟 MorePage 卡片列
+ * 同一種排法。
+ *
+ * **2026-09-04 從 `DataSettingsPage` 的 scoped style 搬過來。**
+ *
+ * 使用者回報「有些頁面沒有 icon 或裝飾，我覺得很空」。清點 24 個頁面之後
+ * 成因不是品味，是這條規則被鎖在一個檔案裡：`.section-heading` 只存在於
+ * 資料設定頁的 scoped style，所以別的頁想用也用不到——通知設定頁 5 張卡
+ * 0 個標題圖示、帳號與雲端資料頁 4 張卡 0 個，而 `ProductsPage` 只好自己
+ * 另刻一個 `.gear-section-heading`。
+ *
+ * 這是同一個坑的第三次：2026-08-31 把 `.time-option` 搬出 scoped、
+ * 2026-09-03 把 `.time-picker--invalid` 搬出 scoped，都是「scoped 擋住了
+ * 共用」。
+ *
+ * **什麼時候用**（判準是「這張卡要不要被掃讀」）：
+ *
+ * - **用**：一頁裡彼此並列、需要快速區分的卡（資料設定的概況／匯出／清除）
+ * - **不用**：一頁裡唯一的一張卡，或流程中依序走過的步驟卡（設定流程的
+ *   情境／部位／時間）——讀者是順著走的，圖示不幫忙掃讀，只多一個視覺重量
+ *
+ * `flex: none` 不是保險——flex 子項預設可壓縮，圖示被壓縮就是變形（跟
+ * `IconLead` 那條註解同一個理由）。
+ */
+.section-heading {
   display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.section-heading svg {
+  flex: none;
+}
+
+/*
+ * 2026-08-26：收斂三個流程頁重複的標題列版型。
+ *
+ * **2026-09-03：說明文字改成橫跨兩欄。**
+ *
+ * 原本是 flex：標題群組（eyebrow ＋ h1 ＋ 說明）一整塊在左、圖示鈕在右。
+ * 圖示鈕只有 44px 高，卻讓**整塊**都少掉一個按鈕的寬度——實測 375px 上
+ * 可用 336px、標題群組只拿到 275px。
+ *
+ * 說明文字在按鈕**下方**，本來就不必讓位；改成 grid 之後它自己一列、
+ * 橫跨兩欄，拿回整個寬度。eyebrow 與 h1 留在第一列，圖示鈕仍然與標題
+ * 同一列（`closeButtonLayout.test.ts` 守的那條規則不變）。
+ *
+ * 為什麼不用衛教文章頁那招 float：那一頁的第一行就是大標，需要「只讓開
+ * 前幾行」；這裡真正被壓到的是說明文字，它整段都在按鈕下方，用 grid 讓
+ * 它跨欄更直接，也不必動 DOM 順序。
+ */
+.flow-heading {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
   align-items: start;
-  justify-content: space-between;
-  gap: var(--space-4);
+  gap: var(--space-3) var(--space-4);
+}
+
+/* 說明自成一列、橫跨兩欄——它在按鈕下方，不需要為按鈕讓出寬度。 */
+.flow-heading > p {
+  grid-column: 1 / -1;
+  color: var(--text-body);
+  line-height: var(--line-height-body);
 }
 
 .flow-heading h1,
@@ -255,10 +479,11 @@ body
   gap: var(--space-3);
 }
 
-.flow-heading div > p:last-child {
-  color: var(--text-body);
-  line-height: var(--line-height-body);
-}
+/*
+ * 2026-09-03：說明文字搬出 `div` 之後由 `.flow-heading > p` 接手。原本這條
+ * 靠「div 的最後一個 p」認人，搬走之後那個位置會變成 eyebrow——留著會把
+ * eyebrow 染成內文色。
+ */
 
 /*
  * 2026-08-24：flow-heading 版型（ReapplyPage／EventCorrectionPage／
@@ -288,13 +513,24 @@ body
  * decorative uppercase label. This gives the mono font a job that means
  * something (precision / station-reading) instead of just looking techy.
  */
+/*
+ * 2026-09-04：拿掉 `color` 與 `line-height`。
+ *
+ * **顏色**：讀數要跟它所在的那句話同色。原本寫死 `--text-primary`，於是
+ * 五日預報的「更新時間 9/4 00:15」比同一行的「更新時間」深了一階
+ * （實測值 rgb(46,41,37) 對 rgb(111,90,84)），看起來像另一個元件掉進來。
+ * 需要特定顏色的地方本來就自己指定——首頁 UV 讀數依風險等級上色就是這樣
+ * 寫的；其餘使用點的父層本來就是 `--text-primary`，拿掉之後渲染結果不變。
+ *
+ * **行高**：0.95 是給**獨立的大讀數**用的（那裡要壓掉數字上下的空隙）。
+ * 行內讀數混在句子裡時，它會把那一行的行盒縮短，讓數字看起來浮在行間。
+ * 移到 `--display` 變體，需要的人才拿得到。
+ */
 .stat-figure {
   font-family: var(--font-mono);
   font-variant-numeric: tabular-nums;
   font-weight: 600;
-  line-height: 0.95;
   letter-spacing: var(--letter-spacing-readout);
-  color: var(--text-primary);
 }
 
 /*
@@ -306,11 +542,25 @@ body
  */
 .stat-figure--display {
   font-size: clamp(3rem, 15vw, 3.75rem);
+  /* 大讀數要壓掉數字上下的空隙，才不會在區塊裡多出兩條空白。 */
+  line-height: 0.95;
 }
 
-.stat-figure--inline {
-  font-size: 1.05em;
-}
+/*
+ * 2026-08-30：移除 .stat-figure--inline。它只做一件事——font-size: 1.05em，
+ * 把行內讀數放大成父層的 1.05 倍，實測在 16px 的父層下渲染成 16.8px，
+ * 不在 12／14／16／18／20／28 的量表上（見 2026-08-30-ui-audit-findings.md
+ * 第二節）。
+ *
+ * 這個值來自第一個 commit 的鷹架（cefaa61），DESIGN.md 第 668 節描述
+ * .stat-figure 時只記載了 --display 變體，從未規範過 --inline——跟同日
+ * 移除的 max-width: 14ch 是同一類殘留。
+ *
+ * 而且六個使用點全都是「數字混在一句話裡」（「・1 個原因」、「更新時間
+ * 15:53」、「塗抹後 15 分鐘」），這種行內讀數本來就該跟同一行的文字同
+ * 字級；放大 5% 只會讓基線看起來浮動。改成直接套 .stat-figure，字級由
+ * 父層決定，等寬與 tabular-nums 不受影響。
+ */
 
 .app-card {
   border: 1px solid var(--border-subtle);
@@ -319,11 +569,26 @@ body
 }
 
 /* 2026-08-26：流程完成後的共通成功面板。 */
+/*
+ * 2026-09-03：拿掉 `border-top: 0.35rem solid var(--color-saved)`。
+ *
+ * 那是全站唯一的 `0.35rem`（5.5px），也是唯一一條有顏色的粗上緣——
+ * DESIGN.md 第七節的高度階層只有「平面／1px 細邊框／暖色卡片／深色表面／
+ * 浮層」五種，沒有「彩色橫條」這一階。使用者回報這張卡「看起來像預設樣式」。
+ *
+ * 「已儲存」的訊號改由領銜圖示承擔：`state-success`（它的 `<title>` 本來
+ * 就是「已儲存」）＋ `--color-saved`。顏色的語意沒變，只是換成系統裡有
+ * 定義的表達方式；順帶讓一顆一直沒有使用點的圖示上工。
+ */
 .success-panel {
   display: grid;
   gap: var(--space-4);
-  padding: var(--space-5);
-  border-top: 0.35rem solid var(--color-saved);
+  padding: var(--card-padding);
+}
+
+/* 只染圖示：標題在同一個 IconLead 的插槽裡，不能跟著變色。 */
+.success-panel .icon-lead__icon {
+  color: var(--color-saved);
 }
 
 .success-panel h2,
@@ -342,8 +607,23 @@ body
   line-height: var(--line-height-body);
 }
 
+/*
+ * 單一控制項的寬度上限（2026-09-04，稽核第二輪 §3）。
+ *
+ * 內容欄本身有 752px 上限並且置中，那部分是對的；沒有上限的是**控制項**。
+ * 1280px 視窗實測：首頁主 CTA 662px、回饋頁送出鈕與 textarea／select 各
+ * 620px——手機版型直接拉開的樣子。
+ *
+ * 掛在 `.button` 與欄位的元素選擇器上，新加的控制項不必記得套任何 class。
+ * 手機上內容欄比 26rem 窄，所以這條在小螢幕完全不作用，不需要 media
+ * query；`.button` 在 31rem 以下那條 `width: 100%` 也不受影響。
+ *
+ * **不改對齊方式**：拿掉寬度之後控制項落在哪裡由容器決定（多數 grid 是
+ * start）。想置中的地方各自處理，這裡不替它們決定。
+ */
 .button {
   display: inline-flex;
+  max-width: var(--control-max);
   min-height: var(--tap-target);
   align-items: center;
   justify-content: center;
@@ -364,8 +644,21 @@ body
     filter var(--duration-fast) var(--ease-out);
 }
 
+/*
+ * 按壓回饋為什麼是「底色 ＋ 變暗」兩件事（2026-09-04 實測後修正）：
+ *
+ * 這些可點表面**幾乎全都沒有自己的底色**（透明，直接坐在畫布上），而
+ * `filter: brightness()` 只能把已經畫出來的像素變暗——沒有填色可暗，
+ * 它就只動到 1px 的邊框與文字，螢幕上**看不出來**。截圖並排比對過：
+ * 透明藥丸套 0.92 與沒套完全分不出來。
+ *
+ * 所以透明表面按下時補一層 `--color-hairline` 底；有填色的表面
+ * （primary 按鈕、已選取狀態）則由 brightness 負責。兩條規則疊在一起，
+ * 任何一種表面都至少有一個會生效。
+ */
 .button:active {
-  filter: brightness(0.92);
+  background-color: var(--color-hairline);
+  filter: brightness(var(--press-dim));
 }
 
 /* 行動色是 --color-primary，不是 --color-tracking（那是「追蹤中」狀態色）。 */
@@ -404,17 +697,46 @@ body
   opacity: 0.55;
 }
 
+/*
+ * 2026-08-31：換行時兩顆按鈕會等寬。
+ *
+ * 原本只有 flex-wrap，於是窄螢幕上兩顆各自保留自然寬度——「繼續設定 →」
+ * 比「重新開始」長一截，疊起來左對齊、右邊參差不齊，讀起來像跑版
+ * （使用者實測回報）。
+ *
+ * flex-basis 用 10rem：夠寬的容器仍然並排，不夠寬時一起換行並各自撐滿，
+ * 兩種情況下右緣都是齊的。三個使用點（回復卡、裝備詳情、部位表單）的
+ * 按鈕文字長度都在這個範圍內。
+ */
+/*
+ * `width: 100%` 是 2026-09-03 補的，而且是這組按鈕排不成一列的**真正原因**。
+ *
+ * `.recovery-card` 是 `display: grid` ＋ `justify-items: start`，所以這個
+ * 群組會縮成內容寬（實測 600px 視窗下卡片欄寬 472px，群組只有 280px）。
+ * 兩顆 `flex-basis: 10rem` 的按鈕加起來 332px 塞不進 280px，於是換行——
+ * **與視窗多寬無關**，放大視窗也一樣是上下兩顆。
+ *
+ * 先前只改了 31rem 以下的 media query，所以窄螢幕好了、500–600px 之間
+ * 還是壞的（使用者回報）。這一行才是通用解：群組先拿到整欄寬度，裡面
+ * 的按鈕才有得分。
+ */
 .button-group {
   display: flex;
   flex-wrap: wrap;
+  width: 100%;
   gap: var(--space-3);
+}
+
+.button-group > .button {
+  flex: 1 1 10rem;
 }
 
 .text-link {
   display: inline-flex;
   align-items: center;
   gap: var(--space-2);
-  color: var(--color-primary);
+  /* 文字用的行動色，比填色用的深一階——理由見 styles.css 的定義。 */
+  color: var(--color-primary-text);
   font-weight: 500;
   text-underline-offset: 0.25rem;
 }
@@ -466,10 +788,85 @@ button.text-link {
   background: transparent;
   color: var(--text-primary);
   cursor: pointer;
+  /*
+   * 2026-09-04：原本只有 :active 的 filter，**沒有 transition**——按下與
+   * 放開都是瞬變，讀起來是閃爍而不是回饋。`.button` 一直都有，這裡是漏的。
+   */
+  transition:
+    background-color var(--duration-fast) var(--ease-out),
+    filter var(--duration-fast) var(--ease-out);
 }
 
 .icon-button:active {
-  filter: brightness(0.92);
+  background-color: var(--color-hairline);
+  filter: brightness(var(--press-dim));
+}
+
+/*
+ * 2026-08-31：視覺上小一號的圓圈，**命中區維持 44px**。
+ *
+ * 使用者回饋標題列的叉叉太大。直接把 width／height 改小會讓命中區跟著
+ * 縮到 44px 以下，違反 WCAG SC 2.5.5（也是 --tap-target 這個 token 存在
+ * 的理由）。所以按鈕本身尺寸不動，只把**看得見的圓圈**交給 ::before：
+ * 邊框畫在 2rem 的偽元素上，按鈕自己不畫邊框。
+ *
+ * 兩個子元素都放在同一個 grid cell，靠 .icon-button 既有的 place-items
+ * 置中，圖示因此仍在圓心。
+ */
+.icon-button--compact {
+  border-color: transparent;
+}
+
+.icon-button--compact::before {
+  content: "";
+  grid-area: 1 / 1;
+  width: 2rem;
+  height: 2rem;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-pill);
+}
+
+.icon-button--compact > * {
+  grid-area: 1 / 1;
+}
+
+/*
+ * 表單欄位的共用外觀（2026-08-31 收斂）。
+ *
+ * 收斂前是**四份各自的 scoped 拷貝**——QuickTimePicker、GearForm、
+ * ReapplicationProductAssignments、FeedbackPage——同樣的宣告抄四次，然後
+ * 各自漂移。分歧已經造成兩個實際問題：
+ *
+ * 1. GearForm 只寫了 `input, textarea` 漏掉 `select`，所以「好不好用」
+ *    下拉是瀏覽器原生外觀（白底、系統藍框），跟旁邊的米色欄位不同一套。
+ *    2026-08-31 已在該檔補上，這裡收斂後不會再有人漏掉。
+ * 2. FeedbackPage 沒有 `min-height`，欄位可能低於 44px（WCAG SC 2.5.5）。
+ *    收斂後自動補上。
+ *
+ * **排除 radio 與 checkbox**：那兩種走 `.choice-grid`（原生外觀 ＋
+ * accent-color）或被 `.category-option input` 藏起來，套上邊框與內距會
+ * 把它們變成奇怪的方塊。
+ *
+ * **不含 width**：四份拷貝裡只有兩份有 `width: 100%`，而 QuickTimePicker
+ * 的欄位是並排的。寬度是版面決定，留給各自的 scoped style。
+ */
+input:not([type="radio"], [type="checkbox"]),
+select,
+textarea {
+  /* 理由同 `.button` 的 max-width——620px 寬的下拉選單不是桌面的設計。 */
+  max-width: var(--control-max);
+  min-height: var(--tap-target);
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-sm);
+  color: var(--text-primary);
+  background: var(--surface-primary);
+  font: inherit;
+}
+
+textarea {
+  min-height: calc(var(--tap-target) * 2);
+  resize: vertical;
 }
 
 /*
@@ -510,7 +907,7 @@ button.text-link {
   gap: 0;
   min-width: 0;
   margin: 0;
-  padding: var(--space-5);
+  padding: var(--card-padding);
   border: 1px solid var(--border-subtle);
 }
 
@@ -556,10 +953,26 @@ button.text-link {
   grid-template-columns: minmax(0, 1fr);
 }
 
+/*
+ * 2026-09-03：**不再顯示原生的圓點**（使用者：「前面不要有勾勾符號，其他
+ * 頁面也幫我檢查哪些可以刪除」，接著裁決「改有預設值的那幾組」）。
+ *
+ * 這些選項本來就有選取外觀（`:has(input:checked)`：muted 邊框 ＋ hairline
+ * 底），圓點是同一件事說第二次。全站現在只有一種「選了沒」的訊號。
+ *
+ * **只動 radio，而且只動這一組。** 四個使用點（記錄補擦的原因、記錄狀況的
+ * 下水時間確信度、通知頻率、產品標示問答）都保證**永遠有一項是選的**——
+ * 那個值是不可為空的聯集型別。checkbox 不在裡面：一組都沒勾時整排會變成
+ * 一模一樣的素卡片，看不出是選項，`GearSharePage` 的單一開關同理。
+ *
+ * 欄數跟著從兩欄改回一欄：圓點移出版面之後，內容留在 `auto` 那一欄會縮成
+ * 內容寬，長文字提早折行。
+ */
 .choice-grid label {
+  position: relative;
   display: grid;
   min-height: var(--tap-target);
-  grid-template-columns: auto minmax(0, 1fr);
+  grid-template-columns: minmax(0, 1fr);
   align-items: center;
   gap: var(--space-3);
   padding: var(--space-3);
@@ -569,7 +982,36 @@ button.text-link {
   transition:
     background-color var(--duration-fast) var(--ease-out),
     color var(--duration-fast) var(--ease-out),
-    border-color var(--duration-fast) var(--ease-out);
+    border-color var(--duration-fast) var(--ease-out),
+    filter var(--duration-fast) var(--ease-out);
+}
+
+/*
+ * 藏起來，不是刪掉——控制項仍在 DOM 裡，鍵盤與螢幕閱讀器完全不受影響
+ * （通知設定那一組還帶著 `role="radiogroup"`）。宣告與 `.screen-reader-only`
+ * 相同；不直接套那個 class 是因為這四處的 radio 分散在 20 幾個標籤裡，
+ * 掛在選擇器上才不會有人新增選項時漏掉。
+ */
+.choice-grid label > input[type="radio"] {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/*
+ * **藏掉原生控制項就必須自己接回焦點框。** 焦點原本畫在那個圓點上，圓點
+ * 不見了，鍵盤使用者就看不出停在哪一項（WCAG SC 2.4.7）。radio 群組是靠
+ * 方向鍵移動的，沒有焦點框等於完全不能用。
+ */
+.choice-grid label:has(> input[type="radio"]:focus-visible) {
+  outline: 0.15rem solid var(--focus-ring);
+  outline-offset: 0.2rem;
 }
 
 /*
@@ -581,11 +1023,28 @@ button.text-link {
   background-color: var(--color-hairline-soft);
 }
 
+/*
+ * 2026-09-04：0.85 → var(--press-dim)（0.92）。全站四處按壓變暗原本各自
+ * 寫死，只有這裡是 0.85。收斂到 0.92 的理由見 packages/ui/src/styles.css
+ * 的 --press-dim 註解——0.85 在暖象牙底上會讀成「變成灰色」而不是「被按下」。
+ */
 .choice-grid label:active {
-  filter: brightness(0.85);
+  background-color: var(--color-hairline);
+  filter: brightness(var(--press-dim));
 }
 
-.choice-grid input {
+/*
+ * 勾選類控制項一律用墨色（2026-09-03 收斂成一條）。
+ *
+ * 原本 `accent-color` 寫在兩個地方（這裡的 `.choice-grid input` 與
+ * ZoneProtectionForm 的 `.zone-group-choice input`），第三個地方
+ * ——記錄補擦的 `.zone-choice input`——**漏了**，於是那一頁的 13 個核取方塊
+ * 是瀏覽器預設的亮藍色，在暖象牙底上非常突兀（實測 `accent-color: auto`）。
+ *
+ * 掛在元素選擇器上，新加的勾選控制項不必記得套任何 class。
+ */
+input[type="checkbox"],
+input[type="radio"] {
   accent-color: var(--text-primary);
 }
 
@@ -637,10 +1096,20 @@ p.prose-block {
   text-align: justify;
 }
 
+/*
+ * 2026-08-31：從 supporting(14px) 降到 caption(12px)（使用者裁決）。
+ *
+ * 它的任務是「有寫」，不是「被讀」——每一次捲到底都會遇到同一句話，
+ * 14px 兩行的份量跟它的資訊量不成比例。
+ *
+ * **顏色刻意不動。** --text-secondary 在畫布上是 5.56:1，字級降到 12px
+ * 之後仍然過 WCAG AA 的 4.5:1；再壓暗才會有問題。動手前確認過這一點：
+ * 這是免責文字，縮小可以，看不清楚不行。
+ */
 .safety-note {
   margin: 0;
   color: var(--text-secondary);
-  font-size: var(--font-size-supporting);
+  font-size: var(--font-size-caption);
   line-height: var(--line-height-body);
 }
 
@@ -677,6 +1146,25 @@ p.prose-block {
   line-height: var(--line-height-body);
 }
 
+/*
+ * 使用者自己打的字（2026-09-04）。
+ *
+ * 實測：裝備取名 `SuperUltraWaterproofSunscreenSPF50PLUSPAplusplusplus…`
+ * 之後，375px 視窗的頁面寬度變成 **781px**——整頁可以左右捲，頁首、大標、
+ * 主按鈕全部被切掉右半邊。原因是那串字沒有空格，`overflow-wrap: normal`
+ * 不會在詞中間斷，於是它撐開卡片，再撐開整頁。
+ *
+ * **`anywhere` 而不是 `break-word`**：後者不影響 `min-content` 的計算，
+ * 在 flex／grid 版型裡撐開容器的行為照樣發生。這裡要的正是「算寬度時就
+ * 當它可以斷」。
+ *
+ * **只給使用者輸入的字用**，不要掛到全站文字上——`.prose-block` 那條註解
+ * 講過：衛教文章滿是 UV／SPF／WHO 與英文來源標題，在詞中間亂斷會很難讀。
+ */
+.user-text {
+  overflow-wrap: anywhere;
+}
+
 .screen-reader-only {
   position: absolute;
   width: 1px;
@@ -690,12 +1178,31 @@ p.prose-block {
 }
 
 @media (max-width: 31rem) {
-  .button-group {
-    display: grid;
-  }
-
   .button {
     width: 100%;
+  }
+
+  /*
+   * 2026-09-03：窄螢幕不再把 `.button-group` 拆成上下兩列。
+   *
+   * 原本是 `display: grid`（＝直排）。使用者回報「這組按鈕歪歪的，要水平
+   * 擺放」——直排時兩顆按鈕的圖示一顆在字後（→）、一顆在字前（↺），
+   * 上下疊起來讀成參差不齊的兩行。
+   *
+   * 全站三組 `.button-group` 都是「主要動作＋次要動作」的短標籤配對
+   * （繼續設定／重新開始、使用這組／調整部位、確定刪除／取消），並排讀
+   * 起來就是一個二選一，比上下兩顆更像一組。
+   *
+   * `flex: 1 1 0` 是平分而不是 `10rem` 基準：後者在 375px 上兩顆加起來
+   * 超過可用寬度，仍然會換行——等於改了跟沒改一樣（實測過）。
+   *
+   * 標籤太長時仍然安全：文字會在按鈕內換行，不會溢出。真的有長標籤的
+   * 配對出現時，那一組自己改用直排，不要動這條共用規則。
+   */
+  .button-group > .button {
+    width: auto;
+    flex: 1 1 0;
+    min-width: 0;
   }
 }
 
@@ -706,12 +1213,34 @@ p.prose-block {
  * 變色，彼此已經漂移。2026-08-25 使用者決定統一採用 DataSettingsPage
  * 的完整版本，收斂成共用類別，搭配 components/common/AppNotice.vue 使用。
  */
+/*
+ * 2026-09-04：補進場動畫。在這之前「已儲存」是瞬間出現的——它是操作的
+ * 唯一回饋，卻沒有任何進場，很容易被當成本來就在那裡。
+ *
+ * 用 --duration-base（320ms）而不是 fast：這是「自己發生的事」（系統回報
+ * 結果），不是手指直接造成的位移，依第十二節規則二該慢一點才安靜。
+ *
+ * 動畫不影響 role="status"／role="alert" 的播報——螢幕閱讀器讀的是 DOM
+ * 的插入，不是它畫出來沒有。
+ */
 .notice {
   margin: 0;
   padding: var(--space-3);
   border-radius: var(--radius-sm);
   line-height: var(--line-height-body);
   width: 100%;
+  animation: notice-fade-in var(--duration-base) var(--ease-out) backwards;
+}
+
+@keyframes notice-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(var(--motion-rise));
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
 }
 
 .notice--ok {
@@ -743,6 +1272,30 @@ p.prose-block {
   width: 100%;
 }
 
+/*
+ * 送出區的「取消」——文字連結，不是等寬按鈕（2026-08-31 裁決：次要動作用
+ * 文字連結，實心／描邊按鈕是主行動的語彙）。
+ *
+ * 2026-09-03 從 ReportContextEventPage 的 scoped style 移出來：記錄補擦那頁
+ * 的取消原本還是 `button--quiet`，兩個並排的流程長得不一樣。留在 scoped 裡
+ * 的話那頁換上這個 class 也吃不到樣式——跟 `.time-option` 那次搬遷同一個
+ * 理由。外觀的其餘部分由 app.css 的 `button.text-link` 提供。
+ */
+/*
+ * 選擇器寫兩次是為了贏過 `button.text-link`（0,1,1）的 `padding: 0`——
+ * 那條把按鈕當文字連結用時的重置。同一個手法在 `.control-rule-note` 也用過。
+ */
+.submit-actions__cancel.submit-actions__cancel {
+  justify-self: center;
+  /*
+   * 可點區補到 44px（2026-09-03）。搬過來時實測只有 24px 高、32px 寬——
+   * DESIGN.md 第十二節訂「所有按鈕與可點擊項目最小 44×44」，文字連結也算。
+   * 這是搬遷前就存在的問題，兩頁一起修好。
+   */
+  min-height: var(--tap-target);
+  padding: var(--space-2) var(--space-4);
+}
+
 @media (min-width: 36rem) {
   .submit-actions {
     grid-template-columns: 1fr auto;
@@ -756,4 +1309,91 @@ p.prose-block {
   background: var(--border-subtle);
   color: var(--text-secondary);
   font-size: var(--font-size-caption);
+}
+
+/*
+ * 時間快選與就地展開的調整欄（2026-08-31 從 ApplicationTimePicker 的
+ * scoped style 移出）。
+ *
+ * 入水時間選擇器改成與塗抹時間同一個形狀之後，這幾個 class 變成兩個元件
+ * 共用；留在 scoped style 裡的話 WaterStartPicker 會完全吃不到——那正是
+ * 這個 repo 反覆出現的漂移形態（欄位外觀抄了八份、圖示按鈕尺寸各自決定）。
+ */
+.time-option {
+  display: grid;
+  gap: var(--space-1);
+  padding: var(--space-3);
+  border-radius: var(--radius-sm);
+  color: var(--text-primary);
+  cursor: pointer;
+  /*
+   * 2026-09-03：原本是 `left`。這兩顆是「兩欄並排、內容只有一個短標籤」
+   * 的按鈕，屬於**置中**那一族；靠左是「一整列、左標籤右值」那一族的
+   * 語彙。判準見 DESIGN.md 第五節〈按鈕與列的文字對齊〉。
+   */
+  text-align: center;
+  transition:
+    background-color var(--duration-fast) var(--ease-out),
+    border-color var(--duration-fast) var(--ease-out),
+    filter var(--duration-fast) var(--ease-out);
+}
+
+/* 理由同 .choice-grid label:hover——避免 hover 跟已選取同色。 */
+.time-option:hover {
+  background-color: var(--color-hairline-soft);
+}
+
+.time-option:active {
+  background-color: var(--color-hairline);
+  filter: brightness(var(--press-dim));
+}
+
+/*
+ * 這是 flex 容器，所以 `.time-option` 的 `text-align` 對它無效——
+ * 置中要靠 `justify-content`。只改 text-align 會看起來沒反應。
+ */
+.time-option__label {
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  gap: var(--space-2);
+  font-weight: 500;
+}
+
+/*
+ * 時間選擇器的錯誤外觀（2026-09-03 從 ApplicationTimePicker 的 scoped style
+ * 移出，理由同上：入水時間選擇器也要同一套，留在 scoped 裡它吃不到）。
+ *
+ * 紅框用 --color-due（「已到期」）。這個 App 只有這一顆紅：到期與錯誤共用
+ * 同一個「需要你處理」的語意，再開一顆錯誤紅只會多一個要記的顏色。
+ *
+ * 邊框不是唯一的訊號——旁邊同時有紅字訊息，所以不違反 SC 1.4.1
+ * （不可只用顏色傳達資訊）。
+ */
+.time-picker--invalid {
+  border-color: var(--color-due);
+}
+
+/*
+ * 這兩張卡的 grid row-gap 都是 0，子元素各自用 margin 拉開（實測）。錯誤訊息
+ * 若沿用 `margin: 0`，它的頂線會**貼齊說明文字的底線**——畫出來看之後
+ * 讀起來像說明的第三行，而不是一則獨立的警告。
+ */
+.time-picker__error {
+  margin: var(--space-3) 0 0;
+  color: var(--color-due);
+  font-weight: 500;
+  line-height: var(--line-height-body);
+}
+
+.time-adjust {
+  display: grid;
+  gap: var(--space-3);
+  justify-items: start;
+}
+
+.time-adjust__field {
+  display: grid;
+  gap: var(--space-2);
+  width: 100%;
 }

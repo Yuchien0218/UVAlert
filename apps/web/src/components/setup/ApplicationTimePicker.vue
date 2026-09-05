@@ -1,5 +1,10 @@
 <script setup lang="ts">
 import { computed, shallowRef, useId } from "vue";
+import {
+  APPLICATION_MAX_MINUTES_AGO,
+  describeTooLongAgo,
+  minutesAgo as minutesBetween
+} from "../../features/setup/timeEntryCaps";
 
 /**
  * 塗抹時間：一個預設快選加一個手動調整入口。
@@ -23,9 +28,56 @@ import { computed, shallowRef, useId } from "vue";
  * 需求靠展開收合就足夠。
  */
 
+/**
+ * 2026-08-31：錯誤改由這張卡自己顯示（使用者要求）。
+ *
+ * 原本沒填塗抹時間時，「請確認這次實際的塗抹時間。」印在頁面**最下方**的
+ * 錯誤區——離出問題的欄位有整整一個畫面遠，使用者的原話是「不然使用者
+ * 不知道哪裡沒寫」。訊息現在跟著欄位走，卡片同時上紅框。
+ *
+ * 這是 WCAG 3.3.1（錯誤要指出是哪一項）與 3.3.3（要說怎麼修）的基本做法。
+ */
+const props = defineProps<{ error?: string | null }>();
+
 const value = defineModel<string | null>({ required: true });
 
-const referenceNow = new Date();
+/** 錯誤訊息的 id：欄位群用 aria-describedby 指過來，關係才是真的。 */
+const errorId = useId();
+
+/** 讓 SetupPage 在送出失敗時把焦點送進來——捲到定位還不夠，鍵盤要能接上。 */
+const defaultButton = shallowRef<HTMLButtonElement | null>(null);
+defineExpose({
+  focus(): void {
+    defaultButton.value?.focus();
+  }
+});
+
+/**
+ * 這個選擇器的「現在」。
+ *
+ * **2026-09-02：改成在互動當下重新取樣，不再凍結在掛載那一刻。**
+ *
+ * 改動前是 `const referenceNow = new Date()`，於是頁面開著愈久偏得愈多：
+ *
+ * - 「1 分鐘前」實際上是「開頁前一分鐘」，開著十分鐘就變成十一分鐘前
+ * - `max` 停在開頁那一刻，**選不了比開頁更晚的時間**
+ *
+ * **刻意不用 ticker。** `useCurrentTime` 那類每秒跳動的時鐘會讓畫面在使用者
+ * 眼前漂移：選了「1 分鐘前」之後放著不動，過一分鐘就會自己變成「已調整為
+ * 2 分鐘前」、選取高亮還會跳到另一顆——使用者什麼都沒做，畫面卻在變。
+ *
+ * 只在**使用者動作的當下**重新取樣（按快選、展開調整面板），兩個真正壞掉的
+ * 行為就都好了，而且沒有任何東西會自己動。
+ *
+ * 已知的殘留：展開面板之後放很久才選，`max` 會是展開當下的值。那時送出仍有
+ * 控制器的「不能晚於目前時間」把關，不會寫進未來的時間。
+ */
+const referenceNow = shallowRef(new Date());
+
+/** 在使用者動作的當下把「現在」對回真正的現在。 */
+function syncNow(): void {
+  referenceNow.value = new Date();
+}
 const DEFAULT_MINUTES_AGO = 1;
 
 const adjusting = shallowRef(false);
@@ -34,7 +86,9 @@ const draftLocalValue = shallowRef("");
 const adjustPanelId = useId();
 
 function isoFor(minutesAgo: number): string {
-  return new Date(referenceNow.getTime() - minutesAgo * 60_000).toISOString();
+  return new Date(
+    referenceNow.value.getTime() - minutesAgo * 60_000
+  ).toISOString();
 }
 
 /** datetime-local 需要不含時區的本地字串。 */
@@ -54,15 +108,61 @@ const selectedAt = computed(() =>
 const minutesAgo = computed(() => {
   const at = selectedAt.value;
   if (at === null) return null;
-  return Math.round((referenceNow.getTime() - at.getTime()) / 60_000);
+  return Math.round((referenceNow.value.getTime() - at.getTime()) / 60_000);
 });
 
-/** 預設快選是否正在生效——允許幾秒誤差，避免時鐘跳動造成閃爍。 */
-const usingDefault = computed(() => {
+/**
+ * 「1 分鐘前」快選寫進去的那個值。
+ *
+ * **2026-09-04：選取態改成記住「誰寫的」，不再拿現在的時間反推。**
+ *
+ * 改動前是 `|value - (referenceNow - 60s)| < 30s`——用當下的時鐘回推「這個
+ * 值看起來像不像一分鐘前」。問題是 `syncNow()` 會在使用者**打開調整面板**
+ * 時把 `referenceNow` 推到現在，而 `value` 沒有跟著動，於是同一個值突然被
+ * 判成「不是快選給的」。
+ *
+ * 實測（2026-09-04）：按「1 分鐘前」→ 等 36 秒 → 按「調整時間」，
+ * 選取態自己跳到「調整時間」那一顆，下面還冒出「已調整為 2 分鐘前」——
+ * **使用者只是打開面板，什麼都沒有選。**
+ *
+ * 這正是 2026-09-02 那段註解裡「刻意不用 ticker」想避免的畫面
+ * （「使用者什麼都沒做，畫面卻在變」）；`syncNow()` 只是把同一個跳變延後
+ * 到下一次互動才發生，沒有消掉它。
+ *
+ * 改成比對值本身之後，選取態只會因為使用者按了按鈕而改變。還原草稿時
+ * 這裡是 null，於是顯示「已調整為 N 分鐘前」——那是誠實的：存下來的就是
+ * 一個固定時刻，現在確實是 N 分鐘前。
+ */
+const defaultPickedValue = shallowRef<string | null>(null);
+
+const usingDefault = computed(
+  () => value.value !== null && value.value === defaultPickedValue.value
+);
+
+/**
+ * 超過上限時的提示（2026-08-31 裁決 #9）。
+ *
+ * **不擋輸入**：超過 120 分鐘時真正的下一步是重新塗抹，不是把一個已經
+ * 失效的時間記進去。硬擋會讓使用者卡在表單裡填不出任何值。datetime-local
+ * 的 min 只是讓瀏覽器的選擇器先收窄，手動打字繞過時由這句話接住。
+ */
+const tooLongAgoNotice = computed(() => {
   const at = selectedAt.value;
-  if (at === null) return false;
-  return Math.abs(at.getTime() - (referenceNow.getTime() - 60_000)) < 30_000;
+  if (at === null) return null;
+  return describeTooLongAgo(
+    minutesBetween(at, referenceNow.value),
+    APPLICATION_MAX_MINUTES_AGO,
+    "application"
+  );
 });
+
+const earliestLocalValue = computed(() =>
+  toLocalInputValue(
+    new Date(
+      referenceNow.value.getTime() - APPLICATION_MAX_MINUTES_AGO * 60_000
+    )
+  )
+);
 
 const adjustedLabel = computed(() => {
   const minutes = minutesAgo.value;
@@ -75,7 +175,24 @@ const adjustedLabel = computed(() => {
 });
 
 function selectDefault(): void {
-  value.value = isoFor(DEFAULT_MINUTES_AGO);
+  syncNow();
+  const picked = isoFor(DEFAULT_MINUTES_AGO);
+  value.value = picked;
+  /*
+   * 記下**寫出去的那個字串**，不要讀 `value.value` 回來——`defineModel` 的
+   * 值是從 prop 讀的，父層還沒回寫時它仍是舊值（測試裡直接讀會拿到 null）。
+   */
+  defaultPickedValue.value = picked;
+  /*
+   * 2026-09-04：收掉調整面板。
+   *
+   * 改動前按「1 分鐘前」不會關掉展開中的手動輸入，畫面上同時有「已選 1
+   * 分鐘前」與一個攤開的 datetime-local ——看起來像還有一步沒做完，而那個
+   * 輸入框裡的值也已經不是生效中的選擇了。
+   *
+   * WaterStartPicker 的 selectDefault 本來就有這一行，這裡是漏掉。
+   */
+  adjusting.value = false;
 }
 
 function toggleAdjust(): void {
@@ -83,8 +200,9 @@ function toggleAdjust(): void {
     adjusting.value = false;
     return;
   }
+  syncNow();
   draftLocalValue.value = toLocalInputValue(
-    selectedAt.value ?? new Date(referenceNow.getTime() - 60_000)
+    selectedAt.value ?? new Date(referenceNow.value.getTime() - 60_000)
   );
   adjusting.value = true;
 }
@@ -99,21 +217,34 @@ function applyAdjustment(): void {
 </script>
 
 <template>
-  <fieldset class="time-picker question-card app-card">
+  <fieldset
+    class="time-picker question-card app-card"
+    :class="{ 'time-picker--invalid': props.error }"
+    :aria-describedby="props.error ? errorId : undefined"
+  >
     <legend>塗抹時間</legend>
     <p class="question-card__helper">
       請選擇實際塗抹時間。系統會以此重新計算提醒狀態。
     </p>
 
+    <!--
+      訊息放在選項**上方**：由上往下讀時，先知道這裡出了什麼事，再看到要
+      操作的東西。放在下方的話，使用者已經看完選項才被告知「剛剛那個要填」。
+    -->
+    <p v-if="props.error" :id="errorId" class="time-picker__error" role="alert">
+      {{ props.error }}
+    </p>
+
     <div class="time-picker__quick">
       <button
+        ref="defaultButton"
         class="time-option app-card"
         :class="{ 'option-selected': usingDefault }"
         type="button"
         @click="selectDefault"
       >
         <span class="time-option__label">
-          <span class="stat-figure stat-figure--inline">1</span>
+          <span class="stat-figure">1</span>
           分鐘前
         </span>
       </button>
@@ -136,6 +267,7 @@ function applyAdjustment(): void {
         <input
           v-model="draftLocalValue"
           type="datetime-local"
+          :min="earliestLocalValue"
           :max="toLocalInputValue(referenceNow)"
         />
       </label>
@@ -147,6 +279,10 @@ function applyAdjustment(): void {
         套用
       </button>
     </div>
+
+    <p v-if="tooLongAgoNotice !== null" class="time-picker__cap" role="alert">
+      {{ tooLongAgoNotice }}
+    </p>
 
     <!-- 調整後要看得出目前選了什麼，否則按鈕上只寫「調整時間」等於沒有回饋。 -->
     <p
@@ -169,56 +305,32 @@ function applyAdjustment(): void {
  * 同一頁兩張同構的卡片標題大小與間距不同，就是「排版像舊實作」的來源。
  * 改用共用的 .question-card，這裡只留這張卡特有的東西。
  */
+/*
+ * `.time-picker--invalid`／`.time-picker__error` 2026-09-03 移到 app.css。
+ * 入水時間選擇器也要同一套紅框與警示文字，留在 scoped 裡它會完全吃不到
+ * ——理由同 2026-08-31 把 `.time-option`／`.time-adjust` 搬出去那次。
+ */
+
+.time-picker__cap {
+  margin: 0;
+  color: var(--color-due);
+  font-size: var(--font-size-supporting);
+  line-height: var(--line-height-body);
+}
+
 .time-picker__quick {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: var(--space-2);
 }
 
-.time-option {
-  display: grid;
-  gap: var(--space-1);
-  padding: var(--space-3);
-  border-radius: var(--radius-sm);
-  color: var(--text-primary);
-  cursor: pointer;
-  text-align: left;
-  transition:
-    background-color var(--duration-fast) var(--ease-out),
-    border-color var(--duration-fast) var(--ease-out);
-}
-
-/* 理由同 app.css 的 .choice-grid label:hover——避免 hover 跟已選取同色。 */
-.time-option:hover {
-  background-color: var(--color-hairline-soft);
-}
-
-.time-option:active {
-  filter: brightness(0.92);
-}
-
-.time-option__label {
-  display: flex;
-  align-items: baseline;
-  gap: var(--space-2);
-  font-weight: 500;
-}
+/* .time-option／.time-adjust 2026-08-31 移到 app.css——入水時間選擇器
+   改成同一個形狀之後它們變成兩個元件共用，留在 scoped style 裡的話
+   WaterStartPicker 會完全吃不到。 */
 
 .time-picker__result {
   margin: 0;
   color: var(--text-secondary);
   line-height: var(--line-height-body);
-}
-
-.time-adjust {
-  display: grid;
-  gap: var(--space-3);
-  justify-items: start;
-}
-
-.time-adjust__field {
-  display: grid;
-  gap: var(--space-2);
-  width: 100%;
 }
 </style>

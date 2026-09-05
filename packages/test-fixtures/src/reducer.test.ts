@@ -251,24 +251,32 @@ describe("P0 reminder reducer fixed vectors", () => {
     expect(zone.zoneTimerStartedAt).toBe("2026-07-29T10:00:00.000Z");
   });
 
-  it("TV-003 剩餘 30 分鐘為 reapply_soon", () => {
+  /*
+   * 「快到補擦時間」的門檻是 **20 分鐘**（2026-09-04 使用者裁決，原本 30）。
+   *
+   * 兩條測試夾住邊界的兩側：剛好 20 分鐘要進 soon、21 分鐘還不能。只守
+   * 其中一邊的話，把窗口改成 24 小時或 0 都還會有一條是綠的。
+   *
+   * 塗抹 10:00 ＋ 間隔 90 分鐘 → 到期 11:30。
+   */
+  it("TV-003 剩餘 20 分鐘為 reapply_soon", () => {
     const snapshot = makeProductSnapshot({
       reapplicationIntervalStatus: "explicit_minutes",
       reapplicationIntervalMinutes: 90
     });
     expect(
-      firstZone(makeStream({ snapshot }), "2026-07-29T11:00:00.000Z")
+      firstZone(makeStream({ snapshot }), "2026-07-29T11:10:00.000Z")
         .timingStatus
     ).toBe("reapply_soon");
   });
 
-  it("距到期超過 30 分鐘時仍為 tracking", () => {
+  it("距到期超過 20 分鐘時仍為 tracking", () => {
     const snapshot = makeProductSnapshot({
       reapplicationIntervalStatus: "explicit_minutes",
       reapplicationIntervalMinutes: 90
     });
     expect(
-      firstZone(makeStream({ snapshot }), "2026-07-29T10:59:00.000Z")
+      firstZone(makeStream({ snapshot }), "2026-07-29T11:09:00.000Z")
         .timingStatus
     ).toBe("tracking");
   });
@@ -700,6 +708,142 @@ describe("P0 reminder reducer fixed vectors", () => {
     expect(
       result.zones.find((zone) => zone.zoneInstanceId === "hands")!.zoneDueAt
     ).toBe("2026-07-29T10:30:00.000Z");
+  });
+
+  /*
+   * 2026-09-02 使用者裁決：一切正常時的主行動是「記錄補擦」，不是「記錄
+   * 狀況」。改動前首頁只有一顆按鈕、secondaryActions 是空的，所以還沒到期
+   * 就沒有辦法記錄補擦——而提早補擦是常見的。
+   *
+   * 記錄狀況沒有消失，改由首頁的提問卡承接（HomePage.test.ts 守著）。
+   */
+  it("tracking 的主行動是記錄補擦", () => {
+    const stream = makeStream({ appliedAt: "2026-07-29T10:50:00.000Z" });
+    const result = projection(stream, "2026-07-29T11:00:00.000Z");
+
+    expect(result.zones[0]!.timingStatus).toBe("tracking");
+    expect(result.primaryAction.actionKind).toBe("record_reapplication");
+  });
+
+  /*
+   * 反向：遮蔽等「補擦不適用」的狀態仍然是記錄狀況。只守上面那條的話，
+   * 把整個 actionKind 一律改成 record_reapplication 也會過——那會讓沒有
+   * 防曬乳可補的部位也叫人去補擦。
+   */
+  it("補擦不適用時仍然是記錄狀況", () => {
+    const stream = makeStream({ appliedAt: "2026-07-29T10:50:00.000Z" });
+    const zoneId = stream.sessionStarted.zoneInstanceIds[0]!;
+    addMethod(stream, {
+      id: "cover",
+      zoneInstanceId: zoneId,
+      at: "2026-07-29T10:55:00.000Z",
+      sequence: 9,
+      components: ["clothing"],
+      exposure: "clothing_covered"
+    });
+    const result = projection(stream, "2026-07-29T11:00:00.000Z");
+    const zone = result.zones.find((z) => z.zoneInstanceId === zoneId)!;
+
+    expect(zone.timingStatus).toBe("not_applicable");
+    // **要斷言的是 actionKind，不是 timingStatus。** 第一版只比對後者，
+    // 破壞驗證時發現「把全部 actionKind 一律改成補擦」照樣是綠的。
+    expect(result.primaryAction.actionKind).toBe("report_context_event");
+  });
+
+  /*
+   * **補擦要清得掉原因**（2026-09-02，實機驗證階段一時發現）。
+   *
+   * 判準原本是「最後一次 `eligible` 的塗抹」，但 `identity_unconfirmed`
+   * （標示沒確認）自 2026-08-30 起會用 120 分鐘保守預設開始倒數，卻不算
+   * `eligible`。而一筆合格塗抹都沒有時，過濾會讓所有損耗事件無條件成立——
+   * 結果是標示未確認的使用者只要記錄過流汗，該部位就永遠到期。
+   *
+   * 那是預設路徑（沒填包裝標示就會落在這裡）。
+   */
+  describe("補擦清掉損耗原因", () => {
+    function sweatThenReapply(
+      snapshot: ReturnType<typeof makeProductSnapshot>
+    ) {
+      const stream = makeStream({
+        appliedAt: "2026-07-29T09:00:00.000Z",
+        snapshot
+      });
+      const zones = stream.sessionStarted.zoneInstanceIds;
+      addContext(
+        stream,
+        causeEvent(stream, {
+          id: "sweat",
+          type: "heavy_sweat",
+          at: "2026-07-29T10:30:00.000Z",
+          sequence: 2,
+          zones
+        })
+      );
+      addApplication(stream, {
+        id: "reapply",
+        zoneInstanceIds: [...zones],
+        appliedAt: "2026-07-29T10:31:00.000Z",
+        sequence: 3,
+        snapshot
+      });
+      return firstZone(stream, "2026-07-29T10:32:00.000Z");
+    }
+
+    /* 修復前這條是紅的：期限停在流汗那一刻，補擦清不掉。 */
+    it("標示未確認也能清掉", () => {
+      const zone = sweatThenReapply(
+        makeProductSnapshot({
+          identityStatus: "identity_unconfirmed",
+          ruleEligibilityAtApplication: "identity_unconfirmed"
+        })
+      );
+
+      expect(zone.eventTriggeredDeadline).toBeNull();
+      expect(zone.timingStatus).not.toBe("reapply_due");
+    });
+
+    /* 合格標示本來就清得掉，順便釘住沒有回歸。 */
+    it("合格標示照樣清得掉", () => {
+      const zone = sweatThenReapply(makeProductSnapshot());
+
+      expect(zone.eventTriggeredDeadline).toBeNull();
+    });
+
+    /*
+     * **反向：安全封鎖不得被清掉。**
+     *
+     * 過期／回報異常／回報不適是 S-11／S-13 明訂無法直接恢復的狀態，拿一瓶
+     * 過期的防曬乳再擦一次不該讓警示消失。
+     *
+     * 只守上面兩條的話，把判準放寬成「任何塗抹都算」也會過——那會讓這三種
+     * 安全狀態被一次補擦洗掉。
+     */
+    for (const [label, overrides] of [
+      [
+        "已過期",
+        { expiryStatus: "expired", ruleEligibilityAtApplication: "expired" }
+      ],
+      [
+        "回報異常",
+        {
+          conditionStatus: "abnormal_reported",
+          ruleEligibilityAtApplication: "abnormal_reported"
+        }
+      ],
+      [
+        "回報不適",
+        {
+          conditionStatus: "discomfort_reported",
+          ruleEligibilityAtApplication: "discomfort_reported"
+        }
+      ]
+    ] as const) {
+      it(`${label}的塗抹不得清掉原因`, () => {
+        const zone = sweatThenReapply(makeProductSnapshot(overrides as never));
+
+        expect(zone.eventTriggeredDeadline).toBe("2026-07-29T10:30:00.000Z");
+      });
+    }
   });
 
   it("TV-024 多個原因取最早未解除時間", () => {

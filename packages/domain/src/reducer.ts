@@ -31,7 +31,14 @@ import {
 import { validateWaterIntervals } from "./water";
 
 const GENERAL_MAX_MINUTES = 120;
-const SOON_WINDOW_MS = 30 * 60_000;
+/**
+ * 「快到補擦時間」提前多久開始（2026-09-04 使用者裁決：30 → 20 分鐘）。
+ *
+ * 這個值決定 `reapply_soon`，也就是首頁倒數轉成橘色、部位清單展開成
+ * 「快到補擦時間」那一刻。改短是因為 30 分鐘的預警期太長——橘色出現之後
+ * 還要再等半小時才真的到期，警示色待在畫面上太久就失去警示的作用。
+ */
+const SOON_WINDOW_MS = 20 * 60_000;
 
 type EffectiveStream = Omit<
   SessionEventStreamV1,
@@ -333,7 +340,37 @@ function activeSafetyReasons(
   };
 }
 
-function latestEligibleApplicationForCause(
+/**
+ * 最後一次「足以清掉原因」的塗抹。
+ *
+ * 損耗事件（流汗／擦毛巾／摩擦／洗手／離水）講的是「那層防曬被弄掉了」。
+ * 之後重新塗抹就是換上新的一層，先前那些事件因此在歷史上被取代——這個函式
+ * 回傳的就是判斷「取代點」的那筆塗抹。
+ *
+ * **2026-09-02：判準由 `eligible` 改為「沒有被 `blocksGeneralDeadline` 擋
+ * 住」。**
+ *
+ * 舊判準造成的實際後果：`identity_unconfirmed`（標示沒確認）自 2026-08-30
+ * 起**會**用 120 分鐘保守預設開始倒數，但它不算 `eligible`，所以清不掉原因。
+ * 而且沒有任何一筆合格塗抹時，下面的過濾會走 `=== null` 那一支，讓所有損耗
+ * 事件**無條件成立**——結果是：
+ *
+ * > 標示未確認的使用者，只要記錄過任何損耗事件，該部位就永遠到期，補擦也
+ * > 清不掉。
+ *
+ * 而「標示未確認」是預設路徑（沒填包裝標示就會落在這裡）。
+ *
+ * 新判準的原則很簡單：**足以開始一段倒數的塗抹，就足以清掉一個原因。**
+ * 兩件事用同一個閘門，不會再出現「這筆塗抹算數也不算數」的分裂。
+ *
+ * 被擋住的三種（過期／回報異常／回報不適）**維持不能清**，那是刻意的：
+ * 它們是安全封鎖（S-11／S-13 明訂無法直接恢復），拿一瓶過期的防曬乳再擦
+ * 一次不該讓警示消失。
+ *
+ * 耐水期限不走這裡，仍然要求 `eligible`——沒有抗水標示算不出耐水時間，
+ * 那不是保守預設能補的（見 `GENERAL_DEADLINE_BLOCKERS` 的註解）。
+ */
+function latestCauseResettingApplication(
   zoneId: string,
   applications: ApplicationEventV1[]
 ): ApplicationEventV1 | null {
@@ -342,8 +379,9 @@ function latestEligibleApplicationForCause(
       .filter(
         (application) =>
           application.zoneInstanceIds.includes(zoneId) &&
-          application.productLabelSnapshot.ruleEligibilityAtApplication ===
-            "eligible"
+          !blocksGeneralDeadline(
+            application.productLabelSnapshot.ruleEligibilityAtApplication
+          )
       )
       .sort(compareApplicationOrder)
   );
@@ -476,6 +514,29 @@ function candidateForZone(zone: ZoneProjection): CandidateAction | null {
       actionAt: zone.zoneDueAt
     };
   }
+  /*
+   * **2026-09-02：tracking 的主行動從 report_context_event 改成
+   * record_reapplication（使用者裁決）。**
+   *
+   * 使用者的原則是「這款 App 的主要功能就是提醒要補擦防曬乳」。照那條
+   * 原則，一切正常時 App 唯一叫使用者做的事不該是「去宣告一個問題」。
+   *
+   * 改動前的實際後果：首頁只有一顆按鈕，tracking 時指向記錄狀況，而
+   * secondaryActions 是空的——**還沒到期就沒有辦法記錄補擦**。但提早補擦
+   * 是常見的（要再出門、快下水、覺得乾了），核心動作在正常狀態下不可達
+   * 說不過去。
+   *
+   * 記錄狀況沒有消失，改由首頁的提問卡承接（`showContextEventPrompt`）
+   * ——那張卡 2026-08-30 就已經把它從深杏桃主 CTA 降級了，這次只是讓
+   * domain 的語意跟上 UI 早就做出的判斷。
+   *
+   * 舊版 P0 決策表（`docs/archive/2026-08-pre-redesign/`）把 tier 70 寫成
+   * report_context_event，但那份是歸檔，依 CLAUDE.md「只能用來理解歷史，
+   * 不可當作現行依據」。
+   *
+   * tier／presentationType／actionAt 都不動——**只換 actionKind**。倒數環
+   * 仍然是這個狀態的主體。
+   */
   if (zone.timingStatus === "tracking") {
     return {
       ...base,
@@ -483,7 +544,7 @@ function candidateForZone(zone: ZoneProjection): CandidateAction | null {
       priority: 70,
       presentationType: "timed_ring",
       variant: null,
-      actionKind: "report_context_event",
+      actionKind: "record_reapplication",
       actionAt: zone.zoneDueAt
     };
   }
@@ -778,7 +839,7 @@ export function reduceSession(input: {
       }
     }
 
-    const latestEligibleForCause = latestEligibleApplicationForCause(
+    const causeResetAt = latestCauseResettingApplication(
       zoneId,
       stream.applicationEvents
     );
@@ -791,10 +852,15 @@ export function reduceSession(input: {
       ) {
         return false;
       }
+      /*
+       * `causeResetAt === null` 時所有原因都成立——那是「這個部位從來沒有
+       * 一次能開始倒數的塗抹」，沒有任何一層防曬被換掉過，所以沒有東西可以
+       * 取代先前的損耗。
+       */
       return (
-        latestEligibleForCause === null ||
+        causeResetAt === null ||
         Date.parse(event.effectiveOccurredAt) >=
-          Date.parse(latestEligibleForCause.appliedAt)
+          Date.parse(causeResetAt.appliedAt)
       );
     });
     const causesApplicable = applicable && tracking.trackingStatus === "active";

@@ -1,15 +1,15 @@
 /*
  * 自行托管的 subset 字型（DESIGN.md 第三節）。
- *
+   *
  * 產生方式：node tools/fonts/build-fonts.mjs
  * 原始字型不進 repo，取得與重建方式見 tools/fonts/README.md。
- *
+   *
  * 為什麼不用 Google Fonts CDN：這個產品免登入、本機優先，連定位座標都
  * 不外傳。CDN 會讓每個使用者每次開頁都把 IP 送給 Google，與該定位矛盾。
- *
+   *
  * font-display: swap——字型還沒到時先用備援字體顯示，不要讓文字空白。
  * 對一個「打開就要看到倒數」的 App，可見性優先於字體正確性。
- */
+   */
 @font-face {
   font-family: "Noto Serif TC Subset";
   src: url("/fonts/noto-serif-tc-subset.woff2") format("woff2");
@@ -39,8 +39,40 @@
 
   /* 品牌與陽光 */
   --color-primary: #9f5e42;
+  /*
+   * 行動色當**文字**用的版本（2026-09-03）。
+   *
+   * --color-primary 是為了「填色底＋白字」調的：白字在它上面是 4.80，通過。
+   * 但拿它當文字色時，底色換成了介面本身——畫布 4.66（勉強），**卡片
+   * 4.37，沒有通過 WCAG AA 的 4.5**。文字連結有 6 個是長在卡片上的。
+   *
+   * DESIGN.md 第十二節原本寫「文字連結 4.66:1 … 全數通過 AA」，那句話只量
+   * 了畫布底。壓暗之後：畫布 5.94、--color-surface-soft 5.58、
+   * --color-surface-card 5.07。
+   *
+   * **值取到 #8a4f38 而不是更淺，是因為卡片有兩個深度。** 只看常見的
+   * surface-soft 的話 #96583e 就夠（4.83），但更深的 surface-card 上它只有
+   * 4.39——仍然不過。唯一還是不過的底是 surface-cream-strong（4.43），
+   * 連結不要放在那個底上。
+   *
+   * **只給文字用，不要拿去填色**——按鈕底色維持 --color-primary，那裡的
+   * 對比是白字對底色，改深了反而讓按鈕變重。
+   */
+  --color-primary-text: #8a4f38;
   --color-primary-active: #804536;
   --color-primary-disabled: #e8d1c5;
+  /*
+   * 2026-08-31：apricot 與 blush 都是**保留備用**的色票，目前沒有任何
+   * 落點（DESIGN.md 第二節色彩表已同步）。
+   *
+   * apricot 特別要注意：它與 --color-amber 的對比只有 **1.07**，兩者在
+   * 畫面上分不出來。要啟用之前得先解決這件事，否則只是多一個「像香檳金
+   * 又不太一樣」的顏色。它唯一站得住的角色是深咖文字的底色（6.85），
+   * 而那個位置已經由 --color-surface-cream-strong 承擔。
+   *
+   * 保留而不刪除是刻意的：色票本身是品牌色盤的一部分，刪掉之後要回來
+   * 得重新裁決（blush 2026-08-30 就是這樣處理的）。
+   */
   --color-apricot: #e8a477;
   --color-blush: #d79a92;
   --color-mauve: #8c6f7a;
@@ -88,14 +120,25 @@
   /*
    * 「已儲存／這次記錄成功」的回饋色。**藕紫，不是綠色**——DESIGN.md 第二
    * 節：防曬沒有「完成」狀態，不用綠色暗示安全。2026-08-26 從綠色
-   * --color-success #147d64 改成藕紫（與 --color-mauve 同值），並改名
-   * --color-saved 對齊 DESIGN.md 的 status-saved。
+   * --color-success #147d64 改成藕紫，並改名 --color-saved 對齊
+   * DESIGN.md 的 status-saved。
+   *
+   * 2026-08-30：改成引用 --color-mauve 而不是複製它的色碼。原本兩處各寫
+   * 一份 #8c6f7a，改一處不會連動；而且 --color-mauve 因此在掃描裡顯示成
+   * 「定義了但沒人用」（見 2026-08-30-unused-declaration-audit.md 第二節
+   * C 類）。tokens.test.ts 的 resolveCssToken 會遞迴解析別名，所以與
+   * DESIGN.md 的一致性守門不受影響。
    */
-  --color-saved: #8c6f7a;
-  --color-saved-soft: color-mix(in srgb, #8c6f7a 12%, #faf5ec);
-  --color-uvi-low: #507aa8;
-  --color-uvi-moderate: #bd8500;
-  --color-uvi-high: #d16627;
+  --color-saved: var(--color-mauve);
+  --color-saved-soft: color-mix(in srgb, var(--color-mauve) 12%, #faf5ec);
+  /*
+   * 低／中／高三級在 2026-08-31 壓暗（色相不動），讓風險色同時能當畫布上的
+   * 文字與白字的底色，兩種用法都過 WCAG AA 4.5:1。理由與代價見 DESIGN.md
+   * 第二節「UV 五級風險色」；對比度由 uvRiskContrast.test.ts 守著。
+   */
+  --color-uvi-low: #4b739e;
+  --color-uvi-moderate: #946800;
+  --color-uvi-high: #b25721;
   --color-uvi-very-high: #c43d3d;
   --color-uvi-extreme: #7d4bb3;
 
@@ -218,6 +261,19 @@
   --font-weight-caption: 500;
   --line-height-caption: 1.5;
   --letter-spacing-caption: 0.01em;
+  /*
+   * 行內強調短語的字重（`<strong>`、標籤）。DESIGN.md 第三節：「內文段落
+   * 維持字重 400，標籤與強調短語 500」。
+   *
+   * **刻意不做成第八個 typography 角色。** 那七個角色各自帶完整的五欄
+   * （family／size／weight／line-height／letter-spacing），而強調短語只
+   * 改字重、其餘全部繼承上下文——硬湊成完整角色會逼出四個沒有意義的值，
+   * 也會撞到 tokens.test.ts 的「只公開核准的七個語意角色」守門。
+   *
+   * 也不要借用 --font-weight-caption：值雖然同為 500，但 caption 指的是
+   * 短註腳、時間戳、eyebrow、badge，不是行內強調，借名會誤導。
+   */
+  --font-weight-emphasis: 500;
   --font-family-nav-label: var(--font-sans);
   --font-size-nav-label: 0.75rem;
   --font-weight-nav-label: 500;
@@ -243,8 +299,45 @@
    * 憑感覺判斷，沒有依據。數值完全沒變，只是給它們名字與適用場合。
    */
   --page-stack-gap-compact: var(--space-4);
-  --page-stack-gap: var(--space-6);
+  /*
+   * 2026-08-30：24px → 20px。使用者回饋「卡片與卡片間的距離、卡片跟文字
+   * 之間的距離可以再緊一點」，裁決調全域而不是只調單頁（選項乙），這樣
+   * 各頁節奏才會一致。
+   *
+   * 三檔位的相對關係不變（compact 16 < 預設 20 < prose 32），只是預設那
+   * 一檔往下收一級。18 個頁面吃這個值。
+   */
+  --page-stack-gap: var(--space-5);
   --page-stack-gap-prose: var(--space-8);
+
+  /*
+   * 卡片／面板內距。
+   *
+   * 2026-08-30 新增。DESIGN.md 第四節早就訂了「卡片內距預設 20px」，但這條
+   * 規則在程式碼裡是 28 處各自寫 `padding: var(--space-5)`——想整批調鬆緊
+   * 就得改 28 個檔案，等於這條規則沒有真的收斂成 token。數值沒有變動，
+   * 只是給它一個可以一次調的名字。
+   *
+   * 16px（狀態卡、清單項目）目前沒有任何地方真的用 `--card-padding-*` 的
+   * 形式引用，先不預先造 token——2026-08-30 才因為「留著沒人用的 token 會
+   * 讓人以為某處正在用它」移除過 --space-stack-body-note 與
+   * --space-stack-block。
+   */
+  --card-padding: var(--space-5);
+
+  /*
+   * Bottom sheet 的內距。
+   *
+   * 2026-09-01 新增，**closes DESIGN.md 第六節記的那條已知落差**：第四節
+   * 訂 bottom sheet 用 24px，程式碼一直沿用 `--card-padding`（20px），差異
+   * 被記在第六節「等裁決」。使用者要求把抽屜的外觀對齊整體設計風格時一併
+   * 裁決成照規範走。
+   *
+   * 為什麼 sheet 要比卡片鬆一階：卡片是頁面裡的一塊，四周還有頁面本身的
+   * 邊界撐開；sheet 佔滿整個寬度、緊貼螢幕邊緣，同樣的 20px 在那裡讀起來
+   * 更擠。
+   */
+  --sheet-padding: var(--space-6);
 
   --prose-paragraph-gap: var(--space-3);
   --prose-heading-gap-before: var(--space-8);
@@ -323,6 +416,17 @@
    */
 
   --content-max: 47rem;
+  /*
+   * 單一控制項的寬度上限（2026-09-04）。
+   *
+   * 內容欄本身有 --content-max（752px）並且置中，那是對的；問題出在**控制項
+   * 沒有上限**——1280px 視窗下實測：首頁主 CTA 662px、回饋頁的送出鈕與
+   * textarea／select 各 620px。那是手機版型直接拉開的樣子，不是桌面的設計。
+   *
+   * 26rem＝416px，約等於一支大手機的內容寬。手機上內容欄本來就比它窄，
+   * 所以這個上限在小螢幕完全不作用，不需要 media query。
+   */
+  --control-max: 26rem;
   --tap-target: 2.75rem;
   --bottom-nav-height: 4.5rem;
   /*
@@ -356,6 +460,32 @@
   --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
 
   /*
+   * 2026-09-04 新增。Material 3 的 standard 曲線：起步快、尾段長。
+   *
+   * ease-out 是溫和的 easeOutQuad，中段幾乎等速——同樣 160ms 動同樣的
+   * 東西，換這條曲線就是「有回應」與「沒感覺」的差別。這是使用者指名
+   * 要的 Google Play 底部導覽手感裡，貢獻最大也最便宜的一項。
+   *
+   * **只給直接操作的選取指示器用。** 內容進場與 loader 維持 ease-out／
+   * ease-in-out——那些是「自己發生的事」，強減速會讓它們讀起來很急。
+   *
+   * 兩個控制點的 y 都貼在 0 與 1 上，沒有超過 1，所以不會有 overshoot；
+   * 這條曲線通得過第十二節「不彈跳」那條。
+   */
+  --ease-emphasized: cubic-bezier(0.2, 0, 0, 1);
+
+  /*
+   * 離場用的加速曲線（2026-09-04）。Material 3 的 emphasized-accelerate。
+   *
+   * 離場是「東西要走了」。用 ease-out 這種減速曲線的話，大部分的不透明度
+   * 變化會拖到尾段才發生——同樣 160ms，讀起來卻像它賴著不走。加速曲線把
+   * 變化集中在前段，時長不變但俐落很多。
+   *
+   * 進場不要用它：進場是「東西要來了」，減速收尾才穩。
+   */
+  --ease-accelerate: cubic-bezier(0.3, 0, 0.8, 0.15);
+
+  /*
    * 內容進場的上移距離。2026-08-29 開的例外：系統原本規定「動畫只用
    * opacity，不用位移或縮放」，但在 #FAF5EC 這種低對比暖底上，純粹的
    * 0→1 淡入幾乎察覺不到。4px 小到不構成「位移動畫」，只是讓轉場被看見。
@@ -364,6 +494,16 @@
    * 維持純 opacity——見 DESIGN.md 第十二節。
    */
   --motion-rise: 4px;
+
+  /*
+   * 按下去變暗的倍率（`filter: brightness()`）。2026-09-04 收斂：原本
+   * 四處各自寫死，.choice-grid 用 0.85、其餘三處用 0.92。
+   *
+   * 選 0.92 不是因為它是多數，是因為 0.85 在這個色盤上會變髒——canvas
+   * #FAF5EC 乘 0.85 約落到 #D5D0C9，那不是「被按下」，是「變成灰色」。
+   * 這套配色本來就是低對比設計，暗 15% 會把暖色相整個壓掉。
+   */
+  --press-dim: 0.92;
 
   /*
    * 2026-08-25：z-index 只有兩層——常駐的下排導覽列，跟蓋過它的全螢幕
@@ -405,12 +545,12 @@ html {
  * 這裡的全域預設一起同步改，避免只改一處造成落差；第 5 輪之後改 token
  * 就夠了，`lineHeightTokens.test.ts` 擋住寫死值長回來。
  * `DESIGN.md` 第三節 Body MD 那一列與 frontmatter 都已回寫到 1.5。
- *
+   *
  * **2026-08-30 更正**：本註解原本寫「`.education-article-body` 刻意維持
  * 1.85，不在調整範圍內」。那句話現在是錯的——1.85 其實是 2026-08-25 那
  * 次 sed 掃「1.7」時漏掉的殘留（值不同所以沒掃到），從來沒有被裁決過，
  * 已於 2026-08-30 一併收斂到這個 token。
- */
+   */
 body {
   min-width: 20rem;
   min-height: 100vh;
@@ -426,11 +566,11 @@ body {
 
 /*
  * 所有標題走襯線體，字重 400（DESIGN.md 第三節與第十一節）。
- *
+   *
  * 「不要把襯線標題加粗」不只是風格偏好：Noto Serif TC subset 只有 400
  * 字重，元件若寫 font-weight: 600，瀏覽器會合成假粗（faux bold）——把
  * 筆畫無差別加厚，中文字會糊掉。需要強調時放大字級，不要加粗。
- */
+   */
 h1,
 h2,
 h3 {

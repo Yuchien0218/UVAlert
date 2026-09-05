@@ -32,5 +32,3 @@ CDC 的旅遊健康建議是：**先擦防曬，再使用防蚊液**。兩者都
 
 - [CDC Travelers’ Health：Avoid bug bites](https://wwwnc.cdc.gov/travel/page/avoid-bug-bites)（先防曬、後防蚊及依標示使用；查閱 2026-08-16）
 - [EPA：Using Insect Repellents Safely and Effectively](https://www.epa.gov/insect-repellents/using-insect-repellents-safely-and-effectively)（防蚊產品安全與標示；查閱 2026-08-16）
-
-本文為一般衛教草稿，尚未完成 UVAlert 專業審閱。

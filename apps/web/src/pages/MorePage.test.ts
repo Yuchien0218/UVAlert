@@ -1,7 +1,6 @@
 // @vitest-environment happy-dom
 
-import { readFileSync, readdirSync } from "node:fs";
-import { join } from "node:path";
+import { readFileSync } from "node:fs";
 import { mount } from "@vue/test-utils";
 import { describe, expect, it, vi } from "vitest";
 import MorePage from "./MorePage.vue";
@@ -9,9 +8,8 @@ import MorePage from "./MorePage.vue";
 /**
  * 讓被審查閘門擋住的兩張卡也渲染出來。
  *
- * `/help` 與 `/special-situation` 的內容尚未過審，正常情況下不會列出。
- * 但這個檔案守的是「說明文字不可被刪」，跟內容有沒有上線無關——內容
- * 一上線那兩張卡就會出現，那時文字必須還在。
+ * `/help` 與 `/special-situation` 的內容尚未過審，正常情況下不會列出，
+ * 但這個檔案守的是版型與邊界文字，跟內容有沒有上線無關。
  */
 vi.mock("../features/help/helpTopics", () => ({
   listPublishableTopics: () => [{ slug: "beach" }],
@@ -35,103 +33,87 @@ function mountPage() {
 }
 
 /**
- * B9 第一輪最大的風險不是做錯，是**之後有人為了「再清爽一點」把不該
- * 收的收掉**。
+ * 「更多」頁的入口卡只有標題（2026-09-03 使用者裁決）。
  *
- * 下面四段說明文字在 B9 分類表裡標為「必須常駐」，依 B9 §3 與
- * `DESIGN.md` 第五節的不可隱藏清單，它們不能被刪、也不能收進展開。
- * 每條斷言都註明為什麼。
- *
- * 計畫：docs/superpowers/plans/2026-08-29-b9-icon-first-more-page.md
+ * 這推翻了 2026-08-29 B9 第一輪的逐項分類——當時七張裡四張留著說明，
+ * 結果六列有、一列沒有，那一列比其他矮一截（稽核 §E）。
  */
-const mustStay = [
-  {
-    card: "特殊狀況",
-    text: "醫療邊界與功能限制。",
-    why: "健康／安全邊界。DESIGN.md 第九節：不作疾病診斷或求助分級，所以邊界必須在進入前就說清楚"
-  },
-  {
-    card: "安裝到手機桌面",
-    text: "安裝後資料較不易遺失；不安裝也可正常使用。",
-    why: "決策條件。第二句在防止使用者誤以為非裝不可——少了它，這張卡會變成半個強迫安裝的提示"
-  },
-  {
-    card: "本機資料與隱私",
-    text: "資料留在這台裝置；要跨裝置同步才需登入，同步前會先讓你確認內容。",
-    why: "隱私決策條件。免登入是這個產品的核心承諾，「同步前會先讓你確認內容」是採取動作前必須知道的前提（2026-08-29 合併裁決）"
-  },
-  {
-    card: "問題回報與意見回饋",
-    text: "不用登入也可以回報錯誤或提供建議。",
-    why: "決策條件，直接影響使用者要不要點進去"
-  }
-] as const;
+describe("入口卡只有標題", () => {
+  it("沒有任何說明文字", () => {
+    const wrapper = mountPage();
 
-describe("「更多」頁不可隱藏的說明文字", () => {
-  for (const { card, text, why } of mustStay) {
-    it(`${card} 的說明仍在 DOM 裡`, () => {
-      expect(mountPage().text(), `不可刪的理由：${why}`).toContain(text);
-    });
-  }
-});
+    expect(wrapper.findAll("small")).toHaveLength(0);
+    /*
+     * `description` 這個選填欄位也一併收掉，不是只在模板裡藏起來。
+     * 註解要先剝掉——上面那段說明為什麼拿掉的註解裡就有這個字。
+     */
+    const source = readFileSync("apps/web/src/pages/MorePage.vue", "utf8")
+      .replace(/<!--[\s\S]*?-->/g, "")
+      .replace(/\/\*[\s\S]*?\*\//g, "");
 
-describe("「更多」頁 B9 第一輪的處置", () => {
-  it("通知設定沒有說明文字——原文純重述標題，已依分類表刪除", () => {
-    const html = mountPage().html();
-    expect(html).toContain("通知設定");
-    expect(html).not.toContain("開啟或管理補擦提醒通知");
+    expect(source).not.toContain("description");
   });
 
-  it("沒有說明的卡片不留空的 <small> 撐出間距", () => {
-    const wrapper = mountPage();
-    for (const small of wrapper.findAll("small")) {
-      expect(small.text()).not.toBe("");
+  /*
+   * **反向：入口本身要還在。** 只守「沒有說明」的話，把整份清單刪光也是
+   * 綠的——那時這六頁在 App 裡又沒有進入點了（那正是這一頁當初存在的理由）。
+   */
+  it("七個入口都還在", () => {
+    const text = mountPage().text();
+
+    for (const label of [
+      "通知設定",
+      "防曬衛教",
+      "常見問題",
+      "特殊狀況",
+      "安裝到手機桌面",
+      "本機資料與隱私",
+      "問題回報與意見回饋"
+    ]) {
+      expect(text).toContain(label);
     }
   });
 });
 
 /**
- * 「共六個主題」是文案裡唯一一個**會過期的事實**。
+ * **拿掉說明的代價，由目的頁承擔。**
  *
- * 2026-08-29 裁決時就知道這個代價：加第七個衛教分類，那句話會變成錯
- * 的，而且沒有任何機制會提醒。這條測試就是那個機制。
+ * 原本那四句在 B9 §3 的「不可隱藏清單」裡，理由是醫療邊界與決策條件要
+ * 「進入前就說清楚」。現在改成點進去才看得到——資訊不能因此消失，所以
+ * 這裡守著四個目的頁各自都還在說同一件事。
  *
- * 分類的真實來源是 `docs/education/articles/*.md` 的 `category:`
- * frontmatter，不是產生出來的檔案——產生器只是把它讀過去。
+ * 比對的是**語意的關鍵字**而不是整句：目的頁的句子本來就與卡片上的措辭
+ * 不同（那是兩個位置的文案），逐字比會綁死一份不該綁的文案。
  */
-describe("衛教卡的主題數與實際內容一致", () => {
-  const articlesDir = "docs/education/articles";
-
-  function countCategories(): number {
-    const categories = new Set<string>();
-    for (const file of readdirSync(articlesDir)) {
-      if (!file.endsWith(".md")) continue;
-      const match = /^category:\s*(\S+)\s*$/m.exec(
-        readFileSync(join(articlesDir, file), "utf8")
-      );
-      if (match?.[1] !== undefined) categories.add(match[1]);
+describe("被拿掉的四句話仍然在目的頁上", () => {
+  const destinations = [
+    {
+      page: "apps/web/src/pages/SpecialSituationPage.vue",
+      keywords: ["不提供診斷", "無法判斷你能否曝曬"],
+      why: "醫療邊界。DESIGN.md 第九節：不作疾病診斷或求助分級"
+    },
+    {
+      page: "apps/web/src/pages/InstallPage.vue",
+      keywords: ["不安裝仍可使用核心功能"],
+      why: "決策條件：防止使用者誤以為非裝不可"
+    },
+    {
+      page: "apps/web/src/pages/settings/DataSettingsPage.vue",
+      keywords: ["免登入即可使用", "只留於本機"],
+      why: "隱私決策條件：免登入是這個產品的核心承諾"
+    },
+    {
+      page: "apps/web/src/pages/FeedbackPage.vue",
+      keywords: ["免登入即可回報"],
+      why: "決策條件，直接影響使用者要不要填"
     }
-    return categories.size;
+  ] as const;
+
+  for (const { page, keywords, why } of destinations) {
+    it.each(keywords)(`${page} 仍然說「%s」`, (keyword) => {
+      expect(readFileSync(page, "utf8"), `不可刪的理由：${why}`).toContain(
+        keyword
+      );
+    });
   }
-
-  const numerals = ["零", "一", "二", "三", "四", "五", "六", "七", "八", "九"];
-
-  it("MorePage 文案裡的數字等於實際分類數", () => {
-    const actual = countCategories();
-    const copy = /共(.)個主題/.exec(
-      readFileSync("apps/web/src/pages/MorePage.vue", "utf8")
-    );
-
-    expect(
-      copy?.[1],
-      "「防曬衛教」卡的說明文字不再是「共 N 個主題」的句型"
-    ).toBeDefined();
-
-    expect(
-      numerals.indexOf(copy?.[1] ?? ""),
-      `衛教分類實際有 ${actual} 類，但 MorePage.vue 的文案寫「共${copy?.[1]}個主題」。` +
-        `改了 ${articlesDir} 的分類數就要一起改那句文案——` +
-        `見 docs/decisions/2026-08-29-b9-pre-decision.md 第八節。`
-    ).toBe(actual);
-  });
 });

@@ -1,63 +1,40 @@
 <script setup lang="ts">
 import { computed } from "vue";
 import Icon from "../icons/Icon.vue";
-import type {
-  GearCategory,
-  ProductCatalogRecordV1
-} from "@sunshield/contracts";
+import type { ProductCatalogRecordV1 } from "@sunshield/contracts";
 import {
   affectsCountdown,
-  formatPurchaseMonth,
+  GEAR_CATEGORY_ICONS,
   GEAR_CATEGORY_LABELS,
-  GEAR_CATEGORY_REMINDER_EFFECT,
   gearSafetyState
 } from "../../features/product/gearPresentation";
-import type { IconName } from "../../generated/icons.generated";
 
 const props = defineProps<{ product: ProductCatalogRecordV1 }>();
 defineEmits<{ open: [] }>();
 
-/** 每個品類對應的圖示色塊圖示（依 Claude Design 元件庫，2026-08-23 同步）。 */
-const GEAR_CATEGORY_ICONS: Record<GearCategory, IconName> = {
-  sunscreen: "gear-sunscreen",
-  clothing: "gear-clothing",
-  eyewear: "gear-sunglasses",
-  other_gear: "gear-other"
-};
-
 const safety = computed(() => gearSafetyState(props.product));
-const purchase = computed(() =>
-  formatPurchaseMonth(props.product.purchaseMonth)
-);
-
 /**
- * 一行摘要。防曬乳用真實規格（SPF／PA／補擦間隔），沒資料就不編造，
- * 落回品類的一般提醒效果說明；其他品類本來就只有效果說明可用。
+ * 安全狀態的一行說明。
+ *
+ * **2026-08-31 大幅收斂。** 這裡原本還會顯示 SPF／PA／補擦間隔，沒有規格時
+ * 落回品類的固定說明——但那句固定說明對每一張同品類的卡都一樣（重複度
+ * 100%、資訊量 0），使用者回饋「收合前的文字太多，只留名稱就好」。
+ *
+ * **安全狀態留下來，那不是可以省的裝飾。** 被封鎖或不建立倒數的裝備必須在
+ * 清單上就看得出來，不能等使用者點進詳情頁才知道；規格則是「進去看」也
+ * 不遲。
  */
-const summary = computed((): string => {
-  if (safety.value.kind !== "usable") {
-    return `${safety.value.label}・${safety.value.detail}`;
-  }
-  if (props.product.gearCategory === "sunscreen") {
-    const snapshot = props.product.currentSnapshot;
-    const parts: string[] = [];
-    if (snapshot.spf !== null) parts.push(`SPF ${snapshot.spf}`);
-    // paGrade 存的是使用者輸入的完整標示（欄位 placeholder 就是
-    // 「PA++++」），不要再自己加 PA 前綴——會變成「PAPA++++」。
-    if (snapshot.paGrade !== null) parts.push(snapshot.paGrade);
-    if (snapshot.reapplicationIntervalMinutes !== null) {
-      parts.push(`補擦間隔 ${snapshot.reapplicationIntervalMinutes} 分鐘`);
-    }
-    if (parts.length > 0) return parts.join("・");
-  }
-  return GEAR_CATEGORY_REMINDER_EFFECT[props.product.gearCategory];
-});
+const safetyNotice = computed((): string | null =>
+  safety.value.kind === "usable"
+    ? null
+    : `${safety.value.label}・${safety.value.detail}`
+);
 </script>
 
 <template>
   <button class="gear-item" type="button" @click="$emit('open')">
     <span class="gear-item__icon" aria-hidden="true">
-      <Icon :name="GEAR_CATEGORY_ICONS[product.gearCategory]" :size="24" />
+      <Icon :name="GEAR_CATEGORY_ICONS[product.gearCategory]" :size="32" />
     </span>
 
     <div class="gear-item__body">
@@ -66,25 +43,21 @@ const summary = computed((): string => {
         <span
           v-if="!affectsCountdown(product.gearCategory)"
           class="gear-item__badge"
-          >不會建立倒數</span
+          >僅供紀錄</span
         >
       </p>
-      <strong class="gear-item__name">{{ product.displayName }}</strong>
+      <strong class="gear-item__name user-text">{{ product.displayName }}</strong>
+      <!--
+        購買月份、到期日、個人附註與規格都只在詳情頁——清單的工作是「認出
+        是哪一件」，不是把所有欄位攤開（2026-08-31 使用者裁決）。
+      -->
       <p
+        v-if="safetyNotice !== null"
         class="gear-item__summary"
-        :class="{
-          [`gear-item__summary--${safety.kind}`]: safety.kind !== 'usable'
-        }"
+        :class="`gear-item__summary--${safety.kind}`"
       >
-        {{ summary }}
+        {{ safetyNotice }}
       </p>
-
-      <p v-if="purchase || product.expiryDate" class="gear-item__meta">
-        <span v-if="purchase">{{ purchase }}</span>
-        <span v-if="purchase && product.expiryDate">・</span>
-        <span v-if="product.expiryDate">到期日 {{ product.expiryDate }}</span>
-      </p>
-      <p v-if="product.note" class="gear-item__note">{{ product.note }}</p>
     </div>
     <Icon name="tool-chevron-right" :size="20" />
   </button>
@@ -142,9 +115,7 @@ p {
   font-size: var(--font-size-card-title);
 }
 
-.gear-item__summary,
-.gear-item__meta,
-.gear-item__note {
+.gear-item__summary {
   color: var(--text-secondary);
   line-height: var(--line-height-body);
 }

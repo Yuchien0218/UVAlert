@@ -13,22 +13,22 @@ export const CATEGORY_DEFINITIONS = Object.freeze([
   {
     slug: "uv-basics",
     title: "了解今天的 UV",
-    description: "先讀懂 UV 指數、預報與一天中的曝曬變化。"
+    description: "UV 指數、預報與一天中的變化。"
   },
   {
     slug: "before-going-out",
     title: "出門前準備",
-    description: "挑選防曬乳、衣物與配件，出門前一次準備好。"
+    description: "出門前挑好防曬乳、衣物與配件。"
   },
   {
     slug: "reapply-sunscreen",
     title: "外出中的補擦",
-    description: "把兩小時提醒和流汗、碰水等實際情境分開看。"
+    description: "兩小時提醒與流汗、碰水分開看。"
   },
   {
     slug: "sweat-and-water",
     title: "流汗或碰水後",
-    description: "遇到游泳、淋雨、毛巾擦拭或海邊活動時怎麼處理。"
+    description: "游泳、淋雨、毛巾擦拭後怎麼處理。"
   },
   {
     slug: "after-sun-care",
@@ -38,7 +38,7 @@ export const CATEGORY_DEFINITIONS = Object.freeze([
   {
     slug: "special-situations",
     title: "特殊情況",
-    description: "敏感反應、孕期、嬰幼兒與藥物相關的防護界線。"
+    description: "敏感反應、孕期、嬰幼兒與藥物。"
   }
 ]);
 

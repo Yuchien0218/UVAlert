@@ -1,8 +1,11 @@
 <script setup lang="ts">
+import { useRouter } from "vue-router";
+import IconButton from "../components/common/IconButton.vue";
 import { computed, shallowRef } from "vue";
 import type { FeedbackType } from "@sunshield/contracts";
 import { useFeedbackController } from "../app/injection";
 import AppNotice from "../components/common/AppNotice.vue";
+import InlineLoader from "../components/feedback/InlineLoader.vue";
 
 const feedback = useFeedbackController();
 const feedbackType = shallowRef<FeedbackType>("bug");
@@ -22,17 +25,25 @@ async function submit(): Promise<void> {
     contactEmail.value = "";
   }
 }
+const router = useRouter();
+
+/*
+ * 頂端的返回出口（2026-09-03，稽核 §G：下鑽頁一律有頂端箭頭）。
+ * 直接回「更多」，不用 history.back——這一頁也可能是從網址列直接打開的。
+ */
+function goBack(): void {
+  void router.push({ name: "more" });
+}
 </script>
 
 <template>
   <div class="page-stack">
-    <header class="page-heading">
+    <header class="page-heading page-heading--with-exit">
       <h1 class="page-heading__title" data-typography-role="page-title">
         問題回報與意見回饋
       </h1>
-      <p class="page-heading__body">
-        不用登入。請描述你遇到的情況，我們只會收到這個表單中的內容。
-      </p>
+      <p class="page-heading__body">免登入即可回報，僅會收到此表單的內容。</p>
+      <IconButton icon="tool-arrow-left" label="返回更多" @click="goBack" />
     </header>
 
     <form class="app-card feedback-form" @submit.prevent="submit">
@@ -51,7 +62,7 @@ async function submit(): Promise<void> {
           rows="6"
           maxlength="4000"
           required
-          placeholder="請描述發生了什麼事，以及你原本想做什麼"
+          placeholder="請描述遇到的狀況與原本操作步驟"
         ></textarea>
       </label>
       <label>
@@ -60,10 +71,11 @@ async function submit(): Promise<void> {
           v-model="contactEmail"
           type="email"
           maxlength="320"
-          placeholder="不填也可以回報"
+          placeholder="選填，可聯繫你目前處理進度"
         />
       </label>
       <button class="button button--primary" type="submit" :disabled="busy">
+        <InlineLoader v-if="busy" />
         {{ busy ? "送出中…" : "送出" }}
       </button>
       <AppNotice v-if="feedback.state.value.status === 'submitted'" kind="ok">
@@ -73,10 +85,6 @@ async function submit(): Promise<void> {
         {{ feedback.state.value.error.message }}
       </AppNotice>
     </form>
-
-    <RouterLink class="text-link text-link--muted" to="/more"
-      >返回更多</RouterLink
-    >
   </div>
 </template>
 
@@ -84,7 +92,7 @@ async function submit(): Promise<void> {
 .feedback-form {
   display: grid;
   gap: var(--space-4);
-  padding: var(--space-5);
+  padding: var(--card-padding);
 }
 label {
   display: grid;
@@ -93,18 +101,10 @@ label {
 label span {
   font-weight: 500;
 }
+/* 只留寬度，其餘欄位外觀（含 44px 命中高度）用 app.css 的共用宣告。 */
 input,
 select,
 textarea {
   width: 100%;
-  padding: var(--space-3);
-  border: 1px solid var(--border-strong);
-  border-radius: var(--radius-sm);
-  background: var(--surface-primary);
-  color: var(--text-primary);
-  font: inherit;
-}
-textarea {
-  resize: vertical;
 }
 </style>
