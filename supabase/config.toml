@@ -56,3 +56,15 @@ verify_jwt = false
 
 [functions.push-dispatch]
 verify_jwt = false
+
+[functions.sync-manifest]
+verify_jwt = true
+
+[functions.sync-commit]
+verify_jwt = true
+
+[functions.sync-read]
+verify_jwt = true
+
+[functions.sync-delete]
+verify_jwt = true

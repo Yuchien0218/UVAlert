@@ -33,11 +33,11 @@
 - Consumes: `VITE_API_BASE_URL=https://ykfdnltaqpdytmrszbbk.supabase.co/functions/v1`
 - Produces: `manifest -> /sync-manifest`、`read -> /sync-read`、`commit -> /sync-commit`、`delete -> /sync-delete`、`deleteAccount -> /account-delete`
 
-- [ ] **Step 1: 補上五個原生 Function URL 的 failing tests**
-- [ ] **Step 2: 執行聚焦測試並確認舊 `/sync/...` 路徑使測試失敗**
-- [ ] **Step 3: 以單一 operation-to-slug mapping 實作，避免呼叫端自行拼字**
-- [ ] **Step 4: 執行 adapter 與 service composition 測試**
-- [ ] **Step 5: 獨立規格與品質審查通過後提交**
+- [x] **Step 1: 補上五個原生 Function URL 的 failing tests**
+- [x] **Step 2: 執行聚焦測試並確認舊 `/sync/...` 路徑使測試失敗**
+- [x] **Step 3: 以單一 operation-to-slug mapping 實作，避免呼叫端自行拼字**
+- [x] **Step 4: 執行 adapter 與 service composition 測試**
+- [x] **Step 5: 獨立規格與品質審查通過後提交**
 
 ### Task 2: 鎖定 CORS preflight 與雙層 JWT 驗證邊界
 
@@ -54,10 +54,10 @@
 - Consumes: production `ALLOWED_ORIGINS` 與 Supabase Auth Bearer token
 - Produces: 四支 Function 保留平台 `verify_jwt=true`；approved-origin OPTIONS 204；無 token 的實際請求回 401，前端依 HTTP status 映射為 `AUTH_REQUIRED`
 
-- [ ] **Step 1: 補四支 Function 的 OPTIONS、method 與 handler 未登入 failing tests**
-- [ ] **Step 2: 在 `supabase/config.toml` 明確加入四個 `[functions.sync-*] verify_jwt = true`，避免部署預設值漂移**
-- [ ] **Step 3: 確認非 OPTIONS 路徑仍先呼叫 `requirePermanentUser`，且 adapter 可將平台 401 映射為 `AUTH_REQUIRED`**
-- [ ] **Step 4: 執行四支 handler 測試、config guard test，並保留正式 OPTIONS 204／未登入 401 證據**
+- [x] **Step 1: 補四支 Function 的 OPTIONS、method 與 handler 未登入 failing tests**
+- [x] **Step 2: 在 `supabase/config.toml` 明確加入四個 `[functions.sync-*] verify_jwt = true`，避免部署預設值漂移**
+- [x] **Step 3: 確認非 OPTIONS 路徑仍先呼叫 `requirePermanentUser`，且 adapter 可將平台 401 映射為 `AUTH_REQUIRED`**
+- [x] **Step 4: 執行四支 handler 測試、config guard test，並保留正式 OPTIONS 204／未登入 401 證據**
 - [ ] **Step 5: 獨立安全審查通過後提交**
 
 ### Task 3: 使 Edge payload validation 與共用 contract 等價

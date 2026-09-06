@@ -1,4 +1,5 @@
-import { describe, expect, it } from "vitest";
+import { readFileSync } from "node:fs";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { makeActiveSessionRecord } from "../../../packages/test-fixtures/src";
 import {
   readManifestForUser,
@@ -8,8 +9,98 @@ import {
 } from "../_shared/sync";
 
 const fetchedAt = "2026-08-17T09:00:00.000Z";
+const approvedOrigin = "https://uv-alert-web.vercel.app";
+
+const runtime = vi.hoisted(() => {
+  const requirePermanentUser = vi.fn(async () => ({
+    ok: false as const,
+    response: new Response(
+      JSON.stringify({ error: { code: "AUTH_REQUIRED" } }),
+      { status: 401, headers: { "Content-Type": "application/json" } }
+    )
+  }));
+
+  return { requirePermanentUser };
+});
+
+vi.mock("../_shared/auth.ts", () => ({
+  requirePermanentUser: runtime.requirePermanentUser
+}));
+
+let handleManifest: typeof import("./index.ts").handleManifest;
+
+function makeRequest(method: string): Request {
+  return new Request("https://api.test/sync-manifest", {
+    method,
+    headers: { Origin: approvedOrigin }
+  });
+}
+
+beforeEach(async () => {
+  vi.resetModules();
+  runtime.requirePermanentUser.mockClear();
+  vi.stubGlobal("Deno", {
+    env: {
+      get: (key: string) =>
+        key === "ALLOWED_ORIGINS" ? approvedOrigin : undefined
+    },
+    serve: vi.fn()
+  });
+  ({ handleManifest } = await import("./index.ts"));
+});
+
+afterEach(() => {
+  vi.unstubAllGlobals();
+});
 
 describe("sync manifest boundary", () => {
+  it("approved origin 的 OPTIONS 回 204，且不要求 JWT", async () => {
+    const response = await handleManifest(makeRequest("OPTIONS"));
+
+    expect(response.status).toBe(204);
+    expect(response.headers.get("Access-Control-Allow-Origin")).toBe(
+      approvedOrigin
+    );
+    expect(runtime.requirePermanentUser).not.toHaveBeenCalled();
+  });
+
+  it("拒絕非 GET method，且不進入驗證", async () => {
+    const response = await handleManifest(makeRequest("POST"));
+
+    expect(response.status).toBe(405);
+    expect(runtime.requirePermanentUser).not.toHaveBeenCalled();
+  });
+
+  it("未登入的 GET 仍交給 requirePermanentUser 回 401", async () => {
+    const response = await handleManifest(makeRequest("GET"));
+
+    expect(response.status).toBe(401);
+    await expect(response.json()).resolves.toEqual({
+      error: { code: "AUTH_REQUIRED" }
+    });
+    expect(runtime.requirePermanentUser).toHaveBeenCalledOnce();
+  });
+
+  it("四支 sync Function 都明確保留平台 JWT 驗證", () => {
+    const config = readFileSync(
+      new URL("../../config.toml", import.meta.url),
+      "utf8"
+    );
+
+    for (const functionName of [
+      "sync-manifest",
+      "sync-commit",
+      "sync-read",
+      "sync-delete"
+    ]) {
+      expect(config).toMatch(
+        new RegExp(
+          `\\[functions\\.${functionName}\\][\\s\\S]*?verify_jwt\\s*=\\s*true`
+        )
+      );
+    }
+  });
+
   it("manifest 只回傳摘要，不包含 payload，且不同 user 的 row 不會被組進來", () => {
     const record = makeActiveSessionRecord();
     const rows: SyncRecordRow[] = [
