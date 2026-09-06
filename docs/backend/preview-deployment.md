@@ -1,16 +1,17 @@
 # UVAlert Vercel 部署狀態
 
-## 2026-09-06 Supabase 同步 Function 部署（Vercel 尚待更新）
+## 2026-09-06 Supabase 同步 Function 與資料表權限部署
 
 **驗證時間**：2026-09-06 20:06–20:07（Asia/Taipei）
 
 **Supabase project ref**：`ykfdnltaqpdytmrszbbk`
 
-- 遠端 migration 清單與本地一致，已同步至 `20260904000000`。
+- 遠端 migration 清單已同步至 `20260906000000`；其中 `sync_table_privileges` 撤銷 `public`／`anon` 對三張同步表的權限，僅授予 `authenticated` 必要的 CRUD 權限，RLS 的逐使用者隔離維持不變。
 - `sync-manifest`、`sync-read`、`sync-commit`、`sync-delete` 均已部署為 version 2／`ACTIVE`，且皆保留 `verify_jwt=true`。
 - 自 `https://uv-alert-web.vercel.app` 發出的 OPTIONS 預檢，四支 Function 均回 HTTP 204 與精確的 `Access-Control-Allow-Origin`。
 - 不帶登入憑證的實際 GET／POST 請求，四支 Function 均被平台 JWT 回 HTTP 401；本次 smoke 沒有寫入同步資料。
-- 本段只證明後端 Function 已更新。前端 Function slug 對應尚待合併、推送 `main` 並完成 Vercel redeploy；兩個永久帳號的 manifest／commit／read／conflict／delete 隔離實測亦尚待完成。
+- Vercel 正式站已更新至同步 Function slug 對應版本。以已登入的正式 Chrome 工作階段重新執行「查看同步預覽」，成功顯示同步項目與「同步這些資料」，未按下確認、沒有上傳本機資料；這修復了先前因 `authenticated` 缺少 table-level `SELECT` 而產生的 manifest HTTP 500。
+- 兩個永久帳號的 manifest／commit／read／conflict／delete 隔離實測仍待完成。
 
 ## 2026-09-05 匿名背景推播中繼驗證
 

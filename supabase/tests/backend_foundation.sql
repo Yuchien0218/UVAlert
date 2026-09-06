@@ -1,6 +1,6 @@
 begin;
 
-select plan(23);
+select plan(32);
 
 select has_table('public', 'sync_records', 'sync_records exists');
 select has_table('public', 'sync_tombstones', 'sync_tombstones exists');
@@ -74,6 +74,43 @@ select ok(
 select ok(
   not exists (select 1 from pg_policies where schemaname = 'public' and tablename = 'feedback_submissions' and roles @> array['anon'::name]),
   'feedback has no anon RLS policy'
+);
+
+select ok(
+  has_table_privilege('authenticated', 'public.sync_records', 'SELECT'),
+  'authenticated can select sync_records'
+);
+select ok(
+  has_table_privilege('authenticated', 'public.sync_tombstones', 'SELECT'),
+  'authenticated can select sync_tombstones'
+);
+select ok(
+  has_table_privilege('authenticated', 'public.sync_idempotency_receipts', 'SELECT'),
+  'authenticated can select sync idempotency receipts'
+);
+select ok(
+  has_table_privilege('authenticated', 'public.sync_records', 'INSERT, UPDATE, DELETE'),
+  'authenticated can write sync_records'
+);
+select ok(
+  has_table_privilege('authenticated', 'public.sync_tombstones', 'INSERT, UPDATE, DELETE'),
+  'authenticated can write sync_tombstones'
+);
+select ok(
+  has_table_privilege('authenticated', 'public.sync_idempotency_receipts', 'INSERT, UPDATE, DELETE'),
+  'authenticated can write sync idempotency receipts'
+);
+select ok(
+  not has_table_privilege('anon', 'public.sync_records', 'SELECT'),
+  'anon cannot select sync_records'
+);
+select ok(
+  not has_table_privilege('anon', 'public.sync_tombstones', 'SELECT'),
+  'anon cannot select sync_tombstones'
+);
+select ok(
+  not has_table_privilege('anon', 'public.sync_idempotency_receipts', 'SELECT'),
+  'anon cannot select sync idempotency receipts'
 );
 
 select * from finish();

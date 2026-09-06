@@ -97,3 +97,16 @@
 - [ ] **Step 4: 以永久測試帳號驗證 manifest、commit、idempotency replay、read、409 conflict、delete 與帳號隔離**
 - [ ] **Step 5: 更新 Vercel production、執行 bundle secret scan 與登入後瀏覽器 smoke**
 - [ ] **Step 6: 回填部署紀錄、完成整體審查；只有具備證據的項目才勾選**
+
+### Follow-up: Sync table role privileges
+
+**Root cause:** 2026-09-06 production PostgreSQL logs showed that the
+`authenticated` role lacked table-level `SELECT` on `sync_records` and
+`sync_tombstones`. RLS policies existed, but PostgreSQL evaluates table
+privileges before RLS policies.
+
+- [x] **Step 1: Add regression tests for authenticated sync access and anon denial**
+- [x] **Step 2: Add a least-privilege migration: revoke sync table access from public/anon and grant authenticated CRUD**
+- [x] **Step 3: Reset local Supabase and run all 171 SQL tests**
+- [x] **Step 4: Apply `20260906000000_sync_table_privileges.sql` to production Supabase**
+- [x] **Step 5: Verify production signed-in sync preview reads successfully without uploading local data**
