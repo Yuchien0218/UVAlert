@@ -77,7 +77,7 @@
 - [x] **Step 2: 收斂 Edge schema，完整檢查 active session/event stream、product snapshot、region preference 與 user preferences**
 - [x] **Step 3: 執行 Edge、contracts 與 sync controller 聚焦測試**
 - [ ] **Step 4: 執行 `pnpm check`、`pnpm build`、`supabase db reset`、`supabase test db`**
-- [ ] **Step 5: 獨立規格與品質審查通過後提交**
+- [x] **Step 5: 獨立規格與品質審查通過後提交**
 
 ### Task 4: 重新部署並驗證正式同步服務
 

@@ -177,6 +177,9 @@ function parityFixtures(): Record<string, unknown>[] {
     string,
     any
   >;
+  active.payload.session.primaryAction.reasonCodes = [
+    "GENERAL_INTERVAL_REACHED"
+  ];
   const stream = active.payload.eventStream;
   const started = stream.sessionStarted;
   const envelope = {
