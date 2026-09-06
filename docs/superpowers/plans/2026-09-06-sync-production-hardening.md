@@ -58,7 +58,7 @@
 - [x] **Step 2: 在 `supabase/config.toml` 明確加入四個 `[functions.sync-*] verify_jwt = true`，避免部署預設值漂移**
 - [x] **Step 3: 確認非 OPTIONS 路徑仍先呼叫 `requirePermanentUser`，且 adapter 可將平台 401 映射為 `AUTH_REQUIRED`**
 - [x] **Step 4: 執行四支 handler 測試、config guard test，並保留正式 OPTIONS 204／未登入 401 證據**
-- [ ] **Step 5: 獨立安全審查通過後提交**
+- [x] **Step 5: 獨立安全審查通過後提交**
 
 ### Task 3: 使 Edge payload validation 與共用 contract 等價
 
@@ -73,9 +73,9 @@
 - Consumes: `SyncCommitRequestV1Schema` 對四種 `recordKind` 的完整限制
 - Produces: Edge 在 RPC 前拒絕所有共用 schema 會拒絕的 payload，回 `422 VALIDATION_ERROR`
 
-- [ ] **Step 1: 以合法 fixture 逐欄變異，加入共用 schema 拒絕但 Edge 舊版接受的 failing matrix**
-- [ ] **Step 2: 收斂 Edge schema，完整檢查 active session/event stream、product snapshot、region preference 與 user preferences**
-- [ ] **Step 3: 執行 Edge、contracts 與 sync controller 聚焦測試**
+- [x] **Step 1: 以合法 fixture 逐欄變異，加入共用 schema 拒絕但 Edge 舊版接受的 failing matrix**
+- [x] **Step 2: 收斂 Edge schema，完整檢查 active session/event stream、product snapshot、region preference 與 user preferences**
+- [x] **Step 3: 執行 Edge、contracts 與 sync controller 聚焦測試**
 - [ ] **Step 4: 執行 `pnpm check`、`pnpm build`、`supabase db reset`、`supabase test db`**
 - [ ] **Step 5: 獨立規格與品質審查通過後提交**
 
