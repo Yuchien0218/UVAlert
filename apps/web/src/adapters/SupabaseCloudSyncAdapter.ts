@@ -37,6 +37,17 @@ const KNOWN_ERROR_CODES: readonly CloudErrorCode[] = [
   "SERVER_ERROR"
 ];
 
+type SyncOperation =
+  "manifest" | "read" | "commit" | "delete" | "deleteAccount";
+
+const FUNCTION_SLUG_BY_OPERATION: Readonly<Record<SyncOperation, string>> = {
+  manifest: "sync-manifest",
+  read: "sync-read",
+  commit: "sync-commit",
+  delete: "sync-delete",
+  deleteAccount: "account-delete"
+};
+
 export class SupabaseCloudSyncAdapter implements CloudSyncPort {
   readonly #auth: AuthPort;
   readonly #fetch: FetchPort;
@@ -53,26 +64,18 @@ export class SupabaseCloudSyncAdapter implements CloudSyncPort {
   }
 
   async getManifest(): Promise<SyncManifestV1> {
-    return this.#request(
-      "/sync/manifest",
-      { method: "GET" },
-      SyncManifestV1Schema
-    );
+    return this.#request("manifest", { method: "GET" }, SyncManifestV1Schema);
   }
 
   async read(request: SyncReadRequestV1): Promise<SyncReadResponseV1> {
     const parsed = SyncReadRequestV1Schema.parse(request);
-    return this.#request(
-      "/sync/read",
-      jsonRequest(parsed),
-      SyncReadResponseV1Schema
-    );
+    return this.#request("read", jsonRequest(parsed), SyncReadResponseV1Schema);
   }
 
   async commit(request: SyncCommitRequestV1): Promise<SyncCommitResultV1> {
     const parsed = SyncCommitRequestV1Schema.parse(request);
     return this.#request(
-      "/sync/commit",
+      "commit",
       jsonRequest(parsed),
       SyncCommitResultV1Schema
     );
@@ -81,22 +84,22 @@ export class SupabaseCloudSyncAdapter implements CloudSyncPort {
   async delete(request: SyncDeleteRequestV1): Promise<SyncDeleteResultV1> {
     const parsed = SyncDeleteRequestV1Schema.parse(request);
     return this.#request(
-      "/sync/delete",
+      "delete",
       jsonRequest(parsed),
       SyncDeleteResultV1Schema
     );
   }
 
   async deleteAccount(): Promise<void> {
-    await this.#requestRaw("/account/delete", jsonRequest({ confirm: true }));
+    await this.#requestRaw("deleteAccount", jsonRequest({ confirm: true }));
   }
 
   async #request<T>(
-    path: string,
+    operation: SyncOperation,
     init: RequestInit,
     schema: { parse(input: unknown): T }
   ): Promise<T> {
-    const response = await this.#requestRaw(path, init);
+    const response = await this.#requestRaw(operation, init);
     const body = await readJson(response);
     try {
       return schema.parse(body);
@@ -105,21 +108,27 @@ export class SupabaseCloudSyncAdapter implements CloudSyncPort {
     }
   }
 
-  async #requestRaw(path: string, init: RequestInit): Promise<Response> {
+  async #requestRaw(
+    operation: SyncOperation,
+    init: RequestInit
+  ): Promise<Response> {
     const accessToken = await this.#getAccessToken();
     let response: Response;
     try {
-      response = await this.#fetch(`${this.#baseUrl}${path}`, {
-        ...init,
-        headers: {
-          Accept: "application/json",
-          ...(init.body === undefined
-            ? {}
-            : { "Content-Type": "application/json" }),
-          ...(init.headers ?? {}),
-          Authorization: `Bearer ${accessToken}`
+      response = await this.#fetch(
+        `${this.#baseUrl}/${FUNCTION_SLUG_BY_OPERATION[operation]}`,
+        {
+          ...init,
+          headers: {
+            Accept: "application/json",
+            ...(init.body === undefined
+              ? {}
+              : { "Content-Type": "application/json" }),
+            ...(init.headers ?? {}),
+            Authorization: `Bearer ${accessToken}`
+          }
         }
-      });
+      );
     } catch (error) {
       throw makeCloudError(
         503,

@@ -162,7 +162,7 @@ describe("SupabaseCloudSyncAdapter", () => {
 
     await expect(adapter.getManifest()).resolves.toEqual(manifest());
     expect(fetch).toHaveBeenCalledWith(
-      "/v1/sync/manifest",
+      "/v1/sync-manifest",
       expect.objectContaining({
         method: "GET",
         headers: expect.objectContaining({
@@ -188,7 +188,7 @@ describe("SupabaseCloudSyncAdapter", () => {
 
     await expect(adapter.getManifest()).resolves.toEqual(manifest());
     expect(fetch).toHaveBeenCalledWith(
-      "/v1/sync/manifest",
+      "/v1/sync-manifest",
       expect.objectContaining({
         method: "GET",
         headers: expect.objectContaining({
@@ -246,4 +246,88 @@ describe("SupabaseCloudSyncAdapter", () => {
       message: "版本衝突"
     });
   });
+
+  const operationCases: readonly {
+    operation: string;
+    slug: string;
+    response: unknown;
+    invoke: (adapter: SupabaseCloudSyncAdapter) => Promise<unknown>;
+  }[] = [
+    {
+      operation: "manifest",
+      slug: "sync-manifest",
+      response: manifest(),
+      invoke: (adapter) => adapter.getManifest()
+    },
+    {
+      operation: "read",
+      slug: "sync-read",
+      response: { schemaVersion: "sync-v1", records: [], tombstones: [] },
+      invoke: (adapter) =>
+        adapter.read({ schemaVersion: "sync-v1", recordKeys: [] })
+    },
+    {
+      operation: "commit",
+      slug: "sync-commit",
+      response: {
+        schemaVersion: "sync-v1",
+        committedRecords: [],
+        committedTombstones: [],
+        committedAt: now
+      },
+      invoke: (adapter) =>
+        adapter.commit({
+          schemaVersion: "sync-v1",
+          idempotencyKey: "commit-operation",
+          records: [],
+          tombstones: []
+        })
+    },
+    {
+      operation: "delete",
+      slug: "sync-delete",
+      response: {
+        schemaVersion: "sync-v1",
+        committedTombstones: [],
+        committedAt: now
+      },
+      invoke: (adapter) =>
+        adapter.delete({
+          schemaVersion: "sync-v1",
+          idempotencyKey: "delete-operation",
+          records: []
+        })
+    },
+    {
+      operation: "deleteAccount",
+      slug: "account-delete",
+      response: null,
+      invoke: (adapter) => adapter.deleteAccount()
+    }
+  ];
+
+  it.each(operationCases)(
+    "將 $operation 操作對齊至 Supabase $slug Function",
+    async ({ slug, response, invoke }) => {
+      const fetch = vi.fn(
+        async () =>
+          new Response(response === null ? null : JSON.stringify(response), {
+            status: response === null ? 204 : 200
+          })
+      );
+      const baseUrl = "https://ykfdnltaqpdytmrszbbk.supabase.co/functions/v1";
+      const adapter = new SupabaseCloudSyncAdapter({
+        auth: makeAuth(),
+        fetch,
+        baseUrl
+      });
+
+      await invoke(adapter);
+
+      expect(fetch).toHaveBeenCalledWith(
+        `${baseUrl}/${slug}`,
+        expect.anything()
+      );
+    }
+  );
 });
