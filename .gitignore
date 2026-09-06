@@ -34,3 +34,6 @@ design-exports/
 # brainstorm 預覽伺服器的本機狀態（含 localhost 專用 token 與 pid）。
 .superpowers/brainstorm/
 .superpowers/sdd/
+
+# Claude Code local permissions and session-specific settings.
+.claude/
