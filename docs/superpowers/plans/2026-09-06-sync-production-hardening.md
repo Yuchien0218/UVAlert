@@ -91,9 +91,9 @@
 - Consumes: Tasks 1–3 已審查的 commits、正式 Supabase project `ykfdnltaqpdytmrszbbk`
 - Produces: 四支 ACTIVE Function、正式 CORS/JWT smoke 證據、Vercel intended commit 與不含 secret 的部署紀錄
 
-- [ ] **Step 1: 唯讀確認 project、migration、secret 名稱與待部署 diff**
-- [ ] **Step 2: 依序部署 `sync-manifest`、`sync-read`、`sync-commit`、`sync-delete`**
-- [ ] **Step 3: 驗證 approved-origin OPTIONS 204、未登入 401 JSON、錯誤 method/validation 不寫資料**
+- [x] **Step 1: 唯讀確認 project、migration、secret 名稱與待部署 diff**
+- [x] **Step 2: 依序部署 `sync-manifest`、`sync-read`、`sync-commit`、`sync-delete`**
+- [x] **Step 3: 驗證 approved-origin OPTIONS 204、未登入 401 JSON、錯誤 method/validation 不寫資料**
 - [ ] **Step 4: 以永久測試帳號驗證 manifest、commit、idempotency replay、read、409 conflict、delete 與帳號隔離**
 - [ ] **Step 5: 更新 Vercel production、執行 bundle secret scan 與登入後瀏覽器 smoke**
 - [ ] **Step 6: 回填部署紀錄、完成整體審查；只有具備證據的項目才勾選**
