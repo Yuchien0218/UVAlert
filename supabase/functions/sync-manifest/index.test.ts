@@ -36,6 +36,22 @@ function makeRequest(method: string): Request {
   });
 }
 
+function hasExplicitJwtVerification(
+  config: string,
+  functionName: string
+): boolean {
+  const header = `[functions.${functionName}]`;
+  const sectionStart = config.indexOf(header);
+  if (sectionStart === -1) return false;
+
+  const nextSection = config.indexOf("\n[", sectionStart + header.length);
+  const section = config.slice(
+    sectionStart,
+    nextSection === -1 ? undefined : nextSection
+  );
+  return /^verify_jwt\s*=\s*true\s*$/m.test(section);
+}
+
 beforeEach(async () => {
   vi.resetModules();
   runtime.requirePermanentUser.mockClear();
@@ -93,12 +109,21 @@ describe("sync manifest boundary", () => {
       "sync-read",
       "sync-delete"
     ]) {
-      expect(config).toMatch(
-        new RegExp(
-          `\\[functions\\.${functionName}\\][\\s\\S]*?verify_jwt\\s*=\\s*true`
-        )
-      );
+      expect(hasExplicitJwtVerification(config, functionName)).toBe(true);
     }
+  });
+
+  it("verify_jwt guard 不得跨越下一個 TOML section", () => {
+    const config = [
+      "[functions.sync-manifest]",
+      "verify_jwt = false",
+      "",
+      "[functions.sync-commit]",
+      "verify_jwt = true"
+    ].join("\n");
+
+    expect(hasExplicitJwtVerification(config, "sync-manifest")).toBe(false);
+    expect(hasExplicitJwtVerification(config, "sync-commit")).toBe(true);
   });
 
   it("manifest 只回傳摘要，不包含 payload，且不同 user 的 row 不會被組進來", () => {
