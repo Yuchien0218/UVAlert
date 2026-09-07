@@ -165,7 +165,7 @@ git commit -m "feat(feedback): accept privacy requests"
 - Consumes: Vue Router public route convention and existing `page-stack` / `page-heading` styling tokens.
 - Produces: route names `privacy` and `terms`; direct navigation to `/privacy` and `/terms` resolves to the matching public page.
 
-- [ ] **Step 1: Write failing router tests for both public paths**
+- [x] **Step 1: Write failing router tests for both public paths**
 
 ```ts
 it.each([
@@ -179,13 +179,13 @@ it.each([
 });
 ```
 
-- [ ] **Step 2: Run router tests and confirm both paths currently resolve to `not-found`**
+- [x] **Step 2: Run router tests and confirm both paths currently resolve to `not-found`**
 
 Run: `pnpm vitest run apps/web/src/router/index.test.ts`
 
 Expected: FAIL because `privacy` and `terms` routes do not exist.
 
-- [ ] **Step 3: Create the two focused static page components**
+- [x] **Step 3: Create the two focused static page components**
 
 Use `<script setup lang="ts">` only for `useRouter()` and a `goBack()` action that returns to `more`; render policy text with normal Vue interpolation/template elements, never `v-html`. Include an explicit `RouterLink` to the counterpart page and `/feedback`.
 
@@ -201,7 +201,7 @@ Terms page must state:
 UV、天氣與補擦提醒僅供輔助參考，不構成醫療建議或防曬效果保證。
 ```
 
-- [ ] **Step 4: Add lazy-loaded public routes before the catch-all route**
+- [x] **Step 4: Add lazy-loaded public routes before the catch-all route**
 
 ```ts
 {
@@ -218,7 +218,7 @@ UV、天氣與補擦提醒僅供輔助參考，不構成醫療建議或防曬效
 },
 ```
 
-- [ ] **Step 5: Write content tests for the required public disclosures**
+- [x] **Step 5: Write content tests for the required public disclosures**
 
 ```ts
 expect(readFileSync("apps/web/src/pages/PrivacyPolicyPage.vue", "utf8"))
@@ -227,13 +227,13 @@ expect(readFileSync("apps/web/src/pages/TermsPage.vue", "utf8"))
   .toContain("不構成醫療建議或防曬效果保證");
 ```
 
-- [ ] **Step 6: Run route and page tests**
+- [x] **Step 6: Run route and page tests**
 
 Run: `pnpm vitest run apps/web/src/router/index.test.ts apps/web/src/pages/PrivacyPolicyPage.test.ts apps/web/src/pages/TermsPage.test.ts`
 
 Expected: PASS.
 
-- [ ] **Step 7: Commit the public-page boundary**
+- [x] **Step 7: Commit the public-page boundary**
 
 ```bash
 git add apps/web/src/pages/PrivacyPolicyPage.vue apps/web/src/pages/TermsPage.vue apps/web/src/pages/PrivacyPolicyPage.test.ts apps/web/src/pages/TermsPage.test.ts apps/web/src/router/index.ts apps/web/src/router/index.test.ts
