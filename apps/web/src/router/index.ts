@@ -130,6 +130,18 @@ export function createAppRouter(
         meta: { title: "問題回報與意見回饋" }
       },
       {
+        path: "/privacy",
+        name: "privacy",
+        component: () => import("../pages/PrivacyPolicyPage.vue"),
+        meta: { title: "隱私權政策", hideNavigation: true }
+      },
+      {
+        path: "/terms",
+        name: "terms",
+        component: () => import("../pages/TermsPage.vue"),
+        meta: { title: "服務條款", hideNavigation: true }
+      },
+      {
         path: "/help",
         name: "help",
         component: () => import("../pages/help/HelpIndexPage.vue"),

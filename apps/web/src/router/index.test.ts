@@ -75,6 +75,18 @@ describe("route name 完整性", () => {
 });
 
 describe("createAppRouter", () => {
+  it.each([
+    ["/privacy", "privacy"],
+    ["/terms", "terms"]
+  ])("resolves %s as %s without session guards", async (path, name) => {
+    const router = createAppRouter(makeReadyBoot(), createMemoryHistory());
+
+    await router.push(path);
+    await router.isReady();
+
+    expect(router.currentRoute.value.name).toBe(name);
+  });
+
   it("awaits App Boot before completing navigation", async () => {
     const ensureBooted = vi.fn(async () => undefined);
     const boot: AppBootController = {
