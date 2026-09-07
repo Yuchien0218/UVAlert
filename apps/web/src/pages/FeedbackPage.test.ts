@@ -28,6 +28,8 @@ describe("FeedbackPage", () => {
       }
     });
 
-    expect(wrapper.get("select").text()).toContain("隱私／帳號資料請求");
+    const privacyRequestOption = wrapper.get('option[value="privacy_request"]');
+
+    expect(privacyRequestOption.text()).toBe("隱私／帳號資料請求");
   });
 });

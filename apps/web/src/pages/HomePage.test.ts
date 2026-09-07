@@ -199,6 +199,15 @@ describe("HomePage", () => {
   });
 
   describe("有提醒進行中", () => {
+    it("有提醒時保有公開政策連結", async () => {
+      mockServices({ session, region: { displayName: "臺北市 大安區" } });
+
+      const wrapper = await mountHome();
+
+      expect(wrapper.find('a[href="/privacy"]').exists()).toBe(true);
+      expect(wrapper.find('a[href="/terms"]').exists()).toBe(true);
+    });
+
     /**
      * 2026-08-24 反轉：原本斷言首頁**不內嵌**部位清單、只放「查看完整狀態」
      * 入口（2026-08-08 裁決）。使用者裁決把 `/reminder` 併入首頁——那頁沒有
