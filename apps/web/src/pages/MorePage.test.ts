@@ -25,7 +25,10 @@ function mountPage() {
   return mount(MorePage, {
     global: {
       stubs: {
-        RouterLink: { template: "<a><slot /></a>" },
+        RouterLink: {
+          props: ["to"],
+          template: '<a :href="to"><slot /></a>'
+        },
         Icon: true
       }
     }
@@ -72,6 +75,16 @@ describe("入口卡只有標題", () => {
     ]) {
       expect(text).toContain(label);
     }
+  });
+});
+
+describe("公開政策入口", () => {
+  it("提供隱私權政策與服務條款連結", () => {
+    const wrapper = mountPage();
+
+    expect(wrapper.find('a[href="/privacy"]').text()).toContain("隱私權政策");
+    expect(wrapper.find('a[href="/terms"]').text()).toContain("服務條款");
+    expect(wrapper.text()).toContain("公開資訊");
   });
 });
 

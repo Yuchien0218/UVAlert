@@ -503,9 +503,7 @@ function handleEndSession(): void {
         <p>
           遇到這種情況，提醒一律往「早一點」的方向走——寧可提醒你太多次，也不會因為時間算錯而讓你曬太久。
         </p>
-        <p>
-          恢復連線、或把裝置的系統時間調正之後，提醒間隔會自己回到正常。
-        </p>
+        <p>恢復連線、或把裝置的系統時間調正之後，提醒間隔會自己回到正常。</p>
       </section>
 
       <!-- view_product_label：原地展開，語意是「正在等待，不要離開」 -->
@@ -627,6 +625,11 @@ function handleEndSession(): void {
       -->
     </template>
 
+    <nav class="home__policy-links" aria-label="公開政策">
+      <RouterLink to="/privacy">隱私權政策</RouterLink>
+      <RouterLink to="/terms">服務條款</RouterLink>
+    </nav>
+
     <p class="safety-note">
       這是協助你記得補擦的提醒，不是安全曝曬時間或防護效果保證。
     </p>
@@ -733,6 +736,18 @@ function handleEndSession(): void {
 
 .home__cta {
   width: 100%;
+}
+
+.home__policy-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-4);
+  justify-content: center;
+  font-size: var(--font-size-small);
+}
+
+.home__policy-links a {
+  color: var(--text-secondary);
 }
 
 .home-state {

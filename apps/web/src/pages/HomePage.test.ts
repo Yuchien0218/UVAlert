@@ -180,7 +180,17 @@ async function mountHome() {
   await router.push("/");
   await router.isReady();
 
-  return shallowMount(HomePage, { global: { plugins: [router] } });
+  return shallowMount(HomePage, {
+    global: {
+      plugins: [router],
+      stubs: {
+        RouterLink: {
+          props: ["to"],
+          template: '<a :href="to"><slot /></a>'
+        }
+      }
+    }
+  });
 }
 
 describe("HomePage", () => {
@@ -566,6 +576,15 @@ describe("HomePage", () => {
   });
 
   describe("沒有提醒進行中", () => {
+    it("沒有提醒時保有公開政策連結", async () => {
+      mockServices({ region: { displayName: "臺北市 大安區" } });
+
+      const wrapper = await mountHome();
+
+      expect(wrapper.find('a[href="/privacy"]').exists()).toBe(true);
+      expect(wrapper.find('a[href="/terms"]').exists()).toBe(true);
+    });
+
     it("白天有地區時提供開始提醒的主 CTA", async () => {
       mockServices({ region: { displayName: "臺北市 大安區" } });
 

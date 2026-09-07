@@ -53,6 +53,7 @@ function goBack(): void {
           <option value="bug">功能無法正常使用</option>
           <option value="feature_request">我有功能建議</option>
           <option value="content_correction">衛教內容需要更正</option>
+          <option value="privacy_request">隱私／帳號資料請求</option>
         </select>
       </label>
       <label>
