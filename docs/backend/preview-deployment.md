@@ -1,5 +1,15 @@
 # UVAlert Vercel 部署狀態
 
+## 2026-09-07 公開站點網址設定
+
+**Vercel project**：`yuu15/uv-alert-web`
+
+**設定值**：`VITE_PUBLIC_SITE_URL=https://uv-alert-web.vercel.app`
+
+- 已新增為 Vercel 公開 Config，套用到 Production 與 Preview；它可安全暴露給瀏覽器，僅供產生 canonical URL 與 sitemap。
+- 以既有 Production deployment 重新建置後，`dpl_5R7sYMtFAZioL2gDB2gW1Uz16qct` 顯示 `Ready`，並 alias 至 `https://uv-alert-web.vercel.app`。
+- 唯讀驗證 `https://uv-alert-web.vercel.app/sitemap.xml`：HTTP 200，內容不含 `localhost`。
+
 ## 2026-09-07 公開隱私權／服務條款與隱私請求部署
 
 **驗證時間**：2026-09-07（Asia/Taipei）
