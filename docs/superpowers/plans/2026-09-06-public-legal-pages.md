@@ -319,7 +319,7 @@ git commit -m "feat(web): expose privacy request contact path"
 - Consumes: Tasks 1–3 commits and Vercel production domain `https://uv-alert-web.vercel.app`.
 - Produces: verified public URLs ready for Google OAuth: `https://uv-alert-web.vercel.app/privacy` and `https://uv-alert-web.vercel.app/terms`.
 
-- [ ] **Step 1: Run all focused tests and verify a green build**
+- [x] **Step 1: Run all focused tests and verify a green build**
 
 Run:
 
@@ -332,19 +332,19 @@ supabase test db
 
 Expected: every command exits 0. Record any unrelated blocker rather than claiming it passed.
 
-- [ ] **Step 2: Push the migration to the linked Supabase project only after local SQL tests pass**
+- [x] **Step 2: Push the migration to the linked Supabase project only after local SQL tests pass**
 
 Run: `supabase db push`
 
 Expected: migration `20260906000001_feedback_privacy_request.sql` applies without data deletion.
 
-- [ ] **Step 3: Push `main` and wait for Vercel production deployment**
+- [x] **Step 3: Push `main` and wait for Vercel production deployment**
 
 Run: `git push origin main`
 
 Expected: Vercel build references the pushed commit and production is Ready.
 
-- [ ] **Step 4: Browser-smoke the two exact production URLs and form option**
+- [x] **Step 4: Browser-smoke the two exact production URLs and form option**
 
 Verify:
 
@@ -356,11 +356,11 @@ https://uv-alert-web.vercel.app/feedback
 
 Expected: first two pages render without login; feedback select includes `隱私／帳號資料請求`; no developer email appears.
 
-- [ ] **Step 5: Record evidence and mark only verified plan steps complete**
+- [x] **Step 5: Record evidence and mark only verified plan steps complete**
 
 Record the production deployment URL, migration version, test results, and browser observations in `docs/backend/preview-deployment.md`; mark completed Task 1–4 checkboxes in this plan.
 
-- [ ] **Step 6: Commit verification records**
+- [x] **Step 6: Commit verification records**
 
 ```bash
 git add docs/backend/preview-deployment.md docs/superpowers/plans/2026-09-06-public-legal-pages.md

@@ -1,5 +1,21 @@
 # UVAlert Vercel 部署狀態
 
+## 2026-09-07 公開隱私權／服務條款與隱私請求部署
+
+**驗證時間**：2026-09-07（Asia/Taipei）
+
+**程式 commit**：`4ff6a65`
+
+**正式網址**：`https://uv-alert-web.vercel.app`
+
+**Supabase project ref**：`ykfdnltaqpdytmrszbbk`
+
+- 本機整合驗證通過：focused Vitest 8 個檔案、76 項測試；`pnpm --filter @sunshield/web typecheck`、production build 與 Supabase SQL 4 個檔案、172 項測試皆成功。
+- 正式 Supabase 已套用 migration `20260906000001_feedback_privacy_request.sql`；它只將 `feedback_submissions.feedback_type` 約束擴充為接受 `privacy_request`，未執行資料刪除。
+- `main` 已推送並觸發 Vercel 正式部署。實際 browser smoke 確認 `https://uv-alert-web.vercel.app/privacy` 與 `https://uv-alert-web.vercel.app/terms` 可免登入直接開啟。
+- 正式 `/feedback` 顯示「隱私／帳號資料請求」選項；兩份公開頁皆提供站內 `/feedback` 入口，沒有公開開發者 Email 或 `mailto:` 連結。
+- build 保留既有大型 chunk 警告；本機未設定 `VITE_PUBLIC_SITE_URL` 時，衛教靜態頁的 canonical 與 sitemap 仍使用 localhost。兩者未阻擋本次部署。
+
 ## 2026-09-06 Supabase 同步 Function 與資料表權限部署
 
 **驗證時間**：2026-09-06 20:06–20:07（Asia/Taipei）
