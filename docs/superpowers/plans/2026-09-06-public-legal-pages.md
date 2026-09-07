@@ -35,7 +35,7 @@
 - Consumes: `FeedbackRequestV1Schema`, `_shared/feedback.ts` `FEEDBACK_TYPES`, and `public.feedback_submissions.feedback_type`.
 - Produces: `FeedbackType = "bug" | "feature_request" | "content_correction" | "privacy_request"`; all validated requests may carry `feedbackType: "privacy_request"`.
 
-- [ ] **Step 1: Write the contract failing test for `privacy_request`**
+- [x] **Step 1: Write the contract failing test for `privacy_request`**
 
 ```ts
 it("accepts privacy_request as a feedback type", () => {
@@ -53,13 +53,13 @@ it("accepts privacy_request as a feedback type", () => {
 });
 ```
 
-- [ ] **Step 2: Run the focused contract test and confirm it fails because the enum rejects `privacy_request`**
+- [x] **Step 2: Run the focused contract test and confirm it fails because the enum rejects `privacy_request`**
 
 Run: `pnpm vitest run packages/contracts/src/feedback.test.ts`
 
 Expected: FAIL with an invalid enum value for `privacy_request`.
 
-- [ ] **Step 3: Add `privacy_request` to the shared contract and Edge enum**
+- [x] **Step 3: Add `privacy_request` to the shared contract and Edge enum**
 
 ```ts
 export const FeedbackTypeSchema = z.enum([
@@ -79,7 +79,7 @@ export const FEEDBACK_TYPES = [
 ] as const;
 ```
 
-- [ ] **Step 4: Add Edge parser coverage and verify contract/Edge parity**
+- [x] **Step 4: Add Edge parser coverage and verify contract/Edge parity**
 
 ```ts
 expect(
@@ -99,7 +99,7 @@ Run: `pnpm vitest run packages/contracts/src/feedback.test.ts supabase/functions
 
 Expected: PASS.
 
-- [ ] **Step 5: Write the database failing test before changing the constraint**
+- [x] **Step 5: Write the database failing test before changing the constraint**
 
 ```sql
 select ok(
@@ -114,13 +114,13 @@ select ok(
 );
 ```
 
-- [ ] **Step 6: Run the database test and confirm the current check constraint fails the new assertion**
+- [x] **Step 6: Run the database test and confirm the current check constraint fails the new assertion**
 
 Run: `supabase test db supabase/tests/backend_foundation.sql`
 
 Expected: FAIL because the existing `feedback_type` constraint lists only three values.
 
-- [ ] **Step 7: Add the minimal replacement check constraint migration**
+- [x] **Step 7: Add the minimal replacement check constraint migration**
 
 ```sql
 alter table public.feedback_submissions
@@ -136,13 +136,13 @@ alter table public.feedback_submissions
   ));
 ```
 
-- [ ] **Step 8: Reset the local database and run all SQL tests**
+- [x] **Step 8: Reset the local database and run all SQL tests**
 
 Run: `supabase db reset && supabase test db`
 
 Expected: all migrations apply; every SQL test passes.
 
-- [ ] **Step 9: Commit the contract and migration boundary**
+- [x] **Step 9: Commit the contract and migration boundary**
 
 ```bash
 git add packages/contracts/src/feedback.ts packages/contracts/src/feedback.test.ts supabase/functions/_shared/feedback.ts supabase/functions/_shared/feedback.test.ts supabase/migrations/20260906000001_feedback_privacy_request.sql supabase/tests/backend_foundation.sql
