@@ -4,7 +4,8 @@ import { NonEmptyIdSchema, UtcInstantSchema } from "./common";
 export const FeedbackTypeSchema = z.enum([
   "bug",
   "feature_request",
-  "content_correction"
+  "content_correction",
+  "privacy_request"
 ]);
 
 export type FeedbackType = z.infer<typeof FeedbackTypeSchema>;

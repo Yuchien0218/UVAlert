@@ -16,6 +16,16 @@ describe("feedback contracts", () => {
     expect(FeedbackRequestV1Schema.parse(validFeedback)).toEqual(validFeedback);
   });
 
+  it("accepts privacy_request as a feedback type", () => {
+    expect(
+      FeedbackRequestV1Schema.safeParse({
+        ...validFeedback,
+        feedbackType: "privacy_request",
+        message: "請協助處理我的隱私資料請求"
+      }).success
+    ).toBe(true);
+  });
+
   it("rejects missing messages and malformed contact emails", () => {
     expect(() =>
       FeedbackRequestV1Schema.parse({ ...validFeedback, message: "" })

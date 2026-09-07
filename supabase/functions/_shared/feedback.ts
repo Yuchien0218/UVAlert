@@ -2,7 +2,8 @@ export const FEEDBACK_SCHEMA_VERSION = "feedback-v1" as const;
 export const FEEDBACK_TYPES = [
   "bug",
   "feature_request",
-  "content_correction"
+  "content_correction",
+  "privacy_request"
 ] as const;
 export type FeedbackType = (typeof FEEDBACK_TYPES)[number];
 

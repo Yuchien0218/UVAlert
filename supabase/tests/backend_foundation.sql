@@ -1,6 +1,6 @@
 begin;
 
-select plan(32);
+select plan(33);
 
 select has_table('public', 'sync_records', 'sync_records exists');
 select has_table('public', 'sync_tombstones', 'sync_tombstones exists');
@@ -74,6 +74,17 @@ select ok(
 select ok(
   not exists (select 1 from pg_policies where schemaname = 'public' and tablename = 'feedback_submissions' and roles @> array['anon'::name]),
   'feedback has no anon RLS policy'
+);
+
+select ok(
+  exists (
+    select 1
+    from pg_constraint
+    where conrelid = 'public.feedback_submissions'::regclass
+      and contype = 'c'
+      and pg_get_constraintdef(oid) like '%privacy_request%'
+  ),
+  'feedback type constraint accepts privacy_request'
 );
 
 select ok(

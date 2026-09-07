@@ -30,6 +30,16 @@ describe("feedback request boundary", () => {
     );
   });
 
+  it("accepts privacy_request as a feedback type", () => {
+    expect(
+      parseFeedbackRequest({
+        ...valid,
+        feedbackType: "privacy_request",
+        message: "請協助處理我的隱私資料請求"
+      }).feedbackType
+    ).toBe("privacy_request");
+  });
+
   it("receipt 只保留可公開顯示的識別碼與時間", () => {
     const receipt = parseFeedbackReceipt({
       schemaVersion: "feedback-v1",
