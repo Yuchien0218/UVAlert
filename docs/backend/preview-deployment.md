@@ -1,5 +1,34 @@
 # UVAlert Vercel 部署狀態
 
+## 2026-09-07 私有隱私請求摘要：待逐項授權，尚未正式部署
+
+本節是正式環境核對清單，不是部署完成聲明。Task 1–3 的 migration、pgTAP、Email boundary 與 `privacy-digest` Function 程式已存在於 `codex/private-privacy-digest` worktree；本次沒有執行 linked migration、Function deploy、Function Secrets、Vault、Cron、Resend 或 Vercel 操作。
+
+### 本機證據
+
+- `20260907000001_private_privacy_digest.sql` local reset：PASS。
+- 全部 pgTAP：PASS，5 個 SQL 測試檔、265 項測試。
+- privacy-digest focused Vitest：PASS，2 個測試檔、26 項測試。
+- `pnpm check`：未通過；typecheck 通過，完整 Vitest 為 189/190 files、7916/7917 tests passed。唯一失敗是 `pageExitIcons.test.ts` 尚未登記 `PrivacyPolicyPage.vue` 與 `TermsPage.vue`；Task 4 僅允許文件變更，因此未在本次越界修正，lint 也因 wrapper 提前停止而未執行。另行補跑 `pnpm lint` 後，ESLint 完成，但 Stylelint 因 `HomePage.vue` 的 1 個既有 custom property 錯誤而失敗。
+
+### 正式環境待核對
+
+- [ ] 使用者已建立 Resend 帳號與只寄給本人 Gmail 的 API key，且值未進入 Git、聊天、截圖或 Log。
+- [ ] 三個 Function Secrets 已由使用者在 Supabase 私有介面設定。
+- [ ] Vault 已有 `uvalert_project_url`，並新增與 Function digest secret 相同的 `uvalert_privacy_digest_secret`。
+- [ ] 使用者已明確授權並完成 `supabase db push --linked`；實際 migration version 已查核。
+- [ ] 使用者已另行授權並部署 `privacy-digest`；實際 ACTIVE version 已查核。
+- [ ] `uvalert-privacy-digest` 與 `uvalert-privacy-digest-cleanup` 在正式環境各存在一次，schedule 正確。
+- [ ] 經授權的受控 smoke 只送達一封私有 digest；空 queue 回傳 no-op 且沒有第二封 Email。
+- [ ] 已將不含個資的驗證時間、Function version、Cron job/run ID 與結果補入本節。
+
+正式欄位目前刻意留白；只有取得上述真實正式證據後才可補寫：
+
+- migration version：待查核
+- Edge Function active version：待查核
+- Cron job/run ID：待查核
+- 單封送達與空 queue no-op：待查核
+
 ## 2026-09-07 公開站點網址設定
 
 **Vercel project**：`yuu15/uv-alert-web`
