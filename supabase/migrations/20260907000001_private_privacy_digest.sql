@@ -54,17 +54,88 @@ begin
 
   v_digest_date := (p_now at time zone 'Asia/Taipei')::date;
 
+  -- Serialize digest claims so SKIP LOCKED cannot let a competing invocation
+  -- reserve a second batch for the same actual Taiwan send day.
+  perform pg_advisory_xact_lock(
+    hashtext('uvalert'),
+    hashtext('privacy-digest-claim')
+  );
+
+  -- Retention or a prior failure can leave a claimable batch without items.
+  -- Active claims retain their reservation until the 30-minute lease expires.
+  delete from public.privacy_digest_batches as batch
+  where not exists (
+      select 1
+      from public.privacy_digest_items as item
+      where item.batch_id = batch.id
+    )
+    and (
+      batch.status = 'pending'
+      or (
+        batch.status = 'claimed'
+        and (
+          batch.claimed_at is null
+          or batch.claimed_at <= p_now - interval '30 minutes'
+        )
+      )
+    );
+
   select batch.id
   into v_batch_id
   from public.privacy_digest_batches as batch
-  where batch.status = 'pending'
-    or (
-      batch.status = 'claimed'
-      and batch.claimed_at <= p_now - interval '30 minutes'
+  where batch.digest_date = v_digest_date
+    and (
+      batch.status = 'pending'
+      or (
+        batch.status = 'claimed'
+        and batch.claimed_at <= p_now - interval '30 minutes'
+      )
     )
-  order by batch.digest_date, batch.created_at, batch.id
+  order by batch.created_at, batch.id
   for update of batch skip locked
   limit 1;
+
+  if v_batch_id is null then
+    -- A non-claimable row for today is an active or completed reservation.
+    -- It blocks both historical retries and newly-created work for this day.
+    if exists (
+      select 1
+      from public.privacy_digest_batches as batch
+      where batch.digest_date = v_digest_date
+    ) then
+      return;
+    end if;
+
+    -- A lease acquired before Taiwan midnight may still be delivering. Do not
+    -- start new-day work until it settles or becomes reclaimable.
+    if exists (
+      select 1
+      from public.privacy_digest_batches as batch
+      where batch.digest_date <> v_digest_date
+        and batch.status = 'claimed'
+        and (
+          batch.claimed_at is null
+          or batch.claimed_at > p_now - interval '30 minutes'
+        )
+    ) then
+      return;
+    end if;
+
+    select batch.id
+    into v_batch_id
+    from public.privacy_digest_batches as batch
+    where batch.digest_date <> v_digest_date
+      and (
+        batch.status = 'pending'
+        or (
+          batch.status = 'claimed'
+          and batch.claimed_at <= p_now - interval '30 minutes'
+        )
+      )
+    order by batch.digest_date, batch.created_at, batch.id
+    for update of batch skip locked
+    limit 1;
+  end if;
 
   if v_batch_id is null then
     if not exists (
@@ -115,6 +186,7 @@ begin
 
   update public.privacy_digest_batches as batch
   set
+    digest_date = v_digest_date,
     status = 'claimed',
     claim_token = v_claim_token,
     claimed_at = p_now,
@@ -165,10 +237,17 @@ language plpgsql
 security definer
 set search_path = pg_catalog, public
 as $$
+declare
+  v_digest_date date;
 begin
   if p_now is null then
     raise exception 'p_now is required' using errcode = '22004';
   end if;
+
+  perform pg_advisory_xact_lock(
+    hashtext('uvalert'),
+    hashtext('privacy-digest-claim')
+  );
 
   if p_outcome is null or p_outcome not in ('sent', 'retry') then
     raise exception 'unsupported settlement outcome' using errcode = '22023';
@@ -178,8 +257,20 @@ begin
     raise exception 'sent outcome requires p_provider_message_id' using errcode = '22023';
   end if;
 
+  v_digest_date := (p_now at time zone 'Asia/Taipei')::date;
+
+  if exists (
+    select 1
+    from public.privacy_digest_batches as batch
+    where batch.digest_date = v_digest_date
+      and batch.id <> p_batch_id
+  ) then
+    return false;
+  end if;
+
   update public.privacy_digest_batches as batch
   set
+    digest_date = v_digest_date,
     status = case when p_outcome = 'sent' then 'sent' else 'pending' end,
     claim_token = null,
     claimed_at = null,
@@ -208,6 +299,11 @@ begin
     raise exception 'p_now is required' using errcode = '22004';
   end if;
 
+  perform pg_advisory_xact_lock(
+    hashtext('uvalert'),
+    hashtext('privacy-digest-claim')
+  );
+
   delete from public.feedback_submissions as feedback
   where feedback.feedback_type = 'privacy_request'
     and feedback.created_at < p_now - interval '90 days';
@@ -215,11 +311,24 @@ begin
   get diagnostics v_deleted_feedback = row_count;
 
   delete from public.privacy_digest_batches as batch
-  where batch.created_at < p_now - interval '90 days'
-    and not exists (
+  where not exists (
       select 1
       from public.privacy_digest_items as item
       where item.batch_id = batch.id
+    )
+    and (
+      batch.status = 'pending'
+      or (
+        batch.status = 'claimed'
+        and (
+          batch.claimed_at is null
+          or batch.claimed_at <= p_now - interval '30 minutes'
+        )
+      )
+      or (
+        batch.status = 'sent'
+        and batch.created_at < p_now - interval '90 days'
+      )
     );
 
   return v_deleted_feedback;

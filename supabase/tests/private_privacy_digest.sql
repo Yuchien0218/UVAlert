@@ -1,6 +1,6 @@
 begin;
 
-select plan(57);
+select plan(85);
 
 select has_table('public', 'privacy_digest_batches', 'private digest batch exists');
 select has_table('public', 'privacy_digest_items', 'private digest item exists');
@@ -372,6 +372,349 @@ select throws_ok(
   '22023',
   'unsupported settlement outcome',
   'settlement rejects a missing outcome'
+);
+
+-- A retry keeps its batch identity across days, but the next claim reserves
+-- the actual Taiwan send day so another digest cannot be sent that day.
+delete from public.privacy_digest_batches;
+delete from public.feedback_submissions where feedback_type = 'privacy_request';
+
+insert into public.feedback_submissions (
+  id, feedback_type, message, contact_email, app_version, route,
+  user_agent_summary, status, created_at, updated_at
+) values (
+  '43000000-0000-4000-8000-000000000001', 'privacy_request',
+  'Cross-day retry request.', null, '1.0.0', '/privacy',
+  null, 'new', '2026-10-01 00:30Z', '2026-10-01 00:30Z'
+);
+
+create temporary table cross_day_first_claim as
+select * from public.claim_privacy_digest('2026-10-01 01:00Z');
+
+select is((select count(*) from cross_day_first_claim), 1::bigint, 'cross-day fixture is initially claimed');
+select ok(
+  public.settle_privacy_digest(
+    (select batch_id from cross_day_first_claim),
+    (select claim_token from cross_day_first_claim),
+    'retry',
+    '2026-10-01 01:01Z',
+    null,
+    'PROVIDER_TEMPORARY'
+  ),
+  'cross-day fixture is returned for retry'
+);
+
+insert into public.feedback_submissions (
+  id, feedback_type, message, contact_email, app_version, route,
+  user_agent_summary, status, created_at, updated_at
+) values (
+  '43000000-0000-4000-8000-000000000002', 'privacy_request',
+  'Wait for the next daily digest.', null, '1.0.0', '/privacy',
+  null, 'new', '2026-10-02 00:30Z', '2026-10-02 00:30Z'
+);
+
+create temporary table cross_day_retry_claim as
+select * from public.claim_privacy_digest('2026-10-02 01:00Z');
+
+select is((select count(*) from cross_day_retry_claim), 1::bigint, 'the historical retry is claimed on the next day');
+select is(
+  (select batch_id from cross_day_retry_claim),
+  (select batch_id from cross_day_first_claim),
+  'a cross-day retry preserves its batch identity'
+);
+select is(
+  (select digest_date from cross_day_retry_claim),
+  '2026-10-02'::date,
+  'a cross-day retry reserves its actual Taiwan send day'
+);
+select ok(
+  public.settle_privacy_digest(
+    (select batch_id from cross_day_retry_claim),
+    (select claim_token from cross_day_retry_claim),
+    'sent',
+    '2026-10-02 01:01Z',
+    'provider-cross-day',
+    null
+  ),
+  'the cross-day retry settles on its reserved send day'
+);
+
+create temporary table cross_day_second_claim as
+select * from public.claim_privacy_digest('2026-10-02 01:02Z');
+
+select is((select count(*) from cross_day_second_claim), 0::bigint, 'a sent cross-day retry blocks another digest that day');
+select ok(
+  not exists (
+    select 1
+    from public.privacy_digest_items
+    where feedback_id = '43000000-0000-4000-8000-000000000002'
+  ),
+  'new privacy feedback remains unbatched after the daily send is used'
+);
+
+create temporary table next_day_waiting_claim as
+select * from public.claim_privacy_digest('2026-10-03 01:00Z');
+
+select is((select count(*) from next_day_waiting_claim), 1::bigint, 'waiting privacy feedback is claimable the following day');
+select is(
+  (select feedback_id from next_day_waiting_claim),
+  '43000000-0000-4000-8000-000000000002'::uuid,
+  'the following day claims the feedback that waited'
+);
+
+-- A historical retry and today's new work cannot both be claimed, including
+-- the path that previously skipped the locked historical row.
+delete from public.privacy_digest_batches;
+delete from public.feedback_submissions where feedback_type = 'privacy_request';
+
+insert into public.feedback_submissions (
+  id, feedback_type, message, contact_email, app_version, route,
+  user_agent_summary, status, created_at, updated_at
+) values
+  (
+    '43000000-0000-4000-8000-000000000003', 'privacy_request',
+    'Historical retry wins today.', null, '1.0.0', '/privacy',
+    null, 'new', '2026-10-01 00:30Z', '2026-10-01 00:30Z'
+  ),
+  (
+    '43000000-0000-4000-8000-000000000004', 'privacy_request',
+    'New work must wait.', null, '1.0.0', '/privacy',
+    null, 'new', '2026-10-02 00:30Z', '2026-10-02 00:30Z'
+  );
+insert into public.privacy_digest_batches (
+  id, digest_date, status, created_at, updated_at
+) values (
+  '44000000-0000-4000-8000-000000000001', '2026-10-01', 'pending',
+  '2026-10-01 01:00Z', '2026-10-01 01:00Z'
+);
+insert into public.privacy_digest_items (batch_id, feedback_id) values (
+  '44000000-0000-4000-8000-000000000001',
+  '43000000-0000-4000-8000-000000000003'
+);
+
+create temporary table historical_competing_claim as
+select * from public.claim_privacy_digest('2026-10-02 01:00Z');
+
+select is((select count(*) from historical_competing_claim), 1::bigint, 'historical retry is claimed before new work');
+select is(
+  (select feedback_id from historical_competing_claim),
+  '43000000-0000-4000-8000-000000000003'::uuid,
+  'historical retry keeps its original item'
+);
+select is(
+  (select digest_date from historical_competing_claim),
+  '2026-10-02'::date,
+  'historical retry reserves today before returning'
+);
+select is(
+  (select count(*) from public.claim_privacy_digest('2026-10-02 01:00:01Z')),
+  0::bigint,
+  'a competing invocation cannot create another batch today'
+);
+select ok(
+  not exists (
+    select 1
+    from public.privacy_digest_items
+    where feedback_id = '43000000-0000-4000-8000-000000000004'
+  ),
+  'competing new work remains unbatched'
+);
+
+-- Retention can remove the last item from a recently-created retry batch.
+-- Cleanup and claim both prevent that empty batch from blocking new work.
+delete from public.privacy_digest_batches;
+delete from public.feedback_submissions where feedback_type = 'privacy_request';
+
+insert into public.feedback_submissions (
+  id, feedback_type, message, contact_email, app_version, route,
+  user_agent_summary, status, created_at, updated_at
+) values
+  (
+    '43000000-0000-4000-8000-000000000005', 'privacy_request',
+    'Expired item in a recent failed batch.', null, '1.0.0', '/privacy',
+    null, 'new', '2026-06-01 00:00Z', '2026-06-01 00:00Z'
+  ),
+  (
+    '43000000-0000-4000-8000-000000000006', 'privacy_request',
+    'New request after retention.', null, '1.0.0', '/privacy',
+    null, 'new', '2026-10-02 00:30Z', '2026-10-02 00:30Z'
+  );
+insert into public.privacy_digest_batches (
+  id, digest_date, status, created_at, updated_at
+) values (
+  '44000000-0000-4000-8000-000000000002', '2026-10-01', 'pending',
+  '2026-10-02 00:45Z', '2026-10-02 00:45Z'
+);
+insert into public.privacy_digest_items (batch_id, feedback_id) values (
+  '44000000-0000-4000-8000-000000000002',
+  '43000000-0000-4000-8000-000000000005'
+);
+
+select is(
+  public.cleanup_private_privacy_digest('2026-10-02 01:00Z'),
+  1,
+  'retention removes the expired item from the recent failed batch'
+);
+select ok(
+  not exists (
+    select 1 from public.privacy_digest_batches
+    where id = '44000000-0000-4000-8000-000000000002'
+  ),
+  'retention removes a recent pending batch after its last item is deleted'
+);
+
+create temporary table post_retention_claim as
+select * from public.claim_privacy_digest('2026-10-02 01:01Z');
+
+select is((select count(*) from post_retention_claim), 1::bigint, 'new privacy feedback remains claimable after retention');
+select is(
+  (select feedback_id from post_retention_claim),
+  '43000000-0000-4000-8000-000000000006'::uuid,
+  'claim returns the new privacy feedback after retention'
+);
+
+delete from public.privacy_digest_batches;
+delete from public.feedback_submissions where feedback_type = 'privacy_request';
+
+insert into public.feedback_submissions (
+  id, feedback_type, message, contact_email, app_version, route,
+  user_agent_summary, status, created_at, updated_at
+) values (
+  '43000000-0000-4000-8000-000000000007', 'privacy_request',
+  'Claim past empty batches.', null, '1.0.0', '/privacy',
+  null, 'new', '2026-10-02 00:30Z', '2026-10-02 00:30Z'
+);
+insert into public.privacy_digest_batches (
+  id, digest_date, status, claim_token, claimed_at, created_at, updated_at
+) values
+  (
+    '44000000-0000-4000-8000-000000000003', '2026-09-30', 'pending',
+    null, null, '2026-10-02 00:40Z', '2026-10-02 00:40Z'
+  ),
+  (
+    '44000000-0000-4000-8000-000000000004', '2026-10-01', 'claimed',
+    '45000000-0000-4000-8000-000000000001', '2026-10-02 00:20Z',
+    '2026-10-02 00:40Z', '2026-10-02 00:40Z'
+  );
+
+create temporary table claim_past_empty_batches as
+select * from public.claim_privacy_digest('2026-10-02 01:00Z');
+
+select is((select count(*) from claim_past_empty_batches), 1::bigint, 'claim skips empty pending and stale batches');
+select is(
+  (select feedback_id from claim_past_empty_batches),
+  '43000000-0000-4000-8000-000000000007'::uuid,
+  'claim continues to eligible privacy feedback after empty batches'
+);
+select ok(
+  not exists (
+    select 1 from public.privacy_digest_batches
+    where id = '44000000-0000-4000-8000-000000000003'
+  ),
+  'claim removes an empty pending batch'
+);
+select ok(
+  not exists (
+    select 1 from public.privacy_digest_batches
+    where id = '44000000-0000-4000-8000-000000000004'
+  ),
+  'claim removes an empty stale claimed batch'
+);
+
+-- A claim that crosses midnight reserves the day on which it settles, and an
+-- active historical lease blocks new work until it settles or becomes stale.
+delete from public.privacy_digest_batches;
+delete from public.feedback_submissions where feedback_type = 'privacy_request';
+
+insert into public.feedback_submissions (
+  id, feedback_type, message, contact_email, app_version, route,
+  user_agent_summary, status, created_at, updated_at
+) values
+  (
+    '43000000-0000-4000-8000-000000000008', 'privacy_request',
+    'Claimed before midnight.', null, '1.0.0', '/privacy',
+    null, 'new', '2026-10-01 15:50Z', '2026-10-01 15:50Z'
+  ),
+  (
+    '43000000-0000-4000-8000-000000000009', 'privacy_request',
+    'Must wait after midnight settlement.', null, '1.0.0', '/privacy',
+    null, 'new', '2026-10-01 16:01Z', '2026-10-01 16:01Z'
+  );
+insert into public.privacy_digest_batches (
+  id, digest_date, status, claim_token, claimed_at, created_at, updated_at
+) values (
+  '44000000-0000-4000-8000-000000000005', '2026-10-01', 'claimed',
+  '45000000-0000-4000-8000-000000000002', '2026-10-01 15:55Z',
+  '2026-10-01 15:50Z', '2026-10-01 15:55Z'
+);
+insert into public.privacy_digest_items (batch_id, feedback_id) values (
+  '44000000-0000-4000-8000-000000000005',
+  '43000000-0000-4000-8000-000000000008'
+);
+
+select ok(
+  public.settle_privacy_digest(
+    '44000000-0000-4000-8000-000000000005',
+    '45000000-0000-4000-8000-000000000002',
+    'sent',
+    '2026-10-01 16:05Z',
+    'provider-after-midnight',
+    null
+  ),
+  'a historical active claim can settle after Taiwan midnight'
+);
+select is(
+  (select digest_date from public.privacy_digest_batches where id = '44000000-0000-4000-8000-000000000005'),
+  '2026-10-02'::date,
+  'settlement reserves its actual Taiwan send day'
+);
+select is(
+  (select count(*) from public.claim_privacy_digest('2026-10-01 16:06Z')),
+  0::bigint,
+  'midnight settlement blocks another digest on its actual send day'
+);
+
+delete from public.privacy_digest_batches;
+delete from public.feedback_submissions where feedback_type = 'privacy_request';
+
+insert into public.feedback_submissions (
+  id, feedback_type, message, contact_email, app_version, route,
+  user_agent_summary, status, created_at, updated_at
+) values
+  (
+    '43000000-0000-4000-8000-000000000010', 'privacy_request',
+    'Active across Taiwan midnight.', null, '1.0.0', '/privacy',
+    null, 'new', '2026-10-01 15:50Z', '2026-10-01 15:50Z'
+  ),
+  (
+    '43000000-0000-4000-8000-000000000011', 'privacy_request',
+    'Wait for the active historical lease.', null, '1.0.0', '/privacy',
+    null, 'new', '2026-10-01 16:01Z', '2026-10-01 16:01Z'
+  );
+insert into public.privacy_digest_batches (
+  id, digest_date, status, claim_token, claimed_at, created_at, updated_at
+) values (
+  '44000000-0000-4000-8000-000000000006', '2026-10-01', 'claimed',
+  '45000000-0000-4000-8000-000000000003', '2026-10-01 15:55Z',
+  '2026-10-01 15:50Z', '2026-10-01 15:55Z'
+);
+insert into public.privacy_digest_items (batch_id, feedback_id) values (
+  '44000000-0000-4000-8000-000000000006',
+  '43000000-0000-4000-8000-000000000010'
+);
+
+select is(
+  (select count(*) from public.claim_privacy_digest('2026-10-01 16:05Z')),
+  0::bigint,
+  'an active historical lease blocks a new-day claim'
+);
+select ok(
+  not exists (
+    select 1
+    from public.privacy_digest_items
+    where feedback_id = '43000000-0000-4000-8000-000000000011'
+  ),
+  'new-day work remains unbatched while the historical lease is active'
 );
 
 select * from finish();
