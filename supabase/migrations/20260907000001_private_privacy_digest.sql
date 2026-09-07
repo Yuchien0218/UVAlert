@@ -327,7 +327,10 @@ begin
       )
       or (
         batch.status = 'sent'
-        and batch.created_at < p_now - interval '90 days'
+        and greatest(
+          coalesce(batch.sent_at, '-infinity'::timestamptz),
+          batch.digest_date::timestamp at time zone 'Asia/Taipei'
+        ) < p_now - interval '90 days'
       )
     );
 

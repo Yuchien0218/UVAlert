@@ -1,6 +1,6 @@
 begin;
 
-select plan(85);
+select plan(93);
 
 select has_table('public', 'privacy_digest_batches', 'private digest batch exists');
 select has_table('public', 'privacy_digest_items', 'private digest item exists');
@@ -715,6 +715,100 @@ select ok(
     where feedback_id = '43000000-0000-4000-8000-000000000011'
   ),
   'new-day work remains unbatched while the historical lease is active'
+);
+
+-- Retention may remove an old item immediately after its historical batch is
+-- sent today. The empty sent batch must keep today's reservation until the
+-- actual send timestamp itself is beyond retention.
+delete from public.privacy_digest_batches;
+delete from public.feedback_submissions where feedback_type = 'privacy_request';
+
+insert into public.feedback_submissions (
+  id, feedback_type, message, contact_email, app_version, route,
+  user_agent_summary, status, created_at, updated_at
+) values
+  (
+    '43000000-0000-4000-8000-000000000012', 'privacy_request',
+    'Old item sent in today''s historical retry.', null, '1.0.0', '/privacy',
+    null, 'new', '2026-06-01 00:00Z', '2026-06-01 00:00Z'
+  ),
+  (
+    '43000000-0000-4000-8000-000000000013', 'privacy_request',
+    'New work waits because today already sent.', null, '1.0.0', '/privacy',
+    null, 'new', '2026-10-02 01:00Z', '2026-10-02 01:00Z'
+  );
+insert into public.privacy_digest_batches (
+  id, digest_date, status, claim_token, claimed_at, created_at, updated_at
+) values (
+  '44000000-0000-4000-8000-000000000007', '2026-06-01', 'claimed',
+  '45000000-0000-4000-8000-000000000004', '2026-10-02 00:59Z',
+  '2026-06-01 00:00Z', '2026-10-02 00:59Z'
+);
+insert into public.privacy_digest_items (batch_id, feedback_id) values (
+  '44000000-0000-4000-8000-000000000007',
+  '43000000-0000-4000-8000-000000000012'
+);
+
+select ok(
+  public.settle_privacy_digest(
+    '44000000-0000-4000-8000-000000000007',
+    '45000000-0000-4000-8000-000000000004',
+    'sent',
+    '2026-10-02 01:01Z',
+    'provider-old-item-today',
+    null
+  ),
+  'the historical batch is sent today'
+);
+select is(
+  public.cleanup_private_privacy_digest('2026-10-02 01:02Z'),
+  1,
+  'retention removes the old privacy item after today''s send'
+);
+select ok(
+  exists (
+    select 1
+    from public.privacy_digest_batches
+    where id = '44000000-0000-4000-8000-000000000007'
+      and status = 'sent'
+      and digest_date = '2026-10-02'
+      and sent_at = '2026-10-02 01:01Z'
+  ),
+  'cleanup preserves today''s empty sent reservation'
+);
+select ok(
+  not exists (
+    select 1
+    from public.privacy_digest_items
+    where feedback_id = '43000000-0000-4000-8000-000000000012'
+  ),
+  'retention still cascades the old digest item link'
+);
+select is(
+  (select count(*) from public.claim_privacy_digest('2026-10-02 01:03Z')),
+  0::bigint,
+  'today''s preserved sent reservation blocks a second batch'
+);
+select ok(
+  not exists (
+    select 1
+    from public.privacy_digest_items
+    where feedback_id = '43000000-0000-4000-8000-000000000013'
+  ),
+  'same-day new privacy feedback remains unbatched'
+);
+select is(
+  public.cleanup_private_privacy_digest('2027-01-02 01:03Z'),
+  1,
+  'later retention removes the waiting privacy feedback'
+);
+select ok(
+  not exists (
+    select 1
+    from public.privacy_digest_batches
+    where id = '44000000-0000-4000-8000-000000000007'
+  ),
+  'the empty sent reservation is eventually cleaned after its send time ages out'
 );
 
 select * from finish();
