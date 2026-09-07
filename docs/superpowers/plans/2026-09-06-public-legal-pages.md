@@ -257,19 +257,19 @@ git commit -m "feat(web): add public legal pages"
 - Consumes: `FeedbackType` from `@sunshield/contracts`, route names from Task 2.
 - Produces: users can choose `privacy_request` on `/feedback`; policy links are discoverable from the rendered homepage and More page.
 
-- [ ] **Step 1: Write the failing feedback-page test for the new option**
+- [x] **Step 1: Write the failing feedback-page test for the new option**
 
 ```ts
 expect(wrapper.get("select").text()).toContain("隱私／帳號資料請求");
 ```
 
-- [ ] **Step 2: Run the focused test and confirm the option is absent**
+- [x] **Step 2: Run the focused test and confirm the option is absent**
 
 Run: `pnpm vitest run apps/web/src/pages/FeedbackPage.test.ts`
 
 Expected: FAIL because the select currently lists three categories.
 
-- [ ] **Step 3: Add the fourth select option with clear request copy**
+- [x] **Step 3: Add the fourth select option with clear request copy**
 
 ```vue
 <option value="privacy_request">隱私／帳號資料請求</option>
@@ -277,11 +277,11 @@ Expected: FAIL because the select currently lists three categories.
 
 Keep the contact Email label as optional and do not introduce the developer email.
 
-- [ ] **Step 4: Add a compact public-policy section to MorePage**
+- [x] **Step 4: Add a compact public-policy section to MorePage**
 
 Add two `RouterLink`s to `/privacy` and `/terms` after the entry list, using the existing tokens and no new bottom-navigation item. The content must state that privacy and terms are public information.
 
-- [ ] **Step 5: Add failing MorePage tests and then verify the links**
+- [x] **Step 5: Add failing MorePage tests and then verify the links**
 
 ```ts
 expect(wrapper.find('a[href="/privacy"]').text()).toContain("隱私權政策");
@@ -292,15 +292,15 @@ Run: `pnpm vitest run apps/web/src/pages/FeedbackPage.test.ts apps/web/src/pages
 
 Expected: PASS.
 
-- [ ] **Step 6: Add a compact link pair to the rendered HomePage**
+- [x] **Step 6: Add a compact link pair to the rendered HomePage**
 
 Add a small footer-level `RouterLink` pair to `/privacy` and `/terms` in `HomePage.vue`, outside the reminder-state branches so it remains visible on the actual app homepage. Add a HomePage test that asserts both `href` values. This is the visible homepage entry required for the Google OAuth policy URL.
 
-- [ ] **Step 7: Add a plain HTML fallback link pair to the app document**
+- [x] **Step 7: Add a plain HTML fallback link pair to the app document**
 
 Add an accessible `noscript` section in `apps/web/index.html` linking to `/privacy` and `/terms`, so the policy URLs are discoverable even when JavaScript cannot boot. Do not replace the SPA policy pages or add an external domain.
 
-- [ ] **Step 8: Commit discoverability and form selection changes**
+- [x] **Step 8: Commit discoverability and form selection changes**
 
 ```bash
 git add apps/web/src/pages/FeedbackPage.vue apps/web/src/pages/FeedbackPage.test.ts apps/web/src/pages/HomePage.vue apps/web/src/pages/HomePage.test.ts apps/web/src/pages/MorePage.vue apps/web/src/pages/MorePage.test.ts apps/web/index.html
