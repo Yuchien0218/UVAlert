@@ -745,7 +745,7 @@ function handleEndSession(): void {
   flex-wrap: wrap;
   gap: var(--space-4);
   justify-content: center;
-  font-size: var(--font-size-small);
+  font-size: var(--font-size-caption);
 }
 
 .home__policy-links a {
