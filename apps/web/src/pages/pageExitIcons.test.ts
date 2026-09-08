@@ -62,7 +62,9 @@ const DRILL_DOWN = [
   "pages/FeedbackPage.vue",
   "pages/GearSharePage.vue",
   "pages/InstallPage.vue",
+  "pages/PrivacyPolicyPage.vue",
   "pages/SpecialSituationPage.vue",
+  "pages/TermsPage.vue",
   "pages/education/EducationArticlePage.vue",
   "pages/education/EducationCategoryPage.vue",
   "pages/education/EducationIndexPage.vue",
@@ -70,9 +72,7 @@ const DRILL_DOWN = [
   "pages/help/HelpTopicPage.vue",
   "pages/settings/AccountDataPage.vue",
   "pages/settings/DataSettingsPage.vue",
-  "pages/settings/NotificationSettingsPage.vue",
-  "pages/PrivacyPolicyPage.vue",
-  "pages/TermsPage.vue"
+  "pages/settings/NotificationSettingsPage.vue"
 ];
 
 function exitIconsIn(file: string): string[] {
