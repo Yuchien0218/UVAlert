@@ -4,6 +4,7 @@ UVAlert 的後端以 Supabase 為第一版實作，但核心仍是免登入、In
 
 - [本機開發](./local-development.md)：CLI、migration、Edge Functions、Google OAuth 與前端 env。
 - [部署檢查表](./deployment-checklist.md)：正式環境 secrets、RLS、API 路徑、CORS 與刪除資料驗證。
+- [私有隱私請求摘要](./privacy-request-digest.md)：非機密設定名稱、安全本機驗證、逐項授權部署、監測與輪替。
 - [Vercel 部署狀態](./preview-deployment.md)：目前 preview 與正式網域的差異、已驗證項目與升級條件。
 - [後端設計](../superpowers/specs/2026-08-17-backend-foundation-design.md)：已確認的資料邊界與決策。
 - [實作計畫](../superpowers/plans/2026-08-17-backend-foundation.md)：任務與驗證紀錄。

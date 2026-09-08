@@ -433,7 +433,7 @@ git commit -m "feat(feedback): dispatch private privacy digest"
 ```markdown
 Function Secrets:
 
-- `RESEND_API_KEY`: Resend 僅寄信權限 API key。
+- `RESEND_API_KEY`: 只授予 `sending_access`；帳號本人收件限制由 `resend.dev` 測試網域執行，不是 API key 的收件者權限。
 - `PRIVACY_DIGEST_RECIPIENT`: 營運者私有 Gmail；不得出現在截圖、commit 或公開文件。
 - `PRIVACY_DIGEST_SECRET`: Cron 專用高熵密鑰；不得和瀏覽器或 Vercel env 共用。
 
@@ -446,19 +446,19 @@ Vault:
 - [x] **Step 2: 寫正式前安全檢查命令，不輸出真實密鑰**
 
 ```powershell
-rg -n --hidden --glob '!node_modules/**' --glob '!dist/**' 'RESEND_API_KEY=.+|PRIVACY_DIGEST_RECIPIENT=.+|PRIVACY_DIGEST_SECRET=.+' .
+rg -l --hidden --glob '!node_modules/**' --glob '!dist/**' 'RESEND_API_KEY=.+|PRIVACY_DIGEST_RECIPIENT=.+|PRIVACY_DIGEST_SECRET=.+' .
 supabase db reset --local
 supabase test db --local
 pnpm vitest run supabase/functions/privacy-digest/email.test.ts supabase/functions/privacy-digest/index.test.ts
 pnpm check
 ```
 
-Expected: 搜尋只允許範例變數名稱與文件標題，不得有真實值；其他命令全 PASS。
+Expected: 搜尋只輸出含候選內容的檔名，不得把匹配值印到 terminal／tool logs；以受控方式確認沒有真實值後，其他命令全 PASS。
 
 - [x] **Step 3: 寫明確的正式部署順序與人工核對點**
 
 ```markdown
-1. 由使用者建立 Resend 帳號與只寄給本人 Gmail 的 API key；不要貼進聊天室或 Git。
+1. 由使用者建立 Resend 帳號與只授予 `sending_access` 的 API key；使用 `resend.dev` 測試網域，由該網域限制只能寄到帳號擁有者自己的 Gmail。不要貼進聊天室或 Git。
 2. 由使用者在 Supabase Dashboard 設定三個 Function Secrets 與一個新增 Vault secret。
 3. 取得使用者明確同意後，`supabase db push --linked`，再部署 `privacy-digest`。
 4. 在 Dashboard／SQL 確認兩個 Cron job 各存在一次，並以受控測試資料手動 invoke 一次。

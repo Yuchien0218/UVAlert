@@ -15,7 +15,7 @@
 
 ### Function Secrets
 
-- `RESEND_API_KEY`：Resend 僅寄信權限 API key。
+- `RESEND_API_KEY`：只授予 `sending_access` 的 Resend API key。API key 權限只限制可執行寄信，不限制特定收件者；使用 `resend.dev` 測試網域時，由該測試網域限制只能寄到 Resend 帳號擁有者自己的 Email。
 - `PRIVACY_DIGEST_RECIPIENT`：營運者私有 Gmail；不得出現在截圖、commit、公開文件、Log 或聊天內容。
 - `PRIVACY_DIGEST_SECRET`：Cron 專用高熵密鑰；不得和瀏覽器、`VITE_*` 或 Vercel environment variable 共用。
 
@@ -33,23 +33,23 @@
 在 repository 根目錄逐一執行：
 
 ```powershell
-rg -n --hidden --glob '!node_modules/**' --glob '!dist/**' 'RESEND_API_KEY=.+|PRIVACY_DIGEST_RECIPIENT=.+|PRIVACY_DIGEST_SECRET=.+' .
+rg -l --hidden --glob '!node_modules/**' --glob '!dist/**' 'RESEND_API_KEY=.+|PRIVACY_DIGEST_RECIPIENT=.+|PRIVACY_DIGEST_SECRET=.+' .
 supabase db reset --local
 supabase test db --local
 pnpm vitest run supabase/functions/privacy-digest/email.test.ts supabase/functions/privacy-digest/index.test.ts
 pnpm check
 ```
 
-若系統沒有全域 Supabase CLI，可使用專案先前驗證過的 CLI 版本執行等價的本機命令：
+若系統沒有全域 Supabase CLI，使用本次本機驗證的精確版本 `2.116.0` 執行等價命令，避免 `latest` 隨時間漂移：
 
 ```powershell
-pnpm dlx supabase@latest db reset --local
-pnpm dlx supabase@latest test db --local
+pnpm dlx supabase@2.116.0 db reset --local
+pnpm dlx supabase@2.116.0 test db --local
 ```
 
 判讀規則：
 
-- `rg` 結果只可出現文件中的變數名稱或上述搜尋命令本身；任何看似被賦值的內容都必須在繼續前人工確認並移除。不要把可疑命中內容複製到紀錄。
+- `rg -l` 只輸出含有候選內容的檔名，不會把匹配值印到 terminal／tool logs。若有檔名輸出，必須在不記錄內容的受控環境人工確認；未排除真實值前不得繼續，也不要把可疑內容複製到紀錄。
 - reset、全部 pgTAP、focused Vitest 與 `pnpm check` 必須全部 exit 0。Docker 未啟動或任一命令失敗時，不得標記本機驗證完成。
 - 只允許 `--local`。在此階段不得使用 `--linked`，也不得執行 deploy、secret、Vault、Cron 或 Resend 的正式操作。
 
@@ -57,7 +57,7 @@ pnpm dlx supabase@latest test db --local
 
 以下每一步都需要使用者針對該步驟明確授權；前一步完成不代表後續步驟已獲授權。
 
-1. 由使用者建立 Resend 帳號與只寄給本人 Gmail 的 API key；不要貼進聊天室、Git 或終端參數。
+1. 由使用者建立 Resend 帳號與只授予 `sending_access` 的 API key；測試寄件者使用 `resend.dev` 網域，由該網域限制只能寄到帳號擁有者自己的 Gmail。不要把 API key 或地址貼進聊天室、Git 或終端參數。
 2. 由使用者在 Supabase Dashboard 設定三個 Function Secrets：`RESEND_API_KEY`、`PRIVACY_DIGEST_RECIPIENT`、`PRIVACY_DIGEST_SECRET`；另新增 Vault secret `uvalert_privacy_digest_secret`，並確認既有 `uvalert_project_url` 可用。
 3. 使用者明確授權資料庫變更後，才執行 `supabase db push --linked`；人工確認 migration `20260907000001_private_privacy_digest.sql` 已套用，且沒有非預期 migration。
 4. 使用者另行明確授權 Function 部署後，才部署 `privacy-digest`；在 Dashboard 確認狀態為 ACTIVE 並記下實際 version，紀錄中不包含 secret。
@@ -73,7 +73,7 @@ pnpm dlx supabase@latest test db --local
 - [ ] 使用者已逐項授權本次正式操作。
 - [ ] 本機安全搜尋沒有真實值。
 - [ ] local reset、全部 pgTAP、focused Vitest 與 `pnpm check` 全部通過。
-- [ ] API key 權限只涵蓋寄信，收件者只允許營運者本人。
+- [ ] API key 只授予 `sending_access`；測試寄件者使用 `resend.dev` 網域，且收件者是帳號擁有者本人。
 - [ ] Function secret 與 Vault secret 的 digest 密鑰一致，且未出現在瀏覽器或 Vercel。
 
 ### 部署後
@@ -100,14 +100,14 @@ pnpm dlx supabase@latest test db --local
 1. 選擇不會撞上每日 Cron 的維護時段，並取得使用者對 Function secret、Vault secret 與必要 smoke 的個別授權。
 2. 在私有介面產生新的高熵 `PRIVACY_DIGEST_SECRET`，短時間內同步更新 Function Secret 與 `uvalert_privacy_digest_secret`；不要輸出舊值或新值。
 3. 以受控空 queue 或合成資料 invoke 驗證授權成功，再確認下一次 Cron run。輪替期間若出現 401，queue 不應被 claim；修正兩端一致性後再測。
-4. Resend key 輪替時先建立新的僅寄信 key、更新 Function Secret、完成受控寄送，再於 Resend 私有介面撤銷舊 key。
+4. Resend key 輪替時先建立新的 `sending_access` key、更新 Function Secret、完成受控寄送，再於 Resend 私有介面撤銷舊 key；帳號本人收件限制仍由 `resend.dev` 測試網域執行。
 5. 收件 Gmail 變更也必須由使用者在 Supabase 私有介面操作並重新做單封與 no-op smoke；任何紀錄只寫「收件者已核對」，不寫地址。
 6. deployment record 只記錄輪替時間、操作者確認、Function version／Cron run ID 與結果，不保存任何 secret fingerprint 或 Email。
 
 ## 2026-09-07 本機驗證紀錄
 
-- `pnpm dlx supabase@latest db reset --local`：PASS；migration `20260907000001_private_privacy_digest.sql` 已在本機套用。
-- `pnpm dlx supabase@latest test db --local`：PASS；5 個 SQL 測試檔、265 項測試。
+- `pnpm dlx supabase@2.116.0 db reset --local`：PASS；migration `20260907000001_private_privacy_digest.sql` 已在本機套用。
+- `pnpm dlx supabase@2.116.0 test db --local`：PASS；5 個 SQL 測試檔、265 項測試。
 - focused Vitest：PASS；2 個測試檔、26 項測試。由於本機無法直接解析 `pnpm vitest` binary，改以等價的 repository script `pnpm test -- <兩個測試檔>` 執行。
 - `pnpm check`：FAIL；typecheck 通過，但完整 Vitest 有 1 項既有頁面出口清單測試失敗（189/190 files、7916/7917 tests passed），因此 wrapper 未執行 lint。
 - 補跑 `pnpm lint`：FAIL；ESLint 完成後，Stylelint 在 `HomePage.vue` 發現 1 個既有 custom property 錯誤。
