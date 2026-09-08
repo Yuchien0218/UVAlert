@@ -70,7 +70,9 @@ const DRILL_DOWN = [
   "pages/help/HelpTopicPage.vue",
   "pages/settings/AccountDataPage.vue",
   "pages/settings/DataSettingsPage.vue",
-  "pages/settings/NotificationSettingsPage.vue"
+  "pages/settings/NotificationSettingsPage.vue",
+  "pages/PrivacyPolicyPage.vue",
+  "pages/TermsPage.vue"
 ];
 
 function exitIconsIn(file: string): string[] {
