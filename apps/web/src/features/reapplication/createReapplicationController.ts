@@ -241,7 +241,9 @@ export function createReapplicationController(
             zone.timingStatus === "reapply_soon")
       )
       .map((zone) => zone.zoneInstanceId);
-    // 沒有 reapply_due／reapply_soon 部位時，退回 primaryAction 指定的部位。
+    // 沒有 reapply_due／reapply_soon 部位時，首次防護紀錄可退回 primaryAction 指定的部位。
+    // 一般補擦若仍在 tracking，代表使用者是提早手動記錄；不可自行假定所有
+    // primaryAction 部位都有實際補擦，應保持未選取，交由使用者逐一勾選。
     // 不得再以「已有既有 Application」過濾：`complete_protection_record`
     // （recordStatus === "unrecorded"）的部位本來就沒有 Application，
     // 過濾掉會讓首次記錄變體開啟時零選取，使用者得自己找回該選哪些部位。
@@ -251,12 +253,14 @@ export function createReapplicationController(
         .filter(canRecordReapplication)
         .map((zone) => zone.zoneInstanceId)
     );
-    suggestedZoneIds.value =
-      suggested.length > 0
-        ? suggested
+    const fallbackSuggestedZoneIds =
+      context.session.primaryAction.actionKind === "record_reapplication"
+        ? []
         : context.session.primaryAction.affectedZoneInstanceIds.filter(
             (zoneId) => recordableZoneIds.has(zoneId)
           );
+    suggestedZoneIds.value =
+      suggested.length > 0 ? suggested : fallbackSuggestedZoneIds;
     selectedZoneIds.value = [...suggestedZoneIds.value];
     reason.value = null;
     committedReasonRevision = null;

@@ -196,6 +196,39 @@ describe("createReapplicationController", () => {
     expect(controller.selectedZoneIds.value).toEqual([]);
   });
 
+  it("提早手動補擦時不預選 primaryAction 的部位", async () => {
+    const source = context();
+    source.session.zones[0].timingStatus = "tracking";
+    source.session.zones[1].timingStatus = "tracking";
+    source.session.primaryAction.affectedZoneInstanceIds = ["zone-a", "zone-b"];
+    const controller = createReapplicationController({
+      repository: {
+        getReapplicationContext: vi.fn().mockResolvedValue(source),
+        reapply: vi.fn(),
+        getContextEventContext: vi.fn(),
+        reportContextEvent: vi.fn()
+      },
+      identity: {
+        getOrCreateLocalVisitorId: vi.fn().mockResolvedValue("visitor"),
+        getOrCreateDeviceLocalId: vi.fn().mockResolvedValue("device")
+      },
+      boot: {
+        refresh: vi.fn(),
+        currentSession: { value: source.session }
+      } as any,
+      createId: vi.fn().mockReturnValue("id"),
+      now: () => new Date("2026-08-01T10:30:00.000Z"),
+      getConnectivity: () => "online"
+    });
+
+    await controller.load();
+
+    expect(controller.suggestedZoneIds.value).toEqual([]);
+    expect(controller.selectedZoneIds.value).toEqual([]);
+    controller.selectAll();
+    expect(controller.selectedZoneIds.value).toEqual(["zone-a", "zone-b"]);
+  });
+
   it("儲存端回報狀態已變更時，提供重新讀取出口", async () => {
     const source = context();
     let id = 0;
