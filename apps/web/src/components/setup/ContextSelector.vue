@@ -90,7 +90,7 @@ const groups = [
       {
         value: "water_active",
         label: "已在水中",
-        description: "稍後需要確認實際入水時間；不確定也能繼續。"
+        description: "稍後需確認實際入水時間，若不確定亦可繼續。"
       }
     ]
   }

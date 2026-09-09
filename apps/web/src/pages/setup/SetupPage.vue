@@ -415,7 +415,7 @@ onMounted(async () => {
     >
       <h2 data-typography-role="card-title">目前無法開始設定</h2>
       <p>
-        讀取這台裝置上的設定草稿時發生問題。已經記錄的提醒與裝備不會受影響；請重新整理後再試一次。
+        裝置上的設定草稿暫時無法讀取。既有的提醒與裝備已安全留存，點選下方重新整理即可繼續。
       </p>
       <button class="button button--primary" type="button" @click="reload">
         <Icon name="tool-refresh" :size="20" />
@@ -501,7 +501,7 @@ onMounted(async () => {
         class="form-error"
         role="status"
       >
-        設定目前無法儲存；輸入仍會保留，可以再試一次。
+        你的設定內容已妥善保留。系統暫時無法寫入，請稍後再試一次。
       </p>
 
       <!-- 選好情境才揭露後半段，避免整頁一次攤開。 -->
@@ -559,7 +559,7 @@ onMounted(async () => {
             type="button"
             @click="openGearForm"
           >
-            改為填寫完整的防曬乳包裝標示
+            改填完整包裝標示
             <Icon name="tool-arrow-right" :size="20" />
           </button>
         </template>
@@ -622,7 +622,7 @@ onMounted(async () => {
     <p v-if="setup.submitError.value" class="form-error" role="alert">
       {{
         setup.submitError.value === "active_session_conflict"
-          ? "另一個提醒已經開始；請先查看目前提醒。"
+          ? "已有進行中的提醒，請先查看目前提醒狀態。"
           : setup.submitError.value === "persistence_error"
             ? "沒有完整儲存，這次提醒尚未開始。輸入仍會保留，可以再試一次。"
             : "部分資料需要重新確認，請返回相應步驟修改。"

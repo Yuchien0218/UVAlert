@@ -5,7 +5,7 @@ import { describe, expect, it } from "vitest";
 import RegionPreferenceSummary from "./RegionPreferenceSummary.vue";
 
 describe("RegionPreferenceSummary", () => {
-  it("目前設定是摘要卡片標題", () => {
+  it("目前地區是摘要卡片標題", () => {
     const wrapper = mount(RegionPreferenceSummary, {
       props: { preference: null },
       global: { stubs: { MapPin: true } }

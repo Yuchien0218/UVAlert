@@ -265,7 +265,7 @@ describe("同步區的說明不重複", () => {
     useServices();
     const wrapper = shallowMount(DataSettingsPage);
 
-    expect(wrapper.text()).toContain("不登入不影響本機倒數與資料");
+    expect(wrapper.text()).toContain("不登入亦不影響本機倒數與資料");
   });
 });
 

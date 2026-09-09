@@ -96,7 +96,7 @@ const { closeFromBackdrop } = useOverlay({
             要結束這次提醒嗎？
           </p>
           <p id="session-end-confirm-body" class="session-end__confirm-body">
-            結束後會停止所有待處理提示；裝備紀錄與既有資料不會受影響。
+            結束後會停止所有待處理提示，裝備紀錄與既有資料不受影響。
           </p>
 
           <p v-if="error !== null" class="session-end__error" role="alert">

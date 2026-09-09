@@ -66,7 +66,7 @@ const robots = computed(() =>
   <div class="page-stack education-page">
     <EducationSeoHead
       title="防曬衛教"
-      description="用白話讀懂 UV、防曬乳、補擦、碰水與曬後照護；每篇文章列出官方來源與使用界線。"
+      description="用白話讀懂 UV、防曬乳、補擦、碰水與曬後照護，每篇文章皆列出官方來源與使用界線。"
       canonical-path="/education"
       :robots="robots"
       :breadcrumbs="[{ name: '防曬衛教', path: '/education' }]"

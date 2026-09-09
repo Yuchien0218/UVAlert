@@ -30,8 +30,8 @@ const warning = computed(() => {
   if (eligibility === null || eligibility === "eligible") return null;
   const copy: Record<string, { title: string; body: string }> = {
     expired: {
-      title: "這瓶防曬乳已超過記錄的有效期限",
-      body: "這瓶防曬乳已過期，無法用來建立新的補擦提醒。"
+      title: "防曬乳已超過有效期限",
+      body: "無法用來建立新的補擦提醒。"
     },
     abnormal_reported: {
       title: "已回報這瓶防曬乳有異常",
@@ -39,7 +39,7 @@ const warning = computed(() => {
     },
     discomfort_reported: {
       title: "已回報使用這瓶防曬乳後不適",
-      body: "請停止使用並依包裝警語處理；需要時尋求醫療協助。"
+      body: "請停止使用並依包裝警語處理，必要時尋求醫療協助。"
     }
     /*
      * 2026-08-30：no_sunscreen_claim 與 identity_unconfirmed 兩則已移除。

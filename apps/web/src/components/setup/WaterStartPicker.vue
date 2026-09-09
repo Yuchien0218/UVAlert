@@ -244,7 +244,7 @@ function applyAdjustment(): void {
   >
     <legend>實際何時開始入水？</legend>
     <p class="question-card__helper">
-      請選擇實際入水時間；若無法確認，可以選擇不確定，系統會保守處理，不會猜測入水時間。
+      請選擇實際入水時間。若記不清楚也沒關係，選擇「不確定」系統會啟動安全保守防護，不會隨意猜測。
     </p>
 
     <!--

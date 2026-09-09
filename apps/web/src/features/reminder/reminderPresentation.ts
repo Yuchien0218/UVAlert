@@ -309,7 +309,7 @@ function buildUntimedPresentation(options: {
       ...base,
       eyebrow: "已停止使用這項防曬乳",
       title: "已停止使用這項防曬乳建立提醒",
-      body: "你回報使用後感到不適。請停止使用並依包裝警語處理；需要時尋求醫療協助。系統不會判斷不適原因。",
+      body: "你回報使用後感到不適。請停止使用並依包裝警語處理，必要時尋求醫療協助。系統不會判斷不適原因。",
       timeLabel: "未計時",
       ariaLabel: `${zoneLabel}已回報使用後不適，停止使用這瓶防曬乳計時。`,
       secondaryActions: secondary("view_handling_guidance")
@@ -390,7 +390,7 @@ function buildUntimedPresentation(options: {
       ...base,
       eyebrow: "入水時間不確定",
       title: `無法判斷${zoneLabel}剩餘的耐水時間`,
-      body: "無法確認你的實際入水時間，因此不會以記錄時間代替。你可以補上或更正入水時間；若仍不確定，請依產品標示保守處理。",
+      body: "無法確認你的實際入水時間，因此不會以記錄時間代替。你可以補上或更正入水時間。若仍不確定，請依產品標示保守處理。",
       timeLabel: "未計時",
       ariaLabel: `無法判斷${zoneLabel}剩餘的耐水時間。`
     };

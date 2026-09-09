@@ -57,7 +57,7 @@ const allEntries: readonly MoreEntry[] = [
   {
     to: "/install",
     icon: "more-install",
-    label: "安裝到手機桌面"
+    label: "安裝到主畫面"
   },
   {
     to: "/settings/data",
@@ -67,7 +67,7 @@ const allEntries: readonly MoreEntry[] = [
   {
     to: "/feedback",
     icon: "more-feedback",
-    label: "問題回報與意見回饋"
+    label: "問題與意見回饋"
   }
 ];
 

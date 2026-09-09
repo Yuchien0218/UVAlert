@@ -162,7 +162,7 @@ function zoneNames(zoneIds: string[]): string {
         返回目前提醒
       </button>
       <p class="correction-note">
-        若紀錄有誤，稍後可從事件更正功能處理；本頁目前不會直接改寫已提交紀錄。
+        若紀錄有誤，稍後可至事件更正功能處理。本頁不會直接改寫已提交之紀錄。
       </p>
     </section>
 

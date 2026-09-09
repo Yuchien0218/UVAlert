@@ -170,14 +170,14 @@ function editGear(productId: string): void {
           class="no-sunscreen-note"
           role="status"
         >
-          目前沒有可以建立補擦倒數的防曬乳。清單裡的
+          清單中的
           {{
             current
               .map((product) => GEAR_CATEGORY_LABELS[product.gearCategory])
               .filter((label, index, all) => all.indexOf(label) === index)
               .join("、")
           }}
-          都不會產生倒數。
+          僅供防護紀錄。新增具備標示的防曬乳即可為你建立補擦倒數。
         </p>
 
         <section aria-labelledby="gear-current-title">
@@ -237,7 +237,7 @@ function editGear(productId: string): void {
           </div>
           <!-- 2026-09-01：詳情頁已改成抽屜，這句不能再指向一個不存在的頁。 -->
           <p class="section-empty">
-            這些裝備不會用於新的提醒；點一下可以恢復使用。
+            這些裝備不會用於新的提醒，點選即可恢復使用。
           </p>
           <ul class="gear-list">
             <li v-for="product in past" :key="product.productId">

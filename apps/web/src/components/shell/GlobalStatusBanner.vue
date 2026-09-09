@@ -37,7 +37,7 @@ const status = computed(() => {
     return {
       tone: "offline",
       icon: "state-offline" as const,
-      message: "目前離線；這台裝置上已儲存的提醒仍可查看。"
+      message: "目前離線。這台裝置上已儲存的提醒仍可隨時查看。"
     };
   }
   return null;

@@ -99,7 +99,7 @@ const zoneLabels = computed(() =>
             @click="$emit('adjust')"
           >
             <Icon name="tool-edit" :size="16" />
-            調整要提醒的部位
+            調整提醒部位
           </button>
         </div>
       </div>

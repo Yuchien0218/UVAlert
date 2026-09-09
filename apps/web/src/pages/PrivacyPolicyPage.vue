@@ -16,7 +16,7 @@ function goBack(): void {
         隱私權政策
       </h1>
       <p class="page-heading__body">
-        說明 UVAlert 如何處理提醒、登入、同步與聯絡資料。
+        說明防曬晴報員如何處理提醒、登入、同步與聯絡資料。
       </p>
       <IconButton icon="tool-arrow-left" label="返回更多" @click="goBack" />
     </header>
@@ -31,11 +31,11 @@ function goBack(): void {
     <section class="app-card legal-card">
       <h2 data-typography-role="card-title">Google 登入與跨裝置同步</h2>
       <p>
-        Google 登入僅用於建立登入工作階段與跨裝置同步；UVAlert 不會讀取
+        Google 登入僅用於建立登入工作階段與跨裝置同步。防曬晴報員不會讀取
         Gmail、Google Drive、聯絡人或其他 Google 服務資料。
       </p>
       <p>
-        同步功能為選用；你可停止同步或在登入與雲端資料設定中清除 UVAlert
+        同步功能為選用，你可隨時停止同步，或在登入與雲端資料設定中清除防曬晴報員的
         雲端資料。
       </p>
     </section>
@@ -46,7 +46,7 @@ function goBack(): void {
         若你同意接收推播通知，瀏覽器會保存推播訂閱資料，以傳送補擦提醒。你可隨時在通知設定中關閉通知。
       </p>
       <p>
-        位置只會在你主動允許時用於判斷目前地區的 UV 與天氣資訊；UVAlert
+        位置只會在你主動允許時用於判斷目前地區的 UV 與天氣資訊，防曬晴報員
         不會保存精確座標。
       </p>
     </section>
@@ -54,7 +54,7 @@ function goBack(): void {
     <section class="app-card legal-card">
       <h2 data-typography-role="card-title">隱私請求與條款</h2>
       <p>
-        如需提出隱私或帳號資料請求，請使用站內回饋表單；送出回饋不會自動執行資料匯出、刪除或帳號操作。
+        如需提出隱私或帳號資料請求，請使用站內回饋表單。送出回饋不會自動執行資料匯出、刪除或帳號操作。
       </p>
       <div class="legal-card__links">
         <RouterLink class="button button--quiet" to="/terms"

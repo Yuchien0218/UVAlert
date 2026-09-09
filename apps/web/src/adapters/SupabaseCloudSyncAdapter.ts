@@ -156,10 +156,10 @@ export class SupabaseCloudSyncAdapter implements CloudSyncPort {
     try {
       state = await this.#auth.getState();
     } catch (error) {
-      throw makeCloudError(401, "AUTH_REQUIRED", "請先登入 UVAlert", error);
+      throw makeCloudError(401, "AUTH_REQUIRED", "請先登入防曬晴報員", error);
     }
     if (state.kind !== "signed_in") {
-      throw makeCloudError(401, "AUTH_REQUIRED", "請先登入 UVAlert");
+      throw makeCloudError(401, "AUTH_REQUIRED", "請先登入防曬晴報員");
     }
     // AuthState deliberately only exposes expiry metadata.  The adapter that
     // talks to the API may provide the token through this optional method,

@@ -49,7 +49,7 @@ const CHOICES: Choice[] = [
   <fieldset class="reason-picker question-card app-card">
     <legend>為什麼補擦？</legend>
     <p class="question-card__helper">
-      選了原因會一起記錄下來；只是時間到了就不用選。
+      選取原因將一併儲存，例行補擦無需選取。
     </p>
 
     <div class="choice-grid">

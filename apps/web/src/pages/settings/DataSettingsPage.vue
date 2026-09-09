@@ -167,7 +167,7 @@ function goBack(): void {
     <EmptyStateCard
       v-else-if="localData.error.value === 'load_failed'"
       title="暫時讀不到本機資料"
-      body="目前無法讀取這台裝置上的資料。這不代表資料已經消失，請稍後再試；在讀取成功之前建議先不要執行清除。"
+      body="目前無法讀取這台裝置上的資料。既有資料仍妥善保存中，請稍後重試。在讀取成功前建議先不要執行清除。"
       role="alert"
     />
 
@@ -359,7 +359,7 @@ function goBack(): void {
         -->
         <div class="clear-row">
           <p v-if="summary.hasActiveSession">
-            進行中的提醒<strong>不會</strong>被刪除；要結束它請到提醒頁明確結束，或使用下方的清除全部。
+            進行中的提醒<strong>不會</strong>被刪除。如需結束請至提醒頁明確結束，或使用下方的清除全部。
           </p>
           <ConfirmAction
             :confirming="confirming === 'history'"
@@ -377,7 +377,7 @@ function goBack(): void {
             -->
             <template #warning>
               <p>
-                裝備清單與已結束的提醒會消失，<strong>無法復原</strong>；之後建立提醒要重新填寫包裝標示。
+                裝備清單與已結束的提醒會消失且<strong>無法復原</strong>。之後建立提醒需重新填寫包裝標示。
               </p>
             </template>
           </ConfirmAction>
@@ -461,7 +461,7 @@ function goBack(): void {
         四個字（48px，14% 的行寬）。
       -->
       <p class="sync-group__lead">
-        登入 Google 帳號可跨裝置同步提醒、裝備與設定；不登入不影響本機倒數與資料。
+        登入 Google 帳號可跨裝置同步提醒、裝備與設定。不登入亦不影響本機倒數與資料。
       </p>
 
       <!--
@@ -496,7 +496,7 @@ function goBack(): void {
         <h3 class="sync-block__title" data-typography-role="supporting">
           同步已停止
         </h3>
-        <p>雲端資料仍保留；重新開啟同步前，不會再讀取或上傳雲端資料。</p>
+        <p>雲端資料仍保留。重新開啟同步前，不會再讀取或上傳雲端資料。</p>
         <button class="button button--quiet" type="button" @click="enableSync">
           重新開啟同步
         </button>
@@ -506,7 +506,7 @@ function goBack(): void {
         <h3 class="sync-block__title" data-typography-role="supporting">
           先看同步內容
         </h3>
-        <p>確認後才會上傳或下載；遇到版本不同時，系統不會自動覆蓋任何一邊。</p>
+        <p>確認後才會上傳或下載。遇到版本不同時，系統不會自動覆蓋任何一邊。</p>
         <button
           v-if="preview === null"
           class="button button--quiet"

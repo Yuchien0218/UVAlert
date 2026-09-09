@@ -24,11 +24,11 @@ const emit = defineEmits<{
 const errorMessage = computed(() => {
   switch (props.error) {
     case "permission_denied":
-      return "你沒有允許定位。可以改用下方手動選擇地區。";
+      return "開啟定位權限可自動取得即時 UV，亦可隨時在下方手動選擇地區。";
     case "position_unavailable":
       return "目前無法取得位置。請稍後重試，或手動選擇地區。";
     case "timeout":
-      return "無法取得位置。請確認定位權限，或移到訊號較好的地方重試；你也可以手動選擇地區。";
+      return "暫時無法取得位置。請確認定位權限或至訊號良好處重試，亦可手動選擇地區。";
     case "unsupported":
       return "這個瀏覽器不支援定位，請改用手動選擇。";
     case "outside_supported_area":

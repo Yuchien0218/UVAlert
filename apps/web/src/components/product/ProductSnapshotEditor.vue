@@ -271,8 +271,8 @@ const waterHasClaim = computed<string>({
               }}
             </legend>
             <p class="question-card__helper">
-              請確認包裝上是否有 SPF、PA
-              等防曬標示；僅有品牌、成分或「天然」宣稱，無法確認這是防曬乳。
+                請確認包裝上是否有 SPF、PA
+                等防曬標示。若僅有品牌或「天然」宣稱，無法確認為防曬乳。
             </p>
             <div class="choice-grid choice-grid--row">
               <label>
@@ -342,7 +342,7 @@ const waterHasClaim = computed<string>({
             >
               <legend>包裝怎麼寫擦上後的等待時間？</legend>
               <p class="question-card__helper">
-                只填包裝上可確認的內容；看不清楚時請選擇「不確定」。
+                請依包裝可確認之內容填寫，若標示不清請選擇「不確定」。
               </p>
               <div class="choice-grid choice-grid--row">
                 <label>
@@ -642,9 +642,9 @@ const waterHasClaim = computed<string>({
       -->
       <Icon name="state-warning" :size="24" />
       <div>
-        <strong>目前無法建立防曬乳補擦時間</strong>
+        <strong>確認包裝防曬標示後即可開啟補擦倒數</strong>
         <p>
-          標示確認前，系統暫時無法建立防曬乳補擦倒數；仍會保留這次使用紀錄。
+          若標示不清楚，可先選擇「不確定」，再依包裝資訊補充確認。
         </p>
       </div>
     </aside>

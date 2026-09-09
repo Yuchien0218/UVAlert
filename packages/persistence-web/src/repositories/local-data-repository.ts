@@ -108,7 +108,7 @@ export class LocalDataRepository implements LocalDataPort {
     return {
       formatVersion: LOCAL_DATA_EXPORT_FORMAT_VERSION,
       exportedAt,
-      application: "UVAlert 防曬晴報員",
+      application: "防曬晴報員",
       notice:
         "這份檔案由你的裝置直接產生，沒有上傳、沒有經過後端。目前版本只支援匯出，尚不支援匯入還原。",
       excluded: [

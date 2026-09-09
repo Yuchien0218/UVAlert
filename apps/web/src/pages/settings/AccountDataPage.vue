@@ -52,7 +52,7 @@ async function deleteCloudData(): Promise<void> {
   try {
     await cloudSync.deleteAccount();
     await auth.signOut();
-    notice.value = "UVAlert 的雲端資料與登入資訊已清除；本機提醒與資料仍保留。";
+    notice.value = "防曬晴報員的雲端資料與登入資訊已清除，本機提醒與資料仍保留。";
     confirmingDelete.value = false;
   } catch (caught) {
     error.value =
@@ -103,8 +103,8 @@ function goBack(): void {
           <Icon name="tool-refresh" :size="32" />
           <span>同步狀態</span>
         </h2>
-        <p v-if="syncDisabled">同步已停止；雲端資料保留中。</p>
-        <p v-else>同步已開啟；每次同步前會先顯示預覽。</p>
+        <p v-if="syncDisabled">同步已停止，雲端資料保留中。</p>
+        <p v-else>同步已開啟，每次同步前會先顯示預覽。</p>
         <button
           v-if="!syncDisabled"
           class="button button--quiet"
@@ -135,18 +135,18 @@ function goBack(): void {
           :disabled="busy"
           @click="signOut"
         >
-          登出 UVAlert
+          登出防曬晴報員
         </button>
       </section>
 
       <section class="app-card account-card account-card--danger">
         <h2 class="section-heading" data-typography-role="card-title">
           <Icon name="tool-delete" :size="32" />
-          <span>清除 UVAlert 雲端資料</span>
+          <span>清除雲端資料</span>
         </h2>
         <p>
-          會刪除 UVAlert 雲端同步資料與 UVAlert 登入；不會刪除 Google
-          帳號。本機提醒與本機資料不受影響。
+          將刪除防曬晴報員的雲端同步資料與登入狀態，不會刪除 Google
+          帳號。本機提醒與資料不受影響。
         </p>
         <ConfirmAction
           :confirming="confirmingDelete"

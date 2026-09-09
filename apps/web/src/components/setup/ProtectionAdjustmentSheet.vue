@@ -24,7 +24,7 @@ function close(): void {
 <template>
   <BottomSheet
     :open="open"
-    title="調整要提醒的部位"
+    title="調整提醒部位"
     labelled-by-id="protection-sheet-title"
     @close="close"
   >

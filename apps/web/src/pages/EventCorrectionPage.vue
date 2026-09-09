@@ -87,7 +87,7 @@ async function runVoid(): Promise<void> {
       />
       <!-- 說明橫跨兩欄，不必為圖示鈕讓出寬度（2026-09-03）。 -->
       <p>
-        原本的紀錄會保留下來，你會在後面新增一筆更正。送出前不會改變目前提醒。
+      原紀錄將完整保留，並於其後新增更正紀錄。送出前不會變更目前提醒。
       </p>
     </header>
 
@@ -158,7 +158,7 @@ async function runVoid(): Promise<void> {
             v-if="eventCorrection.zoneSelectionLocked.value"
             class="control-rule-note"
           >
-            這段水上活動已經有對應的離水紀錄。改動入水的部位會讓那筆離水失去配對，因此這裡不可調整；需要改的話請先更正離水那一筆。
+      此水上活動已有對應的離水紀錄。若調整入水部位將導致離水紀錄失去配對，如需修改請先更正該筆離水紀錄。
           </p>
           <p v-else class="control-rule-note">
             取消勾選的部位會從這筆紀錄移除，其他部位不受影響。
@@ -241,7 +241,7 @@ async function runVoid(): Promise<void> {
           <h2 data-typography-role="card-title">作廢這筆紀錄</h2>
           <template v-if="!confirmingVoid">
             <p>
-              如果這筆紀錄根本不該存在，可以作廢它。原紀錄仍會留在事件歷史中，只是不再影響提醒。
+      若無需保留此筆紀錄，可將其作廢。原紀錄仍會留存於歷史清單備查，且不再影響目前的提醒倒數。
             </p>
             <button
               class="button button--quiet"

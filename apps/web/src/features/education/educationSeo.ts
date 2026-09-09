@@ -18,11 +18,11 @@ export interface EducationSeoInput {
 }
 
 const SEO_MARKER = "data-uvalert-education-seo";
-const BRAND_NAME = "UVAlert 防曬晴報員";
+const BRAND_NAME = "防曬晴報員";
 
 /** `<title>` 的區段名與品牌尾綴。與 BRAND_NAME 不同：那個是給 schema 用的全名。 */
 const TITLE_SECTION = "防曬衛教";
-const TITLE_SUFFIX = "UVAlert";
+const TITLE_SUFFIX = "防曬晴報員";
 
 /**
  * 組 `<title>`，並且**不重複相鄰的同名區段**。

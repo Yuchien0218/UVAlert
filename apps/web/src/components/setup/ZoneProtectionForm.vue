@@ -160,7 +160,7 @@ function makeDraftZone(
         </h2>
         <p class="preset-card__body">{{ preset.summary }}</p>
         <p class="preset-card__note">
-          這只是建議組合；確認前不會建立任何提醒資料。
+          已預先為你搭配推薦部位，可依個人習慣自由調整，確認後才會正式啟用。
         </p>
       </div>
       <div class="button-group preset-card__actions">

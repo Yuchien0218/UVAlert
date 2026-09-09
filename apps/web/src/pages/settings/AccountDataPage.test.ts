@@ -124,7 +124,7 @@ describe("帳號頁的卡片標題圖示", () => {
     expect(headings.map((heading) => heading.get("span").text())).toEqual([
       "同步狀態",
       "登出",
-      "清除 UVAlert 雲端資料"
+      "清除雲端資料"
     ]);
   });
 });

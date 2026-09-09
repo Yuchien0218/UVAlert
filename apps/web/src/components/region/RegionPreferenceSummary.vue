@@ -29,7 +29,7 @@ defineProps<Props>();
         class="region-summary__title"
         data-typography-role="card-title"
       >
-        目前設定
+        目前地區
       </h2>
       <p class="region-summary__value">
         <template v-if="preference?.mode === 'selected'">

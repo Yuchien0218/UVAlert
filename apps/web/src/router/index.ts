@@ -176,7 +176,7 @@ export function createAppRouter(
         meta: {
           title: "本機資料與隱私",
           heading: "本機資料與隱私",
-          body: "查看、匯出與清除本機資料；匯出不上傳、不經後端。"
+          body: "查看、匯出與清除本機資料。匯出資料不上傳、不經後端。"
         }
       },
       {

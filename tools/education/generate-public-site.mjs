@@ -173,7 +173,7 @@ function renderEducationIndex(content, baseUrl, indexable, lastmod) {
   return renderDocument({
     title: "防曬衛教",
     description:
-      "用白話讀懂 UV、防曬乳、補擦、碰水與曬後照護；每篇文章列出官方來源與使用界線。",
+      "用白話讀懂 UV、防曬乳、補擦、碰水與曬後照護，每篇文章皆列出官方來源與使用界線。",
     canonicalPath: "/education",
     robots: indexable ? "index,follow" : "noindex,follow",
     baseUrl,
@@ -260,7 +260,7 @@ function renderArticlePage(article, content, baseUrl) {
  * 在有無 JS 兩種情況下標題會不一樣。
  */
 function buildTitle(pageTitle) {
-  return [pageTitle, "防曬衛教", "UVAlert"]
+  return [pageTitle, "防曬衛教", "防曬晴報員"]
     .filter((segment, index, all) => segment !== all[index - 1])
     .join("｜");
 }
@@ -286,7 +286,7 @@ function renderDocument({
     name: title,
     description,
     inLanguage: "zh-Hant",
-    isPartOf: { "@type": "WebSite", name: "UVAlert 防曬晴報員", url: baseUrl }
+    isPartOf: { "@type": "WebSite", name: "防曬晴報員", url: baseUrl }
   };
   const breadcrumbSchema = {
     "@context": "https://schema.org",
@@ -310,8 +310,8 @@ function renderDocument({
       inLanguage: "zh-Hant",
       dateModified: article.lastReviewed,
       isAccessibleForFree: true,
-      author: { "@type": "Organization", name: "UVAlert 防曬晴報員" },
-      publisher: { "@type": "Organization", name: "UVAlert 防曬晴報員" }
+      author: { "@type": "Organization", name: "防曬晴報員" },
+      publisher: { "@type": "Organization", name: "防曬晴報員" }
     });
   }
   const schemaScripts = schemas
@@ -324,7 +324,7 @@ function renderDocument({
     lastmod === undefined
       ? ""
       : `<meta name="last-modified" content="${escapeHtml(lastmod)}">`;
-  return `<!doctype html><html lang="zh-Hant"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>${escapeHtml(buildTitle(title))}</title><meta name="description" content="${escapeHtml(description)}"><meta name="robots" content="${robots}"><link rel="canonical" href="${escapeHtml(canonicalUrl)}"><meta property="og:title" content="${escapeHtml(title)}"><meta property="og:description" content="${escapeHtml(description)}"><meta property="og:type" content="${article === undefined ? "website" : "article"}"><meta property="og:url" content="${escapeHtml(canonicalUrl)}"><meta property="og:site_name" content="UVAlert 防曬晴報員">${lastmodMeta}<style>${PUBLIC_STYLE}</style>${schemaScripts}</head><body><header class="site-header"><a href="/">UVAlert 防曬晴報員</a><small>防曬生活編輯部</small></header><main>${body}</main><footer>一般衛教內容；若有持續或加重的不適，請尋求醫療專業協助。</footer></body></html>`;
+  return `<!doctype html><html lang="zh-Hant"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>${escapeHtml(buildTitle(title))}</title><meta name="description" content="${escapeHtml(description)}"><meta name="robots" content="${robots}"><link rel="canonical" href="${escapeHtml(canonicalUrl)}"><meta property="og:title" content="${escapeHtml(title)}"><meta property="og:description" content="${escapeHtml(description)}"><meta property="og:type" content="${article === undefined ? "website" : "article"}"><meta property="og:url" content="${escapeHtml(canonicalUrl)}"><meta property="og:site_name" content="防曬晴報員">${lastmodMeta}<style>${PUBLIC_STYLE}</style>${schemaScripts}</head><body><header class="site-header"><a href="/">防曬晴報員</a><small>防曬生活編輯部</small></header><main>${body}</main><footer>一般衛教內容。若有持續或加重的不適，請尋求醫療專業協助。</footer></body></html>`;
 }
 
 function renderSitemap(baseUrl, urls) {

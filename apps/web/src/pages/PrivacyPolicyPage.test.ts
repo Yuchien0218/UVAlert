@@ -9,7 +9,7 @@ describe("PrivacyPolicyPage", () => {
     ).replace(/\s+/g, " ");
 
     expect(text).toContain(
-      "Google 登入僅用於建立登入工作階段與跨裝置同步；UVAlert 不會讀取 Gmail、Google Drive、聯絡人或其他 Google 服務資料。"
+      "Google 登入僅用於建立登入工作階段與跨裝置同步。防曬晴報員不會讀取 Gmail、Google Drive、聯絡人或其他 Google 服務資料。"
     );
   });
 

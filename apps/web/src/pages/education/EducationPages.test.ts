@@ -400,12 +400,12 @@ describe("衛教頁的 <title>", () => {
    * 那一個。只守首頁的話，把整個尾綴拿掉也會過。
    */
   it("首頁不重複「防曬衛教」", () => {
-    expect(buildEducationTitle("防曬衛教")).toBe("防曬衛教｜UVAlert");
+    expect(buildEducationTitle("防曬衛教")).toBe("防曬衛教｜防曬晴報員");
   });
 
   it("一般頁面仍然保留完整的三段", () => {
     expect(buildEducationTitle("流汗或碰水後")).toBe(
-      "流汗或碰水後｜防曬衛教｜UVAlert"
+      "流汗或碰水後｜防曬衛教｜防曬晴報員"
     );
   });
 
@@ -414,7 +414,7 @@ describe("衛教頁的 <title>", () => {
       global: { stubs: { RouterLink: { template: "<a><slot /></a>" } } }
     });
 
-    expect(document.title).toBe("防曬衛教｜UVAlert");
+    expect(document.title).toBe("防曬衛教｜防曬晴報員");
   });
 
   /*
@@ -431,7 +431,7 @@ describe("衛教頁的 <title>", () => {
     expect(
       generator,
       "不該再有寫死的三段尾綴"
-    ).not.toContain("｜防曬衛教｜UVAlert</title>");
+    ).not.toContain("｜防曬衛教｜防曬晴報員</title>");
   });
 });
 

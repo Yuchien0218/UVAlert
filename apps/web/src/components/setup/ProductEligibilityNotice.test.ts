@@ -22,7 +22,7 @@ describe("ProductEligibilityNotice", () => {
 
     const alert = wrapper.find('[role="alert"]');
     expect(alert.exists()).toBe(true);
-    expect(alert.text()).toContain("已超過記錄的有效期限");
+    expect(alert.text()).toContain("已超過有效期限");
   });
 
   /*

@@ -455,7 +455,7 @@ function handleEndSession(): void {
         @click="handleWaterActivity"
       >
         <Icon name="context-water" :size="20" />
-        水上活動（下水／離水）
+        水上活動記錄
       </button>
 
       <!--

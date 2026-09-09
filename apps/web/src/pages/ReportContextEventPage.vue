@@ -159,7 +159,7 @@ function zoneNames(zoneIds: string[]): string {
         說明搬出上面那個 div：它在圖示鈕下方，不需要為按鈕讓出寬度。
         `.flow-heading > p` 讓它橫跨兩欄（2026-09-03）。
       -->
-      <p>記下這次狀況後，相關部位的提醒會更新；確認前不會改變提醒。</p>
+      <p>記錄狀況後將更新相關部位狀態，確認前不會變更現有提醒。</p>
     </header>
 
     <BroadcastLoader
@@ -238,7 +238,7 @@ function zoneNames(zoneIds: string[]): string {
         返回目前提醒
       </button>
       <p class="correction-note">
-        如果紀錄有誤，稍後可以從最近事件更正；本頁不會改寫已提交紀錄。
+        若紀錄有誤，稍後可由最近事件更正。本頁不會改寫已提交之紀錄。
       </p>
     </section>
 
@@ -298,7 +298,7 @@ function zoneNames(zoneIds: string[]): string {
             離水會直接套用下水時選取的部位，無法在此修改。
           </p>
           <p v-else class="control-rule-note">
-            只勾選這次實際受影響的部位；未勾選的部位狀態不會改變。
+            僅需勾選本次受影響的部位，未勾選的部位狀態不受影響。
           </p>
           <ZoneSelectorGrid
             :zones="contextEvent.selectableZones.value"

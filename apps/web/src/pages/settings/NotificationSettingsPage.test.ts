@@ -90,18 +90,18 @@ describe("NotificationSettingsPage", () => {
       ["more-about", "32"]
     ]);
     expect(wrapper.get("h2.section-heading span").text()).toBe(
-      "目前狀態：通知已開啟"
+      "通知權限：通知已開啟"
     );
   });
 
   it.each([
-    ["default", true, "目前狀態：未開啟", "state-notification-pending"],
-    ["granted", true, "目前狀態：通知已開啟", "more-notifications"],
-    ["denied", true, "目前狀態：通知已被拒絕", "state-notification-off"],
+    ["default", true, "通知權限：未開啟", "state-notification-pending"],
+    ["granted", true, "通知權限：通知已開啟", "more-notifications"],
+    ["denied", true, "通知權限：通知已被拒絕", "state-notification-off"],
     [
       "default",
       false,
-      "目前狀態：這個瀏覽器不支援通知",
+      "通知權限：這個瀏覽器不支援通知",
       "state-notification-off"
     ]
   ] as const)(

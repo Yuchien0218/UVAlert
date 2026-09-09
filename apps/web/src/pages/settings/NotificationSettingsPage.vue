@@ -33,7 +33,7 @@ const BACKGROUND_PUSH_DESCRIPTORS: Record<
 > = {
   unsupported: {
     title: "無法使用背景推播",
-    body: "此瀏覽器或環境無法使用背景推播；本機倒數與分頁仍開啟時的提醒仍可使用。",
+    body: "此瀏覽器或環境無法使用背景推播。本機倒數與分頁開啟時的提醒仍可正常使用。",
     canEnable: false,
     canDisable: false,
     canRetry: false
@@ -75,7 +75,7 @@ const BACKGROUND_PUSH_DESCRIPTORS: Record<
   },
   "schedule-error": {
     title: "無法依賴背景推播",
-    body: "背景推播設定失效，或舊版關閉紀錄無法安全確認；本機倒數仍是依據。若要維持關閉，請按下「完成關閉背景推播」，系統會以目前裝置設定重新完成關閉。完成後若想再次使用，可再重新開啟。",
+    body: "背景推播設定失效，或舊版關閉紀錄無法安全確認，本機倒數仍是依據。若要維持關閉，請按下「完成關閉背景推播」，系統會以目前裝置設定重新完成關閉。完成後若想再次使用，可再重新開啟。",
     canEnable: false,
     canDisable: true,
     canRetry: false
@@ -165,7 +165,7 @@ async function runTest(): Promise<void> {
       >
         <Icon :name="statusIcon" :size="32" />
         <span
-          >目前狀態：<strong>{{ statusLabel }}</strong></span
+          >通知權限：<strong>{{ statusLabel }}</strong></span
         >
       </h2>
       <div v-if="!isSupported" class="note-box" role="status">
@@ -292,7 +292,7 @@ async function runTest(): Promise<void> {
       <div class="delivery-emphasis delivery-emphasis--limited">
         <p class="delivery-emphasis__title">本機提醒範圍</p>
         <p>
-          分頁仍開啟時，本機提醒可作為倒數的輔助；背景送達則需另行啟用上方的背景推播。
+          分頁仍開啟時，本機提醒可作為倒數的輔助。背景送達則需啟用上方的背景推播。
         </p>
       </div>
       <div v-if="isGranted" class="delivery-test">

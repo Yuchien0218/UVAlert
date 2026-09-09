@@ -88,7 +88,7 @@ const startedLabel = computed<string | null>(() => {
     -->
     <p class="night-session__eyebrow">
       <Icon name="state-night" :size="20" />
-      提醒仍在進行
+      夜間・提醒仍在進行
     </p>
 
     <p v-if="elapsedLabel !== null" class="stat-figure night-session__figure">

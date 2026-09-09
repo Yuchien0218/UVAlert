@@ -85,7 +85,7 @@ export async function handleAccountDelete(request: Request): Promise<Response> {
       errorResponse({
         status: 500,
         code: "SERVER_ERROR",
-        message: "UVAlert 帳號尚未刪除"
+        message: "防曬晴報員帳號尚未刪除"
       })
     );
   }
