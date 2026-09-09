@@ -3,6 +3,7 @@ import {
   type FiveDayUvForecast,
   type UvRiskLevel
 } from "@sunshield/contracts";
+import { getUvRiskPresentation } from "./uvDistributionPresentation";
 
 export const EVENING_START_HOUR = 18;
 export const EVENING_END_HOUR = 6;
@@ -79,18 +80,7 @@ export function selectUpcomingForecast(
 }
 
 export function getUvRiskLevelLabel(riskLevel: UvRiskLevel): string {
-  switch (riskLevel) {
-    case "low":
-      return "低量級";
-    case "moderate":
-      return "中量級";
-    case "high":
-      return "高量級";
-    case "very_high":
-      return "過量級";
-    case "extreme":
-      return "危險級";
-  }
+  return getUvRiskPresentation(riskLevel).label;
 }
 
 export function getHighestForecastDay(

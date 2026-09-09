@@ -43,6 +43,16 @@ describe("fixed evening and five-day UV rules", () => {
     });
   });
 
+  it.each([
+    ["low", "低量級"],
+    ["moderate", "中量級"],
+    ["high", "高量級"],
+    ["very_high", "過量級"],
+    ["extreme", "危險級"]
+  ] as const)("保留共享分級名稱：%s", (riskLevel, label) => {
+    expect(getUvRiskLevelLabel(riskLevel)).toBe(label);
+  });
+
   /*
    * **日落之後今天不能消失**（2026-09-04，使用者回報「有時候晚上打開會少一
    * 天」）。
