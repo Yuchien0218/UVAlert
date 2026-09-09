@@ -37,7 +37,7 @@ describe("TaiwanUvMap", () => {
     // 22 個縣市全部都要有形狀，不能因為沒有 UV 就不畫。
     expect(paths).toHaveLength(22);
     expect(wrapper.findAll(".uv-map__county--unknown")).toHaveLength(20);
-    expect(wrapper.findAll(".uv-map__county--very_high")).toHaveLength(1);
+    expect(wrapper.findAll(".uv-map__county--very-high")).toHaveLength(1);
     expect(wrapper.findAll(".uv-map__county--high")).toHaveLength(1);
   });
 
@@ -84,7 +84,7 @@ describe("TaiwanUvMap", () => {
       "low",
       "moderate",
       "high",
-      "very_high",
+      "very-high",
       "extreme"
     ]) {
       const rule = source.match(
@@ -113,5 +113,18 @@ describe("TaiwanUvMap", () => {
     // 本島（含澎湖）約 2.47 度經距 × cos24 ≈ 2.25；含金門會超過 3.4。
     expect(width).toBeLessThan(2.6);
     expect(height).toBeGreaterThan(width!);
+  });
+
+  it("金門與馬祖都有集中設定的可辨識 inset 標籤", () => {
+    const wrapper = mountMap();
+    const labels = wrapper.findAll(".uv-map__inset-label");
+
+    expect(labels.map((label) => label.text())).toEqual(["金門", "馬祖"]);
+    expect(labels.map((label) => label.attributes("data-county-code"))).toEqual([
+      "09020",
+      "09007"
+    ]);
+    expect(wrapper.findAll(".uv-map__county--very-high")).toHaveLength(1);
+    expect(wrapper.find(".uv-map__marker").exists()).toBe(false);
   });
 });

@@ -2,6 +2,7 @@
 import { computed } from "vue";
 import type { NationwideUvForecast } from "@sunshield/contracts";
 import outlines from "../../generated/county-outlines.generated.json";
+import { getUvRiskClassSuffix } from "../../features/uv/uvDistributionPresentation";
 
 /**
  * 全臺 UV 分布地圖。
@@ -41,8 +42,22 @@ const props = defineProps<{
   highlightCountyCode: string | null;
 }>();
 
-/** 金門：離本島太遠，單獨畫成 inset。 */
-const INSET_COUNTY_CODES = new Set(["09020"]);
+interface InsetConfig {
+  readonly countyCode: string;
+  readonly label: string;
+  readonly scale: number;
+  readonly xRatio: number;
+  readonly yRatio: number;
+}
+
+/* 離島的投影位置、比例與標籤集中管理，模板不依縣市碼分支。 */
+const INSET_CONFIGS: readonly InsetConfig[] = [
+  { countyCode: "09020", label: "金門", scale: 2, xRatio: 0.04, yRatio: 0.82 },
+  { countyCode: "09007", label: "馬祖", scale: 3, xRatio: 0.04, yRatio: 0.1 }
+];
+const insetConfigByCounty = new Map(
+  INSET_CONFIGS.map((config) => [config.countyCode, config])
+);
 
 /**
  * 經度乘 cos(緯度) 修正橫向壓縮，否則台灣會顯得比實際胖（24 度附近約 9%）。
@@ -72,10 +87,7 @@ function boundsOf(list: Outline[]) {
 }
 
 const mainCounties = outlines.counties.filter(
-  (county) => !INSET_COUNTY_CODES.has(county.countyCode)
-);
-const insetCounties = outlines.counties.filter((county) =>
-  INSET_COUNTY_CODES.has(county.countyCode)
+  (county) => !insetConfigByCounty.has(county.countyCode)
 );
 
 const mainBounds = boundsOf(mainCounties);
@@ -128,23 +140,29 @@ const mainShapes = computed(() =>
   )
 );
 
-/**
- * 金門的 inset：放大 2 倍擺在左下角。放大是因為它本身很小，照原比例畫在
- * 角落只會是一個看不出形狀的點。
- */
-const insetBounds = boundsOf(insetCounties);
-const INSET_SCALE = 2;
 const insetShapes = computed(() =>
-  insetCounties.map((county) =>
-    decorate(
-      county,
-      pathFor(county, insetBounds, INSET_SCALE, {
-        x: width * 0.04,
-        y: height * 0.82
-      })
-    )
-  )
+  INSET_CONFIGS.flatMap((config) => {
+    const county = outlines.counties.find(
+      (candidate) => candidate.countyCode === config.countyCode
+    );
+    if (county === undefined) return [];
+    return [
+      decorate(
+        county,
+        pathFor(county, boundsOf([county]), config.scale, {
+          x: width * config.xRatio,
+          y: height * config.yRatio
+        })
+      )
+    ];
+  })
 );
+
+const insetLabels = INSET_CONFIGS.map((config) => ({
+  ...config,
+  x: width * config.xRatio,
+  y: height * config.yRatio
+}));
 
 /** 目前所在縣市的定位標記：取它最大環的中心。 */
 const marker = computed(() => {
@@ -187,9 +205,20 @@ const marker = computed(() => {
         'uv-map__county',
         shape.risk === null
           ? 'uv-map__county--unknown'
-          : `uv-map__county--${shape.risk}`
+          : `uv-map__county--${getUvRiskClassSuffix(shape.risk)}`
       ]"
     />
+
+    <text
+      v-for="inset in insetLabels"
+      :key="inset.countyCode"
+      class="uv-map__inset-label"
+      :data-county-code="inset.countyCode"
+      :x="inset.x"
+      :y="inset.y"
+    >
+      {{ inset.label }}
+    </text>
 
     <!--
       定位標記用一個小環而不是描邊整個縣市：資料是鄉鎮環的集合，描邊會把
@@ -243,28 +272,37 @@ const marker = computed(() => {
 }
 
 .uv-map__county--low {
-  fill: var(--color-uvi-low);
-  stroke: var(--color-uvi-low);
+  fill: var(--color-uvi-visual-low);
+  stroke: var(--color-uvi-visual-low);
 }
 
 .uv-map__county--moderate {
-  fill: var(--color-uvi-moderate);
-  stroke: var(--color-uvi-moderate);
+  fill: var(--color-uvi-visual-moderate);
+  stroke: var(--color-uvi-visual-moderate);
 }
 
 .uv-map__county--high {
-  fill: var(--color-uvi-high);
-  stroke: var(--color-uvi-high);
+  fill: var(--color-uvi-visual-high);
+  stroke: var(--color-uvi-visual-high);
 }
 
-.uv-map__county--very_high {
-  fill: var(--color-uvi-very-high);
-  stroke: var(--color-uvi-very-high);
+.uv-map__county--very-high {
+  fill: var(--color-uvi-visual-very-high);
+  stroke: var(--color-uvi-visual-very-high);
 }
 
 .uv-map__county--extreme {
-  fill: var(--color-uvi-extreme);
-  stroke: var(--color-uvi-extreme);
+  fill: var(--color-uvi-visual-extreme);
+  stroke: var(--color-uvi-visual-extreme);
+}
+
+.uv-map__inset-label {
+  fill: var(--color-body-strong);
+  font-family: var(--font-family-caption);
+  font-size: var(--font-size-caption);
+  font-weight: var(--font-weight-caption);
+  line-height: var(--line-height-caption);
+  letter-spacing: var(--letter-spacing-caption);
 }
 
 .uv-map__marker {
