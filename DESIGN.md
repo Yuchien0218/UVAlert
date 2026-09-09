@@ -52,6 +52,11 @@ colors:
   uvi-high: "#B25721"
   uvi-very-high: "#C43D3D"
   uvi-extreme: "#7D4BB3"
+  uvi-visual-low: "#A3D977"
+  uvi-visual-moderate: "#FDD835"
+  uvi-visual-high: "#FFA726"
+  uvi-visual-very-high: "#EF5350"
+  uvi-visual-extreme: "#AB47BC"
 
 typography:
   page-title:
@@ -157,6 +162,13 @@ layout:
   tap-target: 44px
 
 components:
+  uv-distribution:
+    itemRadius: "{rounded.sm}"
+    itemPaddingInline: "{spacing.sm}"
+    itemPaddingBlock: 6px
+    rowGap: 10px
+    columnGap: "{spacing.md}"
+    groupGap: "{spacing.lg}"
   brand-header:
     backgroundColor: "{colors.canvas}"
     textColor: "{colors.ink}"
@@ -499,6 +511,8 @@ components:
 **2026-08-31：低／中／高三級壓暗，色相不動。** 原值在暖象牙畫布上當文字全部過不了 WCAG AA 4.5:1（low 4.12、moderate 2.97、high 3.43），白字疊在色上也一樣不合格（4.25／3.06／3.53）——五日 UV 卡的徽章因此一直是不合格的，那不是新引入的問題。壓暗後兩種用法同時過關（文字對畫布 4.56／4.56／4.52，白字在色上 4.70／4.70／4.66）。過量級與危險級本來就及格，維持原值。
 
 代價是五個色的亮度變接近（相鄰兩級彼此只差 1.00–1.16），**在地圖上主要靠色相區分，不靠明暗**。全臺 UV 分布地圖因此是 `aria-hidden`，並以縣市數值清單作為等價替代。
+
+**全臺分布視覺層（2026-09-09）**：地圖填色與縣市長條使用 `{colors.uvi-visual-low}` 至 `{colors.uvi-visual-extreme}` 的明亮標準色階，提升資料掃讀；文字、徽章與任何需要白字疊色的地方仍使用上表壓暗的 `{colors.uvi-*}`，不可互換。清單項目以 `components.uv-distribution` 的 8px 圓角、12px 水平內距、6px 垂直內距和 10px 列距排版；分組間距為 20px，雙欄間距為 16px。標題、分組標題、輔助說明、圖例與數字分別沿用 `section-title`、`card-title`、`supporting`、`caption`、`stat-figure`，不新增字體尺度。
 
 對比度由 `packages/ui/src/uvRiskContrast.test.ts` 守著，改色票會直接讓它變紅。
 

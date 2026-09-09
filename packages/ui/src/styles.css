@@ -142,6 +142,17 @@
   --color-uvi-very-high: #c43d3d;
   --color-uvi-extreme: #7d4bb3;
 
+  /*
+   * 全臺 UV 分布圖專用的亮色視覺層。文字與徽章繼續使用上方通過 AA 的
+   * --color-uvi-* 前景色；地圖區塊與清單進度條才使用這組，避免把可讀性
+   * 與資料辨識兩種需求混成同一個 token。
+   */
+  --color-uvi-visual-low: #a3d977;
+  --color-uvi-visual-moderate: #fdd835;
+  --color-uvi-visual-high: #ffa726;
+  --color-uvi-visual-very-high: #ef5350;
+  --color-uvi-visual-extreme: #ab47bc;
+
   --page-background: var(--color-canvas);
   /*
    * 卡片表面。2026-08-24 定案為暖奶油 --color-surface-soft（#f7ede1）。
@@ -407,6 +418,14 @@
   --radius-lg: 1.25rem;
   --radius-sheet: 1.5rem;
   --radius-pill: 999px;
+
+  /* 全臺 UV 分布：清單與地圖共用的版面尺度。 */
+  --uv-distribution-item-radius: var(--radius-sm);
+  --uv-distribution-item-padding-inline: var(--space-3);
+  --uv-distribution-item-padding-block: 0.375rem;
+  --uv-distribution-row-gap: 0.625rem;
+  --uv-distribution-column-gap: var(--space-4);
+  --uv-distribution-group-gap: var(--space-5);
 
   /*
    * 沒有陰影 token：DESIGN.md 第七節「色塊優先、陰影罕用」，目前全站

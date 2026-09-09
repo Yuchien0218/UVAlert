@@ -19,7 +19,13 @@ import { describe, expect, it } from "vitest";
  * vitest 的 cwd 是 repo 根目錄。
  */
 
-const stylesCss = readFileSync("packages/ui/src/styles.css", "utf8");
+function stripCssComments(source: string): string {
+  return source.replace(/\/\*[\s\S]*?\*\//g, "");
+}
+
+const stylesCss = stripCssComments(
+  readFileSync("packages/ui/src/styles.css", "utf8")
+);
 
 /** 讀 :root 的值；`--text-inverse: var(--color-on-dark)` 這種一層轉指也解得開。 */
 /**
@@ -62,7 +68,7 @@ function contrast(a: string, b: string): number {
   return (hi! + 0.05) / (lo! + 0.05);
 }
 
-const LEVELS = [
+const TEXT_FOREGROUND_LEVELS = [
   "--color-uvi-low",
   "--color-uvi-moderate",
   "--color-uvi-high",
@@ -70,20 +76,43 @@ const LEVELS = [
   "--color-uvi-extreme"
 ] as const;
 
+const VISUALIZATION_LEVELS = [
+  "--color-uvi-visual-low",
+  "--color-uvi-visual-moderate",
+  "--color-uvi-visual-high",
+  "--color-uvi-visual-very-high",
+  "--color-uvi-visual-extreme"
+] as const;
+
+const declaredUviTokens = new Set(
+  [...stylesCss.matchAll(/^\s*(--color-uvi-[\w-]+):/gm)].map(
+    (match) => match[1]!
+  )
+);
+
 const AA_NORMAL = 4.5;
 
 describe("UV 五級風險色的對比度", () => {
+  it("把亮色視覺化 token 與文字前景 token 明確分流", () => {
+    for (const visualToken of VISUALIZATION_LEVELS) {
+      expect(TEXT_FOREGROUND_LEVELS).not.toContain(visualToken);
+    }
+    expect([...declaredUviTokens].sort()).toEqual(
+      [...TEXT_FOREGROUND_LEVELS, ...VISUALIZATION_LEVELS].sort()
+    );
+  });
+
   /*
    * 兩種用法分成兩條測試。合成一條的話，只要有一邊過就可能掩護另一邊——
    * 而 2026-08-31 修的正是「兩邊各自不及格」的情形。
    */
-  it.each(LEVELS)("%s 當文字畫在畫布上時達到 AA", (name) => {
+  it.each(TEXT_FOREGROUND_LEVELS)("%s 當文字畫在畫布上時達到 AA", (name) => {
     expect(contrast(token(name), token("--color-canvas"))).toBeGreaterThanOrEqual(
       AA_NORMAL
     );
   });
 
-  it.each(LEVELS)("%s 當底色、疊白字時達到 AA", (name) => {
+  it.each(TEXT_FOREGROUND_LEVELS)("%s 當底色、疊白字時達到 AA", (name) => {
     expect(
       contrast(token(name), token("--text-inverse"))
     ).toBeGreaterThanOrEqual(AA_NORMAL);
@@ -96,8 +125,8 @@ describe("UV 五級風險色的對比度", () => {
    * 裡「靠色相區分」那段敘述與地圖的無障礙處理。
    */
   it("相鄰兩級之間的亮度差很小，所以地圖不能只靠明暗", () => {
-    const neighbours = LEVELS.slice(0, -1).map((name, index) =>
-      contrast(token(name), token(LEVELS[index + 1]!))
+    const neighbours = TEXT_FOREGROUND_LEVELS.slice(0, -1).map((name, index) =>
+      contrast(token(name), token(TEXT_FOREGROUND_LEVELS[index + 1]!))
     );
     for (const ratio of neighbours) {
       expect(ratio).toBeLessThan(1.5);

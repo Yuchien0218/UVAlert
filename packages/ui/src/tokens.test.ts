@@ -22,7 +22,14 @@ import { describe, expect, it } from "vitest";
  */
 
 const designMd = readFileSync("DESIGN.md", "utf8");
-const stylesCss = readFileSync("packages/ui/src/styles.css", "utf8");
+
+function stripCssComments(source: string): string {
+  return source.replace(/\/\*[\s\S]*?\*\//g, "");
+}
+
+const stylesCss = stripCssComments(
+  readFileSync("packages/ui/src/styles.css", "utf8")
+);
 
 // --- DESIGN.md frontmatter parser（只認得這份文件實際用到的簡單 YAML 形狀）---
 
@@ -129,6 +136,31 @@ function typographyRoles(): Record<
   return out;
 }
 
+function componentFields(component: string): Record<string, string> {
+  const fm = designMd.match(/^---\r?\n([\s\S]*?)\r?\n---/)?.[1] ?? "";
+  const lines = fm.split(/\r?\n/);
+  const componentsStart = lines.findIndex((line) => line === "components:");
+  const section =
+    componentsStart === -1 ? [] : lines.slice(componentsStart + 1);
+  const out: Record<string, string> = {};
+  let inComponent = false;
+
+  for (const line of section) {
+    const componentKey = line.match(/^ {2}([\w-]+):\s*$/);
+    if (componentKey) {
+      inComponent = componentKey[1] === component;
+      continue;
+    }
+    if (!inComponent) continue;
+    const field = line.match(/^ {4}([\w-]+):\s*(.+)$/);
+    if (field) {
+      out[field[1]!] = field[2]!.trim().replace(/^["']|["']$/g, "");
+    }
+  }
+
+  return out;
+}
+
 function typographyToken(role: string, field: TypographyField): string {
   return `--${TYPOGRAPHY_FIELDS[field]}-${role}`;
 }
@@ -173,6 +205,40 @@ function normalize(value: string): string {
   if (rem) return `${parseFloat(rem[1]!)}rem`;
   return v;
 }
+
+function resolveDesignTokenReference(value: string): string {
+  const reference = value.match(/^\{([\w-]+)\.([\w-]+)\}$/);
+  if (reference === null) return value;
+
+  const token = tokenFor(reference[1]!, reference[2]!);
+  if (token === null) {
+    throw new Error(`Unsupported DESIGN.md token reference: ${value}`);
+  }
+  return resolveCssToken(token) ?? value;
+}
+
+const UV_DISTRIBUTION_TOKENS = [
+  ["--color-uvi-visual-low", "#A3D977"],
+  ["--color-uvi-visual-moderate", "#FDD835"],
+  ["--color-uvi-visual-high", "#FFA726"],
+  ["--color-uvi-visual-very-high", "#EF5350"],
+  ["--color-uvi-visual-extreme", "#AB47BC"],
+  ["--uv-distribution-item-radius", "8px"],
+  ["--uv-distribution-item-padding-inline", "12px"],
+  ["--uv-distribution-item-padding-block", "6px"],
+  ["--uv-distribution-row-gap", "10px"],
+  ["--uv-distribution-column-gap", "16px"],
+  ["--uv-distribution-group-gap", "20px"]
+] as const;
+
+const UV_DISTRIBUTION_COMPONENT_TOKENS = {
+  itemRadius: "--uv-distribution-item-radius",
+  itemPaddingInline: "--uv-distribution-item-padding-inline",
+  itemPaddingBlock: "--uv-distribution-item-padding-block",
+  rowGap: "--uv-distribution-row-gap",
+  columnGap: "--uv-distribution-column-gap",
+  groupGap: "--uv-distribution-group-gap"
+} as const;
 
 // --- 已知落差（待清空）---
 //
@@ -233,6 +299,41 @@ const SECTIONS = [
   "layout",
   "motion"
 ] as const;
+
+describe("UV 分布視覺化 token", () => {
+  it.each(UV_DISTRIBUTION_TOKENS)("%s 解析為 %s", (name, expected) => {
+    const resolved = resolveCssToken(name);
+    expect(resolved, `styles.css :root 缺少 ${name}`).toBeDefined();
+    expect(normalize(resolved!)).toBe(normalize(expected));
+  });
+
+  describe("DESIGN.md components.uv-distribution 漂移守門", () => {
+    const designComponent = componentFields("uv-distribution");
+
+    it("只定義核准的六個元件欄位", () => {
+      expect(Object.keys(designComponent).sort()).toEqual(
+        Object.keys(UV_DISTRIBUTION_COMPONENT_TOKENS).sort()
+      );
+    });
+
+    for (const [field, token] of Object.entries(
+      UV_DISTRIBUTION_COMPONENT_TOKENS
+    )) {
+      it(`${field} 對應 ${token}，解析值一致`, () => {
+        const designValue = designComponent[field];
+        expect(
+          designValue,
+          `DESIGN.md components.uv-distribution 缺少 ${field}`
+        ).toBeDefined();
+        const cssValue = resolveCssToken(token);
+        expect(cssValue, `styles.css :root 缺少 ${token}`).toBeDefined();
+        expect(normalize(cssValue!)).toBe(
+          normalize(resolveDesignTokenReference(designValue!))
+        );
+      });
+    }
+  });
+});
 
 /**
  * 幽靈 token 引用守門（2026-08-29 新增）。
