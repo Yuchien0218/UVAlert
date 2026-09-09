@@ -1,5 +1,9 @@
 // @vitest-environment happy-dom
-import type { NationwideUvCounty, NationwideUvForecast } from "@sunshield/contracts";
+import type {
+  NationwideUvCounty,
+  NationwideUvForecast,
+  RegionSelection
+} from "@sunshield/contracts";
 import { mount } from "@vue/test-utils";
 import { createMemoryHistory, createRouter } from "vue-router";
 import { describe, expect, it } from "vitest";
@@ -19,7 +23,17 @@ const forecast: NationwideUvForecast = {
   localDate: "2026-08-31", counties
 };
 
-function mountDistribution(region: { regionCode: string; displayName: string } | null) {
+const selectedRegion: RegionSelection = {
+  regionCode: "63000010",
+  displayName: "臺北市中正區",
+  countyCode: "63000",
+  countyName: "臺北市",
+  townName: "中正區",
+  boundaryDataVersion: "test",
+  selectionMethod: "manual"
+};
+
+function mountDistribution(region: RegionSelection | null) {
   const router = createRouter({
     history: createMemoryHistory(),
     routes: [{ path: "/region", component: { template: "<div />" } }]
@@ -29,7 +43,7 @@ function mountDistribution(region: { regionCode: string; displayName: string } |
 
 describe("TaiwanUvDistribution", () => {
   it("把目前地區放在分布內容與分隔線之前", () => {
-    const wrapper = mountDistribution({ regionCode: "63000010", displayName: "臺北市中正區" });
+    const wrapper = mountDistribution(selectedRegion);
     expect(wrapper.find(".uv-distribution__region").element.compareDocumentPosition(wrapper.find(".uv-distribution__content").element)).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
     expect(wrapper.text()).toContain("目前地區：臺北市中正區");
     expect(wrapper.get(".text-link").text()).toBe("變更地區");
