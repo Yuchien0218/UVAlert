@@ -778,6 +778,10 @@ const waterHasClaim = computed<string>({
  * 母選項被選中時，下緣接到分鐘那一排——所以拿掉下方圓角。
  * 邊框留著：兩段共用同一條線，看起來就是一張卡被橫線分成兩段。
  */
+.water-claim-option {
+  grid-column: 1 / -1;
+}
+
 .water-claim-option--joined {
   border-end-start-radius: 0;
   border-end-end-radius: 0;

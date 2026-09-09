@@ -291,3 +291,15 @@ describe("耐水拆成兩層（裁決丙）", () => {
     expect(text).toContain("明確標示不耐水");
   });
 });
+
+describe("耐水選項的桌面網格", () => {
+  it("母選項在多欄網格中橫跨整列，避免留下兩個空白欄位", () => {
+    const source = readFileSync(
+      "apps/web/src/components/product/ProductSnapshotEditor.vue",
+      "utf8"
+    );
+    const rule = /\.water-claim-option\s*\{([^}]*)\}/.exec(source);
+
+    expect(rule?.[1]).toContain("grid-column: 1 / -1;");
+  });
+});
