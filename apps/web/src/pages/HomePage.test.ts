@@ -199,13 +199,13 @@ describe("HomePage", () => {
   });
 
   describe("有提醒進行中", () => {
-    it("有提醒時保有公開政策連結", async () => {
+    it("有提醒時不在提醒流程重複顯示公開政策連結", async () => {
       mockServices({ session, region: { displayName: "臺北市 大安區" } });
 
       const wrapper = await mountHome();
 
-      expect(wrapper.find('a[href="/privacy"]').exists()).toBe(true);
-      expect(wrapper.find('a[href="/terms"]').exists()).toBe(true);
+      expect(wrapper.find('a[href="/privacy"]').exists()).toBe(false);
+      expect(wrapper.find('a[href="/terms"]').exists()).toBe(false);
     });
 
     /**
@@ -585,13 +585,13 @@ describe("HomePage", () => {
   });
 
   describe("沒有提醒進行中", () => {
-    it("沒有提醒時保有公開政策連結", async () => {
+    it("沒有提醒時也不在提醒流程重複顯示公開政策連結", async () => {
       mockServices({ region: { displayName: "臺北市 大安區" } });
 
       const wrapper = await mountHome();
 
-      expect(wrapper.find('a[href="/privacy"]').exists()).toBe(true);
-      expect(wrapper.find('a[href="/terms"]').exists()).toBe(true);
+      expect(wrapper.find('a[href="/privacy"]').exists()).toBe(false);
+      expect(wrapper.find('a[href="/terms"]').exists()).toBe(false);
     });
 
     it("白天有地區時提供開始提醒的主 CTA", async () => {

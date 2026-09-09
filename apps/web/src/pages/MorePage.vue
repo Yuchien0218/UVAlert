@@ -113,16 +113,10 @@ const entries = computed(() =>
       </RouterLink>
     </nav>
 
-    <section class="public-policies" aria-labelledby="public-policies-title">
-      <h2 id="public-policies-title" data-typography-role="section-title">
-        公開資訊
-      </h2>
-      <p>隱私權政策與服務條款可公開查看。</p>
-      <nav class="public-policies__links" aria-label="公開政策">
-        <RouterLink to="/privacy">隱私權政策</RouterLink>
-        <RouterLink to="/terms">服務條款</RouterLink>
-      </nav>
-    </section>
+    <nav class="policy-links" aria-label="公開政策">
+      <RouterLink to="/privacy">隱私權政策</RouterLink>
+      <RouterLink to="/terms">服務條款</RouterLink>
+    </nav>
   </div>
 </template>
 
@@ -158,28 +152,15 @@ const entries = computed(() =>
   line-height: 1.4;
 }
 
-.public-policies {
-  display: grid;
-  gap: var(--space-3);
-  padding-top: var(--space-2);
-}
-
-.public-policies h2,
-.public-policies p {
-  margin: 0;
-}
-
-.public-policies p {
-  color: var(--text-secondary);
-}
-
-.public-policies__links {
+.policy-links {
   display: flex;
   flex-wrap: wrap;
   gap: var(--space-4);
+  justify-content: center;
+  font-size: var(--font-size-caption);
 }
 
-.public-policies__links a {
+.policy-links a {
   color: var(--text-secondary);
 }
 </style>

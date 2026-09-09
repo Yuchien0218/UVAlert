@@ -627,11 +627,6 @@ function handleEndSession(): void {
       -->
     </template>
 
-    <nav class="home__policy-links" aria-label="公開政策">
-      <RouterLink to="/privacy">隱私權政策</RouterLink>
-      <RouterLink to="/terms">服務條款</RouterLink>
-    </nav>
-
     <p class="safety-note">
       這是協助你記得補擦的提醒，不是安全曝曬時間或防護效果保證。
     </p>
@@ -738,18 +733,7 @@ function handleEndSession(): void {
 
 .home__cta {
   width: 100%;
-}
-
-.home__policy-links {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-4);
-  justify-content: center;
-  font-size: var(--font-size-caption);
-}
-
-.home__policy-links a {
-  color: var(--text-secondary);
+  max-width: none;
 }
 
 .home-state {
