@@ -394,3 +394,21 @@ git add -- docs/superpowers/plans/2026-09-09-taiwan-uv-distribution-redesign.md
 git diff --cached --check
 git commit -m "docs: record UV distribution verification"
 ```
+
+### 2026-09-09 inline execution evidence
+
+- Token guards passed: `packages/ui/src/tokens.test.ts` and
+  `packages/ui/src/uvRiskContrast.test.ts`, **183 tests**.
+- Final targeted UV regression run passed **10 test files / 209 tests**.
+- Component and container regression tests passed during implementation: legend,
+  county item, grouped list, map, distribution container, ForecastPage, and
+  controller. The final container fixture re-run passed **2 tests**.
+- `pnpm typecheck` passed after the final fixture type correction.
+- `pnpm lint` passed after the final fixture type correction.
+- A full `pnpm test` before that fixture-only type correction passed **193 test
+  files / 7962 tests**. The correction only adds the required `RegionSelection`
+  fields to the test fixture; the execution environment subsequently truncated
+  two full-suite summaries, so a fresh untruncated whole-suite result remains
+  required before release approval.
+- Browser visual QA at 320px, 390px, desktop, and 200% zoom remains pending;
+  no deployment, push, merge, PR, or worktree cleanup was performed.
