@@ -28,6 +28,7 @@ const fillStyle = computed(() => ({
 
 <style scoped>
 .uv-county-item {
+  --uvi-fill: 0%;
   position: relative;
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;

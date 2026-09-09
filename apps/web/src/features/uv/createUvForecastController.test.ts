@@ -1,5 +1,6 @@
 import type {
   FiveDayUvForecast,
+  NationwideUvForecast,
   RegionPreferenceV1,
   RegionSelection
 } from "@sunshield/contracts";
@@ -52,12 +53,11 @@ function makeDependencies(options: {
   apiForecast?: FiveDayUvForecast;
   cachedForecast?: FiveDayUvForecast | null;
   apiFailure?: boolean;
+  nationwideForecast?: NationwideUvForecast;
 }) {
   const api = {
-    /* 地圖資料在這組測試裡沒有落點，給一個永遠失敗的 stub 就夠——
-       控制器對它的失敗是靜默處理（不改 phase），那條路徑由地圖自己的
-       測試守。 */
     getNationwideForecast: vi.fn(async () => {
+      if (options.nationwideForecast !== undefined) return options.nationwideForecast;
       throw new Error("not used");
     }),
     getFiveDayForecast: vi.fn(async () => {
@@ -114,6 +114,24 @@ describe("createUvForecastController", () => {
     expect(controller.forecast.value).toBeNull();
     expect(controller.showEveningPrompt.value).toBe(false);
     expect(dependencies.api.getFiveDayForecast).not.toHaveBeenCalled();
+    controller.dispose();
+  });
+
+  it("沒有地區時仍可獨立取得全臺資料，不改變 no_region 狀態", async () => {
+    const nationwideForecast = makeNationwideForecast();
+    const dependencies = makeDependencies({ region: null, nationwideForecast });
+    const controller = createUvForecastController({
+      ...dependencies, connectivity: shallowRef("online"), lifecycle: new FakeLifecycle(),
+      now: () => new Date(2026, 6, 30, 20, 0), storage: new MemoryStorage(), scheduler: silentScheduler
+    });
+
+    await controller.ensureLoaded();
+    await controller.ensureNationwideLoaded();
+
+    expect(dependencies.api.getFiveDayForecast).not.toHaveBeenCalled();
+    expect(dependencies.api.getNationwideForecast).toHaveBeenCalledOnce();
+    expect(controller.phase.value).toBe("no_region");
+    expect(controller.nationwide.value).toEqual(nationwideForecast);
     controller.dispose();
   });
 
@@ -222,6 +240,22 @@ describe("createUvForecastController", () => {
     controller.dispose();
   });
 });
+
+function makeNationwideForecast(): NationwideUvForecast {
+  return {
+    schemaVersion: "nationwide-uv-v1",
+    sourceKind: "forecast",
+    sourceDataset: "F-D0047-091",
+    sourceDisplayName: "中央氣象署區域預報",
+    issuedAt: "2026-07-30T00:00:00.000Z",
+    fetchedAt: "2026-07-30T00:00:00.000Z",
+    usableUntil: "2026-07-30T06:00:00.000Z",
+    localDate: "2026-07-30",
+    counties: [
+      { countyCode: "63000", displayName: "臺北市", uvi: 8, riskLevel: "very_high" }
+    ]
+  };
+}
 
 function makeRegionSelection(): RegionSelection {
   return {
