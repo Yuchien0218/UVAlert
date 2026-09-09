@@ -45,6 +45,42 @@ export interface ReapplicationSuccess {
   committedRevision: number;
 }
 
+function normalizeRepositoryFieldErrors(
+  fieldErrors: Record<string, string[]> | undefined
+): Record<string, string[]> {
+  const normalized: Record<string, string[]> = {};
+  for (const [path, messages] of Object.entries(fieldErrors ?? {})) {
+    const target =
+      path === "payload.appliedAt"
+        ? "appliedAt"
+        : path === "payload.applications"
+          ? "zones"
+          : path;
+    normalized[target] = [...(normalized[target] ?? []), ...messages];
+  }
+  return normalized;
+}
+
+/**
+ * 可以記錄補擦的部位，必須與儲存端的驗證條件一致。
+ *
+ * 不能只看「有防曬」：被衣物遮住、或防護方式尚未確認的部位，不能建立一筆
+ * 補擦 Application。先前表單的預選／全選漏了這兩個條件，會讓使用者填完後才
+ * 在儲存端被拒絕。
+ */
+function canRecordReapplication(
+  zone: SessionProjection["zones"][number]
+): boolean {
+  return (
+    zone.trackingStatus === "active" &&
+    zone.skinExposureStatus === "exposed" &&
+    zone.methodCertainty === "confirmed" &&
+    zone.methodComponents.some(
+      (component) => component === "sunscreen" || component === "other_topical"
+    )
+  );
+}
+
 export interface ReapplicationController {
   phase: Readonly<ShallowRef<ReapplicationPhase>>;
   session: Readonly<ShallowRef<SessionProjection | null>>;
@@ -200,24 +236,31 @@ export function createReapplicationController(
     const suggested = context.session.zones
       .filter(
         (zone) =>
-          zone.trackingStatus === "active" &&
-          zone.methodComponents.some(
-            (component) =>
-              component === "sunscreen" || component === "other_topical"
-          ) &&
+          canRecordReapplication(zone) &&
           (zone.timingStatus === "reapply_due" ||
             zone.timingStatus === "reapply_soon")
       )
       .map((zone) => zone.zoneInstanceId);
-    // 沒有 reapply_due／reapply_soon 部位時，退回 primaryAction 指定的部位。
+    // 沒有 reapply_due／reapply_soon 部位時，首次防護紀錄可退回 primaryAction 指定的部位。
+    // 一般補擦若仍在 tracking，代表使用者是提早手動記錄；不可自行假定所有
+    // primaryAction 部位都有實際補擦，應保持未選取，交由使用者逐一勾選。
     // 不得再以「已有既有 Application」過濾：`complete_protection_record`
     // （recordStatus === "unrecorded"）的部位本來就沒有 Application，
     // 過濾掉會讓首次記錄變體開啟時零選取，使用者得自己找回該選哪些部位。
     // 未指派產品的部位仍會在 submit 時被擋下並顯示就近錯誤，不會靜默送出。
+    const recordableZoneIds = new Set(
+      context.session.zones
+        .filter(canRecordReapplication)
+        .map((zone) => zone.zoneInstanceId)
+    );
+    const fallbackSuggestedZoneIds =
+      context.session.primaryAction.actionKind === "record_reapplication"
+        ? []
+        : context.session.primaryAction.affectedZoneInstanceIds.filter(
+            (zoneId) => recordableZoneIds.has(zoneId)
+          );
     suggestedZoneIds.value =
-      suggested.length > 0
-        ? suggested
-        : context.session.primaryAction.affectedZoneInstanceIds;
+      suggested.length > 0 ? suggested : fallbackSuggestedZoneIds;
     selectedZoneIds.value = [...suggestedZoneIds.value];
     reason.value = null;
     committedReasonRevision = null;
@@ -243,14 +286,7 @@ export function createReapplicationController(
   function selectAll(): void {
     selectedZoneIds.value =
       session.value?.zones
-        .filter(
-          (zone) =>
-            zone.trackingStatus === "active" &&
-            zone.methodComponents.some(
-              (component) =>
-                component === "sunscreen" || component === "other_topical"
-            )
-        )
+        .filter(canRecordReapplication)
         .map((zone) => zone.zoneInstanceId) ?? [];
     pendingCommand = null;
   }
@@ -348,7 +384,19 @@ export function createReapplicationController(
       ) {
         error.value = "state_changed";
         pendingCommand = null;
-      } else error.value = "validation";
+      } else {
+        const repositoryErrors = normalizeRepositoryFieldErrors(
+          result.fieldErrors
+        );
+        if (Object.keys(repositoryErrors).length > 0) {
+          fieldErrors.value = repositoryErrors;
+          error.value = "validation";
+        } else {
+          // 儲存端只會在狀態已不符合「可補擦」時回傳這種無欄位驗證失敗。
+          // 這不是使用者填錯；要求重讀，避免讓畫面看起來像按鈕沒有反應。
+          error.value = "state_changed";
+        }
+      }
       phase.value = "error";
       return false;
     }

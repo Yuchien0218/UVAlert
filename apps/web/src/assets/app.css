@@ -735,6 +735,11 @@ strong {
   display: inline-flex;
   align-items: center;
   gap: var(--space-2);
+  /*
+   * 行動文字要與 `.button` 使用同一個緊湊行高。否則它在 flex / grid 操作列
+   * 裡會沿用內文的 1.5，和置中的圖示、按鈕看起來有細微高低差。
+   */
+  line-height: 1.2;
   /* 文字用的行動色，比填色用的深一階——理由見 styles.css 的定義。 */
   color: var(--color-primary-text);
   font-weight: 500;

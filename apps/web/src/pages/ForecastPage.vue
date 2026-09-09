@@ -139,6 +139,8 @@ onMounted(() => {
 .uv-map-section {
   display: grid;
   gap: var(--space-4);
+  padding-block-start: var(--space-4);
+  border-block-start: 1px solid var(--border-subtle);
 }
 
 /*
@@ -248,7 +250,7 @@ onMounted(() => {
 .forecast-region {
   display: flex;
   justify-content: space-between;
-  align-items: baseline;
+  align-items: center;
   gap: var(--space-3);
   padding-top: var(--space-4);
   border-top: 1px solid var(--border-subtle);
