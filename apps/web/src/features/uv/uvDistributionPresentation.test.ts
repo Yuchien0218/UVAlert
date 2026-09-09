@@ -50,6 +50,7 @@ describe("UV 分布展示規則", () => {
       classSuffix: "very-high"
     });
     expect(getUvRiskClassSuffix("extreme")).toBe("extreme");
+    expect(getUvRiskPresentation("extreme").rangeLabel).toBe("11+");
   });
 
   it("以 11 為固定滿格門檻，且無效數字不會畫出色條", () => {

@@ -38,7 +38,7 @@ const UV_RISK_PRESENTATION_BY_LEVEL = {
   extreme: {
     level: "extreme",
     label: "危險級",
-    rangeLabel: "11 以上",
+    rangeLabel: "11+",
     classSuffix: "extreme"
   }
 } as const satisfies Readonly<Record<UvRiskLevel, UvRiskPresentation>>;
