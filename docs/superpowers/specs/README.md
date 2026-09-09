@@ -1,7 +1,7 @@
 # UVAlert 設計規格索引
 
 **用途**：集中列出已整理的詳細設計規格，讓換對話的 AI 先找到正確契約，再決定是否需要讀實作計畫。  
-**更新日期**：2026-08-30（Asia/Taipei）
+**更新日期**：2026-09-09（Asia/Taipei）
 
 ## 規格清單
 
@@ -13,6 +13,7 @@
 | [`2026-08-27-b8-role-based-typography-design.md`](2026-08-27-b8-role-based-typography-design.md)                         | 產品端已確認；待撰寫實作計畫                       | 七角色字級量表、舊 token 遷移、長文節奏、文章波浪與視覺驗證        | [`../plans/2026-08-26-codebase-consolidation-audit.md`](../plans/2026-08-26-codebase-consolidation-audit.md)、[`../../../DESIGN.md`](../../../DESIGN.md)         |
 | [`2026-08-27-b9-icon-first-progressive-disclosure-design.md`](2026-08-27-b9-icon-first-progressive-disclosure-design.md) | 方向已確認；待另行盤點與實作計畫                   | Icon-first、常駐／收合資訊分類、互動與無障礙契約                   | [`2026-08-27-b8-role-based-typography-design.md`](2026-08-27-b8-role-based-typography-design.md)、[`../../../DESIGN.md`](../../../DESIGN.md)                     |
 | [`2026-08-30-vercel-supabase-uv-forecast-integration-design.md`](2026-08-30-vercel-supabase-uv-forecast-integration-design.md) | 架構方向已確認；待使用者審閱規格                   | Vercel 前端、Supabase UV Edge Function、CWA secret、快取與分批部署 | [`../../backend/README.md`](../../backend/README.md)、[`../plans/2026-08-17-backend-foundation.md`](../plans/2026-08-17-backend-foundation.md)                   |
+| [`2026-09-09-taiwan-uv-distribution-redesign.md`](2026-09-09-taiwan-uv-distribution-redesign.md)                           | 方向已確認；待使用者審閱書面規格                   | 全臺 UV 地圖、五區縣市清單、圖例、視覺化與字體 token、元件邊界     | [`../../../DESIGN.md`](../../../DESIGN.md)、`apps/web/src/pages/ForecastPage.vue`、`apps/web/src/components/uv/TaiwanUvMap.vue`                                  |
 
 ## 讀取規則
 
