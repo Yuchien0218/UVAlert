@@ -150,6 +150,7 @@ const uvLabel = computed(() =>
   color: var(--text-secondary);
   font-size: var(--font-size-caption);
   font-weight: 500;
+  line-height: 1.2;
   text-decoration: none;
 }
 
@@ -172,6 +173,7 @@ const uvLabel = computed(() =>
   color: var(--text-secondary);
   font-size: var(--font-size-caption);
   font-weight: 500;
+  line-height: 1.2;
   text-decoration: none;
 }
 
