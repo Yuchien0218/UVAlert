@@ -427,16 +427,9 @@ function goBack(): void {
     </template>
 
     <!--
-      次要區塊：跨裝置同步。
-
-      DESIGN.md 第六節要求每頁只有一個最主要任務。這裡的主任務是本機
-      備份（概況／匯出／清除三張 app-card），同步是次要的，所以層級差
-      異做在「外框」而不是「字級」——第一層是有底色與內距的卡片，同步
-      群組沒有卡片外框，只有一條 hairline 起手，內容直接落在頁面背景
-      上。字級不縮小是刻意的：這裡有登入與上傳雲端的決策資訊，縮字會
-      變成看不清楚，而不是變次要。
+      次要區塊：跨裝置同步（套用共用 .app-card 卡片樣式）。
     -->
-    <section class="sync-group" aria-labelledby="sync-group-title">
+    <section class="app-card sync-group" aria-labelledby="sync-group-title">
       <h2 id="sync-group-title" data-typography-role="card-title">
         跨裝置同步
       </h2>
@@ -731,15 +724,10 @@ dd {
 }
 
 /*
- * 同步群組刻意不用 .app-card：層級差異靠有沒有卡片外框，不靠縮字。
- * 見模板裡的註解。
+ * 同步群組套用共用 .app-card，樣式與上方卡片一致。
  */
 .sync-group {
-  display: grid;
-  gap: var(--space-3);
   justify-items: start;
-  padding-top: var(--space-5);
-  border-top: 1px solid var(--border-strong);
 }
 
 /*
