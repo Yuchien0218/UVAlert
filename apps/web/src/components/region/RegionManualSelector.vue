@@ -68,7 +68,10 @@ async function save(): Promise<void> {
 </script>
 
 <template>
-  <section class="manual-region" aria-labelledby="manual-region-title">
+  <section
+    class="manual-region form-control-stack"
+    aria-labelledby="manual-region-title"
+  >
     <header>
       <h2 id="manual-region-title" data-typography-role="section-title">
         手動選擇地區
@@ -190,12 +193,6 @@ async function save(): Promise<void> {
 
 .manual-region__field label {
   font-weight: 500;
-}
-
-/* 只留寬度，其餘欄位外觀用 app.css 的共用宣告。 */
-.manual-region__field select,
-.manual-region__field input {
-  width: 100%;
 }
 
 .manual-region__field select[aria-invalid="true"] {

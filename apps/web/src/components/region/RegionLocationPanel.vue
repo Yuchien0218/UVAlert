@@ -48,7 +48,10 @@ const errorMessage = computed(() => {
 </script>
 
 <template>
-  <section class="location-panel app-card" aria-labelledby="location-title">
+  <section
+    class="location-panel app-card form-control-stack"
+    aria-labelledby="location-title"
+  >
     <div class="location-panel__heading">
       <div>
         <p class="eyebrow--mono">裝置定位</p>

@@ -8,6 +8,14 @@ function withoutComments(source: string): string {
 const appCss = withoutComments(readFileSync("apps/web/src/assets/app.css", "utf8"));
 const feedbackPage = readFileSync("apps/web/src/pages/FeedbackPage.vue", "utf8");
 const gearForm = readFileSync("apps/web/src/components/product/GearForm.vue", "utf8");
+const regionLocationPanel = readFileSync(
+  "apps/web/src/components/region/RegionLocationPanel.vue",
+  "utf8"
+);
+const regionManualSelector = readFileSync(
+  "apps/web/src/components/region/RegionManualSelector.vue",
+  "utf8"
+);
 
 function cssRule(selector: string): string {
   const escaped = selector.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
@@ -20,6 +28,15 @@ describe("桌面表單欄寬", () => {
   it("表單頁明確採用共用的欄寬契約", () => {
     expect(feedbackPage).toContain("feedback-form form-control-stack");
     expect(gearForm).toContain('class="gear-form form-control-stack"');
+  });
+
+  it("地區定位與手動選擇採用共用的欄寬契約", () => {
+    expect(regionLocationPanel).toMatch(
+      /class="location-panel app-card form-control-stack"/
+    );
+    expect(regionManualSelector).toMatch(
+      /class="manual-region form-control-stack"/
+    );
   });
 
   it("表單的文字控制項與主要送出動作填滿欄位，不受一般控制項上限截斷", () => {

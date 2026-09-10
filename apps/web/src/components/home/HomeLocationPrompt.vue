@@ -48,5 +48,7 @@
 
 .location-prompt__cta {
   justify-self: stretch;
+  width: 100%;
+  max-width: none;
 }
 </style>
