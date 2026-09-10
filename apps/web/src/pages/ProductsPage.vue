@@ -152,7 +152,7 @@ function editGear(productId: string): void {
       >
         <template #actions>
           <button
-            class="button button--primary gear-page__cta"
+            class="button button--primary page-primary-action"
             type="button"
             @click="addGear"
           >
@@ -210,7 +210,7 @@ function editGear(productId: string): void {
           的清單拆開了。
         -->
         <button
-          class="button button--primary gear-page__cta"
+          class="button button--primary page-primary-action"
           type="button"
           @click="addGear"
         >
@@ -361,8 +361,4 @@ section {
   list-style: none;
 }
 
-.gear-page__cta {
-  width: 100%;
-  max-width: none;
-}
 </style>

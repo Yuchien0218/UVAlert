@@ -436,7 +436,7 @@ function handleEndSession(): void {
 
       <button
         v-if="showPrimaryCta && reminderPresentation !== null"
-        class="button button--primary home__cta"
+        class="button button--primary home__cta page-primary-action"
         type="button"
         @click="handleAction(reminderPresentation.actionKind)"
       >
@@ -611,7 +611,7 @@ function handleEndSession(): void {
 
       <button
         v-else
-        class="button button--primary home__cta"
+        class="button button--primary home__cta page-primary-action"
         type="button"
         @click="handleStartSetup"
       >
@@ -729,11 +729,6 @@ function handleEndSession(): void {
 
 .home__session-head > .session-end {
   justify-self: end;
-}
-
-.home__cta {
-  width: 100%;
-  max-width: none;
 }
 
 .home-state {

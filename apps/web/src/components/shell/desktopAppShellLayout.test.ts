@@ -36,13 +36,9 @@ describe("桌面 App Shell 版面", () => {
     );
   });
 
-  it("裝備頁的新增裝備 CTA 填滿殼層內欄寬", () => {
+  it("裝備頁的新增裝備 CTA 使用置中的共用頁面主要動作", () => {
     expect(productsPage).toContain(
-      'class="button button--primary gear-page__cta"'
+      'class="button button--primary page-primary-action"'
     );
-
-    const cta = cssRule(productsPage, ".gear-page__cta");
-    expect(cta).toContain("width: 100%;");
-    expect(cta).toContain("max-width: none;");
   });
 });
