@@ -116,12 +116,12 @@ describe("被拿掉的四句話仍然在目的頁上", () => {
     },
     {
       page: "apps/web/src/pages/settings/DataSettingsPage.vue",
-      keywords: ["免登入即可使用", "只留於本機"],
-      why: "隱私決策條件：免登入是這個產品的核心承諾"
+      keywords: ["匯出檔案由裝置直接產生", "不會上傳或用於分析"],
+      why: "隱私決策條件：匯出安全與不上傳分析"
     },
     {
       page: "apps/web/src/pages/FeedbackPage.vue",
-      keywords: ["免登入即可回報"],
+      keywords: ["可匿名或提供聯絡信箱"],
       why: "決策條件，直接影響使用者要不要填"
     }
   ] as const;

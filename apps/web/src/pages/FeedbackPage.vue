@@ -42,7 +42,7 @@ function goBack(): void {
       <h1 class="page-heading__title" data-typography-role="page-title">
         問題回報與意見回饋
       </h1>
-      <p class="page-heading__body">免登入即可回報，僅會收到此表單的內容。</p>
+      <p class="page-heading__body">可匿名或提供聯絡信箱，僅會收到此表單的回覆。</p>
       <IconButton icon="tool-arrow-left" label="返回更多" @click="goBack" />
     </header>
 

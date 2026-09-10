@@ -33,7 +33,7 @@ const BACKGROUND_PUSH_DESCRIPTORS: Record<
 > = {
   unsupported: {
     title: "無法使用背景推播",
-    body: "此瀏覽器或環境無法使用背景推播。本機倒數與分頁開啟時的提醒仍可正常使用。",
+    body: "此瀏覽器或環境無法使用背景推播，但分頁開啟時，提醒仍可正常使用。",
     canEnable: false,
     canDisable: false,
     canRetry: false
@@ -153,7 +153,7 @@ async function runTest(): Promise<void> {
       </div>
       <IconButton icon="tool-arrow-left" label="返回更多" @click="goBack" />
       <p>
-        在防曬即將失效或該補擦時接收提醒。本機倒數是提醒依據，背景推播僅是選用的輔助送達方式。
+        本機倒數是提醒依據，背景推播僅是選用的輔助送達方式。
       </p>
     </header>
 
@@ -203,7 +203,7 @@ async function runTest(): Promise<void> {
         </button>
       </div>
       <div v-else class="note-box" role="status">
-        <p>已開啟補擦提醒。當有活動中的防曬提醒時，系統會在到期前發出通知。</p>
+        <p>已開啟補擦提醒。當有防曬提醒時，系統會在到期時發送通知。</p>
       </div>
     </section>
 

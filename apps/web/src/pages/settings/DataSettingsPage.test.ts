@@ -168,7 +168,7 @@ describe("DataSettingsPage 的合併結果", () => {
     const scope = wrapper.find(".summary-scope");
 
     expect(scope.exists()).toBe(true);
-    expect(scope.text()).toContain("這台裝置");
+    expect(scope.text()).toContain("裝置");
     expect(scope.text()).toContain("雲端");
   });
 });

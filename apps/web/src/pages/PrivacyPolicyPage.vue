@@ -31,37 +31,34 @@ function goBack(): void {
     <section class="app-card legal-card">
       <h2 data-typography-role="card-title">Google 登入與跨裝置同步</h2>
       <p>
-        Google 登入僅用於建立登入工作階段與跨裝置同步。防曬晴報員不會讀取
-        Gmail、Google Drive、聯絡人或其他 Google 服務資料。
+        Google登入僅用於建立登入工作階段與跨裝置同步。防曬晴報員不會讀取Gmail、Google Drive、聯絡人或其他Google服務資料。
       </p>
       <p>
-        同步功能為選用，你可隨時停止同步，或在登入與雲端資料設定中清除防曬晴報員的
-        雲端資料。
+        同步功能為選用，可隨時停止同步，或在登入與雲端資料設定中清除防曬晴報員的雲端資料。
       </p>
     </section>
 
     <section class="app-card legal-card">
       <h2 data-typography-role="card-title">通知與位置</h2>
       <p>
-        若你同意接收推播通知，瀏覽器會保存推播訂閱資料，以傳送補擦提醒。你可隨時在通知設定中關閉通知。
+        若同意接收推播通知，瀏覽器會保存推播訂閱資料，以傳送補擦提醒。可隨時在通知設定中關閉通知。
       </p>
       <p>
-        位置只會在你主動允許時用於判斷目前地區的 UV 與天氣資訊，防曬晴報員
-        不會保存精確座標。
+        位置只會在你允許時，用於判斷目前地區的UV與天氣資訊，防曬晴報員不會保存精確座標。
       </p>
     </section>
 
     <section class="app-card legal-card">
       <h2 data-typography-role="card-title">隱私請求與條款</h2>
       <p>
-        如需提出隱私或帳號資料請求，請使用站內回饋表單。送出回饋不會自動執行資料匯出、刪除或帳號操作。
+        如需提出隱私或帳號資料請求，請使用站內回饋表單。表單不會自動執行資料匯出、刪除或帳號操作。
       </p>
       <div class="legal-card__links">
         <RouterLink class="button button--quiet" to="/terms"
           >查看服務條款</RouterLink
         >
         <RouterLink class="button button--quiet" to="/feedback"
-          >提出隱私請求</RouterLink
+          >問題回報與意見回饋</RouterLink
         >
       </div>
     </section>

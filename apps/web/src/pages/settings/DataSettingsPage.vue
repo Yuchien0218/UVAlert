@@ -154,7 +154,7 @@ function goBack(): void {
         本機資料與隱私
       </h1>
       <p>
-        免登入即可使用，未同步的資料只留於本機。匯出檔案由裝置直接產生，絕不上傳或用於分析。
+        匯出檔案由裝置直接產生，不會上傳或用於分析。
       </p>
       <IconButton icon="tool-arrow-left" label="返回更多" @click="goBack" />
     </header>
@@ -201,7 +201,7 @@ function goBack(): void {
           「本機 vs 雲端」混淆（見該裁決第九節），只是當時沒有訂這句。
         -->
         <p class="summary-scope">
-          以下數量只代表這台裝置上的本機紀錄，不包含其他裝置或尚未下載的雲端資料。
+          此為裝置上的本機紀錄，不含其他裝置或未下載的雲端資料。
         </p>
         <!--
           2026-09-03：空值一律說「沒有紀錄」。
@@ -359,7 +359,7 @@ function goBack(): void {
         -->
         <div class="clear-row">
           <p v-if="summary.hasActiveSession">
-            進行中的提醒<strong>不會</strong>被刪除。如需結束請至提醒頁明確結束，或使用下方的清除全部。
+            進行中的提醒<strong>不會</strong>被刪除。如需結束請至提醒頁明確結束，或點選「清除全部本機資料」。
           </p>
           <ConfirmAction
             :confirming="confirming === 'history'"

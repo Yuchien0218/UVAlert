@@ -115,7 +115,6 @@ function goBack(): void {
         <h2 data-typography-role="card-title">從瀏覽器選單安裝</h2>
         <p>
           開啟瀏覽器選單，尋找「安裝應用程式」或「加入主畫面」。
-          找不到時，用一般瀏覽器仍然可以完整使用。
         </p>
         <p class="install-card__note">選單名稱可能因裝置與瀏覽器版本不同。</p>
       </div>
