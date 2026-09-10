@@ -21,9 +21,8 @@ const props = withDefaults(defineProps<Props>(), {
  * 2026-08-24 使用者裁決：右上角從「本機提醒」改成顯示紫外線指數，
  * 例如「臺中市 低量級」，文字顏色跟著風險等級走，點下去到 /forecast。
  *
- * 沒有 UV 可顯示時（沒設定地區，或預報讀不到）改顯示「前往地區設定」，
- * 連到 /region——那是唯一能讓使用者自己解決的動作，比留一句沒有出口的
- * 狀態文字有用。
+ * 沒有 UV 可顯示時（沒設定地區，或預報讀不到）顯示「今日全臺UV分布」，
+ * 連到 /forecast。
  *
  * 2026-08-24 一併移除原本的 tone／狀態點（提醒進行中／快到補擦時間／
  * 建議現在補擦）。那組資訊現在整份都在首頁看得到（倒數、部位狀態清單），
@@ -63,8 +62,8 @@ const uvLabel = computed(() =>
       {{ uvLabel }}
     </RouterLink>
 
-    <RouterLink v-else class="brand-header__set-region" to="/region">
-      前往地區設定
+    <RouterLink v-else class="brand-header__set-region" to="/forecast">
+      今日全臺UV分布
     </RouterLink>
   </header>
 </template>

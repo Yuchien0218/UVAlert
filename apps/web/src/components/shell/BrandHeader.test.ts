@@ -61,11 +61,9 @@ describe("BrandHeader", () => {
     });
 
     /*
-     * 2026-08-24：沒有 UV 可顯示時改為給出口「前往地區設定」，取代原本
-     * 退回顯示提醒狀態文字的做法——提醒狀態現在整份都在首頁看得到，
-     * 頁首再放一次只是重複；而地區設定是使用者唯一能自己解決的動作。
+     * 沒有 UV 可顯示時改為顯示「今日全臺UV分布」，連到 /forecast。
      */
-    it("沒有地區或預報時顯示前往地區設定的出口", () => {
+    it("沒有地區或預報時顯示今日全臺UV分布的出口", () => {
       for (const props of [
         { uvRiskLevel: "high" },
         { regionName: "臺中市" },
@@ -74,13 +72,13 @@ describe("BrandHeader", () => {
         const wrapper = mountHeader(props);
         expect(wrapper.find(".brand-header__uv").exists()).toBe(false);
         expect(wrapper.get(".brand-header__set-region").text()).toBe(
-          "前往地區設定"
+          "今日全臺UV分布"
         );
         expect(
           wrapper
             .findAllComponents(RouterLinkStub)
             .map((link) => link.props("to"))
-        ).toContain("/region");
+        ).toContain("/forecast");
       }
     });
   });
