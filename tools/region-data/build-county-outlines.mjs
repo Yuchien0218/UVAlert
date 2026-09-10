@@ -37,12 +37,12 @@ const OUTPUT = "apps/web/src/generated/county-outlines.generated.json";
 const TOLERANCE = 0.008;
 
 /**
- * 小於這個面積（平方度）的環直接丟掉。
+ * 小於這個面積（平方度）的附屬島嶼環直接丟掉。
  *
- * 台灣本島周邊有大量小島與礁岩，在這個尺度下每個都只有不到一個像素，
- * 卻各自佔掉一組座標。0.0004 平方度約 4 平方公里。
+ * 每個鄉鎮市區的主要陸地環一律保留；
+ * 此門檻僅過濾鄉鎮所屬之外海無人極小島嶼與礁岩（小於約 2 平方公里）。
  */
-const MIN_RING_AREA = 0.002;
+const MIN_SECONDARY_RING_AREA = 0.0002;
 
 /** 座標保留幾位小數。3 位約 100 公尺，足夠這個尺度。 */
 const PRECISION = 3;
@@ -98,10 +98,19 @@ function round(value) {
   return Number(value.toFixed(PRECISION));
 }
 
-function collectRings(geometry) {
-  if (geometry.type === "Polygon") return geometry.coordinates;
-  if (geometry.type === "MultiPolygon") return geometry.coordinates.flat();
+/** 只取外環（陸地外圍邊界），不取內部開孔（如湖泊/內環）。 */
+function collectOuterRings(geometry) {
+  if (geometry.type === "Polygon") return [geometry.coordinates[0]];
+  if (geometry.type === "MultiPolygon")
+    return geometry.coordinates.map((poly) => poly[0]);
   return [];
+}
+
+/** 排除東沙/南沙 (x < 118, y < 21) 與釣魚臺 (x > 122.05) 等偏遠海域，避免本島地圖被撐寬變形。 */
+function isWithinDisplayBounds(ring) {
+  return ring.every(
+    ([x, y]) => x >= 118.0 && x <= 122.05 && y >= 21.85 && y <= 26.25
+  );
 }
 
 export function buildCountyOutlines(featureCollection) {
@@ -114,36 +123,31 @@ export function buildCountyOutlines(featureCollection) {
     }
     const county = byCounty.get(countyCode);
 
-    for (const ring of collectRings(feature.geometry)) {
-      const simplified = simplify(ring, TOLERANCE);
-      // 少於 4 點的環畫不出面積，留著只是雜訊。
-      if (simplified.length < 4) continue;
-      county.rings.push({
-        area: ringArea(ring),
-        points: simplified.map(([x, y]) => [round(x), round(y)])
-      });
-    }
+    /*
+     * 逐「鄉鎮市區」排序其外環：
+     * 最大環（index === 0）代表該鄉鎮市區的陸地本體，一律保留（不可因市區面積小
+     * 而整區消失，例如臺北市中正、大安、大同、萬華或臺中中區等）。
+     * 其餘次要環（離島、礁岩）則需達到最小附屬島面積門檻。
+     */
+    const outerRings = collectOuterRings(feature.geometry).filter(
+      isWithinDisplayBounds
+    );
+    const sorted = outerRings
+      .map((ring) => ({ ring, area: ringArea(ring) }))
+      .sort((left, right) => right.area - left.area);
+
+    sorted.forEach((item, idx) => {
+      if (idx === 0 || item.area >= MIN_SECONDARY_RING_AREA) {
+        const simplified = simplify(item.ring, TOLERANCE);
+        // 少於 4 點的環無法構成閉合多邊形面，留著只是雜訊。
+        if (simplified.length >= 4) {
+          county.rings.push(simplified.map(([x, y]) => [round(x), round(y)]));
+        }
+      }
+    });
   }
 
-  /*
-   * 面積過濾**逐縣市**進行，而且永遠保留該縣市最大的那個環。
-   *
-   * 第一版是全域一刀切，結果連江縣（馬祖）整個消失——它的島全部小於門檻。
-   * 一張少了一個縣市的地圖不是「簡化」，是錯的；而且那正是使用者最可能
-   * 發現的錯誤（那裡是台灣行政區的一部分，不是可以省略的細節）。
-   */
   const counties = [...byCounty.values()]
-    .map((county) => {
-      const sorted = [...county.rings].sort((left, right) => right.area - left.area);
-      const kept = sorted.filter(
-        (ring, index) => index === 0 || ring.area >= MIN_RING_AREA
-      );
-      return {
-        countyCode: county.countyCode,
-        countyName: county.countyName,
-        rings: kept.map((ring) => ring.points)
-      };
-    })
     .filter((county) => county.rings.length > 0)
     .sort((left, right) => left.countyCode.localeCompare(right.countyCode));
 
@@ -191,7 +195,7 @@ function main() {
     },
     generator: {
       tolerance: TOLERANCE,
-      minRingArea: MIN_RING_AREA,
+      minRingArea: MIN_SECONDARY_RING_AREA,
       precision: PRECISION
     }
   };

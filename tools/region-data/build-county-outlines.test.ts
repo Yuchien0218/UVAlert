@@ -46,6 +46,24 @@ describe("county-outlines.generated.json", () => {
     }
   });
 
+  it("重要都會區的所有行政區皆完整保留，不因面積小而被掏空", () => {
+    const taipei = outlines.counties.find((c) => c.countyCode === "63000");
+    expect(taipei).toBeDefined();
+    expect(taipei?.rings.length).toBe(12);
+
+    const newTaipei = outlines.counties.find((c) => c.countyCode === "65000");
+    expect(newTaipei).toBeDefined();
+    expect(newTaipei?.rings.length).toBe(29);
+
+    const hsinchuCity = outlines.counties.find((c) => c.countyCode === "10018");
+    expect(hsinchuCity).toBeDefined();
+    expect(hsinchuCity?.rings.length).toBe(3);
+
+    const chiayiCity = outlines.counties.find((c) => c.countyCode === "10020");
+    expect(chiayiCity).toBeDefined();
+    expect(chiayiCity?.rings.length).toBe(2);
+  });
+
   /*
    * 體積上限：這份會進 bundle。原始來源 13.5MB，簡化後目前約 70KB；
    * 150KB 留了一倍餘裕，但擋得住「調鬆容差」造成的失控。
