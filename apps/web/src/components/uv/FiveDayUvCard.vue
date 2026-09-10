@@ -163,7 +163,6 @@ function getUnavailableMessage(error: UvForecastError): string {
         <span v-if="phase === 'cached'" class="uv-forecast__badge">
           已儲存資料
         </span>
-        <span v-else class="uv-forecast__badge"> 地區預報 </span>
       </div>
 
       <ol class="uv-forecast__days" aria-label="未來五日白日時段紫外線預報">
