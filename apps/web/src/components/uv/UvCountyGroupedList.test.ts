@@ -26,6 +26,7 @@ describe("UvCountyGroupedList", () => {
       "北部", "中部", "南部", "東部", "外島"
     ]);
     expect(wrapper.findAllComponents(UvCountyListItem)).toHaveLength(22);
+    expect(wrapper.get(".uv-county-group__title").attributes("data-typography-role")).toBe("supporting");
     expect(wrapper.text()).toContain("臺北市");
     expect(wrapper.text()).toContain("金門縣");
     expect(wrapper.get("ul").findAll("li").length).toBeGreaterThan(0);

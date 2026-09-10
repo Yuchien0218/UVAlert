@@ -11,7 +11,7 @@ const groups = computed(() => groupNationwideCounties(props.counties));
 <template>
   <ul class="uv-county-groups">
     <li v-for="group in groups" :key="group.id" class="uv-county-group">
-      <h3 class="uv-county-group__title" data-typography-role="card-title">
+      <h3 class="uv-county-group__title" data-typography-role="supporting">
         {{ group.label }}
       </h3>
       <ul class="uv-county-group__list">
@@ -41,11 +41,11 @@ const groups = computed(() => groupNationwideCounties(props.counties));
 .uv-county-group__title {
   margin: 0 0 var(--uv-distribution-row-gap);
   color: var(--color-ink);
-  font-family: var(--font-family-card-title);
-  font-size: var(--font-size-card-title);
-  font-weight: var(--font-weight-card-title);
-  line-height: var(--line-height-card-title);
-  letter-spacing: var(--letter-spacing-card-title);
+  font-family: var(--font-family-supporting);
+  font-size: var(--font-size-supporting);
+  font-weight: var(--font-weight-supporting);
+  line-height: var(--line-height-supporting);
+  letter-spacing: var(--letter-spacing-supporting);
 }
 
 .uv-county-group__list {
