@@ -158,32 +158,14 @@ const insetShapes = computed(() =>
   })
 );
 
+/** 離島標籤基準線與離島頂部之間的間距（避免文字緊貼島嶼圖形）。 */
+const INSET_LABEL_GAP = 0.05;
+
 const insetLabels = INSET_CONFIGS.map((config) => ({
   ...config,
   x: width * config.xRatio,
-  y: height * config.yRatio
+  y: height * config.yRatio - INSET_LABEL_GAP
 }));
-
-/** 目前所在縣市的定位標記：取它最大環的中心。 */
-const marker = computed(() => {
-  if (props.highlightCountyCode === null) return null;
-  const county = mainCounties.find(
-    (candidate) => candidate.countyCode === props.highlightCountyCode
-  );
-  if (county === undefined) return null;
-  const largest = [...county.rings].sort(
-    (left, right) => right.length - left.length
-  )[0];
-  if (largest === undefined) return null;
-  let sumX = 0;
-  let sumY = 0;
-  for (const point of largest) {
-    const [lon, lat] = point as [number, number];
-    sumX += (lon - mainBounds.minX) * LATITUDE_SCALE;
-    sumY += mainBounds.maxY - lat;
-  }
-  return { x: sumX / largest.length, y: sumY / largest.length };
-});
 </script>
 
 <template>
@@ -218,18 +200,6 @@ const marker = computed(() => {
       :x="inset.x"
       :y="inset.y"
     >{{ inset.label }}</text>
-
-    <!--
-      定位標記用一個小環而不是描邊整個縣市：資料是鄉鎮環的集合，描邊會把
-      該縣市內部的鄉鎮界一起畫出來。
-    -->
-    <circle
-      v-if="marker !== null"
-      class="uv-map__marker"
-      :cx="marker.x"
-      :cy="marker.y"
-      r="0.06"
-    />
   </svg>
 </template>
 
@@ -279,11 +249,5 @@ const marker = computed(() => {
   font-weight: var(--font-weight-caption);
   line-height: var(--line-height-caption);
   letter-spacing: var(--letter-spacing-caption);
-}
-
-.uv-map__marker {
-  fill: none;
-  stroke: var(--text-primary);
-  stroke-width: 0.03;
 }
 </style>

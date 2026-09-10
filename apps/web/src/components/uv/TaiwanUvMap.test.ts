@@ -61,11 +61,10 @@ describe("TaiwanUvMap", () => {
   });
 
   /*
-   * 定位標記用一個小圓環，不是描邊整個縣市——資料是鄉鎮環的集合，描邊會
-   * 把該縣市內部的鄉鎮界一起畫出來。
+   * 依據使用者需求，地圖不繪製定位黑圓圈，以保持全臺 UV 分布資訊視覺純粹。
    */
-  it("有設定地區時畫出定位標記", () => {
-    expect(mountMap("63000").find(".uv-map__marker").exists()).toBe(true);
+  it("不繪製定位標記圓圈，保持地圖純粹資訊展示", () => {
+    expect(mountMap("63000").find(".uv-map__marker").exists()).toBe(false);
     expect(mountMap(null).find(".uv-map__marker").exists()).toBe(false);
   });
 
