@@ -278,6 +278,7 @@ const marker = computed(() => {
 .uv-map__inset-label-frame {
   fill: var(--surface-primary);
   stroke: var(--border-subtle);
+  stroke-width: var(--uv-distribution-map-inset-frame-stroke-width);
   rx: var(--radius-xs);
 }
 

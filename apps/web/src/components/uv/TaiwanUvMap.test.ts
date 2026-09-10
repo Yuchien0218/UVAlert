@@ -119,4 +119,12 @@ describe("TaiwanUvMap", () => {
     expect(wrapper.findAll(".uv-map__county--very-high")).toHaveLength(1);
     expect(wrapper.find(".uv-map__marker").exists()).toBe(false);
   });
+
+  it("離島標籤框使用地圖座標專用的細描邊，不使用 SVG 預設的一個座標單位", () => {
+    const frameRule = source.match(/\.uv-map__inset-label-frame \{([^}]*)\}/);
+
+    expect(frameRule?.[1]).toMatch(
+      /stroke-width:\s*var\(--uv-distribution-map-inset-frame-stroke-width\);/
+    );
+  });
 });

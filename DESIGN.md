@@ -169,6 +169,7 @@ components:
     rowGap: 10px
     columnGap: "{spacing.md}"
     groupGap: "{spacing.lg}"
+    insetFrameStrokeWidth: 0.008
   brand-header:
     backgroundColor: "{colors.canvas}"
     textColor: "{colors.ink}"

@@ -228,7 +228,8 @@ const UV_DISTRIBUTION_TOKENS = [
   ["--uv-distribution-item-padding-block", "6px"],
   ["--uv-distribution-row-gap", "10px"],
   ["--uv-distribution-column-gap", "16px"],
-  ["--uv-distribution-group-gap", "20px"]
+  ["--uv-distribution-group-gap", "20px"],
+  ["--uv-distribution-map-inset-frame-stroke-width", "0.008"]
 ] as const;
 
 const UV_DISTRIBUTION_COMPONENT_TOKENS = {
@@ -237,7 +238,8 @@ const UV_DISTRIBUTION_COMPONENT_TOKENS = {
   itemPaddingBlock: "--uv-distribution-item-padding-block",
   rowGap: "--uv-distribution-row-gap",
   columnGap: "--uv-distribution-column-gap",
-  groupGap: "--uv-distribution-group-gap"
+  groupGap: "--uv-distribution-group-gap",
+  insetFrameStrokeWidth: "--uv-distribution-map-inset-frame-stroke-width"
 } as const;
 
 // --- 已知落差（待清空）---
