@@ -123,4 +123,12 @@ describe("TaiwanUvMap", () => {
   it("不輸出 SVG 矩形框，避免不同瀏覽器將描邊放大成色塊", () => {
     expect(source).not.toContain("uv-map__inset-label-frame");
   });
+
+  it("離島標籤使用 SVG 地圖座標專用字級，不套用 rem 介面字級", () => {
+    const labelRule = source.match(/\.uv-map__inset-label \{([^}]*)\}/);
+
+    expect(labelRule?.[1]).toMatch(
+      /font-size:\s*var\(--uv-distribution-map-inset-label-font-size\);/
+    );
+  });
 });

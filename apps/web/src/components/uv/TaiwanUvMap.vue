@@ -275,7 +275,7 @@ const marker = computed(() => {
 .uv-map__inset-label {
   fill: var(--color-body-strong);
   font-family: var(--font-family-caption);
-  font-size: var(--font-size-caption);
+  font-size: var(--uv-distribution-map-inset-label-font-size);
   font-weight: var(--font-weight-caption);
   line-height: var(--line-height-caption);
   letter-spacing: var(--letter-spacing-caption);
