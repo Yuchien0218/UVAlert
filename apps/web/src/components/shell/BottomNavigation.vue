@@ -72,7 +72,7 @@ function navigationLabel(to: string, label: string): string {
    * 改用 max-width：寬度交給 left/right 決定（那個是扣掉捲軸的），
    * max-width 只負責限制上限，margin-inline: auto 維持置中。
    */
-  max-width: var(--content-max);
+  max-width: var(--app-shell-max);
   min-height: calc(var(--bottom-nav-height) + env(safe-area-inset-bottom));
   grid-template-columns: repeat(3, 1fr);
   margin-inline: auto;

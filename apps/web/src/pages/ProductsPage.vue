@@ -151,7 +151,11 @@ function editGear(productId: string): void {
         body="把常用的防曬乳與裝備記在這裡，建立提醒時就不必重填包裝標示。也可以先不儲存防曬乳，直接建立提醒。"
       >
         <template #actions>
-          <button class="button button--primary" type="button" @click="addGear">
+          <button
+            class="button button--primary gear-page__cta"
+            type="button"
+            @click="addGear"
+          >
             <Icon name="tool-plus" :size="20" />
             新增裝備
           </button>
@@ -205,7 +209,11 @@ function editGear(productId: string): void {
           夾在「沒有可倒數的防曬乳」那句提示與清單之間，把說明與它描述
           的清單拆開了。
         -->
-        <button class="button button--primary" type="button" @click="addGear">
+        <button
+          class="button button--primary gear-page__cta"
+          type="button"
+          @click="addGear"
+        >
           <Icon name="tool-plus" :size="20" />
           新增裝備
         </button>
@@ -351,5 +359,10 @@ section {
   margin: 0;
   padding: 0;
   list-style: none;
+}
+
+.gear-page__cta {
+  width: 100%;
+  max-width: none;
 }
 </style>

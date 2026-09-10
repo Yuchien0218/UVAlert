@@ -63,7 +63,7 @@ watch(
 <style scoped>
 .app-shell {
   display: grid;
-  width: min(100%, var(--content-max));
+  width: min(100%, var(--app-shell-max));
   min-height: 100vh;
   min-height: 100svh;
   grid-template-rows: auto auto 1fr;

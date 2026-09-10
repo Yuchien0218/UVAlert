@@ -81,6 +81,7 @@ const SPACING_MAP: Record<string, string> = {
  * 但列在這裡是為了讓「哪些 section 有被守著」一眼看得完。
  */
 const LAYOUT_MAP: Record<string, string> = {
+  "app-shell-max": "--app-shell-max",
   "content-max": "--content-max",
   "control-max": "--control-max",
   "tap-target": "--tap-target"

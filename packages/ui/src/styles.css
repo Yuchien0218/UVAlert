@@ -436,6 +436,12 @@
    * （原 --shadow-card／--shadow-float 從未被引用，2026-08-26 移除。）
    */
 
+  /*
+   * AppShell 是手機優先應用程式的共用外框。桌面上仍維持手機閱讀寬度，
+   * 由自身的 margin:auto 置中；內容文章需要的較寬閱讀欄則繼續使用
+   * --content-max，兩者不互相挾制。
+   */
+  --app-shell-max: 30rem;
   --content-max: 47rem;
   /*
    * 單一控制項的寬度上限（2026-09-04）。

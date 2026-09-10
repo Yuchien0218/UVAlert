@@ -157,6 +157,7 @@ spacing:
   section: 40px
 
 layout:
+  app-shell-max: 480px
   content-max: 752px
   control-max: 416px
   tap-target: 44px
