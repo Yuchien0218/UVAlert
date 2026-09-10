@@ -16,5 +16,14 @@ const port = Number(process.env.PORT);
 
 export default defineConfig({
   plugins: [vue()],
-  server: Number.isInteger(port) && port > 0 ? { port, strictPort: true } : {}
+  server: {
+    ...(Number.isInteger(port) && port > 0 ? { port, strictPort: true } : {}),
+    proxy: {
+      "/v1/uv/forecast": {
+        target: "https://ykfdnltaqpdytmrszbbk.supabase.co/functions/v1/uv-forecast",
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/v1\/uv\/forecast/, "")
+      }
+    }
+  }
 });
