@@ -374,7 +374,7 @@ async function remove(): Promise<void> {
 </script>
 
 <template>
-  <div class="gear-form">
+  <div class="gear-form form-control-stack">
     <!--
       2026-08-30：拿掉 `app-card`，比照 `ContextSelector`（設定流程的「選擇
       情境」）。原本是 `question-card app-card` 外框再包四個各自有邊框的

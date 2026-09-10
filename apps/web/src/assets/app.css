@@ -869,6 +869,19 @@ textarea {
   font: inherit;
 }
 
+/* Forms opt in when their controls should fill the form column. This retains
+ * compact inline controls elsewhere while preventing desktop form fields and
+ * their primary action from being capped at the generic control width. */
+.form-control-stack :is(input:not([type="radio"], [type="checkbox"]), select, textarea) {
+  width: 100%;
+  max-width: none;
+}
+
+.form-control-stack .button--primary {
+  width: 100%;
+  max-width: none;
+}
+
 textarea {
   min-height: calc(var(--tap-target) * 2);
   resize: vertical;

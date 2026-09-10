@@ -79,12 +79,16 @@ describe("入口卡只有標題", () => {
 });
 
 describe("公開政策入口", () => {
-  it("提供隱私權政策與服務條款連結", () => {
+  it("在入口清單下方保留提醒頁的置中連結樣式，不重複顯示說明區塊", () => {
     const wrapper = mountPage();
 
-    expect(wrapper.find('a[href="/privacy"]').text()).toContain("隱私權政策");
-    expect(wrapper.find('a[href="/terms"]').text()).toContain("服務條款");
-    expect(wrapper.text()).toContain("公開資訊");
+    const links = wrapper.get('nav[aria-label="公開政策"]');
+
+    expect(links.classes()).toContain("policy-links");
+    expect(links.find('a[href="/privacy"]').text()).toContain("隱私權政策");
+    expect(links.find('a[href="/terms"]').text()).toContain("服務條款");
+    expect(wrapper.text()).not.toContain("公開資訊");
+    expect(wrapper.text()).not.toContain("可公開查看");
   });
 });
 

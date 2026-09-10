@@ -46,7 +46,7 @@ function goBack(): void {
       <IconButton icon="tool-arrow-left" label="返回更多" @click="goBack" />
     </header>
 
-    <form class="app-card feedback-form" @submit.prevent="submit">
+    <form class="app-card feedback-form form-control-stack" @submit.prevent="submit">
       <label>
         <span>問題類型</span>
         <select v-model="feedbackType">
@@ -101,11 +101,5 @@ label {
 }
 label span {
   font-weight: 500;
-}
-/* 只留寬度，其餘欄位外觀（含 44px 命中高度）用 app.css 的共用宣告。 */
-input,
-select,
-textarea {
-  width: 100%;
 }
 </style>
