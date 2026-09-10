@@ -2,6 +2,8 @@
 import { useRouter } from "vue-router";
 import IconButton from "../components/common/IconButton.vue";
 import { computed, onMounted, onUnmounted, shallowRef } from "vue";
+import installBannerImg from "../assets/images/install/install-banner.jpg";
+import installPromptImg from "../assets/images/install/install-prompt.jpg";
 
 /**
  * S-20 安裝到手機。
@@ -116,6 +118,24 @@ function goBack(): void {
         <p>
           開啟瀏覽器選單，尋找「安裝應用程式」或「加入主畫面」。
         </p>
+        <div class="install-screenshots">
+          <img
+            :src="installBannerImg"
+            alt="點擊安裝防曬晴報員提示"
+            class="install-screenshot"
+            width="919"
+            height="334"
+            loading="lazy"
+          />
+          <img
+            :src="installPromptImg"
+            alt="確認安裝應用程式對話框"
+            class="install-screenshot"
+            width="919"
+            height="589"
+            loading="lazy"
+          />
+        </div>
         <p class="install-card__note">選單名稱可能因裝置與瀏覽器版本不同。</p>
       </div>
 
@@ -191,6 +211,23 @@ function goBack(): void {
 
 .install-card__note {
   font-size: var(--font-size-body);
+}
+
+.install-screenshots {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  width: 100%;
+  max-width: 24rem;
+  margin-block: var(--space-1);
+}
+
+.install-screenshot {
+  display: block;
+  width: 100%;
+  height: auto;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-subtle);
 }
 
 .install-result {

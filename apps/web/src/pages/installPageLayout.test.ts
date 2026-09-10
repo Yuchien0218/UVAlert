@@ -47,4 +47,16 @@ describe("安裝頁只有一張卡", () => {
       /\.install-card__rule \{[^}]*border-top: 1px solid var\(--border-subtle\);/
     );
   });
+
+  /*
+   * **反向三：瀏覽器安裝指引包含截圖輔助。** 協助使用者理解安裝提示橫條與確認彈窗。
+   */
+  it("從瀏覽器選單安裝包含兩張安裝流程截圖", () => {
+    expect(SOURCE).toContain('import installBannerImg from "../assets/images/install/install-banner.jpg";');
+    expect(SOURCE).toContain('import installPromptImg from "../assets/images/install/install-prompt.jpg";');
+    expect(TEMPLATE).toContain(':src="installBannerImg"');
+    expect(TEMPLATE).toContain(':src="installPromptImg"');
+    expect(SOURCE).toContain(".install-screenshots");
+    expect(SOURCE).toContain(".install-screenshot");
+  });
 });
