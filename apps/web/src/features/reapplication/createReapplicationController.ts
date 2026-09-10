@@ -111,6 +111,7 @@ export interface ReapplicationController {
   error: Readonly<ShallowRef<ReapplicationError>>;
   success: Readonly<ShallowRef<ReapplicationSuccess | null>>;
   load(): Promise<void>;
+  clearSelection(): void;
   selectSuggested(): void;
   setReason(value: ReapplyReason | null): void;
   selectAll(): void;
@@ -290,7 +291,7 @@ export function createReapplicationController(
       suggested.length > 0 ? suggested : fallbackSuggestedZoneIds;
     lastZoneIdsByKind = context.lastZoneIdsByKind ?? {};
     suggestedZoneIds.value = [...baseSuggestedZoneIds];
-    selectedZoneIds.value = [...suggestedZoneIds.value];
+    selectedZoneIds.value = recordableZones.map((zone) => zone.zoneInstanceId);
     assignSelectedProduct(selectedZoneIds.value);
     reason.value = null;
     committedReasonRevision = null;
@@ -312,6 +313,11 @@ export function createReapplicationController(
     pendingCommand = null;
   }
 
+  function clearSelection(): void {
+    selectedZoneIds.value = [];
+    assignSelectedProduct(selectedZoneIds.value);
+    pendingCommand = null;
+  }
   function selectSuggested(): void {
     selectedZoneIds.value = [...suggestedZoneIds.value];
     assignSelectedProduct(selectedZoneIds.value);
@@ -654,6 +660,7 @@ export function createReapplicationController(
     error: shallowReadonly(error),
     success: shallowReadonly(success),
     load,
+    clearSelection,
     selectSuggested,
     selectAll,
     toggleZone,

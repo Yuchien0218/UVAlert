@@ -217,7 +217,7 @@ describe("createReapplicationController", () => {
     expect(controller.selectedZoneIds.value).toEqual([]);
   });
 
-  it("提早手動補擦時不預選 primaryAction 的部位", async () => {
+  it("進入補擦頁時預設全選所有可記錄部位，並可透過清除清空選取", async () => {
     const source = context();
     source.session.zones[0].timingStatus = "tracking";
     source.session.zones[1].timingStatus = "tracking";
@@ -245,6 +245,8 @@ describe("createReapplicationController", () => {
     await controller.load();
 
     expect(controller.suggestedZoneIds.value).toEqual([]);
+    expect(controller.selectedZoneIds.value).toEqual(["zone-a", "zone-b"]);
+    controller.clearSelection();
     expect(controller.selectedZoneIds.value).toEqual([]);
     controller.selectAll();
     expect(controller.selectedZoneIds.value).toEqual(["zone-a", "zone-b"]);
