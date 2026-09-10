@@ -1,6 +1,6 @@
 // @vitest-environment happy-dom
 
-import { mount } from "@vue/test-utils";
+import { flushPromises, mount } from "@vue/test-utils";
 import { shallowReadonly, shallowRef } from "vue";
 import { createMemoryHistory, createRouter } from "vue-router";
 import { beforeEach, describe, expect, it, vi } from "vitest";
@@ -39,6 +39,14 @@ function makeRegionService() {
   };
 }
 
+function makeUvForecastService() {
+  return {
+    nationwide: shallowReadonly(shallowRef({ counties: [] })),
+    region: shallowReadonly(shallowRef(null)),
+    ensureNationwideLoaded: vi.fn(async () => undefined)
+  };
+}
+
 async function mountPage() {
   const router = createRouter({
     history: createMemoryHistory(),
@@ -51,8 +59,16 @@ async function mountPage() {
   await router.push("/region");
   await router.isReady();
   const wrapper = mount(RegionPage, {
-    global: { plugins: [router] }
+    global: {
+      plugins: [router],
+      stubs: {
+        TaiwanUvDistribution: {
+          template: '<section data-testid="region-nationwide-distribution" />'
+        }
+      }
+    }
   });
+  await flushPromises();
   return { wrapper, router };
 }
 
@@ -73,7 +89,8 @@ describe("RegionPage", () => {
   it("navigation and mount do not request device location", async () => {
     const region = makeRegionService();
     vi.mocked(useWebAppServices).mockReturnValue({
-      region
+      region,
+      uvForecast: makeUvForecastService()
     } as unknown as WebAppServices);
 
     const { wrapper } = await mountPage();
@@ -83,10 +100,25 @@ describe("RegionPage", () => {
     expect(wrapper.text()).toContain("不儲存或分析位置資訊");
   });
 
+  it("未設定地區時載入並顯示全臺分布", async () => {
+    const region = makeRegionService();
+    const uvForecast = makeUvForecastService();
+    vi.mocked(useWebAppServices).mockReturnValue({
+      region,
+      uvForecast
+    } as unknown as WebAppServices);
+
+    const { wrapper } = await mountPage();
+
+    expect(uvForecast.ensureNationwideLoaded).toHaveBeenCalledOnce();
+    expect(wrapper.find('[data-testid="region-nationwide-distribution"]').exists()).toBe(true);
+  });
+
   it("requests location only after the explicit button press", async () => {
     const region = makeRegionService();
     vi.mocked(useWebAppServices).mockReturnValue({
-      region
+      region,
+      uvForecast: makeUvForecastService()
     } as unknown as WebAppServices);
     const { wrapper } = await mountPage();
 
@@ -98,7 +130,8 @@ describe("RegionPage", () => {
   it("manual county and district selection works without network state", async () => {
     const region = makeRegionService();
     vi.mocked(useWebAppServices).mockReturnValue({
-      region
+      region,
+      uvForecast: makeUvForecastService()
     } as unknown as WebAppServices);
     const { wrapper } = await mountPage();
 
@@ -125,7 +158,8 @@ describe("RegionPage", () => {
    */
   it("手動選擇預設收起來", async () => {
     vi.mocked(useWebAppServices).mockReturnValue({
-      region: makeRegionService()
+      region: makeRegionService(),
+      uvForecast: makeUvForecastService()
     } as unknown as WebAppServices);
     const { wrapper } = await mountPage();
 
@@ -134,7 +168,8 @@ describe("RegionPage", () => {
 
   it("使用目前位置維持常駐，不收合", async () => {
     vi.mocked(useWebAppServices).mockReturnValue({
-      region: makeRegionService()
+      region: makeRegionService(),
+      uvForecast: makeUvForecastService()
     } as unknown as WebAppServices);
     const { wrapper } = await mountPage();
 
@@ -148,7 +183,8 @@ describe("RegionPage", () => {
    */
   it("略過的說明沒有跟著收掉", async () => {
     vi.mocked(useWebAppServices).mockReturnValue({
-      region: makeRegionService()
+      region: makeRegionService(),
+      uvForecast: makeUvForecastService()
     } as unknown as WebAppServices);
     const { wrapper } = await mountPage();
 
@@ -158,7 +194,8 @@ describe("RegionPage", () => {
   it("saves an explicit skip", async () => {
     const region = makeRegionService();
     vi.mocked(useWebAppServices).mockReturnValue({
-      region
+      region,
+      uvForecast: makeUvForecastService()
     } as unknown as WebAppServices);
     const { wrapper } = await mountPage();
 

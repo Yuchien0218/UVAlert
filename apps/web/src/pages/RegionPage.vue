@@ -5,6 +5,7 @@ import { useWebAppServices } from "../app/injection";
 import RegionLocationPanel from "../components/region/RegionLocationPanel.vue";
 import RegionManualSelector from "../components/region/RegionManualSelector.vue";
 import RegionPreferenceSummary from "../components/region/RegionPreferenceSummary.vue";
+import TaiwanUvDistribution from "../components/uv/TaiwanUvDistribution.vue";
 
 /**
  * 手動選擇預設收起來（2026-08-31 使用者裁決）。
@@ -14,12 +15,15 @@ import RegionPreferenceSummary from "../components/region/RegionPreferenceSummar
  */
 const showManualSelector = shallowRef(false);
 
-const { region } = useWebAppServices();
+const { region, uvForecast } = useWebAppServices();
 const route = useRoute();
 const router = useRouter();
 
-onMounted(() => {
-  void region.ensureLoaded();
+onMounted(async () => {
+  await region.ensureLoaded();
+  if (region.preference.value === null) {
+    void uvForecast.ensureNationwideLoaded();
+  }
 });
 
 async function confirmCandidate(): Promise<void> {
@@ -55,6 +59,13 @@ function returnToCaller(): Promise<unknown> {
     </header>
 
     <RegionPreferenceSummary :preference="region.preference.value" />
+
+    <TaiwanUvDistribution
+      v-if="region.preference.value === null && uvForecast.nationwide.value !== null"
+      data-testid="region-nationwide-distribution"
+      :forecast="uvForecast.nationwide.value"
+      :region="uvForecast.region.value"
+    />
 
     <RegionLocationPanel
       :phase="region.phase.value"
