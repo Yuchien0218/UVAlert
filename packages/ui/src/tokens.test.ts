@@ -229,7 +229,7 @@ const UV_DISTRIBUTION_TOKENS = [
   ["--uv-distribution-row-gap", "10px"],
   ["--uv-distribution-column-gap", "16px"],
   ["--uv-distribution-group-gap", "20px"],
-  ["--uv-distribution-map-inset-label-font-size", "0.12"]
+  ["--uv-distribution-map-inset-label-font-size", "0.12px"]
 ] as const;
 
 const UV_DISTRIBUTION_COMPONENT_TOKENS = {

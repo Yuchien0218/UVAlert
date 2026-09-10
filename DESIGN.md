@@ -169,7 +169,7 @@ components:
     rowGap: 10px
     columnGap: "{spacing.md}"
     groupGap: "{spacing.lg}"
-    insetLabelFontSize: 0.12
+    insetLabelFontSize: 0.12px
   brand-header:
     backgroundColor: "{colors.canvas}"
     textColor: "{colors.ink}"
