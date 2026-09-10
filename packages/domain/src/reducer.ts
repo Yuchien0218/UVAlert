@@ -105,7 +105,13 @@ const GENERAL_DEADLINE_BLOCKERS = new Set<ProductEligibility>([
   "discomfort_reported"
 ]);
 
-function blocksGeneralDeadline(eligibility: ProductEligibility): boolean {
+/**
+ * 單一規則來源：只有已知的產品安全問題會阻止一般補擦倒數。
+ *
+ * 產品標示尚未確認或沒有防曬宣稱時，仍使用 120 分鐘的保守預設；介面與
+ * reducer 都必須沿用這個判斷，不能各自以 `eligible` 作為另一套門檻。
+ */
+export function blocksGeneralDeadline(eligibility: ProductEligibility): boolean {
   return GENERAL_DEADLINE_BLOCKERS.has(eligibility);
 }
 

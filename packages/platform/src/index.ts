@@ -79,6 +79,8 @@ export interface ReapplicationContext {
   session: SessionProjection;
   currentApplications: ApplicationEventV1[];
   products: ProductCatalogRecordV1[];
+  /** 每一種補擦原因上次確認的部位，供原因切換時沿用既有選擇。 */
+  lastZoneIdsByKind: Record<string, string[]>;
 }
 
 export interface ReapplicationRepositoryPort {

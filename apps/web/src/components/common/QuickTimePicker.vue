@@ -113,7 +113,11 @@ function applyAdjustment(): void {
 </script>
 
 <template>
-  <section class="app-card time-section" :aria-labelledby="`${idPrefix}-title`">
+  <section
+    :id="`${idPrefix}-field`"
+    class="app-card time-section"
+    :aria-labelledby="`${idPrefix}-title`"
+  >
     <h2 :id="`${idPrefix}-title`" data-typography-role="card-title">
       {{ heading }}
     </h2>

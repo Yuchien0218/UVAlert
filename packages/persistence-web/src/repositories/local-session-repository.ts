@@ -1080,7 +1080,12 @@ export class LocalSessionRepository {
     const products = await new LocalProductCatalogRepository(
       this.#database
     ).listProducts();
-    return { session, currentApplications, products };
+    const lastZoneIdsByKind: Record<string, string[]> = {};
+    for (const event of stream.contextEvents) {
+      if (!("zoneInstanceIds" in event)) continue;
+      lastZoneIdsByKind[event.contextType] = [...event.zoneInstanceIds];
+    }
+    return { session, currentApplications, products, lastZoneIdsByKind };
   }
 
   /**

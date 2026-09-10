@@ -113,6 +113,9 @@ importers:
       '@sunshield/contracts':
         specifier: workspace:*
         version: link:../../packages/contracts
+      '@sunshield/domain':
+        specifier: workspace:*
+        version: link:../../packages/domain
       '@sunshield/persistence-web':
         specifier: workspace:*
         version: link:../../packages/persistence-web

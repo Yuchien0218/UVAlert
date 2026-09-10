@@ -7,6 +7,7 @@ import {
   type ReapplyCommandV1,
   type SessionProjection
 } from "@sunshield/contracts";
+import { blocksGeneralDeadline } from "@sunshield/domain";
 import type {
   ContextEventRepositoryPort,
   DeviceIdentityPort,
@@ -15,6 +16,7 @@ import type {
 } from "@sunshield/platform";
 import { shallowReadonly, shallowRef, type ShallowRef } from "vue";
 import type { AppBootController } from "../../app/createAppBootController";
+import { resolvePresetZoneIds } from "../reminder/createContextEventController";
 
 export type ReapplicationPhase =
   "idle" | "loading" | "ready" | "submitting" | "success" | "error";
@@ -43,6 +45,20 @@ export interface ReapplicationSuccess {
   appliedAt: string;
   productGroups: Array<{ displayName: string; zoneIds: string[] }>;
   committedRevision: number;
+}
+
+export type ReapplicationInvalidField = "zones" | "product" | "appliedAt";
+
+/** 驗證順序也是回饋順序：讓頁面能把使用者帶到最先可處理的欄位。 */
+export function firstInvalidReapplicationField(
+  errors: Record<string, string[]>
+): ReapplicationInvalidField | null {
+  if (errors.zones?.length) return "zones";
+  if (Object.keys(errors).some((key) => key.startsWith("product."))) {
+    return "product";
+  }
+  if (errors.appliedAt?.length) return "appliedAt";
+  return null;
 }
 
 function normalizeRepositoryFieldErrors(
@@ -152,6 +168,11 @@ export function createReapplicationController(
    * 而使用者重試時，第一段已經成功了——記著它才不會寫出兩筆流汗。
    */
   let committedReasonRevision: number | null = null;
+  let recordableZones: SessionProjection["zones"] = [];
+  let baseSuggestedZoneIds: string[] = [];
+  let lastZoneIdsByKind: Record<string, string[]> = {};
+  let preferredChoiceId: string | null = null;
+  let selectedProductChoiceId: string | null = null;
   const selectedZoneIds = shallowRef<string[]>([]);
   const productChoices = shallowRef<ReapplicationProductChoice[]>([]);
   const assignments = shallowRef<Record<string, string>>({});
@@ -193,10 +214,11 @@ export function createReapplicationController(
         snapshotFingerprint: product.snapshotFingerprint,
         snapshot: product.currentSnapshot,
         selectable: product.status === "active",
-        restriction:
-          product.currentSnapshot.ruleEligibilityAtApplication === "eligible"
-            ? null
-            : "這項裝備只會保留使用紀錄，不會建立補擦倒數。"
+        restriction: blocksGeneralDeadline(
+          product.currentSnapshot.ruleEligibilityAtApplication
+        )
+          ? "這項裝備只會保留使用紀錄，不會建立補擦倒數。"
+          : null
       });
     }
     const nextAssignments: Record<string, string> = {};
@@ -221,11 +243,11 @@ export function createReapplicationController(
           ),
           snapshot: application.productLabelSnapshot,
           selectable: true,
-          restriction:
-            application.productLabelSnapshot.ruleEligibilityAtApplication ===
-            "eligible"
-              ? null
-              : "這項裝備只會保留使用紀錄，不會建立補擦倒數。"
+          restriction: blocksGeneralDeadline(
+            application.productLabelSnapshot.ruleEligibilityAtApplication
+          )
+            ? "這項裝備只會保留使用紀錄，不會建立補擦倒數。"
+            : null
         });
       }
       for (const zoneId of application.zoneInstanceIds)
@@ -233,6 +255,12 @@ export function createReapplicationController(
     }
     productChoices.value = [...choices.values()];
     assignments.value = nextAssignments;
+    preferredChoiceId =
+      context.session.primaryAction.affectedZoneInstanceIds
+        .map((zoneId) => nextAssignments[zoneId])
+        .find((choiceId): choiceId is string => choiceId !== undefined) ??
+      Object.values(nextAssignments)[0] ??
+      null;
     const suggested = context.session.zones
       .filter(
         (zone) =>
@@ -248,10 +276,9 @@ export function createReapplicationController(
     // （recordStatus === "unrecorded"）的部位本來就沒有 Application，
     // 過濾掉會讓首次記錄變體開啟時零選取，使用者得自己找回該選哪些部位。
     // 未指派產品的部位仍會在 submit 時被擋下並顯示就近錯誤，不會靜默送出。
+    recordableZones = context.session.zones.filter(canRecordReapplication);
     const recordableZoneIds = new Set(
-      context.session.zones
-        .filter(canRecordReapplication)
-        .map((zone) => zone.zoneInstanceId)
+      recordableZones.map((zone) => zone.zoneInstanceId)
     );
     const fallbackSuggestedZoneIds =
       context.session.primaryAction.actionKind === "record_reapplication"
@@ -259,9 +286,12 @@ export function createReapplicationController(
         : context.session.primaryAction.affectedZoneInstanceIds.filter(
             (zoneId) => recordableZoneIds.has(zoneId)
           );
-    suggestedZoneIds.value =
+    baseSuggestedZoneIds =
       suggested.length > 0 ? suggested : fallbackSuggestedZoneIds;
+    lastZoneIdsByKind = context.lastZoneIdsByKind ?? {};
+    suggestedZoneIds.value = [...baseSuggestedZoneIds];
     selectedZoneIds.value = [...suggestedZoneIds.value];
+    assignSelectedProduct(selectedZoneIds.value);
     reason.value = null;
     committedReasonRevision = null;
     referenceNow.value = dependencies.now().toISOString();
@@ -276,29 +306,68 @@ export function createReapplicationController(
    */
   function setReason(value: ReapplyReason | null): void {
     reason.value = value;
+    suggestedZoneIds.value = suggestedZoneIdsForReason(value);
+    selectedZoneIds.value = [...suggestedZoneIds.value];
+    assignSelectedProduct(selectedZoneIds.value);
     pendingCommand = null;
   }
 
   function selectSuggested(): void {
     selectedZoneIds.value = [...suggestedZoneIds.value];
+    assignSelectedProduct(selectedZoneIds.value);
     pendingCommand = null;
   }
   function selectAll(): void {
-    selectedZoneIds.value =
-      session.value?.zones
-        .filter(canRecordReapplication)
-        .map((zone) => zone.zoneInstanceId) ?? [];
+    selectedZoneIds.value = recordableZones.map((zone) => zone.zoneInstanceId);
+    assignSelectedProduct(selectedZoneIds.value);
     pendingCommand = null;
   }
   function toggleZone(zoneId: string): void {
     selectedZoneIds.value = selectedZoneIds.value.includes(zoneId)
       ? selectedZoneIds.value.filter((id) => id !== zoneId)
       : [...selectedZoneIds.value, zoneId];
+    assignSelectedProduct(selectedZoneIds.value);
     pendingCommand = null;
   }
   function assignProduct(zoneId: string, choiceId: string): void {
+    selectedProductChoiceId = choiceId;
     assignments.value = { ...assignments.value, [zoneId]: choiceId };
     pendingCommand = null;
+  }
+
+  /**
+   * 預設是開始提醒時用的產品；使用者改選後，後來新增的部位也沿用使用者選擇。
+   * 補擦介面只允許一瓶產品，因此不能保留各部位舊有的不一致指派。
+   */
+  function assignSelectedProduct(zoneIds: string[]): void {
+    const choiceId = selectedProductChoiceId ?? preferredChoiceId;
+    if (choiceId === null) return;
+    if (
+      !productChoices.value.some(
+        (choice) => choice.choiceId === choiceId && choice.selectable
+      )
+    )
+      return;
+    const nextAssignments = { ...assignments.value };
+    let changed = false;
+    for (const zoneId of zoneIds) {
+      if (nextAssignments[zoneId] === choiceId) continue;
+      nextAssignments[zoneId] = choiceId;
+      changed = true;
+    }
+    if (changed) assignments.value = nextAssignments;
+  }
+
+  /** 原因切換沿用「記錄狀況」流程的部位建議邏輯，避免兩條流程各自判斷。 */
+  function suggestedZoneIdsForReason(value: ReapplyReason | null): string[] {
+    if (value === null) return [...baseSuggestedZoneIds];
+    const fromReason = resolvePresetZoneIds({
+      kind: value,
+      selectableZones: recordableZones,
+      openWaterInterval: null,
+      lastZoneIdsByKind
+    });
+    return fromReason.length > 0 ? fromReason : [...baseSuggestedZoneIds];
   }
   function setAppliedAt(value: string): void {
     appliedAt.value = value;

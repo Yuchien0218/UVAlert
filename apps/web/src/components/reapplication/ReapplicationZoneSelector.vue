@@ -21,6 +21,7 @@ const emit = defineEmits<{
     標題都是 18px——多出來的 2px 沒有理由，只是沒有走共用類別。
   -->
   <fieldset
+    id="reapply-zone-field"
     class="zone-selector question-card app-card"
     :aria-describedby="error ? 'zone-selection-error' : undefined"
   >

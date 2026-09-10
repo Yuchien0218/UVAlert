@@ -8,6 +8,7 @@ import ReapplicationProductAssignments from "../components/reapplication/Reappli
 import QuickTimePicker from "../components/common/QuickTimePicker.vue";
 import ReapplicationReview from "../components/reapplication/ReapplicationReview.vue";
 import { getZoneLabel } from "../features/reminder/reminderPresentation";
+import { firstInvalidReapplicationField } from "../features/reapplication/createReapplicationController";
 import { formatDateTime } from "../helpers/datetime";
 import IconButton from "../components/common/IconButton.vue";
 import IconLead from "../components/common/IconLead.vue";
@@ -52,6 +53,28 @@ function finish(): void {
 function goToReport(): void {
   void router.push({ name: "reminder-report" });
 }
+
+async function submit(): Promise<void> {
+  const submitted = await reapplication.submit();
+  if (submitted || reapplication.error.value !== "validation") return;
+
+  await nextTick();
+  const field = firstInvalidReapplicationField(reapplication.fieldErrors.value);
+  const targetId =
+    field === "zones"
+      ? "reapply-zone-field"
+      : field === "product"
+        ? "reapply-product-field"
+        : field === "appliedAt"
+          ? "reapply-time-field"
+          : null;
+  if (targetId === null) return;
+  document.getElementById(targetId)?.scrollIntoView({
+    behavior: "smooth",
+    block: "center"
+  });
+}
+
 function zoneNames(zoneIds: string[]): string {
   return zoneIds
     .map((zoneId) => {
@@ -253,7 +276,7 @@ function zoneNames(zoneIds: string[]): string {
           class="button button--primary"
           type="button"
           :disabled="reapplication.phase.value === 'submitting'"
-          @click="reapplication.submit"
+          @click="submit"
         >
           <InlineLoader v-if="reapplication.phase.value === 'submitting'" />
           {{

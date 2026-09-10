@@ -1,6 +1,9 @@
 import { describe, expect, it, vi } from "vitest";
 import { makeProductSnapshot } from "../../../../../packages/test-fixtures/src/index";
-import { createReapplicationController } from "./createReapplicationController";
+import {
+  createReapplicationController,
+  firstInvalidReapplicationField
+} from "./createReapplicationController";
 
 function context() {
   const snapshot = makeProductSnapshot();
@@ -162,6 +165,24 @@ function firstRecordContext() {
 }
 
 describe("createReapplicationController", () => {
+  it("驗證失敗時先定位部位，接著才是產品與時間", () => {
+    expect(
+      firstInvalidReapplicationField({
+        zones: ["請至少選擇一個實際補擦的部位。"],
+        "product.zone-a": ["請選擇防曬乳。"],
+        appliedAt: ["實際塗抹時間不能晚於目前時間。"]
+      })
+    ).toBe("zones");
+    expect(
+      firstInvalidReapplicationField({ "product.zone-a": ["請選擇防曬乳。"] })
+    ).toBe("product");
+    expect(
+      firstInvalidReapplicationField({
+        appliedAt: ["實際塗抹時間不能晚於目前時間。"]
+      })
+    ).toBe("appliedAt");
+  });
+
   it("不把無法建立補擦紀錄的部位預選或納入全部部位", async () => {
     const source = context();
     source.session.zones[0].timingStatus = "tracking";
@@ -458,7 +479,7 @@ describe("createReapplicationController", () => {
     });
   });
 
-  it("預選 due/soon 並保留不同部位目前的不同產品", async () => {
+  it("預選 due/soon，並以開始提醒時的產品套用到全部選取部位", async () => {
     const controller = createReapplicationController({
       repository: {
         getReapplicationContext: vi.fn().mockResolvedValue(context()),
@@ -480,9 +501,110 @@ describe("createReapplicationController", () => {
     });
     await controller.load();
     expect(controller.selectedZoneIds.value).toEqual(["zone-a", "zone-b"]);
-    expect(controller.assignments.value["zone-a"]).not.toBe(
+    expect(controller.assignments.value["zone-a"]).toBe(
       controller.assignments.value["zone-b"]
     );
+  });
+
+  it("選洗手後，預設只選手背並沿用開始提醒時的防曬乳", async () => {
+    const source = context();
+    source.session.zones[0].bodyZoneCode = "hand_backs";
+    source.session.zones[0].timingStatus = "tracking";
+    source.session.zones[1].timingStatus = "tracking";
+    const controller = createReapplicationController({
+      repository: {
+        getReapplicationContext: vi.fn().mockResolvedValue(source),
+        reapply: vi.fn(),
+        getContextEventContext: vi.fn(),
+        reportContextEvent: vi.fn()
+      },
+      identity: {
+        getOrCreateLocalVisitorId: vi.fn().mockResolvedValue("visitor"),
+        getOrCreateDeviceLocalId: vi.fn().mockResolvedValue("device")
+      },
+      boot: { refresh: vi.fn(), currentSession: { value: source.session } } as any,
+      createId: vi.fn(() => crypto.randomUUID()),
+      now: () => new Date("2026-08-01T10:00:00.000Z"),
+      getConnectivity: () => "online"
+    });
+
+    await controller.load();
+    controller.setReason("hand_wash");
+    controller.selectSuggested();
+
+    expect(controller.selectedZoneIds.value).toEqual(["zone-a"]);
+    expect(controller.assignments.value["zone-a"]).toBeDefined();
+  });
+
+  it("未確認產品標示仍顯示為可建立 120 分鐘保守倒數", async () => {
+    const source = context();
+    source.currentApplications[0].productLabelSnapshot = makeProductSnapshot({
+      identityStatus: "identity_unconfirmed",
+      ruleEligibilityAtApplication: "identity_unconfirmed"
+    });
+    const controller = createReapplicationController({
+      repository: {
+        getReapplicationContext: vi.fn().mockResolvedValue(source),
+        reapply: vi.fn(),
+        getContextEventContext: vi.fn(),
+        reportContextEvent: vi.fn()
+      },
+      identity: {
+        getOrCreateLocalVisitorId: vi.fn().mockResolvedValue("visitor"),
+        getOrCreateDeviceLocalId: vi.fn().mockResolvedValue("device")
+      },
+      boot: { refresh: vi.fn(), currentSession: { value: source.session } } as any,
+      createId: vi.fn(() => crypto.randomUUID()),
+      now: () => new Date("2026-08-01T10:00:00.000Z"),
+      getConnectivity: () => "online"
+    });
+
+    await controller.load();
+
+    const choiceId = controller.assignments.value["zone-a"];
+    expect(
+      controller.productChoices.value.find((choice) => choice.choiceId === choiceId)
+        ?.restriction
+    ).toBeNull();
+  });
+
+  it("採用建議部位與預設產品後可直接儲存補擦紀錄", async () => {
+    const source = context();
+    source.session.zones[0].bodyZoneCode = "hand_backs";
+    source.session.zones[0].timingStatus = "tracking";
+    source.session.zones[1].timingStatus = "tracking";
+    const reapply = vi.fn().mockResolvedValue({
+      ok: true,
+      data: { ...source.session, revision: 2 },
+      sessionId: source.session.sessionId,
+      revision: 2,
+      committedEventIds: []
+    });
+    const controller = createReapplicationController({
+      repository: {
+        getReapplicationContext: vi.fn().mockResolvedValue(source),
+        reapply,
+        getContextEventContext: vi.fn(),
+        reportContextEvent: vi.fn().mockResolvedValue({ ok: true, revision: 2 })
+      },
+      identity: {
+        getOrCreateLocalVisitorId: vi.fn().mockResolvedValue("visitor"),
+        getOrCreateDeviceLocalId: vi.fn().mockResolvedValue("device")
+      },
+      boot: {
+        refresh: vi.fn(),
+        currentSession: { value: { ...source.session, revision: 2 } }
+      } as any,
+      createId: vi.fn(() => crypto.randomUUID()),
+      now: () => new Date("2026-08-01T10:00:00.000Z"),
+      getConnectivity: () => "online"
+    });
+
+    await controller.load();
+    controller.setReason("hand_wash");
+
+    expect(await controller.submit()).toBe(true);
+    expect(reapply).toHaveBeenCalledTimes(1);
   });
 
   it("持久化失敗後重試沿用同一 idempotency command", async () => {

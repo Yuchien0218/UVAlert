@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@sunshield/contracts": "workspace:*",
+    "@sunshield/domain": "workspace:*",
     "@sunshield/persistence-web": "workspace:*",
     "@sunshield/platform": "workspace:*",
     "@sunshield/ui": "workspace:*",

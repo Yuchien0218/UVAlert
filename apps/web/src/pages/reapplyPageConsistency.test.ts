@@ -55,6 +55,14 @@ describe("每個區塊都套共用類別", () => {
   });
 });
 
+describe("補擦送出驗證回饋", () => {
+  it("驗證失敗時會平滑捲動到第一個有錯的欄位", () => {
+    expect(PAGE).toContain("scrollIntoView");
+    expect(PAGE).toContain('behavior: "smooth"');
+    expect(PAGE).toContain("firstInvalidReapplicationField");
+  });
+});
+
 describe("五個區塊標題同一級", () => {
   /*
    * `question-card` 的 legend 由共用類別給 card-title 字級，`h2` 則靠

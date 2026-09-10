@@ -76,6 +76,7 @@ function optionLabel(choice: ReapplicationProductChoice): string {
 
 <template>
   <section
+    id="reapply-product-field"
     class="app-card assignment-section"
     aria-labelledby="assignment-title"
   >
