@@ -31,11 +31,11 @@ describe("桌面表單欄寬", () => {
   });
 
   it("地區定位與手動選擇採用共用的欄寬契約", () => {
-    expect(regionLocationPanel).toContain(
-      'class="location-panel app-card form-control-stack"'
+    expect(regionLocationPanel).toMatch(
+      /class="location-panel app-card form-control-stack"/
     );
-    expect(regionManualSelector).toContain(
-      'class="manual-region form-control-stack"'
+    expect(regionManualSelector).toMatch(
+      /class="manual-region form-control-stack"/
     );
   });
 

@@ -1288,6 +1288,7 @@ p.prose-block {
 
 .submit-actions .button {
   width: 100%;
+  max-width: none;
 }
 
 /*

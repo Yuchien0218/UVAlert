@@ -158,6 +158,11 @@ defineEmits<{
   padding-bottom: env(safe-area-inset-bottom);
 }
 
+.setup-shell__actions > :slotted(.button) {
+  width: 100%;
+  max-width: none;
+}
+
 @media (max-width: 31rem) {
   .setup-shell__actions {
     display: grid;

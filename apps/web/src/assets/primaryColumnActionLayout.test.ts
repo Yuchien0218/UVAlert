@@ -24,7 +24,7 @@ describe("桌面主流程欄位動作", () => {
   it("送出、設定與無地區入口各自填滿容器欄寬", () => {
     for (const [source, selector] of [
       [appCss, ".submit-actions .button"],
-      [setupShell, ".setup-shell__actions > .button"],
+      [setupShell, ".setup-shell__actions > :slotted(.button)"],
       [locationPrompt, ".location-prompt__cta"]
     ] as const) {
       const rule = cssRule(source, selector);

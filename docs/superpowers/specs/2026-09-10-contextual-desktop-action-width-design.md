@@ -18,7 +18,7 @@
 下列容器的主要按鈕是目前工作流程的唯一提交／前進動作，桌面與手機都應填滿其可用欄寬：`width: 100%; max-width: none;`。
 
 - `.submit-actions .button`：補擦、回報與事件修正頁的主要送出動作。取消按鈕仍是 `.submit-actions__cancel` 文字連結，維持它自己的置中規則。
-- `.setup-shell__actions > .button`：`/setup` 的「開始防曬提醒」。容器仍保留 `flex-wrap` 與既有間距；此規則只影響由具名 actions slot 放入的主按鈕。
+- `.setup-shell__actions > :slotted(.button)`：`/setup` 的「開始防曬提醒」。容器仍保留 `flex-wrap` 與既有間距；` :slotted()` 讓 scoped CSS 能選到由具名 actions slot 放入的主按鈕。
 - `.location-prompt__cta`：首頁「尚未設定地區」卡片的唯一下一步。它是主流程入口，填滿提示卡的可用寬度，而不是在內容欄左側留下 416px 寬的孤島。
 
 這些規則是局部容器契約，不依賴桌面媒體查詢：小螢幕原本已是單欄，規則只消除大螢幕的通用上限截斷。

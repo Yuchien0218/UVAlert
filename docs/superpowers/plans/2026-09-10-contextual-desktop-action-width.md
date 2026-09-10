@@ -44,8 +44,8 @@ Create a `cssRule(source, selector)` helper that escapes the selector and return
 ```ts
 expect(cssRule(appCss, ".submit-actions .button")).toContain("width: 100%;");
 expect(cssRule(appCss, ".submit-actions .button")).toContain("max-width: none;");
-expect(cssRule(setupShell, ".setup-shell__actions > .button")).toContain("width: 100%;");
-expect(cssRule(setupShell, ".setup-shell__actions > .button")).toContain("max-width: none;");
+expect(cssRule(setupShell, ".setup-shell__actions > :slotted(.button)")).toContain("width: 100%;");
+expect(cssRule(setupShell, ".setup-shell__actions > :slotted(.button)")).toContain("max-width: none;");
 expect(cssRule(locationPrompt, ".location-prompt__cta")).toContain("width: 100%;");
 expect(cssRule(locationPrompt, ".location-prompt__cta")).toContain("max-width: none;");
 ```
@@ -117,7 +117,7 @@ Do not change `.submit-actions__cancel.submit-actions__cancel`.
 Add the scoped setup rule next to `.setup-shell__actions`:
 
 ```css
-.setup-shell__actions > .button {
+.setup-shell__actions > :slotted(.button) {
   width: 100%;
   max-width: none;
 }
