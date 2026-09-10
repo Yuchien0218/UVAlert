@@ -475,7 +475,7 @@ function goBack(): void {
         <h3 class="sync-block__title" data-typography-role="supporting">
           目前使用免登入模式
         </h3>
-        <button class="button button--quiet" type="button" @click="signIn">
+        <button class="button button--primary" type="button" @click="signIn">
           使用 Google 登入同步
         </button>
         <AppNotice v-if="auth.state.value.status === 'error'" kind="error">
