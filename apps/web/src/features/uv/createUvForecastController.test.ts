@@ -135,8 +135,10 @@ describe("createUvForecastController", () => {
     controller.dispose();
   });
 
-  it("明確略過地區時不呼叫 API", async () => {
+  it("明確略過地區時不呼叫地區 API，但仍可載入全臺資料", async () => {
+    const nationwideForecast = makeNationwideForecast();
     const dependencies = makeDependencies({
+      nationwideForecast,
       preference: {
         schemaVersion: REGION_PREFERENCE_SCHEMA_VERSION,
         mode: "skipped",
@@ -153,10 +155,13 @@ describe("createUvForecastController", () => {
     });
 
     await controller.ensureLoaded();
+    await controller.ensureNationwideLoaded();
 
     expect(controller.phase.value).toBe("no_region");
     expect(controller.region.value).toBeNull();
     expect(dependencies.api.getFiveDayForecast).not.toHaveBeenCalled();
+    expect(dependencies.api.getNationwideForecast).toHaveBeenCalledOnce();
+    expect(controller.nationwide.value).toEqual(nationwideForecast);
     controller.dispose();
   });
 

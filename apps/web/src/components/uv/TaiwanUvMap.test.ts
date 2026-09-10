@@ -78,23 +78,14 @@ describe("TaiwanUvMap", () => {
    * 所以規則是「描邊顏色必須與填色相同」，兩邊都不能少。分開守，因為
    * 合成一條時把 stroke 改成畫布色仍然會有 stroke 宣告。
    */
-  it("每個風險等級的描邊顏色與填色相同", () => {
-    for (const level of [
-      "unknown",
-      "low",
-      "moderate",
-      "high",
-      "very-high",
-      "extreme"
-    ]) {
-      const rule = source.match(
-        new RegExp(`\\.uv-map__county--${level} \\{([^}]*)\\}`)
-      );
-      expect(rule, level).not.toBeNull();
-      const fill = rule![1]!.match(/fill:\s*([^;]+);/)?.[1]?.trim();
-      const stroke = rule![1]!.match(/stroke:\s*([^;]+);/)?.[1]?.trim();
-      expect(stroke, `${level} 的 stroke`).toBe(fill);
-    }
+  it("所有已知風險等級以同一個展示 token 設定填色與描邊", () => {
+    const rule = source.match(/\.uv-map__county \{([^}]*)\}/);
+    const ruleBody = rule?.[1] ?? "";
+    const fill = ruleBody.match(/fill:\s*([^;]+);/)?.[1]?.trim();
+    const stroke = ruleBody.match(/stroke:\s*([^;]+);/)?.[1]?.trim();
+
+    expect(fill).toBe("var(--uv-risk-visual-color)");
+    expect(stroke).toBe(fill);
   });
 
   it("有描邊寬度，不是完全不描邊", () => {
@@ -120,10 +111,11 @@ describe("TaiwanUvMap", () => {
     const labels = wrapper.findAll(".uv-map__inset-label");
 
     expect(labels.map((label) => label.text())).toEqual(["金門", "馬祖"]);
-    expect(labels.map((label) => label.attributes("data-county-code"))).toEqual([
+    expect(labels.map((label) => label.element.parentElement?.getAttribute("data-county-code"))).toEqual([
       "09020",
       "09007"
     ]);
+    expect(wrapper.findAll(".uv-map__inset-label-frame")).toHaveLength(2);
     expect(wrapper.findAll(".uv-map__county--very-high")).toHaveLength(1);
     expect(wrapper.find(".uv-map__marker").exists()).toBe(false);
   });

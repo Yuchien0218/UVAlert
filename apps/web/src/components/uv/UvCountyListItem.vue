@@ -3,7 +3,8 @@ import { computed } from "vue";
 import type { NationwideUvCounty } from "@sunshield/contracts";
 import {
   getUviFillPercent,
-  getUvRiskClassSuffix
+  getUvRiskClassSuffix,
+  getUvRiskVisualStyle
 } from "../../features/uv/uvDistributionPresentation";
 
 const props = defineProps<{ county: NationwideUvCounty }>();
@@ -12,7 +13,8 @@ const riskClass = computed(
   () => `uv-county-item--${getUvRiskClassSuffix(props.county.riskLevel)}`
 );
 const fillStyle = computed(() => ({
-  "--uvi-fill": getUviFillPercent(props.county.uvi)
+  "--uvi-fill": `${Math.round(getUviFillPercent(props.county.uvi) * 100)}%`,
+  ...getUvRiskVisualStyle(props.county.riskLevel)
 }));
 </script>
 
@@ -64,9 +66,4 @@ const fillStyle = computed(() => ({
 }
 
 .uv-county-item__value { color: var(--color-ink); }
-.uv-county-item--low { --uv-risk-visual-color: var(--color-uvi-visual-low); }
-.uv-county-item--moderate { --uv-risk-visual-color: var(--color-uvi-visual-moderate); }
-.uv-county-item--high { --uv-risk-visual-color: var(--color-uvi-visual-high); }
-.uv-county-item--very-high { --uv-risk-visual-color: var(--color-uvi-visual-very-high); }
-.uv-county-item--extreme { --uv-risk-visual-color: var(--color-uvi-visual-extreme); }
 </style>

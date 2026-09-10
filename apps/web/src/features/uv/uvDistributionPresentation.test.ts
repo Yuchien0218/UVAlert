@@ -47,20 +47,21 @@ describe("UV 分布展示規則", () => {
       level: "very_high",
       label: "過量級",
       rangeLabel: "8–10",
-      classSuffix: "very-high"
+      classSuffix: "very-high",
+      visualToken: "--color-uvi-visual-very-high"
     });
     expect(getUvRiskClassSuffix("extreme")).toBe("extreme");
     expect(getUvRiskPresentation("extreme").rangeLabel).toBe("11+");
   });
 
   it("以 11 為固定滿格門檻，且無效數字不會畫出色條", () => {
-    expect(getUviFillPercent(0)).toBe("0%");
-    expect(getUviFillPercent(6)).toBe("55%");
-    expect(getUviFillPercent(11)).toBe("100%");
-    expect(getUviFillPercent(15)).toBe("100%");
-    expect(getUviFillPercent(-1)).toBe("0%");
-    expect(getUviFillPercent(Number.NaN)).toBe("0%");
-    expect(getUviFillPercent(Number.POSITIVE_INFINITY)).toBe("0%");
+    expect(getUviFillPercent(0)).toBe(0);
+    expect(getUviFillPercent(6)).toBeCloseTo(6 / 11);
+    expect(getUviFillPercent(11)).toBe(1);
+    expect(getUviFillPercent(15)).toBe(1);
+    expect(getUviFillPercent(-1)).toBe(0);
+    expect(getUviFillPercent(Number.NaN)).toBe(0);
+    expect(getUviFillPercent(Number.POSITIVE_INFINITY)).toBe(0);
   });
 
   it("依固定臺灣區域順序分組，且每個輸入縣市只出現一次", () => {

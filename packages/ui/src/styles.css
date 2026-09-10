@@ -152,6 +152,7 @@
   --color-uvi-visual-high: #ffa726;
   --color-uvi-visual-very-high: #ef5350;
   --color-uvi-visual-extreme: #ab47bc;
+  --uv-risk-visual-color: var(--color-uvi-visual-low);
 
   --page-background: var(--color-canvas);
   /*

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { UV_RISK_PRESENTATIONS } from "../../features/uv/uvDistributionPresentation";
+import { getUvRiskVisualStyle, UV_RISK_PRESENTATIONS } from "../../features/uv/uvDistributionPresentation";
 </script>
 
 <template>
@@ -9,6 +9,7 @@ import { UV_RISK_PRESENTATIONS } from "../../features/uv/uvDistributionPresentat
       :key="presentation.level"
       class="uv-risk-legend__item"
       :class="`uv-risk-legend__item--${presentation.classSuffix}`"
+      :style="getUvRiskVisualStyle(presentation.level)"
       data-typography-role="supporting"
     >
       <span class="uv-risk-legend__swatch" aria-hidden="true" />
@@ -46,9 +47,4 @@ import { UV_RISK_PRESENTATIONS } from "../../features/uv/uvDistributionPresentat
   background: var(--uv-risk-visual-color);
 }
 
-.uv-risk-legend__item--low { --uv-risk-visual-color: var(--color-uvi-visual-low); }
-.uv-risk-legend__item--moderate { --uv-risk-visual-color: var(--color-uvi-visual-moderate); }
-.uv-risk-legend__item--high { --uv-risk-visual-color: var(--color-uvi-visual-high); }
-.uv-risk-legend__item--very-high { --uv-risk-visual-color: var(--color-uvi-visual-very-high); }
-.uv-risk-legend__item--extreme { --uv-risk-visual-color: var(--color-uvi-visual-extreme); }
 </style>

@@ -5,6 +5,7 @@ export interface UvRiskPresentation {
   readonly label: string;
   readonly rangeLabel: string;
   readonly classSuffix: string;
+  readonly visualToken: string;
 }
 
 export interface UvCountyGroup {
@@ -16,30 +17,30 @@ export interface UvCountyGroup {
 const UVI_FULL_SCALE = 11;
 
 const UV_RISK_PRESENTATION_BY_LEVEL = {
-  low: { level: "low", label: "低量級", rangeLabel: "0–2", classSuffix: "low" },
+  low: { level: "low", label: "低量級", rangeLabel: "0–2", classSuffix: "low", visualToken: "--color-uvi-visual-low" },
   moderate: {
     level: "moderate",
     label: "中量級",
     rangeLabel: "3–5",
-    classSuffix: "moderate"
+    classSuffix: "moderate", visualToken: "--color-uvi-visual-moderate"
   },
   high: {
     level: "high",
     label: "高量級",
     rangeLabel: "6–7",
-    classSuffix: "high"
+    classSuffix: "high", visualToken: "--color-uvi-visual-high"
   },
   very_high: {
     level: "very_high",
     label: "過量級",
     rangeLabel: "8–10",
-    classSuffix: "very-high"
+    classSuffix: "very-high", visualToken: "--color-uvi-visual-very-high"
   },
   extreme: {
     level: "extreme",
     label: "危險級",
     rangeLabel: "11+",
-    classSuffix: "extreme"
+    classSuffix: "extreme", visualToken: "--color-uvi-visual-extreme"
   }
 } as const satisfies Readonly<Record<UvRiskLevel, UvRiskPresentation>>;
 
@@ -89,10 +90,14 @@ export function getUvRiskClassSuffix(riskLevel: UvRiskLevel): string {
   return getUvRiskPresentation(riskLevel).classSuffix;
 }
 
-export function getUviFillPercent(uvi: number): string {
-  if (!Number.isFinite(uvi) || uvi < 0) return "0%";
+export function getUviFillPercent(uvi: number): number {
+  if (!Number.isFinite(uvi) || uvi < 0) return 0;
 
-  return `${Math.round(Math.min(uvi / UVI_FULL_SCALE, 1) * 100)}%`;
+  return Math.min(uvi / UVI_FULL_SCALE, 1);
+}
+
+export function getUvRiskVisualStyle(riskLevel: UvRiskLevel): Record<"--uv-risk-visual-color", string> {
+  return { "--uv-risk-visual-color": `var(${getUvRiskPresentation(riskLevel).visualToken})` };
 }
 
 export function groupNationwideCounties(
