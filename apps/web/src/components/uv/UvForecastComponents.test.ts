@@ -51,7 +51,7 @@ describe("FiveDayUvCard", () => {
     expect(wrapper.text()).not.toContain("不影響補擦倒數");
   });
 
-  it("沒有地區時不顯示任何 UV 數字", () => {
+  it("沒有地區時不渲染五日預報卡片，也不顯示任何 UV 數字", () => {
     const wrapper = mount(FiveDayUvCard, {
       props: {
         phase: "no_region",
@@ -63,35 +63,7 @@ describe("FiveDayUvCard", () => {
       }
     });
 
-    expect(wrapper.text()).toContain("設定地區");
-    /*
-     * 2026-09-04：尾巴「，才能查看五日 UV 預報」已拿掉——h1 已經是
-     * 「五日 UV 預報」，同一個畫面不要說兩次。這裡改守「不要又長回來」。
-     */
-    expect(wrapper.text()).not.toContain("才能查看五日 UV 預報");
+    expect(wrapper.find(".uv-forecast").exists()).toBe(false);
     expect(wrapper.findAll(".uv-day")).toHaveLength(0);
-  });
-
-  /*
-   * 這條守著一個真的送過使用者手上的 bug：「設定地區」原本是
-   * href="#outdoor-context" 的頁內錨點，而這一頁根本沒有那個 id——
-   * 點下去什麼也不會發生。修正記在
-   * docs/decisions/2026-08-23-hifi-redesign-round2-closeout.md 第五節，
-   * 但那次的修正留在一條沒有合併的分支上，main 一直帶著這個 bug 到
-   * 2026-08-29。有測試才不會再掉一次。
-   */
-  it("沒有地區時的「設定地區」連到 /region，不是頁內錨點", () => {
-    const wrapper = mount(FiveDayUvCard, {
-      props: {
-        phase: "no_region",
-        error: null,
-        forecast: null
-      },
-      global: {
-        plugins: [router]
-      }
-    });
-
-    expect(wrapper.get(".text-link").attributes("href")).toBe("/region");
   });
 });
