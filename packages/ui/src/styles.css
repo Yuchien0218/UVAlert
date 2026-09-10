@@ -427,7 +427,6 @@
   --uv-distribution-row-gap: 0.625rem;
   --uv-distribution-column-gap: var(--space-4);
   --uv-distribution-group-gap: var(--space-5);
-  --uv-distribution-map-inset-frame-stroke-width: 0.008;
 
   /*
    * 沒有陰影 token：DESIGN.md 第七節「色塊優先、陰影罕用」，目前全站

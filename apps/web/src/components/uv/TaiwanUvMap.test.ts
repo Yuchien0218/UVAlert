@@ -106,25 +106,21 @@ describe("TaiwanUvMap", () => {
     expect(height).toBeGreaterThan(width!);
   });
 
-  it("金門與馬祖都有集中設定的可辨識 inset 標籤", () => {
+  it("金門與馬祖都有集中設定的可辨識純文字 inset 標籤", () => {
     const wrapper = mountMap();
     const labels = wrapper.findAll(".uv-map__inset-label");
 
     expect(labels.map((label) => label.text())).toEqual(["金門", "馬祖"]);
-    expect(labels.map((label) => label.element.parentElement?.getAttribute("data-county-code"))).toEqual([
+    expect(labels.map((label) => label.attributes("data-county-code"))).toEqual([
       "09020",
       "09007"
     ]);
-    expect(wrapper.findAll(".uv-map__inset-label-frame")).toHaveLength(2);
+    expect(wrapper.findAll(".uv-map__inset-label-frame")).toHaveLength(0);
     expect(wrapper.findAll(".uv-map__county--very-high")).toHaveLength(1);
     expect(wrapper.find(".uv-map__marker").exists()).toBe(false);
   });
 
-  it("離島標籤框使用地圖座標專用的細描邊，不使用 SVG 預設的一個座標單位", () => {
-    const frameRule = source.match(/\.uv-map__inset-label-frame \{([^}]*)\}/);
-
-    expect(frameRule?.[1]).toMatch(
-      /stroke-width:\s*var\(--uv-distribution-map-inset-frame-stroke-width\);/
-    );
+  it("不輸出 SVG 矩形框，避免不同瀏覽器將描邊放大成色塊", () => {
+    expect(source).not.toContain("uv-map__inset-label-frame");
   });
 });

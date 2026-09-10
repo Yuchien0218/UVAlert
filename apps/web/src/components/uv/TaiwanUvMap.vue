@@ -48,15 +48,12 @@ interface InsetConfig {
   readonly scale: number;
   readonly xRatio: number;
   readonly yRatio: number;
-  readonly labelWidth: number;
-  readonly labelHeight: number;
-  readonly labelYOffset: number;
 }
 
 /* 離島的投影位置、比例與標籤集中管理，模板不依縣市碼分支。 */
 const INSET_CONFIGS: readonly InsetConfig[] = [
-  { countyCode: "09020", label: "金門", scale: 2, xRatio: 0.04, yRatio: 0.82, labelWidth: 0.34, labelHeight: 0.16, labelYOffset: -0.12 },
-  { countyCode: "09007", label: "馬祖", scale: 3, xRatio: 0.04, yRatio: 0.1, labelWidth: 0.34, labelHeight: 0.16, labelYOffset: -0.12 }
+  { countyCode: "09020", label: "金門", scale: 2, xRatio: 0.04, yRatio: 0.82 },
+  { countyCode: "09007", label: "馬祖", scale: 3, xRatio: 0.04, yRatio: 0.1 }
 ];
 const insetConfigByCounty = new Map(
   INSET_CONFIGS.map((config) => [config.countyCode, config])
@@ -213,14 +210,14 @@ const marker = computed(() => {
       :style="shape.risk === null ? undefined : getUvRiskVisualStyle(shape.risk)"
     />
 
-    <g
+    <text
       v-for="inset in insetLabels"
       :key="inset.countyCode"
+      class="uv-map__inset-label"
       :data-county-code="inset.countyCode"
-    >
-      <rect class="uv-map__inset-label-frame" :x="inset.x" :y="inset.y + inset.labelYOffset" :width="inset.labelWidth" :height="inset.labelHeight" />
-      <text class="uv-map__inset-label" :x="inset.x" :y="inset.y">{{ inset.label }}</text>
-    </g>
+      :x="inset.x"
+      :y="inset.y"
+    >{{ inset.label }}</text>
 
     <!--
       定位標記用一個小環而不是描邊整個縣市：資料是鄉鎮環的集合，描邊會把
@@ -273,13 +270,6 @@ const marker = computed(() => {
 .uv-map__county--unknown {
   fill: var(--color-untimed-soft, var(--surface-soft));
   stroke: var(--color-untimed-soft, var(--surface-soft));
-}
-
-.uv-map__inset-label-frame {
-  fill: var(--surface-primary);
-  stroke: var(--border-subtle);
-  stroke-width: var(--uv-distribution-map-inset-frame-stroke-width);
-  rx: var(--radius-xs);
 }
 
 .uv-map__inset-label {
