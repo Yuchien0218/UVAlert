@@ -83,6 +83,19 @@ export function getUvRiskLevelLabel(riskLevel: UvRiskLevel): string {
   return getUvRiskPresentation(riskLevel).label;
 }
 
+export const UV_RISK_LEVEL_ADVICE: Readonly<Record<UvRiskLevel, string>> = {
+  low: "一般情況下防護需求較低，但長時間戶外仍可採取遮蔽",
+  moderate: "戶外活動建議開始安排基本防護",
+  high: "應更積極使用遮蔭、衣物、帽子、眼鏡與防曬乳",
+  very_high: "盡量避開強烈日曬時段，若需外出應採取完整防護",
+  extreme: "優先減少烈日下活動，外出時採取完整防護"
+};
+
+export function getUvRiskLevelAdvice(riskLevel: UvRiskLevel): string {
+  return UV_RISK_LEVEL_ADVICE[riskLevel];
+}
+
+
 export function getHighestForecastDay(
   forecast: FiveDayUvForecast
 ): FiveDayUvForecast["days"][number] {

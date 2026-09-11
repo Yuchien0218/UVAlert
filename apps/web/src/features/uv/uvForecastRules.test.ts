@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import {
   getEveningCycleKey,
   getHighestForecastDay,
+  getUvRiskLevelAdvice,
   getUvRiskLevelLabel,
   isFixedEvening,
   selectUpcomingForecast,
@@ -51,6 +52,16 @@ describe("fixed evening and five-day UV rules", () => {
     ["extreme", "危險級"]
   ] as const)("保留共享分級名稱：%s", (riskLevel, label) => {
     expect(getUvRiskLevelLabel(riskLevel)).toBe(label);
+  });
+
+  it.each([
+    ["low", "一般情況下防護需求較低，但長時間戶外仍可採取遮蔽"],
+    ["moderate", "戶外活動建議開始安排基本防護"],
+    ["high", "應更積極使用遮蔭、衣物、帽子、眼鏡與防曬乳"],
+    ["very_high", "盡量避開強烈日曬時段，若需外出應採取完整防護"],
+    ["extreme", "優先減少烈日下活動，外出時採取完整防護"]
+  ] as const)("提供對應的白話防護提醒：%s", (riskLevel, advice) => {
+    expect(getUvRiskLevelAdvice(riskLevel)).toBe(advice);
   });
 
   /*

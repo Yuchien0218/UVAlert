@@ -188,3 +188,28 @@ describe("HomeUvHeadline 的五日預報入口", () => {
     expect(wrapper.find(".uv-headline__more").exists()).toBe(false);
   });
 });
+
+describe("HomeUvHeadline 數字下方的白話防護小字說明", () => {
+  it.each([
+    ["low", 1, "一般情況下防護需求較低，但長時間戶外仍可採取遮蔽"],
+    ["moderate", 4, "戶外活動建議開始安排基本防護"],
+    ["high", 7, "應更積極使用遮蔭、衣物、帽子、眼鏡與防曬乳"],
+    ["very_high", 9, "盡量避開強烈日曬時段，若需外出應採取完整防護"],
+    ["extreme", 12, "優先減少烈日下活動，外出時採取完整防護"]
+  ] as const)(
+    "當 UV 等級為 %s 時，在數字下方顯示對應的說明小字",
+    (riskLevel, uvi, advice) => {
+      const wrapper = mountHeadline(riskLevel, uvi);
+
+      const adviceEl = wrapper.get(".uv-headline__advice");
+      expect(adviceEl.text()).toBe(advice);
+    }
+  );
+
+  it("沒有 UV 資料時不顯示說明小字", () => {
+    const wrapper = mountHeadline(null, null);
+
+    expect(wrapper.find(".uv-headline__advice").exists()).toBe(false);
+  });
+});
+

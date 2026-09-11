@@ -2,7 +2,10 @@
 import type { UvRiskLevel } from "@sunshield/contracts";
 import { computed } from "vue";
 import ChevronLink from "../common/ChevronLink.vue";
-import { getUvRiskLevelLabel } from "../../features/uv/uvForecastRules";
+import {
+  getUvRiskLevelAdvice,
+  getUvRiskLevelLabel
+} from "../../features/uv/uvForecastRules";
 
 /**
  * 首屏的 UV 標題區塊。
@@ -83,6 +86,10 @@ const hasValue = computed(() => props.uvi !== null && props.riskLevel !== null);
         五日預報
       </ChevronLink>
     </div>
+
+    <p v-if="hasValue" class="uv-headline__advice">
+      {{ getUvRiskLevelAdvice(riskLevel!) }}
+    </p>
 
     <!--
       沒有資料時不顯示 0，也不顯示「--」。0 是一個合法的 UV 值，
@@ -218,6 +225,13 @@ const hasValue = computed(() => props.uvi !== null && props.riskLevel !== null);
   margin: 0;
   color: var(--text-secondary);
   font-size: var(--font-size-supporting);
+}
+
+.uv-headline__advice {
+  margin: 0;
+  color: var(--text-secondary);
+  font-size: var(--font-size-caption);
+  line-height: var(--line-height-caption);
 }
 
 .uv-headline__note {
