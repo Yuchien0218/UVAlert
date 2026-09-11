@@ -40,12 +40,12 @@ begin
     raise exception 'VALIDATION_ERROR' using errcode = '22023';
   end if;
 
-  select response
+  select sync_receipt.response
     into receipt_response
-    from public.sync_idempotency_receipts
-   where user_id = p_user_id
-     and operation = 'commit'
-     and idempotency_key = p_idempotency_key;
+    from public.sync_idempotency_receipts as sync_receipt
+   where sync_receipt.user_id = p_user_id
+     and sync_receipt.operation = 'commit'
+     and sync_receipt.idempotency_key = p_idempotency_key;
   if receipt_response is not null then
     return receipt_response;
   end if;
@@ -253,12 +253,12 @@ begin
     raise exception 'VALIDATION_ERROR' using errcode = '22023';
   end if;
 
-  select response
+  select sync_receipt.response
     into receipt_response
-    from public.sync_idempotency_receipts
-   where user_id = p_user_id
-     and operation = 'delete'
-     and idempotency_key = p_idempotency_key;
+    from public.sync_idempotency_receipts as sync_receipt
+   where sync_receipt.user_id = p_user_id
+     and sync_receipt.operation = 'delete'
+     and sync_receipt.idempotency_key = p_idempotency_key;
   if receipt_response is not null then
     return receipt_response;
   end if;

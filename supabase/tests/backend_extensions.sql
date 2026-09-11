@@ -1,6 +1,6 @@
 begin;
 
-select plan(9);
+select plan(11);
 
 select has_column(
   'public',
@@ -33,6 +33,24 @@ select ok(
       and pronargs = 4
   ),
   'atomic sync delete function exists'
+);
+select ok(
+  position(
+    'sync_receipt.response'
+    in pg_get_functiondef(
+      'public.commit_sync_batch(uuid,text,jsonb,jsonb,timestamp with time zone)'::regprocedure
+    )
+  ) > 0,
+  'atomic sync commit reads the idempotency receipt without a variable conflict'
+);
+select ok(
+  position(
+    'sync_receipt.response'
+    in pg_get_functiondef(
+      'public.delete_sync_batch(uuid,text,jsonb,timestamp with time zone)'::regprocedure
+    )
+  ) > 0,
+  'atomic sync delete reads the idempotency receipt without a variable conflict'
 );
 select ok(
   exists (
