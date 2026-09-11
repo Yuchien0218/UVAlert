@@ -78,6 +78,7 @@ export class LocalProductCatalogRepository implements ProductCatalogPort {
       shadingRate: input.shadingRate ?? null,
       weight: input.weight ?? null,
       hatStyle: input.hatStyle ?? null,
+      uvProtection: input.uvProtection ?? null,
       archivedAt: existing?.archivedAt ?? null,
       createdAt: existing?.createdAt ?? input.now,
       updatedAt: input.now,

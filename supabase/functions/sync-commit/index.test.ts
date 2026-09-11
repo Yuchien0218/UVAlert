@@ -270,6 +270,7 @@ function parityFixtures(): Record<string, unknown>[] {
         shadingRate: null,
         weight: null,
         hatStyle: null,
+        uvProtection: null,
         archivedAt: null,
         createdAt: started.effectiveOccurredAt,
         updatedAt: started.effectiveOccurredAt,

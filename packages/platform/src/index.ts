@@ -7,6 +7,7 @@ import type {
   ProductLabelSnapshotV1,
   GearCategory,
   ShadingRate,
+  UvProtection,
   ProductCatalogRecordV1,
   RegionPreferenceV1,
   ReapplyCommandV1,
@@ -206,6 +207,8 @@ export interface SaveProductInput {
   weight?: string | null;
   /** 2026-09-11：純紀錄，不進 reducer。帽款（例如 漁夫帽、棒球帽）。 */
   hatStyle?: string | null;
+  /** 2026-09-11：純紀錄，不進 reducer。太陽眼鏡抗 UV 規格（例如 uv400、100_percent、uv380）。 */
+  uvProtection?: UvProtection | null;
   now: string;
 }
 

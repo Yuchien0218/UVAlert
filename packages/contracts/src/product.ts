@@ -177,6 +177,15 @@ export const ShadingRateSchema = z.enum([
 
 export type ShadingRate = z.infer<typeof ShadingRateSchema>;
 
+/** 太陽眼鏡抗 UV 規格。 */
+export const UvProtectionSchema = z.enum([
+  "uv400",
+  "100_percent",
+  "uv380"
+]);
+
+export type UvProtection = z.infer<typeof UvProtectionSchema>;
+
 /** 只有這兩個品類需要產品身分確認與包裝標示欄位（S-12）。 */
 export const GEAR_CATEGORIES_WITH_LABEL: readonly GearCategory[] = [
   "sunscreen",
@@ -322,6 +331,11 @@ export const ProductCatalogRecordV1Schema = z.object({
    * 帽子專屬欄位。
    */
   hatStyle: z.string().trim().max(30).nullable().default(null),
+  /**
+   * 太陽眼鏡抗 UV 規格（uv400、100_percent、uv380）。不進 reducer。
+   * 太陽眼鏡專屬欄位。
+   */
+  uvProtection: UvProtectionSchema.nullable().default(null),
   /** 「過去用過」的時間戳，不進 reducer。 */
   archivedAt: z.string().datetime({ offset: true }).nullable().default(null),
   createdAt: z.string().datetime({ offset: true }),

@@ -313,6 +313,57 @@ describe("ProductCatalogRecordV1Schema", () => {
       }).success
     ).toBe(true);
   });
+
+  it("支援太陽眼鏡 uvProtection 欄位並校驗選項", () => {
+    const base = {
+      schemaVersion: PRODUCT_CATALOG_RECORD_VERSION,
+      productId: "eyewear-1",
+      displayName: "墨鏡",
+      gearCategory: "eyewear" as const,
+      currentSnapshot: {
+        snapshotVersion: PRODUCT_LABEL_SNAPSHOT_VERSION,
+        identityStatus: "confirmed" as const,
+        expiryStatus: "unknown" as const,
+        conditionStatus: "no_issue_reported" as const,
+        sunscreenClaimStatus: "no_claim" as const,
+        ruleEligibilityAtApplication: "no_sunscreen_claim" as const,
+        reapplicationIntervalStatus: "no_numeric_interval" as const,
+        reapplicationIntervalMinutes: null,
+        preExposureWaitStatus: "no_instruction" as const,
+        preExposureWaitMinutes: null,
+        waterResistanceStatus: "no_claim" as const,
+        waterResistanceMinutes: null,
+        spf: null,
+        paGrade: null,
+        capturedAt: "2026-08-01T08:00:00.000Z"
+      },
+      snapshotFingerprint: "fingerprint-eyewear",
+      createdAt: "2026-08-01T08:00:00.000Z",
+      updatedAt: "2026-08-01T08:00:00.000Z",
+      status: "active" as const
+    };
+
+    expect(
+      ProductCatalogRecordV1Schema.safeParse({
+        ...base,
+        uvProtection: "uv400"
+      }).success
+    ).toBe(true);
+
+    expect(
+      ProductCatalogRecordV1Schema.safeParse({
+        ...base,
+        uvProtection: "100_percent"
+      }).success
+    ).toBe(true);
+
+    expect(
+      ProductCatalogRecordV1Schema.safeParse({
+        ...base,
+        uvProtection: "invalid_uv"
+      }).success
+    ).toBe(false);
+  });
 });
 
 describe("deriveExpiryStatus", () => {

@@ -613,6 +613,7 @@ const productPayload = object({
   shadingRate: optionalNull(choice("complete", "grade_1", "grade_2", "grade_3")),
   weight: optionalNull(textRule(0, 20)),
   hatStyle: optionalNull(textRule(0, 30)),
+  uvProtection: optionalNull(choice("uv400", "100_percent", "uv380")),
   archivedAt: optionalNull(offsetInstant),
   createdAt: offsetInstant,
   updatedAt: offsetInstant,
