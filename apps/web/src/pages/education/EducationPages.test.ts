@@ -177,7 +177,7 @@ describe("衛教分類的圖示版型", () => {
     );
   });
 
-  it("分類卡的圖示與標題在同一列", async () => {
+  it("分類卡的圖示、標題與說明文字在同一個 IconLead 排版中", async () => {
     const router = makeRouter(EducationIndexPage, "/education");
     await router.push("/education");
     await router.isReady();
@@ -190,15 +190,18 @@ describe("衛教分類的圖示版型", () => {
      *
      * 2026-08-31 從六張變五張：hero 搬出卡片列表改成橫幅，不再是
      * `.education-category-card`。橫幅另有自己的守門（見下方）。
+     * 2026-09-11：說明文字也搬進 IconLead，與標題左對齊，圖示對齊兩行中間。
      */
     const cards = wrapper.findAll("a.education-category-card");
     expect(cards).toHaveLength(5);
 
     for (const card of cards) {
       const lead = card.get(".icon-lead");
-      // 標題必須在 IconLead 裡面，不是它的兄弟節點——那才是「同一列」。
+      // 標題與說明文字都必須在 IconLead 裡面，不是它的兄弟節點
       expect(lead.find("strong").exists()).toBe(true);
+      expect(lead.find("small").exists()).toBe(true);
       expect(lead.find("svg").exists()).toBe(true);
+      expect(card.find(".education-card-titles").exists()).toBe(true);
     }
   });
 

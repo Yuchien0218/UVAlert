@@ -130,8 +130,8 @@ const robots = computed(() =>
       :to="educationCategoryPath(heroCard.slug)"
     >
       <IconLead :icon="heroCard.icon">
-        <span class="education-hero-banner__body">
-          <span class="education-hero-banner__titles">
+        <span class="education-card-body education-hero-banner__body">
+          <span class="education-card-titles education-hero-banner__titles">
             <strong>{{ heroCard.title }}</strong>
             <span class="education-card-kicker">先從這裡開始</span>
           </span>
@@ -160,21 +160,19 @@ const robots = computed(() =>
         >
           <!--
             2026-09-03：篇數藥丸從標題**上方**移到標題**右邊**。
-
-            疊在上方時它把標題往下推，而 `IconLead` 的 40px 圖示是對整個
-            文字區塊垂直置中——於是圖示既不對齊藥丸也不對齊標題（實測圖示
-            中心 528、標題中心 542，差 14px）。放到同一行之後，圖示對齊的
-            就是標題本身。
+            2026-09-11：說明文字移至 IconLead 內部左對齊標題，與 hero 橫幅結構一致。
           -->
           <IconLead :icon="category.icon">
-            <span class="education-category-card__titles">
-              <strong>{{ category.title }}</strong>
-              <span class="education-card-kicker"
-                >{{ category.articleCount }} 篇文章</span
-              >
+            <span class="education-card-body education-category-card__body">
+              <span class="education-card-titles education-category-card__titles">
+                <strong>{{ category.title }}</strong>
+                <span class="education-card-kicker"
+                  >{{ category.articleCount }} 篇文章</span
+                >
+              </span>
+              <small>{{ category.description }}</small>
             </span>
           </IconLead>
-          <small>{{ category.description }}</small>
         </RouterLink>
       </nav>
     </section>
@@ -279,8 +277,7 @@ const robots = computed(() =>
  * 一列，卡片反而從 175px 長到 189px——空柱子沒了，卻換來一整列空行。
  */
 .education-category-card {
-  display: grid;
-  gap: var(--space-2);
+  display: block;
   padding: var(--card-padding);
   color: inherit;
   text-decoration: none;
@@ -288,7 +285,7 @@ const robots = computed(() =>
 
 /*
  * 2026-08-30：hero 卡。規格見 DESIGN.md 第五節 education-hero-card——
- * cream-strong 底、襯線 page-title、內距 24px。
+ * cream-strong 底、內距 20px。
  *
  * kicker 用「先從這裡開始」取代其他五張卡的「N 篇文章」，是刻意的取捨：
  * hero 的任務是當新使用者的起點（2026-08-09 訪談裁決、2026-08-14 再確認），
@@ -308,6 +305,7 @@ const robots = computed(() =>
   text-decoration: none;
 }
 
+.education-card-body,
 .education-hero-banner__body {
   display: grid;
   gap: var(--space-1);
@@ -321,14 +319,15 @@ const robots = computed(() =>
 }
 
 /*
- * 標題與標籤同一行。`baseline` 對齊，避免字級差異導致小字飄浮。
+ * 標題與標籤同一行。`center` 垂直置中對齊，讓膠囊與標題在同一水平中線上。
  * `wrap` 確保窄螢幕折行。
  */
+.education-card-titles,
 .education-hero-banner__titles,
 .education-category-card__titles {
   display: flex;
   flex-wrap: wrap;
-  align-items: baseline;
+  align-items: center;
   gap: var(--space-2);
 }
 
