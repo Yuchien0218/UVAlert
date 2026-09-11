@@ -22,6 +22,7 @@ import { getUvRiskVisualStyle, UV_RISK_PRESENTATIONS } from "../../features/uv/u
 .uv-risk-legend {
   display: flex;
   flex-wrap: wrap;
+  justify-content: center;
   gap: var(--uv-distribution-row-gap) var(--uv-distribution-column-gap);
   margin: 0;
   padding: 0;
