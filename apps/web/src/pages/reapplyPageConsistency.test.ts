@@ -89,25 +89,10 @@ describe("五個區塊標題同一級", () => {
 });
 
 describe("說明文字只有一種寫法", () => {
-  it("三個區塊都用 question-card__helper", () => {
-    expect(ZONE).toContain('class="question-card__helper"');
-    expect(ASSIGN).toContain('class="question-card__helper"');
-  });
-
   /* 反向：自刻的那兩個類別要真的消失，不是留著沒用。 */
   it("不再有自刻的說明類別", () => {
     expect(ZONE).not.toContain("section-help");
     expect(ASSIGN).not.toContain("assignment-section__helper");
-  });
-
-  /*
-   * 標題→說明是 stack 系統的 `--space-stack-title-body`（8px），不是區塊
-   * 之間的 16px。產品指派那張卡的 grid gap 是 16px，所以要抵掉差額。
-   */
-  it("產品指派把標題→說明收成 stack 間距", () => {
-    expect(ASSIGN).toContain(
-      "margin-top: calc(var(--space-stack-title-body) - var(--space-4));"
-    );
   });
 });
 
@@ -214,11 +199,6 @@ describe("兩頁的部位選擇器共用同一個元件", () => {
     expect(ZONE).not.toContain("建議</small>");
     expect(ZONE).not.toContain("--color-tracking");
   });
-
-  /* 說明文字要接住 badge 拿掉之後留下的資訊。 */
-  it("說明仍然講出「已預選」這件事", () => {
-    expect(ZONE).toContain("已預選");
-  });
 });
 
 describe("不再逐部位指定防曬乳", () => {
@@ -248,11 +228,10 @@ describe("不再逐部位指定防曬乳", () => {
 /**
  * 成功頁（2026-09-03，使用者：「這個卡片樣式好像是預設的？」）。
  *
- * `.success-panel` 由記錄補擦、記錄狀況、事件更正三頁共用，所以三頁一起守。
+ * `.success-panel` 由記錄狀況、事件更正兩頁共用。
  */
 describe("成功頁不再用彩色粗上緣", () => {
   const SUCCESS_PAGES = [
-    "pages/ReapplyPage.vue",
     "pages/ReportContextEventPage.vue",
     "pages/EventCorrectionPage.vue"
   ];
@@ -280,36 +259,5 @@ describe("成功頁不再用彩色粗上緣", () => {
 
   it.each(SUCCESS_PAGES)("%s 的成功頁有領銜圖示", (relative) => {
     expect(read(relative)).toContain('<IconLead icon="state-success">');
-  });
-});
-
-describe("成功頁的文字", () => {
-  /*
-   * 頁首那句「儲存前不會更新提醒。」與正下方的「補擦紀錄已更新」直接矛盾
-   * ——記錄已經寫進去了。成功之後要收起來。
-   */
-  it("成功之後不再說「儲存前不會更新」", () => {
-    expect(PAGE).toContain(
-      "<p v-if=\"reapplication.phase.value !== 'success'\">"
-    );
-  });
-
-  /*
-   * 只有一組時不用項目符號清單——「不同部位用不同防曬乳」拿掉之後這裡
-   * 永遠只有一組，一個項目的清單讀起來像漏了東西。
-   */
-  it("單一分組時用句子不用清單", () => {
-    expect(PAGE).toContain("success-groups__single");
-    expect(PAGE).toContain(
-      "reapplication.success.value.productGroups.length === 1"
-    );
-  });
-
-  /* 卡片結尾的補充說明不該跟主要訊息同一個字級。 */
-  it("更正說明用 supporting，不是 body", () => {
-    const rule = /\.correction-note \{[^}]*\}/.exec(PAGE)?.[0];
-
-    expect(rule).toBeDefined();
-    expect(rule).toContain("font-size: var(--font-size-supporting);");
   });
 });

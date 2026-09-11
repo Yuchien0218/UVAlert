@@ -7,11 +7,8 @@ import ReapplyReasonPicker from "../components/reapplication/ReapplyReasonPicker
 import ReapplicationProductAssignments from "../components/reapplication/ReapplicationProductAssignments.vue";
 import QuickTimePicker from "../components/common/QuickTimePicker.vue";
 import ReapplicationReview from "../components/reapplication/ReapplicationReview.vue";
-import { getZoneLabel } from "../features/reminder/reminderPresentation";
 import { firstInvalidReapplicationField } from "../features/reapplication/createReapplicationController";
-import { formatDateTime } from "../helpers/datetime";
 import IconButton from "../components/common/IconButton.vue";
-import IconLead from "../components/common/IconLead.vue";
 import InlineLoader from "../components/feedback/InlineLoader.vue";
 
 const { reapplication } = useWebAppServices();
@@ -28,20 +25,8 @@ watch(
     if (value === "not_found") void router.replace({ name: "home" });
   }
 );
-watch(
-  () => reapplication.phase.value,
-  async (value) => {
-    if (value === "success") {
-      await nextTick();
-      document.querySelector<HTMLElement>("#reapply-success-title")?.focus();
-    }
-  }
-);
 
 function cancel(): void {
-  void router.push({ name: "home" });
-}
-function finish(): void {
   void router.push({ name: "home" });
 }
 /**
@@ -56,7 +41,11 @@ function goToReport(): void {
 
 async function submit(): Promise<void> {
   const submitted = await reapplication.submit();
-  if (submitted || reapplication.error.value !== "validation") return;
+  if (submitted) {
+    void router.push({ name: "home" });
+    return;
+  }
+  if (reapplication.error.value !== "validation") return;
 
   await nextTick();
   const field = firstInvalidReapplicationField(reapplication.fieldErrors.value);
@@ -74,17 +63,6 @@ async function submit(): Promise<void> {
     block: "center"
   });
 }
-
-function zoneNames(zoneIds: string[]): string {
-  return zoneIds
-    .map((zoneId) => {
-      const zone = reapplication.session.value?.zones.find(
-        (item) => item.zoneInstanceId === zoneId
-      );
-      return zone ? getZoneLabel(zone) : zoneId;
-    })
-    .join("、");
-}
 </script>
 
 <template>
@@ -100,14 +78,7 @@ function zoneNames(zoneIds: string[]): string {
         -->
       </div>
       <IconButton icon="tool-close" label="返回提醒" @click="cancel" />
-      <!--
-        2026-09-03：成功之後這句要收起來。它與正下方的「補擦紀錄已更新」
-        直接矛盾——記錄已經寫進去了，「儲存前不會更新」不再成立。
-
-        同日搬出上面那個 div：說明在圖示鈕下方，不必為按鈕讓出寬度，
-        `.flow-heading > p` 讓它橫跨兩欄。
-      -->
-      <p v-if="reapplication.phase.value !== 'success'">
+      <p>
         儲存前不會更新提醒。
       </p>
     </header>
@@ -115,79 +86,6 @@ function zoneNames(zoneIds: string[]): string {
     <p v-if="reapplication.phase.value === 'loading'" role="status">
       正在讀取目前部位與防曬乳…
     </p>
-
-    <section
-      v-else-if="
-        reapplication.phase.value === 'success' && reapplication.success.value
-      "
-      class="app-card success-panel"
-    >
-      <!--
-        2026-09-03：「已儲存」的訊號從彩色粗上緣改成領銜圖示
-        （`state-success` 的 `<title>` 本來就是「已儲存」）。理由見 app.css
-        的 `.success-panel`。
-      -->
-      <IconLead icon="state-success">
-      <h2
-        id="reapply-success-title"
-        data-typography-role="card-title"
-        tabindex="-1"
-      >
-        補擦紀錄已更新
-      </h2>
-      </IconLead>
-      <p>
-        已更新 {{ reapplication.success.value.zoneIds.length }} 個部位，{{
-          formatDateTime(reapplication.success.value.appliedAt)
-        }}。其他未選的部位維持原本狀態。
-      </p>
-      <!--
-        2026-09-03：只有一組時不用清單。「不同部位用不同防曬乳」拿掉之後
-        這裡永遠只有一組，一個項目的項目符號清單讀起來像漏了東西。
-      -->
-      <p
-        v-if="reapplication.success.value.productGroups.length === 1"
-        class="success-groups__single user-text"
-      >
-        <strong>{{
-          reapplication.success.value.productGroups[0]?.displayName
-        }}</strong
-        >：{{
-          zoneNames(reapplication.success.value.productGroups[0]?.zoneIds ?? [])
-        }}
-      </p>
-      <ul v-else class="success-groups user-text">
-        <li
-          v-for="group in reapplication.success.value.productGroups"
-          :key="`${group.displayName}-${group.zoneIds.join('-')}`"
-        >
-          <strong>{{ group.displayName }}</strong
-          >：{{ zoneNames(group.zoneIds) }}
-        </li>
-      </ul>
-      <div
-        v-if="reapplication.error.value === 'refresh_failed'"
-        class="refresh-warning"
-        role="alert"
-      >
-        <p>
-          補擦紀錄已儲存，但目前提醒尚未重新讀取。重新整理只會讀取已提交結果，不會再次送出補擦紀錄。
-        </p>
-        <button
-          class="button button--quiet"
-          type="button"
-          @click="reapplication.refreshCommitted"
-        >
-          重新整理提醒
-        </button>
-      </div>
-      <button class="button button--primary" type="button" @click="finish">
-        返回目前提醒
-      </button>
-      <p class="correction-note">
-        若紀錄有誤，稍後可至事件更正功能處理。本頁不會直接改寫已提交之紀錄。
-      </p>
-    </section>
 
     <template v-else-if="reapplication.session.value">
       <!--
@@ -324,43 +222,5 @@ function zoneNames(zoneIds: string[]): string {
 }
 .submit-error p {
   margin: 0;
-}
-/*
- * 2026-09-03：body(16px) → supporting(14px)。它是卡片結尾的補充說明，
- * 跟主要訊息同一個字級會讓兩者讀起來一樣重要。
- */
-.correction-note {
-  color: var(--text-secondary);
-  font-size: var(--font-size-supporting);
-  line-height: var(--line-height-body);
-}
-
-.success-groups__single {
-  margin: 0;
-  line-height: var(--line-height-body);
-}
-.success-groups {
-  margin: 0;
-  padding-inline-start: var(--space-5);
-  line-height: var(--line-height-body);
-}
-/*
- * 2026-08-24：原本用 --color-untimed-soft（「未計時」狀態色）。這是
- * role="alert" 的真警告（紀錄已存但提醒沒重讀），跟「未計時」無關；
- * 改用 --color-soon-soft，跟 ProductSnapshotEditor 的 .identity-warning
- * 一致——soon 是這套系統裡的警告色。untimed 今天剛從紫色改成中性灰，
- * 留著只會更像未套樣式。
- */
-.refresh-warning {
-  display: grid;
-  justify-items: start;
-  gap: var(--space-3);
-  padding: var(--space-4);
-  border-radius: var(--radius-sm);
-  background: var(--color-soon-soft);
-}
-.refresh-warning p {
-  margin: 0;
-  line-height: var(--line-height-body);
 }
 </style>

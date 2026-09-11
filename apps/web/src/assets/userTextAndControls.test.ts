@@ -47,8 +47,7 @@ describe("使用者輸入的字不會撐開版面", () => {
   it.each([
     ["apps/web/src/components/product/GearListItem.vue", "裝備名稱"],
     ["apps/web/src/components/reminder/ZoneSelectorGrid.vue", "部位藥丸"],
-    ["apps/web/src/components/reminder/ZoneStatusList.vue", "部位狀態藥丸"],
-    ["apps/web/src/pages/ReapplyPage.vue", "補擦成功卡的防曬乳名稱"]
+    ["apps/web/src/components/reminder/ZoneStatusList.vue", "部位狀態藥丸"]
   ])("%s（%s）套了 .user-text", (file) => {
     expect(read(file)).toContain("user-text");
   });

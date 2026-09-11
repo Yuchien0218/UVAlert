@@ -27,7 +27,6 @@ const emit = defineEmits<{
     :aria-describedby="error ? 'zone-selection-error' : undefined"
   >
     <legend>補擦哪些部位？</legend>
-    <p class="question-card__helper">已預選全部部位。</p>
     <div class="button-group mode-actions">
       <button
         class="button button--quiet"
