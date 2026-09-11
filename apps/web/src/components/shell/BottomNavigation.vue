@@ -6,7 +6,8 @@ import Icon from "../icons/Icon.vue";
 const { boot } = useWebAppServices();
 
 const navigationItems = [
-  { to: "/", label: "提醒", icon: "nav-reminder" },
+  { to: "/forecast", label: "UV", icon: "feature-uv-forecast" },
+  { to: "/reminder", label: "提醒", icon: "nav-reminder" },
   { to: "/products", label: "裝備", icon: "nav-gear" },
   { to: "/more", label: "更多", icon: "nav-more" }
 ] as const;
@@ -20,7 +21,7 @@ const hasDueReminder = computed(() => {
 // 紅點是 aria-hidden 的純視覺標記，所以「有部位到期」這個資訊必須進到
 // 連結本身的可及名稱，否則螢幕閱讀器使用者完全收不到。
 function navigationLabel(to: string, label: string): string {
-  return to === "/" && hasDueReminder.value
+  return to === "/reminder" && hasDueReminder.value
     ? `${label}（有部位建議現在補擦）`
     : label;
 }
@@ -39,7 +40,7 @@ function navigationLabel(to: string, label: string): string {
       <div class="bottom-nav__icon-wrapper">
         <Icon :name="item.icon" :size="24" />
         <div
-          v-if="item.to === '/' && hasDueReminder"
+          v-if="item.to === '/reminder' && hasDueReminder"
           class="bottom-nav__badge"
           data-testid="bottom-nav-badge"
           aria-hidden="true"
@@ -74,7 +75,7 @@ function navigationLabel(to: string, label: string): string {
    */
   max-width: var(--app-shell-max);
   min-height: calc(var(--bottom-nav-height) + env(safe-area-inset-bottom));
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(4, 1fr);
   margin-inline: auto;
   padding: var(--space-2) max(var(--space-2), env(safe-area-inset-right))
     calc(var(--space-2) + env(safe-area-inset-bottom))

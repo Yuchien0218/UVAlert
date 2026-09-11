@@ -22,17 +22,17 @@ describe("BottomNavigation", () => {
       }
     } as unknown as WebAppServices);
   });
-  it("提供提醒、裝備與更多三個主要入口", async () => {
+  it("提供 UV、提醒、裝備與更多四個主要入口", async () => {
     const router = createRouter({
       history: createMemoryHistory(),
       routes: [
-        { path: "/", component: { template: "<div />" } },
+        { path: "/forecast", component: { template: "<div />" } },
         { path: "/reminder", component: { template: "<div />" } },
         { path: "/products", component: { template: "<div />" } },
         { path: "/more", component: { template: "<div />" } }
       ]
     });
-    await router.push("/");
+    await router.push("/forecast");
     await router.isReady();
 
     const wrapper = mount(BottomNavigation, {
@@ -42,7 +42,8 @@ describe("BottomNavigation", () => {
 
     expect(links.map((link) => [link.text(), link.attributes("href")])).toEqual(
       [
-        ["提醒", "/"],
+        ["UV", "/forecast"],
+        ["提醒", "/reminder"],
         ["裝備", "/products"],
         ["更多", "/more"]
       ]
@@ -59,13 +60,13 @@ describe("BottomNavigation", () => {
     const router = createRouter({
       history: createMemoryHistory(),
       routes: [
-        { path: "/", component: { template: "<div />" } },
+        { path: "/forecast", component: { template: "<div />" } },
         { path: "/reminder", component: { template: "<div />" } },
         { path: "/products", component: { template: "<div />" } },
         { path: "/more", component: { template: "<div />" } }
       ]
     });
-    await router.push("/");
+    await router.push("/forecast");
     await router.isReady();
 
     const wrapper = mount(BottomNavigation, {
@@ -134,13 +135,13 @@ describe("BottomNavigation", () => {
     const router = createRouter({
       history: createMemoryHistory(),
       routes: [
-        { path: "/", component: { template: "<div />" } },
+        { path: "/forecast", component: { template: "<div />" } },
         { path: "/reminder", component: { template: "<div />" } },
         { path: "/products", component: { template: "<div />" } },
         { path: "/more", component: { template: "<div />" } }
       ]
     });
-    await router.push("/");
+    await router.push("/forecast");
     await router.isReady();
 
     const wrapper = mount(BottomNavigation, {
@@ -153,7 +154,7 @@ describe("BottomNavigation", () => {
     // 紅點是 aria-hidden 的純視覺標記，狀態必須另外進到可及名稱，
     // 否則顏色與形狀就是唯一載體。
     expect(badge.attributes("aria-hidden")).toBe("true");
-    expect(wrapper.get('a[href="/"]').attributes("aria-label")).toBe(
+    expect(wrapper.get('a[href="/reminder"]').attributes("aria-label")).toBe(
       "提醒（有部位建議現在補擦）"
     );
   });
