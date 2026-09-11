@@ -49,7 +49,6 @@ function returnToCaller(): Promise<unknown> {
 <template>
   <div class="page-stack region-page">
     <header class="page-heading">
-      <p class="page-heading__eyebrow eyebrow--mono">地區／本機資料</p>
       <h1 class="page-heading__title" data-typography-role="page-title">
         地區設定
       </h1>
@@ -127,7 +126,6 @@ function returnToCaller(): Promise<unknown> {
   padding-bottom: var(--space-6);
 }
 
-.page-heading__eyebrow,
 /*
  * 兩條備援路徑並排成文字連結。它們是「主要路徑走不通時的出口」，不是
  * 三選一的等重選項——所以不做成卡片，只用一條 hairline 跟上面分開。

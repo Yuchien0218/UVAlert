@@ -203,4 +203,15 @@ describe("RegionPage", () => {
 
     expect(region.skipRegion).toHaveBeenCalledOnce();
   });
+
+  it("頁首不呈現眉標（eyebrow）與上方水平線", async () => {
+    vi.mocked(useWebAppServices).mockReturnValue({
+      region: makeRegionService(),
+      uvForecast: makeUvForecastService()
+    } as unknown as WebAppServices);
+    const { wrapper } = await mountPage();
+
+    expect(wrapper.find(".page-heading__eyebrow").exists()).toBe(false);
+    expect(wrapper.text()).not.toContain("地區／本機資料");
+  });
 });
