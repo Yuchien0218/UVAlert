@@ -195,6 +195,124 @@ describe("ProductCatalogRecordV1Schema", () => {
       }).success
     ).toBe(false);
   });
+
+  it("支援陽傘與帽子品類及其專屬規格欄位", () => {
+    const umbrella = ProductCatalogRecordV1Schema.parse({
+      schemaVersion: PRODUCT_CATALOG_RECORD_VERSION,
+      productId: "umbrella-1",
+      displayName: "輕量抗UV陽傘",
+      gearCategory: "umbrella",
+      currentSnapshot: {
+        snapshotVersion: PRODUCT_LABEL_SNAPSHOT_VERSION,
+        identityStatus: "confirmed",
+        expiryStatus: "unknown",
+        conditionStatus: "no_issue_reported",
+        sunscreenClaimStatus: "no_claim",
+        ruleEligibilityAtApplication: "no_sunscreen_claim",
+        reapplicationIntervalStatus: "no_numeric_interval",
+        reapplicationIntervalMinutes: null,
+        preExposureWaitStatus: "no_instruction",
+        preExposureWaitMinutes: null,
+        waterResistanceStatus: "no_claim",
+        waterResistanceMinutes: null,
+        spf: null,
+        paGrade: null,
+        capturedAt: "2026-08-01T08:00:00.000Z"
+      },
+      snapshotFingerprint: "fingerprint-umbrella",
+      upf: "UPF 50+",
+      shadingRate: "complete",
+      weight: "180g",
+      createdAt: "2026-08-01T08:00:00.000Z",
+      updatedAt: "2026-08-01T08:00:00.000Z",
+      status: "active"
+    });
+
+    expect(umbrella.gearCategory).toBe("umbrella");
+    expect(umbrella.upf).toBe("UPF 50+");
+    expect(umbrella.shadingRate).toBe("complete");
+    expect(umbrella.weight).toBe("180g");
+    expect(umbrella.hatStyle).toBeNull();
+
+    const hat = ProductCatalogRecordV1Schema.parse({
+      schemaVersion: PRODUCT_CATALOG_RECORD_VERSION,
+      productId: "hat-1",
+      displayName: "寬邊遮陽帽",
+      gearCategory: "hat",
+      currentSnapshot: {
+        snapshotVersion: PRODUCT_LABEL_SNAPSHOT_VERSION,
+        identityStatus: "confirmed",
+        expiryStatus: "unknown",
+        conditionStatus: "no_issue_reported",
+        sunscreenClaimStatus: "no_claim",
+        ruleEligibilityAtApplication: "no_sunscreen_claim",
+        reapplicationIntervalStatus: "no_numeric_interval",
+        reapplicationIntervalMinutes: null,
+        preExposureWaitStatus: "no_instruction",
+        preExposureWaitMinutes: null,
+        waterResistanceStatus: "no_claim",
+        waterResistanceMinutes: null,
+        spf: null,
+        paGrade: null,
+        capturedAt: "2026-08-01T08:00:00.000Z"
+      },
+      snapshotFingerprint: "fingerprint-hat",
+      size: "M",
+      hatStyle: "漁夫帽",
+      createdAt: "2026-08-01T08:00:00.000Z",
+      updatedAt: "2026-08-01T08:00:00.000Z",
+      status: "active"
+    });
+
+    expect(hat.gearCategory).toBe("hat");
+    expect(hat.size).toBe("M");
+    expect(hat.hatStyle).toBe("漁夫帽");
+    expect(hat.upf).toBeNull();
+  });
+
+  it("shadingRate 只接受有效檔位", () => {
+    const base = {
+      schemaVersion: PRODUCT_CATALOG_RECORD_VERSION,
+      productId: "umbrella-invalid",
+      displayName: "陽傘",
+      gearCategory: "umbrella" as const,
+      currentSnapshot: {
+        snapshotVersion: PRODUCT_LABEL_SNAPSHOT_VERSION,
+        identityStatus: "confirmed" as const,
+        expiryStatus: "unknown" as const,
+        conditionStatus: "no_issue_reported" as const,
+        sunscreenClaimStatus: "no_claim" as const,
+        ruleEligibilityAtApplication: "no_sunscreen_claim" as const,
+        reapplicationIntervalStatus: "no_numeric_interval" as const,
+        reapplicationIntervalMinutes: null,
+        preExposureWaitStatus: "no_instruction" as const,
+        preExposureWaitMinutes: null,
+        waterResistanceStatus: "no_claim" as const,
+        waterResistanceMinutes: null,
+        spf: null,
+        paGrade: null,
+        capturedAt: "2026-08-01T08:00:00.000Z"
+      },
+      snapshotFingerprint: "fingerprint-umbrella",
+      createdAt: "2026-08-01T08:00:00.000Z",
+      updatedAt: "2026-08-01T08:00:00.000Z",
+      status: "active" as const
+    };
+
+    expect(
+      ProductCatalogRecordV1Schema.safeParse({
+        ...base,
+        shadingRate: "invalid_grade"
+      }).success
+    ).toBe(false);
+
+    expect(
+      ProductCatalogRecordV1Schema.safeParse({
+        ...base,
+        shadingRate: "grade_1"
+      }).success
+    ).toBe(true);
+  });
 });
 
 describe("deriveExpiryStatus", () => {

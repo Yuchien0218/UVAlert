@@ -160,10 +160,22 @@ export const GearCategorySchema = z.enum([
   "sunscreen",
   "clothing",
   "eyewear",
+  "umbrella",
+  "hat",
   "other_gear"
 ]);
 
 export type GearCategory = z.infer<typeof GearCategorySchema>;
+
+/** 陽傘遮光率（四檔）。 */
+export const ShadingRateSchema = z.enum([
+  "complete",
+  "grade_1",
+  "grade_2",
+  "grade_3"
+]);
+
+export type ShadingRate = z.infer<typeof ShadingRateSchema>;
 
 /** 只有這兩個品類需要產品身分確認與包裝標示欄位（S-12）。 */
 export const GEAR_CATEGORIES_WITH_LABEL: readonly GearCategory[] = [
@@ -290,6 +302,26 @@ export const ProductCatalogRecordV1Schema = z.object({
     .enum(["physical", "chemical", "hybrid"])
     .nullable()
     .default(null),
+  /**
+   * 防UV係數（例如 UPF 50+）。不進 reducer。
+   * 陽傘專屬欄位。
+   */
+  upf: z.string().trim().max(20).nullable().default(null),
+  /**
+   * 遮光率（完全遮光、一級遮光、二級遮光、三級遮光）。不進 reducer。
+   * 陽傘專屬欄位。
+   */
+  shadingRate: ShadingRateSchema.nullable().default(null),
+  /**
+   * 重量（例如 180g）。不進 reducer。
+   * 陽傘專屬欄位。
+   */
+  weight: z.string().trim().max(20).nullable().default(null),
+  /**
+   * 帽款（例如 漁夫帽、棒球帽、寬邊遮陽帽）。不進 reducer。
+   * 帽子專屬欄位。
+   */
+  hatStyle: z.string().trim().max(30).nullable().default(null),
   /** 「過去用過」的時間戳，不進 reducer。 */
   archivedAt: z.string().datetime({ offset: true }).nullable().default(null),
   createdAt: z.string().datetime({ offset: true }),

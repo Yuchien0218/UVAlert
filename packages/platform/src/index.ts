@@ -6,6 +6,7 @@ import type {
   NationwideUvForecast,
   ProductLabelSnapshotV1,
   GearCategory,
+  ShadingRate,
   ProductCatalogRecordV1,
   RegionPreferenceV1,
   ReapplyCommandV1,
@@ -197,6 +198,14 @@ export interface SaveProductInput {
   formulation?: "lotion" | "gel" | "cream" | "spray" | "stick" | null;
   /** 2026-09-02：純紀錄，不進 reducer。 */
   protectionType?: "physical" | "chemical" | "hybrid" | null;
+  /** 2026-09-11：純紀錄，不進 reducer。陽傘防UV係數（例如 UPF 50+）。 */
+  upf?: string | null;
+  /** 2026-09-11：純紀錄，不進 reducer。陽傘遮光率。 */
+  shadingRate?: ShadingRate | null;
+  /** 2026-09-11：純紀錄，不進 reducer。陽傘重量（例如 180g）。 */
+  weight?: string | null;
+  /** 2026-09-11：純紀錄，不進 reducer。帽款（例如 漁夫帽、棒球帽）。 */
+  hatStyle?: string | null;
   now: string;
 }
 
