@@ -150,11 +150,10 @@ describe("ChevronLink", () => {
   });
 
   /*
-   * **這條才是使用者要的保證。** 三個使用點必須都走這個元件，而且不能有
-   * 第四個地方自己寫一份「文字＋尾端 chevron」。
+   * **這條才是使用者要的保證。** 既有使用點必須都走這個元件，而且不能有
+   * 別的地方自己寫一份「文字＋尾端 chevron」。
    */
   it.each([
-    "apps/web/src/components/home/HomeUvHeadline.vue",
     "apps/web/src/components/reminder/RecentEventsList.vue",
     "apps/web/src/components/reminder/ZoneStatusList.vue"
   ])("%s 使用 ChevronLink", (path) => {

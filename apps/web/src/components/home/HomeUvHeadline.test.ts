@@ -154,55 +154,20 @@ describe("HomeUvHeadline 的精簡與分隔線", () => {
 });
 
 /*
- * 2026-08-31：讀數右側加上前往五日預報的入口（使用者要求）。
- *
- * 這推翻了 2026-08-24 的「這裡不再重複一個入口」——當時的顧慮是重複，但
- * 頁首那個入口看起來像狀態顯示而不是連結，實際可點卻沒人知道可點。
+ * 2026-09-11：移除五日預報文字按鈕（使用者要求）。
  */
-describe("HomeUvHeadline 的五日預報入口", () => {
-  it("有 UV 值時顯示前往 /forecast 的連結", () => {
-    const wrapper = mount(HomeUvHeadline, {
-      props: { eyebrow: "今日 UV", uvi: 4, riskLevel: "moderate", note: null },
-      global: {
-        stubs: {
-          RouterLink: {
-            props: ["to"],
-            template: '<a :href="to"><slot /></a>'
-          }
-        }
-      }
-    });
+describe("HomeUvHeadline 不再顯示五日預報入口", () => {
+  it("有 UV 值時不再顯示五日預報文字連結", () => {
+    const wrapper = mountHeadline("moderate", 4);
 
-    const link = wrapper.get(".uv-headline__more");
-    expect(link.attributes("href")).toBe("/forecast");
-    expect(link.text()).toContain("五日預報");
+    expect(wrapper.find(".uv-headline__more").exists()).toBe(false);
+    expect(wrapper.text()).not.toContain("五日預報");
   });
 
-  it("沒有 UV 值時不顯示入口", () => {
+  it("沒有 UV 值時也不顯示入口", () => {
     const wrapper = mountHeadline(null, null);
 
     expect(wrapper.find(".uv-headline__more").exists()).toBe(false);
-  });
-
-  it("五日預報入口移出數值列，位於區塊底部水平線上方", () => {
-    const wrapper = mount(HomeUvHeadline, {
-      props: { eyebrow: "今日 UV", uvi: 4, riskLevel: "moderate", note: null },
-      global: {
-        stubs: {
-          RouterLink: {
-            props: ["to"],
-            template: '<a :href="to"><slot /></a>'
-          }
-        }
-      }
-    });
-
-    expect(
-      wrapper.find(".uv-headline__value .uv-headline__more").exists()
-    ).toBe(false);
-    expect(wrapper.find(".uv-headline > .uv-headline__more").exists()).toBe(
-      true
-    );
   });
 });
 
