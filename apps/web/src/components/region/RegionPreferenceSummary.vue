@@ -58,9 +58,8 @@ defineProps<Props>();
 }
 
 /*
- * `baseline` 而不是 `center`：兩者字級相同但字重不同，靠基線對齊才不會
- * 因為粗體的視覺重心而看起來錯開。窄到放不下時 `wrap` 讓值掉到下一行，
- * 那是退路不是預設。
+ * 2026-09-11 使用者裁決：目前地區右側文字（.region-summary__value）的字級、
+ * 粗細與顏色跟左側標題（.region-summary__title）完全一致。
  */
 .region-summary__row {
   display: flex;
@@ -73,16 +72,10 @@ defineProps<Props>();
 .region-summary__title,
 .region-summary__value {
   margin: 0;
-}
-
-.region-summary__title {
   font-size: var(--font-size-card-title);
+  font-weight: var(--font-weight-card-title);
+  line-height: var(--line-height-card-title);
   color: var(--text-secondary);
-}
-
-.region-summary__value {
-  font-size: var(--font-size-card-title);
-  font-weight: 600;
 }
 
 </style>
