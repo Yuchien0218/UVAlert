@@ -178,14 +178,31 @@ describe("HomeUvHeadline 的五日預報入口", () => {
     expect(link.text()).toContain("五日預報");
   });
 
-  /*
-   * 沒有 UV 值時整個 value 區塊都不渲染，入口自然也不在——那是對的：
-   * 沒有資料可看時，「看更多」沒有意義。
-   */
   it("沒有 UV 值時不顯示入口", () => {
     const wrapper = mountHeadline(null, null);
 
     expect(wrapper.find(".uv-headline__more").exists()).toBe(false);
+  });
+
+  it("五日預報入口移出數值列，位於區塊底部水平線上方", () => {
+    const wrapper = mount(HomeUvHeadline, {
+      props: { eyebrow: "今日 UV", uvi: 4, riskLevel: "moderate", note: null },
+      global: {
+        stubs: {
+          RouterLink: {
+            props: ["to"],
+            template: '<a :href="to"><slot /></a>'
+          }
+        }
+      }
+    });
+
+    expect(
+      wrapper.find(".uv-headline__value .uv-headline__more").exists()
+    ).toBe(false);
+    expect(wrapper.find(".uv-headline > .uv-headline__more").exists()).toBe(
+      true
+    );
   });
 });
 

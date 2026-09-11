@@ -82,9 +82,6 @@ const hasValue = computed(() => props.uvi !== null && props.riskLevel !== null);
       <span class="uv-headline__level">
         {{ getUvRiskLevelLabel(riskLevel!) }}
       </span>
-      <ChevronLink class="uv-headline__more" to="/forecast">
-        五日預報
-      </ChevronLink>
     </div>
 
     <p v-if="hasValue" class="uv-headline__advice">
@@ -109,6 +106,17 @@ const hasValue = computed(() => props.uvi !== null && props.riskLevel !== null);
       拿掉之後沒有東西要對齊了。
     -->
     <p v-if="note !== null" class="uv-headline__note">{{ note }}</p>
+
+    <!--
+      2026-09-11：前往五日預報的入口移至下方水平線上方（使用者要求）。
+    -->
+    <ChevronLink
+      v-if="hasValue"
+      class="uv-headline__more"
+      to="/forecast"
+    >
+      五日預報
+    </ChevronLink>
   </section>
 </template>
 
@@ -161,8 +169,12 @@ const hasValue = computed(() => props.uvi !== null && props.riskLevel !== null);
   gap: var(--space-2);
 }
 
-/* 推到最右端。大小與間距由 ChevronLink 決定，這裡只管位置。 */
+/*
+ * 2026-09-11：五日預報入口移到下方水平線上方、靠右對齊。
+ * 大小與間距由 ChevronLink 決定。
+ */
 .uv-headline__more {
+  justify-self: end;
   margin-inline-start: auto;
   white-space: nowrap;
 }
