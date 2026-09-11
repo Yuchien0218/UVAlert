@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted } from "vue";
+import { computed, onMounted } from "vue";
 import FiveDayUvCard from "../components/uv/FiveDayUvCard.vue";
 import TaiwanUvDistribution from "../components/uv/TaiwanUvDistribution.vue";
 import { useWebAppServices } from "../app/injection";
@@ -7,16 +7,13 @@ import { useWebAppServices } from "../app/injection";
 /**
  * 五日 UV 預報。
  *
- * **這一頁是 2026-08-23 新增的。** 首頁改版後把五日預報從內嵌卡片改成
- * 「五日 UV 預報 ›」連結（wireframe 01–04 都有這一列），但當時
- * `FiveDayUvCard` 沒有任何頁面承接，等於把功能弄丟了。這頁補上落點。
- *
- * 內容刻意只有預報本身與資料來源說明——不放倒數、不放 Session 狀態。
- * DESIGN.md 第十一節：「不要在提醒頁以外的頁面顯示迷你倒數或 Session
- * 狀態——那會產生第二個提醒頁」。
+ * 2026-08-23 新增，2026-09-11 提升為全站首頁入口分頁。
+ * 讓使用者先掌握當前與未來數日紫外線風險，並在下方引導開始防曬提醒。
  */
 
-const { uvForecast } = useWebAppServices();
+const { uvForecast, boot } = useWebAppServices();
+
+const hasActiveSession = computed(() => boot?.currentSession?.value != null);
 
 onMounted(() => {
   void uvForecast.ensureLoaded();
@@ -78,5 +75,30 @@ onMounted(() => {
     <p class="safety-note">
       今日數值為當前至日落最高預測，UV 高低不影響補擦倒數。
     </p>
+
+    <div class="forecast-action">
+      <RouterLink
+        v-if="hasActiveSession"
+        to="/reminder"
+        class="button button--primary page-primary-action"
+      >
+        查看防曬提醒
+      </RouterLink>
+      <RouterLink
+        v-else
+        to="/setup"
+        class="button button--primary page-primary-action"
+      >
+        開始防曬提醒
+      </RouterLink>
+    </div>
   </div>
 </template>
+
+<style scoped>
+.forecast-action {
+  display: grid;
+  justify-items: center;
+  margin-top: var(--space-2);
+}
+</style>

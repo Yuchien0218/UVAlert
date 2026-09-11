@@ -20,20 +20,41 @@ const nationwide = {
   counties: codes.map((countyCode, index) => ({ countyCode, displayName: `縣市 ${index + 1}`, uvi: index % 12, riskLevel: "low" })) as NationwideUvCounty[]
 };
 
-async function mountForecast(region: { regionCode: string; displayName: string } | null) {
-  const router = createRouter({ history: createMemoryHistory(), routes: [
-    { path: "/forecast", component: ForecastPage }, { path: "/region", component: { template: "<div />" } }
-  ] });
+async function mountForecast(
+  region: { regionCode: string; displayName: string } | null,
+  session: unknown = null
+) {
+  const router = createRouter({
+    history: createMemoryHistory(),
+    routes: [
+      { path: "/forecast", component: ForecastPage },
+      { path: "/region", component: { template: "<div />" } },
+      { path: "/setup", component: { template: "<div />" } },
+      { path: "/reminder", component: { template: "<div />" } }
+    ]
+  });
   const ensureLoaded = vi.fn(async () => undefined);
   const ensureNationwideLoaded = vi.fn(async () => undefined);
-  vi.mocked(useWebAppServices).mockReturnValue({ uvForecast: {
-    phase: shallowReadonly(shallowRef(region === null ? "no_region" : "ready")),
-    error: shallowReadonly(shallowRef(null)), forecast: shallowReadonly(shallowRef(region === null ? null : makeFiveDayUvForecast())),
-    region: shallowReadonly(shallowRef(region)), nationwide: shallowReadonly(shallowRef(nationwide)),
-    ensureLoaded, ensureNationwideLoaded, refresh: vi.fn(async () => undefined)
-  }} as unknown as WebAppServices);
-  await router.push("/forecast"); await router.isReady();
-  const wrapper = mount(ForecastPage, { global: { plugins: [router], stubs: { Icon: true } } });
+  vi.mocked(useWebAppServices).mockReturnValue({
+    uvForecast: {
+      phase: shallowReadonly(shallowRef(region === null ? "no_region" : "ready")),
+      error: shallowReadonly(shallowRef(null)),
+      forecast: shallowReadonly(shallowRef(region === null ? null : makeFiveDayUvForecast())),
+      region: shallowReadonly(shallowRef(region)),
+      nationwide: shallowReadonly(shallowRef(nationwide)),
+      ensureLoaded,
+      ensureNationwideLoaded,
+      refresh: vi.fn(async () => undefined)
+    },
+    boot: {
+      currentSession: shallowReadonly(shallowRef(session))
+    }
+  } as unknown as WebAppServices);
+  await router.push("/forecast");
+  await router.isReady();
+  const wrapper = mount(ForecastPage, {
+    global: { plugins: [router], stubs: { Icon: true } }
+  });
   await flushPromises();
   return { wrapper, ensureLoaded, ensureNationwideLoaded };
 }
@@ -52,5 +73,28 @@ describe("ForecastPage", () => {
   it("保留一次安全說明", async () => {
     const { wrapper } = await mountForecast({ regionCode: "63000010", displayName: "臺北市中正區" });
     expect(wrapper.text().split("不影響補擦倒數").length - 1).toBe(1);
+  });
+
+  it("無 active session 時顯示開始防曬提醒按鈕", async () => {
+    const { wrapper } = await mountForecast(
+      { regionCode: "63000010", displayName: "臺北市中正區" },
+      null
+    );
+    const cta = wrapper.find(".forecast-action .button--primary");
+    expect(cta.exists()).toBe(true);
+    expect(cta.text()).toContain("開始防曬提醒");
+    expect(cta.attributes("href")).toBe("/setup");
+  });
+
+  it("有 active session 時顯示查看防曬提醒按鈕", async () => {
+    const fakeSession = { sessionId: "session-1" };
+    const { wrapper } = await mountForecast(
+      { regionCode: "63000010", displayName: "臺北市中正區" },
+      fakeSession
+    );
+    const cta = wrapper.find(".forecast-action .button--primary");
+    expect(cta.exists()).toBe(true);
+    expect(cta.text()).toContain("查看防曬提醒");
+    expect(cta.attributes("href")).toBe("/reminder");
   });
 });
