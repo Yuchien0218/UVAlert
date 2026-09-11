@@ -2,7 +2,7 @@
 title: "眼周、嘴唇、耳朵和頭皮也要防護嗎？不同部位要用對方式"
 slug: sunscreen-around-eyes-lips-and-scalp
 category: before-going-out
-summary: "臉、耳朵、嘴唇、頸部、頭頂稀疏處與腳背都可能是裸露部位；眼周與嘴唇要選適合的產品，避免把一般防曬直接弄進眼睛或嘴巴。"
+summary: "臉部、耳朵、嘴唇、後頸、頭皮分線及腳背皆屬於容易忽略的裸露部位。眼周與唇部應選用合適溫和的專用防曬，避免將一般身體防曬乳滲入眼口。"
 primaryQuestion: "防曬乳可以擦在眼皮、嘴唇和頭皮嗎？"
 status: draft
 reviewStatus: needs-professional-review
@@ -16,7 +16,7 @@ lastReviewed: 2026-08-16
 ## 這些位置最容易漏掉
 
 - **耳朵與髮際**：戴帽子仍可能露出，塗抹時從正面、側面和耳後一起檢查。
-- **眼周**：選擇標示適合眼周的產品或防曬棒，輕柔塗在眼周皮膚，不要讓產品進入眼睛；若進眼，依標示用清水沖洗。
+- **眼周**：選擇眼周適用或不熏眼的防曬配方，輕柔塗抹於眼周肌膚，避免滲入眼睛，若不慎入眼，請立即以大量清水溫和沖洗。
 - **嘴唇**：使用具有 SPF 與廣效防護標示的護唇產品，不要把身體防曬乳當作口紅或吞食用品。
 - **頭頂稀疏處**：可用寬邊帽、具 UPF 的帽子或產品標示適合頭皮的形式，避免只靠頭髮厚度判斷。
 - **鼻子、頸部、手背與腳背**：這些都是 FDA 特別提醒容易漏擦的暴露區域。
@@ -32,10 +32,10 @@ lastReviewed: 2026-08-16
 
 ## 文章限制
 
-不同劑型、成分與部位適用性會依品牌而異。本文不是眼科或皮膚科處方；若眼睛疼痛、視力改變或嘴唇明顯腫脹，請儘快尋求醫療協助。
+不同劑型、成分與部位適用性會依品牌而異。本文並非眼科或皮膚專科處方。若眼睛出現劇烈疼痛、視力模糊或嘴唇異常腫脹，請儘速就醫診療。
 
 ## 資料來源
 
-- [FDA：Tips to Stay Safe in the Sun](https://www.fda.gov/consumers/consumer-updates/tips-stay-safe-sun-sunscreen-sunglasses)（耳朵、鼻子、嘴唇、頸部、手腳等容易漏擦部位；查閱 2026-08-16）
-- [AAD：How to apply sunscreen](https://www.aad.org/public/everyday-care/sun-protection/shade-clothing-sunscreen/how-to-apply-sunscreen)（臉、耳朵、頸部、腳背、嘴唇與頭皮防護；查閱 2026-08-16）
-- [AAD：How do I know if I’m using the right sunscreen?](https://www.aad.org/public/everyday-care/sun-protection/shade-clothing-sunscreen/choosing-right-sunscreen)（眼周、嘴唇與不同膚況的產品選擇方向；查閱 2026-08-16）
+- [FDA：Tips to Stay Safe in the Sun](https://www.fda.gov/consumers/consumer-updates/tips-stay-safe-sun-sunscreen-sunglasses)（耳朵、鼻子、嘴唇、頸部、手腳等容易漏擦部位，查閱於 2026-08-16）
+- [AAD：How to apply sunscreen](https://www.aad.org/public/everyday-care/sun-protection/shade-clothing-sunscreen/how-to-apply-sunscreen)（臉、耳朵、頸部、腳背、嘴唇與頭皮防護，查閱於 2026-08-16）
+- [AAD：How do I know if I’m using the right sunscreen?](https://www.aad.org/public/everyday-care/sun-protection/shade-clothing-sunscreen/choosing-right-sunscreen)（眼周、嘴唇與不同膚況的產品選擇方向，查閱於 2026-08-16）

@@ -15,7 +15,7 @@ SPF 50 的測試防護高於 SPF 30，但不是「多 20 就能多曬 20 分鐘�
 
 ## 為什麼不能直接換算時間？
 
-實際曝曬會受太陽強度、時間、膚色、流汗、摩擦和塗抹量影響。SPF 測試在規定條件與用量下進行；現實中薄擦、漏擦或被毛巾擦掉，都會讓保護下降。
+實際曝曬會受太陽強度、時間、膚色、流汗、摩擦和塗抹量影響。SPF 係數是在標準用量下檢測得出，現實生活中若塗抹量過薄、漏擦部位或被毛巾擦拭，都會顯著降低防護力。
 
 實際選擇可依三步：
 
@@ -31,6 +31,6 @@ SPF 50 的測試防護高於 SPF 30，但不是「多 20 就能多曬 20 分鐘�
 
 ## 資料來源
 
-- [FDA：Sunscreen: How to Help Protect Your Skin from the Sun](https://www.fda.gov/drugs/understanding-over-counter-medicines/sunscreen-how-help-protect-your-skin-sun)（SPF、廣效、抗水與補擦；查閱 2026-08-16）
-- [AAD：How to decode a sunscreen label](https://www.aad.org/public/everyday-care/sun-protection/shade-clothing-sunscreen/understand-sunscreen-labels)（SPF 30 以上及標示判讀；查閱 2026-08-16）
-- [衛生福利部食品藥物管理署：防曬乳的 PA 值是不是表示抗 UVB？](https://www.fda.gov.tw/tc/newsContent.aspx?cid=5049&id=25128)（SPF／PA 與 UVA／UVB；查閱 2026-08-16）
+- [FDA：Sunscreen: How to Help Protect Your Skin from the Sun](https://www.fda.gov/drugs/understanding-over-counter-medicines/sunscreen-how-help-protect-your-skin-sun)（SPF、廣效、抗水與補擦，查閱於 2026-08-16）
+- [AAD：How to decode a sunscreen label](https://www.aad.org/public/everyday-care/sun-protection/shade-clothing-sunscreen/understand-sunscreen-labels)（SPF 30 以上及標示判讀，查閱於 2026-08-16）
+- [衛生福利部食品藥物管理署：防曬乳的 PA 值是不是表示抗 UVB？](https://www.fda.gov.tw/tc/newsContent.aspx?cid=5049&id=25128)（SPF／PA 與 UVA／UVB，查閱於 2026-08-16）

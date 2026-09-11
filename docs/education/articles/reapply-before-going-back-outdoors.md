@@ -2,7 +2,7 @@
 title: "在室內一段時間後又要出門，防曬要重新檢查嗎？"
 slug: reapply-before-going-back-outdoors
 category: reapply-sunscreen
-summary: "準備再次外出時，先看上次塗抹時間與中間是否流汗、碰水或擦拭；若已接近一般兩小時節點或有事件，就先補擦再出門。"
+summary: "準備再次外出時，先看上次塗抹時間與中間是否流汗、碰水或擦拭，若已接近一般兩小時節點或有事件，就先補擦再出門。"
 primaryQuestion: "早上擦過防曬，下午再出門前需要重新補擦嗎？"
 status: draft
 reviewStatus: needs-professional-review
@@ -21,13 +21,13 @@ lastReviewed: 2026-08-16
 
 ## 不需要重新洗掉再開始
 
-如果皮膚沒有明顯髒污或不適，通常不需要為了重新補擦而反覆洗臉；先按產品與活動情況補足裸露部位即可。若已大量流汗、碰水或毛巾擦拭，先輕按吸乾並依產品標示重新塗抹。
+如果皮膚沒有明顯髒污或不適，通常不需要為了重新補擦而反覆洗臉，先按產品與活動情況補足裸露部位即可。若已大量流汗、碰水或毛巾擦拭，先輕按吸乾並依產品標示重新塗抹。
 
 若皮膚已經紅、腫、刺痛、破皮或有水泡，就不要為了出門硬塗在受刺激部位，改以衣物與遮蔭保護並參考「特殊情況」。
 
-## 和 防曬晴報員 倒數怎麼配合？
+## 和防曬晴報員倒數怎麼配合？
 
-再次出門前的補擦，是「實際行動優先」的檢查點。補擦完成後，再從實際時間重新開始倒數；如果仍在室內且沒有曝曬，倒數不是用來替代出門前的產品標示檢查。
+再次出門前的補擦，是「實際行動優先」的檢查點。補擦完成後，再從實際時間重新開始倒數，如果仍在室內且沒有曝曬，倒數不是用來替代出門前的產品標示檢查。
 
 ---
 
@@ -37,6 +37,6 @@ lastReviewed: 2026-08-16
 
 ## 資料來源
 
-- [AAD：How to apply sunscreen](https://www.aad.org/public/everyday-care/sun-protection/shade-clothing-sunscreen/how-to-apply-sunscreen)（兩小時與事件後補擦；查閱 2026-08-16）
-- [FDA：Sunscreen: How to Help Protect Your Skin from the Sun](https://www.fda.gov/drugs/understanding-over-counter-medicines/sunscreen-how-help-protect-your-skin-sun)（依活動與標示補擦；查閱 2026-08-16）
-- [WHO：Ultraviolet radiation](https://www.who.int/news-room/fact-sheets/detail/ultraviolet-radiation)（遮蔭、衣物與防曬的組合；查閱 2026-08-16）
+- [AAD：How to apply sunscreen](https://www.aad.org/public/everyday-care/sun-protection/shade-clothing-sunscreen/how-to-apply-sunscreen)（兩小時與事件後補擦，查閱於 2026-08-16）
+- [FDA：Sunscreen: How to Help Protect Your Skin from the Sun](https://www.fda.gov/drugs/understanding-over-counter-medicines/sunscreen-how-help-protect-your-skin-sun)（依活動與標示補擦，查閱於 2026-08-16）
+- [WHO：Ultraviolet radiation](https://www.who.int/news-room/fact-sheets/detail/ultraviolet-radiation)（遮蔭、衣物與防曬的組合，查閱於 2026-08-16）

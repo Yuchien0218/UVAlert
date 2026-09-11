@@ -18,7 +18,7 @@ lastReviewed: 2026-08-16
 1. 查看完整有效成分，不只看包裝正面的綠色圖案。
 2. 確認旅遊地是否對特定成分或產品有規定。
 3. 留意品牌是否說明測試方法、濃度與適用環境，而非只寫「天然」。
-4. 同時確認廣效、SPF 與抗水需求；海洋友善宣稱不等於防曬效果或抗水能力。
+4. 同時確認廣效、SPF 與抗水需求，海洋友善宣稱不等於防曬效果或抗水能力。
 
 若希望減少產品進入水中，最直接的做法之一是先用防曬衣、寬邊帽與遮蔭減少需要塗抹的裸露面積，再把防曬用在衣物沒有遮住的皮膚。
 
@@ -34,6 +34,6 @@ lastReviewed: 2026-08-16
 
 ## 資料來源
 
-- [AAD：How to decode a sunscreen label](https://www.aad.org/public/everyday-care/sun-protection/shade-clothing-sunscreen/understand-sunscreen-labels)（reef-safe 尚無 FDA 定義；查閱 2026-08-16）
-- [Hawaii DLNR：Avoid sunscreens with oxybenzone](https://dlnr.hawaii.gov/dar/announcements/dlnr-asks-ocean-users-to-avoid-sunscreens-with-oxybenzone/)（標語、成分閱讀與衣物防護；查閱 2026-08-16）
-- [EPA：UV Filters in Sunscreens and Aquatic Environmental Health](https://www.epa.gov/water-research/uv-filters-sunscreens-and-aquatic-environmental-health)（水域研究現況與不確定性；查閱 2026-08-16）
+- [AAD：How to decode a sunscreen label](https://www.aad.org/public/everyday-care/sun-protection/shade-clothing-sunscreen/understand-sunscreen-labels)（reef-safe 尚無 FDA 定義，查閱於 2026-08-16）
+- [Hawaii DLNR：Avoid sunscreens with oxybenzone](https://dlnr.hawaii.gov/dar/announcements/dlnr-asks-ocean-users-to-avoid-sunscreens-with-oxybenzone/)（標語、成分閱讀與衣物防護，查閱於 2026-08-16）
+- [EPA：UV Filters in Sunscreens and Aquatic Environmental Health](https://www.epa.gov/water-research/uv-filters-sunscreens-and-aquatic-environmental-health)（水域研究現況與不確定性，查閱於 2026-08-16）

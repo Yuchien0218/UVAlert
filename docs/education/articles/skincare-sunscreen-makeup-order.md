@@ -11,7 +11,7 @@ lastReviewed: 2026-08-16
 
 ## 先說結論
 
-一般順序是**保養 → 防曬 → 底妝**。防曬應均勻覆蓋裸露皮膚，底妝則放在後面；若產品包裝有不同使用方式，以標示為準。
+一般順序是**保養 → 防曬 → 底妝**。防曬乳應先均勻塗抹於裸露皮膚，待吸收成膜後再上底妝。若特定產品有不同使用指引，請以包裝說明為準。
 
 ## 怎麼做比較不容易打架？
 
@@ -24,7 +24,7 @@ lastReviewed: 2026-08-16
 
 ## 有 SPF 的粉底可以取代防曬嗎？
 
-彩妝上的 SPF 是在規定用量下測得；實際上妝量常不足以均勻覆蓋所有裸露位置。若有戶外曝曬需求，不宜只靠少量底妝代替完整防護。
+彩妝品所標示的 SPF 是在實驗室足量塗抹下測得，而一般上妝用量通常不足以提供全面保護。如有長時間戶外活動需求，切勿單靠彩妝品取代專業防曬。
 
 ---
 
@@ -34,5 +34,5 @@ lastReviewed: 2026-08-16
 
 ## 資料來源
 
-- [AAD：How to apply sunscreen](https://www.aad.org/public/everyday-care/sun-protection/shade-clothing-sunscreen/how-to-apply-sunscreen)（出門前、足量與均勻塗抹；查閱 2026-08-16）
-- [AAD：How to decode a sunscreen label](https://www.aad.org/public/everyday-care/sun-protection/shade-clothing-sunscreen/understand-sunscreen-labels)（帶妝使用與產品形式；查閱 2026-08-16）
+- [AAD：How to apply sunscreen](https://www.aad.org/public/everyday-care/sun-protection/shade-clothing-sunscreen/how-to-apply-sunscreen)（出門前、足量與均勻塗抹，查閱於 2026-08-16）
+- [AAD：How to decode a sunscreen label](https://www.aad.org/public/everyday-care/sun-protection/shade-clothing-sunscreen/understand-sunscreen-labels)（帶妝使用與產品形式，查閱於 2026-08-16）

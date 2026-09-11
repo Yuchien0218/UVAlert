@@ -11,11 +11,11 @@ lastReviewed: 2026-08-16
 
 ## 先說結論
 
-孕期不需要因為擔心成分就完全放棄防曬。先用遮蔭、衣物、寬邊帽與太陽眼鏡降低曝曬；需要塗抹的部位，可依產品標示與自己的產科或皮膚科專業建議選擇。
+懷孕期間受荷爾蒙變化影響更容易產生色素沉澱，無須因擔心化妝品成分而完全放棄防曬。應優先利用寬邊帽、陽傘與長袖衣物進行物理遮蔽，若需塗擦防曬乳，可諮詢婦產科或皮膚科醫師推薦安全溫和的成分。
 
 ## 如果想採較保守的選擇
 
-可考慮以氧化鋅或二氧化鈦為有效成分的礦物性防曬。AAD 將這類產品列為孕期可考慮的選項；但「礦物性」仍不代表一定不刺激，也需要先確認其他配方成分。
+孕媽咪可優先考慮以氧化鋅或二氧化鈦等純物理礦物防曬劑為主的溫和產品，降低經皮吸收疑慮，同時仍應檢視其全成分清單，避開高濃度人工香料與不必要的刺激成分。
 
 使用時仍要：
 
@@ -35,5 +35,5 @@ lastReviewed: 2026-08-16
 
 ## 資料來源
 
-- [AAD：Dermatologist-approved pregnancy skin care](https://www.aad.org/public/everyday-care/skin-care-secrets/routine/pregnancy-skin-care)（孕期遮蔽與礦物性防曬選擇；查閱 2026-08-16）
-- [FDA：Sunscreen: How to Help Protect Your Skin from the Sun](https://www.fda.gov/drugs/understanding-over-counter-medicines/sunscreen-how-help-protect-your-skin-sun)（防曬標示與綜合防護；查閱 2026-08-16）
+- [AAD：Dermatologist-approved pregnancy skin care](https://www.aad.org/public/everyday-care/skin-care-secrets/routine/pregnancy-skin-care)（孕期遮蔽與礦物性防曬選擇，查閱於 2026-08-16）
+- [FDA：Sunscreen: How to Help Protect Your Skin from the Sun](https://www.fda.gov/drugs/understanding-over-counter-medicines/sunscreen-how-help-protect-your-skin-sun)（防曬標示與綜合防護，查閱於 2026-08-16）

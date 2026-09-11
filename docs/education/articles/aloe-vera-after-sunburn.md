@@ -15,15 +15,15 @@ lastReviewed: 2026-08-16
 
 ## 怎麼用比較穩妥？
 
-先用涼水降溫，皮膚微濕時再薄擦自己過去能耐受的產品。選擇時可避開酒精、強烈香味或會造成刺痛的配方；若越擦越紅、癢、腫或灼熱，應停止使用並清洗。
+先用涼水降溫，皮膚微濕時再薄擦自己過去能耐受的產品。挑選蘆薈保濕產品應避開酒精、高濃度香精與刺激性防腐劑。若塗抹後泛紅、發癢或灼熱感加劇，請立即停用並以清水沖淨。
 
-現切植物葉片不是無菌產品，也可能含刺激物；「天然」不代表每個人都不會過敏。
+新鮮現採的蘆薈未經消毒且可能含有刺激性汁液，『天然』成分並不等於不會引起過敏，受損肌膚尤應謹慎對待。
 
 ## 真正重要的是什麼？
 
 - 避免再次曝曬，外出以寬鬆衣物遮蔽。
 - 補充水分，不抓、不撕脫皮。
-- 水泡保持完整；嚴重症狀尋求醫療協助。
+- 保持水泡完整勿自行刺破，若症狀加劇應儘速尋求專業醫師協助。
 
 ---
 
@@ -33,5 +33,5 @@ lastReviewed: 2026-08-16
 
 ## 資料來源
 
-- [AAD：How to treat sunburn](https://www.aad.org/public/everyday-care/injured-skin/burns/treat-sunburn)（含蘆薈／大豆保濕、補水與遮蔽；查閱 2026-08-16）
-- [NHS：Sunburn](https://www.nhs.uk/conditions/sunburn/)（曬傷居家照護及應避免事項；查閱 2026-08-16）
+- [AAD：How to treat sunburn](https://www.aad.org/public/everyday-care/injured-skin/burns/treat-sunburn)（含蘆薈／大豆保濕、補水與遮蔽，查閱於 2026-08-16）
+- [NHS：Sunburn](https://www.nhs.uk/conditions/sunburn/)（曬傷居家照護及應避免事項，查閱於 2026-08-16）

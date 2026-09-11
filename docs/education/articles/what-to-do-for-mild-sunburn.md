@@ -2,7 +2,7 @@
 title: "已經曬紅了，先做什麼比較好？"
 slug: what-to-do-for-mild-sunburn
 category: after-sun-care
-summary: "先離開陽光並讓皮膚降溫，再溫和保濕、補充水分；不要戳破水泡或繼續曝曬。若症狀嚴重或出現全身不適，應尋求醫療協助。"
+summary: "先離開陽光並讓皮膚降溫，再溫和保濕、補充水分，不要戳破水泡或繼續曝曬。若症狀嚴重或出現全身不適，應尋求醫療協助。"
 primaryQuestion: "皮膚曬紅或輕微曬傷後，第一步要做什麼？"
 status: draft
 reviewStatus: needs-professional-review
@@ -18,19 +18,19 @@ lastReviewed: 2026-08-16
 ## 可以先做的四件事
 
 1. **離開陽光**：進入室內或遮蔭處，暫停會讓紅痛加重的戶外活動。
-2. **溫和降溫**：用涼爽的淋浴或冷濕布舒緩；不要把冰塊直接貼在皮膚上，也不要用力搓洗。
+2. **溫和降溫**：用涼爽的淋浴或冷濕布舒緩，請勿把冰塊直接貼在皮膚上，也不要用力搓洗。
 3. **保濕與補水**：皮膚微濕時薄薄塗上能耐受的保濕產品，並適量飲水。若某產品一擦就刺痛，停止使用。
 4. **保護受傷皮膚**：穿寬鬆、柔軟的衣物，避免再讓受傷部位直接接觸陽光。
 
 ## 如果有水泡
 
-不要自行戳破水泡，也不要撕掉覆蓋皮膚。保持清潔並以適當方式保護；若水泡很多、範圍大、破掉後出現膿或疼痛與腫脹越來越明顯，請尋求醫療協助。
+不要自行戳破水泡，也不要撕掉覆蓋皮膚。保持清潔並以適當方式保護，若水泡很多、範圍大、破掉後出現膿或疼痛與腫脹越來越明顯，請尋求醫療協助。
 
 ## 先不要做什麼？
 
 - 不要回到陽光下「再曬一下看看」或用防曬倒數取代遮蔽。
 - 不要用力去角質、搓掉脫皮，或在破損皮膚上硬塗防曬乳。
-- 不要自行把藥物、精油或偏方當成治療；需要用藥時先問醫師或藥師。
+- 不要自行把藥物、精油或偏方當成治療，需要用藥時先問醫師或藥師。
 
 ---
 
@@ -40,6 +40,6 @@ lastReviewed: 2026-08-16
 
 ## 資料來源
 
-- [AAD：How to treat sunburn](https://www.aad.org/public/everyday-care/injured-skin/burns/treat-sunburn)（離開陽光、降溫、保濕、補水與水泡照護；查閱 2026-08-16）
-- [CDC：Preventing Sunburn](https://www.cdc.gov/skin-cancer/prevention/sunburn.html)（曬傷後避免再次曝曬與警示症狀；查閱 2026-08-16）
-- [NHS：Sunburn](https://www.nhs.uk/conditions/sunburn/)（曬傷後避免事項與求助警訊；查閱 2026-08-16）
+- [AAD：How to treat sunburn](https://www.aad.org/public/everyday-care/injured-skin/burns/treat-sunburn)（離開陽光、降溫、保濕、補水與水泡照護，查閱於 2026-08-16）
+- [CDC：Preventing Sunburn](https://www.cdc.gov/skin-cancer/prevention/sunburn.html)（曬傷後避免再次曝曬與警示症狀，查閱於 2026-08-16）
+- [NHS：Sunburn](https://www.nhs.uk/conditions/sunburn/)（曬傷後避免事項與求助警訊，查閱於 2026-08-16）

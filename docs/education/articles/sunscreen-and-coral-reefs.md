@@ -15,7 +15,7 @@ lastReviewed: 2026-08-16
 
 ## 研究為什麼看起來常互相矛盾？
 
-研究可能使用不同珊瑚物種、生命階段、成分濃度、曝露時間與水質條件。實驗室觀察到的效應，不能不經判讀就直接等同真實海域風險；但「還有不確定性」也不代表可以忽略污染。
+研究可能使用不同珊瑚物種、生命階段、成分濃度、曝露時間與水質條件。實驗室觀察到的效應，不能不經判讀就直接等同真實海域風險，但「還有不確定性」也不代表可以忽略污染。
 
 目前比較穩妥的行動是：
 
@@ -32,5 +32,5 @@ lastReviewed: 2026-08-16
 
 ## 資料來源
 
-- [EPA：UV Filters in Sunscreens and Aquatic Environmental Health](https://www.epa.gov/water-research/uv-filters-sunscreens-and-aquatic-environmental-health)（環境研究與不確定性；查閱 2026-08-16）
-- [NOAA：Skincare Chemicals and Coral Reefs](https://oceanservice.noaa.gov/news/sunscreen-corals.html)（防曬成分與水生生物研究概況；查閱 2026-08-16）
+- [EPA：UV Filters in Sunscreens and Aquatic Environmental Health](https://www.epa.gov/water-research/uv-filters-sunscreens-and-aquatic-environmental-health)（環境研究與不確定性，查閱於 2026-08-16）
+- [NOAA：Skincare Chemicals and Coral Reefs](https://oceanservice.noaa.gov/news/sunscreen-corals.html)（防曬成分與水生生物研究概況，查閱於 2026-08-16）

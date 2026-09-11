@@ -11,7 +11,7 @@ lastReviewed: 2026-08-16
 
 ## 先說結論
 
-曬傷如果只是局部輕微泛紅，可以先離開陽光、降溫、保濕並觀察；但出現大片或嚴重水泡、疼痛／腫脹越來越強、發燒或發冷、頭暈噁心、明顯脫水、眼睛疼痛或畏光、膿液與紅線等感染徵象，就應尋求醫療協助。不要讓 防曬晴報員 的補擦倒數取代就醫判斷。
+曬傷若僅為表淺泛紅微熱，可先至陰涼處冷敷補水進行居家照護，但若出現大範圍水泡破潰、劇烈灼痛腫脹、寒顫高燒、頭暈反胃、嚴重脫水或傷口流膿感染徵象，必須立即就醫。切勿讓防曬晴報員的提醒倒數延誤關鍵就醫時機。
 
 ## 這些是需要求助的警訊
 
@@ -33,7 +33,7 @@ lastReviewed: 2026-08-16
 
 ## 等待協助時可以做什麼？
 
-先離開陽光、移到涼爽處，使用冷濕布或涼爽淋浴舒緩；在清醒且能正常飲水的情況下適量補水。不要戳破水泡、撕脫皮膚或在破損處反覆塗抹產品。若有意識改變或嚴重全身症狀，優先依所在地緊急醫療指示處理。
+發現曬傷後應立即離開紫外線直射區，以冷水淋浴或濕毛巾冷敷幫助散熱，並在意識清楚狀態下少量多次補充足量水分。嚴禁自行擠破水泡或撕扯表皮，若伴隨意識模糊或全身痙攣，請立即撥打 119 尋求緊急醫療協助。
 
 ## 哪些人要更早詢問？
 
@@ -43,11 +43,11 @@ lastReviewed: 2026-08-16
 
 ## 文章限制
 
-本文列的是一般公共衛教警訊，不是急診分級或個人診斷。症狀是否需要就醫，仍會受到年齡、範圍、病史與實際外觀影響；有疑慮時寧可直接諮詢醫療專業人員。
+本文整理之警訊僅供一般公衛教育參考，無法取代臨床急診檢傷與醫師個別診斷。當對自身曬傷病情有所擔憂時，請毫不猶豫尋求醫療專業人員的親自診視。
 
 ## 資料來源
 
-- [AAD：How to treat a sunburn](https://www.aad.org/public/everyday-care/injured-skin/burns/treat-sunburn)（水泡、感染與曬傷照護；查閱 2026-08-16）
-- [AAD：How to treat a sunburn](https://www.aad.org/news/how-to-treat-a-sunburn)（發燒、發冷、噁心、惡化等求助訊號；查閱 2026-08-16）
-- [NHS：Sunburn](https://www.nhs.uk/conditions/sunburn/)（水泡、全身症狀與急切求助；查閱 2026-08-16）
-- [MedlinePlus：Sunburn](https://medlineplus.gov/ency/article/003227.htm)（脫水與眼睛症狀等警訊；查閱 2026-08-16）
+- [AAD：How to treat a sunburn](https://www.aad.org/public/everyday-care/injured-skin/burns/treat-sunburn)（水泡、感染與曬傷照護，查閱於 2026-08-16）
+- [AAD：How to treat a sunburn](https://www.aad.org/news/how-to-treat-a-sunburn)（發燒、發冷、噁心、惡化等求助訊號，查閱於 2026-08-16）
+- [NHS：Sunburn](https://www.nhs.uk/conditions/sunburn/)（水泡、全身症狀與急切求助，查閱於 2026-08-16）
+- [MedlinePlus：Sunburn](https://medlineplus.gov/ency/article/003227.htm)（脫水與眼睛症狀等警訊，查閱於 2026-08-16）

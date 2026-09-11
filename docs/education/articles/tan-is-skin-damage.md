@@ -15,7 +15,7 @@ lastReviewed: 2026-08-16
 
 ## 沒有紅，為什麼也算受傷？
 
-曬傷的紅痛只是 UV 傷害的一種表現。皮膚為了回應 UV 而增加黑色素，外觀看起來變深，仍代表細胞已受到刺激；長期累積會增加提早老化與皮膚癌風險。
+曬傷的紅痛只是 UV 傷害的一種表現。皮膚為了回應 UV 而增加黑色素，外觀看起來變深，仍代表細胞已受到刺激，長期累積會增加提早老化與皮膚癌風險。
 
 如果喜歡膚色較深的外觀，可考慮不靠 UV 的外用仿曬產品，但它通常**不提供防曬**，仍需照常做遮蔽與防護。
 
@@ -31,5 +31,5 @@ lastReviewed: 2026-08-16
 
 ## 資料來源
 
-- [CDC：Reducing Risk for Skin Cancer](https://www.cdc.gov/skin-cancer/prevention/index.html)（UV 後膚色改變代表傷害；查閱 2026-08-16）
-- [MedlinePlus：Tanning](https://medlineplus.gov/tanning.html)（底曬不能預防曬傷與 UV 風險；查閱 2026-08-16）
+- [CDC：Reducing Risk for Skin Cancer](https://www.cdc.gov/skin-cancer/prevention/index.html)（UV 後膚色改變代表傷害，查閱於 2026-08-16）
+- [MedlinePlus：Tanning](https://medlineplus.gov/tanning.html)（底曬不能預防曬傷與 UV 風險，查閱於 2026-08-16）

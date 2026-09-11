@@ -2,7 +2,7 @@
 title: "流汗、游泳、淋雨或擦毛巾後，何時要重新補擦？"
 slug: after-sweating-swimming-or-rain
 category: sweat-and-water
-summary: "流汗、游泳、淋雨或毛巾擦乾，都可能讓防曬變得不均勻；先到安全處輕按吸乾，再依防曬乳標示重新塗抹，不要只等原本倒數結束。"
+summary: "流汗、游泳、淋雨或毛巾擦拭，皆會使防曬膜產生破損或流失。應先至安全陰涼處輕按吸乾水分，再依產品說明適時補擦，切勿死守原本的倒數時間。"
 primaryQuestion: "流汗、碰水或淋雨後，要不要立刻補擦防曬？"
 status: draft
 reviewStatus: needs-professional-review
@@ -17,7 +17,7 @@ lastReviewed: 2026-08-16
 
 ### 流汗
 
-汗水會讓防曬變薄或移位。先用乾淨毛巾或紙巾輕按吸汗，避免反覆來回擦拭；皮膚乾到可以均勻塗抹後，再補上防曬。若仍在高溫環境，也要同步補水、休息和降溫，因為熱傷害和 UV 傷害是兩種不同風險。
+汗水會使防曬成分移位流失。先以乾淨毛巾或紙巾輕按吸乾汗水，避免來回摩擦，待皮膚乾爽後再補擦防曬乳。若身處悶熱環境，請務必補充水分與休息散熱，避免熱傷害發生。
 
 ### 游泳或碰水
 
@@ -25,15 +25,15 @@ lastReviewed: 2026-08-16
 
 ### 淋雨
 
-淋雨不會自動讓 UV 變成零。如果雨水已經沖掉、稀釋或打亂防曬，擦乾後就按碰水事件處理；如果大部分皮膚由雨具與衣物完整遮住，仍要檢查露出的臉、耳朵、手等部位。
+下雨並不代表紫外線降為零。若雨水已沖刷掉防曬乳，擦乾水分後應視同碰水情境重新補擦，若已穿戴雨具雨衣，仍須留意臉部與手部等外露肌膚。
 
 ### 毛巾擦乾
 
 毛巾摩擦可能帶走防曬，即使皮膚看起來沒有濕。擦乾後重新檢查鼻子、耳朵、頸部、手背和腳背等容易漏擦的位置。
 
-## 防曬晴報員 怎麼記錄比較有用？
+## 防曬晴報員怎麼記錄比較有用？
 
-事件記錄的目的，是讓你知道「發生過需要補擦的事」，不是替你判定產品已經失效。記錄後先完成實際補擦，再從新的補擦時間開始倒數；如果當下正在開車、游泳或處在不安全位置，先到安全地方再處理。
+事件記錄的目的，是讓你知道「發生過需要補擦的事」，不是替你判定產品已經失效。記錄後請確實完成補擦，並重新啟動計時。若當下正在開車、戲水或處於不便操作的環境，請先前往安全定點後再行處理。
 
 ---
 
@@ -43,7 +43,7 @@ lastReviewed: 2026-08-16
 
 ## 資料來源
 
-- [AAD：How to apply sunscreen](https://www.aad.org/public/everyday-care/sun-protection/shade-clothing-sunscreen/how-to-apply-sunscreen)（每兩小時、流汗／游泳後補擦；查閱 2026-08-16）
-- [AAD：How to decode a sunscreen label](https://www.aad.org/public/everyday-care/sun-protection/shade-clothing-sunscreen/understand-sunscreen-labels)（抗水與毛巾擦乾後補擦；查閱 2026-08-16）
-- [FDA：Sunscreen: How to Help Protect Your Skin from the Sun](https://www.fda.gov/drugs/understanding-over-counter-medicines/sunscreen-how-help-protect-your-skin-sun)（依產品標籤與活動補擦；查閱 2026-08-16）
-- [國民健康署：防曬5裝備學起來 一起遠離熱傷害！](https://www.hpa.gov.tw/Pages/Detail.aspx?nodeid=4576&pid=15862)（流汗、補水、休息與降溫；查閱 2026-08-16）
+- [AAD：How to apply sunscreen](https://www.aad.org/public/everyday-care/sun-protection/shade-clothing-sunscreen/how-to-apply-sunscreen)（每兩小時、流汗／游泳後補擦，查閱於 2026-08-16）
+- [AAD：How to decode a sunscreen label](https://www.aad.org/public/everyday-care/sun-protection/shade-clothing-sunscreen/understand-sunscreen-labels)（抗水與毛巾擦乾後補擦，查閱於 2026-08-16）
+- [FDA：Sunscreen: How to Help Protect Your Skin from the Sun](https://www.fda.gov/drugs/understanding-over-counter-medicines/sunscreen-how-help-protect-your-skin-sun)（依產品標籤與活動補擦，查閱於 2026-08-16）
+- [國民健康署：防曬5裝備學起來 一起遠離熱傷害！](https://www.hpa.gov.tw/Pages/Detail.aspx?nodeid=4576&pid=15862)（流汗、補水、休息與降溫，查閱於 2026-08-16）

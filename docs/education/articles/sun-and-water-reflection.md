@@ -2,7 +2,7 @@
 title: "水面、沙地與陰影：為什麼遮住了還是要留意 UV？"
 slug: sun-and-water-reflection
 category: sweat-and-water
-summary: "水面、沙地、雪地與混凝土都可能反射紫外線；遮蔭能降低曝曬但不是完全隔絕，因此仍要搭配衣物、帽子、眼鏡與防曬乳。"
+summary: "水面、沙地、雪地與混凝土都可能反射紫外線，遮蔭能降低曝曬但不是完全隔絕，因此仍要搭配衣物、帽子、眼鏡與防曬乳。"
 primaryQuestion: "在水邊、沙地或陰影下，還需要防曬嗎？"
 status: draft
 reviewStatus: needs-professional-review
@@ -38,7 +38,7 @@ UV 不只從頭頂直直照下來，也可能從天空散射或由周圍表面�
 
 ## 資料來源
 
-- [WHO：Ultraviolet radiation](https://www.who.int/news-room/fact-sheets/detail/ultraviolet-radiation)（反射、雲量、遮蔭與整合防護；查閱 2026-08-16）
-- [CDC：Sun Safety Facts](https://www.cdc.gov/skin-cancer/sun-safety/)（水、沙、雪與混凝土反射；查閱 2026-08-16）
-- [AAD：What to wear to protect your skin from the sun](https://www.aad.org/public/everyday-care/sun-protection/shade-clothing-sunscreen/what-to-wear-protect-skin-from-sun)（衣物、帽子與眼睛防護；查閱 2026-08-16）
-- [中央氣象署：紫外線指數預報服務](https://www.cwa.gov.tw/Data/knowledge/announce/service13.pdf)（臺灣 UV 指數分級與預報；查閱 2026-08-16）
+- [WHO：Ultraviolet radiation](https://www.who.int/news-room/fact-sheets/detail/ultraviolet-radiation)（反射、雲量、遮蔭與整合防護，查閱於 2026-08-16）
+- [CDC：Sun Safety Facts](https://www.cdc.gov/skin-cancer/sun-safety/)（水、沙、雪與混凝土反射，查閱於 2026-08-16）
+- [AAD：What to wear to protect your skin from the sun](https://www.aad.org/public/everyday-care/sun-protection/shade-clothing-sunscreen/what-to-wear-protect-skin-from-sun)（衣物、帽子與眼睛防護，查閱於 2026-08-16）
+- [中央氣象署：紫外線指數預報服務](https://www.cwa.gov.tw/Data/knowledge/announce/service13.pdf)（臺灣 UV 指數分級與預報，查閱於 2026-08-16）

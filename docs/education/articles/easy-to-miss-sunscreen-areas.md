@@ -11,11 +11,11 @@ lastReviewed: 2026-08-16
 
 ## 先說結論
 
-補擦時，請把「所有衣物沒有遮住的皮膚」重新檢查一次。除了臉，耳朵、頸部、手背、腳背、嘴唇與頭頂也可能直接曬到；固定順序比憑印象隨手抹，更不容易漏掉。
+補擦時，請把「所有衣物沒有遮住的皮膚」重新檢查一次。除了臉，耳朵、頸部、手背、腳背、嘴唇與頭頂分線處也常直接曝曬。建立固定的補擦順序，比憑印象隨手塗抹更不容易疏漏。
 
 ## 一個簡單的七區確認法
 
-防曬晴報員 的提醒部位分成七區，你可以把它當成補擦時的檢查順序：
+防曬晴報員的提醒部位分成七區，可作為補擦時的順序參考：
 
 1. 臉部
 2. 頸部與耳朵
@@ -25,7 +25,7 @@ lastReviewed: 2026-08-16
 6. 腿部
 7. 腳部
 
-不是每次都要把被衣物完整遮住的區域重新塗抹；重點是看衣物邊緣、袖口、領口、短褲或鞋子露出的皮膚。背部等難以自己處理的位置，可以請同行者協助或依產品說明選擇合適形式。
+補擦時不需每次都將衣物完整覆蓋的部位重新塗抹，核心重點在於檢查袖口、領口、褲管或鞋面邊緣裸露出的肌膚。背部等難以自己處理的位置，可以請同行者協助或依產品說明選擇合適形式。
 
 ## 特別容易被忽略的位置
 
@@ -41,16 +41,16 @@ lastReviewed: 2026-08-16
 
 ## 讓自己比較不會忘記
 
-把補擦順序固定成「臉 → 耳頸 → 手臂 → 手 → 身體 → 腿 → 腳」，每次照同一條路線走。防曬晴報員 的部位紀錄是幫助你回想與提醒，不是檢查你是否達到醫療上所需的防護量。
+把補擦順序固定成「臉 → 耳頸 → 手臂 → 手 → 身體 → 腿 → 腳」，每次照同一條路線走。防曬晴報員的部位紀錄是協助記憶與提醒，並非檢測醫療防護劑量。
 
 ---
 
 ## 文章限制
 
-本文提供位置檢查方法，不替任何人判斷需要塗抹的實際面積；請依衣物、產品標示、活動與專業建議調整。
+本文提供常見漏擦部位的自我檢視要點，實際塗抹範圍應視當日穿著、產品標示、活動情境與專業建議自行調整。
 
 ## 資料來源
 
-- [AAD：How to apply sunscreen](https://www.aad.org/public/everyday-care/sun-protection/shade-clothing-sunscreen/how-to-apply-sunscreen)（臉、耳朵、頸部、手、腳與頭皮等裸露部位；查閱 2026-08-16）
-- [FDA：Tips to Stay Safe in the Sun](https://www.fda.gov/consumers/consumer-updates/tips-stay-safe-sun-sunscreen-sunglasses)（耳朵、頸部、手、腳與唇部的防護提醒；查閱 2026-08-16）
-- [WHO：Ultraviolet radiation](https://www.who.int/news-room/fact-sheets/detail/ultraviolet-radiation)（衣物與遮蔽優先的整合防護；查閱 2026-08-16）
+- [AAD：How to apply sunscreen](https://www.aad.org/public/everyday-care/sun-protection/shade-clothing-sunscreen/how-to-apply-sunscreen)（臉、耳朵、頸部、手、腳與頭皮等裸露部位，查閱於 2026-08-16）
+- [FDA：Tips to Stay Safe in the Sun](https://www.fda.gov/consumers/consumer-updates/tips-stay-safe-sun-sunscreen-sunglasses)（耳朵、頸部、手、腳與唇部的防護提醒，查閱於 2026-08-16）
+- [WHO：Ultraviolet radiation](https://www.who.int/news-room/fact-sheets/detail/ultraviolet-radiation)（衣物與遮蔽優先的整合防護，查閱於 2026-08-16）

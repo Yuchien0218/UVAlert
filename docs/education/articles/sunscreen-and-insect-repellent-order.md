@@ -15,7 +15,7 @@ CDC 的旅遊健康建議是：**先擦防曬，再使用防蚊液**。兩者都
 
 ## 補擦頻率為什麼不能綁在一起？
 
-防曬在戶外通常需要定期補擦，也會因流汗、碰水與擦拭而提早補；防蚊液的重複使用間隔則依有效成分與產品標示。每次補防曬時都跟著補防蚊液，可能造成不必要的重複使用。
+防曬在戶外通常需要定期補擦，也會因流汗、碰水與擦拭而提早補，防蚊液的重複使用間隔則依有效成分與產品標示。每次補防曬時都跟著補防蚊液，可能造成不必要的重複使用。
 
 可以把兩種提醒分開：
 
@@ -30,5 +30,5 @@ CDC 的旅遊健康建議是：**先擦防曬，再使用防蚊液**。兩者都
 
 ## 資料來源
 
-- [CDC Travelers’ Health：Avoid bug bites](https://wwwnc.cdc.gov/travel/page/avoid-bug-bites)（先防曬、後防蚊及依標示使用；查閱 2026-08-16）
-- [EPA：Using Insect Repellents Safely and Effectively](https://www.epa.gov/insect-repellents/using-insect-repellents-safely-and-effectively)（防蚊產品安全與標示；查閱 2026-08-16）
+- [CDC Travelers’ Health：Avoid bug bites](https://wwwnc.cdc.gov/travel/page/avoid-bug-bites)（先防曬、後防蚊及依標示使用，查閱於 2026-08-16）
+- [EPA：Using Insect Repellents Safely and Effectively](https://www.epa.gov/insect-repellents/using-insect-repellents-safely-and-effectively)（防蚊產品安全與標示，查閱於 2026-08-16）

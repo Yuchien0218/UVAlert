@@ -22,14 +22,14 @@ UV 指數（UVI）用來表示到達地面的紫外線強度與可能造成傷�
 |     0–2 | 低量級 | 一般情況下防護需求較低，但長時間戶外仍可採取遮蔽 |
 |     3–5 | 中量級 | 戶外活動建議開始安排基本防護                     |
 |     6–7 | 高量級 | 應更積極使用遮蔭、衣物、帽子、眼鏡與防曬乳       |
-|    8–10 | 過量級 | 盡量避開強光時段；需要外出時採取完整防護         |
+|    8–10 | 過量級 | 盡量避開強烈日曬時段，若需外出應採取完整防護         |
 | 11 以上 | 危險級 | 優先減少烈日下活動，外出時採取完整防護           |
 
 分級是公共衛教工具，不會替每個人計算同一個曬傷時間。膚色、衣物、活動位置、反射環境、雲量與曝曬時段都會影響實際曝曬。
 
 ## 為什麼中午前後常比較強？
 
-太陽高度會隨時間改變，UV 強度也會跟著變化。天氣與 UV 預報常用當日較高的時段提醒大家；中央氣象署的預報服務提供區域的每日最大 UV 指數，並不是把每個人的皮膚狀況換算成一個保證時間。
+太陽高度會隨時間改變，UV 強度也會跟著變化。天氣與 UV 預報通常以當日紫外線較高的時段提醒大家。中央氣象署的預報服務提供各區域的每日最大 UV 指數，而非將個別皮膚狀況換算成安全曝曬時間。
 
 因此，看到「今天 UV 很高」時，先調整活動安排，再補上防曬乳。不要只看到早上數字較低，就推論整天都不需要防護。
 
@@ -40,7 +40,7 @@ UV 指數（UVI）用來表示到達地面的紫外線強度與可能造成傷�
 3. 防曬乳塗在衣物沒有覆蓋的皮膚，並依防曬乳標示與活動狀況補擦。
 4. 如果流汗、碰水或用毛巾擦拭，請改看「流汗或碰水後」的處理方式，而不是只等固定時間。
 
-防曬晴報員 的倒數是協助記住補擦的工具；它不會把 UV 指數轉換成個人安全時間，也不取代防曬乳標示或醫療專業建議。
+防曬晴報員的倒數是協助記住補擦的工具，不會將 UV 指數轉換成個人安全時間，亦不取代防曬乳標示或專業醫療建議。
 
 ---
 
@@ -50,6 +50,6 @@ UV 指數（UVI）用來表示到達地面的紫外線強度與可能造成傷�
 
 ## 資料來源
 
-- [中央氣象署：紫外線指數預報服務](https://www.cwa.gov.tw/Data/knowledge/announce/service13.pdf)（台灣分級與預報說明；查閱 2026-08-16）
-- [WHO：Radiation: The ultraviolet (UV) index](https://www.who.int/news-room/questions-and-answers/item/radiation-the-ultraviolet-%28uv%29-index)（UVI 意義與依指數採取防護；查閱 2026-08-16）
-- [WHO：Ultraviolet radiation](https://www.who.int/news-room/fact-sheets/detail/ultraviolet-radiation)（UV 健康影響與整合防護；查閱 2026-08-16）
+- [中央氣象署：紫外線指數預報服務](https://www.cwa.gov.tw/Data/knowledge/announce/service13.pdf)（台灣分級與預報說明，查閱於 2026-08-16）
+- [WHO：Radiation: The ultraviolet (UV) index](https://www.who.int/news-room/questions-and-answers/item/radiation-the-ultraviolet-%28uv%29-index)（UVI 意義與依指數採取防護，查閱於 2026-08-16）
+- [WHO：Ultraviolet radiation](https://www.who.int/news-room/fact-sheets/detail/ultraviolet-radiation)（UV 健康影響與整合防護，查閱於 2026-08-16）

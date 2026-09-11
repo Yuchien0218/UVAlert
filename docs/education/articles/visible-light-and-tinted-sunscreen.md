@@ -2,7 +2,7 @@
 title: "潤色防曬真的能防藍光嗎？先分清太陽可見光與螢幕藍光"
 slug: visible-light-and-tinted-sunscreen
 category: uv-basics
-summary: "潤色防曬中的氧化鐵可能增加對太陽可見光的防護，對容易色素沉澱者較有意義；這不等於所有產品都能防螢幕藍光。"
+summary: "潤色防曬中的氧化鐵成分有助於提升對太陽可見光的防護，對容易色素沉澱者具實質意義，但這並不等於所有潤色產品都能阻擋螢幕藍光。"
 primaryQuestion: "潤色防曬可以防藍光嗎？"
 status: draft
 reviewStatus: needs-professional-review
@@ -11,11 +11,11 @@ lastReviewed: 2026-08-16
 
 ## 先說結論
 
-先看產品在講哪一種光。皮膚科資料所說的「可見光防護」，主要關注的是**太陽中的可見光**；不能直接延伸成「任何潤色產品都能阻擋手機或電腦螢幕藍光」。
+先看產品在講哪一種光。皮膚科資料所說的「可見光防護」，主要關注的是**太陽光中的可見光**，無法直接推論為「任何潤色產品皆能阻隔手機或電腦螢幕藍光」。
 
 ## 潤色的作用在哪裡？
 
-部分潤色防曬含氧化鐵。AAD 指出，含氧化鐵的潤色防曬可增加對太陽可見光的防護，對肝斑或容易色素沉澱的人可能較有幫助。選購時仍要先確認廣效防護、適合的 SPF 與自己的膚況；「有顏色」本身不是完整證明。
+部分潤色防曬含氧化鐵。AAD 指出，含氧化鐵的潤色防曬可增加對太陽可見光的防護，對肝斑或容易色素沉澱的人可能較有幫助。選購時仍應先確認具備廣效防護、合適的 SPF 係數並考量自身膚況，「帶有顏色」本身並不足以作為防護證明。
 
 閱讀商品文案時可問三件事：
 
@@ -31,5 +31,5 @@ lastReviewed: 2026-08-16
 
 ## 資料來源
 
-- [AAD：How to decode a sunscreen label](https://www.aad.org/public/everyday-care/sun-protection/shade-clothing-sunscreen/understand-sunscreen-labels)（氧化鐵、潤色防曬與太陽可見光；查閱 2026-08-16）
-- [WHO：Ultraviolet radiation](https://www.who.int/news-room/fact-sheets/detail/ultraviolet-radiation)（紫外線範圍與健康影響；查閱 2026-08-16）
+- [AAD：How to decode a sunscreen label](https://www.aad.org/public/everyday-care/sun-protection/shade-clothing-sunscreen/understand-sunscreen-labels)（氧化鐵、潤色防曬與太陽可見光，查閱於 2026-08-16）
+- [WHO：Ultraviolet radiation](https://www.who.int/news-room/fact-sheets/detail/ultraviolet-radiation)（紫外線範圍與健康影響，查閱於 2026-08-16）

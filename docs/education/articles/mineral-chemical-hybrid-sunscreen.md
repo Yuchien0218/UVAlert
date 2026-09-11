@@ -19,7 +19,7 @@ lastReviewed: 2026-08-16
 - 化學性：使用其他核准的有機 UV 濾劑。
 - 混合型：同時使用上述兩類濾劑。
 
-「物理性只反射、化學性只吸收」是過度簡化；AAD 說明所有防曬成分都會吸收紫外線，礦物成分也會反射一部分。
+「物理性只反射、化學性只吸收」屬於過度簡化的說法。皮膚科醫學會指出，各類防曬成分皆具吸收紫外線的作用，而礦物性成分則同時具備散射與反射效果。
 
 ## 選擇時依什麼順序？
 
@@ -36,5 +36,5 @@ lastReviewed: 2026-08-16
 
 ## 資料來源
 
-- [衛生福利部食品藥物管理署：物理性與化學性防曬](https://www.fda.gov.tw/Tc/PublishOtherEpaperContent.aspx?id=1519&r=2101262437&tid=4827)（成分類型與作用；查閱 2026-08-16）
-- [AAD：How to decode a sunscreen label](https://www.aad.org/public/everyday-care/sun-protection/shade-clothing-sunscreen/understand-sunscreen-labels)（礦物、化學與混合型說明；查閱 2026-08-16）
+- [衛生福利部食品藥物管理署：物理性與化學性防曬](https://www.fda.gov.tw/Tc/PublishOtherEpaperContent.aspx?id=1519&r=2101262437&tid=4827)（成分類型與作用，查閱於 2026-08-16）
+- [AAD：How to decode a sunscreen label](https://www.aad.org/public/everyday-care/sun-protection/shade-clothing-sunscreen/understand-sunscreen-labels)（礦物、化學與混合型說明，查閱於 2026-08-16）
