@@ -19,10 +19,11 @@ function mountHeader(props: Record<string, unknown> = {}) {
 describe("BrandHeader", () => {
   /*
    * 2026-08-24 使用者裁決：右上角改顯示紫外線指數（例如「臺中市 低量級」），
-   * 顏色跟著風險等級走，點下去到 /forecast。
+   * 顏色跟著風險等級走。
+   * 2026-09-11 使用者裁決：點下去到 /region（地區設定）。
    */
   describe("UV 指數", () => {
-    it("有地區與風險等級時顯示地區＋等級，並連到五日預報", () => {
+    it("有地區與風險等級時顯示地區＋等級，並連到地區設定", () => {
       const wrapper = mountHeader({
         regionName: "臺中市",
         uvRiskLevel: "low"
@@ -36,7 +37,7 @@ describe("BrandHeader", () => {
         wrapper
           .findAllComponents(RouterLinkStub)
           .map((link) => link.props("to"))
-      ).toContain("/forecast");
+      ).toContain("/region");
       // UV 取代原本的提醒狀態文字，不並存。
       expect(wrapper.find(".brand-header__context").exists()).toBe(false);
     });

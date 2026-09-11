@@ -19,7 +19,9 @@ const props = withDefaults(defineProps<Props>(), {
 
 /**
  * 2026-08-24 使用者裁決：右上角從「本機提醒」改成顯示紫外線指數，
- * 例如「臺中市 低量級」，文字顏色跟著風險等級走，點下去到 /forecast。
+ * 例如「臺中市 低量級」，文字顏色跟著風險等級走。
+ *
+ * 2026-09-11 使用者裁決：右上角顯示地區與 UV 等級時，點擊路由改為連到 /region（地區設定）。
  *
  * 沒有 UV 可顯示時（沒設定地區，或預報讀不到）顯示「今日全臺UV分布」，
  * 連到 /forecast。
@@ -57,7 +59,7 @@ const uvLabel = computed(() =>
       v-if="showUv"
       class="brand-header__uv"
       :class="`brand-header__uv--${uvRiskLevel}`"
-      to="/forecast"
+      to="/region"
     >
       {{ uvLabel }}
     </RouterLink>
