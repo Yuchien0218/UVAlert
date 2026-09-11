@@ -1,6 +1,6 @@
 begin;
 
-select plan(7);
+select plan(9);
 
 select has_column(
   'public',
@@ -63,6 +63,23 @@ select ok(
       and roles && array['anon'::name, 'authenticated'::name]
   ),
   'feedback has no browser policies'
+);
+
+select ok(
+  has_table_privilege(
+    'service_role',
+    'public.feedback_submissions',
+    'select,insert'
+  ),
+  'feedback function can read and create submissions'
+);
+select ok(
+  not has_table_privilege(
+    'service_role',
+    'public.feedback_submissions',
+    'update,delete'
+  ),
+  'feedback function cannot mutate or delete existing submissions'
 );
 
 select * from finish();
