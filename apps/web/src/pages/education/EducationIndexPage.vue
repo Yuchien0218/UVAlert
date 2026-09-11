@@ -129,11 +129,11 @@ const robots = computed(() =>
       class="app-card education-hero-banner"
       :to="educationCategoryPath(heroCard.slug)"
     >
-      <span class="education-card-kicker">先從這裡開始</span>
       <IconLead :icon="heroCard.icon">
         <strong>{{ heroCard.title }}</strong>
       </IconLead>
       <small>{{ heroCard.description }}</small>
+      <span class="education-card-kicker">先從這裡開始</span>
     </RouterLink>
 
     <section aria-labelledby="education-categories-title">
@@ -383,8 +383,11 @@ const robots = computed(() =>
  * 橫幅的 kicker 保持膠囊（跟五張卡一致），但底色要換：一般卡的膠囊底是
  * --border-subtle，疊在更深的 cream-strong 上幾乎看不出來。用畫布色當底，
  * 在深底上反而是最清楚的做法。
+ *
+ * 2026-09-11（使用者要求）：改到右下方，靠右對齊。
  */
 .education-hero-banner .education-card-kicker {
+  justify-self: end;
   background: var(--color-canvas);
 }
 </style>

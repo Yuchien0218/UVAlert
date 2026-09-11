@@ -458,6 +458,16 @@ describe("衛教 hero 橫幅", () => {
     expect(banner.text()).toContain("先從這裡開始");
   });
 
+  it("「先從這裡開始」標籤位於橫幅右下方", () => {
+    const wrapper = mountIndex();
+    const banner = wrapper.get(".education-hero-banner");
+    const children = banner.element.children;
+
+    expect(
+      children[children.length - 1]?.classList.contains("education-card-kicker")
+    ).toBe(true);
+  });
+
   /*
    * **這條才是「丁」的本體。** hero 之所以讀起來彆扭，是因為它跟其餘五張
    * 結構相同卻份量不同；只要它還在 .education-category-grid 裡，矛盾就還在。
