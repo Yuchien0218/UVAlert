@@ -1,7 +1,8 @@
 import type {
   GearCategory,
   ProductCatalogRecordV1,
-  ProductLabelSnapshotV1
+  ProductLabelSnapshotV1,
+  ShadingRate
 } from "@sunshield/contracts";
 import type {
   ProductCatalogPort,
@@ -48,6 +49,14 @@ export interface SaveGearInput {
   formulation?: "lotion" | "gel" | "cream" | "spray" | "stick" | null | undefined;
   /** 2026-09-02：純紀錄，不進 reducer。 */
   protectionType?: "physical" | "chemical" | "hybrid" | null | undefined;
+  /** 2026-09-11：純紀錄，不進 reducer。 */
+  upf?: string | null | undefined;
+  /** 2026-09-11：純紀錄，不進 reducer。 */
+  shadingRate?: ShadingRate | null | undefined;
+  /** 2026-09-11：純紀錄，不進 reducer。 */
+  weight?: string | null | undefined;
+  /** 2026-09-11：純紀錄，不進 reducer。 */
+  hatStyle?: string | null | undefined;
   productId?: string | undefined;
   /**
    * 只有 sunscreen 會成為「目前使用產品」。記錄一副墨鏡不該改變
@@ -119,6 +128,10 @@ export function createProductSettingsController(
         volume: input.volume ?? null,
         formulation: input.formulation ?? null,
         protectionType: input.protectionType ?? null,
+        upf: input.upf ?? null,
+        shadingRate: input.shadingRate ?? null,
+        weight: input.weight ?? null,
+        hatStyle: input.hatStyle ?? null,
         now
       });
       if (setAsCurrent) {

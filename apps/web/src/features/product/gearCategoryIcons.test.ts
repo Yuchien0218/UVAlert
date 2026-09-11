@@ -48,8 +48,8 @@ function sourceFiles(dir: string, out: string[] = []): string[] {
 }
 
 describe("GEAR_CATEGORY_ICONS", () => {
-  it("四個品類都有圖示，而且圖示真的存在", () => {
-    expect(Object.keys(GEAR_CATEGORY_ICONS)).toHaveLength(4);
+  it("六個品類都有圖示，而且圖示真的存在", () => {
+    expect(Object.keys(GEAR_CATEGORY_ICONS)).toHaveLength(6);
     for (const icon of Object.values(GEAR_CATEGORY_ICONS)) {
       expect(Object.keys(ICONS), icon).toContain(icon);
     }

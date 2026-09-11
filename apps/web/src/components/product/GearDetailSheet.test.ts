@@ -64,6 +64,10 @@ function makeProduct(
     volume: null,
     formulation: null,
     protectionType: null,
+    upf: null,
+    shadingRate: null,
+    weight: null,
+    hatStyle: null,
     // paGrade 存照包裝抄的完整標示，顯示端不再自己加 PA 前綴。
     currentSnapshot: { ...snapshot, spf: 50, paGrade: "PA++++" },
     snapshotFingerprint: fingerprintProductLabelSnapshot(snapshot),
@@ -177,6 +181,70 @@ describe("GearDetailSheet", () => {
     // 沒填的欄位不留空列
     expect(text).not.toContain("到期日");
     expect(text).not.toContain("尺寸");
+  });
+
+  it("陽傘品類：完整呈現填寫的防UV係數、遮光率、重量與評價", async () => {
+    await mountSheet(
+      makeProduct({
+        displayName: "輕量抗UV降溫傘",
+        gearCategory: "umbrella",
+        purchaseMonth: "2026-07",
+        expiryDate: null,
+        priceTwd: 790,
+        usageRating: "good",
+        upf: "UPF 50+",
+        shadingRate: "complete",
+        weight: "180g",
+        note: "大太陽必備"
+      })
+    );
+
+    const text = sheetText();
+    expect(text).toContain("輕量抗UV降溫傘");
+    expect(text).toContain("陽傘");
+    expect(text).toContain("僅供紀錄");
+    expect(text).toContain("防UV係數");
+    expect(text).toContain("UPF 50+");
+    expect(text).toContain("遮光率");
+    expect(text).toContain("完全遮光");
+    expect(text).toContain("重量");
+    expect(text).toContain("180g");
+    expect(text).toContain("NT$ 790");
+    expect(text).toContain("好用");
+    expect(text).toContain("大太陽必備");
+    expect(text).not.toContain("帽款");
+    expect(text).not.toContain("尺寸");
+  });
+
+  it("帽子品類：完整呈現填寫的帽款、尺寸、顏色與評價", async () => {
+    await mountSheet(
+      makeProduct({
+        displayName: "戶外寬邊遮陽帽",
+        gearCategory: "hat",
+        purchaseMonth: "2026-05",
+        expiryDate: null,
+        priceTwd: 450,
+        usageRating: "ok",
+        hatStyle: "漁夫帽",
+        size: "M",
+        color: "卡其色",
+        note: "防曬效果好"
+      })
+    );
+
+    const text = sheetText();
+    expect(text).toContain("戶外寬邊遮陽帽");
+    expect(text).toContain("帽子");
+    expect(text).toContain("僅供紀錄");
+    expect(text).toContain("帽款");
+    expect(text).toContain("漁夫帽");
+    expect(text).toContain("尺寸");
+    expect(text).toContain("M");
+    expect(text).toContain("顏色");
+    expect(text).toContain("卡其色");
+    expect(text).toContain("普通");
+    expect(text).not.toContain("防UV係數");
+    expect(text).not.toContain("遮光率");
   });
 
   it("防曬衣物品類：完整呈現填寫的尺寸、顏色、價格與評價", async () => {

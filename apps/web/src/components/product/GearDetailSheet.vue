@@ -10,6 +10,7 @@ import {
   GEAR_CATEGORY_LABELS,
   gearSafetyState,
   PROTECTION_TYPE_LABELS,
+  SHADING_RATE_LABELS,
   USAGE_RATING_LABELS
 } from "../../features/product/gearPresentation";
 
@@ -109,6 +110,17 @@ const size = computed(() => props.product?.size ?? null);
 
 const color = computed(() => props.product?.color ?? null);
 
+const upf = computed(() => props.product?.upf ?? null);
+
+const shadingRate = computed(() => {
+  if (props.product?.shadingRate == null) return null;
+  return SHADING_RATE_LABELS[props.product.shadingRate];
+});
+
+const weight = computed(() => props.product?.weight ?? null);
+
+const hatStyle = computed(() => props.product?.hatStyle ?? null);
+
 const price = computed(() =>
   props.product?.priceTwd == null ? null : `NT$ ${props.product.priceTwd}`
 );
@@ -138,6 +150,10 @@ const hasSpecRows = computed(() => {
     volume.value !== null ||
     formulation.value !== null ||
     protectionType.value !== null ||
+    upf.value !== null ||
+    shadingRate.value !== null ||
+    weight.value !== null ||
+    hatStyle.value !== null ||
     size.value !== null ||
     color.value !== null ||
     purchase.value !== null ||
@@ -243,6 +259,22 @@ async function handleDelete(): Promise<void> {
         <div v-if="protectionType !== null" class="spec-row">
           <dt>防曬原理</dt>
           <dd>{{ protectionType }}</dd>
+        </div>
+        <div v-if="upf !== null" class="spec-row">
+          <dt>防UV係數</dt>
+          <dd>{{ upf }}</dd>
+        </div>
+        <div v-if="shadingRate !== null" class="spec-row">
+          <dt>遮光率</dt>
+          <dd>{{ shadingRate }}</dd>
+        </div>
+        <div v-if="weight !== null" class="spec-row">
+          <dt>重量</dt>
+          <dd>{{ weight }}</dd>
+        </div>
+        <div v-if="hatStyle !== null" class="spec-row">
+          <dt>帽款</dt>
+          <dd>{{ hatStyle }}</dd>
         </div>
         <div v-if="size !== null" class="spec-row">
           <dt>尺寸</dt>

@@ -48,6 +48,10 @@ function product(
     volume: null,
     formulation: null,
     protectionType: null,
+    upf: null,
+    shadingRate: null,
+    weight: null,
+    hatStyle: null,
     currentSnapshot: snapshot,
     snapshotFingerprint: fingerprintProductLabelSnapshot(snapshot),
     createdAt: "2026-08-01T08:00:00.000Z",
@@ -460,7 +464,9 @@ describe("尺寸與顏色只對有這個概念的品類顯示", () => {
   const FORM = readFileSync(
     "apps/web/src/components/product/GearForm.vue",
     "utf8"
-  ).replace(/\/\*[\s\S]*?\*\//g, "");
+  )
+    .replace(/\r\n/g, "\n")
+    .replace(/\/\*[\s\S]*?\*\//g, "");
 
   /*
    * 防曬衣物與其他裝備兩者都有、太陽眼鏡只有顏色、**防曬乳兩者都沒有**
@@ -469,7 +475,7 @@ describe("尺寸與顏色只對有這個概念的品類顯示", () => {
    */
   it("顯示條件照品類切分", () => {
     expect(FORM).toContain(
-      'gearCategory.value === "clothing" || gearCategory.value === "other_gear"'
+      'gearCategory.value === "clothing" ||\n    gearCategory.value === "hat" ||\n    gearCategory.value === "other_gear"'
     );
     expect(FORM).toContain(
       'const showsColor = computed(() => gearCategory.value !== "sunscreen");'
