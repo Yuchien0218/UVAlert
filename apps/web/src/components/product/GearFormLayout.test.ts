@@ -100,6 +100,12 @@ describe("GearForm 裝備區簡化", () => {
     expect(code).toContain("collapsible");
   });
 
+  it("包裝標示只在防曬乳品類顯示，防曬衣物等其他品類不顯示", () => {
+    expect(code).toMatch(
+      /needsLabelFields\s*=\s*computed\(\s*\(\)\s*=>\s*gearCategory\.value\s*===\s*["']sunscreen["']\s*\)/
+    );
+  });
+
   /*
    * 2026-08-31（選項丙）：SPF／PA 搬進包裝標示卡的 identity slot。
    *

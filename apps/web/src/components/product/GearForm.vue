@@ -163,7 +163,7 @@ const categoryLocked = computed(
 );
 
 const needsLabelFields = computed(
-  () => gearCategory.value === "sunscreen" || gearCategory.value === "clothing"
+  () => gearCategory.value === "sunscreen"
 );
 const showSunscreenFields = computed(() => gearCategory.value === "sunscreen");
 
@@ -441,7 +441,7 @@ async function remove(): Promise<void> {
       標示填寫。」）。標題「防曬乳規格確認」＋ eyebrow「包裝標示」已經說完
       同一件事，第三次講只是佔一行。
 
-      衣物那一支留著：它講的是「這裡為什麼沒有倒數相關欄位」，標題沒有涵蓋。
+      2026-09-11：防曬衣物不顯示包裝標示卡（needsLabelFields 僅限 sunscreen）。
     -->
     <ProductSnapshotEditor
       v-if="needsLabelFields"
@@ -452,11 +452,7 @@ async function remove(): Promise<void> {
       :prefilled="isEdit"
       eyebrow="包裝標示"
       title="防曬乳規格確認"
-      :description="
-        showSunscreenFields
-          ? ''
-          : '衣物只需要確認身分；沒有會影響倒數的標示欄位。'
-      "
+      description=""
     >
       <!--
         2026-08-31（選項丙）：SPF／PA 從「裝備暱稱」卡搬到這裡。
