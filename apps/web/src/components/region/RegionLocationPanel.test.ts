@@ -26,7 +26,7 @@ describe("RegionLocationPanel", () => {
     });
 
     expect(wrapper.findAll(".button--primary")).toHaveLength(1);
-    expect(wrapper.get(".button--primary").text()).toBe("使用目前位置");
+    expect(wrapper.get(".button--primary").text()).toBe("允許單次定位");
     expect(wrapper.find('[data-testid="relocate"]').exists()).toBe(false);
   });
 

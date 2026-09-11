@@ -97,7 +97,7 @@ describe("RegionPage", () => {
 
     expect(region.ensureLoaded).toHaveBeenCalledOnce();
     expect(region.useCurrentPosition).not.toHaveBeenCalled();
-    expect(wrapper.text()).toContain("不儲存或分析位置資訊");
+    expect(wrapper.text()).toContain("不記錄亦不進行後續背景定位");
   });
 
   it("未設定地區時載入並顯示全臺分布", async () => {

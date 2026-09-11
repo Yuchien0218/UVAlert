@@ -54,20 +54,20 @@ const errorMessage = computed(() => {
   >
     <div class="location-panel__heading">
       <div>
-        <p class="eyebrow--mono">裝置定位</p>
+        <p class="eyebrow--mono">單次定位</p>
         <h2
           id="location-title"
           class="location-panel__title"
           data-typography-role="card-title"
         >
-          使用目前位置
+          快速偵測所在區域
         </h2>
       </div>
       <Icon name="feature-locate" :size="24" />
     </div>
 
     <p class="location-panel__body">
-      僅短暫定位以配對行政區，不儲存或分析位置資訊，可手動選擇或略過設定。
+      僅在點選時進行一次性區域辨識，本服務不記錄亦不進行後續背景定位。
     </p>
 
     <button
@@ -79,7 +79,7 @@ const errorMessage = computed(() => {
       @click="emit('locate')"
     >
       <InlineLoader v-if="phase === 'locating'" />
-      {{ phase === "locating" ? "正在取得位置…" : "使用目前位置" }}
+      {{ phase === "locating" ? "正在取得位置…" : "允許單次定位" }}
     </button>
 
     <div

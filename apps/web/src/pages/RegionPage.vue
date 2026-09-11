@@ -135,6 +135,7 @@ function returnToCaller(): Promise<unknown> {
 .region-alternatives {
   display: flex;
   flex-wrap: wrap;
+  justify-content: center;
   gap: var(--space-4);
   padding-top: var(--space-5);
   border-top: 1px solid var(--border-subtle);
@@ -152,5 +153,6 @@ function returnToCaller(): Promise<unknown> {
   color: var(--text-secondary);
   font-size: var(--font-size-supporting);
   line-height: var(--line-height-body);
+  text-align: center;
 }
 </style>
