@@ -113,3 +113,23 @@ export function formatPurchaseMonth(value: string | null): string | null {
   const [year, month] = value.split("-");
   return `${year} 年 ${Number(month)} 月購買`;
 }
+
+export const USAGE_RATING_LABELS = {
+  good: "好用",
+  ok: "普通",
+  bad: "不好用"
+} as const;
+
+export const FORMULATION_LABELS = {
+  lotion: "乳液",
+  gel: "凝膠／水感",
+  cream: "霜狀",
+  spray: "噴霧",
+  stick: "防曬棒"
+} as const;
+
+export const PROTECTION_TYPE_LABELS = {
+  physical: "物理性",
+  chemical: "化學性",
+  hybrid: "混合型"
+} as const;

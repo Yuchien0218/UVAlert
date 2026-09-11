@@ -147,9 +147,125 @@ describe("GearDetailSheet", () => {
     expect(sheetText()).toContain("清爽好推");
   });
 
-  it("不顯示不存在於資料模型的容量", async () => {
-    await mountSheet(makeProduct());
-    expect(sheetText()).not.toContain("ml");
+  it("太陽眼鏡品類：完整呈現填寫的價格、評價、顏色與附註", async () => {
+    await mountSheet(
+      makeProduct({
+        displayName: "加價購的太陽眼鏡",
+        gearCategory: "eyewear",
+        purchaseMonth: "2026-09",
+        expiryDate: null,
+        priceTwd: 100,
+        usageRating: "bad",
+        color: "墨綠鏡片",
+        note: "一分錢一分貨"
+      })
+    );
+
+    const text = sheetText();
+    expect(text).toContain("加價購的太陽眼鏡");
+    expect(text).toContain("太陽眼鏡");
+    expect(text).toContain("僅供紀錄");
+    expect(text).toContain("2026 年 9 月購買");
+    expect(text).toContain("購入價格");
+    expect(text).toContain("NT$ 100");
+    expect(text).toContain("使用評價");
+    expect(text).toContain("不好用");
+    expect(text).toContain("顏色");
+    expect(text).toContain("墨綠鏡片");
+    expect(text).toContain("個人附註");
+    expect(text).toContain("一分錢一分貨");
+    // 沒填的欄位不留空列
+    expect(text).not.toContain("到期日");
+    expect(text).not.toContain("尺寸");
+  });
+
+  it("防曬衣物品類：完整呈現填寫的尺寸、顏色、價格與評價", async () => {
+    await mountSheet(
+      makeProduct({
+        displayName: "迪ka農防曬外套",
+        gearCategory: "clothing",
+        purchaseMonth: "2026-06",
+        priceTwd: 890,
+        usageRating: "good",
+        size: "XL",
+        color: "淺灰",
+        note: "透氣防曬"
+      })
+    );
+
+    const text = sheetText();
+    expect(text).toContain("迪ka農防曬外套");
+    expect(text).toContain("防曬衣物");
+    expect(text).toContain("尺寸");
+    expect(text).toContain("XL");
+    expect(text).toContain("顏色");
+    expect(text).toContain("淺灰");
+    expect(text).toContain("購入價格");
+    expect(text).toContain("NT$ 890");
+    expect(text).toContain("使用評價");
+    expect(text).toContain("好用");
+    expect(text).toContain("個人附註");
+    expect(text).toContain("透氣防曬");
+  });
+
+  it("其他裝備品類：完整呈現填寫的尺寸、顏色、價格與評價", async () => {
+    await mountSheet(
+      makeProduct({
+        displayName: "戶外遮陽帽",
+        gearCategory: "other_gear",
+        priceTwd: 350,
+        usageRating: "ok",
+        size: "Free Size",
+        color: "卡其色",
+        note: null
+      })
+    );
+
+    const text = sheetText();
+    expect(text).toContain("戶外遮陽帽");
+    expect(text).toContain("其他裝備");
+    expect(text).toContain("尺寸");
+    expect(text).toContain("Free Size");
+    expect(text).toContain("顏色");
+    expect(text).toContain("卡其色");
+    expect(text).toContain("購入價格");
+    expect(text).toContain("NT$ 350");
+    expect(text).toContain("使用評價");
+    expect(text).toContain("普通");
+    expect(text).not.toContain("個人附註");
+  });
+
+  it("防曬乳品類：完整呈現填寫的容量、劑型、防曬原理、價格與評價", async () => {
+    await mountSheet(
+      makeProduct({
+        displayName: "極效防水清爽防曬",
+        gearCategory: "sunscreen",
+        volume: "60ml",
+        formulation: "gel",
+        protectionType: "physical",
+        priceTwd: 450,
+        usageRating: "good"
+      })
+    );
+
+    const text = sheetText();
+    expect(text).toContain("極效防水清爽防曬");
+    expect(text).toContain("防曬乳");
+    expect(text).toContain("容量");
+    expect(text).toContain("60ml");
+    expect(text).toContain("劑型");
+    expect(text).toContain("凝膠／水感");
+    expect(text).toContain("防曬原理");
+    expect(text).toContain("物理性");
+    expect(text).toContain("購入價格");
+    expect(text).toContain("NT$ 450");
+    expect(text).toContain("使用評價");
+    expect(text).toContain("好用");
+  });
+
+  it("沒填寫容量時不顯示容量列", async () => {
+    await mountSheet(makeProduct({ volume: null }));
+    expect(sheetText()).not.toContain("容量");
   });
 
   /*

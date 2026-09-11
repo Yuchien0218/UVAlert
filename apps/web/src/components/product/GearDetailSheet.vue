@@ -5,9 +5,12 @@ import BottomSheet from "../common/BottomSheet.vue";
 import { useWebAppServices } from "../../app/injection";
 import {
   affectsCountdown,
+  FORMULATION_LABELS,
   formatPurchaseMonth,
   GEAR_CATEGORY_LABELS,
-  gearSafetyState
+  gearSafetyState,
+  PROTECTION_TYPE_LABELS,
+  USAGE_RATING_LABELS
 } from "../../features/product/gearPresentation";
 
 /**
@@ -70,9 +73,6 @@ const purchase = computed(() =>
 /**
  * 規格摘要，只列真實存在的欄位。
  *
- * 容量（「120ml」）不在資料模型裡——`ProductLabelSnapshotV1Schema` 沒有
- * volume／capacity 欄位，所以這裡只顯示 SPF 與 PA，兩者都是真實資料。
- *
  * paGrade 存的是照包裝抄的完整標示（「PA++++」），不加前綴——曾經寫成
  * `PA${paGrade}`，實測顯示成 PAPA++++。
  */
@@ -83,6 +83,39 @@ const specLine = computed(() => {
   if (spf !== null) parts.push(`SPF ${spf}`);
   if (paGrade !== null) parts.push(paGrade);
   return parts.length === 0 ? null : parts.join("・");
+});
+
+const waterResistance = computed(() => {
+  if (props.product === null || !isSunscreen.value) return null;
+  const status = props.product.currentSnapshot.waterResistanceStatus;
+  if (status === "40" || status === "80") return `${status} 分鐘`;
+  if (status === "not_water_resistant") return "標示不耐水";
+  return null;
+});
+
+const volume = computed(() => props.product?.volume ?? null);
+
+const formulation = computed(() => {
+  if (props.product?.formulation == null) return null;
+  return FORMULATION_LABELS[props.product.formulation];
+});
+
+const protectionType = computed(() => {
+  if (props.product?.protectionType == null) return null;
+  return PROTECTION_TYPE_LABELS[props.product.protectionType];
+});
+
+const size = computed(() => props.product?.size ?? null);
+
+const color = computed(() => props.product?.color ?? null);
+
+const price = computed(() =>
+  props.product?.priceTwd == null ? null : `NT$ ${props.product.priceTwd}`
+);
+
+const usageRating = computed(() => {
+  if (props.product?.usageRating == null) return null;
+  return USAGE_RATING_LABELS[props.product.usageRating];
 });
 
 /**
@@ -101,8 +134,16 @@ const hasSpecRows = computed(() => {
   if (props.product === null) return false;
   return (
     specLine.value !== null ||
+    waterResistance.value !== null ||
+    volume.value !== null ||
+    formulation.value !== null ||
+    protectionType.value !== null ||
+    size.value !== null ||
+    color.value !== null ||
     purchase.value !== null ||
     props.product.expiryDate !== null ||
+    price.value !== null ||
+    usageRating.value !== null ||
     props.product.note !== null
   );
 });
@@ -187,6 +228,30 @@ async function handleDelete(): Promise<void> {
           <dt>規格</dt>
           <dd>{{ specLine }}</dd>
         </div>
+        <div v-if="waterResistance !== null" class="spec-row">
+          <dt>耐水</dt>
+          <dd>{{ waterResistance }}</dd>
+        </div>
+        <div v-if="volume !== null" class="spec-row">
+          <dt>容量</dt>
+          <dd>{{ volume }}</dd>
+        </div>
+        <div v-if="formulation !== null" class="spec-row">
+          <dt>劑型</dt>
+          <dd>{{ formulation }}</dd>
+        </div>
+        <div v-if="protectionType !== null" class="spec-row">
+          <dt>防曬原理</dt>
+          <dd>{{ protectionType }}</dd>
+        </div>
+        <div v-if="size !== null" class="spec-row">
+          <dt>尺寸</dt>
+          <dd>{{ size }}</dd>
+        </div>
+        <div v-if="color !== null" class="spec-row">
+          <dt>顏色</dt>
+          <dd>{{ color }}</dd>
+        </div>
         <div v-if="purchase !== null" class="spec-row">
           <dt>購買月份</dt>
           <dd>{{ purchase }}</dd>
@@ -195,9 +260,17 @@ async function handleDelete(): Promise<void> {
           <dt>到期日</dt>
           <dd>{{ product.expiryDate }}</dd>
         </div>
+        <div v-if="price !== null" class="spec-row">
+          <dt>購入價格</dt>
+          <dd>{{ price }}</dd>
+        </div>
+        <div v-if="usageRating !== null" class="spec-row">
+          <dt>使用評價</dt>
+          <dd>{{ usageRating }}</dd>
+        </div>
         <div v-if="product.note !== null" class="spec-row spec-row--full">
           <dt>個人附註</dt>
-          <dd>{{ product.note }}</dd>
+          <dd class="user-text">{{ product.note }}</dd>
         </div>
       </dl>
 
