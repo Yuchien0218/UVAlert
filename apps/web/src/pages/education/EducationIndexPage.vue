@@ -130,10 +130,14 @@ const robots = computed(() =>
       :to="educationCategoryPath(heroCard.slug)"
     >
       <IconLead :icon="heroCard.icon">
-        <strong>{{ heroCard.title }}</strong>
+        <span class="education-hero-banner__body">
+          <span class="education-hero-banner__titles">
+            <strong>{{ heroCard.title }}</strong>
+            <span class="education-card-kicker">先從這裡開始</span>
+          </span>
+          <small>{{ heroCard.description }}</small>
+        </span>
       </IconLead>
-      <small>{{ heroCard.description }}</small>
-      <span class="education-card-kicker">先從這裡開始</span>
     </RouterLink>
 
     <section aria-labelledby="education-categories-title">
@@ -297,14 +301,19 @@ const robots = computed(() =>
  * 下一個人會以為它還在 .education-category-grid 裡。
  */
 .education-hero-banner {
-  display: grid;
-  gap: var(--space-2);
-  padding: var(--space-6);
+  display: block;
+  padding: var(--card-padding);
   background: var(--color-surface-cream-strong);
   color: inherit;
   text-decoration: none;
 }
 
+.education-hero-banner__body {
+  display: grid;
+  gap: var(--space-1);
+}
+
+.education-hero-banner strong,
 .education-category-card strong {
   font-size: var(--font-size-card-title);
   font-weight: 500;
@@ -312,13 +321,10 @@ const robots = computed(() =>
 }
 
 /*
- * 標題與篇數同一行。`baseline` 而不是 `center`：兩者字級差一階（18 對 12），
- * 靠中線對齊會讓小字看起來浮在半空中——跟 `ZoneProtectionForm` 的
- * `.zone-group-choice__text` 是同一個判斷。
- *
- * `wrap` 是保險：最長的分類名加上藥丸在 320px 上放不下時折行即可，不要
- * 讓藥丸被壓扁或溢出。
+ * 標題與標籤同一行。`baseline` 對齊，避免字級差異導致小字飄浮。
+ * `wrap` 確保窄螢幕折行。
  */
+.education-hero-banner__titles,
 .education-category-card__titles {
   display: flex;
   flex-wrap: wrap;
@@ -343,22 +349,14 @@ const robots = computed(() =>
  * balance 留著是給更窄的手機：320px 時最長那一則仍會折行，那時兩行平均分配
  * 比孤字行好看（實測 127／127）。長文正文不要用 balance，會拖慢排版。
  */
+.education-hero-banner small,
+.education-category-card small {
+  line-height: var(--line-height-body);
+}
+
 .education-category-card small {
   color: var(--text-secondary);
-  line-height: var(--line-height-body);
   text-wrap: balance;
-}
-/*
- * 2026-08-31：搬出列表之後就沒有特異性相爭的問題了（`.education-hero-banner`
- * 與 `.education-category-card` 不再套在同一個元素上），但規則留在原地
- * ——移動它沒有好處，而 2026-08-30 那次「放在前面 28px 會變 18px」的
- * 實測仍然是這個檔案裡值得記住的一課。
- */
-.education-hero-banner strong {
-  font-family: var(--font-family-page-title);
-  font-size: var(--font-size-page-title);
-  line-height: var(--line-height-page-title);
-  letter-spacing: var(--letter-spacing-page-title);
 }
 
 /*
@@ -383,11 +381,8 @@ const robots = computed(() =>
  * 橫幅的 kicker 保持膠囊（跟五張卡一致），但底色要換：一般卡的膠囊底是
  * --border-subtle，疊在更深的 cream-strong 上幾乎看不出來。用畫布色當底，
  * 在深底上反而是最清楚的做法。
- *
- * 2026-09-11（使用者要求）：改到右下方，靠右對齊。
  */
 .education-hero-banner .education-card-kicker {
-  justify-self: end;
   background: var(--color-canvas);
 }
 </style>

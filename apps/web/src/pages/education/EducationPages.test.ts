@@ -458,14 +458,19 @@ describe("衛教 hero 橫幅", () => {
     expect(banner.text()).toContain("先從這裡開始");
   });
 
-  it("「先從這裡開始」標籤位於橫幅右下方", () => {
+  it("「先從這裡開始」標籤位於「了解今天的 UV」標題後方，且說明文字在下方", () => {
     const wrapper = mountIndex();
     const banner = wrapper.get(".education-hero-banner");
-    const children = banner.element.children;
+    const titles = banner.get(".education-hero-banner__titles");
 
+    expect(titles.text()).toBe("了解今天的 UV先從這裡開始");
+    expect(titles.element.firstElementChild?.tagName).toBe("STRONG");
     expect(
-      children[children.length - 1]?.classList.contains("education-card-kicker")
+      titles.element.lastElementChild?.classList.contains("education-card-kicker")
     ).toBe(true);
+    expect(
+      banner.find(".education-hero-banner__body small").text()
+    ).toContain("UV 指數、預報與一天中的變化");
   });
 
   /*
