@@ -60,13 +60,6 @@ function returnToCaller(): Promise<unknown> {
 
     <RegionPreferenceSummary :preference="region.preference.value" />
 
-    <TaiwanUvDistribution
-      v-if="region.preference.value === null && uvForecast.nationwide.value !== null"
-      data-testid="region-nationwide-distribution"
-      :forecast="uvForecast.nationwide.value"
-      :region="uvForecast.region.value"
-    />
-
     <RegionLocationPanel
       :phase="region.phase.value"
       :error="region.error.value"
@@ -118,6 +111,13 @@ function returnToCaller(): Promise<unknown> {
       :directory="region.directory"
       :phase="region.phase.value"
       @save="saveManualRegion"
+    />
+
+    <TaiwanUvDistribution
+      v-if="region.preference.value === null && uvForecast.nationwide.value !== null"
+      data-testid="region-nationwide-distribution"
+      :forecast="uvForecast.nationwide.value"
+      :region="uvForecast.region.value"
     />
   </div>
 </template>
