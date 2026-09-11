@@ -19,13 +19,15 @@ export function createAppRouter(
       {
         path: "/",
         name: "home",
-        component: () => import("../pages/HomePage.vue"),
-        meta: { title: "提醒" }
+        component: () => import("../pages/ForecastPage.vue"),
+        meta: { title: "五日 UV 預報" }
       },
-      // 2026-08-24：`/reminder` 已移除，內容併入首頁下半部（摘要在上、
-      // 完整狀態在下）。它原本是首頁連過去的「查看完整狀態」詳細頁，但
-      // 沒有任何導覽歸屬——三個下排 tab 都不對應它，進去之後也沒有明確
-      // 的返回，等於一個懸空的頁面。依 2026-08-08 的前例不留轉址。
+      {
+        path: "/reminder",
+        name: "reminder",
+        component: () => import("../pages/HomePage.vue"),
+        meta: { title: "防曬提醒" }
+      },
       {
         path: "/reminder/reapply",
         name: "reminder-reapply",
@@ -256,30 +258,32 @@ export function createAppRouter(
   router.beforeEach(async (to) => {
     await boot.ensureBooted();
 
+    /*
+     * 智慧入口分流（方案 A）：
+     * - 無進行中提醒時：打開 App（/）自動導向 /forecast（UV 分頁），
+     *   讓使用者先看紫外線預報，再從頁面上的 CTA 決定開始防曬提醒。
+     * - 已有提醒在倒數中時：打開 App（/）自動導向 /reminder（提醒分頁），
+     *   一開 App 立即看倒數環與部位狀態。
+     */
+    if (to.path === "/") {
+      return boot.currentSession.value !== null
+        ? { name: "reminder", hash: to.hash }
+        : { name: "forecast", hash: to.hash };
+    }
+
     if (
       to.meta.requiresNoActiveSession === true &&
       boot.currentSession.value !== null
     ) {
-      return { name: "home" };
+      return { name: "reminder" };
     }
 
     if (
       to.meta.requiresActiveSession === true &&
       boot.currentSession.value === null
     ) {
-      // 2026-08-24：沒有進行中的提醒時導回首頁。首頁就是底部導覽「提醒」
-      // 的去處，也負責顯示「還沒有開始防曬提醒」的空狀態與開始 CTA；
-      // 原本導到 /reminder（「查看完整狀態」詳細頁）會落在使用者沒預期
-      // 的畫面。/reminder 本身保留給首頁的「查看完整狀態／最近紀錄」。
-      return { name: "home" };
+      return { name: "reminder" };
     }
-
-    /*
-     * 2026-08-24：原本這裡有一段 setupStep 守衛，負責把「還沒選情境」或
-     * 「有未完成草稿」的人導回步驟 1。設定合併成單一頁面後兩者都不再需要
-     * ——同一頁就能選情境，未完成草稿由頁面自己顯示「繼續／重新開始」。
-     * `SetupDraftV1.currentStep` 仍保留在契約裡（持久化欄位，供續作用）。
-     */
 
     return true;
   });

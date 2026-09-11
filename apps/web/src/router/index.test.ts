@@ -51,7 +51,9 @@ describe("route name 完整性", () => {
     "education-article",
     "home",
     "setup",
-    "not-found"
+    "not-found",
+    "reminder",
+    "forecast"
   ];
 
   it.each(referencedNames)("%s 存在於路由表", (name) => {
@@ -108,9 +110,7 @@ describe("createAppRouter", () => {
     expect(globalThis.document.title).toBe("防曬裝備｜防曬晴報員");
   });
 
-  // 2026-08-24：/reminder 已移除、內容併入首頁。原本斷言該網址停在提醒頁；
-  // 現在它不存在，因此改為斷言 404，錨點行為改由首頁承接。
-  it("已移除的 /reminder 網址落到 not-found", async () => {
+  it("智慧入口分流：無 active Session 時根路徑導向 /forecast", async () => {
     const boot: AppBootController = {
       phase: shallowReadonly(shallowRef("ready")),
       errorCode: shallowReadonly(shallowRef(null)),
@@ -122,17 +122,49 @@ describe("createAppRouter", () => {
     };
     const router = createAppRouter(boot, createMemoryHistory());
 
-    await router.push("/reminder#zone-status");
+    await router.push("/");
     await router.isReady();
 
-    expect(router.currentRoute.value.name).toBe("not-found");
+    expect(router.currentRoute.value.name).toBe("forecast");
+  });
 
-    // 錨點行為改由首頁承接——部位清單現在在首頁下半部。
+  it("智慧入口分流：有 active Session 時根路徑導向 /reminder", async () => {
+    const fakeSession = { sessionId: "session-1" } as any;
+    const boot: AppBootController = {
+      phase: shallowReadonly(shallowRef("ready")),
+      errorCode: shallowReadonly(shallowRef(null)),
+      connectivity: shallowReadonly(shallowRef("online")),
+      currentSession: shallowReadonly(shallowRef(fakeSession)),
+      ensureBooted: vi.fn(async () => undefined),
+      refresh: vi.fn(async () => undefined),
+      dispose: vi.fn()
+    };
+    const router = createAppRouter(boot, createMemoryHistory());
+
     await router.push("/#zone-status");
     await router.isReady();
 
-    expect(router.currentRoute.value.name).toBe("home");
+    expect(router.currentRoute.value.name).toBe("reminder");
     expect(router.currentRoute.value.hash).toBe("#zone-status");
+  });
+
+  it("/reminder 有獨立路由且顯示防曬提醒", async () => {
+    const boot: AppBootController = {
+      phase: shallowReadonly(shallowRef("ready")),
+      errorCode: shallowReadonly(shallowRef(null)),
+      connectivity: shallowReadonly(shallowRef("online")),
+      currentSession: shallowReadonly(shallowRef(null)),
+      ensureBooted: vi.fn(async () => undefined),
+      refresh: vi.fn(async () => undefined),
+      dispose: vi.fn()
+    };
+    const router = createAppRouter(boot, createMemoryHistory());
+
+    await router.push("/reminder");
+    await router.isReady();
+
+    expect(router.currentRoute.value.name).toBe("reminder");
+    expect(globalThis.document.title).toBe("防曬提醒｜防曬晴報員");
   });
 
   it("地區設定有直接路由且不會在導航時要求定位", async () => {
@@ -181,10 +213,7 @@ describe("createAppRouter", () => {
     }
   });
 
-  // 2026-08-24：落點從 /reminder 改成首頁。首頁是底部導覽「提醒」的
-  // 去處，也負責顯示「還沒有開始防曬提醒」的空狀態與開始 CTA；
-  // /reminder 是首頁連過去的「查看完整狀態」詳細頁，不適合當守衛落點。
-  it("S-08 沒有 active Session 時回到首頁", async () => {
+  it("S-08 沒有 active Session 時回到提醒頁", async () => {
     const boot = {
       phase: shallowReadonly(shallowRef("ready")),
       errorCode: shallowReadonly(shallowRef(null)),
@@ -197,7 +226,7 @@ describe("createAppRouter", () => {
     const router = createAppRouter(boot, createMemoryHistory());
     await router.push("/reminder/reapply");
     await router.isReady();
-    expect(router.currentRoute.value.name).toBe("home");
+    expect(router.currentRoute.value.name).toBe("reminder");
   });
 });
 
