@@ -56,6 +56,7 @@ function makeProduct(
     shadingRate: null,
     weight: null,
     hatStyle: null,
+    uvProtection: null,
     currentSnapshot: baseSnapshot,
     snapshotFingerprint: fingerprintProductLabelSnapshot(baseSnapshot),
     createdAt: "2026-08-24T00:00:00.000Z",

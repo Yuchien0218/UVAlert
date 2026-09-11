@@ -1,7 +1,8 @@
 import type {
   GearCategory,
   ProductCatalogRecordV1,
-  ShadingRate
+  ShadingRate,
+  UvProtection
 } from "@sunshield/contracts";
 import type { IconName } from "../../generated/icons.generated";
 
@@ -134,5 +135,11 @@ export const SHADING_RATE_LABELS: Record<ShadingRate, string> = {
   grade_1: "一級遮光",
   grade_2: "二級遮光",
   grade_3: "三級遮光"
+};
+
+export const UV_PROTECTION_LABELS: Record<UvProtection, string> = {
+  uv400: "UV400",
+  "100_percent": "100% UV Protection",
+  uv380: "UV380"
 };
 

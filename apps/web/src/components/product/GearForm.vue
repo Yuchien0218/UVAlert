@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, onMounted, ref, shallowRef, watch } from "vue";
-import type { GearCategory, ShadingRate } from "@sunshield/contracts";
+import type { GearCategory, ShadingRate, UvProtection } from "@sunshield/contracts";
 import { useWebAppServices } from "../../app/injection";
 import Icon from "../icons/Icon.vue";
 import DisclosureChevron from "../common/DisclosureChevron.vue";
@@ -18,7 +18,8 @@ import {
   GEAR_CATEGORY_LABELS,
   GEAR_CATEGORY_REMINDER_EFFECT,
   gearSafetyState,
-  SHADING_RATE_LABELS
+  SHADING_RATE_LABELS,
+  UV_PROTECTION_LABELS
 } from "../../features/product/gearPresentation";
 import { parseSpfInput } from "../../features/product/parseSpfInput";
 
@@ -134,11 +135,11 @@ const formulation = shallowRef<
   "lotion" | "gel" | "cream" | "spray" | "stick" | ""
 >("");
 const protectionType = shallowRef<"physical" | "chemical" | "hybrid" | "">("");
-/* 2026-09-11：陽傘與帽子專屬純紀錄欄位 */
 const upf = ref("");
 const shadingRate = shallowRef<ShadingRate | "">("");
 const weight = ref("");
 const hatStyle = ref("");
+const uvProtection = shallowRef<UvProtection | "">("");
 const localError = shallowRef<string | null>(null);
 const confirmingDelete = shallowRef(false);
 
@@ -189,7 +190,17 @@ const showsColor = computed(() => gearCategory.value !== "sunscreen");
 const showsSunscreenSpecs = computed(
   () => gearCategory.value === "sunscreen"
 );
-/* 陽傘規格：防UV係數、遮光率、重量。 */
+/* 太陽眼鏡規格：抗 UV 規格。 */
+const showsEyewearSpecs = computed(() => gearCategory.value === "eyewear");
+/* 織品防曬規格：防UV係數（防曬衣物、陽傘、帽子、其他裝備）。 */
+const showsUpf = computed(
+  () =>
+    gearCategory.value === "clothing" ||
+    gearCategory.value === "umbrella" ||
+    gearCategory.value === "hat" ||
+    gearCategory.value === "other_gear"
+);
+/* 陽傘規格：遮光率、重量。 */
 const showsUmbrellaSpecs = computed(() => gearCategory.value === "umbrella");
 /* 帽子規格：帽款。尺寸共用 showsSize。 */
 const showsHatSpecs = computed(() => gearCategory.value === "hat");
@@ -247,6 +258,7 @@ onMounted(async () => {
   shadingRate.value = record.shadingRate ?? "";
   weight.value = record.weight ?? "";
   hatStyle.value = record.hatStyle ?? "";
+  uvProtection.value = record.uvProtection ?? "";
 });
 
 /*
@@ -356,7 +368,7 @@ async function save(): Promise<void> {
         ? protectionType.value
         : null,
     upf:
-      showsUmbrellaSpecs.value && upf.value.trim() !== ""
+      showsUpf.value && upf.value.trim() !== ""
         ? upf.value.trim()
         : null,
     shadingRate:
@@ -370,6 +382,10 @@ async function save(): Promise<void> {
     hatStyle:
       showsHatSpecs.value && hatStyle.value.trim() !== ""
         ? hatStyle.value.trim()
+        : null,
+    uvProtection:
+      showsEyewearSpecs.value && uvProtection.value !== ""
+        ? uvProtection.value
         : null,
     productId: props.productId ?? undefined
   });
@@ -706,19 +722,36 @@ async function remove(): Promise<void> {
           </select>
         </template>
 
-        <!-- 陽傘規格（防UV係數、遮光率、重量） -->
+        <!-- 太陽眼鏡規格（抗 UV 規格） -->
+        <template v-if="showsEyewearSpecs">
+          <label for="gear-uv-protection">抗 UV 規格</label>
+          <select id="gear-uv-protection" v-model="uvProtection">
+            <option value="">未填寫</option>
+            <option
+              v-for="(label, value) in UV_PROTECTION_LABELS"
+              :key="value"
+              :value="value"
+            >
+              {{ label }}
+            </option>
+          </select>
+        </template>
+
+        <!-- 織品防曬防UV係數（防曬衣物、陽傘、帽子、其他裝備） -->
+        <template v-if="showsUpf">
+          <label for="gear-upf">防UV係數</label>
+          <input
+            id="gear-upf"
+            v-model="upf"
+            type="text"
+            maxlength="20"
+            placeholder="例如：UPF 50+"
+          />
+        </template>
+
+        <!-- 陽傘規格（遮光率、重量） -->
         <template v-if="showsUmbrellaSpecs">
           <div class="field-pair">
-            <div>
-              <label for="gear-upf">防UV係數</label>
-              <input
-                id="gear-upf"
-                v-model="upf"
-                type="text"
-                maxlength="20"
-                placeholder="UPF 50+"
-              />
-            </div>
             <div>
               <label for="gear-shading-rate">遮光率</label>
               <select id="gear-shading-rate" v-model="shadingRate">
@@ -732,16 +765,17 @@ async function remove(): Promise<void> {
                 </option>
               </select>
             </div>
+            <div>
+              <label for="gear-weight">重量</label>
+              <input
+                id="gear-weight"
+                v-model="weight"
+                type="text"
+                maxlength="20"
+                placeholder="例如：180g"
+              />
+            </div>
           </div>
-
-          <label for="gear-weight">重量</label>
-          <input
-            id="gear-weight"
-            v-model="weight"
-            type="text"
-            maxlength="20"
-            placeholder="例如：180g"
-          />
         </template>
 
         <!-- 帽子規格（帽款） -->

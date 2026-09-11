@@ -65,6 +65,7 @@ function listProduct(
     shadingRate: null,
     weight: null,
     hatStyle: null,
+    uvProtection: null,
     currentSnapshot: listSnapshot,
     snapshotFingerprint: fingerprintProductLabelSnapshot(listSnapshot),
     createdAt: "2026-08-01T08:00:00.000Z",

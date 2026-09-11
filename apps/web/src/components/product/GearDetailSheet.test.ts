@@ -68,6 +68,7 @@ function makeProduct(
     shadingRate: null,
     weight: null,
     hatStyle: null,
+    uvProtection: null,
     // paGrade 存照包裝抄的完整標示，顯示端不再自己加 PA 前綴。
     currentSnapshot: { ...snapshot, spf: 50, paGrade: "PA++++" },
     snapshotFingerprint: fingerprintProductLabelSnapshot(snapshot),
@@ -151,7 +152,7 @@ describe("GearDetailSheet", () => {
     expect(sheetText()).toContain("清爽好推");
   });
 
-  it("太陽眼鏡品類：完整呈現填寫的價格、評價、顏色與附註", async () => {
+  it("太陽眼鏡品類：完整呈現填寫的價格、評價、顏色、抗 UV 規格與附註", async () => {
     await mountSheet(
       makeProduct({
         displayName: "加價購的太陽眼鏡",
@@ -161,6 +162,7 @@ describe("GearDetailSheet", () => {
         priceTwd: 100,
         usageRating: "bad",
         color: "墨綠鏡片",
+        uvProtection: "uv400",
         note: "一分錢一分貨"
       })
     );
@@ -176,6 +178,8 @@ describe("GearDetailSheet", () => {
     expect(text).toContain("不好用");
     expect(text).toContain("顏色");
     expect(text).toContain("墨綠鏡片");
+    expect(text).toContain("抗 UV 規格");
+    expect(text).toContain("UV400");
     expect(text).toContain("個人附註");
     expect(text).toContain("一分錢一分貨");
     // 沒填的欄位不留空列

@@ -11,7 +11,8 @@ import {
   gearSafetyState,
   PROTECTION_TYPE_LABELS,
   SHADING_RATE_LABELS,
-  USAGE_RATING_LABELS
+  USAGE_RATING_LABELS,
+  UV_PROTECTION_LABELS
 } from "../../features/product/gearPresentation";
 
 /**
@@ -121,6 +122,11 @@ const weight = computed(() => props.product?.weight ?? null);
 
 const hatStyle = computed(() => props.product?.hatStyle ?? null);
 
+const uvProtection = computed(() => {
+  if (props.product?.uvProtection == null) return null;
+  return UV_PROTECTION_LABELS[props.product.uvProtection];
+});
+
 const price = computed(() =>
   props.product?.priceTwd == null ? null : `NT$ ${props.product.priceTwd}`
 );
@@ -154,6 +160,7 @@ const hasSpecRows = computed(() => {
     shadingRate.value !== null ||
     weight.value !== null ||
     hatStyle.value !== null ||
+    uvProtection.value !== null ||
     size.value !== null ||
     color.value !== null ||
     purchase.value !== null ||
@@ -259,6 +266,10 @@ async function handleDelete(): Promise<void> {
         <div v-if="protectionType !== null" class="spec-row">
           <dt>防曬原理</dt>
           <dd>{{ protectionType }}</dd>
+        </div>
+        <div v-if="uvProtection !== null" class="spec-row">
+          <dt>抗 UV 規格</dt>
+          <dd>{{ uvProtection }}</dd>
         </div>
         <div v-if="upf !== null" class="spec-row">
           <dt>防UV係數</dt>
