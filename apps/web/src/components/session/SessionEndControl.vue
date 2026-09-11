@@ -120,7 +120,7 @@ const { closeFromBackdrop } = useOverlay({
               :disabled="phase === 'ending'"
               @click="cancelConfirmation"
             >
-              取消
+              返回
             </button>
           </div>
         </div>

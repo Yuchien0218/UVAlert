@@ -42,10 +42,10 @@ describe("SessionEndControl", () => {
         ?.textContent?.trim()
     ).toBe("要結束這次提醒嗎？");
     expect(confirmation.getAttribute("tabindex")).toBe("-1");
-    expect(document.activeElement).toBe(getButton("取消"));
+    expect(document.activeElement).toBe(getButton("返回"));
     expect(confirmation.textContent).toContain("結束後會停止所有待處理提示");
 
-    getButton("取消").click();
+    getButton("返回").click();
     await nextTick();
 
     expect(document.body.querySelector('[role="dialog"]')).toBeNull();
@@ -70,7 +70,7 @@ describe("SessionEndControl", () => {
     await nextTick();
 
     const confirm = getButton("結束本次提醒");
-    const cancel = getButton("取消");
+    const cancel = getButton("返回");
     expect(document.body.style.overflow).toBe("hidden");
     expect(background.hasAttribute("inert")).toBe(true);
     expect(document.activeElement).toBe(cancel);
@@ -123,7 +123,7 @@ describe("SessionEndControl", () => {
     });
 
     expect(getButton("正在結束…").hasAttribute("disabled")).toBe(true);
-    expect(getButton("取消").hasAttribute("disabled")).toBe(true);
+    expect(getButton("返回").hasAttribute("disabled")).toBe(true);
 
     await wrapper.setProps({
       phase: "error",
