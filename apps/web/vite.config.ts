@@ -23,6 +23,11 @@ export default defineConfig({
         target: "https://ykfdnltaqpdytmrszbbk.supabase.co/functions/v1/uv-forecast",
         changeOrigin: true,
         rewrite: (path) => path.replace(/^\/v1\/uv\/forecast/, "")
+      },
+      "/v1/feedback": {
+        target: "https://ykfdnltaqpdytmrszbbk.supabase.co/functions/v1/feedback",
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/v1\/feedback/, "")
       }
     }
   }

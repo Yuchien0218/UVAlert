@@ -5,19 +5,39 @@ import {
   type FeedbackRequestV1
 } from "@sunshield/contracts";
 import type { CloudError, FeedbackPort } from "@sunshield/platform";
+import { readConfiguredEnvironmentValue } from "./configuredEnvironment";
 
 type FetchPort = (
   input: RequestInfo | URL,
   init?: RequestInit
 ) => Promise<Response>;
 
+const DEFAULT_API_BASE_URL = "/v1";
+
+/**
+ * 回饋與 UV／同步服務使用同一個公開 API base。
+ *
+ * 正式環境是 Supabase Edge Functions；未設定時才退回開發用的同源 `/v1`
+ * proxy。不能固定 `/v1/feedback`，否則 Vercel 的 SPA 靜態 fallback 會拒絕
+ * POST 並回傳 405。
+ */
+export function resolveFeedbackEndpoint(baseUrl?: string): string {
+  const configuredBaseUrl =
+    readConfiguredEnvironmentValue(baseUrl) ?? DEFAULT_API_BASE_URL;
+  return `${configuredBaseUrl.replace(/\/+$/, "")}/feedback`;
+}
+
 export class BrowserFeedbackClient implements FeedbackPort {
   readonly #fetch: FetchPort;
   readonly #endpoint: string;
 
-  constructor(options: { fetch?: FetchPort; endpoint?: string } = {}) {
+  constructor(
+    options: { fetch?: FetchPort; endpoint?: string; baseUrl?: string } = {}
+  ) {
     this.#fetch = options.fetch ?? globalThis.fetch.bind(globalThis);
-    this.#endpoint = options.endpoint ?? "/v1/feedback";
+    this.#endpoint =
+      options.endpoint ??
+      resolveFeedbackEndpoint(options.baseUrl ?? import.meta.env.VITE_API_BASE_URL);
   }
 
   async submit(request: FeedbackRequestV1): Promise<FeedbackReceiptV1> {
