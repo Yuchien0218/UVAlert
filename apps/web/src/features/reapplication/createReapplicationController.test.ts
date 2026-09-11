@@ -687,4 +687,72 @@ describe("createReapplicationController", () => {
     expect(await controller.submit()).toBe(false);
     expect(repository.reapply).toHaveBeenCalledTimes(1);
   });
+
+  it("補擦產品選項僅納入防曬乳類，過濾並排除帽子、墨鏡等其他裝備", async () => {
+    const source = context();
+    source.products = [
+      {
+        productId: "prod-sunscreen",
+        displayName: "高效防曬乳",
+        gearCategory: "sunscreen",
+        status: "active",
+        snapshotFingerprint: "fp-sunscreen",
+        currentSnapshot: makeProductSnapshot()
+      },
+      {
+        productId: "prod-hat",
+        displayName: "遮陽帽",
+        gearCategory: "hat",
+        status: "active",
+        snapshotFingerprint: "fp-hat",
+        currentSnapshot: makeProductSnapshot()
+      },
+      {
+        productId: "prod-umbrella",
+        displayName: "抗UV折疊傘",
+        gearCategory: "umbrella",
+        status: "active",
+        snapshotFingerprint: "fp-umbrella",
+        currentSnapshot: makeProductSnapshot()
+      },
+      {
+        productId: "prod-eyewear",
+        displayName: "偏光墨鏡",
+        gearCategory: "eyewear",
+        status: "active",
+        snapshotFingerprint: "fp-eyewear",
+        currentSnapshot: makeProductSnapshot()
+      }
+    ];
+
+    const controller = createReapplicationController({
+      repository: {
+        getReapplicationContext: vi.fn().mockResolvedValue(source),
+        reapply: vi.fn(),
+        getContextEventContext: vi.fn(),
+        reportContextEvent: vi.fn()
+      },
+      identity: {
+        getOrCreateLocalVisitorId: vi.fn().mockResolvedValue("visitor"),
+        getOrCreateDeviceLocalId: vi.fn().mockResolvedValue("device")
+      },
+      boot: {
+        refresh: vi.fn(),
+        currentSession: { value: source.session }
+      } as any,
+      createId: vi.fn().mockReturnValue("id"),
+      now: () => new Date("2026-08-01T10:30:00.000Z"),
+      getConnectivity: () => "online"
+    });
+
+    await controller.load();
+
+    const displayNames = controller.productChoices.value.map(
+      (c) => c.displayName
+    );
+    expect(displayNames).toContain("高效防曬乳");
+    expect(displayNames).not.toContain("遮陽帽");
+    expect(displayNames).not.toContain("抗UV折疊傘");
+    expect(displayNames).not.toContain("偏光墨鏡");
+  });
 });

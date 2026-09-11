@@ -208,6 +208,10 @@ export function createReapplicationController(
     session.value = context.session;
     const choices = new Map<string, ReapplicationProductChoice>();
     for (const product of context.products) {
+      /* 補擦記錄僅能選擇防曬乳類，過濾並排除帽子、墨鏡、陽傘、衣物等其他裝備。 */
+      if (product.gearCategory && product.gearCategory !== "sunscreen") {
+        continue;
+      }
       choices.set(`product:${product.productId}`, {
         choiceId: `product:${product.productId}`,
         displayName: product.displayName,
