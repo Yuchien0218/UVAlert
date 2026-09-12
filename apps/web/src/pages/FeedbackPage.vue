@@ -13,6 +13,32 @@ const message = shallowRef("");
 const contactEmail = shallowRef("");
 const busy = computed(() => feedback.state.value.status === "submitting");
 
+const FEEDBACK_FIELD_CONFIG: Record<
+  FeedbackType,
+  { label: string; placeholder: string }
+> = {
+  bug: {
+    label: "問題描述",
+    placeholder: "請描述發生的狀況與操作步驟，幫助我們更快排查"
+  },
+  feature_request: {
+    label: "建議內容",
+    placeholder: "分享你期待的新功能或使用體驗改善想法"
+  },
+  content_correction: {
+    label: "更正說明",
+    placeholder: "請指出有疑慮的衛教文章、數值或章節，以及建議修正內容"
+  },
+  privacy_request: {
+    label: "請求內容",
+    placeholder: "請說明需要查閱、匯出或刪除的帳號與隱私資料項目"
+  }
+};
+
+const fieldConfig = computed(
+  () => FEEDBACK_FIELD_CONFIG[feedbackType.value] ?? FEEDBACK_FIELD_CONFIG.bug
+);
+
 async function submit(): Promise<void> {
   const ok = await feedback.submit({
     feedbackType: feedbackType.value,
@@ -57,17 +83,17 @@ function goBack(): void {
         </select>
       </label>
       <label>
-        <span>請描述你遇到的情況</span>
+        <span>{{ fieldConfig.label }}</span>
         <textarea
           v-model="message"
           rows="6"
           maxlength="4000"
           required
-          placeholder="請描述遇到的狀況與原本操作步驟"
+          :placeholder="fieldConfig.placeholder"
         ></textarea>
       </label>
       <label>
-        <span>聯絡信箱（選填）</span>
+        <span>聯絡信箱</span>
         <input
           v-model="contactEmail"
           type="email"
