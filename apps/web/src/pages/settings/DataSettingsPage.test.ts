@@ -6,6 +6,10 @@ import { describe, expect, it, vi } from "vitest";
 import type { WebAppServices } from "../../app/createWebAppServices";
 import { useWebAppServices } from "../../app/injection";
 import BroadcastLoader from "../../components/feedback/BroadcastLoader.vue";
+import type {
+  LocalDataError,
+  LocalDataNotice
+} from "../../features/settings/createLocalDataController";
 import DataSettingsPage from "./DataSettingsPage.vue";
 
 vi.mock("../../app/injection", () => ({ useWebAppServices: vi.fn() }));
@@ -74,11 +78,12 @@ function makeServices(
   const localData = {
     phase: shallowReadonly(shallowRef(phase)),
     summary: shallowReadonly(shallowRef(summary)),
-    notice: shallowReadonly(shallowRef(null)),
-    error: shallowReadonly(shallowRef(null)),
+    notice: shallowReadonly(shallowRef<LocalDataNotice>(null)),
+    error: shallowReadonly(shallowRef<LocalDataError>(null)),
     hasExportedThisVisit: shallowReadonly(shallowRef(false)),
     load: vi.fn(async () => undefined),
     exportData: vi.fn(async () => true),
+    importData: vi.fn(async () => true),
     clearSetupDrafts: vi.fn(async () => true),
     clearProductsAndHistory: vi.fn(async () => true),
     clearAll: vi.fn(async () => true),
@@ -273,3 +278,70 @@ describe("清除卡的三列", () => {
     }
   });
 });
+
+describe("本機備份與還原卡片", () => {
+  it("同時呈現匯出本機資料與匯入備份資料按鈕", () => {
+    useServices("signed_out", "idle", SUMMARY_FIXTURE);
+    const wrapper = mount(DataSettingsPage, {
+      global: {
+        stubs: {
+          RouterLink: true,
+          ConfirmAction: false
+        }
+      }
+    });
+
+    const exportSection = wrapper.find("[aria-labelledby='data-export-title']");
+    expect(exportSection.exists()).toBe(true);
+    expect(exportSection.text()).toContain("本機備份與還原");
+    expect(exportSection.text()).toContain("匯出本機資料");
+    expect(exportSection.text()).toContain("匯入備份資料");
+  });
+
+  it("匯入成功時呈現成功還原通知", () => {
+    const services = makeServices("signed_out", "idle", SUMMARY_FIXTURE);
+    services.localData.notice = shallowReadonly(
+      shallowRef({
+        kind: "imported",
+        productCount: 5,
+        sessionCount: 2
+      })
+    );
+    vi.mocked(useWebAppServices).mockReturnValue(
+      services as unknown as WebAppServices
+    );
+
+    const wrapper = mount(DataSettingsPage, {
+      global: {
+        stubs: {
+          RouterLink: true
+        }
+      }
+    });
+
+    expect(wrapper.text()).toContain("已成功還原備份資料");
+    expect(wrapper.text()).toContain("5 筆防曬裝備");
+  });
+
+  it("匯入格式不合時呈現明確錯誤訊息", () => {
+    const services = makeServices("signed_out", "idle", SUMMARY_FIXTURE);
+    services.localData.error = shallowReadonly(
+      shallowRef("import_invalid_file")
+    );
+    vi.mocked(useWebAppServices).mockReturnValue(
+      services as unknown as WebAppServices
+    );
+
+    const wrapper = mount(DataSettingsPage, {
+      global: {
+        stubs: {
+          RouterLink: true
+        }
+      }
+    });
+
+    expect(wrapper.text()).toContain("匯入檔案格式不符合");
+    expect(wrapper.text()).toContain("本機資料維持原狀");
+  });
+});
+

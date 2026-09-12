@@ -7,10 +7,16 @@ export type LocalDataPhase = "idle" | "loading" | "ready" | "working" | "error";
 export type LocalDataNotice =
   | { kind: "exported"; fileName: string }
   | { kind: "cleared"; scope: "drafts" | "history" | "all" }
+  | { kind: "imported"; productCount: number; sessionCount: number }
   | null;
 
 export type LocalDataError =
-  "load_failed" | "export_failed" | "clear_failed" | null;
+  | "load_failed"
+  | "export_failed"
+  | "clear_failed"
+  | "import_invalid_file"
+  | "import_failed"
+  | null;
 
 export interface LocalDataController {
   phase: Readonly<ShallowRef<LocalDataPhase>>;
@@ -21,6 +27,7 @@ export interface LocalDataController {
   hasExportedThisVisit: Readonly<ShallowRef<boolean>>;
   load(): Promise<void>;
   exportData(): Promise<boolean>;
+  importData(file: File): Promise<boolean>;
   clearSetupDrafts(): Promise<boolean>;
   clearProductsAndHistory(): Promise<boolean>;
   clearAll(): Promise<boolean>;
@@ -92,6 +99,44 @@ export function createLocalDataController(
     }
   }
 
+  async function importData(file: File): Promise<boolean> {
+    if (phase.value === "working") return false;
+    phase.value = "working";
+    error.value = null;
+    notice.value = null;
+
+    let payload: unknown;
+    try {
+      const text = await file.text();
+      payload = JSON.parse(text);
+    } catch {
+      error.value = "import_invalid_file";
+      phase.value = "ready";
+      return false;
+    }
+
+    try {
+      const result = await dependencies.repository.importData(payload);
+      await dependencies.boot.refresh();
+      summary.value = await dependencies.repository.getSummary();
+      notice.value = {
+        kind: "imported",
+        productCount: result.productCount,
+        sessionCount: result.sessionCount
+      };
+      phase.value = "ready";
+      return true;
+    } catch (err) {
+      if (err instanceof Error && err.message === "INVALID_BACKUP_PAYLOAD") {
+        error.value = "import_invalid_file";
+      } else {
+        error.value = "import_failed";
+      }
+      phase.value = "ready";
+      return false;
+    }
+  }
+
   async function runClear(
     scope: "drafts" | "history" | "all",
     run: () => Promise<void>
@@ -123,6 +168,7 @@ export function createLocalDataController(
     hasExportedThisVisit: shallowReadonly(hasExportedThisVisit),
     load,
     exportData,
+    importData,
     clearSetupDrafts: () =>
       runClear("drafts", () => dependencies.repository.clearSetupDrafts()),
     clearProductsAndHistory: () =>

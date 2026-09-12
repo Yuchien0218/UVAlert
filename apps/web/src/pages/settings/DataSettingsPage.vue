@@ -25,6 +25,9 @@ const { localData } = useWebAppServices();
 
 type ClearScope = "drafts" | "history" | "all";
 const confirming = shallowRef<ClearScope | null>(null);
+const confirmingImport = shallowRef(false);
+const selectedFile = shallowRef<File | null>(null);
+const fileInputRef = shallowRef<HTMLInputElement | null>(null);
 
 const summary = computed(() => localData.summary.value);
 const busy = computed(() => localData.phase.value === "working");
@@ -45,6 +48,34 @@ async function runClear(scope: ClearScope): Promise<void> {
         ? await localData.clearProductsAndHistory()
         : await localData.clearAll();
   if (ok) confirming.value = null;
+}
+
+function triggerFileSelect(): void {
+  fileInputRef.value?.click();
+}
+
+function onFileSelected(event: Event): void {
+  const target = event.target as HTMLInputElement;
+  const file = target.files?.[0] ?? null;
+  if (!file) return;
+  selectedFile.value = file;
+  confirmingImport.value = true;
+}
+
+function cancelImport(): void {
+  confirmingImport.value = false;
+  selectedFile.value = null;
+  if (fileInputRef.value) fileInputRef.value.value = "";
+}
+
+async function executeImport(): Promise<void> {
+  if (!selectedFile.value) return;
+  const ok = await localData.importData(selectedFile.value);
+  if (ok) {
+    confirmingImport.value = false;
+    selectedFile.value = null;
+    if (fileInputRef.value) fileInputRef.value.value = "";
+  }
 }
 
 const router = useRouter();
@@ -126,36 +157,80 @@ function goBack(): void {
           data-typography-role="card-title"
         >
           <Icon name="tool-download" :size="32" />
-          <span>匯出本機資料</span>
+          <span>本機備份與還原</span>
         </h2>
         <div class="card-prose">
           <p>
-            匯出包含裝備、提醒與偏好的 JSON
-            檔案（不含定位與裝置識別碼）。
-          </p>
-          <p class="caution">
-            目前<strong>僅支援匯出備份</strong>，匯入還原功能將於後續版本更新。
+            匯出或還原包含防曬裝備、提醒歷程與偏好設定的 JSON 備份檔案（不含定位與裝置識別碼）。
           </p>
         </div>
-        <button
-          class="button button--primary"
-          type="button"
-          :disabled="busy"
-          @click="localData.exportData"
-        >
-          <InlineLoader v-if="busy" />
-          {{ busy ? "處理中…" : "匯出本機資料" }}
-        </button>
+
+        <div class="backup-actions">
+          <button
+            class="button button--secondary"
+            type="button"
+            :disabled="busy"
+            @click="localData.exportData"
+          >
+            <InlineLoader v-if="busy && !confirmingImport" />
+            {{ busy && !confirmingImport ? "處理中…" : "匯出本機資料" }}
+          </button>
+
+          <input
+            ref="fileInputRef"
+            type="file"
+            accept=".json,application/json"
+            class="visually-hidden"
+            @change="onFileSelected"
+          />
+
+          <ConfirmAction
+            :confirming="confirmingImport"
+            :pending="busy"
+            trigger-label="匯入備份資料"
+            confirm-label="確認覆蓋並還原"
+            @trigger="triggerFileSelect"
+            @confirm="executeImport"
+            @cancel="cancelImport"
+          >
+            <template #warning>
+              <p>
+                匯入備份將會<strong>完整覆蓋</strong>這台裝置目前所有的防曬裝備與歷史紀錄。
+              </p>
+              <p v-if="summary.hasActiveSession">
+                <strong>目前進行中的防曬提醒也會被終止並覆蓋。</strong>
+              </p>
+              <p v-if="selectedFile">
+                已選取備份檔案：<code>{{ selectedFile.name }}</code>
+              </p>
+            </template>
+          </ConfirmAction>
+        </div>
 
         <AppNotice v-if="localData.notice.value?.kind === 'exported'" kind="ok">
           已產生
           {{ localData.notice.value.fileName }}。請確認檔案已儲存到你要的位置。
+        </AppNotice>
+        <AppNotice v-if="localData.notice.value?.kind === 'imported'" kind="ok">
+          已成功還原備份資料（共 {{ localData.notice.value.productCount }} 筆防曬裝備、{{ localData.notice.value.sessionCount }} 次提醒紀錄）。
         </AppNotice>
         <AppNotice
           v-if="localData.error.value === 'export_failed'"
           kind="error"
         >
           匯出沒有完成，本機資料沒有任何變動，可以再試一次。
+        </AppNotice>
+        <AppNotice
+          v-if="localData.error.value === 'import_invalid_file'"
+          kind="error"
+        >
+          匯入檔案格式不符合《防曬晴報員》備份規格或已損毀，本機資料維持原狀。
+        </AppNotice>
+        <AppNotice
+          v-if="localData.error.value === 'import_failed'"
+          kind="error"
+        >
+          匯入還原過程發生未預期的錯誤，本機資料已安全復原維持原狀。
         </AppNotice>
       </section>
 
@@ -361,5 +436,24 @@ dd {
 
 .clear-row--danger strong {
   color: var(--color-due);
+}
+
+.backup-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  align-items: center;
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
 }
 </style>

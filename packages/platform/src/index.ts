@@ -247,6 +247,11 @@ export interface LocalDataSummary {
   lastClockCalibrationAt: string | null;
 }
 
+export interface LocalDataImportResult {
+  productCount: number;
+  sessionCount: number;
+}
+
 export interface LocalDataPort {
   getSummary(): Promise<LocalDataSummary>;
   /**
@@ -257,6 +262,12 @@ export interface LocalDataPort {
    * 而 P0 的唯一去處是使用者自己的檔案系統。
    */
   exportData(exportedAt: string): Promise<unknown>;
+  /**
+   * 匯入本機備份資料並完整還原覆蓋。
+   *
+   * 驗證檔案結構與版本，並在單一交易中覆蓋裝備、歷程與偏好。
+   */
+  importData(payload: unknown): Promise<LocalDataImportResult>;
   clearSetupDrafts(): Promise<void>;
   clearProductsAndHistory(): Promise<void>;
   clearAll(): Promise<void>;
