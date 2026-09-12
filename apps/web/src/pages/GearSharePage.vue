@@ -266,7 +266,7 @@ function goBack(): void {
         @click="saveImage"
       >
         <Icon name="more-install" :size="20" mono />
-        <span>{{ busy ? "產生中…" : "儲存圖片" }}</span>
+        <span>{{ busy ? "產生中" : "儲存圖片" }}</span>
       </button>
       <button
         v-if="canShare"

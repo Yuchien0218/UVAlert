@@ -152,7 +152,7 @@ async function save(): Promise<void> {
       @click="save"
     >
       <InlineLoader v-if="phase === 'saving'" />
-      {{ phase === "saving" ? "正在儲存…" : "儲存這個地區" }}
+      {{ phase === "saving" ? "儲存中" : "儲存這個地區" }}
     </button>
   </section>
 </template>

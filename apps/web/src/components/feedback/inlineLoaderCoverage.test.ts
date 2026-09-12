@@ -42,14 +42,13 @@ function vueFiles(dir: string, out: string[] = []): string[] {
 }
 
 /**
- * 「忙碌文字」的形狀：按鈕內出現以刪節號收尾的字串（「儲存中…」）。
+ * 「忙碌文字」的形狀：按鈕內出現以「中」收尾的字串（「儲存中」）。
  *
- * 實測這個 pattern 在全站抓到 15 顆，**沒有誤抓**——刪節號在這個 repo 就
- * 只用在這個用途上。比對的是完整的 `…"`（字串結尾），不是單獨的刪節號，
- * 所以句子中間出現刪節號的內文不會被算進來。
+ * 實測這個 pattern 在全站抓到 17 顆，沒有誤抓。比對的是完整的 `中"`（字串結尾），
+ * 不是單獨的字，所以句子中間出現「中」的內文不會被算進來。
  */
 const BUSY_BUTTON = /<button[\s\S]*?<\/button>/g;
-const BUSY_TEXT = /"[^"]*…"/;
+const BUSY_TEXT = /"[^"]*中"/;
 
 interface BusyButton {
   file: string;
@@ -78,7 +77,7 @@ function busyButtons(): BusyButton[] {
  *
  * `GearSharePage` 的「儲存圖片」左邊已經有一顆 20px 的 `more-install`
  * 圖示。2026-09-02 的註解寫著「產生中時圖示不換掉：文字已經從『儲存圖片』
- * 變成『產生中…』，圖示跟著抽換只會讓按鈕在點下去的瞬間跳一下」。
+ * 變成『產生中』，圖示跟著抽換只會讓按鈕在點下去的瞬間跳一下」。
  *
  * 再塞一顆 loader 進去會變成「圖示 ＋ loader ＋ 文字」，而且正好製造那段
  * 註解想避免的寬度跳動。
@@ -127,7 +126,7 @@ describe("InlineLoader 是裝飾，不是可及內容", () => {
 
   /*
    * 它永遠出現在「按鈕內、旁邊就有忙碌文字」的位置——按鈕自己已經從
-   * 「儲存」變成「儲存中…」。宣告成 `role="img"` ＋ aria-label 會把同一
+   * 「儲存」變成「儲存中」。宣告成 `role="img"` ＋ aria-label 會把同一
    * 件事播報兩次；`ReapplyPage` 那顆旁邊還有一個 `role="status"`，會變成
    * 三次。接到 13 顆按鈕之後這個重複會被放大 13 倍。
    */
@@ -141,10 +140,10 @@ describe("InlineLoader 是裝飾，不是可及內容", () => {
    * **反向：可見的動畫必須還在。** 少了這條，把整個 `<svg>` 刪掉也會過
    * 上面那條——那時「有沒有接上 loader」的守門守的就是一個空元件。
    */
-  it("三段膠囊與掃描動畫都還在", () => {
-    expect(source).toContain("inline-loader__segment");
+  it("tool-loading 旋轉動畫存在", () => {
+    expect(source).toContain("inline-loader__spinner");
     expect(source).toMatch(
-      /animation:\s*inline-loader-sweep var\(--duration-loader-cycle\)/
+      /animation-name:\s*inline-loader-spin/
     );
   });
 });

@@ -173,7 +173,7 @@ function goBack(): void {
             @click="localData.exportData"
           >
             <InlineLoader v-if="busy && !confirmingImport" />
-            {{ busy && !confirmingImport ? "處理中…" : "匯出本機資料" }}
+            {{ busy && !confirmingImport ? "處理中" : "匯出本機資料" }}
           </button>
 
           <input
@@ -443,6 +443,10 @@ dd {
   flex-wrap: wrap;
   gap: var(--space-2);
   align-items: center;
+}
+
+.backup-actions .button {
+  min-width: 8.5rem;
 }
 
 .visually-hidden {

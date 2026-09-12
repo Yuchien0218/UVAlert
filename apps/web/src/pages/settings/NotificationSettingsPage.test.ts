@@ -108,30 +108,28 @@ describe("NotificationSettingsPage", () => {
     expect(
       wrapper.get('button[aria-label="返回更多"] icon-stub').attributes("name")
     ).toBe("tool-arrow-left");
-    expect(wrapper.findAll("h2.section-heading")).toHaveLength(4);
+    expect(wrapper.findAll("h2.section-heading")).toHaveLength(2);
     expect(
       wrapper
         .findAll("h2.section-heading icon-stub")
         .map((icon) => [icon.attributes("name"), icon.attributes("size")])
     ).toEqual([
       ["more-notifications", "32"],
-      ["more-notifications", "32"],
-      ["more-notifications", "32"],
-      ["more-about", "32"]
+      ["more-notifications", "32"]
     ]);
     expect(wrapper.get("h2.section-heading span").text()).toBe(
-      "通知權限：通知已開啟"
+      "瀏覽器通知：通知已開啟"
     );
   });
 
   it.each([
-    ["default", true, "通知權限：未開啟", "state-notification-pending"],
-    ["granted", true, "通知權限：通知已開啟", "more-notifications"],
-    ["denied", true, "通知權限：通知已被拒絕", "state-notification-off"],
+    ["default", true, "瀏覽器通知：未開啟", "state-notification-pending"],
+    ["granted", true, "瀏覽器通知：通知已開啟", "more-notifications"],
+    ["denied", true, "瀏覽器通知：通知已被拒絕", "state-notification-off"],
     [
       "default",
       false,
-      "通知權限：這個瀏覽器不支援通知",
+      "瀏覽器通知：這個瀏覽器不支援通知",
       "state-notification-off"
     ]
   ] as const)(
@@ -245,7 +243,7 @@ describe("NotificationSettingsPage", () => {
     const button = wrapper.get(".delivery-test button");
     const clicking = button.trigger("click");
     await nextTick();
-    expect(button.text()).toContain("傳送中…");
+    expect(button.text()).toContain("傳送中");
     expect(button.find("inline-loader-stub").exists()).toBe(true);
     resolveTest(true);
     await clicking;

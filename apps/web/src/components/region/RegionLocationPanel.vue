@@ -79,7 +79,7 @@ const errorMessage = computed(() => {
       @click="emit('locate')"
     >
       <InlineLoader v-if="phase === 'locating'" />
-      {{ phase === "locating" ? "正在取得位置…" : "允許單次定位" }}
+      {{ phase === "locating" ? "定位中" : "允許單次定位" }}
     </button>
 
     <div
@@ -106,7 +106,7 @@ const errorMessage = computed(() => {
         @click="emit('confirm')"
       >
         <InlineLoader v-if="phase === 'saving'" />
-        {{ phase === "saving" ? "正在儲存…" : "確認並使用此地區" }}
+        {{ phase === "saving" ? "儲存中" : "確認並使用此地區" }}
       </button>
       <button
         data-testid="relocate"

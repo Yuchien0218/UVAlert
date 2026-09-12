@@ -4,6 +4,7 @@ import { computed, onMounted, shallowRef } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { useWebAppServices } from "../../app/injection";
 import IconButton from "../../components/common/IconButton.vue";
+import AppNotice from "../../components/common/AppNotice.vue";
 import InlineLoader from "../../components/feedback/InlineLoader.vue";
 import Icon from "../../components/icons/Icon.vue";
 
@@ -195,9 +196,10 @@ async function runTest(): Promise<void> {
       >
         <Icon :name="statusIcon" :size="32" />
         <span
-          >通知權限：<strong>{{ statusLabel }}</strong></span
+          >瀏覽器通知：<strong>{{ statusLabel }}</strong></span
         >
       </h2>
+
       <div v-if="!isSupported" class="note-box" role="status">
         <p>目前使用的瀏覽器或環境不支援本機通知功能。</p>
       </div>
@@ -229,82 +231,109 @@ async function runTest(): Promise<void> {
           type="button"
           @click="requestPermission"
         >
-          開啟補擦通知
+          開啟瀏覽器通知
         </button>
       </div>
-      <div v-else class="note-box" role="status">
-        <p>已開啟補擦提醒。當有防曬提醒時，系統會在到期時發送通知。</p>
-      </div>
-    </section>
-
-    <section class="app-card" aria-labelledby="background-push-heading">
-      <h2
-        id="background-push-heading"
-        class="section-heading"
-        data-typography-role="card-title"
-      >
-        <Icon name="more-notifications" :size="32" /><span>背景推播</span>
-      </h2>
-      <div
-        class="delivery-emphasis"
-        :class="{
-          'delivery-emphasis--limited':
-            backgroundPushState === 'pending-sync' ||
-            backgroundPushState === 'schedule-error'
-        }"
-        role="status"
-      >
-        <p class="delivery-emphasis__title">
-          {{ backgroundPushDescriptor.title }}
+      <div v-else class="permission-granted-group">
+        <p class="delivery-note" role="status">
+          已開啟補擦提醒。當有防曬提醒時，系統會在到期時發送通知。
         </p>
-        <p>{{ backgroundPushDescriptor.body }}</p>
+        <div class="delivery-test">
+          <button
+            class="button button--quiet"
+            type="button"
+            :disabled="testResult === 'sending'"
+            @click="runTest"
+          >
+            <InlineLoader v-if="testResult === 'sending'" />
+            {{ testResult === "sending" ? "傳送中" : "測試瀏覽器通知" }}
+          </button>
+          <p v-if="testResult === 'sent'" class="delivery-note" role="status">
+            已送出，請查看系統通知。
+          </p>
+          <p v-if="testResult === 'failed'" class="form-error" role="alert">
+            測試通知傳送失敗，請確認瀏覽器通知權限。
+          </p>
+        </div>
       </div>
-      <div
-        v-if="
-          backgroundPushDescriptor.canEnable ||
-          backgroundPushDescriptor.canDisable ||
-          backgroundPushDescriptor.canRetry
-        "
-        class="action-row"
-      >
-        <button
-          v-if="backgroundPushDescriptor.canEnable"
-          data-testid="enable-background-push"
-          class="button button--primary"
-          type="button"
-          :disabled="isBackgroundActionPending"
-          @click="enableBackgroundPush"
+
+      <div class="card-subdivision">
+        <h3
+          id="background-push-heading"
+          class="section-subheading"
+          data-typography-role="card-title"
         >
-          開啟背景推播
-        </button>
-        <button
-          v-if="backgroundPushDescriptor.canRetry"
-          data-testid="retry-background-push"
-          class="button button--quiet"
-          type="button"
-          :disabled="isBackgroundActionPending"
-          @click="retryBackgroundSync"
+          <Icon name="more-notifications" :size="24" />
+          <span>背景推播（選用）</span>
+        </h3>
+        <div
+          class="delivery-emphasis"
+          :class="{
+            'delivery-emphasis--limited':
+              backgroundPushState === 'pending-sync' ||
+              backgroundPushState === 'schedule-error'
+          }"
+          role="status"
         >
-          重試同步
-        </button>
-        <button
-          v-if="backgroundPushDescriptor.canDisable"
-          data-testid="disable-background-push"
-          class="button button--quiet"
-          type="button"
-          :disabled="isBackgroundActionPending"
-          @click="disableBackgroundPush"
+          <p class="delivery-emphasis__title">
+            {{ backgroundPushDescriptor.title }}
+          </p>
+          <p>{{ backgroundPushDescriptor.body }}</p>
+        </div>
+        <div
+          v-if="
+            backgroundPushDescriptor.canEnable ||
+            backgroundPushDescriptor.canDisable ||
+            backgroundPushDescriptor.canRetry
+          "
+          class="action-row"
         >
-          {{ backgroundPushDisableLabel }}
-        </button>
+          <button
+            v-if="backgroundPushDescriptor.canEnable"
+            data-testid="enable-background-push"
+            class="button button--primary"
+            type="button"
+            :disabled="isBackgroundActionPending"
+            @click="enableBackgroundPush"
+          >
+            開啟背景推播
+          </button>
+          <button
+            v-if="backgroundPushDescriptor.canRetry"
+            data-testid="retry-background-push"
+            class="button button--quiet"
+            type="button"
+            :disabled="isBackgroundActionPending"
+            @click="retryBackgroundSync"
+          >
+            重試同步
+          </button>
+          <button
+            v-if="backgroundPushDescriptor.canDisable"
+            data-testid="disable-background-push"
+            class="button button--quiet"
+            type="button"
+            :disabled="isBackgroundActionPending"
+            @click="disableBackgroundPush"
+          >
+            {{ backgroundPushDisableLabel }}
+          </button>
+        </div>
       </div>
-      <p class="delivery-note">
-        背景推播是輔助功能，可能受瀏覽器或平台能力、網路、省電模式與作業系統設定影響而延遲或無法送達，不保證準時。
-      </p>
-      <p class="delivery-note">
-        iPhone/iPad 必須把此網站加入主畫面，從主畫面開啟 Web
-        App，並允許通知後，才可使用背景推播。
-      </p>
+
+      <div class="card-subdivision">
+        <p class="delivery-note">
+          <strong>單一提醒原則</strong
+          >：系統每次只會排定下一個最近的補擦到期提醒，避免過多通知干擾。
+        </p>
+        <p class="delivery-note">
+          分頁開啟時由瀏覽器直接提醒；若分頁關閉，背景推播可能受網路、省電模式與系統設定影響而延遲或無法送達，不保證準時。
+        </p>
+        <p class="delivery-note">
+          iPhone/iPad 必須把此網站加入主畫面，從主畫面開啟 Web
+          App，並允許通知後，才可使用背景推播。
+        </p>
+      </div>
     </section>
 
     <section class="app-card" aria-labelledby="line-push-heading">
@@ -317,7 +346,6 @@ async function runTest(): Promise<void> {
       </h2>
       <div
         class="delivery-emphasis"
-        :class="{ 'delivery-emphasis--bound': isLineBound }"
         role="status"
       >
         <p class="delivery-emphasis__title">
@@ -332,17 +360,13 @@ async function runTest(): Promise<void> {
         </p>
       </div>
 
-      <div
-        v-if="lineActionMessage"
-        class="note-box note-box--success"
-        role="status"
-      >
-        <p>{{ lineActionMessage }}</p>
-      </div>
+      <AppNotice v-if="lineActionMessage" kind="ok">
+        {{ lineActionMessage }}
+      </AppNotice>
 
-      <div v-if="lineError" class="form-error" role="alert">
-        <p>{{ lineError }}</p>
-      </div>
+      <AppNotice v-if="lineError" kind="error">
+        {{ lineError }}
+      </AppNotice>
 
       <div class="action-row">
         <button
@@ -354,7 +378,7 @@ async function runTest(): Promise<void> {
           @click="bindLine"
         >
           <InlineLoader v-if="isLineLoading" />
-          {{ isLineLoading ? "連線中…" : "綁定 LINE 接收提醒" }}
+          {{ isLineLoading ? "連線中" : "綁定 LINE 接收提醒" }}
         </button>
         <template v-else>
           <button
@@ -365,7 +389,7 @@ async function runTest(): Promise<void> {
             @click="sendLineTest"
           >
             <InlineLoader v-if="isLineLoading" />
-            {{ isLineLoading ? "傳送中…" : "發送測試提醒" }}
+            {{ isLineLoading ? "傳送中" : "發送測試提醒" }}
           </button>
           <button
             data-testid="unbind-line-button"
@@ -383,43 +407,6 @@ async function runTest(): Promise<void> {
         提醒：本功能需加入「防曬晴報員」LINE 官方帳號好友，並請確認未將官方帳號設為「關閉提醒（靜音）」。
       </p>
     </section>
-
-    <section class="app-card" aria-labelledby="delivery-heading">
-      <h2
-        id="delivery-heading"
-        class="section-heading"
-        data-typography-role="card-title"
-      >
-        <Icon name="more-about" :size="32" /><span>通知傳送說明</span>
-      </h2>
-      <p class="delivery-note">
-        <strong>單一提醒原則</strong
-        >：系統每次只會排定下一個最近的補擦到期提醒，避免過多通知干擾。
-      </p>
-      <div class="delivery-emphasis delivery-emphasis--limited">
-        <p class="delivery-emphasis__title">本機提醒範圍</p>
-        <p>
-          分頁仍開啟時，本機提醒可作為倒數的輔助。背景送達則需啟用上方的背景推播。
-        </p>
-      </div>
-      <div v-if="isGranted" class="delivery-test">
-        <button
-          class="button button--quiet"
-          type="button"
-          :disabled="testResult === 'sending'"
-          @click="runTest"
-        >
-          <InlineLoader v-if="testResult === 'sending'" />
-          {{ testResult === "sending" ? "傳送中…" : "送出測試通知" }}
-        </button>
-        <p v-if="testResult === 'sent'" class="delivery-note" role="status">
-          已送出，請查看系統通知。
-        </p>
-        <p v-if="testResult === 'failed'" class="form-error" role="alert">
-          測試通知傳送失敗，請確認瀏覽器通知權限。
-        </p>
-      </div>
-    </section>
   </div>
 </template>
 
@@ -432,6 +419,18 @@ async function runTest(): Promise<void> {
   display: grid;
   gap: var(--space-3);
   padding: var(--card-padding);
+}
+.card-subdivision {
+  display: grid;
+  gap: var(--space-3);
+  padding-top: var(--space-3);
+  border-top: 1px solid var(--border-subtle);
+}
+.section-subheading {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin: 0;
 }
 .note-box {
   padding: var(--space-3);
@@ -455,10 +454,22 @@ async function runTest(): Promise<void> {
   display: grid;
   gap: var(--space-3);
 }
+.permission-granted-group {
+  display: grid;
+  gap: var(--space-2);
+}
 .action-row {
   display: flex;
   flex-wrap: wrap;
+  align-items: center;
   gap: var(--space-3);
+}
+[data-testid="bind-line-button"] {
+  min-width: 13.5rem;
+}
+[data-testid="send-line-test-button"],
+.delivery-test .button {
+  min-width: 9.5rem;
 }
 .delivery-note {
   margin: 0;
@@ -467,9 +478,10 @@ async function runTest(): Promise<void> {
   line-height: var(--line-height-body);
 }
 .delivery-test {
-  display: grid;
-  justify-items: start;
-  gap: var(--space-2);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-3);
 }
 .delivery-emphasis {
   display: grid;
@@ -481,9 +493,6 @@ async function runTest(): Promise<void> {
 .delivery-emphasis--limited {
   border-color: var(--color-due);
 }
-.delivery-emphasis--bound {
-  border-color: var(--color-saved);
-}
 .delivery-emphasis__title {
   margin: 0;
   font-weight: 600;
@@ -492,9 +501,5 @@ async function runTest(): Promise<void> {
   margin: 0;
   color: var(--text-body);
   line-height: var(--line-height-body);
-}
-.note-box--success {
-  border-left: 3px solid var(--color-saved);
-  color: var(--text-body);
 }
 </style>

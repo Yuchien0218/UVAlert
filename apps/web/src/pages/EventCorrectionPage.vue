@@ -223,7 +223,7 @@ async function runVoid(): Promise<void> {
             />
             {{
               eventCorrection.phase.value === "submitting"
-                ? "更正中…"
+                ? "更正中"
                 : "儲存更正"
             }}
           </button>

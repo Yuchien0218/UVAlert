@@ -397,7 +397,7 @@ function zoneNames(zoneIds: string[]): string {
           @click="contextEvent.submit"
         >
           <InlineLoader v-if="contextEvent.phase.value === 'submitting'" />
-          {{ contextEvent.phase.value === "submitting" ? "記錄中…" : submitLabel }}
+          {{ contextEvent.phase.value === "submitting" ? "記錄中" : submitLabel }}
         </button>
         <button
           class="text-link submit-actions__cancel"

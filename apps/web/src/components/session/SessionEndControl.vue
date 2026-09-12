@@ -111,7 +111,7 @@ const { closeFromBackdrop } = useOverlay({
               @click="confirmEnd"
             >
               <InlineLoader v-if="phase === 'ending'" />
-              {{ phase === "ending" ? "正在結束…" : "結束本次提醒" }}
+              {{ phase === "ending" ? "結束中" : "結束本次提醒" }}
             </button>
             <button
               ref="cancelButton"
