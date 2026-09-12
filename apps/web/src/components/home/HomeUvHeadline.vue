@@ -55,9 +55,12 @@ const hasValue = computed(() => props.uvi !== null && props.riskLevel !== null);
     :class="{ 'uv-headline--empty': !hasValue }"
     aria-labelledby="uv-headline-title"
   >
-    <p id="uv-headline-title" class="uv-headline__eyebrow">
-      {{ eyebrow }}
-    </p>
+    <div class="uv-headline__header">
+      <p id="uv-headline-title" class="uv-headline__eyebrow">
+        {{ eyebrow }}
+      </p>
+      <p v-if="note !== null" class="uv-headline__note">{{ note }}</p>
+    </div>
 
     <!--
       2026-08-31：讀數右側補上前往五日預報的入口（使用者要求）。
@@ -92,19 +95,6 @@ const hasValue = computed(() => props.uvi !== null && props.riskLevel !== null);
       拿它當「沒資料」會讓使用者以為現在紫外線很低。
     -->
     <p v-else class="uv-headline__empty">無資料</p>
-
-    <!--
-      2026-08-31：拿掉「臺中市西區・約 28°C」那一行（使用者要求）。
-
-      地區已經常駐在頁首右上角（「臺中市西區 中量級」），同一頁重複兩次；
-      溫度不是這個 App 的主題，它跟著地區一起被帶進來，但沒有任何一個
-      決策會用到它。
-
-      note 只在真的有話說時才佔位——白天沒有註記，就不留一列空的。原本
-      用一個 aria-hidden 的「—」佔位，那是為了讓地區與註記兩端對齊；地區
-      拿掉之後沒有東西要對齊了。
-    -->
-    <p v-if="note !== null" class="uv-headline__note">{{ note }}</p>
   </section>
 </template>
 
@@ -132,6 +122,17 @@ const hasValue = computed(() => props.uvi !== null && props.riskLevel !== null);
   align-items: baseline;
   gap: var(--space-3);
   padding-block: var(--space-3);
+}
+
+.uv-headline--empty .uv-headline__header {
+  display: contents;
+}
+
+.uv-headline__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: var(--space-2);
 }
 
 .uv-headline__eyebrow {

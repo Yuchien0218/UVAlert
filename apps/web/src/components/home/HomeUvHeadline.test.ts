@@ -151,6 +151,28 @@ describe("HomeUvHeadline 的精簡與分隔線", () => {
 
     expect(wrapper.get(".uv-headline__note").text()).toBe("明天比今天高 1");
   });
+
+  it("有 note 時與 eyebrow 一起包在 uv-headline__header 內（置於標題右側）", () => {
+    const wrapper = mount(HomeUvHeadline, {
+      props: {
+        eyebrow: "明日 UV 預報",
+        uvi: 5,
+        riskLevel: "moderate",
+        note: "與今天相同"
+      },
+      global: GLOBAL
+    });
+
+    const header = wrapper.get(".uv-headline__header");
+    expect(header.find(".uv-headline__eyebrow").text()).toBe("明日 UV 預報");
+    expect(header.find(".uv-headline__note").text()).toBe("與今天相同");
+  });
+
+  it("uv-headline__header 使用 flex 兩端對齊", () => {
+    expect(source).toContain(".uv-headline__header {");
+    expect(source).toContain("justify-content: space-between;");
+    expect(source).toContain("align-items: baseline;");
+  });
 });
 
 /*
