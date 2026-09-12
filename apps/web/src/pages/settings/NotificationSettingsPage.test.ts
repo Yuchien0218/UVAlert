@@ -243,7 +243,7 @@ describe("NotificationSettingsPage", () => {
     const button = wrapper.get(".delivery-test button");
     const clicking = button.trigger("click");
     await nextTick();
-    expect(button.text()).toContain("傳送中…");
+    expect(button.text()).toContain("傳送中");
     expect(button.find("inline-loader-stub").exists()).toBe(true);
     resolveTest(true);
     await clicking;

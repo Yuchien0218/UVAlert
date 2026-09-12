@@ -246,7 +246,7 @@ async function runTest(): Promise<void> {
             @click="runTest"
           >
             <InlineLoader v-if="testResult === 'sending'" />
-            {{ testResult === "sending" ? "傳送中…" : "測試瀏覽器通知" }}
+            {{ testResult === "sending" ? "傳送中" : "測試瀏覽器通知" }}
           </button>
           <p v-if="testResult === 'sent'" class="delivery-note" role="status">
             已送出，請查看系統通知。
@@ -378,7 +378,7 @@ async function runTest(): Promise<void> {
           @click="bindLine"
         >
           <InlineLoader v-if="isLineLoading" />
-          {{ isLineLoading ? "連線中…" : "綁定 LINE 接收提醒" }}
+          {{ isLineLoading ? "連線中" : "綁定 LINE 接收提醒" }}
         </button>
         <template v-else>
           <button
@@ -389,7 +389,7 @@ async function runTest(): Promise<void> {
             @click="sendLineTest"
           >
             <InlineLoader v-if="isLineLoading" />
-            {{ isLineLoading ? "傳送中…" : "發送測試提醒" }}
+            {{ isLineLoading ? "傳送中" : "發送測試提醒" }}
           </button>
           <button
             data-testid="unbind-line-button"
@@ -463,6 +463,13 @@ async function runTest(): Promise<void> {
   flex-wrap: wrap;
   align-items: center;
   gap: var(--space-3);
+}
+[data-testid="bind-line-button"] {
+  min-width: 13.5rem;
+}
+[data-testid="send-line-test-button"],
+.delivery-test .button {
+  min-width: 9.5rem;
 }
 .delivery-note {
   margin: 0;

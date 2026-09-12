@@ -613,7 +613,7 @@ onMounted(async () => {
         <InlineLoader v-if="setup.phase.value === 'submitting'" />
         {{
           setup.phase.value === "submitting"
-            ? "開始防曬提醒中…"
+            ? "開始防曬提醒中"
             : "開始防曬提醒"
         }}
       </button>

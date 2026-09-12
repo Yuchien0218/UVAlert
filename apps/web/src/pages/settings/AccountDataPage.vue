@@ -177,7 +177,7 @@ function goBack(): void {
             @click="prepare"
           >
             <InlineLoader v-if="syncBusy" />
-            {{ syncBusy ? "讀取中…" : "查看同步預覽" }}
+            {{ syncBusy ? "讀取中" : "查看同步預覽" }}
           </button>
 
           <template v-else>
@@ -198,7 +198,7 @@ function goBack(): void {
                 @click="confirmSync"
               >
                 <InlineLoader v-if="syncBusy" />
-                {{ syncBusy ? "同步中…" : "同步這些資料" }}
+                {{ syncBusy ? "同步中" : "同步這些資料" }}
               </button>
               <button
                 class="button button--quiet"
@@ -308,6 +308,9 @@ function goBack(): void {
   display: grid;
   gap: var(--space-3);
   width: 100%;
+}
+.sync-actions .button {
+  min-width: 8.5rem;
 }
 .sync-list {
   display: grid;

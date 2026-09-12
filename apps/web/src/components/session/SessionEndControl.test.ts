@@ -122,7 +122,7 @@ describe("SessionEndControl", () => {
       error: null
     });
 
-    expect(getButton("正在結束…").hasAttribute("disabled")).toBe(true);
+    expect(getButton("結束中").hasAttribute("disabled")).toBe(true);
     expect(getButton("返回").hasAttribute("disabled")).toBe(true);
 
     await wrapper.setProps({

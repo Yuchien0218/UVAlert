@@ -103,7 +103,7 @@ function goBack(): void {
       </label>
       <button class="button button--primary" type="submit" :disabled="busy">
         <InlineLoader v-if="busy" />
-        {{ busy ? "送出中…" : "送出" }}
+        {{ busy ? "送出中" : "送出" }}
       </button>
       <AppNotice v-if="feedback.state.value.status === 'submitted'" kind="ok">
         已收到你的回報，謝謝！

@@ -92,7 +92,7 @@ describe("送出按鈕的文字", () => {
 
   it("按鈕綁的是 submitLabel，不是寫死的字串", () => {
     expect(SOURCE).toContain(
-      '{{ contextEvent.phase.value === "submitting" ? "記錄中…" : submitLabel }}'
+      '{{ contextEvent.phase.value === "submitting" ? "記錄中" : submitLabel }}'
     );
   });
 

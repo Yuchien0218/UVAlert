@@ -806,7 +806,7 @@ async function remove(): Promise<void> {
       @click="save"
     >
       <InlineLoader v-if="productSettings.phase.value === 'saving'" />
-      {{ productSettings.phase.value === "saving" ? "儲存中…" : "儲存" }}
+      {{ productSettings.phase.value === "saving" ? "儲存中" : "儲存" }}
     </button>
 
     <!--

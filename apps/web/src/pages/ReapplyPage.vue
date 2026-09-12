@@ -180,7 +180,7 @@ async function submit(): Promise<void> {
           <InlineLoader v-if="reapplication.phase.value === 'submitting'" />
           {{
             reapplication.phase.value === "submitting"
-              ? "儲存中…"
+              ? "儲存中"
               : "儲存補擦紀錄"
           }}
         </button>
