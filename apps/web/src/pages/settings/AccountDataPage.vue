@@ -4,11 +4,12 @@ import Icon from "../../components/icons/Icon.vue";
 import IconButton from "../../components/common/IconButton.vue";
 import { computed, onMounted, shallowRef } from "vue";
 import { useWebAppServices } from "../../app/injection";
+import type { SyncPreviewItem } from "../../features/sync/createSyncController";
 import AppNotice from "../../components/common/AppNotice.vue";
 import ConfirmAction from "../../components/common/ConfirmAction.vue";
 import InlineLoader from "../../components/feedback/InlineLoader.vue";
 
-const { auth, cloudSync, sync } = useWebAppServices();
+const { auth, cloudSync, sync, productSettings } = useWebAppServices();
 const confirmingDelete = shallowRef(false);
 const busy = shallowRef(false);
 const notice = shallowRef<string | null>(null);
@@ -27,6 +28,7 @@ const preview = computed(() => sync?.state?.value?.preview ?? null);
 
 onMounted(() => {
   void auth.refresh();
+  void productSettings?.ensureLoaded?.();
 });
 
 function stopSync(): void {
@@ -104,6 +106,23 @@ function labelFor(kind: string): string {
     default:
       return kind;
   }
+}
+
+function labelForItem(item: SyncPreviewItem): string {
+  if (item.key.recordKind === "product_catalog") {
+    if (item.localRecord && item.localRecord.recordKind === "product_catalog") {
+      const name = item.localRecord.payload.displayName?.trim();
+      if (name) return name;
+    }
+    const match = productSettings?.products?.value?.find(
+      (p) => p.productId === item.key.recordId
+    );
+    if (match?.displayName?.trim()) {
+      return match.displayName.trim();
+    }
+    return "防曬裝備";
+  }
+  return labelFor(item.key.recordKind);
 }
 
 function statusLabelFor(status: string): string {
@@ -186,7 +205,7 @@ function goBack(): void {
                 v-for="item in preview.items"
                 :key="`${item.key.recordKind}:${item.key.recordId}`"
               >
-                <strong>{{ labelFor(item.key.recordKind) }}</strong>
+                <strong>{{ labelForItem(item) }}</strong>
                 <span>{{ statusLabelFor(item.status) }}</span>
               </li>
             </ul>
@@ -206,7 +225,7 @@ function goBack(): void {
                 :disabled="syncBusy"
                 @click="cancelSync"
               >
-                取消
+                返回
               </button>
             </div>
           </template>
