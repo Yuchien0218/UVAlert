@@ -9,17 +9,19 @@ import AccountDataPage from "./AccountDataPage.vue";
 
 vi.mock("../../app/injection", () => ({ useWebAppServices: vi.fn() }));
 
-function makeServices() {
+function makeServices(signedIn = true) {
   return {
     auth: {
       state: shallowReadonly(
         shallowRef({
-          status: "signed_in" as const,
-          auth: {
-            kind: "signed_in" as const,
-            userId: "user-1",
-            accessTokenExpiresAt: null
-          },
+          status: signedIn ? ("signed_in" as const) : ("signed_out" as const),
+          auth: signedIn
+            ? {
+                kind: "signed_in" as const,
+                userId: "user-1",
+                accessTokenExpiresAt: null
+              }
+            : { kind: "signed_out" as const },
           errorCode: null
         })
       ),
@@ -28,11 +30,33 @@ function makeServices() {
       signOut: vi.fn(async () => true),
       dispose: vi.fn()
     },
-    cloudSync: { deleteAccount: vi.fn(async () => undefined) }
+    cloudSync: { deleteAccount: vi.fn(async () => undefined) },
+    sync: {
+      state: shallowReadonly(
+        shallowRef({
+          status: "idle" as const,
+          preview: null,
+          error: null
+        })
+      ),
+      preparePreview: vi.fn(async () => undefined),
+      confirm: vi.fn(async () => undefined),
+      cancelPreview: vi.fn()
+    }
   };
 }
 
 describe("AccountDataPage", () => {
+  it("未登入時呈現免登入模式與 Google 登入按鈕", async () => {
+    const services = makeServices(false);
+    vi.mocked(useWebAppServices).mockReturnValue(
+      services as unknown as WebAppServices
+    );
+    const wrapper = shallowMount(AccountDataPage);
+    expect(wrapper.text()).toContain("目前使用免登入模式");
+    expect(wrapper.text()).toContain("使用 Google 登入同步");
+  });
+
   it("停止同步只改本機同步開關，保留雲端操作入口", async () => {
     const services = makeServices();
     vi.mocked(useWebAppServices).mockReturnValue(
@@ -41,7 +65,11 @@ describe("AccountDataPage", () => {
     const wrapper = shallowMount(AccountDataPage, {
       global: { stubs: { ConfirmAction: false } }
     });
-    await wrapper.get("button").trigger("click");
+    const stopButton = wrapper
+      .findAll("button")
+      .find((button) => button.text() === "停止同步");
+    expect(stopButton).toBeDefined();
+    await stopButton!.trigger("click");
     expect(wrapper.text()).toContain("重新開啟同步");
     expect(services.cloudSync.deleteAccount).not.toHaveBeenCalled();
   });

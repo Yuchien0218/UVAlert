@@ -60,6 +60,11 @@ const allEntries: readonly MoreEntry[] = [
     label: "安裝到主畫面"
   },
   {
+    to: "/settings/account-data",
+    icon: "tool-refresh",
+    label: "帳號與跨裝置同步"
+  },
+  {
     to: "/settings/data",
     icon: "more-data",
     label: "本機資料與隱私"

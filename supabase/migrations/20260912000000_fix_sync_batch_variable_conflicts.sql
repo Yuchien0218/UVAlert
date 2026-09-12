@@ -1,7 +1,6 @@
--- Atomic sync writes used by the four sync Edge Functions.
--- The Edge layer validates the full versioned payload before calling these
--- functions; this layer is still responsible for ownership, revision checks,
--- idempotent replay and all-or-nothing writes.
+-- Completely redefine commit_sync_batch and delete_sync_batch with unambiguous
+-- variable names (v_record_kind, v_record_id, v_response) so that no local variable
+-- conflicts with any column names in sync_records, sync_tombstones, or sync_idempotency_receipts.
 
 create or replace function public.commit_sync_batch(
   p_user_id uuid,
@@ -27,7 +26,7 @@ declare
   incoming_revision bigint;
   committed_records jsonb := '[]'::jsonb;
   committed_tombstones jsonb := '[]'::jsonb;
-  response jsonb;
+  v_response jsonb;
 begin
   if auth.uid() is null
      or auth.uid() <> p_user_id
@@ -50,7 +49,7 @@ begin
     return receipt_response;
   end if;
 
-  -- Preflight every revision before modifying either table.  This function is
+  -- Preflight every revision before modifying either table. This function is
   -- a single transaction, so a conflict aborts the entire batch.
   for item in select value from jsonb_array_elements(p_records)
   loop
@@ -207,7 +206,7 @@ begin
     );
   end loop;
 
-  response := jsonb_build_object(
+  v_response := jsonb_build_object(
     'schemaVersion', 'sync-v1',
     'committedRecords', committed_records,
     'committedTombstones', committed_tombstones,
@@ -216,8 +215,8 @@ begin
 
   insert into public.sync_idempotency_receipts (
     user_id, operation, idempotency_key, response, created_at
-  ) values (p_user_id, 'commit', p_idempotency_key, response, p_now);
-  return response;
+  ) values (p_user_id, 'commit', p_idempotency_key, v_response, p_now);
+  return v_response;
 end;
 $$;
 
@@ -242,7 +241,7 @@ declare
   current_revision bigint;
   next_revision bigint;
   committed_tombstones jsonb := '[]'::jsonb;
-  response jsonb;
+  v_response jsonb;
 begin
   if auth.uid() is null
      or auth.uid() <> p_user_id
@@ -315,15 +314,15 @@ begin
     );
   end loop;
 
-  response := jsonb_build_object(
+  v_response := jsonb_build_object(
     'schemaVersion', 'sync-v1',
     'committedTombstones', committed_tombstones,
     'committedAt', to_char(p_now at time zone 'utc', 'YYYY-MM-DD"T"HH24:MI:SS.MS"Z"')
   );
   insert into public.sync_idempotency_receipts (
     user_id, operation, idempotency_key, response, created_at
-  ) values (p_user_id, 'delete', p_idempotency_key, response, p_now);
-  return response;
+  ) values (p_user_id, 'delete', p_idempotency_key, v_response, p_now);
+  return v_response;
 end;
 $$;
 
