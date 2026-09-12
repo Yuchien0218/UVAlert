@@ -7,6 +7,7 @@ import {
   type PushDispatcherDependencies
 } from "./handler.ts";
 import { createPushSender } from "./pushSender.ts";
+import { sendLinePushNotification } from "../_shared/line.ts";
 
 function createProductionDependencies(): PushDispatcherDependencies {
   const supabaseUrl = Deno.env.get("SUPABASE_URL");
@@ -113,6 +114,34 @@ function createProductionDependencies(): PushDispatcherDependencies {
     },
     reportError(code) {
       console.error(code);
+    },
+    async sendLineReminder(deviceId) {
+      try {
+        const { data } = await requireClient()
+          .from("line_push_subscriptions")
+          .select("line_user_id")
+          .eq("device_id", deviceId)
+          .eq("status", "active")
+          .maybeSingle();
+
+        if (data?.line_user_id) {
+          const message = [
+            "【UVAlert 防曬晴報員】補擦時間到囉！",
+            "您目前的防曬保護力即將減弱。",
+            "建議儘速補擦防曬裝備或適時尋找陰涼處避光。"
+          ].join("\n");
+
+          await sendLinePushNotification(message, {
+            fetch: globalThis.fetch,
+            readEnv: (key) => {
+              if (key === "LINE_USER_ID") return data.line_user_id;
+              return Deno.env.get(key);
+            }
+          });
+        }
+      } catch {
+        // ignore non-critical LINE push error
+      }
     }
   };
 }

@@ -323,4 +323,17 @@ describe("push dispatcher", () => {
       claimed.endpoint
     );
   });
+
+  it("推播派送成功結算後，呼叫 sendLineReminder", async () => {
+    const sendLineReminder = vi.fn(async () => undefined);
+    const dependencies = makeDependencies({
+      send: vi.fn(async () => ({ kind: "sent" as const })),
+      sendLineReminder
+    });
+
+    const response = await createPushDispatcher(dependencies)(request());
+
+    expect(response.status).toBe(200);
+    expect(sendLineReminder).toHaveBeenCalledWith(claimed.deviceId);
+  });
 });

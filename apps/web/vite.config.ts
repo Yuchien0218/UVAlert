@@ -28,6 +28,11 @@ export default defineConfig({
         target: "https://ykfdnltaqpdytmrszbbk.supabase.co/functions/v1/feedback",
         changeOrigin: true,
         rewrite: (path) => path.replace(/^\/v1\/feedback/, "")
+      },
+      "/v1/line-subscription": {
+        target: "https://ykfdnltaqpdytmrszbbk.supabase.co/functions/v1/line-subscription",
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/v1\/line-subscription/, "")
       }
     }
   }

@@ -60,6 +60,7 @@ export type PushDispatcherDependencies = {
     now: string;
   }): Promise<boolean>;
   reportError(code: string): void;
+  sendLineReminder?: (deviceId: string) => Promise<void>;
 };
 
 type DispatchSummary = {
@@ -207,6 +208,9 @@ async function dispatchRow(
   if (result.kind === "sent") {
     if (await settle(dependencies, row, "sent", completedAt, null, null)) {
       summary.sent += 1;
+      if (dependencies.sendLineReminder) {
+        await dependencies.sendLineReminder(row.deviceId).catch(() => {});
+      }
     }
     return;
   }
