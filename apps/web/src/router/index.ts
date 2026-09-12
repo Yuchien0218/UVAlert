@@ -176,8 +176,8 @@ export function createAppRouter(
         name: "settings-data",
         component: () => import("../pages/settings/DataSettingsPage.vue"),
         meta: {
-          title: "本機資料與隱私",
-          heading: "本機資料與隱私",
+          title: "本機資料與匯出",
+          heading: "本機資料與匯出",
           body: "查看、匯出與清除本機資料。匯出資料不上傳、不經後端。"
         }
       },

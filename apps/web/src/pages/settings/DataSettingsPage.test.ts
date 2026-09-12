@@ -119,28 +119,7 @@ describe("DataSettingsPage 的載入狀態", () => {
  * 測試就只在驗同步，也順便守住「本機資料讀取失敗時同步區塊仍要在」
  * 這個性質。
  */
-describe("DataSettingsPage 的同步區塊", () => {
-  it("未登入先顯示免登入說明與 Google sync CTA", () => {
-    useServices();
-    const wrapper = shallowMount(DataSettingsPage);
-    expect(wrapper.text()).toContain("目前使用免登入模式");
-    expect(wrapper.text()).toContain("使用 Google 登入同步");
-  });
-
-  it("登入後可先讀取同步預覽，不會在頁面開啟時自動上傳", async () => {
-    const services = useServices("signed_in");
-    const wrapper = shallowMount(DataSettingsPage);
-    expect(services.sync.preparePreview).not.toHaveBeenCalled();
-    await wrapper.get("button").trigger("click");
-    expect(services.sync.preparePreview).toHaveBeenCalledTimes(1);
-  });
-});
-
-describe("DataSettingsPage 的合併結果", () => {
-  /*
-   * 這張卡（「雲端資料請到另一頁管理」）是拆成兩頁製造出來的純導覽
-   * 補救，合併的整個理由就是消掉它。守著它別以別的形式復活。
-   */
+describe("DataSettingsPage 的資訊範圍", () => {
   it("不再出現「請到另一頁」的導覽補救文字", () => {
     useServices();
     const wrapper = shallowMount(DataSettingsPage);
@@ -148,20 +127,6 @@ describe("DataSettingsPage 的合併結果", () => {
     expect(wrapper.text()).not.toContain("本頁只處理這台裝置的本機資料");
   });
 
-  it("同步區塊裡仍進得去登入與雲端資料頁", () => {
-    useServices();
-    const wrapper = shallowMount(DataSettingsPage);
-    expect(wrapper.html()).toContain("/settings/account-data");
-  });
-
-  /*
-   * 2026-08-30：資料概況的範圍說明是常駐條件，不是可有可無的補充。
-   *
-   * 這些數字只數得到本機 IndexedDB；登入同步後雲端可能還有其他裝置上傳
-   * 的紀錄，這張卡看不到也數不到。少了這句，「防曬裝備 0 筆」會被讀成
-   * 「我的資料都不見了」——而這正是 2026-08-29 那次合併要解決的
-   * 「本機 vs 雲端」混淆。DESIGN.md 第五節把這類前提列為不可隱藏。
-   */
   it("資料概況說明數字只涵蓋本機，不含雲端", () => {
     useServices("signed_out", "idle", SUMMARY_FIXTURE);
     const wrapper = shallowMount(DataSettingsPage);
@@ -243,31 +208,7 @@ describe("清除區的警示框", () => {
   });
 });
 
-/**
- * 2026-09-04（方案 A）：「不登入不影響本機倒數與資料」從未登入區塊搬到群組
- * 說明——它在三種同步狀態下都成立，本來就屬於群組層。
- */
-describe("同步區的說明不重複", () => {
-  /*
-   * **掛載後數次數，不是掃原始碼。** 搬家的風險是「搬上去了但下面沒刪」，
-   * 那在原始碼裡是兩個不同的字串（原句有「也」），掃字串抓不到；畫面上
-   * 卻是同一件事連著講兩次。
-   */
-  it("「不登入」的保證整頁只出現一次", () => {
-    useServices();
-    const wrapper = shallowMount(DataSettingsPage);
 
-    expect(wrapper.text().split("不登入").length - 1).toBe(1);
-  });
-
-  /* 反向：不可以連同群組說明一起弄丟——那句是免登入模式的核心承諾。 */
-  it("那句保證仍然在頁面上", () => {
-    useServices();
-    const wrapper = shallowMount(DataSettingsPage);
-
-    expect(wrapper.text()).toContain("不登入亦不影響本機倒數與資料");
-  });
-});
 
 /**
  * 2026-09-05：清除卡三列都收成「說明（如果有）＋一顆講完整動作名稱的按鈕」。

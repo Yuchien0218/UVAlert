@@ -15,79 +15,10 @@ const SOURCE = readFileSync(
   .replace(/<!--[\s\S]*?-->/g, "")
   .replace(/\/\*[\s\S]*?\*\//g, "");
 
-describe("同步區的標題字級", () => {
-  /*
-   * **2026-09-04：改成比群組標題低一階（使用者裁決）。**
-   *
-   * 2026-09-02 曾把這三塊從 16px 拉到 18px，理由是「差一階剛好落在看得出
-   * 不一樣、但看不出為什麼的區間」。那次拉平之後的實際結果是**一個區塊裡
-   * 兩個同級標題**——群組標題「跨裝置同步」與狀態列一樣重，使用者回報
-   * 「這一區排版很亂」。
-   *
-   * 這次一次降到 `supporting`（14px），不是回頭走 16px：18 對 14 是看得出
-   * 意圖的差距，18 對 16 才是當初被否決的那種曖昧差距。
-   *
-   * 兩件事分開守：三塊狀態都要是 h3，而且都要標成 supporting。只守其中
-   * 一件的話，改成 h3 但忘了標 role（字級掉回 body）也會過。
-   */
-  it("三個同步狀態都是 h3", () => {
-    const titles = [...SOURCE.matchAll(/<h3 class="sync-block__title"/g)];
-    expect(titles).toHaveLength(3);
-  });
-
-  it("三個同步狀態走 supporting，比「跨裝置同步」低一階", () => {
-    const titles = [
-      ...SOURCE.matchAll(
-        /<h3 class="sync-block__title" data-typography-role="supporting">/g
-      )
-    ];
-    expect(titles).toHaveLength(3);
-    expect(SOURCE).toContain(
-      '<h2 id="sync-group-title" data-typography-role="card-title">'
-    );
-  });
-
-  /*
-   * **反向：顏色也要跟著降。** 只降字級的話，14px 的深色文字仍然像個標題
-   * ——那是 2026-09-02 想避免的「看得出不一樣、看不出為什麼」。
-   */
-  it("狀態列用次要文字色", () => {
-    expect(SOURCE).toMatch(
-      /\.sync-block__title \{[^}]*color: var\(--text-secondary\);/
-    );
-  });
-
-  it("不再用 <strong> 當同步狀態的標題", () => {
-    expect(SOURCE).not.toContain("<strong>目前使用免登入模式</strong>");
-  });
-});
-
-describe("管理登入與雲端資料", () => {
-  /*
-   * 有箭頭、有底線——來自 ChevronLink（渲染成 `<a>` 時保留瀏覽器預設底線，
-   * 2026-08-31 的裁決）。這裡只守「用了那個元件」，樣式本身由
-   * chevronLink.test.ts 守。
-   */
-  it("用 ChevronLink", () => {
-    expect(SOURCE).toContain(
-      '<ChevronLink class="sync-group__more" to="/settings/account-data">'
-    );
-  });
-
-  /*
-   * **2026-09-04 翻面：從靠右改成靠左（使用者裁決）。**
-   *
-   * 2026-09-01 定的靠右，理由是「跟五日預報那顆一樣」。但那顆在卡片標題列
-   * 的右端，右邊界是它自己那一列的邊界；這一顆排在一疊左對齊的內容底下，
-   * 實測右緣是 90 → 322/48 → 127 → 336 → **173 靠右**，再下面的「返回更多」
-   * 又靠左——同一個畫面三個互動元素三種對齊。
-   *
-   * 寫成明確的 `start` 而不是刪掉整條規則：`.sync-group` 帶著
-   * `justify-items: start`，靠繼承的話下次有人動那一行就會靜默改掉這裡。
-   */
-  it("靠左，與按鈕同一條左邊界", () => {
-    expect(SOURCE).toMatch(/\.sync-group__more \{[^}]*justify-self:\s*start;/);
-    expect(SOURCE).not.toMatch(/\.sync-group__more \{[^}]*justify-self:\s*end;/);
+describe("跨裝置同步已獨立成專屬頁面", () => {
+  it("本機資料與匯出頁不再包含重複的跨裝置同步卡片", () => {
+    expect(SOURCE).not.toContain('id="sync-group-title"');
+    expect(SOURCE).not.toContain("sync-group");
   });
 });
 
@@ -187,35 +118,10 @@ describe("清除全部的紅字", () => {
 });
 
 /**
- * 2026-09-04（方案 A）：同步區的兩句說明併成一句、分組間距。
+ * 2026-09-12：清除卡內部水平線已移除。
  */
-describe("同步區的說明與間距", () => {
-  /*
-   * 「登入能做什麼」與「不登入不會怎樣」是同一件事的兩面，改動前卻被一個
-   * 14px 的狀態標題隔開，變成 16 / 14 / 16 的 V 字形。併成一句之後
-   * `.sync-block` 裡只剩「狀態標題＋按鈕」，字級才是單調遞減的。
-   *
-   * 不綁字面，只要求這一句同時講到兩件事——換句話說可以，拆回兩段不行。
-   */
-  it("群組說明一句話講完「登入能做什麼」與「不登入不會怎樣」", () => {
-    const lead = /<p class="sync-group__lead">\s*([^<]*)</.exec(SOURCE)?.[1];
-
-    expect(lead, "找不到 .sync-group__lead").toBeDefined();
-    expect(lead).toContain("登入 Google 帳號");
-    expect(lead).toContain("不登入");
-  });
-
-  /*
-   * 改動前 `.sync-group` 與 `.sync-block` 的 gap 都是 --space-3，五個元素
-   * 完全等距，讀起來是五條平行的線而不是「標題＋說明＋動作」。
-   *
-   * 這條守的是「有沒有分組」，不是某個特定數值——所以只要求那兩個選擇器
-   * 拿得到 gap 之上的一段。
-   */
-  it("狀態區與出口各自跟上面拉開一階", () => {
-    const rule = /\.sync-block,\s*\.sync-group__more \{([^}]*)\}/.exec(SOURCE)?.[1];
-
-    expect(rule, "找不到分組間距規則").toBeDefined();
-    expect(rule).toContain("margin-block-start: var(--space-2);");
+describe("清除卡的排版", () => {
+  it("清除列之間沒有上緣水平線", () => {
+    expect(SOURCE).not.toMatch(/\.clear-row\s*\{[^}]*border-top:\s*1px/);
   });
 });
