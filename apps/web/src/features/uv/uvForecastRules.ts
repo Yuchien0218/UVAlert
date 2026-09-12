@@ -14,6 +14,14 @@ export function isFixedEvening(date: Date): boolean {
 }
 
 /**
+ * 是否為夜間換日後（00:00–05:59）。
+ */
+export function isAfterMidnightEvening(date: Date): boolean {
+  const hour = date.getHours();
+  return hour < EVENING_END_HOUR;
+}
+
+/**
  * 裝置本地的 `YYYY-MM-DD`，格式與預報的 `localDate` 相同。
  *
  * 不用 `toISOString().slice(0, 10)`——那是 UTC，台灣時間凌晨 0–8 點會被算成

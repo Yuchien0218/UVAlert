@@ -86,6 +86,7 @@ const forecast = {
 interface Options {
   session?: SessionProjection | null;
   isEvening?: boolean;
+  isAfterMidnight?: boolean;
   region?: { displayName: string } | null;
   /**
    * 這次提醒的情境。水上活動入口只在情境是水上、或有進行中的水中區間時
@@ -99,6 +100,7 @@ function mockServices(options: Options = {}): void {
   const {
     session: currentSession = null,
     isEvening = false,
+    isAfterMidnight = false,
     region = null,
     initialContext = "outdoor_general",
     contextEvents = []
@@ -122,6 +124,7 @@ function mockServices(options: Options = {}): void {
       region: shallowReadonly(shallowRef(region)),
       forecast: shallowReadonly(shallowRef(region === null ? null : forecast)),
       isEvening: shallowReadonly(shallowRef(isEvening)),
+      isAfterMidnight: shallowReadonly(shallowRef(isAfterMidnight)),
       showEveningPrompt: shallowReadonly(shallowRef(false)),
       ensureLoaded: vi.fn(async () => undefined),
       refresh: vi.fn(async () => undefined),
@@ -618,6 +621,40 @@ describe("HomePage", () => {
 
       expect(wrapper.findComponent(HomeNightNotice).exists()).toBe(true);
       expect(wrapper.find(".button--primary").exists()).toBe(false);
+    });
+
+    it("換日前夜間（isAfterMidnight: false）顯示「明日 UV 預報」與「明早」提醒", async () => {
+      mockServices({
+        isEvening: true,
+        isAfterMidnight: false,
+        region: { displayName: "臺北市 大安區" }
+      });
+
+      const wrapper = await mountHome();
+
+      expect(wrapper.findComponent(HomeUvHeadline).props("eyebrow")).toBe(
+        "明日 UV 預報"
+      );
+      expect(
+        wrapper.findComponent(HomeNightNotice).props("isAfterMidnight")
+      ).toBe(false);
+    });
+
+    it("換日後夜間（isAfterMidnight: true）顯示「今日 UV 預報」與「今早」提醒", async () => {
+      mockServices({
+        isEvening: true,
+        isAfterMidnight: true,
+        region: { displayName: "臺北市 大安區" }
+      });
+
+      const wrapper = await mountHome();
+
+      expect(wrapper.findComponent(HomeUvHeadline).props("eyebrow")).toBe(
+        "今日 UV 預報"
+      );
+      expect(
+        wrapper.findComponent(HomeNightNotice).props("isAfterMidnight")
+      ).toBe(true);
     });
 
     /**

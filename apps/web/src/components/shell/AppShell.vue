@@ -22,7 +22,9 @@ const isNight = computed(() => uvForecast.isEvening.value);
 const headerUvDay = computed(() => {
   const days = uvForecast.forecast.value?.days ?? [];
   if (days.length === 0) return null;
-  return isNight.value ? (days[1] ?? null) : (days[0] ?? null);
+  const isBeforeMidnightNight =
+    isNight.value && !(uvForecast.isAfterMidnight?.value ?? false);
+  return isBeforeMidnightNight ? (days[1] ?? null) : (days[0] ?? null);
 });
 
 watch(

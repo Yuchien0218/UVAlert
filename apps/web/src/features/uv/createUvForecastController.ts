@@ -21,6 +21,7 @@ import {
 } from "vue";
 import {
   getEveningCycleKey,
+  isAfterMidnightEvening,
   isFixedEvening,
   selectUpcomingForecast
 } from "./uvForecastRules";
@@ -57,6 +58,7 @@ export interface UvForecastController {
    */
   readonly nationwide: Readonly<ShallowRef<NationwideUvForecast | null>>;
   readonly isEvening: ComputedRef<boolean>;
+  readonly isAfterMidnight: ComputedRef<boolean>;
   readonly showEveningPrompt: ComputedRef<boolean>;
   ensureLoaded(): Promise<void>;
   /** 只有真的要顯示地圖時才呼叫；已載入過就不再打。 */
@@ -93,6 +95,9 @@ export function createUvForecastController(
   const currentTimeState = shallowRef(getNow());
   const dismissedCycleState = shallowRef(readDismissedCycle(storage));
   const isEvening = computed(() => isFixedEvening(currentTimeState.value));
+  const isAfterMidnight = computed(() =>
+    isAfterMidnightEvening(currentTimeState.value)
+  );
   const currentEveningCycle = computed(() =>
     getEveningCycleKey(currentTimeState.value)
   );
@@ -283,6 +288,7 @@ export function createUvForecastController(
     forecast: shallowReadonly(forecastState),
     nationwide: shallowReadonly(nationwideState),
     isEvening,
+    isAfterMidnight,
     showEveningPrompt,
     ensureLoaded,
     ensureNationwideLoaded,

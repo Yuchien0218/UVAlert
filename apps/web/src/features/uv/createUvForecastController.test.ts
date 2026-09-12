@@ -244,6 +244,45 @@ describe("createUvForecastController", () => {
     expect(controller.forecast.value?.region.displayName).toBe("臺北市中正區");
     controller.dispose();
   });
+
+  it("依時間正確計算 isEvening 與 isAfterMidnight", () => {
+    const dependencies = makeDependencies({});
+    const lateNightController = createUvForecastController({
+      ...dependencies,
+      connectivity: shallowRef("online"),
+      lifecycle: new FakeLifecycle(),
+      now: () => new Date("2026-07-30T22:00:00.000"),
+      storage: new MemoryStorage(),
+      scheduler: silentScheduler
+    });
+    expect(lateNightController.isEvening.value).toBe(true);
+    expect(lateNightController.isAfterMidnight.value).toBe(false);
+    lateNightController.dispose();
+
+    const afterMidnightController = createUvForecastController({
+      ...dependencies,
+      connectivity: shallowRef("online"),
+      lifecycle: new FakeLifecycle(),
+      now: () => new Date("2026-07-31T01:00:00.000"),
+      storage: new MemoryStorage(),
+      scheduler: silentScheduler
+    });
+    expect(afterMidnightController.isEvening.value).toBe(true);
+    expect(afterMidnightController.isAfterMidnight.value).toBe(true);
+    afterMidnightController.dispose();
+
+    const daytimeController = createUvForecastController({
+      ...dependencies,
+      connectivity: shallowRef("online"),
+      lifecycle: new FakeLifecycle(),
+      now: () => new Date("2026-07-31T10:00:00.000"),
+      storage: new MemoryStorage(),
+      scheduler: silentScheduler
+    });
+    expect(daytimeController.isEvening.value).toBe(false);
+    expect(daytimeController.isAfterMidnight.value).toBe(false);
+    daytimeController.dispose();
+  });
 });
 
 function makeNationwideForecast(): NationwideUvForecast {

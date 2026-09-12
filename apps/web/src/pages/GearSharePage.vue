@@ -88,11 +88,13 @@ const sessionInfo = computed<GearShareCardData["session"]>(() => {
   return { context, startedAt: stream.sessionStarted.effectiveStartedAt };
 });
 
-/** 白天看今日、夜間看明日——跟 AppShell 頁首同一條規則。 */
+/** 換日前夜間看明日、換日後夜間與白天看今日——跟 AppShell 頁首同一條規則。 */
 const uvDay = computed(() => {
   const days = uvForecast.forecast.value?.days ?? [];
   if (days.length === 0) return null;
-  return uvForecast.isEvening.value ? (days[1] ?? null) : (days[0] ?? null);
+  const isBeforeMidnightNight =
+    uvForecast.isEvening.value && !(uvForecast.isAfterMidnight?.value ?? false);
+  return isBeforeMidnightNight ? (days[1] ?? null) : (days[0] ?? null);
 });
 
 const cardData = computed<GearShareCardData>(() => ({

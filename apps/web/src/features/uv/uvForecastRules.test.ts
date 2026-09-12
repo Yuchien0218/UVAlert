@@ -5,6 +5,7 @@ import {
   getHighestForecastDay,
   getUvRiskLevelAdvice,
   getUvRiskLevelLabel,
+  isAfterMidnightEvening,
   isFixedEvening,
   selectUpcomingForecast,
   toLocalDateKey
@@ -22,6 +23,13 @@ describe("fixed evening and five-day UV rules", () => {
     expect(getEveningCycleKey(new Date(2026, 6, 30, 23, 0))).toBe("2026-07-30");
     expect(getEveningCycleKey(new Date(2026, 6, 31, 2, 0))).toBe("2026-07-30");
     expect(getEveningCycleKey(new Date(2026, 6, 31, 12, 0))).toBeNull();
+  });
+
+  it("以裝置當地時間 00:00～05:59 判斷換日後凌晨", () => {
+    expect(isAfterMidnightEvening(new Date(2026, 6, 30, 23, 59))).toBe(false);
+    expect(isAfterMidnightEvening(new Date(2026, 6, 31, 0, 0))).toBe(true);
+    expect(isAfterMidnightEvening(new Date(2026, 6, 31, 5, 59))).toBe(true);
+    expect(isAfterMidnightEvening(new Date(2026, 6, 31, 6, 0))).toBe(false);
   });
 
   it("只保留仍有效的白日時段，不沿用過期資料", () => {

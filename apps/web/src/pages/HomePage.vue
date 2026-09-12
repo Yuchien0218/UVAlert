@@ -105,6 +105,9 @@ watch(
 const session = computed(() => boot.currentSession.value);
 const hasSession = computed(() => session.value !== null);
 const isNight = computed(() => uvForecast.isEvening.value);
+const isAfterMidnight = computed(
+  () => uvForecast.isAfterMidnight?.value ?? false
+);
 const hasRegion = computed(() => uvForecast.region.value !== null);
 
 const forecastDays = computed(() => uvForecast.forecast.value?.days ?? []);
@@ -125,18 +128,20 @@ const today = computed(() => findDay(0));
 const tomorrow = computed(() => findDay(1));
 
 /**
- * 夜間顯示明日預報，白天顯示今日。
+ * 換日前夜間（18:00–23:59）顯示明日預報；
+ * 換日後夜間（00:00–05:59）與白天顯示今日預報。
  *
- * 夜間看「今天的 UV」沒有行動價值——今天已經過完了。使用者晚上會想知道
- * 的是明天要不要防曬。
+ * 2026-09-12：半夜換日後（00:00–05:59）改看今日，標題顯示「今日 UV 預報」
+ * （避免換日後使用者誤以為明日是指後天或搞混時間）。
  */
 const headlineDay = computed(() =>
-  isNight.value ? tomorrow.value : today.value
+  isNight.value && !isAfterMidnight.value ? tomorrow.value : today.value
 );
 
-const headlineEyebrow = computed(() =>
-  isNight.value ? "明日 UV 預報" : "今日 UV"
-);
+const headlineEyebrow = computed(() => {
+  if (!isNight.value) return "今日 UV";
+  return isAfterMidnight.value ? "今日 UV 預報" : "明日 UV 預報";
+});
 
 /**
  * 標題右側的註記。
@@ -155,7 +160,7 @@ const headlineNote = computed<string | null>(() => {
    * 標註它等於在說「這是資料」。夜間那一支留著：「明天比今天高 1」是
    * 實際算出來的比較，不是標籤。
    */
-  if (!isNight.value) return null;
+  if (!isNight.value || isAfterMidnight.value) return null;
 
   const todayUvi = today.value?.uvi;
   const tomorrowUvi = tomorrow.value?.uvi;
@@ -607,7 +612,11 @@ function handleEndSession(): void {
       <HomeLocationPrompt v-if="!hasRegion" />
 
       <!-- 夜間不放主 CTA，改用說明加逃生出口。 -->
-      <HomeNightNotice v-if="isNight" @start="handleStartSetup" />
+      <HomeNightNotice
+        v-if="isNight"
+        :is-after-midnight="isAfterMidnight"
+        @start="handleStartSetup"
+      />
 
       <button
         v-else

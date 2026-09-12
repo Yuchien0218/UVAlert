@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { computed } from "vue";
 import IconLead from "../common/IconLead.vue";
 
 /**
@@ -30,13 +31,29 @@ import IconLead from "../common/IconLead.vue";
  * `tools/icon-system/generate-icons.mjs` 裡那顆的註解。
  */
 
+const props = withDefaults(
+  defineProps<{
+    /** 是否為半夜換日後（00:00–05:59）。換日後顯示「今早」，換日前維持「明早」。 */
+    isAfterMidnight?: boolean;
+  }>(),
+  {
+    isAfterMidnight: false
+  }
+);
+
 defineEmits<{ start: [] }>();
+
+const noticeText = computed(() =>
+  props.isAfterMidnight
+    ? "現在不需要防曬，今早出門前再開始提醒。"
+    : "現在不需要防曬，明早出門前再開始提醒。"
+);
 </script>
 
 <template>
   <div class="night-notice">
     <IconLead class="night-notice__lead" icon="state-night" size="hero">
-      <p class="night-notice__body">現在不需要防曬，明早出門前再開始提醒。</p>
+      <p class="night-notice__body">{{ noticeText }}</p>
     </IconLead>
 
     <!--

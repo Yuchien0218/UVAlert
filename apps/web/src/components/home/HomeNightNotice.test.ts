@@ -25,4 +25,24 @@ describe("HomeNightNotice", () => {
 
     expect(wrapper.get(".icon-lead svg").attributes("width")).toBe("56");
   });
+
+  it("換日前（預設）顯示「明早出門前再開始提醒」", () => {
+    const wrapper = mount(HomeNightNotice, {
+      props: { isAfterMidnight: false }
+    });
+
+    expect(wrapper.get(".night-notice__body").text()).toBe(
+      "現在不需要防曬，明早出門前再開始提醒。"
+    );
+  });
+
+  it("換日後凌晨（isAfterMidnight: true）顯示「今早出門前再開始提醒」", () => {
+    const wrapper = mount(HomeNightNotice, {
+      props: { isAfterMidnight: true }
+    });
+
+    expect(wrapper.get(".night-notice__body").text()).toBe(
+      "現在不需要防曬，今早出門前再開始提醒。"
+    );
+  });
 });
