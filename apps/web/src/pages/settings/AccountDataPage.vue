@@ -6,8 +6,9 @@ import { computed, onMounted, shallowRef } from "vue";
 import { useWebAppServices } from "../../app/injection";
 import AppNotice from "../../components/common/AppNotice.vue";
 import ConfirmAction from "../../components/common/ConfirmAction.vue";
+import InlineLoader from "../../components/feedback/InlineLoader.vue";
 
-const { auth, cloudSync } = useWebAppServices();
+const { auth, cloudSync, sync } = useWebAppServices();
 const confirmingDelete = shallowRef(false);
 const busy = shallowRef(false);
 const notice = shallowRef<string | null>(null);
@@ -16,6 +17,13 @@ const signedIn = computed(() => auth.state.value.auth.kind === "signed_in");
 const syncDisabled = shallowRef(
   globalThis.localStorage?.getItem("uvalert.sync.disabled") === "true"
 );
+
+const syncBusy = computed(
+  () =>
+    sync?.state?.value?.status === "preparing" ||
+    sync?.state?.value?.status === "syncing"
+);
+const preview = computed(() => sync?.state?.value?.preview ?? null);
 
 onMounted(() => {
   void auth.refresh();
@@ -31,6 +39,22 @@ function enableSync(): void {
   globalThis.localStorage?.removeItem("uvalert.sync.disabled");
   syncDisabled.value = false;
   notice.value = "同步已重新開啟。";
+}
+
+async function signIn(): Promise<void> {
+  await auth.signInWithGoogle();
+}
+
+async function prepare(): Promise<void> {
+  if (!syncDisabled.value && sync) await sync.preparePreview();
+}
+
+async function confirmSync(): Promise<void> {
+  if (sync) await sync.confirm();
+}
+
+function cancelSync(): void {
+  if (sync) sync.cancelPreview();
 }
 
 async function signOut(): Promise<void> {
@@ -66,12 +90,43 @@ async function deleteCloudData(): Promise<void> {
     busy.value = false;
   }
 }
+
+function labelFor(kind: string): string {
+  switch (kind) {
+    case "active_session":
+      return "進行中的提醒";
+    case "product_catalog":
+      return "防曬裝備";
+    case "region_preference":
+      return "地區設定";
+    case "user_preferences":
+      return "提醒與顯示偏好";
+    default:
+      return kind;
+  }
+}
+
+function statusLabelFor(status: string): string {
+  switch (status) {
+    case "unchanged":
+      return "兩邊相同";
+    case "conflict":
+      return "需要選擇版本";
+    case "local_only":
+      return "只有本機資料";
+    case "remote_only":
+      return "只有雲端資料";
+    case "local_deleted":
+      return "本機已刪除";
+    case "remote_deleted":
+      return "雲端已刪除";
+    default:
+      return "尚未同步";
+  }
+}
+
 const router = useRouter();
 
-/*
- * 頂端的返回出口（2026-09-03，稽核 §G：下鑽頁一律有頂端箭頭）。
- * 直接回「更多」，不用 history.back——這一頁也可能是從網址列直接打開的。
- */
 function goBack(): void {
   void router.push({ name: "more" });
 }
@@ -81,20 +136,25 @@ function goBack(): void {
   <div class="page-stack">
     <header class="page-heading page-heading--with-exit">
       <h1 class="page-heading__title" data-typography-role="page-title">
-        登入與雲端資料
+        帳號與跨裝置同步
       </h1>
       <p class="page-heading__body">
-        此處僅管理雲端同步資料，清除不會影響 Google 帳號與本機現有提醒。
+        管理 Google 登入帳號、同步狀態與雲端資料備份。
       </p>
       <IconButton icon="tool-arrow-left" label="返回更多" @click="goBack" />
     </header>
 
     <section v-if="!signedIn" class="app-card account-card">
-      <h2 data-typography-role="card-title">目前沒有登入</h2>
-      <p>你仍可直接使用本機防曬提醒。</p>
-      <RouterLink class="button button--primary" to="/settings/data"
-        >前往同步設定</RouterLink
-      >
+      <h2 data-typography-role="card-title">目前使用免登入模式</h2>
+      <p>
+        登入 Google 帳號可跨裝置同步提醒、裝備與設定。不登入亦不影響本機倒數與資料。
+      </p>
+      <button class="button button--primary" type="button" @click="signIn">
+        使用 Google 登入同步
+      </button>
+      <AppNotice v-if="auth.state.value.status === 'error'" kind="error">
+        登入未完成，請稍後再試（{{ auth.state.value.errorCode }}）。本機資料沒有變動。
+      </AppNotice>
     </section>
 
     <template v-else>
@@ -104,7 +164,59 @@ function goBack(): void {
           <span>同步狀態</span>
         </h2>
         <p v-if="syncDisabled">同步已停止，雲端資料保留中。</p>
-        <p v-else>同步已開啟，每次同步前會先顯示預覽。</p>
+        <p v-else>同步已開啟。確認後才會上傳或下載，不會自動覆蓋任何一邊。</p>
+
+        <div v-if="!syncDisabled" class="sync-actions">
+          <button
+            v-if="preview === null"
+            class="button button--primary"
+            type="button"
+            :disabled="syncBusy"
+            @click="prepare"
+          >
+            <InlineLoader v-if="syncBusy" />
+            {{ syncBusy ? "讀取中…" : "查看同步預覽" }}
+          </button>
+
+          <template v-else>
+            <ul class="sync-list" aria-label="同步項目">
+              <li
+                v-for="item in preview.items"
+                :key="`${item.key.recordKind}:${item.key.recordId}`"
+              >
+                <strong>{{ labelFor(item.key.recordKind) }}</strong>
+                <span>{{ statusLabelFor(item.status) }}</span>
+              </li>
+            </ul>
+            <div class="button-row">
+              <button
+                class="button button--primary"
+                type="button"
+                :disabled="syncBusy"
+                @click="confirmSync"
+              >
+                <InlineLoader v-if="syncBusy" />
+                {{ syncBusy ? "同步中…" : "同步這些資料" }}
+              </button>
+              <button
+                class="button button--quiet"
+                type="button"
+                :disabled="syncBusy"
+                @click="cancelSync"
+              >
+                取消
+              </button>
+            </div>
+          </template>
+
+          <AppNotice v-if="sync?.state?.value?.status === 'synced'" kind="ok">
+            同步完成。
+          </AppNotice>
+          <AppNotice v-if="sync?.state?.value?.error" kind="error">
+            {{ sync.state.value.error.message }} 本機資料沒有因雲端錯誤被刪除。
+          </AppNotice>
+        </div>
+
         <button
           v-if="!syncDisabled"
           class="button button--quiet"
@@ -189,5 +301,32 @@ function goBack(): void {
 }
 .account-card--danger h2 {
   color: var(--color-due);
+}
+.sync-actions {
+  display: grid;
+  gap: var(--space-3);
+  width: 100%;
+}
+.sync-list {
+  display: grid;
+  gap: var(--space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  width: 100%;
+}
+.sync-list li {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--space-2) 0;
+  border-bottom: 1px solid var(--border-subtle);
+  font-size: var(--font-size-body);
+}
+.button-row {
+  display: flex;
+  gap: var(--space-2);
+  align-items: center;
+  flex-wrap: wrap;
 }
 </style>

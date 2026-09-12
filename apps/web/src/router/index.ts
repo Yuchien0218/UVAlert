@@ -185,7 +185,7 @@ export function createAppRouter(
         path: "/settings/account-data",
         name: "settings-account-data",
         component: () => import("../pages/settings/AccountDataPage.vue"),
-        meta: { title: "登入與雲端資料" }
+        meta: { title: "帳號與跨裝置同步" }
       },
       {
         path: "/settings/notifications",

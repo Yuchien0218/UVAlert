@@ -602,7 +602,7 @@ dd {
 
 .app-card {
   display: grid;
-  gap: var(--space-4);
+  gap: var(--space-3);
   padding: var(--card-padding);
   justify-items: start;
 }
@@ -644,9 +644,17 @@ dd {
  */
 .summary-grid {
   display: grid;
+  grid-template-columns: 1fr;
   width: 100%;
   margin: 0;
   color: var(--text-secondary);
+}
+
+@media (min-width: 30rem) {
+  .summary-grid {
+    grid-template-columns: 1fr 1fr;
+    gap: 0 var(--space-4);
+  }
 }
 
 /*
@@ -658,13 +666,20 @@ dd {
 .summary-grid > div {
   display: flex;
   justify-content: space-between;
-  gap: var(--space-3);
-  padding-block: var(--space-3);
+  align-items: baseline;
+  gap: var(--space-2);
+  padding-block: var(--space-2);
   border-top: 1px solid var(--border-subtle);
 }
 
 .summary-grid > div:first-child {
   border-top: 0;
+}
+
+@media (min-width: 30rem) {
+  .summary-grid > div:nth-child(2) {
+    border-top: 0;
+  }
 }
 
 /* 2026-08-31：標籤不得被值壓縮。這一列也是 flex + space-between，跟
@@ -681,10 +696,10 @@ dd {
 
 .clear-row {
   display: grid;
-  gap: var(--space-3);
+  gap: var(--space-2);
   justify-items: start;
   width: 100%;
-  padding-top: var(--space-4);
+  padding-top: var(--space-3);
   border-top: 1px solid var(--border-strong);
 }
 
