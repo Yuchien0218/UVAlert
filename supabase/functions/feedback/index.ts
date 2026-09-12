@@ -16,6 +16,7 @@ import {
   toResponse,
   withCors
 } from "../_shared/http.ts";
+import { notifyFeedbackLine } from "../_shared/line.ts";
 
 const limiter = new SlidingWindowRateLimiter({
   maxRequests: 5,
@@ -142,6 +143,7 @@ export async function handleFeedback(request: Request): Promise<Response> {
       })
     );
   }
+  await notifyFeedbackLine(parsed);
   return jsonResponse(toReceipt(insertResult.data));
 }
 
