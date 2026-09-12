@@ -1,7 +1,15 @@
-import type { LocalDataPort, LocalDataSummary } from "@sunshield/platform";
+import type {
+  LocalDataImportResult,
+  LocalDataPort,
+  LocalDataSummary
+} from "@sunshield/platform";
 import type { SunshieldDatabase } from "../db/database";
+import {
+  LOCAL_DATA_EXPORT_FORMAT_VERSION,
+  LocalDataBackupPayloadSchema
+} from "./local-data-backup-schema";
 
-export const LOCAL_DATA_EXPORT_FORMAT_VERSION = "1.0.0" as const;
+export { LOCAL_DATA_EXPORT_FORMAT_VERSION };
 
 /**
  * 絕不匯出的 AppMetadata 鍵。
@@ -206,5 +214,140 @@ export class LocalDataRepository implements LocalDataPort {
       { key: "localVisitorId", value: this.#createId() },
       { key: "deviceLocalId", value: this.#createId() }
     ]);
+  }
+
+  async importData(payload: unknown): Promise<LocalDataImportResult> {
+    const parseResult = LocalDataBackupPayloadSchema.safeParse(payload);
+    if (!parseResult.success) {
+      throw new Error("INVALID_BACKUP_PAYLOAD");
+    }
+
+    const validated = parseResult.data;
+
+    const visitorMeta = await this.#database.AppMetadata.get("localVisitorId");
+    const deviceMeta = await this.#database.AppMetadata.get("deviceLocalId");
+    const localVisitorId = visitorMeta?.value ?? this.#createId();
+    const deviceLocalId = deviceMeta?.value ?? this.#createId();
+    const ownerKey = `guest:${localVisitorId}`;
+
+    const sessionsToPut = validated.sessions.map((session) => ({
+      ...session,
+      ownerKey
+    }));
+
+    const reminderPreferences = validated.preferences.reminderPresentation.map(
+      (item) => ({
+        deviceLocalId,
+        soundEnabled: item.soundEnabled,
+        vibrationEnabled: item.vibrationEnabled
+      })
+    );
+
+    const metadataToPut = validated.preferences.metadata
+      .filter((item) => !EXCLUDED_METADATA_KEYS.has(item.key))
+      .map((item) => ({ key: item.key, value: item.value }));
+    metadataToPut.push(
+      { key: "localVisitorId", value: localVisitorId },
+      { key: "deviceLocalId", value: deviceLocalId }
+    );
+
+    const tablesToLock = [
+      this.#database.SunscreenProducts,
+      this.#database.ProtectionSessions,
+      this.#database.ProtectionZoneStates,
+      this.#database.SessionStartedEvents,
+      this.#database.ZoneTrackingEvents,
+      this.#database.ZoneMethodEvents,
+      this.#database.ApplicationConfirmationGroups,
+      this.#database.ApplicationEvents,
+      this.#database.ProductSafetyEvents,
+      this.#database.ContextEvents,
+      this.#database.SessionEndedEvents,
+      this.#database.LocalReminderPresentationPreferences,
+      this.#database.AppMetadata,
+      this.#database.ActiveSessionLocks,
+      this.#database.SetupDrafts
+    ];
+
+    await this.#database.transaction("rw", tablesToLock, async () => {
+      await Promise.all(tablesToLock.map((table) => table.clear()));
+
+      if (validated.products.length > 0) {
+        await this.#database.SunscreenProducts.bulkPut(
+          validated.products as never
+        );
+      }
+      if (sessionsToPut.length > 0) {
+        await this.#database.ProtectionSessions.bulkPut(sessionsToPut as never);
+      }
+      if (validated.zoneStates.length > 0) {
+        await this.#database.ProtectionZoneStates.bulkPut(
+          validated.zoneStates as never
+        );
+      }
+
+      if (validated.events.sessionStarted.length > 0) {
+        await this.#database.SessionStartedEvents.bulkPut(
+          validated.events.sessionStarted as never
+        );
+      }
+      if (validated.events.zoneTracking.length > 0) {
+        await this.#database.ZoneTrackingEvents.bulkPut(
+          validated.events.zoneTracking as never
+        );
+      }
+      if (validated.events.zoneMethod.length > 0) {
+        await this.#database.ZoneMethodEvents.bulkPut(
+          validated.events.zoneMethod as never
+        );
+      }
+      if (validated.events.applicationConfirmationGroups.length > 0) {
+        await this.#database.ApplicationConfirmationGroups.bulkPut(
+          validated.events.applicationConfirmationGroups as never
+        );
+      }
+      if (validated.events.applications.length > 0) {
+        await this.#database.ApplicationEvents.bulkPut(
+          validated.events.applications as never
+        );
+      }
+      if (validated.events.productSafety.length > 0) {
+        await this.#database.ProductSafetyEvents.bulkPut(
+          validated.events.productSafety as never
+        );
+      }
+      if (validated.events.context.length > 0) {
+        await this.#database.ContextEvents.bulkPut(
+          validated.events.context as never
+        );
+      }
+      if (validated.events.sessionEnded.length > 0) {
+        await this.#database.SessionEndedEvents.bulkPut(
+          validated.events.sessionEnded as never
+        );
+      }
+
+      if (reminderPreferences.length > 0) {
+        await this.#database.LocalReminderPresentationPreferences.bulkPut(
+          reminderPreferences
+        );
+      }
+      await this.#database.AppMetadata.bulkPut(metadataToPut);
+
+      const activeSession = sessionsToPut.find(
+        (session) => session.overallStatus === "tracking" && !session.endedAt
+      );
+      if (activeSession) {
+        await this.#database.ActiveSessionLocks.put({
+          ownerKey,
+          sessionId: activeSession.id
+        } as never);
+      }
+    });
+
+    return {
+      productCount: validated.products.length,
+      sessionCount: validated.sessions.length
+    };
   }
 }

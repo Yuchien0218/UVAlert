@@ -224,3 +224,182 @@ describe("LocalDataRepository 摘要與清除", () => {
     });
   });
 });
+
+describe("LocalDataRepository 匯入還原", () => {
+  it("完整匯入備份資料，正確賦予 ownerKey 並還原裝備與事件", async () => {
+    const { database, repository } = makeRepository();
+    // 預設本機有一些舊資料
+    await database.AppMetadata.bulkPut([
+      { key: "localVisitorId", value: "current-visitor-123" },
+      { key: "deviceLocalId", value: "current-device-456" }
+    ]);
+    await new LocalProductCatalogRepository(database).saveProduct({
+      productId: "old-product",
+      displayName: "舊防曬",
+      gearCategory: "sunscreen",
+      snapshot: makeProductSnapshot(),
+      now: "2026-08-01T00:00:00.000Z"
+    });
+
+    const validBackupPayload = {
+      formatVersion: "1.0.0",
+      application: "防曬晴報員",
+      exportedAt: "2026-08-08T12:00:00.000Z",
+      products: [
+        {
+          schemaVersion: "1.1.0",
+          productId: "backup-product-1",
+          displayName: "備份防曬乳",
+          gearCategory: "sunscreen",
+          currentSnapshot: makeProductSnapshot(),
+          status: "active",
+          statusChangedAt: "2026-08-08T00:00:00.000Z",
+          createdAt: "2026-08-08T00:00:00.000Z",
+          updatedAt: "2026-08-08T00:00:00.000Z"
+        }
+      ],
+      sessions: [
+        {
+          id: "session-restored",
+          overallStatus: "ended",
+          startedAt: "2026-08-08T01:00:00.000Z",
+          endedAt: "2026-08-08T03:00:00.000Z",
+          revision: 1
+        }
+      ],
+      zoneStates: [
+        {
+          sessionId: "session-restored",
+          zoneInstanceId: "zone-1",
+          bodyZoneCode: "face",
+          timingStatus: "untimed",
+          zoneDueAt: null
+        }
+      ],
+      events: {
+        sessionStarted: [
+          {
+            id: "evt-started-1",
+            sessionId: "session-restored",
+            effectiveOccurredAt: "2026-08-08T01:00:00.000Z"
+          }
+        ],
+        zoneTracking: [],
+        zoneMethod: [],
+        applicationConfirmationGroups: [],
+        applications: [],
+        productSafety: [],
+        context: [],
+        sessionEnded: [
+          {
+            id: "evt-ended-1",
+            sessionId: "session-restored",
+            effectiveOccurredAt: "2026-08-08T03:00:00.000Z"
+          }
+        ]
+      },
+      preferences: {
+        reminderPresentation: [
+          { soundEnabled: true, vibrationEnabled: false }
+        ],
+        metadata: [
+          { key: "uvRegionPreferenceV1", value: '{"mode":"manual"}' }
+        ]
+      }
+    };
+
+    const result = await repository.importData(validBackupPayload);
+
+    expect(result).toEqual({ productCount: 1, sessionCount: 1 });
+
+    // 舊資料應被清除，新資料被還原
+    const products = await database.SunscreenProducts.toArray();
+    expect(products).toHaveLength(1);
+    expect(products[0]?.productId).toBe("backup-product-1");
+
+    // Session 應被附加上本機 visitor 的 ownerKey
+    const session = await database.ProtectionSessions.get("session-restored");
+    expect(session?.ownerKey).toBe("guest:current-visitor-123");
+
+    // 事件應成功還原
+    const startedEvents = await database.SessionStartedEvents.toArray();
+    expect(startedEvents).toHaveLength(1);
+    expect(startedEvents[0]?.id).toBe("evt-started-1");
+
+    // 偏好應附加上當前的 deviceLocalId
+    const pref = await database.LocalReminderPresentationPreferences.get(
+      "current-device-456"
+    );
+    expect(pref?.soundEnabled).toBe(true);
+
+    // 本機訪客識別碼與偏好 metadata 應被妥善保留
+    const meta = await database.AppMetadata.get("uvRegionPreferenceV1");
+    expect(meta?.value).toBe('{"mode":"manual"}');
+  });
+
+  it("若格式不合則拋出 INVALID_BACKUP_PAYLOAD 且不更動現有資料", async () => {
+    const { database, repository } = makeRepository();
+    await new LocalProductCatalogRepository(database).saveProduct({
+      productId: "product-remain",
+      displayName: "維持原狀",
+      gearCategory: "sunscreen",
+      snapshot: makeProductSnapshot(),
+      now: "2026-08-01T00:00:00.000Z"
+    });
+
+    const invalidPayload = {
+      formatVersion: "9.9.9", // 版本不支援
+      application: "其他惡意應用"
+    };
+
+    await expect(repository.importData(invalidPayload)).rejects.toThrow(
+      "INVALID_BACKUP_PAYLOAD"
+    );
+
+    // 現有裝備維持原狀
+    const products = await database.SunscreenProducts.toArray();
+    expect(products).toHaveLength(1);
+    expect(products[0]?.productId).toBe("product-remain");
+  });
+
+  it("匯入包含進行中 session 時，自動補上 ActiveSessionLocks", async () => {
+    const { database, repository } = makeRepository();
+    const backupWithActive = {
+      formatVersion: "1.0.0",
+      application: "防曬晴報員",
+      exportedAt: "2026-08-08T12:00:00.000Z",
+      products: [],
+      sessions: [
+        {
+          id: "active-session-1",
+          overallStatus: "tracking",
+          startedAt: "2026-08-08T01:00:00.000Z",
+          endedAt: null,
+          revision: 1
+        }
+      ],
+      zoneStates: [],
+      events: {
+        sessionStarted: [],
+        zoneTracking: [],
+        zoneMethod: [],
+        applicationConfirmationGroups: [],
+        applications: [],
+        productSafety: [],
+        context: [],
+        sessionEnded: []
+      },
+      preferences: {
+        reminderPresentation: [],
+        metadata: []
+      }
+    };
+
+    await repository.importData(backupWithActive);
+
+    const locks = await database.ActiveSessionLocks.toArray();
+    expect(locks).toHaveLength(1);
+    expect(locks[0]?.sessionId).toBe("active-session-1");
+  });
+});
+

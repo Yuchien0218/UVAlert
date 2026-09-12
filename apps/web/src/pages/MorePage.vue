@@ -61,13 +61,13 @@ const allEntries: readonly MoreEntry[] = [
   },
   {
     to: "/settings/account-data",
-    icon: "tool-refresh",
+    icon: "state-online",
     label: "帳號與跨裝置同步"
   },
   {
     to: "/settings/data",
     icon: "more-data",
-    label: "本機資料與隱私"
+    label: "本機資料與匯出"
   },
   {
     to: "/feedback",

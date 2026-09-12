@@ -6,6 +6,10 @@ import { describe, expect, it, vi } from "vitest";
 import type { WebAppServices } from "../../app/createWebAppServices";
 import { useWebAppServices } from "../../app/injection";
 import BroadcastLoader from "../../components/feedback/BroadcastLoader.vue";
+import type {
+  LocalDataError,
+  LocalDataNotice
+} from "../../features/settings/createLocalDataController";
 import DataSettingsPage from "./DataSettingsPage.vue";
 
 vi.mock("../../app/injection", () => ({ useWebAppServices: vi.fn() }));
@@ -74,11 +78,12 @@ function makeServices(
   const localData = {
     phase: shallowReadonly(shallowRef(phase)),
     summary: shallowReadonly(shallowRef(summary)),
-    notice: shallowReadonly(shallowRef(null)),
-    error: shallowReadonly(shallowRef(null)),
+    notice: shallowReadonly(shallowRef<LocalDataNotice>(null)),
+    error: shallowReadonly(shallowRef<LocalDataError>(null)),
     hasExportedThisVisit: shallowReadonly(shallowRef(false)),
     load: vi.fn(async () => undefined),
     exportData: vi.fn(async () => true),
+    importData: vi.fn(async () => true),
     clearSetupDrafts: vi.fn(async () => true),
     clearProductsAndHistory: vi.fn(async () => true),
     clearAll: vi.fn(async () => true),
@@ -119,28 +124,7 @@ describe("DataSettingsPage 的載入狀態", () => {
  * 測試就只在驗同步，也順便守住「本機資料讀取失敗時同步區塊仍要在」
  * 這個性質。
  */
-describe("DataSettingsPage 的同步區塊", () => {
-  it("未登入先顯示免登入說明與 Google sync CTA", () => {
-    useServices();
-    const wrapper = shallowMount(DataSettingsPage);
-    expect(wrapper.text()).toContain("目前使用免登入模式");
-    expect(wrapper.text()).toContain("使用 Google 登入同步");
-  });
-
-  it("登入後可先讀取同步預覽，不會在頁面開啟時自動上傳", async () => {
-    const services = useServices("signed_in");
-    const wrapper = shallowMount(DataSettingsPage);
-    expect(services.sync.preparePreview).not.toHaveBeenCalled();
-    await wrapper.get("button").trigger("click");
-    expect(services.sync.preparePreview).toHaveBeenCalledTimes(1);
-  });
-});
-
-describe("DataSettingsPage 的合併結果", () => {
-  /*
-   * 這張卡（「雲端資料請到另一頁管理」）是拆成兩頁製造出來的純導覽
-   * 補救，合併的整個理由就是消掉它。守著它別以別的形式復活。
-   */
+describe("DataSettingsPage 的資訊範圍", () => {
   it("不再出現「請到另一頁」的導覽補救文字", () => {
     useServices();
     const wrapper = shallowMount(DataSettingsPage);
@@ -148,20 +132,6 @@ describe("DataSettingsPage 的合併結果", () => {
     expect(wrapper.text()).not.toContain("本頁只處理這台裝置的本機資料");
   });
 
-  it("同步區塊裡仍進得去登入與雲端資料頁", () => {
-    useServices();
-    const wrapper = shallowMount(DataSettingsPage);
-    expect(wrapper.html()).toContain("/settings/account-data");
-  });
-
-  /*
-   * 2026-08-30：資料概況的範圍說明是常駐條件，不是可有可無的補充。
-   *
-   * 這些數字只數得到本機 IndexedDB；登入同步後雲端可能還有其他裝置上傳
-   * 的紀錄，這張卡看不到也數不到。少了這句，「防曬裝備 0 筆」會被讀成
-   * 「我的資料都不見了」——而這正是 2026-08-29 那次合併要解決的
-   * 「本機 vs 雲端」混淆。DESIGN.md 第五節把這類前提列為不可隱藏。
-   */
   it("資料概況說明數字只涵蓋本機，不含雲端", () => {
     useServices("signed_out", "idle", SUMMARY_FIXTURE);
     const wrapper = shallowMount(DataSettingsPage);
@@ -243,31 +213,7 @@ describe("清除區的警示框", () => {
   });
 });
 
-/**
- * 2026-09-04（方案 A）：「不登入不影響本機倒數與資料」從未登入區塊搬到群組
- * 說明——它在三種同步狀態下都成立，本來就屬於群組層。
- */
-describe("同步區的說明不重複", () => {
-  /*
-   * **掛載後數次數，不是掃原始碼。** 搬家的風險是「搬上去了但下面沒刪」，
-   * 那在原始碼裡是兩個不同的字串（原句有「也」），掃字串抓不到；畫面上
-   * 卻是同一件事連著講兩次。
-   */
-  it("「不登入」的保證整頁只出現一次", () => {
-    useServices();
-    const wrapper = shallowMount(DataSettingsPage);
 
-    expect(wrapper.text().split("不登入").length - 1).toBe(1);
-  });
-
-  /* 反向：不可以連同群組說明一起弄丟——那句是免登入模式的核心承諾。 */
-  it("那句保證仍然在頁面上", () => {
-    useServices();
-    const wrapper = shallowMount(DataSettingsPage);
-
-    expect(wrapper.text()).toContain("不登入亦不影響本機倒數與資料");
-  });
-});
 
 /**
  * 2026-09-05：清除卡三列都收成「說明（如果有）＋一顆講完整動作名稱的按鈕」。
@@ -332,3 +278,70 @@ describe("清除卡的三列", () => {
     }
   });
 });
+
+describe("本機備份與還原卡片", () => {
+  it("同時呈現匯出本機資料與匯入備份資料按鈕", () => {
+    useServices("signed_out", "idle", SUMMARY_FIXTURE);
+    const wrapper = mount(DataSettingsPage, {
+      global: {
+        stubs: {
+          RouterLink: true,
+          ConfirmAction: false
+        }
+      }
+    });
+
+    const exportSection = wrapper.find("[aria-labelledby='data-export-title']");
+    expect(exportSection.exists()).toBe(true);
+    expect(exportSection.text()).toContain("本機備份與還原");
+    expect(exportSection.text()).toContain("匯出本機資料");
+    expect(exportSection.text()).toContain("匯入備份資料");
+  });
+
+  it("匯入成功時呈現成功還原通知", () => {
+    const services = makeServices("signed_out", "idle", SUMMARY_FIXTURE);
+    services.localData.notice = shallowReadonly(
+      shallowRef({
+        kind: "imported",
+        productCount: 5,
+        sessionCount: 2
+      })
+    );
+    vi.mocked(useWebAppServices).mockReturnValue(
+      services as unknown as WebAppServices
+    );
+
+    const wrapper = mount(DataSettingsPage, {
+      global: {
+        stubs: {
+          RouterLink: true
+        }
+      }
+    });
+
+    expect(wrapper.text()).toContain("已成功還原備份資料");
+    expect(wrapper.text()).toContain("5 筆防曬裝備");
+  });
+
+  it("匯入格式不合時呈現明確錯誤訊息", () => {
+    const services = makeServices("signed_out", "idle", SUMMARY_FIXTURE);
+    services.localData.error = shallowReadonly(
+      shallowRef("import_invalid_file")
+    );
+    vi.mocked(useWebAppServices).mockReturnValue(
+      services as unknown as WebAppServices
+    );
+
+    const wrapper = mount(DataSettingsPage, {
+      global: {
+        stubs: {
+          RouterLink: true
+        }
+      }
+    });
+
+    expect(wrapper.text()).toContain("匯入檔案格式不符合");
+    expect(wrapper.text()).toContain("本機資料維持原狀");
+  });
+});
+

@@ -109,13 +109,13 @@ function labelFor(kind: string): string {
 function statusLabelFor(status: string): string {
   switch (status) {
     case "unchanged":
-      return "兩邊相同";
+      return "本機與雲端一致";
     case "conflict":
-      return "需要選擇版本";
+      return "版本不同（需選擇）";
     case "local_only":
-      return "只有本機資料";
+      return "僅儲存於本機裝置";
     case "remote_only":
-      return "只有雲端資料";
+      return "僅存在於 Google 雲端";
     case "local_deleted":
       return "本機已刪除";
     case "remote_deleted":
@@ -164,7 +164,9 @@ function goBack(): void {
           <span>同步狀態</span>
         </h2>
         <p v-if="syncDisabled">同步已停止，雲端資料保留中。</p>
-        <p v-else>同步已開啟。確認後才會上傳或下載，不會自動覆蓋任何一邊。</p>
+        <p v-else>
+          同步已開啟。確認後才會上傳或下載，不會自動覆蓋本機或雲端資料。
+        </p>
 
         <div v-if="!syncDisabled" class="sync-actions">
           <button

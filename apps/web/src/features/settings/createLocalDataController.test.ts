@@ -31,6 +31,7 @@ describe("createLocalDataController", () => {
     const repository: LocalDataPort = {
       getSummary: vi.fn(async () => summary),
       exportData: vi.fn(async () => ({})),
+      importData: vi.fn(async () => ({ productCount: 0, sessionCount: 0 })),
       clearSetupDrafts: vi.fn(async () => undefined),
       clearProductsAndHistory: vi.fn(async () => undefined),
       clearAll: vi.fn(async () => {
@@ -145,6 +146,7 @@ describe("createLocalDataController", () => {
     const repository: LocalDataPort = {
       getSummary: vi.fn(async () => summary),
       exportData: vi.fn(async () => ({})),
+      importData: vi.fn(async () => ({ productCount: 0, sessionCount: 0 })),
       clearSetupDrafts: vi.fn(async () => undefined),
       clearProductsAndHistory: vi.fn(async () => undefined),
       clearAll: vi.fn(async () => {
@@ -300,5 +302,107 @@ describe("createLocalDataController", () => {
     expect(storedCredentials).toBeNull();
     expect(pendingIntent).toBeNull();
     notificationController.dispose();
+  });
+
+  describe("importData", () => {
+    it("成功讀取合規 JSON 並通知 boot 重新整理與更新摘要", async () => {
+      const repository: LocalDataPort = {
+        getSummary: vi.fn(async () => ({ ...summary, productCount: 3 })),
+        exportData: vi.fn(async () => ({})),
+        importData: vi.fn(async () => ({ productCount: 3, sessionCount: 2 })),
+        clearSetupDrafts: vi.fn(async () => undefined),
+        clearProductsAndHistory: vi.fn(async () => undefined),
+        clearAll: vi.fn(async () => undefined)
+      };
+      const boot = {
+        refresh: vi.fn(async () => undefined)
+      } as unknown as AppBootController;
+      const controller = createLocalDataController({
+        repository,
+        boot,
+        now: () => new Date("2026-08-31T00:00:00.000Z"),
+        saveFile: vi.fn()
+      });
+
+      const file = new File(
+        [JSON.stringify({ formatVersion: "1.0.0", application: "防曬晴報員" })],
+        "backup.json",
+        { type: "application/json" }
+      );
+
+      const success = await controller.importData(file);
+
+      expect(success).toBe(true);
+      expect(repository.importData).toHaveBeenCalledWith({
+        formatVersion: "1.0.0",
+        application: "防曬晴報員"
+      });
+      expect(boot.refresh).toHaveBeenCalledOnce();
+      expect(controller.summary.value?.productCount).toBe(3);
+      expect(controller.notice.value).toEqual({
+        kind: "imported",
+        productCount: 3,
+        sessionCount: 2
+      });
+      expect(controller.error.value).toBeNull();
+    });
+
+    it("檔案非有效 JSON 時設定 import_invalid_file 且不調用 boot refresh", async () => {
+      const repository: LocalDataPort = {
+        getSummary: vi.fn(async () => summary),
+        exportData: vi.fn(async () => ({})),
+        importData: vi.fn(async () => ({ productCount: 0, sessionCount: 0 })),
+        clearSetupDrafts: vi.fn(async () => undefined),
+        clearProductsAndHistory: vi.fn(async () => undefined),
+        clearAll: vi.fn(async () => undefined)
+      };
+      const boot = {
+        refresh: vi.fn(async () => undefined)
+      } as unknown as AppBootController;
+      const controller = createLocalDataController({
+        repository,
+        boot,
+        now: () => new Date("2026-08-31T00:00:00.000Z"),
+        saveFile: vi.fn()
+      });
+
+      const brokenFile = new File(["not a valid json {{" ], "broken.json");
+
+      const success = await controller.importData(brokenFile);
+
+      expect(success).toBe(false);
+      expect(controller.error.value).toBe("import_invalid_file");
+      expect(boot.refresh).not.toHaveBeenCalled();
+      expect(repository.importData).not.toHaveBeenCalled();
+    });
+
+    it("repository 拋出 INVALID_BACKUP_PAYLOAD 時設定 import_invalid_file", async () => {
+      const repository: LocalDataPort = {
+        getSummary: vi.fn(async () => summary),
+        exportData: vi.fn(async () => ({})),
+        importData: vi.fn(async () => {
+          throw new Error("INVALID_BACKUP_PAYLOAD");
+        }),
+        clearSetupDrafts: vi.fn(async () => undefined),
+        clearProductsAndHistory: vi.fn(async () => undefined),
+        clearAll: vi.fn(async () => undefined)
+      };
+      const boot = {
+        refresh: vi.fn(async () => undefined)
+      } as unknown as AppBootController;
+      const controller = createLocalDataController({
+        repository,
+        boot,
+        now: () => new Date("2026-08-31T00:00:00.000Z"),
+        saveFile: vi.fn()
+      });
+
+      const file = new File([JSON.stringify({ invalid: true })], "invalid.json");
+
+      const success = await controller.importData(file);
+
+      expect(success).toBe(false);
+      expect(controller.error.value).toBe("import_invalid_file");
+    });
   });
 });
