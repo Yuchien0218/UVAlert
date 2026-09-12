@@ -30,3 +30,7 @@ export function useSyncController() {
 export function useFeedbackController() {
   return useWebAppServices().feedback;
 }
+
+export function useLineNotificationController() {
+  return useWebAppServices().lineNotification;
+}

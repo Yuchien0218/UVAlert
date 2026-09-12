@@ -16,12 +16,26 @@ function makeServices(
     permission?: "default" | "granted" | "denied";
     isSupported?: boolean;
     backgroundPushState?: BackgroundPushState;
+    isLineBound?: boolean;
+    isLineLoading?: boolean;
+    lineError?: string | null;
+    lineActionMessage?: string | null;
   } = {}
 ) {
   const permissionState = shallowRef(options.permission ?? "default");
   const backgroundPushState = shallowRef<BackgroundPushState>(
     options.backgroundPushState ?? "permission-required"
   );
+  const lineIsBound = shallowRef(options.isLineBound ?? false);
+  const lineUserId = shallowRef<string | null>(
+    options.isLineBound ? "U12345678" : null
+  );
+  const lineIsLoading = shallowRef(options.isLineLoading ?? false);
+  const lineError = shallowRef<string | null>(options.lineError ?? null);
+  const lineActionMessage = shallowRef<string | null>(
+    options.lineActionMessage ?? null
+  );
+
   return {
     backgroundPushState,
     notifications: {
@@ -38,6 +52,21 @@ function makeServices(
       retryBackgroundSync: vi.fn(async () => undefined),
       sendTestNotification: vi.fn(async () => true),
       dispose: vi.fn()
+    },
+    lineNotification: {
+      isBound: shallowReadonly(lineIsBound),
+      lineUserId: shallowReadonly(lineUserId),
+      isLoading: shallowReadonly(lineIsLoading),
+      isConfigured: shallowReadonly(shallowRef(true)),
+      error: shallowReadonly(lineError),
+      actionMessage: shallowReadonly(lineActionMessage),
+      fetchStatus: vi.fn(async () => undefined),
+      startBinding: vi.fn(),
+      handleCallback: vi.fn(async () => true),
+      unbind: vi.fn(async () => true),
+      sendTest: vi.fn(async () => true),
+      clearError: vi.fn(),
+      clearActionMessage: vi.fn()
     }
   };
 }
@@ -79,12 +108,13 @@ describe("NotificationSettingsPage", () => {
     expect(
       wrapper.get('button[aria-label="返回更多"] icon-stub').attributes("name")
     ).toBe("tool-arrow-left");
-    expect(wrapper.findAll("h2.section-heading")).toHaveLength(3);
+    expect(wrapper.findAll("h2.section-heading")).toHaveLength(4);
     expect(
       wrapper
         .findAll("h2.section-heading icon-stub")
         .map((icon) => [icon.attributes("name"), icon.attributes("size")])
     ).toEqual([
+      ["more-notifications", "32"],
       ["more-notifications", "32"],
       ["more-notifications", "32"],
       ["more-about", "32"]
@@ -241,4 +271,72 @@ describe("NotificationSettingsPage", () => {
     expect(text).not.toContain("再次提醒頻率");
     expect(wrapper.findAll('input[name="reminder-frequency"]')).toHaveLength(0);
   });
+
+  describe("LINE 補擦提醒卡片", () => {
+    it("未綁定時呈現未綁定說明與「綁定 LINE 接收提醒」按鈕", () => {
+      const { wrapper } = mountWith({ isLineBound: false });
+
+      expect(wrapper.text()).toContain("LINE 補擦提醒");
+      expect(wrapper.text()).toContain("透過 LINE 接收補擦通知");
+      expect(wrapper.find('[data-testid="bind-line-button"]').exists()).toBe(
+        true
+      );
+      expect(
+        wrapper.find('[data-testid="send-line-test-button"]').exists()
+      ).toBe(false);
+      expect(wrapper.find('[data-testid="unbind-line-button"]').exists()).toBe(
+        false
+      );
+    });
+
+    it("點擊「綁定 LINE 接收提醒」觸發 startBinding", async () => {
+      const { services, wrapper } = mountWith({ isLineBound: false });
+
+      await wrapper.get('[data-testid="bind-line-button"]').trigger("click");
+      expect(services.lineNotification.startBinding).toHaveBeenCalledOnce();
+    });
+
+    it("已綁定時呈現已啟用說明、「發送測試提醒」與「解除綁定」按鈕", () => {
+      const { wrapper } = mountWith({ isLineBound: true });
+
+      expect(wrapper.text()).toContain("已啟用 LINE 補擦提醒");
+      expect(wrapper.find('[data-testid="bind-line-button"]').exists()).toBe(
+        false
+      );
+      expect(
+        wrapper.find('[data-testid="send-line-test-button"]').exists()
+      ).toBe(true);
+      expect(wrapper.find('[data-testid="unbind-line-button"]').exists()).toBe(
+        true
+      );
+    });
+
+    it("點擊「發送測試提醒」觸發 sendTest", async () => {
+      const { services, wrapper } = mountWith({ isLineBound: true });
+
+      await wrapper
+        .get('[data-testid="send-line-test-button"]')
+        .trigger("click");
+      expect(services.lineNotification.sendTest).toHaveBeenCalledOnce();
+    });
+
+    it("點擊「解除綁定」觸發 unbind", async () => {
+      const { services, wrapper } = mountWith({ isLineBound: true });
+
+      await wrapper.get('[data-testid="unbind-line-button"]').trigger("click");
+      expect(services.lineNotification.unbind).toHaveBeenCalledOnce();
+    });
+
+    it("呈現操作成功提示與錯誤訊息", () => {
+      const { wrapper } = mountWith({
+        isLineBound: true,
+        lineActionMessage: "測試提醒已傳送至您的 LINE",
+        lineError: "發送失敗"
+      });
+
+      expect(wrapper.text()).toContain("測試提醒已傳送至您的 LINE");
+      expect(wrapper.text()).toContain("發送失敗");
+    });
+  });
 });
+

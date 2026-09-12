@@ -95,6 +95,10 @@ import {
   createNotificationController,
   type NotificationController
 } from "../features/notification/createNotificationController";
+import {
+  createLineNotificationController,
+  type LineNotificationController
+} from "../features/notification/createLineNotificationController";
 
 export interface WebAppServices {
   readonly boot: AppBootController;
@@ -113,6 +117,7 @@ export interface WebAppServices {
   readonly cloudSync: CloudSyncPort;
   readonly feedback: FeedbackController;
   readonly notifications: NotificationController;
+  readonly lineNotification: LineNotificationController;
   /** 分享卡輸出圖片後交給系統分享（計畫階段三）。 */
   readonly share: SharePort;
   dispose(): void;
@@ -278,6 +283,13 @@ export function createWebAppServices(
     connectivity: boot.connectivity,
     createOperationId: createId
   });
+  const lineNotification = createLineNotificationController({
+    identity,
+    apiBaseUrl: import.meta.env.VITE_API_BASE_URL,
+    lineChannelId:
+      import.meta.env.VITE_LINE_LOGIN_CHANNEL_ID ||
+      import.meta.env.VITE_LINE_CHANNEL_ID
+  });
   const localData = createLocalDataController({
     repository: new LocalDataRepository({ database, createId }),
     boot,
@@ -304,6 +316,7 @@ export function createWebAppServices(
     cloudSync,
     feedback,
     notifications,
+    lineNotification,
     dispose(): void {
       notifications.dispose();
       sync.dispose();

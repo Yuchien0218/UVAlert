@@ -51,6 +51,9 @@ verify_jwt = false
 [functions.feedback]
 verify_jwt = false
 
+[functions.line-subscription]
+verify_jwt = false
+
 [functions.push-subscription]
 verify_jwt = false
 

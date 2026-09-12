@@ -1,13 +1,14 @@
 <script setup lang="ts">
 import type { BackgroundPushState } from "@sunshield/platform";
-import { computed, shallowRef } from "vue";
-import { useRouter } from "vue-router";
+import { computed, onMounted, shallowRef } from "vue";
+import { useRoute, useRouter } from "vue-router";
 import { useWebAppServices } from "../../app/injection";
 import IconButton from "../../components/common/IconButton.vue";
 import InlineLoader from "../../components/feedback/InlineLoader.vue";
 import Icon from "../../components/icons/Icon.vue";
 
-const { notifications } = useWebAppServices();
+const { notifications, lineNotification } = useWebAppServices();
+const route = useRoute();
 const router = useRouter();
 const permission = computed(() => notifications.permission.value);
 const isSupported = computed(() => notifications.isSupported);
@@ -18,6 +19,35 @@ const backgroundPushState = computed(
 );
 const showDeniedSteps = shallowRef(false);
 const isBackgroundActionPending = shallowRef(false);
+
+const isLineBound = computed(() => lineNotification.isBound.value);
+const isLineLoading = computed(() => lineNotification.isLoading.value);
+const lineError = computed(() => lineNotification.error.value);
+const lineActionMessage = computed(() => lineNotification.actionMessage.value);
+
+onMounted(async () => {
+  const code = route.query.code;
+  if (typeof code === "string" && code.trim()) {
+    await lineNotification.handleCallback(code);
+    void router.replace({
+      query: { ...route.query, code: undefined, state: undefined }
+    });
+  } else {
+    await lineNotification.fetchStatus();
+  }
+});
+
+function bindLine(): void {
+  lineNotification.startBinding();
+}
+
+async function sendLineTest(): Promise<void> {
+  await lineNotification.sendTest();
+}
+
+async function unbindLine(): Promise<void> {
+  await lineNotification.unbind();
+}
 
 type BackgroundPushDescriptor = {
   title: string;
@@ -277,6 +307,83 @@ async function runTest(): Promise<void> {
       </p>
     </section>
 
+    <section class="app-card" aria-labelledby="line-push-heading">
+      <h2
+        id="line-push-heading"
+        class="section-heading"
+        data-typography-role="card-title"
+      >
+        <Icon name="more-notifications" :size="32" /><span>LINE 補擦提醒</span>
+      </h2>
+      <div
+        class="delivery-emphasis"
+        :class="{ 'delivery-emphasis--bound': isLineBound }"
+        role="status"
+      >
+        <p class="delivery-emphasis__title">
+          {{ isLineBound ? "已啟用 LINE 補擦提醒" : "透過 LINE 接收補擦通知" }}
+        </p>
+        <p>
+          {{
+            isLineBound
+              ? "已成功連結您的 LINE 帳號。補擦時間到期時，系統將由「防曬晴報員」官方帳號即時傳送推播訊息。"
+              : "將補擦提醒直接傳送到您的 LINE 聊天室，即使螢幕關閉或未常駐瀏覽器，也能即時收到提醒。"
+          }}
+        </p>
+      </div>
+
+      <div
+        v-if="lineActionMessage"
+        class="note-box note-box--success"
+        role="status"
+      >
+        <p>{{ lineActionMessage }}</p>
+      </div>
+
+      <div v-if="lineError" class="form-error" role="alert">
+        <p>{{ lineError }}</p>
+      </div>
+
+      <div class="action-row">
+        <button
+          v-if="!isLineBound"
+          data-testid="bind-line-button"
+          class="button button--primary"
+          type="button"
+          :disabled="isLineLoading"
+          @click="bindLine"
+        >
+          <InlineLoader v-if="isLineLoading" />
+          {{ isLineLoading ? "連線中…" : "綁定 LINE 接收提醒" }}
+        </button>
+        <template v-else>
+          <button
+            data-testid="send-line-test-button"
+            class="button button--quiet"
+            type="button"
+            :disabled="isLineLoading"
+            @click="sendLineTest"
+          >
+            <InlineLoader v-if="isLineLoading" />
+            {{ isLineLoading ? "傳送中…" : "發送測試提醒" }}
+          </button>
+          <button
+            data-testid="unbind-line-button"
+            class="button button--quiet"
+            type="button"
+            :disabled="isLineLoading"
+            @click="unbindLine"
+          >
+            解除綁定
+          </button>
+        </template>
+      </div>
+
+      <p class="delivery-note">
+        提醒：本功能需加入「防曬晴報員」LINE 官方帳號好友，並請確認未將官方帳號設為「關閉提醒（靜音）」。
+      </p>
+    </section>
+
     <section class="app-card" aria-labelledby="delivery-heading">
       <h2
         id="delivery-heading"
@@ -374,6 +481,9 @@ async function runTest(): Promise<void> {
 .delivery-emphasis--limited {
   border-color: var(--color-due);
 }
+.delivery-emphasis--bound {
+  border-color: var(--color-saved);
+}
 .delivery-emphasis__title {
   margin: 0;
   font-weight: 600;
@@ -382,5 +492,9 @@ async function runTest(): Promise<void> {
   margin: 0;
   color: var(--text-body);
   line-height: var(--line-height-body);
+}
+.note-box--success {
+  border-left: 3px solid var(--color-saved);
+  color: var(--text-body);
 }
 </style>
