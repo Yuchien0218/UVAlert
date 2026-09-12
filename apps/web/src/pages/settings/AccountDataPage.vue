@@ -164,9 +164,13 @@ function goBack(): void {
           <span>同步狀態</span>
         </h2>
         <p v-if="syncDisabled">同步已停止，雲端資料保留中。</p>
+<<<<<<< HEAD
         <p v-else>
           同步已開啟。確認後才會上傳或下載，不會自動覆蓋本機或雲端資料。
         </p>
+=======
+        <p v-else>同步已開啟。確認後才會上傳或下載，不會自動覆蓋任何一邊。</p>
+>>>>>>> origin/main
 
         <div v-if="!syncDisabled" class="sync-actions">
           <button
