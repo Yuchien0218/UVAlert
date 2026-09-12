@@ -20,8 +20,8 @@ declare
   item jsonb;
   record_json jsonb;
   tombstone_json jsonb;
-  record_kind text;
-  record_id text;
+  v_record_kind text;
+  v_record_id text;
   expected_revision bigint;
   current_revision bigint;
   incoming_revision bigint;
@@ -55,8 +55,8 @@ begin
   for item in select value from jsonb_array_elements(p_records)
   loop
     record_json := item -> 'record';
-    record_kind := record_json ->> 'recordKind';
-    record_id := record_json ->> 'recordId';
+    v_record_kind := record_json ->> 'recordKind';
+    v_record_id := record_json ->> 'recordId';
     incoming_revision := (record_json ->> 'revision')::bigint;
     expected_revision := nullif(item ->> 'expectedRevision', '')::bigint;
 
@@ -64,16 +64,16 @@ begin
       into current_revision
       from public.sync_records
      where user_id = p_user_id
-       and sync_records.record_kind = record_kind
-       and sync_records.record_id = record_id
+       and sync_records.record_kind = v_record_kind
+       and sync_records.record_id = v_record_id
      for update;
     if current_revision is null then
       select revision
         into current_revision
         from public.sync_tombstones
        where user_id = p_user_id
-         and sync_tombstones.record_kind = record_kind
-         and sync_tombstones.record_id = record_id
+         and sync_tombstones.record_kind = v_record_kind
+         and sync_tombstones.record_id = v_record_id
        for update;
     end if;
 
@@ -91,8 +91,8 @@ begin
   for item in select value from jsonb_array_elements(p_tombstones)
   loop
     tombstone_json := item -> 'tombstone';
-    record_kind := tombstone_json ->> 'recordKind';
-    record_id := tombstone_json ->> 'recordId';
+    v_record_kind := tombstone_json ->> 'recordKind';
+    v_record_id := tombstone_json ->> 'recordId';
     incoming_revision := (tombstone_json ->> 'revision')::bigint;
     expected_revision := nullif(item ->> 'expectedRevision', '')::bigint;
 
@@ -100,16 +100,16 @@ begin
       into current_revision
       from public.sync_records
      where user_id = p_user_id
-       and sync_records.record_kind = record_kind
-       and sync_records.record_id = record_id
+       and sync_records.record_kind = v_record_kind
+       and sync_records.record_id = v_record_id
      for update;
     if current_revision is null then
       select revision
         into current_revision
         from public.sync_tombstones
        where user_id = p_user_id
-         and sync_tombstones.record_kind = record_kind
-         and sync_tombstones.record_id = record_id
+         and sync_tombstones.record_kind = v_record_kind
+         and sync_tombstones.record_id = v_record_id
        for update;
     end if;
 
@@ -127,20 +127,20 @@ begin
   for item in select value from jsonb_array_elements(p_records)
   loop
     record_json := item -> 'record';
-    record_kind := record_json ->> 'recordKind';
-    record_id := record_json ->> 'recordId';
+    v_record_kind := record_json ->> 'recordKind';
+    v_record_id := record_json ->> 'recordId';
     delete from public.sync_tombstones
      where user_id = p_user_id
-       and sync_tombstones.record_kind = record_kind
-       and sync_tombstones.record_id = record_id;
+       and sync_tombstones.record_kind = v_record_kind
+       and sync_tombstones.record_id = v_record_id;
 
     insert into public.sync_records (
       user_id, record_kind, record_id, schema_version, revision,
       payload_fingerprint, payload, created_at, updated_at
     ) values (
       p_user_id,
-      record_kind,
-      record_id,
+      v_record_kind,
+      v_record_id,
       record_json ->> 'schemaVersion',
       (record_json ->> 'revision')::bigint,
       record_json ->> 'payloadFingerprint',
@@ -157,8 +157,8 @@ begin
 
     committed_records := committed_records || jsonb_build_array(
       jsonb_build_object(
-        'recordKind', record_kind,
-        'recordId', record_id,
+        'recordKind', v_record_kind,
+        'recordId', v_record_id,
         'schemaVersion', 'sync-v1',
         'revision', (record_json ->> 'revision')::bigint,
         'payloadFingerprint', record_json ->> 'payloadFingerprint',
@@ -170,20 +170,20 @@ begin
   for item in select value from jsonb_array_elements(p_tombstones)
   loop
     tombstone_json := item -> 'tombstone';
-    record_kind := tombstone_json ->> 'recordKind';
-    record_id := tombstone_json ->> 'recordId';
+    v_record_kind := tombstone_json ->> 'recordKind';
+    v_record_id := tombstone_json ->> 'recordId';
     delete from public.sync_records
      where user_id = p_user_id
-       and sync_records.record_kind = record_kind
-       and sync_records.record_id = record_id;
+       and sync_records.record_kind = v_record_kind
+       and sync_records.record_id = v_record_id;
 
     insert into public.sync_tombstones (
       user_id, record_kind, record_id, schema_version, revision,
       deleted_at, created_at, updated_at
     ) values (
       p_user_id,
-      record_kind,
-      record_id,
+      v_record_kind,
+      v_record_id,
       tombstone_json ->> 'schemaVersion',
       (tombstone_json ->> 'revision')::bigint,
       (tombstone_json ->> 'deletedAt')::timestamptz,
@@ -198,8 +198,8 @@ begin
 
     committed_tombstones := committed_tombstones || jsonb_build_array(
       jsonb_build_object(
-        'recordKind', record_kind,
-        'recordId', record_id,
+        'recordKind', v_record_kind,
+        'recordId', v_record_id,
         'schemaVersion', 'sync-v1',
         'revision', (tombstone_json ->> 'revision')::bigint,
         'deletedAt', tombstone_json ->> 'deletedAt'
@@ -236,8 +236,8 @@ declare
   receipt_response jsonb;
   item jsonb;
   key_json jsonb;
-  record_kind text;
-  record_id text;
+  v_record_kind text;
+  v_record_id text;
   expected_revision bigint;
   current_revision bigint;
   next_revision bigint;
@@ -266,15 +266,15 @@ begin
   for item in select value from jsonb_array_elements(p_records)
   loop
     key_json := item -> 'key';
-    record_kind := key_json ->> 'recordKind';
-    record_id := key_json ->> 'recordId';
+    v_record_kind := key_json ->> 'recordKind';
+    v_record_id := key_json ->> 'recordId';
     expected_revision := (item ->> 'expectedRevision')::bigint;
     select revision
       into current_revision
       from public.sync_records
      where user_id = p_user_id
-       and sync_records.record_kind = record_kind
-       and sync_records.record_id = record_id
+       and sync_records.record_kind = v_record_kind
+       and sync_records.record_id = v_record_id
      for update;
     if current_revision is null or current_revision <> expected_revision then
       raise exception 'SYNC_CONFLICT' using errcode = '40001';
@@ -284,19 +284,19 @@ begin
   for item in select value from jsonb_array_elements(p_records)
   loop
     key_json := item -> 'key';
-    record_kind := key_json ->> 'recordKind';
-    record_id := key_json ->> 'recordId';
+    v_record_kind := key_json ->> 'recordKind';
+    v_record_id := key_json ->> 'recordId';
     expected_revision := (item ->> 'expectedRevision')::bigint;
     next_revision := expected_revision + 1;
     delete from public.sync_records
      where user_id = p_user_id
-       and sync_records.record_kind = record_kind
-       and sync_records.record_id = record_id;
+       and sync_records.record_kind = v_record_kind
+       and sync_records.record_id = v_record_id;
     insert into public.sync_tombstones (
       user_id, record_kind, record_id, schema_version, revision,
       deleted_at, created_at, updated_at
     ) values (
-      p_user_id, record_kind, record_id, 'sync-v1', next_revision,
+      p_user_id, v_record_kind, v_record_id, 'sync-v1', next_revision,
       p_now, p_now, p_now
     )
     on conflict (user_id, record_kind, record_id) do update set
@@ -306,8 +306,8 @@ begin
       updated_at = excluded.updated_at;
     committed_tombstones := committed_tombstones || jsonb_build_array(
       jsonb_build_object(
-        'recordKind', record_kind,
-        'recordId', record_id,
+        'recordKind', v_record_kind,
+        'recordId', v_record_id,
         'schemaVersion', 'sync-v1',
         'revision', next_revision,
         'deletedAt', to_char(p_now at time zone 'utc', 'YYYY-MM-DD"T"HH24:MI:SS.MS"Z"')

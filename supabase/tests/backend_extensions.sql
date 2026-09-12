@@ -1,6 +1,6 @@
 begin;
 
-select plan(11);
+select plan(13);
 
 select has_column(
   'public',
@@ -51,6 +51,24 @@ select ok(
     )
   ) > 0,
   'atomic sync delete reads the idempotency receipt without a variable conflict'
+);
+select ok(
+  position(
+    '= record_kind'
+    in pg_get_functiondef(
+      'public.commit_sync_batch(uuid,text,jsonb,jsonb,timestamp with time zone)'::regprocedure
+    )
+  ) = 0,
+  'atomic sync commit does not confuse record key variables with table columns'
+);
+select ok(
+  position(
+    '= record_kind'
+    in pg_get_functiondef(
+      'public.delete_sync_batch(uuid,text,jsonb,timestamp with time zone)'::regprocedure
+    )
+  ) = 0,
+  'atomic sync delete does not confuse record key variables with table columns'
 );
 select ok(
   exists (
