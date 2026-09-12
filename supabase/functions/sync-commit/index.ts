@@ -74,6 +74,7 @@ export async function handleCommit(request: Request): Promise<Response> {
         })
       );
     }
+    console.error("commit_sync_batch error:", error);
     return toResponse(
       errorResponse({
         status: 500,
