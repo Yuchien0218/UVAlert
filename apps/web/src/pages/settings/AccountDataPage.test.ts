@@ -2,12 +2,16 @@
 
 import { shallowMount } from "@vue/test-utils";
 import { shallowReadonly, shallowRef } from "vue";
-import { describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { WebAppServices } from "../../app/createWebAppServices";
 import { useWebAppServices } from "../../app/injection";
 import AccountDataPage from "./AccountDataPage.vue";
 
 vi.mock("../../app/injection", () => ({ useWebAppServices: vi.fn() }));
+
+beforeEach(() => {
+  localStorage.clear();
+});
 
 function makeServices(signedIn = true) {
   return {
@@ -154,5 +158,145 @@ describe("帳號頁的卡片標題圖示", () => {
       "登出",
       "清除雲端資料"
     ]);
+  });
+});
+
+describe("同步狀態預覽與按鈕", () => {
+  it("防曬裝備項目優先顯示裝備名稱，且預覽取消按鈕文字為「返回」", async () => {
+    const services = makeServices();
+    const mockSyncState = shallowRef({
+      status: "ready" as const,
+      preview: {
+        createdAt: "2026-09-12T12:00:00.000Z",
+        items: [
+          {
+            key: { recordKind: "product_catalog" as const, recordId: "prod-1" },
+            status: "unchanged" as const,
+            localRecord: {
+              schemaVersion: "1.0.0" as const,
+              recordKind: "product_catalog" as const,
+              recordId: "prod-1",
+              revision: 1,
+              updatedAt: "2026-09-12T12:00:00.000Z",
+              payloadFingerprint: "fp-1",
+              payload: {
+                schemaVersion: "1.1.0" as const,
+                productId: "prod-1",
+                displayName: "安耐曬金鑽高效防曬露",
+                gearCategory: "sunscreen" as const,
+                currentSnapshot: {
+                  spf: 50,
+                  broadSpectrum: true,
+                  waterResistanceMinutes: 80
+                },
+                snapshotFingerprint: "sfp-1"
+              }
+            },
+            localTombstone: null,
+            remoteSummary: null,
+            remoteTombstone: null,
+            defaultAction: null
+          },
+          {
+            key: { recordKind: "region_preference" as const, recordId: "reg-1" },
+            status: "unchanged" as const,
+            localRecord: null,
+            localTombstone: null,
+            remoteSummary: null,
+            remoteTombstone: null,
+            defaultAction: null
+          }
+        ]
+      },
+      error: null
+    });
+    (services.sync as { state: unknown }).state = shallowReadonly(mockSyncState);
+
+    vi.mocked(useWebAppServices).mockReturnValue(
+      services as unknown as WebAppServices
+    );
+    const wrapper = shallowMount(AccountDataPage);
+
+    expect(wrapper.text()).toContain("安耐曬金鑽高效防曬露");
+    expect(wrapper.text()).toContain("地區設定");
+
+    const returnButton = wrapper
+      .findAll("button")
+      .find((button) => button.text() === "返回");
+    expect(returnButton).toBeDefined();
+
+    const cancelButton = wrapper
+      .findAll("button")
+      .find((button) => button.text() === "取消");
+    expect(cancelButton).toBeUndefined();
+
+    await returnButton!.trigger("click");
+    expect(services.sync.cancelPreview).toHaveBeenCalledTimes(1);
+  });
+
+  it("若本機無 localRecord 則嘗試從 productSettings 讀取名稱", async () => {
+    const services = {
+      ...makeServices(),
+      productSettings: {
+        phase: shallowReadonly(shallowRef("ready")),
+        products: shallowReadonly(
+          shallowRef([
+            {
+              productId: "prod-2",
+              displayName: "輕量抗UV遮陽傘"
+            }
+          ])
+        ),
+        snapshot: shallowReadonly(shallowRef(null)),
+        ensureLoaded: vi.fn(async () => undefined),
+        save: vi.fn(),
+        saveProduct: vi.fn(),
+        stopProduct: vi.fn(),
+        archiveProduct: vi.fn(),
+        restoreProduct: vi.fn(),
+        deleteProduct: vi.fn(),
+        refresh: vi.fn(),
+        dispose: vi.fn()
+      }
+    };
+    const mockSyncState = shallowRef({
+      status: "ready" as const,
+      preview: {
+        createdAt: "2026-09-12T12:00:00.000Z",
+        items: [
+          {
+            key: { recordKind: "product_catalog" as const, recordId: "prod-2" },
+            status: "remote_only" as const,
+            localRecord: null,
+            localTombstone: null,
+            remoteSummary: null,
+            remoteTombstone: null,
+            defaultAction: null
+          },
+          {
+            key: {
+              recordKind: "product_catalog" as const,
+              recordId: "prod-unknown"
+            },
+            status: "remote_only" as const,
+            localRecord: null,
+            localTombstone: null,
+            remoteSummary: null,
+            remoteTombstone: null,
+            defaultAction: null
+          }
+        ]
+      },
+      error: null
+    });
+    (services.sync as { state: unknown }).state = shallowReadonly(mockSyncState);
+
+    vi.mocked(useWebAppServices).mockReturnValue(
+      services as unknown as WebAppServices
+    );
+    const wrapper = shallowMount(AccountDataPage);
+
+    expect(wrapper.text()).toContain("輕量抗UV遮陽傘");
+    expect(wrapper.text()).toContain("防曬裝備");
   });
 });
