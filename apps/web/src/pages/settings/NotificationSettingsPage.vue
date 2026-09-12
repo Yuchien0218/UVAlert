@@ -4,6 +4,7 @@ import { computed, onMounted, shallowRef } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { useWebAppServices } from "../../app/injection";
 import IconButton from "../../components/common/IconButton.vue";
+import AppNotice from "../../components/common/AppNotice.vue";
 import InlineLoader from "../../components/feedback/InlineLoader.vue";
 import Icon from "../../components/icons/Icon.vue";
 
@@ -317,7 +318,6 @@ async function runTest(): Promise<void> {
       </h2>
       <div
         class="delivery-emphasis"
-        :class="{ 'delivery-emphasis--bound': isLineBound }"
         role="status"
       >
         <p class="delivery-emphasis__title">
@@ -332,17 +332,13 @@ async function runTest(): Promise<void> {
         </p>
       </div>
 
-      <div
-        v-if="lineActionMessage"
-        class="note-box note-box--success"
-        role="status"
-      >
-        <p>{{ lineActionMessage }}</p>
-      </div>
+      <AppNotice v-if="lineActionMessage" kind="ok">
+        {{ lineActionMessage }}
+      </AppNotice>
 
-      <div v-if="lineError" class="form-error" role="alert">
-        <p>{{ lineError }}</p>
-      </div>
+      <AppNotice v-if="lineError" kind="error">
+        {{ lineError }}
+      </AppNotice>
 
       <div class="action-row">
         <button
@@ -390,16 +386,16 @@ async function runTest(): Promise<void> {
         class="section-heading"
         data-typography-role="card-title"
       >
-        <Icon name="more-about" :size="32" /><span>通知傳送說明</span>
+        <Icon name="more-about" :size="32" /><span>瀏覽器通知說明</span>
       </h2>
       <p class="delivery-note">
         <strong>單一提醒原則</strong
         >：系統每次只會排定下一個最近的補擦到期提醒，避免過多通知干擾。
       </p>
       <div class="delivery-emphasis delivery-emphasis--limited">
-        <p class="delivery-emphasis__title">本機提醒範圍</p>
+        <p class="delivery-emphasis__title">瀏覽器提醒範圍</p>
         <p>
-          分頁仍開啟時，本機提醒可作為倒數的輔助。背景送達則需啟用上方的背景推播。
+          當網頁分頁保持開啟時，由瀏覽器直接彈出通知。若分頁關閉，則需啟用上方的「背景推播」，或綁定「LINE 補擦提醒」在背景接收。
         </p>
       </div>
       <div v-if="isGranted" class="delivery-test">
@@ -410,7 +406,7 @@ async function runTest(): Promise<void> {
           @click="runTest"
         >
           <InlineLoader v-if="testResult === 'sending'" />
-          {{ testResult === "sending" ? "傳送中…" : "送出測試通知" }}
+          {{ testResult === "sending" ? "傳送中…" : "測試瀏覽器通知" }}
         </button>
         <p v-if="testResult === 'sent'" class="delivery-note" role="status">
           已送出，請查看系統通知。
@@ -481,9 +477,6 @@ async function runTest(): Promise<void> {
 .delivery-emphasis--limited {
   border-color: var(--color-due);
 }
-.delivery-emphasis--bound {
-  border-color: var(--color-saved);
-}
 .delivery-emphasis__title {
   margin: 0;
   font-weight: 600;
@@ -492,9 +485,5 @@ async function runTest(): Promise<void> {
   margin: 0;
   color: var(--text-body);
   line-height: var(--line-height-body);
-}
-.note-box--success {
-  border-left: 3px solid var(--color-saved);
-  color: var(--text-body);
 }
 </style>
