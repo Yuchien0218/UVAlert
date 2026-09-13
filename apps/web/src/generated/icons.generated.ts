@@ -14,7 +14,7 @@ export const ICONS = {
     viewBox: "0 0 24 24",
     title: "提醒",
     body: `<title>提醒</title>
-  <path d="M7.9 5.1H16.1L12 11.7Z" fill="#C1832E"/><path d="M6.4 3.9H17.6L12 12L17.6 20.1H6.4L12 12Z" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>`
+  <path d="M6.4 3.9H17.6L12 12Z" fill="#C1832E"/><path d="M6.4 3.9H17.6L12 12L17.6 20.1H6.4L12 12Z" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>`
   },
   "nav-gear": {
     viewBox: "0 0 24 24",

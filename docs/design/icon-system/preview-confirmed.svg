@@ -5,9 +5,9 @@
   <text x="64" y="62" fill="#2E2925" font-family="'Noto Serif TC', serif" font-size="32" font-weight="500" letter-spacing="0.5" lang="zh-Hant-TW">圖示系統 — 已確認</text>
   <text x="64" y="108" fill="#2E2925" font-family="'Noto Sans TC', sans-serif" font-size="25" font-weight="500" lang="zh-Hant-TW">下排導覽（雙色）</text>
   <g data-icon-cell="nav-reminder" transform="translate(64 154)">
-    <g transform="scale(4)"><path d="M7.9 5.1H16.1L12 11.7Z" fill="#C1832E"/><path d="M6.4 3.9H17.6L12 12L17.6 20.1H6.4L12 12Z" fill="none" stroke="#33291F" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></g>
-    <g transform="translate(104 62) scale(1.5)"><path d="M7.9 5.1H16.1L12 11.7Z" fill="#C1832E"/><path d="M6.4 3.9H17.6L12 12L17.6 20.1H6.4L12 12Z" fill="none" stroke="#33291F" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></g>
-    <g transform="translate(150 74) scale(0.75)"><path d="M7.9 5.1H16.1L12 11.7Z" fill="#C1832E"/><path d="M6.4 3.9H17.6L12 12L17.6 20.1H6.4L12 12Z" fill="none" stroke="#33291F" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></g>
+    <g transform="scale(4)"><path d="M6.4 3.9H17.6L12 12Z" fill="#C1832E"/><path d="M6.4 3.9H17.6L12 12L17.6 20.1H6.4L12 12Z" fill="none" stroke="#33291F" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></g>
+    <g transform="translate(104 62) scale(1.5)"><path d="M6.4 3.9H17.6L12 12Z" fill="#C1832E"/><path d="M6.4 3.9H17.6L12 12L17.6 20.1H6.4L12 12Z" fill="none" stroke="#33291F" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></g>
+    <g transform="translate(150 74) scale(0.75)"><path d="M6.4 3.9H17.6L12 12Z" fill="#C1832E"/><path d="M6.4 3.9H17.6L12 12L17.6 20.1H6.4L12 12Z" fill="none" stroke="#33291F" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></g>
     <text x="104" y="118" fill="#6F5A54" font-family="'Noto Sans TC', sans-serif" font-size="13" lang="zh-Hant-TW">36px / 18px</text>
     <text x="0" y="130" fill="#2E2925" font-family="'Noto Sans TC', sans-serif" font-size="17" lang="zh-Hant-TW">提醒</text>
   </g>
