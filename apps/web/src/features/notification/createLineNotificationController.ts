@@ -5,6 +5,7 @@ export interface LineNotificationDependencies {
     getOrCreateLocalVisitorId(): Promise<string>;
     getOrCreateDeviceLocalId?(): Promise<string>;
   };
+  readonly getPushDeviceId?: (() => Promise<string | null>) | undefined;
   readonly apiBaseUrl?: string | undefined;
   readonly lineChannelId?: string | undefined;
   readonly fetch?: typeof fetch | undefined;
@@ -87,12 +88,25 @@ export function createLineNotificationController(
     actionMessage.value = null;
   }
 
+  async function resolveDeviceId(): Promise<string | null> {
+    return (
+      (await deps.getPushDeviceId?.()) ??
+      (await deps.identity.getOrCreateDeviceLocalId?.()) ??
+      null
+    );
+  }
+
   async function fetchStatus(): Promise<void> {
     isLoading.value = true;
     error.value = null;
     try {
       const visitorId = await deps.identity.getOrCreateLocalVisitorId();
-      const endpoint = `${apiBase}/line-subscription/status?visitorId=${encodeURIComponent(visitorId)}`;
+      const deviceId = await resolveDeviceId();
+      const params = new URLSearchParams({ visitorId });
+      if (deviceId) {
+        params.set("deviceId", deviceId);
+      }
+      const endpoint = `${apiBase}/line-subscription/status?${params.toString()}`;
       const res = await fetchFn(endpoint, {
         method: "GET",
         headers: { Accept: "application/json" }
@@ -166,6 +180,7 @@ export function createLineNotificationController(
 
     try {
       const visitorId = await deps.identity.getOrCreateLocalVisitorId();
+      const deviceId = await resolveDeviceId();
 
       let currentOrigin = "";
       let currentPath = "";
@@ -188,7 +203,8 @@ export function createLineNotificationController(
         body: JSON.stringify({
           code: code.trim(),
           redirectUri,
-          localVisitorId: visitorId
+          localVisitorId: visitorId,
+          deviceId
         })
       });
 

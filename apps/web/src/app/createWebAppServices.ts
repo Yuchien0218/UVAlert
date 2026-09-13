@@ -173,8 +173,9 @@ export function createWebAppServices(
     lifecycle,
     crossContext: notifier
   });
+  const pushState = new LocalPushStateRepository(database);
   const remotePush = createConfiguredBrowserRemotePush({
-    state: new LocalPushStateRepository(database),
+    state: pushState,
     configuredApiBaseUrl: import.meta.env.VITE_API_BASE_URL,
     publicVapidKey: import.meta.env.VITE_PUSH_PUBLIC_KEY,
     isSecureContext: () => globalThis.isSecureContext,
@@ -285,6 +286,7 @@ export function createWebAppServices(
   });
   const lineNotification = createLineNotificationController({
     identity,
+    getPushDeviceId: async () => (await pushState.readCredentials())?.deviceId ?? null,
     apiBaseUrl: import.meta.env.VITE_API_BASE_URL,
     lineChannelId:
       import.meta.env.VITE_LINE_LOGIN_CHANNEL_ID ||

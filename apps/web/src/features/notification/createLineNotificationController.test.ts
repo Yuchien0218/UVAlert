@@ -74,7 +74,7 @@ describe("createLineNotificationController", () => {
       expect(controller.lineUserId.value).toBe("U12345678");
       expect(controller.error.value).toBeNull();
       expect(mockFetch).toHaveBeenCalledWith(
-        "https://api.test/v1/line-subscription/status?visitorId=test-visitor-123",
+        "https://api.test/v1/line-subscription/status?visitorId=test-visitor-123&deviceId=test-device-456",
         expect.objectContaining({ method: "GET" })
       );
     });
@@ -167,7 +167,37 @@ describe("createLineNotificationController", () => {
           body: JSON.stringify({
             code: "oauth-auth-code-123",
             redirectUri: "https://uvalert.test/settings/notifications",
-            localVisitorId: "test-visitor-123"
+            localVisitorId: "test-visitor-123",
+            deviceId: "test-device-456"
+          })
+        })
+      );
+    });
+
+    it("若有提供 getPushDeviceId，優先使用 Web Push 的 deviceId", async () => {
+      const { deps, mockFetch } = createMockDeps({
+        getPushDeviceId: vi.fn(async () => "push-credential-device-789")
+      });
+      mockFetch.mockResolvedValueOnce(
+        new Response(
+          JSON.stringify({ ok: true, lineUserId: "U88888888" }),
+          { status: 200 }
+        )
+      );
+
+      const controller = createLineNotificationController(deps);
+      const success = await controller.handleCallback("oauth-auth-code-123");
+
+      expect(success).toBe(true);
+      expect(mockFetch).toHaveBeenCalledWith(
+        "https://api.test/v1/line-subscription/exchange",
+        expect.objectContaining({
+          method: "POST",
+          body: JSON.stringify({
+            code: "oauth-auth-code-123",
+            redirectUri: "https://uvalert.test/settings/notifications",
+            localVisitorId: "test-visitor-123",
+            deviceId: "push-credential-device-789"
           })
         })
       );

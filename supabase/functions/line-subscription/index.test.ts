@@ -8,9 +8,17 @@ vi.stubGlobal("Deno", { env: { get: vi.fn(() => undefined) } });
 
 import { handleLineSubscription } from "./index";
 
-function makeMockDb(rows: Array<{ local_visitor_id: string; line_user_id: string; status: string }> = []) {
+function makeMockDb(
+  rows: Array<{
+    local_visitor_id: string;
+    device_id?: string | null;
+    line_user_id: string;
+    status: string;
+  }> = []
+) {
   let dbRows = [...rows];
   return {
+    getRows: () => dbRows,
     from: vi.fn((tableName: string) => {
       let selectedFields: string | null = null;
       let filterVisitor: string | null = null;
@@ -39,15 +47,16 @@ function makeMockDb(rows: Array<{ local_visitor_id: string; line_user_id: string
           updateData = data;
           return {
             eq: vi.fn((col1: string, val1: string) => {
-              if (col1 === "local_visitor_id") filterVisitor = val1;
+              let filterCol1 = col1;
+              let filterVal1 = val1;
               return {
                 eq: vi.fn((col2: string, val2: string) => {
-                  if (col2 === "status") filterStatus = val2;
-                  dbRows = dbRows.map((r) => {
-                    if (
-                      (!filterVisitor || r.local_visitor_id === filterVisitor) &&
-                      (!filterStatus || r.status === filterStatus)
-                    ) {
+                  let filterCol2 = col2;
+                  let filterVal2 = val2;
+                  dbRows = dbRows.map((r: any) => {
+                    const match1 = r[filterCol1] === filterVal1;
+                    const match2 = r[filterCol2] === filterVal2;
+                    if (match1 && match2) {
                       return { ...r, ...updateData };
                     }
                     return r;
@@ -237,6 +246,65 @@ describe("handleLineSubscription", () => {
         lineUserId: "U99999",
         displayName: "小明"
       });
+    });
+
+    it("exchange 時若傳入 deviceId，成功寫入 device_id 欄位", async () => {
+      const mockDb = makeMockDb([]);
+      const mockFetch = vi
+        .fn()
+        .mockImplementationOnce(async () =>
+          new Response(JSON.stringify({ access_token: "access-token-123" }), { status: 200 })
+        )
+        .mockImplementationOnce(async () =>
+          new Response(JSON.stringify({ userId: "U88888", displayName: "小美" }), { status: 200 })
+        )
+        .mockImplementationOnce(async () =>
+          new Response(JSON.stringify({ access_token: "access-token-123", expires_in: 3600 }), { status: 200 })
+        )
+        .mockImplementationOnce(async () =>
+          new Response(JSON.stringify({}), { status: 200 })
+        );
+
+      const req = new Request("https://example.supabase.co/functions/v1/line-subscription/exchange", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          code: "auth-code-xyz",
+          redirectUri: "https://example.com/settings/notifications",
+          localVisitorId: "visitor-10",
+          deviceId: "device-uuid-10"
+        })
+      });
+
+      const res = await handleLineSubscription(req, {
+        readEnv: (key) => baseEnv[key],
+        fetch: mockFetch as unknown as typeof fetch,
+        createDbClient: () => mockDb
+      });
+
+      expect(res.status).toBe(200);
+      const inserted = mockDb.getRows().find((r) => r.local_visitor_id === "visitor-10");
+      expect(inserted?.device_id).toBe("device-uuid-10");
+    });
+  });
+
+  describe("查詢狀態時自動同步 deviceId", () => {
+    it("若原綁定無 device_id 且 query 傳入 deviceId，自動更新補齊", async () => {
+      const mockDb = makeMockDb([
+        { local_visitor_id: "visitor-synced", device_id: null, line_user_id: "U33333", status: "active" }
+      ]);
+      const req = new Request(
+        "https://example.supabase.co/functions/v1/line-subscription/status?visitorId=visitor-synced&deviceId=device-auto-sync",
+        { method: "GET" }
+      );
+      const res = await handleLineSubscription(req, {
+        readEnv: (key) => baseEnv[key],
+        createDbClient: () => mockDb
+      });
+
+      expect(res.status).toBe(200);
+      const updated = mockDb.getRows().find((r) => r.local_visitor_id === "visitor-synced");
+      expect(updated?.device_id).toBe("device-auto-sync");
     });
   });
 });

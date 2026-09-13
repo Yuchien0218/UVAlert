@@ -193,6 +193,10 @@ async function dispatchRow(
   });
   if (!ownsClaim) return;
 
+  if (dependencies.sendLineReminder) {
+    await dependencies.sendLineReminder(row.deviceId).catch(() => {});
+  }
+
   let result: PushSendResult;
   try {
     result = await dependencies.send(
@@ -208,9 +212,6 @@ async function dispatchRow(
   if (result.kind === "sent") {
     if (await settle(dependencies, row, "sent", completedAt, null, null)) {
       summary.sent += 1;
-      if (dependencies.sendLineReminder) {
-        await dependencies.sendLineReminder(row.deviceId).catch(() => {});
-      }
     }
     return;
   }

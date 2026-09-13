@@ -336,4 +336,17 @@ describe("push dispatcher", () => {
     expect(response.status).toBe(200);
     expect(sendLineReminder).toHaveBeenCalledWith(claimed.deviceId);
   });
+
+  it("即使 Web Push 訂閱失效 (gone)，依然呼叫 sendLineReminder 確保提醒不漏發", async () => {
+    const sendLineReminder = vi.fn(async () => undefined);
+    const dependencies = makeDependencies({
+      send: vi.fn(async () => ({ kind: "gone" as const, status: 410 as const })),
+      sendLineReminder
+    });
+
+    const response = await createPushDispatcher(dependencies)(request());
+
+    expect(response.status).toBe(200);
+    expect(sendLineReminder).toHaveBeenCalledWith(claimed.deviceId);
+  });
 });

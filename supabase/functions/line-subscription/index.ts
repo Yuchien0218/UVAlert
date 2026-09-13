@@ -63,10 +63,12 @@ export async function handleLineSubscription(
   // 1. 查詢綁定狀態: POST/GET /status
   if (action === "status" || request.method === "GET") {
     let visitorId = url.searchParams.get("visitorId");
+    let deviceId = url.searchParams.get("deviceId");
     if (!visitorId && request.method === "POST") {
       try {
         const body = await request.json();
         visitorId = body.localVisitorId ?? body.visitorId;
+        deviceId = body.deviceId ?? deviceId;
       } catch {
         // ignore
       }
@@ -84,7 +86,7 @@ export async function handleLineSubscription(
 
     const { data, error } = await dbClient
       .from("line_push_subscriptions")
-      .select("line_user_id, status")
+      .select("line_user_id, status, device_id")
       .eq("local_visitor_id", visitorId.trim())
       .eq("status", "active")
       .maybeSingle();
@@ -97,6 +99,18 @@ export async function handleLineSubscription(
           message: "查詢狀態失敗"
         })
       );
+    }
+
+    // 若前端有傳入有效的 deviceId 且資料庫中尚未綁定或不一致，自動補齊以確保排程派發時能直接命中
+    if (data !== null && deviceId?.trim() && data.device_id !== deviceId.trim()) {
+      await dbClient
+        .from("line_push_subscriptions")
+        .update({
+          device_id: deviceId.trim(),
+          updated_at: new Date().toISOString()
+        })
+        .eq("local_visitor_id", visitorId.trim())
+        .eq("status", "active");
     }
 
     return jsonResponse({
@@ -216,6 +230,7 @@ export async function handleLineSubscription(
       code?: string;
       redirectUri?: string;
       localVisitorId?: string;
+      deviceId?: string;
     };
     try {
       payload = await request.json();
@@ -351,11 +366,20 @@ export async function handleLineSubscription(
       .eq("local_visitor_id", localVisitorId.trim())
       .eq("status", "active");
 
+    if (payload.deviceId?.trim()) {
+      await dbClient
+        .from("line_push_subscriptions")
+        .update({ status: "revoked", updated_at: now })
+        .eq("device_id", payload.deviceId.trim())
+        .eq("status", "active");
+    }
+
     // 寫入新的綁定
     const { error: insertError } = await dbClient
       .from("line_push_subscriptions")
       .insert({
         local_visitor_id: localVisitorId.trim(),
+        device_id: payload.deviceId?.trim() || null,
         line_user_id: profile.userId,
         status: "active",
         created_at: now,
