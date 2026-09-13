@@ -52,16 +52,6 @@ describe("內層區塊用深一階的表面", () => {
     );
   });
 
-  /*
-   * 同一頁的兩個內層框用同一個內距。原本一個 16px 一個 12px，於是同一張
-   * 卡上有兩種內縮節奏。
-   */
-  it("通知設定的兩個內層框內距一致", () => {
-    expect(rule(NOTIFY, ".note-box")).toContain("padding: var(--space-3);");
-    expect(rule(NOTIFY, ".delivery-emphasis")).toContain(
-      "padding: var(--space-3);"
-    );
-  });
 });
 
 describe("新增裝備的文案收斂", () => {

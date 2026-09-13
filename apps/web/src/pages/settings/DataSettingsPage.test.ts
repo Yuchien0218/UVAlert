@@ -141,6 +141,29 @@ describe("DataSettingsPage 的資訊範圍", () => {
     expect(scope.text()).toContain("裝置");
     expect(scope.text()).toContain("雲端");
   });
+
+  it("只有資料概況使用卡片，備份與清除為同層扁平區段", () => {
+    useServices("signed_out", "idle", SUMMARY_FIXTURE);
+    const wrapper = mount(DataSettingsPage, {
+      global: { stubs: { RouterLink: true } }
+    });
+
+    expect(wrapper.findAll("section.app-card")).toHaveLength(1);
+    expect(wrapper.findAll("section.data-section")).toHaveLength(2);
+  });
+
+  it("依資料種類呈現精確的空狀態", () => {
+    useServices("signed_out", "idle", {
+      ...SUMMARY_FIXTURE,
+      hasActiveSession: false
+    });
+    const wrapper = shallowMount(DataSettingsPage);
+
+    expect(wrapper.text()).toContain("未進行");
+    expect(wrapper.text()).toContain("尚無資料");
+    expect(wrapper.text()).toContain("尚未校對");
+    expect(wrapper.text().match(/沒有紀錄/g)).toBeNull();
+  });
 });
 
 /*
@@ -277,6 +300,18 @@ describe("清除卡的三列", () => {
       );
     }
   });
+
+  it("沒有草稿時改顯示靜態狀態，不保留停用按鈕", () => {
+    useServices("signed_out", "idle", SUMMARY_FIXTURE);
+    const wrapper = mount(DataSettingsPage, {
+      global: { stubs: { RouterLink: true } }
+    });
+
+    expect(wrapper.get('[data-testid="draft-empty-state"]').text()).toContain(
+      "目前沒有"
+    );
+    expect(wrapper.findAll("button").some((button) => button.text() === "沒有草稿可以清除")).toBe(false);
+  });
 });
 
 describe("本機備份與還原卡片", () => {
@@ -293,9 +328,9 @@ describe("本機備份與還原卡片", () => {
 
     const exportSection = wrapper.find("[aria-labelledby='data-export-title']");
     expect(exportSection.exists()).toBe(true);
-    expect(exportSection.text()).toContain("本機備份與還原");
-    expect(exportSection.text()).toContain("匯出本機資料");
-    expect(exportSection.text()).toContain("匯入備份資料");
+    expect(exportSection.text()).toContain("備份與還原");
+    expect(exportSection.text()).toContain("下載備份檔");
+    expect(exportSection.text()).toContain("從備份還原");
   });
 
   it("匯入成功時呈現成功還原通知", () => {

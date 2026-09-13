@@ -70,8 +70,8 @@ const BACKGROUND_PUSH_DESCRIPTORS: Record<
     canRetry: false
   },
   "permission-required": {
-    title: "開啟背景推播",
-    body: "背景推播尚未啟用。這是選用的輔助送達方式。",
+    title: "尚未使用背景推播",
+    body: "開啟後，分頁關閉時仍可嘗試送達提醒。",
     canEnable: true,
     canDisable: false,
     canRetry: false
@@ -84,15 +84,15 @@ const BACKGROUND_PUSH_DESCRIPTORS: Record<
     canRetry: false
   },
   enabled: {
-    title: "已啟用背景推播",
-    body: "已啟用背景推播，但目前沒有已確認同步的下一個提醒。",
+    title: "背景送達已開啟",
+    body: "目前沒有已確認同步的下一個提醒。",
     canEnable: false,
     canDisable: true,
     canRetry: false
   },
   scheduled: {
-    title: "已同步下一個補擦提醒",
-    body: "已同步下一個補擦提醒，可嘗試在背景送達。",
+    title: "下一個提醒已同步",
+    body: "分頁關閉後可嘗試由背景送達。",
     canEnable: false,
     canDisable: true,
     canRetry: false
@@ -114,10 +114,10 @@ const BACKGROUND_PUSH_DESCRIPTORS: Record<
 };
 
 const statusLabel = computed(() => {
-  if (!isSupported.value) return "這個瀏覽器不支援通知";
-  if (isGranted.value) return "通知已開啟";
-  if (isDenied.value) return "通知已被拒絕";
-  return "未開啟";
+  if (!isSupported.value) return "此瀏覽器不支援";
+  if (isGranted.value) return "已開啟";
+  if (isDenied.value) return "已被封鎖";
+  return "尚未開啟";
 });
 const statusIcon = computed(() => {
   if (!isSupported.value || isDenied.value) return "state-notification-off";
@@ -188,17 +188,21 @@ async function runTest(): Promise<void> {
       </p>
     </header>
 
-    <section class="app-card" aria-labelledby="permission-heading">
-      <h2
-        id="permission-heading"
-        class="section-heading"
-        data-typography-role="card-title"
-      >
-        <Icon :name="statusIcon" :size="32" />
-        <span
-          >瀏覽器通知：<strong>{{ statusLabel }}</strong></span
+    <section class="notification-channel" aria-labelledby="permission-heading">
+      <header class="notification-channel__header">
+        <h2
+          id="permission-heading"
+          class="section-heading"
+          data-typography-role="card-title"
         >
-      </h2>
+          <Icon :name="statusIcon" :size="32" />
+          <span>瀏覽器通知</span>
+        </h2>
+        <p class="channel-summary" role="status">
+          <strong>{{ statusLabel }}</strong>
+          <span v-if="isGranted">到期時由瀏覽器通知。</span>
+        </p>
+      </header>
 
       <div v-if="!isSupported" class="note-box" role="status">
         <p>目前使用的瀏覽器或環境不支援本機通知功能。</p>
@@ -225,7 +229,7 @@ async function runTest(): Promise<void> {
         </div>
       </div>
       <div v-else-if="!isGranted" class="action-box">
-        <p>開啟後將於下次補擦前發送提醒。</p>
+        <p>允許通知後，補擦時間到時會發送提醒。</p>
         <button
           class="button button--primary"
           type="button"
@@ -235,9 +239,6 @@ async function runTest(): Promise<void> {
         </button>
       </div>
       <div v-else class="permission-granted-group">
-        <p class="delivery-note" role="status">
-          已開啟補擦提醒。當有防曬提醒時，系統會在到期時發送通知。
-        </p>
         <div class="delivery-test">
           <button
             class="button button--quiet"
@@ -263,19 +264,19 @@ async function runTest(): Promise<void> {
           class="section-subheading"
           data-typography-role="card-title"
         >
-          <Icon name="more-notifications" :size="24" />
-          <span>背景推播（選用）</span>
+          <span>背景推播</span>
+          <span class="optional-label">選用</span>
         </h3>
         <div
-          class="delivery-emphasis"
+          class="channel-status"
           :class="{
-            'delivery-emphasis--limited':
+            'channel-status--limited':
               backgroundPushState === 'pending-sync' ||
               backgroundPushState === 'schedule-error'
           }"
           role="status"
         >
-          <p class="delivery-emphasis__title">
+          <p class="channel-status__title">
             {{ backgroundPushDescriptor.title }}
           </p>
           <p>{{ backgroundPushDescriptor.body }}</p>
@@ -323,42 +324,37 @@ async function runTest(): Promise<void> {
 
       <div class="card-subdivision">
         <p class="delivery-note">
-          <strong>單一提醒原則</strong
-          >：系統每次只會排定下一個最近的補擦到期提醒，避免過多通知干擾。
+          每次只安排下一個最近的補擦提醒，避免重複通知。
         </p>
         <p class="delivery-note">
-          分頁開啟時由瀏覽器直接提醒；若分頁關閉，背景推播可能受網路、省電模式與系統設定影響而延遲或無法送達，不保證準時。
+          分頁關閉後，背景推播可能受網路、省電模式或系統設定影響而延遲或無法送達，不保證準時。
         </p>
         <p class="delivery-note">
-          iPhone/iPad 必須把此網站加入主畫面，從主畫面開啟 Web
-          App，並允許通知後，才可使用背景推播。
+          iPhone/iPad 須先將網站加入主畫面，再從主畫面開啟並允許通知。
         </p>
       </div>
     </section>
 
-    <section class="app-card" aria-labelledby="line-push-heading">
-      <h2
-        id="line-push-heading"
-        class="section-heading"
-        data-typography-role="card-title"
-      >
-        <Icon name="more-notifications" :size="32" /><span>LINE 補擦提醒</span>
-      </h2>
-      <div
-        class="delivery-emphasis"
-        role="status"
-      >
-        <p class="delivery-emphasis__title">
-          {{ isLineBound ? "已啟用 LINE 補擦提醒" : "透過 LINE 接收補擦通知" }}
+    <section class="notification-channel" aria-labelledby="line-push-heading">
+      <header class="notification-channel__header">
+        <h2
+          id="line-push-heading"
+          class="section-heading"
+          data-typography-role="card-title"
+        >
+          <Icon name="more-notifications" :size="32" /><span>LINE 補擦提醒</span>
+        </h2>
+        <p class="channel-summary" role="status">
+          <strong>{{ isLineBound ? "已連結" : "尚未連結" }}</strong>
+          <span>
+            {{
+              isLineBound
+                ? "補擦時間到時傳送 LINE 訊息。"
+                : "連結後可在 LINE 接收補擦提醒。"
+            }}
+          </span>
         </p>
-        <p>
-          {{
-            isLineBound
-              ? "已成功連結您的 LINE 帳號。補擦時間到期時，系統將由「防曬晴報員」官方帳號即時傳送推播訊息。"
-              : "將補擦提醒直接傳送到您的 LINE 聊天室，即使螢幕關閉或未常駐瀏覽器，也能即時收到提醒。"
-          }}
-        </p>
-      </div>
+      </header>
 
       <AppNotice v-if="lineActionMessage" kind="ok">
         {{ lineActionMessage }}
@@ -404,7 +400,7 @@ async function runTest(): Promise<void> {
       </div>
 
       <p class="delivery-note">
-        提醒：本功能需加入「防曬晴報員」LINE 官方帳號好友，並請確認未將官方帳號設為「關閉提醒（靜音）」。
+        需加入「防曬晴報員」LINE 官方帳號好友，並保持該帳號通知開啟。
       </p>
     </section>
   </div>
@@ -415,22 +411,44 @@ async function runTest(): Promise<void> {
   display: grid;
   gap: var(--page-stack-gap-compact);
 }
-.app-card {
+.notification-channel {
   display: grid;
-  gap: var(--space-3);
-  padding: var(--card-padding);
+  gap: var(--space-4);
+  padding-block: var(--space-4);
+}
+.notification-channel + .notification-channel {
+  border-top: 1px solid var(--border-subtle);
+}
+.notification-channel__header {
+  display: grid;
+  gap: var(--space-2);
+}
+.channel-summary {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin: 0;
+  color: var(--text-secondary);
+  line-height: var(--line-height-body);
+}
+.channel-summary strong {
+  color: var(--text-body);
 }
 .card-subdivision {
   display: grid;
   gap: var(--space-3);
-  padding-top: var(--space-3);
-  border-top: 1px solid var(--border-subtle);
+  padding-inline-start: calc(var(--space-4) + var(--space-3));
 }
 .section-subheading {
   display: flex;
   align-items: center;
   gap: var(--space-2);
   margin: 0;
+}
+.optional-label {
+  color: var(--text-secondary);
+  font-size: var(--font-size-supporting);
+  font-weight: var(--font-weight-body);
 }
 .note-box {
   padding: var(--space-3);
@@ -483,23 +501,28 @@ async function runTest(): Promise<void> {
   align-items: center;
   gap: var(--space-3);
 }
-.delivery-emphasis {
+.channel-status {
   display: grid;
   gap: var(--space-2);
-  padding: var(--space-3);
-  border: 1px solid var(--border-strong);
-  border-radius: var(--radius-sm);
+  padding-inline-start: var(--space-3);
+  border-inline-start: 2px solid var(--border-strong);
 }
-.delivery-emphasis--limited {
+.channel-status--limited {
   border-color: var(--color-due);
 }
-.delivery-emphasis__title {
+.channel-status__title {
   margin: 0;
   font-weight: 600;
 }
-.delivery-emphasis p:not(.delivery-emphasis__title) {
+.channel-status p:not(.channel-status__title) {
   margin: 0;
   color: var(--text-body);
   line-height: var(--line-height-body);
+}
+
+@media (max-width: 30rem) {
+  .card-subdivision {
+    padding-inline-start: 0;
+  }
 }
 </style>

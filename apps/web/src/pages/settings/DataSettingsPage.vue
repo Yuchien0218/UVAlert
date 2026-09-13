@@ -36,8 +36,8 @@ onMounted(() => {
   void localData.load();
 });
 
-function formatTime(value: string | null): string {
-  return value === null ? "沒有紀錄" : formatMonthDayTime(value);
+function formatTime(value: string | null, emptyLabel: string): string {
+  return value === null ? emptyLabel : formatMonthDayTime(value);
 }
 
 async function runClear(scope: ClearScope): Promise<void> {
@@ -92,7 +92,7 @@ function goBack(): void {
         本機資料與匯出
       </h1>
       <p>
-        匯出檔案由裝置直接產生，不會上傳或用於分析。
+        查看這台裝置的資料，並可備份、還原或清除。
       </p>
       <IconButton icon="tool-arrow-left" label="返回更多" @click="goBack" />
     </header>
@@ -129,7 +129,7 @@ function goBack(): void {
           </div>
           <div>
             <dt>進行中提醒</dt>
-            <dd>{{ summary.hasActiveSession ? "有" : "沒有紀錄" }}</dd>
+            <dd>{{ summary.hasActiveSession ? "進行中" : "未進行" }}</dd>
           </div>
           <div>
             <dt>已結束的提醒</dt>
@@ -137,31 +137,32 @@ function goBack(): void {
           </div>
           <div>
             <dt>未儲存草稿</dt>
-            <dd>{{ summary.hasSetupDraft ? "有" : "沒有紀錄" }}</dd>
+            <dd>{{ summary.hasSetupDraft ? "有" : "無" }}</dd>
           </div>
           <div>
             <dt>氣象資料最後更新</dt>
-            <dd>{{ formatTime(summary.lastWeatherSnapshotAt) }}</dd>
+            <dd>{{ formatTime(summary.lastWeatherSnapshotAt, "尚無資料") }}</dd>
           </div>
           <div>
             <dt>上次時間校對</dt>
-            <dd>{{ formatTime(summary.lastClockCalibrationAt) }}</dd>
+            <dd>{{ formatTime(summary.lastClockCalibrationAt, "尚未校對") }}</dd>
           </div>
         </dl>
       </section>
 
-      <section class="app-card" aria-labelledby="data-export-title">
+      <section class="data-section" aria-labelledby="data-export-title">
         <h2
           class="section-heading"
           id="data-export-title"
           data-typography-role="card-title"
         >
           <Icon name="tool-download" :size="32" />
-          <span>本機備份與還原</span>
+          <span>備份與還原</span>
         </h2>
         <div class="card-prose">
           <p>
-            匯出或還原包含防曬裝備、提醒歷程與偏好設定的 JSON 備份檔案（不含定位與裝置識別碼）。
+            備份包含防曬裝備、提醒紀錄與偏好設定，不包含定位或裝置識別碼。
+            匯出檔案由裝置直接產生，不會上傳或用於分析。
           </p>
         </div>
 
@@ -173,7 +174,7 @@ function goBack(): void {
             @click="localData.exportData"
           >
             <InlineLoader v-if="busy && !confirmingImport" />
-            {{ busy && !confirmingImport ? "處理中" : "匯出本機資料" }}
+            {{ busy && !confirmingImport ? "處理中" : "下載備份檔" }}
           </button>
 
           <input
@@ -187,7 +188,7 @@ function goBack(): void {
           <ConfirmAction
             :confirming="confirmingImport"
             :pending="busy"
-            trigger-label="匯入備份資料"
+            trigger-label="從備份還原"
             confirm-label="確認覆蓋並還原"
             @trigger="triggerFileSelect"
             @confirm="executeImport"
@@ -234,7 +235,7 @@ function goBack(): void {
         </AppNotice>
       </section>
 
-      <section class="app-card" aria-labelledby="data-clear-title">
+      <section class="data-section" aria-labelledby="data-clear-title">
         <h2
           class="section-heading"
           id="data-clear-title"
@@ -257,16 +258,22 @@ function goBack(): void {
         </AppNotice>
 
         <div class="clear-row">
-          <p v-if="summary.hasSetupDraft">
+          <p
+            v-if="!summary.hasSetupDraft"
+            class="clear-status"
+            data-testid="draft-empty-state"
+          >
+            <span>設定草稿</span>
+            <strong>目前沒有</strong>
+          </p>
+          <p v-else>
             只刪除還沒建立提醒的設定進度。
           </p>
           <ConfirmAction
+            v-if="summary.hasSetupDraft"
             :confirming="confirming === 'drafts'"
             :pending="busy"
-            :trigger-disabled="!summary.hasSetupDraft"
-            :trigger-label="
-              summary.hasSetupDraft ? '清除設定草稿' : '沒有草稿可以清除'
-            "
+            trigger-label="清除設定草稿"
             confirm-label="確定清除"
             @trigger="confirming = 'drafts'"
             @confirm="runClear('drafts')"
@@ -276,7 +283,7 @@ function goBack(): void {
 
         <div class="clear-row">
           <p v-if="summary.hasActiveSession">
-            進行中的提醒<strong>不會</strong>被刪除。如需結束請至提醒頁明確結束，或點選「清除全部本機資料」。
+            只清除裝備與已結束的提醒；進行中的提醒<strong>會保留</strong>。
           </p>
           <ConfirmAction
             :confirming="confirming === 'history'"
@@ -296,6 +303,8 @@ function goBack(): void {
         </div>
 
         <div class="clear-row clear-row--danger">
+          <h3 data-typography-role="card-title">恢復初始狀態</h3>
+          <p>將裝備、提醒、設定與快取全部清除。</p>
           <ConfirmAction
             :confirming="confirming === 'all'"
             :pending="busy"
@@ -357,7 +366,19 @@ dd {
   justify-items: start;
 }
 
-.app-card > h2 {
+.data-section {
+  display: grid;
+  gap: var(--space-3);
+  justify-items: start;
+  padding-block: var(--space-4);
+}
+
+.data-section + .data-section {
+  border-top: 1px solid var(--border-subtle);
+}
+
+.app-card > h2,
+.data-section > h2 {
   font-size: var(--font-size-card-title);
 }
 
@@ -430,8 +451,28 @@ dd {
   line-height: var(--line-height-body);
 }
 
+.clear-status {
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+}
+
+.clear-status strong {
+  color: var(--text-body);
+}
+
 .clear-row--danger > .button {
   color: var(--color-due);
+}
+
+.clear-row--danger {
+  margin-top: var(--space-2);
+  padding-top: var(--space-4);
+  border-top: 1px solid var(--border-subtle);
+}
+
+.clear-row--danger h3 {
+  margin: 0;
 }
 
 .clear-row--danger strong {

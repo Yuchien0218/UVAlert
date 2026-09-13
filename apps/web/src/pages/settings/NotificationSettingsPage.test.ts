@@ -102,34 +102,39 @@ describe("NotificationSettingsPage", () => {
     return { services, wrapper };
   }
 
-  it("保留新版頁首、共用卡片標題與狀態圖示", () => {
-    const { wrapper } = mountWith({ permission: "granted" });
+  it("以兩個同層通知管道呈現，且每個管道只顯示一次主圖示", () => {
+    const { wrapper } = mountWith({
+      permission: "granted",
+      isLineBound: true
+    });
 
     expect(
       wrapper.get('button[aria-label="返回更多"] icon-stub').attributes("name")
     ).toBe("tool-arrow-left");
-    expect(wrapper.findAll("h2.section-heading")).toHaveLength(2);
+    expect(wrapper.findAll("section.notification-channel")).toHaveLength(2);
     expect(
       wrapper
-        .findAll("h2.section-heading icon-stub")
+        .findAll("section.notification-channel > header icon-stub")
         .map((icon) => [icon.attributes("name"), icon.attributes("size")])
     ).toEqual([
       ["more-notifications", "32"],
       ["more-notifications", "32"]
     ]);
-    expect(wrapper.get("h2.section-heading span").text()).toBe(
-      "瀏覽器通知：通知已開啟"
+    expect(wrapper.findAll("section.notification-channel icon-stub")).toHaveLength(
+      2
     );
+    expect(wrapper.findAll(".delivery-emphasis")).toHaveLength(0);
+    expect(wrapper.findAll(".app-card")).toHaveLength(0);
   });
 
   it.each([
-    ["default", true, "瀏覽器通知：未開啟", "state-notification-pending"],
-    ["granted", true, "瀏覽器通知：通知已開啟", "more-notifications"],
-    ["denied", true, "瀏覽器通知：通知已被拒絕", "state-notification-off"],
+    ["default", true, "尚未開啟", "state-notification-pending"],
+    ["granted", true, "已開啟", "more-notifications"],
+    ["denied", true, "已被封鎖", "state-notification-off"],
     [
       "default",
       false,
-      "瀏覽器通知：這個瀏覽器不支援通知",
+      "此瀏覽器不支援",
       "state-notification-off"
     ]
   ] as const)(
@@ -142,6 +147,21 @@ describe("NotificationSettingsPage", () => {
       ).toBe(icon);
     }
   );
+
+  it("已開啟的管道不重複宣告啟用狀態", () => {
+    const { wrapper } = mountWith({
+      permission: "granted",
+      backgroundPushState: "enabled",
+      isLineBound: true
+    });
+    const browserChannel = wrapper.findAll("section.notification-channel")[0];
+    const lineChannel = wrapper.findAll("section.notification-channel")[1];
+
+    expect(browserChannel?.find(".notification-channel__header").text().match(/已開啟/g)).toHaveLength(1);
+    expect(lineChannel?.text().match(/已啟用 LINE 補擦提醒/g)).toBeNull();
+    expect(lineChannel?.text()).toContain("已連結");
+    expect(lineChannel?.text()).toContain("補擦時間到時傳送 LINE 訊息");
+  });
 
   it("要求通知權限，並可展開被封鎖時的三步說明", async () => {
     const pending = mountWith({ permission: "default" });
@@ -159,10 +179,10 @@ describe("NotificationSettingsPage", () => {
 
   it.each<readonly [BackgroundPushState, string, boolean, boolean, boolean]>([
     ["unsupported", "無法使用背景推播", false, false, false],
-    ["permission-required", "開啟背景推播", true, false, false],
+    ["permission-required", "尚未使用背景推播", true, false, false],
     ["subscribing", "設定中", false, false, false],
-    ["enabled", "已啟用背景推播", false, true, false],
-    ["scheduled", "已同步下一個補擦提醒", false, true, false],
+    ["enabled", "背景送達已開啟", false, true, false],
+    ["scheduled", "下一個提醒已同步", false, true, false],
     ["pending-sync", "等待同步", false, true, true],
     ["schedule-error", "無法依賴背景推播", false, true, false]
   ])(
@@ -181,6 +201,14 @@ describe("NotificationSettingsPage", () => {
       ).toBe(canRetry);
     }
   );
+
+  it("背景推播的狀態標題不會在說明中再重複一次", () => {
+    const enabled = mountWith({ backgroundPushState: "enabled" }).wrapper;
+    const scheduled = mountWith({ backgroundPushState: "scheduled" }).wrapper;
+
+    expect(enabled.text().match(/背景送達已開啟/g)).toHaveLength(1);
+    expect(scheduled.text().match(/下一個提醒已同步/g)).toHaveLength(1);
+  });
 
   it("說明並執行舊版關閉紀錄的安全復原", async () => {
     const { services, wrapper } = mountWith({
@@ -263,8 +291,8 @@ describe("NotificationSettingsPage", () => {
     expect(text).toContain("不保證準時");
     expect(text).toContain("iPhone/iPad");
     expect(text).toContain("加入主畫面");
-    expect(text).toContain("單一提醒原則");
-    expect(text).toContain("下一個最近的補擦到期提醒");
+    expect(text).toContain("下一個最近的補擦提醒");
+    expect(text).toContain("避免重複通知");
     expect(text).not.toContain("通知皆於本機發出，不經外部伺服器");
     expect(text).not.toContain("再次提醒頻率");
     expect(wrapper.findAll('input[name="reminder-frequency"]')).toHaveLength(0);
@@ -275,7 +303,8 @@ describe("NotificationSettingsPage", () => {
       const { wrapper } = mountWith({ isLineBound: false });
 
       expect(wrapper.text()).toContain("LINE 補擦提醒");
-      expect(wrapper.text()).toContain("透過 LINE 接收補擦通知");
+      expect(wrapper.text()).toContain("尚未連結");
+      expect(wrapper.text()).toContain("連結後可在 LINE 接收補擦提醒");
       expect(wrapper.find('[data-testid="bind-line-button"]').exists()).toBe(
         true
       );
@@ -297,7 +326,7 @@ describe("NotificationSettingsPage", () => {
     it("已綁定時呈現已啟用說明、「發送測試提醒」與「解除綁定」按鈕", () => {
       const { wrapper } = mountWith({ isLineBound: true });
 
-      expect(wrapper.text()).toContain("已啟用 LINE 補擦提醒");
+      expect(wrapper.text()).toContain("已連結");
       expect(wrapper.find('[data-testid="bind-line-button"]').exists()).toBe(
         false
       );
