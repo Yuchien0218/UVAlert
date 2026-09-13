@@ -556,12 +556,14 @@ function handleEndSession(): void {
         :eyebrow="headlineEyebrow"
         :uvi="headlineDay?.uvi ?? null"
         :risk-level="headlineDay?.riskLevel ?? null"
+        :region-name="uvForecast.region.value?.displayName ?? null"
+        :show-region-setup="!hasRegion"
         :note="headlineNote"
       />
 
       <!--
-        2026-08-24：「五日 UV 預報」入口移到頁首右上角的 UV 指數
-        （點下去就是 /forecast），這裡不再重複一個入口。
+        2026-09-13：「五日 UV 預報」是頁首右上角的明確導覽入口
+        （點下去就是 /forecast），這裡不再重複。
       -->
 
       <!--
@@ -590,6 +592,7 @@ function handleEndSession(): void {
         :eyebrow="headlineEyebrow"
         :uvi="headlineDay?.uvi ?? null"
         :risk-level="headlineDay?.riskLevel ?? null"
+        :region-name="uvForecast.region.value?.displayName ?? null"
         :note="headlineNote"
       />
 
@@ -620,10 +623,11 @@ function handleEndSession(): void {
 
       <button
         v-else
-        class="button button--primary home__cta page-primary-action"
+        class="button button--primary home__cta home__cta--start page-primary-action"
         type="button"
         @click="handleStartSetup"
       >
+        <Icon name="nav-reminder" :size="20" mono />
         開始防曬提醒
       </button>
 
@@ -632,7 +636,7 @@ function handleEndSession(): void {
         移除。
         - 「查看最近紀錄」連到 /reminder：該頁已併入本頁，且沒有提醒進行中
           時事件流本來就查不到東西（事件流只查得到目前 session）。
-        - 「五日 UV 預報」：入口移到頁首右上角的 UV 指數，點它就是 /forecast。
+        - 「五日 UV 預報」：入口在頁首右上角，點它就是 /forecast。
       -->
     </template>
 
@@ -703,6 +707,10 @@ function handleEndSession(): void {
  */
 .home {
   gap: var(--page-stack-gap);
+}
+
+.home__cta--start {
+  margin-block-start: calc(-1 * var(--space-2));
 }
 
 /*

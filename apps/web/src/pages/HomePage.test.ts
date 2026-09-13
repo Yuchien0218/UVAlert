@@ -16,6 +16,7 @@ import HomeLocationPrompt from "../components/home/HomeLocationPrompt.vue";
 import HomeNightNotice from "../components/home/HomeNightNotice.vue";
 import HomeNightSession from "../components/home/HomeNightSession.vue";
 import HomeUvHeadline from "../components/home/HomeUvHeadline.vue";
+import Icon from "../components/icons/Icon.vue";
 import ZoneStatusList from "../components/reminder/ZoneStatusList.vue";
 import SessionEndControl from "../components/session/SessionEndControl.vue";
 import HomePage from "./HomePage.vue";
@@ -202,6 +203,17 @@ describe("HomePage", () => {
   });
 
   describe("有提醒進行中", () => {
+    it("沒有地區時在 UV 區塊提供精簡的設定地區入口", async () => {
+      mockServices({ session, region: null });
+
+      const wrapper = await mountHome();
+
+      expect(
+        wrapper.findComponent(HomeUvHeadline).props("showRegionSetup")
+      ).toBe(true);
+      expect(wrapper.findComponent(HomeLocationPrompt).exists()).toBe(false);
+    });
+
     it("有提醒時不在提醒流程重複顯示公開政策連結", async () => {
       mockServices({ session, region: { displayName: "臺北市 大安區" } });
 
@@ -602,8 +614,20 @@ describe("HomePage", () => {
 
       const wrapper = await mountHome();
 
-      expect(wrapper.findComponent(HomeUvHeadline).exists()).toBe(true);
-      expect(wrapper.find(".button--primary").text()).toBe("開始防曬提醒");
+      const headline = wrapper.findComponent(HomeUvHeadline);
+      const action = wrapper.get(".button--primary");
+      expect(headline.exists()).toBe(true);
+      expect(headline.props("regionName")).toBe("臺北市 大安區");
+      expect(action.text()).toBe("開始防曬提醒");
+      expect(action.getComponent(Icon).props()).toMatchObject({
+        name: "nav-reminder",
+        size: 20,
+        mono: true
+      });
+      expect(
+        headline.element.compareDocumentPosition(action.element) &
+          Node.DOCUMENT_POSITION_FOLLOWING
+      ).toBeTruthy();
       expect(wrapper.findComponent(HomeNightNotice).exists()).toBe(false);
     });
 

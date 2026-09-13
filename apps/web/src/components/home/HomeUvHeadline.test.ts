@@ -1,6 +1,6 @@
 // @vitest-environment happy-dom
 import { readFileSync } from "node:fs";
-import { mount } from "@vue/test-utils";
+import { mount, RouterLinkStub } from "@vue/test-utils";
 import { describe, expect, it } from "vitest";
 import HomeUvHeadline from "./HomeUvHeadline.vue";
 
@@ -13,7 +13,7 @@ const source = readFileSync(
  * 2026-08-31：讀數右側多了前往五日預報的 RouterLink，所以掛載時要 stub
  * 掉它——這個元件本身不需要 router，只是借用連結。
  */
-const GLOBAL = { stubs: { RouterLink: { template: "<a><slot /></a>" } } };
+const GLOBAL = { stubs: { RouterLink: RouterLinkStub } };
 
 function mountHeadline(riskLevel: string | null, uvi: number | null) {
   return mount(HomeUvHeadline, {
@@ -101,12 +101,7 @@ describe("HomeUvHeadline 風險色", () => {
 });
 
 /*
- * 2026-08-31：拿掉地區與溫度那一行，並把 UV 區塊上下框上分隔線
- * （使用者要求，位置由截圖指定）。
- *
- * 三件事分開守，因為它們可以互相掩護：只守「沒有地區」→ 溫度可以留著；
- * 只守「有分隔線」→ 地區可以回來；只守「note 有條件」→ 白天可以又固定
- * 顯示「地區預報」。
+ * UV 區塊的所在地、補充註記與上下分隔線各自有明確位置。
  */
 describe("HomeUvHeadline 的精簡與分隔線", () => {
   const source = readFileSync(
@@ -116,9 +111,39 @@ describe("HomeUvHeadline 的精簡與分隔線", () => {
     .replace(/<!--[\s\S]*?-->/g, "")
     .replace(/\/\*[\s\S]*?\*\//g, "");
 
-  it("不再接收地區與溫度", () => {
-    expect(source).not.toContain("regionName");
-    expect(source).not.toContain("temperatureCelsius");
+  it("在今日 UV 右側顯示所在地，並連到地區設定", () => {
+    const wrapper = mount(HomeUvHeadline, {
+      props: {
+        eyebrow: "今日 UV",
+        uvi: 9,
+        riskLevel: "very_high",
+        note: null,
+        regionName: "臺中市西區"
+      },
+      global: GLOBAL
+    });
+
+    const header = wrapper.get(".uv-headline__header");
+    const region = header.getComponent(RouterLinkStub);
+    expect(region.text()).toBe("臺中市西區");
+    expect(region.props("to")).toBe("/region");
+  });
+
+  it("提醒進行中但沒有地區時，顯示精簡的設定地區入口", () => {
+    const wrapper = mount(HomeUvHeadline, {
+      props: {
+        eyebrow: "今日 UV",
+        uvi: null,
+        riskLevel: null,
+        note: null,
+        showRegionSetup: true
+      },
+      global: GLOBAL
+    });
+
+    const regionSetup = wrapper.getComponent(RouterLinkStub);
+    expect(regionSetup.text()).toBe("設定地區");
+    expect(regionSetup.props("to")).toBe("/region");
   });
 
   it("UV 區塊上下都有分隔線", () => {

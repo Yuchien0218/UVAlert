@@ -3,12 +3,11 @@ import { computed } from "vue";
 
 import type { UvRiskLevel } from "@sunshield/contracts";
 import BrandLockup from "./BrandLockup.vue";
-import { getUvRiskLevelLabel } from "../../features/uv/uvForecastRules";
 
 interface Props {
-  /** 目前地區名稱。與 riskLevel 同時有值時，右上角才顯示 UV。 */
+  /** 目前地區名稱。與 riskLevel 同時有值時，右上角顯示五日預報入口。 */
   regionName?: string | null;
-  /** 要顯示的 UV 風險等級（白天今日、夜間明日，由父層決定）。 */
+  /** 是否已有可用 UV 預報（白天今日、夜間明日，由父層決定）。 */
   uvRiskLevel?: UvRiskLevel | null;
 }
 
@@ -18,10 +17,8 @@ const props = withDefaults(defineProps<Props>(), {
 });
 
 /**
- * 2026-08-24 使用者裁決：右上角從「本機提醒」改成顯示紫外線指數，
- * 例如「臺中市 低量級」，文字顏色跟著風險等級走。
- *
- * 2026-09-11 使用者裁決：右上角顯示地區與 UV 等級時，點擊路由改為連到 /region（地區設定）。
+ * 2026-09-13 使用者裁決：地區與風險等級移到提醒頁的 UV 區塊；頁首右上角
+ * 改成「五日 UV 預報」，讓它明確讀成導覽入口而非重複的狀態資訊。
  *
  * 沒有 UV 可顯示時（沒設定地區，或預報讀不到）顯示「今日全臺UV分布」，
  * 連到 /forecast。
@@ -34,11 +31,6 @@ const showUv = computed(
   () => props.regionName !== null && props.uvRiskLevel !== null
 );
 
-const uvLabel = computed(() =>
-  props.uvRiskLevel === null
-    ? null
-    : `${props.regionName} ${getUvRiskLevelLabel(props.uvRiskLevel)}`
-);
 </script>
 
 <template>
@@ -58,10 +50,9 @@ const uvLabel = computed(() =>
     <RouterLink
       v-if="showUv"
       class="brand-header__uv"
-      :class="`brand-header__uv--${uvRiskLevel}`"
-      to="/region"
+      to="/forecast"
     >
-      {{ uvLabel }}
+      五日 UV 預報
     </RouterLink>
 
     <RouterLink v-else class="brand-header__set-region" to="/forecast">
@@ -156,10 +147,8 @@ const uvLabel = computed(() =>
 }
 
 /*
- * UV 指數入口。顏色用 DESIGN.md 第二節的 UV 五級風險色。
- *
- * 顏色不是唯一的載體——等級名稱（低量級／中量級…）本身就是文字，
- * 灰階或色覺差異下仍讀得出來，符合本檔案上方對狀態點的同一條規則。
+ * 五日 UV 預報入口。保留原本的 class，避免讓全域頁首樣式產生不必要的
+ * 分支；內容已不再承擔即時風險狀態，因此使用一般次要文字色。
  *
  * **2026-09-04 更正**：這裡原本寫「觸控目標靠 padding 撐到 44px，不寫
  * min-height」——**實測只有 42px**（12＋18＋12）。那句話從一開始就不成立。
@@ -178,23 +167,4 @@ const uvLabel = computed(() =>
   text-decoration: none;
 }
 
-.brand-header__uv--low {
-  color: var(--color-uvi-low);
-}
-
-.brand-header__uv--moderate {
-  color: var(--color-uvi-moderate);
-}
-
-.brand-header__uv--high {
-  color: var(--color-uvi-high);
-}
-
-.brand-header__uv--very_high {
-  color: var(--color-uvi-very-high);
-}
-
-.brand-header__uv--extreme {
-  color: var(--color-uvi-extreme);
-}
 </style>

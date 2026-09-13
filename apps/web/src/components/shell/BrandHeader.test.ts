@@ -17,48 +17,23 @@ function mountHeader(props: Record<string, unknown> = {}) {
 }
 
 describe("BrandHeader", () => {
-  /*
-   * 2026-08-24 使用者裁決：右上角改顯示紫外線指數（例如「臺中市 低量級」），
-   * 顏色跟著風險等級走。
-   * 2026-09-11 使用者裁決：點下去到 /region（地區設定）。
-   */
-  describe("UV 指數", () => {
-    it("有地區與風險等級時顯示地區＋等級，並連到地區設定", () => {
+  /* 2026-09-13：狀態資訊移回 UV 區塊，頁首改成明確的預報入口。 */
+  describe("UV 預報入口", () => {
+    it("有地區與風險等級時顯示五日 UV 預報，並連到預報頁", () => {
       const wrapper = mountHeader({
-        regionName: "臺中市",
+        regionName: "臺中市西區",
         uvRiskLevel: "low"
       });
 
       const uv = wrapper.get(".brand-header__uv");
-      expect(uv.text()).toBe("臺中市 低量級");
-      expect(uv.classes()).toContain("brand-header__uv--low");
-      // 注意頁首有兩個 RouterLink（品牌 Logo 連到 /），要取 UV 這一個。
+      expect(uv.text()).toBe("五日 UV 預報");
+      expect(uv.text()).not.toContain("臺中市西區");
+      expect(uv.text()).not.toContain("低量級");
       expect(
         wrapper
           .findAllComponents(RouterLinkStub)
           .map((link) => link.props("to"))
-      ).toContain("/region");
-      // UV 取代原本的提醒狀態文字，不並存。
-      expect(wrapper.find(".brand-header__context").exists()).toBe(false);
-    });
-
-    // 顏色不能是唯一載體——等級名稱本身就是文字，灰階下仍讀得出來。
-    it.each([
-      ["low", "低量級"],
-      ["moderate", "中量級"],
-      ["high", "高量級"],
-      ["very_high", "過量級"],
-      ["extreme", "危險級"]
-    ] as const)("%s 顯示對應的等級文字", (riskLevel, label) => {
-      const wrapper = mountHeader({
-        regionName: "臺中市",
-        uvRiskLevel: riskLevel
-      });
-
-      expect(wrapper.get(".brand-header__uv").text()).toBe(`臺中市 ${label}`);
-      expect(wrapper.get(".brand-header__uv").classes()).toContain(
-        `brand-header__uv--${riskLevel}`
-      );
+      ).toContain("/forecast");
     });
 
     /*

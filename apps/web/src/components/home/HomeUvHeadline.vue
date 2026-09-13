@@ -19,12 +19,16 @@ import {
  * 同理拿掉「12:00 最強」——資料集沒有尖峰時段。
  */
 
-const props = defineProps<{
+const props = withDefaults(defineProps<{
   /** 「今日 UV」或「明日 UV 預報」。 */
   eyebrow: string;
   /** null 代表沒有可用資料（未設定地區或取不到預報）。 */
   uvi: number | null;
   riskLevel: UvRiskLevel | null;
+  /** 目前預報地區；有值時提供前往地區設定的入口。 */
+  regionName?: string | null;
+  /** 無地區時是否提供精簡設定入口；提醒進行中使用，避免插入大型提示卡。 */
+  showRegionSetup?: boolean;
   /**
    * 註記，例如夜間的「明天比今天高 1」。白天是 null。
    *
@@ -32,7 +36,10 @@ const props = defineProps<{
    * 沒有資訊量，這個 App 的 UV 本來就只有地區預報一種來源。
    */
   note: string | null;
-}>();
+}>(), {
+  regionName: null,
+  showRegionSetup: false
+});
 
 const hasValue = computed(() => props.uvi !== null && props.riskLevel !== null);
 </script>
@@ -59,20 +66,28 @@ const hasValue = computed(() => props.uvi !== null && props.riskLevel !== null);
       <p id="uv-headline-title" class="uv-headline__eyebrow">
         {{ eyebrow }}
       </p>
-      <p v-if="note !== null" class="uv-headline__note">{{ note }}</p>
+      <div
+        v-if="regionName !== null || showRegionSetup || note !== null"
+        class="uv-headline__meta"
+      >
+        <RouterLink
+          v-if="regionName !== null"
+          class="uv-headline__region"
+          to="/region"
+        >
+          {{ regionName }}
+        </RouterLink>
+        <RouterLink
+          v-else-if="showRegionSetup"
+          class="uv-headline__region"
+          to="/region"
+        >
+          設定地區
+        </RouterLink>
+        <p v-if="note !== null" class="uv-headline__note">{{ note }}</p>
+      </div>
     </div>
 
-    <!--
-      2026-08-31：讀數右側補上前往五日預報的入口（使用者要求）。
-
-      **這推翻了 2026-08-24 的一句註解**（「五日 UV 預報入口移到頁首右上角
-      的 UV 指數，這裡不再重複一個入口」）。當時的顧慮是重複，但頁首那個
-      入口是「臺中市西區 中量級」，看起來像狀態顯示而不是連結——沒有箭頭、
-      沒有底線、也不在使用者正在讀的位置。實際可點卻沒人知道可點，等於
-      沒有入口。
-
-      放在讀數同一列的右端：它描述的正是這個數字「還有沒有別的可以看」。
-    -->
     <div
       v-if="hasValue"
       class="uv-headline__value"
@@ -128,11 +143,33 @@ const hasValue = computed(() => props.uvi !== null && props.riskLevel !== null);
   display: contents;
 }
 
+.uv-headline--empty .uv-headline__meta {
+  order: 2;
+  margin-inline-start: auto;
+}
+
 .uv-headline__header {
   display: flex;
   justify-content: space-between;
   align-items: baseline;
   gap: var(--space-2);
+}
+
+.uv-headline__meta {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-2);
+}
+
+.uv-headline__region {
+  display: inline-flex;
+  min-height: var(--tap-target);
+  align-items: center;
+  margin-block: calc(-1 * var(--space-3));
+  color: var(--text-secondary);
+  font-size: var(--font-size-caption);
+  font-weight: 500;
+  text-decoration: none;
 }
 
 .uv-headline__eyebrow {
@@ -206,8 +243,7 @@ const hasValue = computed(() => props.uvi !== null && props.riskLevel !== null);
  * 視覺重量**。有 UV 值時那個位置放的是 `--display` 的大讀數，那是有內容
  * 才配得上的份量。
  *
- * （2026-08-31 更新：當時「應該讓位給地區名」，而地區那一行已經拿掉了；
- * 降字級的理由本身不變。）
+ * （2026-09-13 更新：地區已移到標題列右側；降字級的理由本身不變。）
  *
  * 用 supporting 而不是 body：這是「這裡沒有東西」的說明文字，對應
  * DESIGN.md 第五節的「次要資訊與補充文字」。
