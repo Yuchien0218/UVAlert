@@ -171,7 +171,7 @@ function renderEducationIndex(content, baseUrl, indexable, lastmod) {
       return `<a class="card" href="/education/${category.slug}"><span class="kicker">${articles.length} 篇文章</span><strong>${escapeHtml(category.title)}</strong><small>${escapeHtml(category.description)}</small></a>`;
     })
     .join("\n");
-  const body = `<p class="eyebrow">防曬生活編輯部</p><h1>防曬衛教</h1><p class="lead">提供實用情境與官方指引。本專區為一般衛教資訊，不能取代專業醫療診斷。</p><h2>依一天的使用流程找答案</h2><div class="card-list">${categories}</div>`;
+  const body = `<p class="eyebrow">防曬生活編輯部</p><h1>防曬衛教</h1><figure class="article-hero"><img src="/images/education/categories/education-index.jpg" alt="防曬衛教" loading="lazy" /></figure><p class="lead">提供實用情境與官方指引。本專區為一般衛教資訊，不能取代專業醫療診斷。</p><h2>依一天的使用流程找答案</h2><div class="card-list">${categories}</div>`;
   return renderDocument({
     title: "防曬衛教",
     description:
@@ -193,7 +193,7 @@ function renderCategoryPage(category, articles, baseUrl, indexable, lastmod) {
         `<a class="card" href="/education/articles/${article.slug}"><span class="kicker">${escapeHtml(article.primaryQuestion)}</span><strong>${escapeHtml(article.title)}</strong><small>${escapeHtml(article.summary)}</small></a>`
     )
     .join("\n");
-  const body = `<a class="back-link" href="/education">← 防曬衛教</a><p class="eyebrow">衛教分類</p><h1>${escapeHtml(category.title)}</h1><p class="lead">${escapeHtml(category.description)}</p><h2>文章</h2><div class="card-list">${cards}</div>`;
+  const body = `<a class="back-link" href="/education">← 防曬衛教</a><p class="eyebrow">衛教分類</p><h1>${escapeHtml(category.title)}</h1><figure class="article-hero"><img src="/images/education/categories/${escapeHtml(category.slug)}.jpg" alt="${escapeHtml(category.title)}" loading="lazy" /></figure><p class="lead">${escapeHtml(category.description)}</p><h2>文章</h2><div class="card-list">${cards}</div>`;
   return renderDocument({
     title: category.title,
     description: category.description,

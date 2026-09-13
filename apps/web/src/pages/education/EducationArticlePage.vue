@@ -239,7 +239,12 @@ const relatedArticles = computed(() =>
  * 已經不是 grid，那兩行是失效的殘留。
  */
 
-.education-article-meta,
+.education-article-meta {
+  margin: var(--space-3) 0 0;
+  color: var(--text-secondary);
+  font-size: var(--font-size-caption);
+}
+
 .education-card-kicker {
   margin: 0;
   color: var(--text-secondary);
@@ -248,7 +253,7 @@ const relatedArticles = computed(() =>
 
 .education-article-hero {
   max-width: 44rem;
-  margin: var(--space-4) 0 var(--space-5);
+  margin: calc(-1 * var(--space-3)) 0 calc(-1 * var(--space-3));
   border-radius: var(--radius-md);
   overflow: hidden;
   border: 1px solid var(--border-subtle);

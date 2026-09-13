@@ -76,6 +76,16 @@ const robots = computed(() =>
         @click="router.push('/education')"
       />
 
+      <figure class="education-category-cover">
+        <img
+          :src="`/images/education/categories/${category.slug}.jpg`"
+          :alt="category.title"
+          class="education-category-cover__img"
+          loading="eager"
+          decoding="async"
+        />
+      </figure>
+
       <p class="page-heading__body">{{ category.description }}</p>
     </header>
 
@@ -151,6 +161,22 @@ const robots = computed(() =>
 .education-heading__body,
 .education-heading .page-heading__body {
   grid-column: 1 / -1;
+}
+
+.education-category-cover {
+  grid-column: 1 / -1;
+  margin: var(--space-2) 0 var(--space-1);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  border: 1px solid var(--border-subtle);
+  background: var(--surface-primary);
+}
+
+.education-category-cover__img {
+  display: block;
+  width: 100%;
+  height: auto;
+  object-fit: cover;
 }
 
 .education-review-note {

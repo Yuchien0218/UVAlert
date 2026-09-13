@@ -100,6 +100,16 @@ const robots = computed(() =>
         @click="router.push('/more')"
       />
 
+      <figure class="education-index-cover">
+        <img
+          :src="'/images/education/categories/education-index.jpg'"
+          alt="防曬衛教"
+          class="education-index-cover__img"
+          loading="eager"
+          decoding="async"
+        />
+      </figure>
+
       <p class="page-heading__body">
         提供實用情境與官方指引。本專區為一般衛教資訊，不能取代專業醫療診斷。
       </p>
@@ -164,7 +174,9 @@ const robots = computed(() =>
           -->
           <IconLead :icon="category.icon">
             <span class="education-card-body education-category-card__body">
-              <span class="education-card-titles education-category-card__titles">
+              <span
+                class="education-card-titles education-category-card__titles"
+              >
                 <strong>{{ category.title }}</strong>
                 <span class="education-card-kicker"
                   >{{ category.articleCount }} 篇文章</span
@@ -206,6 +218,22 @@ const robots = computed(() =>
 
 .education-hero .page-heading__body {
   grid-column: 1 / -1;
+}
+
+.education-index-cover {
+  grid-column: 1 / -1;
+  margin: var(--space-2) 0 var(--space-1);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  border: 1px solid var(--border-subtle);
+  background: var(--surface-primary);
+}
+
+.education-index-cover__img {
+  display: block;
+  width: 100%;
+  height: auto;
+  object-fit: cover;
 }
 
 .education-section-heading {
