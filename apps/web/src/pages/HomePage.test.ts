@@ -12,11 +12,11 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { WebAppServices } from "../app/createWebAppServices";
 import { useWebAppServices } from "../app/injection";
 import HomeCountdown from "../components/home/HomeCountdown.vue";
+import IconLead from "../components/common/IconLead.vue";
 import HomeLocationPrompt from "../components/home/HomeLocationPrompt.vue";
 import HomeNightNotice from "../components/home/HomeNightNotice.vue";
 import HomeNightSession from "../components/home/HomeNightSession.vue";
 import HomeUvHeadline from "../components/home/HomeUvHeadline.vue";
-import Icon from "../components/icons/Icon.vue";
 import ZoneStatusList from "../components/reminder/ZoneStatusList.vue";
 import SessionEndControl from "../components/session/SessionEndControl.vue";
 import HomePage from "./HomePage.vue";
@@ -609,7 +609,7 @@ describe("HomePage", () => {
       expect(wrapper.find('a[href="/terms"]').exists()).toBe(false);
     });
 
-    it("白天有地區時提供開始提醒的主 CTA", async () => {
+    it("白天有地區時提供開始提醒的主 CTA 與領銜沙漏", async () => {
       mockServices({ region: { displayName: "臺北市 大安區" } });
 
       const wrapper = await mountHome();
@@ -619,10 +619,9 @@ describe("HomePage", () => {
       expect(headline.exists()).toBe(true);
       expect(headline.props("regionName")).toBe("臺北市 大安區");
       expect(action.text()).toBe("開始防曬提醒");
-      expect(action.getComponent(Icon).props()).toMatchObject({
-        name: "nav-reminder",
-        size: 20,
-        mono: true
+      expect(wrapper.findComponent(IconLead).props()).toMatchObject({
+        icon: "nav-reminder",
+        size: "hero"
       });
       expect(
         headline.element.compareDocumentPosition(action.element) &
@@ -692,12 +691,15 @@ describe("HomePage", () => {
      * 倒數的前置條件。地區只影響看不看得到 UV，不影響倒數長度。使用者
      * 2026-08-31 裁決放行。
      */
-    it("沒有地區時仍然可以開始提醒，提示卡與主 CTA 同時出現", async () => {
+    it("沒有地區時在 UV 區塊整合設定入口，仍然可以開始提醒", async () => {
       mockServices({ region: null });
 
       const wrapper = await mountHome();
 
-      expect(wrapper.findComponent(HomeLocationPrompt).exists()).toBe(true);
+      expect(wrapper.findComponent(HomeLocationPrompt).exists()).toBe(false);
+      expect(
+        wrapper.findComponent(HomeUvHeadline).props("showRegionSetup")
+      ).toBe(true);
       expect(wrapper.find(".button--primary").text()).toBe("開始防曬提醒");
     });
 
@@ -705,12 +707,15 @@ describe("HomePage", () => {
      * 夜間那一支**仍然**替換主 CTA，即使同時沒有地區——把兩件事分開守，
      * 否則「地區不擋」很容易連帶把夜間的裁決也一起拆掉。
      */
-    it("沒有地區又是夜間時，維持夜間的說明與逃生出口", async () => {
+    it("沒有地區又是夜間時，維持夜間的說明與逃生出口並提供精簡設定入口", async () => {
       mockServices({ region: null, isEvening: true });
 
       const wrapper = await mountHome();
 
-      expect(wrapper.findComponent(HomeLocationPrompt).exists()).toBe(true);
+      expect(wrapper.findComponent(HomeLocationPrompt).exists()).toBe(false);
+      expect(
+        wrapper.findComponent(HomeUvHeadline).props("showRegionSetup")
+      ).toBe(true);
       expect(wrapper.findComponent(HomeNightNotice).exists()).toBe(true);
       expect(wrapper.find(".button--primary").exists()).toBe(false);
     });

@@ -7,7 +7,7 @@ import RecentEventsList from "../components/reminder/RecentEventsList.vue";
 import ZoneStatusList from "../components/reminder/ZoneStatusList.vue";
 import type { SecondaryActionKind } from "../features/reminder/reminderPresentation";
 import HomeCountdown from "../components/home/HomeCountdown.vue";
-import HomeLocationPrompt from "../components/home/HomeLocationPrompt.vue";
+import IconLead from "../components/common/IconLead.vue";
 import HomeNightNotice from "../components/home/HomeNightNotice.vue";
 import HomeNightSession from "../components/home/HomeNightSession.vue";
 import HomeUvHeadline from "../components/home/HomeUvHeadline.vue";
@@ -593,26 +593,9 @@ function handleEndSession(): void {
         :uvi="headlineDay?.uvi ?? null"
         :risk-level="headlineDay?.riskLevel ?? null"
         :region-name="uvForecast.region.value?.displayName ?? null"
+        :show-region-setup="!hasRegion"
         :note="headlineNote"
       />
-
-      <!--
-        沒有地區就沒有 UV 可看，先解決這件事——但**不擋開始提醒**。
-
-        2026-08-31 修正：原本這三塊是 v-if／v-else-if／v-else 一條鏈，
-        於是沒設定地區的人**看不到「開始防曬提醒」那顆按鈕**，等於地區
-        變成開始倒數的前置條件。那既違反 Sitemap §一「定位或網路不足時
-        仍不得阻擋本機倒數與手動操作」，也違反 HomeLocationPrompt 自己
-        docblock 寫的「刻意不阻擋任何其他操作」——實作跟兩份規格都相反。
-
-        地區只影響「看不看得到 UV」，不影響倒數：補擦間隔由包裝標示或
-        120 分鐘保守值決定，UV 高低從來不會延長或縮短它（/forecast 那頁
-        也是這樣寫的）。所以提示卡改成獨立顯示，CTA 照常出現。
-
-        夜間那一支維持替換 CTA——那是 2026-08-23 的裁決，而且它自己帶了
-        「還是要開始提醒」的逃生出口，沒有把人擋死。
-      -->
-      <HomeLocationPrompt v-if="!hasRegion" />
 
       <!-- 夜間不放主 CTA，改用說明加逃生出口。 -->
       <HomeNightNotice
@@ -621,15 +604,21 @@ function handleEndSession(): void {
         @start="handleStartSetup"
       />
 
-      <button
-        v-else
-        class="button button--primary home__cta home__cta--start page-primary-action"
-        type="button"
-        @click="handleStartSetup"
-      >
-        <Icon name="nav-reminder" :size="20" mono />
-        開始防曬提醒
-      </button>
+      <template v-else>
+        <div class="home-start">
+          <IconLead class="home-start__lead" icon="nav-reminder" size="hero">
+            <p class="home-start__body">出門前先記錄防曬，定時提醒補擦。</p>
+          </IconLead>
+
+          <button
+            class="button button--primary home__cta page-primary-action"
+            type="button"
+            @click="handleStartSetup"
+          >
+            開始防曬提醒
+          </button>
+        </div>
+      </template>
 
       <!--
         2026-08-24：這裡原本有兩個次要入口，現在都沒了，連 <nav> 空殼一起
@@ -709,8 +698,22 @@ function handleEndSession(): void {
   gap: var(--page-stack-gap);
 }
 
-.home__cta--start {
-  margin-block-start: calc(-1 * var(--space-2));
+.home-start {
+  display: grid;
+  gap: var(--space-4);
+  justify-items: start;
+  padding-block: var(--space-4) 0;
+}
+
+.home-start__lead {
+  color: var(--text-primary);
+}
+
+.home-start__body {
+  margin: 0;
+  color: var(--text-emphasis);
+  font-size: var(--font-size-body);
+  line-height: var(--line-height-body);
 }
 
 /*
