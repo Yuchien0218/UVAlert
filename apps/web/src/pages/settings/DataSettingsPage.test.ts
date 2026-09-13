@@ -142,14 +142,13 @@ describe("DataSettingsPage 的資訊範圍", () => {
     expect(scope.text()).toContain("雲端");
   });
 
-  it("只有資料概況使用卡片，備份與清除為同層扁平區段", () => {
+  it("資料概況、備份與清除均使用標準卡片結構", () => {
     useServices("signed_out", "idle", SUMMARY_FIXTURE);
     const wrapper = mount(DataSettingsPage, {
       global: { stubs: { RouterLink: true } }
     });
 
-    expect(wrapper.findAll("section.app-card")).toHaveLength(1);
-    expect(wrapper.findAll("section.data-section")).toHaveLength(2);
+    expect(wrapper.findAll("section.app-card")).toHaveLength(3);
   });
 
   it("依資料種類呈現精確的空狀態", () => {

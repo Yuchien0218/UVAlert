@@ -124,7 +124,7 @@ describe("NotificationSettingsPage", () => {
       2
     );
     expect(wrapper.findAll(".delivery-emphasis")).toHaveLength(0);
-    expect(wrapper.findAll(".app-card")).toHaveLength(0);
+    expect(wrapper.findAll(".app-card")).toHaveLength(2);
   });
 
   it.each([

@@ -150,7 +150,7 @@ function goBack(): void {
         </dl>
       </section>
 
-      <section class="data-section" aria-labelledby="data-export-title">
+      <section class="app-card" aria-labelledby="data-export-title">
         <h2
           class="section-heading"
           id="data-export-title"
@@ -235,7 +235,7 @@ function goBack(): void {
         </AppNotice>
       </section>
 
-      <section class="data-section" aria-labelledby="data-clear-title">
+      <section class="app-card" aria-labelledby="data-clear-title">
         <h2
           class="section-heading"
           id="data-clear-title"
@@ -366,19 +366,11 @@ dd {
   justify-items: start;
 }
 
-.data-section {
-  display: grid;
-  gap: var(--space-3);
-  justify-items: start;
-  padding-block: var(--space-4);
+.data-page {
+  padding-bottom: var(--space-8);
 }
 
-.data-section + .data-section {
-  border-top: 1px solid var(--border-subtle);
-}
-
-.app-card > h2,
-.data-section > h2 {
+.app-card > h2 {
   font-size: var(--font-size-card-title);
 }
 

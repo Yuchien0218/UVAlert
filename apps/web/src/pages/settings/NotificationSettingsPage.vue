@@ -188,7 +188,7 @@ async function runTest(): Promise<void> {
       </p>
     </header>
 
-    <section class="notification-channel" aria-labelledby="permission-heading">
+    <section class="app-card notification-channel" aria-labelledby="permission-heading">
       <header class="notification-channel__header">
         <h2
           id="permission-heading"
@@ -335,7 +335,7 @@ async function runTest(): Promise<void> {
       </div>
     </section>
 
-    <section class="notification-channel" aria-labelledby="line-push-heading">
+    <section class="app-card notification-channel" aria-labelledby="line-push-heading">
       <header class="notification-channel__header">
         <h2
           id="line-push-heading"
@@ -409,15 +409,13 @@ async function runTest(): Promise<void> {
 <style scoped>
 .notification-settings-page {
   display: grid;
-  gap: var(--page-stack-gap-compact);
+  gap: var(--page-stack-gap);
+  padding-bottom: var(--space-8);
 }
-.notification-channel {
+.app-card {
   display: grid;
   gap: var(--space-4);
-  padding-block: var(--space-4);
-}
-.notification-channel + .notification-channel {
-  border-top: 1px solid var(--border-subtle);
+  padding: var(--card-padding);
 }
 .notification-channel__header {
   display: grid;
@@ -437,7 +435,8 @@ async function runTest(): Promise<void> {
 .card-subdivision {
   display: grid;
   gap: var(--space-3);
-  padding-inline-start: calc(var(--space-4) + var(--space-3));
+  padding-top: var(--space-3);
+  border-top: 1px solid var(--border-subtle);
 }
 .section-subheading {
   display: flex;
@@ -520,9 +519,4 @@ async function runTest(): Promise<void> {
   line-height: var(--line-height-body);
 }
 
-@media (max-width: 30rem) {
-  .card-subdivision {
-    padding-inline-start: 0;
-  }
-}
 </style>
