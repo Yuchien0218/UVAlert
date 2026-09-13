@@ -706,12 +706,12 @@ function handleEndSession(): void {
 }
 
 .home-start__lead {
-  color: var(--text-primary);
+  color: var(--color-untimed);
 }
 
 .home-start__body {
   margin: 0;
-  color: var(--text-emphasis);
+  color: var(--text-body);
   font-size: var(--font-size-body);
   line-height: var(--line-height-body);
 }

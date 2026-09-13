@@ -503,11 +503,9 @@ async function runTest(): Promise<void> {
 .channel-status {
   display: grid;
   gap: var(--space-2);
-  padding-inline-start: var(--space-3);
-  border-inline-start: 2px solid var(--border-strong);
 }
-.channel-status--limited {
-  border-color: var(--color-due);
+.channel-status--limited .channel-status__title {
+  color: var(--color-due);
 }
 .channel-status__title {
   margin: 0;
