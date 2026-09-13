@@ -326,7 +326,7 @@ function prepareOperation(
     const action = actions[key] ?? item.defaultAction;
     if (action === undefined || action === null) {
       throw makeSelectionError(
-        `請先選擇「${item.key.recordId}」要保留本機或雲端版本`
+        `請先選擇「${friendlyRecordName(item.key.recordKind, item.key.recordId)}」要保留本機或雲端版本`
       );
     }
     if (action === "skip") continue;
@@ -387,6 +387,21 @@ function parseRecordKey(value: string): SyncRecordKey {
     recordKind: value.slice(0, separator) as SyncRecordKey["recordKind"],
     recordId: value.slice(separator + 1)
   };
+}
+
+function friendlyRecordName(recordKind: string, recordId: string): string {
+  switch (recordKind) {
+    case "active_session":
+      return "進行中的提醒";
+    case "product_catalog":
+      return "防曬裝備";
+    case "region_preference":
+      return "地區設定";
+    case "user_preferences":
+      return "提醒與顯示偏好";
+    default:
+      return recordId;
+  }
 }
 
 function makeSelectionError(message: string): CloudError {

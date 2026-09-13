@@ -2,12 +2,16 @@
 
 import { shallowMount } from "@vue/test-utils";
 import { shallowReadonly, shallowRef } from "vue";
-import { describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { WebAppServices } from "../../app/createWebAppServices";
 import { useWebAppServices } from "../../app/injection";
 import AccountDataPage from "./AccountDataPage.vue";
 
 vi.mock("../../app/injection", () => ({ useWebAppServices: vi.fn() }));
+
+beforeEach(() => {
+  localStorage.clear();
+});
 
 function makeServices(signedIn = true) {
   return {
@@ -154,5 +158,116 @@ describe("帳號頁的卡片標題圖示", () => {
       "登出",
       "清除雲端資料"
     ]);
+  });
+});
+
+describe("同步衝突選擇與確認", () => {
+  const conflictItem = {
+    key: { recordKind: "region_preference" as const, recordId: "current" },
+    status: "conflict" as const,
+    localRecord: null,
+    localTombstone: null,
+    remoteSummary: null,
+    remoteTombstone: null,
+    defaultAction: null
+  };
+
+  function mountWithPreview(items = [conflictItem]) {
+    const services = makeServices();
+    services.sync.state = shallowReadonly(
+      shallowRef({
+        status: "ready" as const,
+        preview: {
+          createdAt: "2026-09-13T12:00:00.000Z",
+          items
+        },
+        error: null
+      })
+    ) as unknown as typeof services.sync.state;
+    vi.mocked(useWebAppServices).mockReturnValue(
+      services as unknown as WebAppServices
+    );
+    const wrapper = shallowMount(AccountDataPage, {
+      global: { stubs: { ConfirmAction: false } }
+    });
+    return { wrapper, services };
+  }
+
+  it("有衝突項目時顯示提示說明與選擇選項，未選擇時禁用同步按鈕", () => {
+    const { wrapper } = mountWithPreview();
+
+    expect(wrapper.text()).toContain("標記為「版本不同」的項目");
+    expect(wrapper.text()).toContain("地區設定");
+    expect(wrapper.text()).toContain("版本不同（需選擇）");
+
+    const radios = wrapper.findAll('input[type="radio"]');
+    expect(radios).toHaveLength(2);
+    expect(wrapper.text()).toContain("保留本機版本");
+    expect(wrapper.text()).toContain("保留雲端版本");
+
+    const confirmButton = wrapper
+      .findAll("button")
+      .find((b) => b.text() === "同步這些資料");
+    expect(confirmButton?.attributes("disabled")).toBeDefined();
+  });
+
+  it("選擇保留本機版本後更新狀態文字，啟用同步按鈕並傳入 upload action", async () => {
+    const { wrapper, services } = mountWithPreview();
+
+    const uploadRadio = wrapper
+      .findAll('input[type="radio"]')
+      .find((input) => input.attributes("value") === "upload");
+    expect(uploadRadio).toBeDefined();
+
+    await uploadRadio!.trigger("change");
+
+    expect(wrapper.text()).toContain("版本不同（已選保留本機）");
+
+    const confirmButton = wrapper
+      .findAll("button")
+      .find((b) => b.text() === "同步這些資料");
+    expect(confirmButton?.attributes("disabled")).toBeUndefined();
+
+    await confirmButton!.trigger("click");
+    expect(services.sync.confirm).toHaveBeenCalledWith({
+      actions: {
+        "region_preference:current": "upload"
+      }
+    });
+  });
+
+  it("選擇保留雲端版本後傳入 download action", async () => {
+    const { wrapper, services } = mountWithPreview();
+
+    const downloadRadio = wrapper
+      .findAll('input[type="radio"]')
+      .find((input) => input.attributes("value") === "download");
+    expect(downloadRadio).toBeDefined();
+
+    await downloadRadio!.trigger("change");
+    expect(wrapper.text()).toContain("版本不同（已選保留雲端）");
+
+    const confirmButton = wrapper
+      .findAll("button")
+      .find((b) => b.text() === "同步這些資料");
+    await confirmButton!.trigger("click");
+
+    expect(services.sync.confirm).toHaveBeenCalledWith({
+      actions: {
+        "region_preference:current": "download"
+      }
+    });
+  });
+
+  it("點擊取消時呼叫 cancelPreview", async () => {
+    const { wrapper, services } = mountWithPreview();
+
+    const cancelButton = wrapper
+      .findAll("button")
+      .find((b) => b.text() === "取消");
+    expect(cancelButton).toBeDefined();
+
+    await cancelButton!.trigger("click");
+    expect(services.sync.cancelPreview).toHaveBeenCalledTimes(1);
   });
 });

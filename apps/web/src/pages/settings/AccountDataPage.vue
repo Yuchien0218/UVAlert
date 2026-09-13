@@ -7,6 +7,10 @@ import { useWebAppServices } from "../../app/injection";
 import AppNotice from "../../components/common/AppNotice.vue";
 import ConfirmAction from "../../components/common/ConfirmAction.vue";
 import InlineLoader from "../../components/feedback/InlineLoader.vue";
+import type {
+  SyncAction,
+  SyncPreviewItem
+} from "../../features/sync/createSyncController";
 
 const { auth, cloudSync, sync } = useWebAppServices();
 const confirmingDelete = shallowRef(false);
@@ -24,6 +28,32 @@ const syncBusy = computed(
     sync?.state?.value?.status === "syncing"
 );
 const preview = computed(() => sync?.state?.value?.preview ?? null);
+
+const selectedActions = shallowRef<Record<string, SyncAction>>({});
+
+const hasConflictItems = computed(
+  () => preview.value?.items.some((item) => item.status === "conflict") ?? false
+);
+
+const hasUnresolvedConflicts = computed(() => {
+  if (!preview.value) return false;
+  return preview.value.items.some(
+    (item) =>
+      item.status === "conflict" &&
+      !selectedActions.value[itemKey(item)]
+  );
+});
+
+function itemKey(item: SyncPreviewItem): string {
+  return `${item.key.recordKind}:${item.key.recordId}`;
+}
+
+function setAction(item: SyncPreviewItem, action: SyncAction): void {
+  selectedActions.value = {
+    ...selectedActions.value,
+    [itemKey(item)]: action
+  };
+}
 
 onMounted(() => {
   void auth.refresh();
@@ -46,14 +76,24 @@ async function signIn(): Promise<void> {
 }
 
 async function prepare(): Promise<void> {
-  if (!syncDisabled.value && sync) await sync.preparePreview();
+  if (!syncDisabled.value && sync) {
+    selectedActions.value = {};
+    await sync.preparePreview();
+  }
 }
 
 async function confirmSync(): Promise<void> {
-  if (sync) await sync.confirm();
+  if (sync) {
+    await sync.confirm(
+      Object.keys(selectedActions.value).length > 0
+        ? { actions: selectedActions.value }
+        : undefined
+    );
+  }
 }
 
 function cancelSync(): void {
+  selectedActions.value = {};
   if (sync) sync.cancelPreview();
 }
 
@@ -106,23 +146,32 @@ function labelFor(kind: string): string {
   }
 }
 
-function statusLabelFor(status: string): string {
-  switch (status) {
-    case "unchanged":
-      return "本機與雲端一致";
-    case "conflict":
-      return "版本不同（需選擇）";
-    case "local_only":
-      return "僅儲存於本機裝置";
-    case "remote_only":
-      return "僅存在於 Google 雲端";
-    case "local_deleted":
-      return "本機已刪除";
-    case "remote_deleted":
-      return "雲端已刪除";
-    default:
-      return "尚未同步";
+function statusLabelFor(itemOrStatus: SyncPreviewItem | string): string {
+  if (typeof itemOrStatus === "string") {
+    switch (itemOrStatus) {
+      case "unchanged":
+        return "本機與雲端一致";
+      case "conflict":
+        return "版本不同（需選擇）";
+      case "local_only":
+        return "僅儲存於本機裝置";
+      case "remote_only":
+        return "僅存在於 Google 雲端";
+      case "local_deleted":
+        return "本機已刪除";
+      case "remote_deleted":
+        return "雲端已刪除";
+      default:
+        return "尚未同步";
+    }
   }
+  if (itemOrStatus.status === "conflict") {
+    const action = selectedActions.value[itemKey(itemOrStatus)];
+    if (action === "upload") return "版本不同（已選保留本機）";
+    if (action === "download") return "版本不同（已選保留雲端）";
+    return "版本不同（需選擇）";
+  }
+  return statusLabelFor(itemOrStatus.status);
 }
 
 const router = useRouter();
@@ -181,20 +230,57 @@ function goBack(): void {
           </button>
 
           <template v-else>
+            <p v-if="hasConflictItems" class="question-card__helper">
+              標記為「版本不同」的項目，請選擇要保留本機或雲端版本。
+            </p>
             <ul class="sync-list" aria-label="同步項目">
               <li
                 v-for="item in preview.items"
-                :key="`${item.key.recordKind}:${item.key.recordId}`"
+                :key="itemKey(item)"
+                class="sync-item"
               >
-                <strong>{{ labelFor(item.key.recordKind) }}</strong>
-                <span>{{ statusLabelFor(item.status) }}</span>
+                <div class="sync-item__header">
+                  <strong>{{ labelFor(item.key.recordKind) }}</strong>
+                  <span>{{ statusLabelFor(item) }}</span>
+                </div>
+                <div
+                  v-if="item.status === 'conflict'"
+                  class="sync-item__conflict"
+                >
+                  <div
+                    class="choice-grid choice-grid--row"
+                    role="radiogroup"
+                    :aria-label="`${labelFor(item.key.recordKind)}保留版本選擇`"
+                  >
+                    <label>
+                      <input
+                        type="radio"
+                        :name="`conflict-${item.key.recordKind}-${item.key.recordId}`"
+                        value="upload"
+                        :checked="selectedActions[itemKey(item)] === 'upload'"
+                        @change="setAction(item, 'upload')"
+                      />
+                      <span>保留本機版本</span>
+                    </label>
+                    <label>
+                      <input
+                        type="radio"
+                        :name="`conflict-${item.key.recordKind}-${item.key.recordId}`"
+                        value="download"
+                        :checked="selectedActions[itemKey(item)] === 'download'"
+                        @change="setAction(item, 'download')"
+                      />
+                      <span>保留雲端版本</span>
+                    </label>
+                  </div>
+                </div>
               </li>
             </ul>
             <div class="button-row">
               <button
                 class="button button--primary"
                 type="button"
-                :disabled="syncBusy"
+                :disabled="syncBusy || hasUnresolvedConflicts"
                 @click="confirmSync"
               >
                 <InlineLoader v-if="syncBusy" />
@@ -321,12 +407,20 @@ function goBack(): void {
   width: 100%;
 }
 .sync-list li {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
+  display: grid;
+  gap: var(--space-2);
   padding: var(--space-2) 0;
   border-bottom: 1px solid var(--border-subtle);
   font-size: var(--font-size-body);
+}
+.sync-item__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+}
+.sync-item__conflict {
+  width: 100%;
 }
 .button-row {
   display: flex;

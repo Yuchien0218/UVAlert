@@ -195,6 +195,9 @@ describe("createSyncController", () => {
     await expect(controller.confirm()).resolves.toBe(false);
     expect(local.applySelectedRecords).not.toHaveBeenCalled();
     expect(controller.state.value.error?.code).toBe("VALIDATION_ERROR");
+    expect(controller.state.value.error?.message).toBe(
+      "請先選擇「進行中的提醒」要保留本機或雲端版本"
+    );
 
     await expect(
       controller.confirm({
