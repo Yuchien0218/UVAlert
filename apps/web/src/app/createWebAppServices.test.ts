@@ -71,4 +71,33 @@ describe("createWebAppServices", () => {
       services.dispose();
     }
   });
+
+  it("clearAll clears region preference and resets in-memory region and forecast", async () => {
+    vi.stubGlobal("document", {
+      visibilityState: "visible",
+      addEventListener: vi.fn(),
+      removeEventListener: vi.fn()
+    });
+    vi.stubGlobal("addEventListener", vi.fn());
+    vi.stubGlobal("removeEventListener", vi.fn());
+    vi.stubGlobal("navigator", { onLine: true });
+    vi.stubGlobal("fetch", vi.fn());
+    const services = createWebAppServices({
+      databaseName: `web-services-${Date.now()}-${Math.random()}`,
+      createId: () => "test-id"
+    });
+
+    try {
+      await services.region.saveManualRegion("63000010");
+      expect(services.region.preference.value?.mode).toBe("selected");
+      expect(services.uvForecast.region.value?.regionCode).toBe("63000010");
+
+      await services.localData.clearAll();
+
+      expect(services.region.preference.value).toBeNull();
+      expect(services.uvForecast.region.value).toBeNull();
+    } finally {
+      services.dispose();
+    }
+  });
 });
