@@ -7,6 +7,7 @@ primaryQuestion: "陰天或下雨天是不是就不用防曬？"
 status: draft
 reviewStatus: needs-professional-review
 lastReviewed: 2026-08-16
+coverImage: "/images/education/articles/cloudy-days-still-need-protection.jpg"
 ---
 
 ## 先說結論

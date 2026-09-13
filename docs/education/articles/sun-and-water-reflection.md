@@ -7,6 +7,7 @@ primaryQuestion: "在水邊、沙地或陰影下，還需要防曬嗎？"
 status: draft
 reviewStatus: needs-professional-review
 lastReviewed: 2026-08-16
+coverImage: "/images/education/articles/sun-and-water-reflection.jpg"
 ---
 
 ## 先說結論

@@ -7,6 +7,7 @@ primaryQuestion: "防曬乳寫抗水或 40／80 分鐘，實際上代表什麼�
 status: draft
 reviewStatus: needs-professional-review
 lastReviewed: 2026-08-16
+coverImage: "/images/education/articles/what-water-resistant-means.jpg"
 ---
 
 ## 先說結論

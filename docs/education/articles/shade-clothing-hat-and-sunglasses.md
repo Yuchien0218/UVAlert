@@ -7,6 +7,7 @@ primaryQuestion: "除了擦防曬乳，還能怎麼降低紫外線曝曬？"
 status: draft
 reviewStatus: needs-professional-review
 lastReviewed: 2026-08-16
+coverImage: "/images/education/articles/shade-clothing-hat-and-sunglasses.jpg"
 ---
 
 ## 先說結論

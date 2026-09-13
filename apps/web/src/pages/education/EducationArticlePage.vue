@@ -116,10 +116,18 @@ const relatedArticles = computed(() =>
         summary 沒有被刪除，只是不在這一頁重複：educationSeo.ts 仍然用它當
         meta description，分類頁與首頁的卡片也還在顯示。
       -->
-      <p class="education-article-meta">
-        最後查閱：{{ article.lastReviewed }}
-      </p>
+      <p class="education-article-meta">最後查閱：{{ article.lastReviewed }}</p>
     </header>
+
+    <figure v-if="article.coverImage" class="education-article-hero">
+      <img
+        :src="article.coverImage"
+        :alt="article.title"
+        class="education-article-hero__img"
+        loading="eager"
+        decoding="async"
+      />
+    </figure>
 
     <!--
       文章的「先說結論」段落。
@@ -236,6 +244,22 @@ const relatedArticles = computed(() =>
   margin: 0;
   color: var(--text-secondary);
   font-size: var(--font-size-caption);
+}
+
+.education-article-hero {
+  max-width: 44rem;
+  margin: var(--space-4) 0 var(--space-5);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  border: 1px solid var(--border-subtle);
+  background: var(--surface-primary);
+}
+
+.education-article-hero__img {
+  display: block;
+  width: 100%;
+  height: auto;
+  object-fit: cover;
 }
 
 .education-review-note {

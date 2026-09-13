@@ -7,6 +7,7 @@ primaryQuestion: "SPF 和 PA 分別在看什麼？"
 status: draft
 reviewStatus: needs-professional-review
 lastReviewed: 2026-08-16
+coverImage: "/images/education/articles/uva-uvb-and-sunscreen-labels.jpg"
 ---
 
 ## 先說結論

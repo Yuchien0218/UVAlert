@@ -7,6 +7,7 @@ primaryQuestion: "防曬乳應該在出門前多久擦？要擦多少？"
 status: draft
 reviewStatus: needs-professional-review
 lastReviewed: 2026-08-16
+coverImage: "/images/education/articles/how-much-and-when-to-apply.jpg"
 ---
 
 ## 先說結論

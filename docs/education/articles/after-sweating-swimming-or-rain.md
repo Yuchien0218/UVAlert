@@ -7,6 +7,7 @@ primaryQuestion: "流汗、碰水或淋雨後，要不要立刻補擦防曬？"
 status: draft
 reviewStatus: needs-professional-review
 lastReviewed: 2026-08-16
+coverImage: "/images/education/articles/after-sweating-swimming-or-rain.jpg"
 ---
 
 ## 先說結論

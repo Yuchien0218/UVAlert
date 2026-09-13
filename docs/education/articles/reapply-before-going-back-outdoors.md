@@ -7,6 +7,7 @@ primaryQuestion: "早上擦過防曬，下午再出門前需要重新補擦嗎�
 status: draft
 reviewStatus: needs-professional-review
 lastReviewed: 2026-08-16
+coverImage: "/images/education/articles/reapply-before-going-back-outdoors.jpg"
 ---
 
 ## 先說結論

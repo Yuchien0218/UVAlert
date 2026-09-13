@@ -225,7 +225,9 @@ export function splitLeadTakeaway(bodyMarkdown, sourcePath) {
     .trim();
   const takeawayHtml = renderMarkdownToHtml(takeawayMarkdown);
   if (!/^<p>.+<\/p>$/s.test(takeawayHtml)) {
-    throw new Error(`Leading conclusion must be one paragraph in ${sourcePath}`);
+    throw new Error(
+      `Leading conclusion must be one paragraph in ${sourcePath}`
+    );
   }
 
   return {
@@ -278,6 +280,7 @@ function parseArticle(source, sourcePath) {
     status: frontMatter.status,
     reviewStatus: frontMatter.reviewStatus,
     lastReviewed: frontMatter.lastReviewed,
+    coverImage: frontMatter.coverImage ?? null,
     bodyMarkdown,
     takeawayHtml: lead.takeawayHtml,
     bodyHtml: renderMarkdownToHtml(lead.bodyMarkdown)

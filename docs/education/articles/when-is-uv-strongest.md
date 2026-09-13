@@ -7,6 +7,7 @@ primaryQuestion: "一天中什麼時候紫外線最強？"
 status: draft
 reviewStatus: needs-professional-review
 lastReviewed: 2026-08-16
+coverImage: "/images/education/articles/when-is-uv-strongest.jpg"
 ---
 
 ## 先說結論

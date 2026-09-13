@@ -7,6 +7,7 @@ primaryQuestion: "挑防曬乳時，最先要看哪些資訊？"
 status: draft
 reviewStatus: needs-professional-review
 lastReviewed: 2026-08-16
+coverImage: "/images/education/articles/choose-sunscreen-by-activity.jpg"
 ---
 
 ## 先說結論

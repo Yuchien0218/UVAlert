@@ -7,6 +7,7 @@ primaryQuestion: "防曬超過兩小時沒補擦，現在要怎麼補救？"
 status: draft
 reviewStatus: needs-professional-review
 lastReviewed: 2026-08-16
+coverImage: "/images/education/articles/forgot-to-reapply-sunscreen.jpg"
 ---
 
 ## 先說結論

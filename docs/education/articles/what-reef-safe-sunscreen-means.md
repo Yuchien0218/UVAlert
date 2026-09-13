@@ -7,6 +7,7 @@ primaryQuestion: "標示海洋友善或 reef-safe 的防曬，真的有統一認
 status: draft
 reviewStatus: needs-professional-review
 lastReviewed: 2026-08-16
+coverImage: "/images/education/articles/what-reef-safe-sunscreen-means.jpg"
 ---
 
 ## 先說結論

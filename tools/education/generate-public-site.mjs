@@ -29,6 +29,8 @@ h3 { margin: 1.75rem 0 .5rem; font-size: 1.05rem; }
 .card small, .meta { color: #5a5a5a; font-size: .8rem; }
 /* kicker 是膠囊（與 app 一致）：審閱徽章拿掉之後，卡片上帶底色的元素換它接手。 */
 .kicker { justify-self: start; padding: .1rem .5rem; border-radius: 999px; background: #e3e3e3; color: #5a5a5a; font-size: .75rem; }
+.article-hero { max-width: 44rem; margin: 1rem 0 1.5rem; border-radius: .875rem; overflow: hidden; border: 1px solid #e3e3e3; }
+.article-hero img { display: block; width: 100%; height: auto; }
 /* 文章的「先說結論」段落。產生器把它從 bodyHtml 抽走放進 takeawayHtml，
    所以要單獨渲染，否則整篇文章會少掉結論。 */
 .article-takeaway { max-width: 44rem; margin: 0 0 1.5rem; padding: 1rem 1.25rem; border-radius: .5rem; background: #f4ece2; }
@@ -228,7 +230,10 @@ function renderArticlePage(article, content, baseUrl) {
     related === ""
       ? ""
       : `<section class="related"><hr /><h2>同主題延伸閱讀</h2><ul>${related}</ul></section>`;
-  const body = `<a class="back-link" href="${category === undefined ? "/education" : `/education/${category.slug}`}">← ${escapeHtml(category?.title ?? "防曬衛教")}</a><p class="eyebrow">${escapeHtml(article.primaryQuestion)}</p><h1>${escapeHtml(article.title)}</h1><p class="summary">${escapeHtml(article.summary)}</p><p class="meta">最後查閱：${escapeHtml(article.lastReviewed)}</p><div class="article-takeaway">${article.takeawayHtml}</div><div class="article-body">${article.bodyHtml}</div>${relatedSection}`;
+  const heroImage = article.coverImage
+    ? `<figure class="article-hero"><img src="${escapeHtml(article.coverImage)}" alt="${escapeHtml(article.title)}" loading="lazy" /></figure>`
+    : "";
+  const body = `<a class="back-link" href="${category === undefined ? "/education" : `/education/${category.slug}`}">← ${escapeHtml(category?.title ?? "防曬衛教")}</a><p class="eyebrow">${escapeHtml(article.primaryQuestion)}</p><h1>${escapeHtml(article.title)}</h1><p class="summary">${escapeHtml(article.summary)}</p><p class="meta">最後查閱：${escapeHtml(article.lastReviewed)}</p>${heroImage}<div class="article-takeaway">${article.takeawayHtml}</div><div class="article-body">${article.bodyHtml}</div>${relatedSection}`;
   return renderDocument({
     title: article.title,
     description: article.summary,

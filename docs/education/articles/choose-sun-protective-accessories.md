@@ -7,6 +7,7 @@ primaryQuestion: "帽子、太陽眼鏡、防曬衣物和陽傘要怎麼挑？"
 status: draft
 reviewStatus: needs-professional-review
 lastReviewed: 2026-08-16
+coverImage: "/images/education/articles/choose-sun-protective-accessories.jpg"
 ---
 
 ## 先說結論
