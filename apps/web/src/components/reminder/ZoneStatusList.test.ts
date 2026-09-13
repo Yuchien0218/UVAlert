@@ -118,6 +118,33 @@ describe("ZoneStatusList status boundaries", () => {
     expect(groups[1]!.classes()).toContain("zone-group--tracking");
     expect(groups[1]!.findAll(".zone-chip")).toHaveLength(1);
   });
+
+  it("synchronizes affected zones with the local soon state within 20 minutes", () => {
+    vi.useFakeTimers();
+    // 距 12:00 剩 15 分鐘（11:45）
+    vi.setSystemTime(new Date("2099-07-29T11:45:00.000Z"));
+
+    const wrapper = mount(ZoneStatusList, {
+      props: {
+        primaryAction: {
+          ...baseAction,
+          affectedZoneInstanceIds: ["zone-forehead"]
+        },
+        zones: [
+          makeZone("zone-forehead", "face_forehead", "tracking"),
+          makeZone("zone-arms", "arms", "tracking")
+        ]
+      }
+    });
+
+    const groups = wrapper.findAll(".zone-group");
+    expect(groups).toHaveLength(2);
+    expect(groups[0]!.classes()).toContain("zone-group--soon");
+    expect(groups[0]!.find(".zone-group__status").text()).toBe("快到補擦時間");
+    expect(groups[0]!.findAll(".zone-chip")).toHaveLength(1);
+    expect(groups[1]!.classes()).toContain("zone-group--tracking");
+    expect(groups[1]!.findAll(".zone-chip")).toHaveLength(1);
+  });
 });
 
 /*

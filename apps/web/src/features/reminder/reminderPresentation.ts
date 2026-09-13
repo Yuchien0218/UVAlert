@@ -4,6 +4,7 @@ import type {
   PrimaryAction,
   ZoneProjection
 } from "@sunshield/contracts";
+import { SOON_WINDOW_MS } from "@sunshield/domain";
 import type { ConnectivityStatus } from "@sunshield/platform";
 import { formatTime } from "../../helpers/datetime";
 import { calculateRemainingProgress } from "./homeReminderClockPresentation";
@@ -122,6 +123,26 @@ export function isReminderActionDue(
   return Number.isFinite(dueAt) && dueAt <= now.getTime();
 }
 
+export function isReminderActionSoon(
+  primaryAction: PrimaryAction,
+  now: Date
+): boolean {
+  if (isReminderActionDue(primaryAction, now)) return false;
+  if (
+    primaryAction.presentationType !== "timed_ring" ||
+    primaryAction.actionAt === null
+  ) {
+    return false;
+  }
+
+  const dueAt = Date.parse(primaryAction.actionAt);
+  return (
+    Number.isFinite(dueAt) &&
+    dueAt - now.getTime() <= SOON_WINDOW_MS &&
+    dueAt - now.getTime() > 0
+  );
+}
+
 export function buildReminderPresentation(options: {
   primaryAction: PrimaryAction;
   zones: ZoneProjection[];
@@ -166,9 +187,14 @@ export function buildReminderPresentation(options: {
         now
       });
     }
-    const isSoon = affectedZones.some(
-      (zone) => zone.timingStatus === "reapply_soon"
-    );
+    const isSoon =
+      isReminderActionSoon(primaryAction, now) ||
+      affectedZones.some(
+        (zone) =>
+          zone.timingStatus === "reapply_soon" ||
+          (zone.zoneDueAt !== null &&
+            Date.parse(zone.zoneDueAt) - now.getTime() <= SOON_WINDOW_MS)
+      );
     if (isSoon) {
       return {
         tone: "soon",

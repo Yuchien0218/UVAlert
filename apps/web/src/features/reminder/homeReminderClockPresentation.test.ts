@@ -201,6 +201,29 @@ describe("buildHomeReminderClockPresentation", () => {
     expect(result?.ariaLabel).not.toContain("建議");
   });
 
+  it("剩餘 21 分鐘時維持 tracking（藍色）狀態", () => {
+    // baseZone.zoneDueAt 是 11:30:00，當前時間 11:09:00 即剩 21 分鐘
+    const result = buildHomeReminderClockPresentation(
+      makeSession([baseZone]),
+      new Date("2026-07-29T11:09:00.000Z")
+    );
+
+    expect(result?.remainingMinutes).toBe(21);
+    expect(result?.tone).toBe("tracking");
+  });
+
+  it("即使 zone 原本為 tracking，進入剩餘 20 分鐘以內時即時轉為 soon（橘色）", () => {
+    // baseZone.zoneDueAt 是 11:30:00，當前時間 11:10:00 即剩 20 分鐘
+    const result = buildHomeReminderClockPresentation(
+      makeSession([baseZone]),
+      new Date("2026-07-29T11:10:00.000Z")
+    );
+
+    expect(result?.remainingMinutes).toBe(20);
+    expect(result?.tone).toBe("soon");
+    expect(result?.title).toBe("快到補擦時間：額頭");
+  });
+
   it("主要狀態需要先確認時不自行捏造倒數", () => {
     const session = makeSession([baseZone]);
     session.primaryAction = {

@@ -1,4 +1,5 @@
 import type { SessionProjection, ZoneProjection } from "@sunshield/contracts";
+import { SOON_WINDOW_MS } from "@sunshield/domain";
 import { formatTime } from "../../helpers/datetime";
 import { getZoneLabel } from "./reminderPresentation";
 
@@ -200,6 +201,8 @@ function getTone(
   if (remainingMs <= 0 || zone.timingStatus === "reapply_due") {
     return "due";
   }
-  if (zone.timingStatus === "reapply_soon") return "soon";
+  if (zone.timingStatus === "reapply_soon" || remainingMs <= SOON_WINDOW_MS) {
+    return "soon";
+  }
   return "tracking";
 }

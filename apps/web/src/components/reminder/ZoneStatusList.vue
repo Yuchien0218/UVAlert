@@ -1,12 +1,14 @@
 <script setup lang="ts">
 import type { PrimaryAction, ZoneProjection } from "@sunshield/contracts";
+import { SOON_WINDOW_MS } from "@sunshield/domain";
 import DisclosurePanel from "../common/DisclosurePanel.vue";
 import { computed, ref } from "vue";
 import ChevronLink from "../common/ChevronLink.vue";
 import { useCurrentTime } from "../../composables/useCurrentTime";
 import {
   getZoneLabel,
-  isReminderActionDue
+  isReminderActionDue,
+  isReminderActionSoon
 } from "../../features/reminder/reminderPresentation";
 
 interface Props {
@@ -40,14 +42,24 @@ function getEffectiveTimingStatus(
   const isAffected = props.primaryAction.affectedZoneInstanceIds.includes(
     zone.zoneInstanceId
   );
-  const canBecomeDue =
+  if (!isAffected) {
+    return zone.timingStatus;
+  }
+
+  const canTransition =
     zone.timingStatus === "tracking" || zone.timingStatus === "reapply_soon";
 
-  return isAffected &&
-    canBecomeDue &&
-    isReminderActionDue(props.primaryAction, currentTime.value)
-    ? "reapply_due"
-    : zone.timingStatus;
+  if (!canTransition) return zone.timingStatus;
+
+  if (isReminderActionDue(props.primaryAction, currentTime.value)) {
+    return "reapply_due";
+  }
+
+  if (isReminderActionSoon(props.primaryAction, currentTime.value)) {
+    return "reapply_soon";
+  }
+
+  return zone.timingStatus;
 }
 
 /**
