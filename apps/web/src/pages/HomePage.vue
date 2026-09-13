@@ -709,6 +709,11 @@ function handleEndSession(): void {
   color: var(--color-untimed);
 }
 
+.home-start__lead :deep(path[fill="#C1832E"]),
+.home-start__lead :deep(path[fill="#c1832e"]) {
+  display: none;
+}
+
 .home-start__body {
   margin: 0;
   color: var(--text-body);
