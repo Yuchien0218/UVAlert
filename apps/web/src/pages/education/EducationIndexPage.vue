@@ -209,6 +209,8 @@ const robots = computed(() =>
   max-width: 42rem;
   grid-template-columns: minmax(0, 1fr) auto;
   align-items: start;
+  padding-bottom: var(--space-4);
+  border-bottom: 1px solid var(--border-subtle);
 }
 
 .education-hero__main {
