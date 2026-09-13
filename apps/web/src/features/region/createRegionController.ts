@@ -61,6 +61,7 @@ export interface RegionController {
   readonly directory: readonly RegionDirectoryEntry[];
   readonly error: Readonly<ShallowRef<RegionError>>;
   ensureLoaded(): Promise<void>;
+  reload(): Promise<void>;
   useCurrentPosition(): Promise<void>;
   confirmCandidate(): Promise<boolean>;
   saveManualRegion(regionCode: string): Promise<boolean>;
@@ -107,6 +108,12 @@ export function createRegionController(
       loadPromise = null;
     });
     return loadPromise;
+  }
+
+  async function reload(): Promise<void> {
+    if (disposed) return;
+    loaded = false;
+    await performLoad();
   }
 
   async function useCurrentPosition(): Promise<void> {
@@ -238,6 +245,7 @@ export function createRegionController(
     directory: dependencies.directory,
     error: shallowReadonly(errorState),
     ensureLoaded,
+    reload,
     useCurrentPosition,
     confirmCandidate,
     saveManualRegion,

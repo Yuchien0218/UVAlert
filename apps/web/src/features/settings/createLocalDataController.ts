@@ -43,6 +43,8 @@ interface Dependencies {
   saveFile(fileName: string, contents: string): void;
   /** 清除前先持久化必要的跨網路 teardown。 */
   beforeClearAll?(): Promise<void>;
+  /** 清除後通知其他 controller 重新載入或重置記憶體狀態。 */
+  afterClearAll?(): Promise<void>;
 }
 
 function fileNameFor(now: Date): string {
@@ -179,6 +181,7 @@ export function createLocalDataController(
       runClear("all", async () => {
         await dependencies.beforeClearAll?.();
         await dependencies.repository.clearAll();
+        await dependencies.afterClearAll?.();
       }),
     dismissNotice(): void {
       notice.value = null;

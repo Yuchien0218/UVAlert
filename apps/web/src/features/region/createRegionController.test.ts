@@ -1,3 +1,4 @@
+import type { RegionPreferenceV1 } from "@sunshield/contracts";
 import {
   DeviceGeolocationError,
   type DeviceGeolocationPort,
@@ -47,7 +48,7 @@ function makeDependencies(
     )
   };
   const preferenceRepository = {
-    getPreference: vi.fn(async () => null),
+    getPreference: vi.fn(async (): Promise<RegionPreferenceV1 | null> => null),
     savePreference: vi.fn(async () => {
       if (options.saveFailure) throw new Error("storage failed");
     })
@@ -221,5 +222,31 @@ describe("createRegionController", () => {
     expect(controller.preference.value).toBeNull();
     expect(controller.error.value).toBe("storage_error");
     expect(dependencies.refreshUv).not.toHaveBeenCalled();
+  });
+
+  it("reloads preference from repository even if already loaded", async () => {
+    const dependencies = makeDependencies();
+    const controller = createRegionController({
+      ...dependencies,
+      directory: [taipei],
+      boundaryDataVersion: "2025-03-18"
+    });
+    await controller.ensureLoaded();
+    expect(controller.preference.value).toBeNull();
+
+    // Now repository has a preference
+    const saved = {
+      schemaVersion: "region-preference-v1" as const,
+      mode: "selected" as const,
+      selection: {
+        ...taipei,
+        boundaryDataVersion: "2025-03-18",
+        selectionMethod: "manual" as const
+      }
+    };
+    dependencies.preferenceRepository.getPreference = vi.fn(async () => saved);
+
+    await controller.reload();
+    expect(controller.preference.value).toEqual(saved);
   });
 });

@@ -297,7 +297,11 @@ export function createWebAppServices(
     boot,
     now: () => new Date(),
     saveFile: downloadTextFile,
-    beforeClearAll: () => notifications.disableBackgroundPush()
+    beforeClearAll: () => notifications.disableBackgroundPush(),
+    afterClearAll: async () => {
+      await region.reload();
+      await uvForecast.refresh();
+    }
   });
 
   return {
