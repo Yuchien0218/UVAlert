@@ -104,3 +104,25 @@ describe("情境選擇器的收尾", () => {
     expect(body).not.toContain("setTimeout");
   });
 });
+
+describe("/setup 防曬乳選擇與摘要", () => {
+  it("確認部位後顯示防曬乳單行摘要與更改按鈕", () => {
+    expect(source).toContain('name="gear-sunscreen"');
+    expect(source).toContain("selectedSunscreenDisplayName");
+    expect(source).toContain('@click="showSunscreenSheet = true"');
+  });
+
+  it("整合 SunscreenSelectionSheet 抽屜", () => {
+    expect(source).toContain("<SunscreenSelectionSheet");
+    expect(source).toContain(':open="showSunscreenSheet"');
+    expect(source).toContain('@select="selectedProductId = $event"');
+  });
+
+  it("儲存時間時將防曬乳來源與快照一併傳入 saveTiming", () => {
+    const submitFn = /async function submit\(\)[\s\S]*?\n\}/.exec(source)?.[0];
+    expect(submitFn, "找不到 submit 函式").toBeDefined();
+    expect(submitFn).toContain("sourceProductId: selectedProductId.value");
+    expect(submitFn).toContain("productLabelSnapshot: chosenSnapshot");
+  });
+});
+

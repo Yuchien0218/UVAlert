@@ -60,13 +60,14 @@ export interface WaterStartFormValue {
 }
 
 export interface TimingDraftInput {
-  productLabelSnapshot?: ProductLabelSnapshotV1;
+  sourceProductId?: string | null | undefined;
+  productLabelSnapshot?: ProductLabelSnapshotV1 | undefined;
   /**
    * 步驟 2 的單題快速確認。四題包裝標示裡只有這一題會決定能不能
    * 產生倒數，其餘三題都接受「不確定」，因此併進流程內問，
    * 不必為了開始提醒先跳到產品頁。快照由控制器以可信時鐘建立。
    */
-  sunscreenClaim?: ProductClaimAnswer;
+  sunscreenClaim?: ProductClaimAnswer | undefined;
   appliedAt: string;
   waterStart: WaterStartFormValue | null;
 }
@@ -456,20 +457,21 @@ export function createSetupController(
      * 照常封鎖。
      */
     const productLabelSnapshot =
-      input.productLabelSnapshot ??
-      draft.applications[0]?.productLabelSnapshot ??
-      (await dependencies.productSettings?.getCurrentProductSnapshot()) ??
-      makeSessionOnlyProductSnapshot(
-        {
-          claimAnswer: input.sunscreenClaim ?? "unknown",
-          waitAnswer: "unknown",
-          waitMinutes: null,
-          intervalAnswer: "unknown",
-          intervalMinutes: null,
-          waterResistance: "unknown"
-        },
-        trustedNow.toISOString()
-      );
+      input.productLabelSnapshot !== undefined
+        ? input.productLabelSnapshot
+        : (draft.applications[0]?.productLabelSnapshot ??
+          (await dependencies.productSettings?.getCurrentProductSnapshot()) ??
+          makeSessionOnlyProductSnapshot(
+            {
+              claimAnswer: input.sunscreenClaim ?? "unknown",
+              waitAnswer: "unknown",
+              waitMinutes: null,
+              intervalAnswer: "unknown",
+              intervalMinutes: null,
+              waterResistance: "unknown"
+            },
+            trustedNow.toISOString()
+          ));
 
     if (!Number.isFinite(appliedAtMs) || appliedAtMs > trustedNow.getTime()) {
       fieldErrors.appliedAt = ["塗抹時間不能晚於目前可信時間，請重新確認。"];
@@ -514,7 +516,10 @@ export function createSetupController(
         {
           draftApplicationKey: dependencies.createId(),
           draftZoneKeys: topicalZones.map((zone) => zone.draftZoneKey),
-          sourceProductId: null,
+          sourceProductId:
+            input.sourceProductId !== undefined
+              ? input.sourceProductId
+              : (draft.applications[0]?.sourceProductId ?? null),
           productSnapshotFingerprint: dependencies.createId(),
           productLabelSnapshot
         }

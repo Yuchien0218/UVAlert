@@ -11,9 +11,11 @@ import ProductEligibilityNotice from "../../components/setup/ProductEligibilityN
 import ProtectionAdjustmentSheet from "../../components/setup/ProtectionAdjustmentSheet.vue";
 import QuickProtectionSummary from "../../components/setup/QuickProtectionSummary.vue";
 import SetupStepShell from "../../components/setup/SetupStepShell.vue";
+import SunscreenSelectionSheet from "../../components/setup/SunscreenSelectionSheet.vue";
 import WaterStartPicker from "../../components/setup/WaterStartPicker.vue";
 import { useSetup } from "../../composables/useSetup";
 import { useWebAppServices } from "../../app/injection";
+import { makeSessionOnlyProductSnapshot } from "../../features/setup/productSnapshot";
 import type {
   ProtectionDraftInput,
   WaterStartFormValue
@@ -57,6 +59,78 @@ const localError = shallowRef<string | null>(null);
 const protectionNotice = shallowRef<string | null>(null);
 const showProtectionAdjustment = shallowRef(false);
 const showGearForm = shallowRef(false);
+const showSunscreenSheet = shallowRef(false);
+const selectedProductId = shallowRef<string | null>(null);
+
+const activeSunscreens = computed(() =>
+  productSettings.products.value.filter(
+    (product) =>
+      product.gearCategory === "sunscreen" &&
+      product.archivedAt === null &&
+      product.status === "active"
+  )
+);
+
+const selectedProduct = computed(() => {
+  if (selectedProductId.value === null) return null;
+  return (
+    activeSunscreens.value.find(
+      (product) => product.productId === selectedProductId.value
+    ) ?? null
+  );
+});
+
+const selectedSunscreenDisplayName = computed(() => {
+  if (selectedProduct.value !== null) {
+    return selectedProduct.value.displayName;
+  }
+  return "未指定標示防曬乳";
+});
+
+const effectiveProductSnapshot = computed(() => {
+  if (selectedProductId.value === null) return null;
+  return (
+    selectedProduct.value?.currentSnapshot ?? productSettings.snapshot.value
+  );
+});
+
+function initSelectedProduct(): void {
+  if (selectedProductId.value !== null) return;
+  const sunscreens = activeSunscreens.value;
+  if (sunscreens.length > 0) {
+    const currentSnap = productSettings.snapshot.value;
+    const match = currentSnap
+      ? sunscreens.find(
+          (p) =>
+            p.currentSnapshot.ruleEligibilityAtApplication ===
+              currentSnap.ruleEligibilityAtApplication &&
+            p.currentSnapshot.reapplicationIntervalMinutes ===
+              currentSnap.reapplicationIntervalMinutes &&
+            p.currentSnapshot.waterResistanceStatus ===
+              currentSnap.waterResistanceStatus
+        )
+      : null;
+    const chosen = match ?? sunscreens[0];
+    if (chosen !== undefined) {
+      selectedProductId.value = chosen.productId;
+    }
+  }
+}
+
+watch(
+  () => activeSunscreens.value,
+  (sunscreens) => {
+    if (selectedProductId.value === null && sunscreens.length > 0) {
+      initSelectedProduct();
+    }
+  },
+  { immediate: true }
+);
+
+function handleOpenAddNewFromSheet(): void {
+  showSunscreenSheet.value = false;
+  showGearForm.value = true;
+}
 
 /**
  * 還沒有保存過產品標示的人，才顯示「填寫完整包裝標示」的次要入口。
@@ -249,7 +323,25 @@ async function submit(): Promise<void> {
     return;
   }
 
+  const chosenSnapshot =
+    selectedProduct.value?.currentSnapshot ??
+    (selectedProductId.value === null
+      ? makeSessionOnlyProductSnapshot(
+          {
+            claimAnswer: "unknown",
+            waitAnswer: "unknown",
+            waitMinutes: null,
+            intervalAnswer: "unknown",
+            intervalMinutes: null,
+            waterResistance: "unknown"
+          },
+          new Date().toISOString()
+        )
+      : undefined);
+
   const saved = await setup.saveTiming({
+    sourceProductId: selectedProductId.value,
+    productLabelSnapshot: chosenSnapshot,
     appliedAt: applicationTime.value,
     waterStart: needsWaterStart.value ? waterStart.value : null
   });
@@ -301,6 +393,10 @@ function openGearForm(): void {
 
 function handleGearFormSaved(): void {
   showGearForm.value = false;
+  const first = activeSunscreens.value[0];
+  if (first !== undefined) {
+    selectedProductId.value = first.productId;
+  }
 }
 
 function validateForm(): string | null {
@@ -325,7 +421,9 @@ async function restartDraft(): Promise<void> {
   selectedContext.value = null;
   applicationTime.value = null;
   waterStart.value = null;
+  selectedProductId.value = null;
   localError.value = null;
+  initSelectedProduct();
   /*
    * 「重新開始」產生的是全新草稿，跟第一次進這頁是同一種狀態，所以預設
    * 情境也要跟著套用——不補這一行的話，走回復流程再重來的人會看到一個
@@ -389,6 +487,7 @@ onMounted(async () => {
   if (context.value !== null) {
     await setup.ensureRecommendedProtection();
   }
+  initSelectedProduct();
   applyDefaultContext();
   if (route.query.adjustProtection === "1") {
     await openProtectionAdjustment();
@@ -529,6 +628,25 @@ onMounted(async () => {
             現在是夜間，這個時段紫外線通常很低，仍然可以繼續建立提醒。
           </p>
 
+          <div class="setup-step-summary">
+            <p class="setup-step-summary__value">
+              <span class="setup-step-summary__label">防曬乳</span>
+              <Icon
+                class="setup-step-summary__icon"
+                name="gear-sunscreen"
+                :size="24"
+              />
+              <span class="user-text">{{ selectedSunscreenDisplayName }}</span>
+            </p>
+            <button
+              class="text-link"
+              type="button"
+              @click="showSunscreenSheet = true"
+            >
+              更改
+            </button>
+          </div>
+
           <ApplicationTimePicker
             ref="applicationTimePicker"
             v-model="applicationTime"
@@ -547,7 +665,7 @@ onMounted(async () => {
           />
 
           <ProductEligibilityNotice
-            :product-snapshot="productSettings.snapshot.value"
+            :product-snapshot="effectiveProductSnapshot"
           />
 
           <!--
@@ -594,6 +712,15 @@ onMounted(async () => {
       :draft="setup.draft.value"
       @save="saveProtection"
       @close="showProtectionAdjustment = false"
+    />
+
+    <SunscreenSelectionSheet
+      :open="showSunscreenSheet"
+      :products="productSettings.products.value"
+      :selected-product-id="selectedProductId"
+      @select="selectedProductId = $event"
+      @close="showSunscreenSheet = false"
+      @add-new="handleOpenAddNewFromSheet"
     />
 
     <GearFormSheet
