@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import type { PrimaryAction, ZoneProjection } from "@sunshield/contracts";
-import { SOON_WINDOW_MS } from "@sunshield/domain";
 import DisclosurePanel from "../common/DisclosurePanel.vue";
 import { computed, ref } from "vue";
 import ChevronLink from "../common/ChevronLink.vue";
