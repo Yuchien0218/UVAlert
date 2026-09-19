@@ -4,6 +4,8 @@ import {
   calculateSolarElevationDeg,
   createChartScale,
   getDayOfYear,
+  getEquidistantTicks,
+  getHourlyForecastItems,
   pointsToAreaPath,
   pointsToSmoothPath,
   resolveCoordinatesForRegion,
@@ -159,4 +161,41 @@ describe("solarUvCurve", () => {
       expect(areaPath).toMatch(/Z$/);
     });
   });
+
+  describe("等距刻度與逐小時明細輔助函數", () => {
+    it("正確生成均勻等距的 Y 軸刻度", () => {
+      const { ticks: ticksLow, topUv: topLow } = getEquidistantTicks(5);
+      expect(topLow).toBe(6);
+      expect(ticksLow.map((t) => t.uvi)).toEqual([0, 2, 4, 6]);
+
+      const { ticks: ticksHigh, topUv: topHigh } = getEquidistantTicks(8);
+      expect(topHigh).toBe(9);
+      expect(ticksHigh.map((t) => t.uvi)).toEqual([0, 3, 6, 9]);
+
+      const { ticks: ticksExtreme, topUv: topExtreme } = getEquidistantTicks(11);
+      expect(topExtreme).toBe(12);
+      expect(ticksExtreme.map((t) => t.uvi)).toEqual([0, 3, 6, 9, 12]);
+    });
+
+    it("正確生成日間逐小時預估清單", () => {
+      const date = new Date("2026-08-01T00:00:00+08:00");
+      const now = new Date("2026-08-01T12:30:00+08:00");
+      const curve = buildIntradayUvCurve({
+        date,
+        now,
+        officialMaxUv: 8.0
+      });
+
+      const hourly = getHourlyForecastItems(curve, 6, 18);
+      expect(hourly).toHaveLength(13);
+      expect(hourly[0]!.timeLabel).toBe("06:00");
+      expect(hourly[hourly.length - 1]!.timeLabel).toBe("18:00");
+
+      const noon = hourly.find((h) => h.hour === 12);
+      expect(noon).toBeDefined();
+      expect(noon!.isCurrent).toBe(true);
+      expect(noon!.uv).toBeGreaterThan(5);
+    });
+  });
 });
+

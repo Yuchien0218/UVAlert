@@ -1,4 +1,5 @@
 import type { UvRiskLevel } from "@sunshield/contracts";
+export type { UvRiskLevel };
 
 /**
  * 依 WHO 紫外線指數標準對應風險等級：
@@ -204,7 +205,7 @@ export function buildIntradayUvCurve(options: BuildCurveOptions): IntradayUvCurv
     timezoneOffsetHours = 8,
     startHour = 5,
     endHour = 19,
-    stepMinutes = 15,
+    stepMinutes = 60,
     exponent = 1.2
   } = options;
 
@@ -215,18 +216,16 @@ export function buildIntradayUvCurve(options: BuildCurveOptions): IntradayUvCurv
     return Math.pow(Math.sin(elevRad), exponent);
   };
 
-  // 1. 先計算全日的未縮放理論仰角曲線，並尋找峰值
+  // 1. 高精度搜尋全日峰值與尖峰時段（以 5 分鐘為間隔精確計算）
   const startMinutes = Math.round(startHour * 60);
   const endMinutes = Math.round(endHour * 60);
   let rawPeak = 0;
   let rawPeakMinute = 12 * 60;
 
-  const rawPoints: { minute: number; rawUv: number }[] = [];
-  for (let m = startMinutes; m <= endMinutes; m += stepMinutes) {
+  for (let m = startMinutes; m <= endMinutes; m += 5) {
     const t = new Date(date);
     t.setHours(0, m, 0, 0);
     const rawUv = rawUvAt(t);
-    rawPoints.push({ minute: m, rawUv });
     if (rawUv > rawPeak) {
       rawPeak = rawUv;
       rawPeakMinute = m;
@@ -235,6 +234,26 @@ export function buildIntradayUvCurve(options: BuildCurveOptions): IntradayUvCurv
 
   // 2. 依氣象署 officialMaxUv 校正縮放比率
   const scale = rawPeak > 0 ? officialMaxUv / rawPeak : 0;
+
+  const uvAtTime = (t: Date): number => {
+    const raw = rawUvAt(t);
+    return Math.round(raw * scale * 10) / 10;
+  };
+
+  // 3. 錨點稀疏化：每小時取樣一個關鍵幾何錨點，交給 Catmull-Rom 補弧度，徹底避免密集折線的鋸齒感
+  const rawPoints: { minute: number; rawUv: number }[] = [];
+  for (let m = startMinutes; m <= endMinutes; m += stepMinutes) {
+    const t = new Date(date);
+    t.setHours(0, m, 0, 0);
+    rawPoints.push({ minute: m, rawUv: rawUvAt(t) });
+  }
+
+  // 確保結尾剛好包含 endMinutes
+  if (rawPoints[rawPoints.length - 1]!.minute < endMinutes) {
+    const t = new Date(date);
+    t.setHours(0, endMinutes, 0, 0);
+    rawPoints.push({ minute: endMinutes, rawUv: rawUvAt(t) });
+  }
 
   const points: IntradayUvPoint[] = rawPoints.map(({ minute, rawUv }) => {
     const h = Math.floor(minute / 60);
@@ -249,12 +268,7 @@ export function buildIntradayUvCurve(options: BuildCurveOptions): IntradayUvCurv
     };
   });
 
-  const uvAtTime = (t: Date): number => {
-    const raw = rawUvAt(t);
-    return Math.round(raw * scale * 10) / 10;
-  };
-
-  // 3. 當前時間狀態
+  // 4. 當前時間狀態
   const nowMinuteOfDay = now.getHours() * 60 + now.getMinutes() + now.getSeconds() / 60;
   const currentHour = nowMinuteOfDay / 60;
   const currentUv = uvAtTime(now);
@@ -263,26 +277,45 @@ export function buildIntradayUvCurve(options: BuildCurveOptions): IntradayUvCurv
   const currentProgress = Math.max(0, Math.min(1, rawProgress));
   const isDaytime = currentHour >= startHour && currentHour <= endHour && currentUv > 0;
 
-  // 4. 峰值資訊
+  // 5. 峰值資訊
   const peakHour = rawPeakMinute / 60;
   const peakH = Math.floor(rawPeakMinute / 60);
   const peakM = rawPeakMinute % 60;
   const peakTimeLabel = `${String(peakH).padStart(2, "0")}:${String(peakM).padStart(2, "0")}`;
   const peakUv = Math.round(officialMaxUv * 10) / 10;
 
-  // 5. 尖峰時段判定（頂峰強度區間，取頂峰的 72% 以上，在盛夏約落在 10:00–14:15）
+  // 6. 尖峰時段判定（頂峰強度區間，取頂峰的 72% 以上）
   const peakThreshold = Math.max(3, peakUv * 0.72);
-  const peakPoints = points.filter((p) => p.uv >= peakThreshold && peakThreshold > 1);
+  let firstPeakMinute = -1;
+  let lastPeakMinute = -1;
+
+  if (peakUv >= 3) {
+    for (let m = startMinutes; m <= endMinutes; m += 5) {
+      const t = new Date(date);
+      t.setHours(0, m, 0, 0);
+      const val = uvAtTime(t);
+      if (val >= peakThreshold) {
+        if (firstPeakMinute === -1) firstPeakMinute = m;
+        lastPeakMinute = m;
+      }
+    }
+  }
+
   let peakWindow: PeakWindow | null = null;
-  if (peakPoints.length >= 2 && peakUv >= 3) {
-    const first = peakPoints[0]!;
-    const last = peakPoints[peakPoints.length - 1]!;
-    const isCurrentlyPeak = currentHour >= first.hour && currentHour <= last.hour;
+  if (firstPeakMinute !== -1 && lastPeakMinute !== -1) {
+    const fH = Math.floor(firstPeakMinute / 60);
+    const fM = firstPeakMinute % 60;
+    const lH = Math.floor(lastPeakMinute / 60);
+    const lM = lastPeakMinute % 60;
+    const startHourNum = firstPeakMinute / 60;
+    const endHourNum = lastPeakMinute / 60;
+    const isCurrentlyPeak = currentHour >= startHourNum && currentHour <= endHourNum;
+
     peakWindow = {
-      startLabel: first.timeLabel,
-      endLabel: last.timeLabel,
-      startHour: first.hour,
-      endHour: last.hour,
+      startLabel: `${String(fH).padStart(2, "0")}:${String(fM).padStart(2, "0")}`,
+      endLabel: `${String(lH).padStart(2, "0")}:${String(lM).padStart(2, "0")}`,
+      startHour: startHourNum,
+      endHour: endHourNum,
       isCurrentlyPeak
     };
   }
@@ -310,6 +343,7 @@ export function buildIntradayUvCurve(options: BuildCurveOptions): IntradayUvCurv
 export interface ChartScale {
   xScale: (hour: number) => number;
   yScale: (uv: number) => number;
+  baselineY: number;
 }
 
 export function createChartScale(config: {
@@ -337,12 +371,14 @@ export function createChartScale(config: {
     yScale: (uv) => {
       const ratio = uv / safeMaxUv;
       return chartBottom - ratio * (chartBottom - chartTop);
-    }
+    },
+    baselineY: chartBottom
   };
 }
 
 /**
- * 將點位轉換為平滑的三次方貝茲曲線路徑字串。
+ * 將點位以 Catmull-Rom Spline 演算法轉換為真正的圓滑三次方貝茲曲線路徑。
+ * 每一段控制點參考前後兩點的切線方向，徹底消除密集直線或相鄰中點造成的波浪鋸齒感。
  */
 export function pointsToSmoothPath(points: IntradayUvPoint[], scale: ChartScale): string {
   if (points.length === 0) return "";
@@ -350,18 +386,35 @@ export function pointsToSmoothPath(points: IntradayUvPoint[], scale: ChartScale)
     return `M ${scale.xScale(points[0]!.hour).toFixed(1)} ${scale.yScale(points[0]!.uv).toFixed(1)}`;
   }
 
-  const coords = points.map((p) => [scale.xScale(p.hour), scale.yScale(p.uv)] as const);
+  const coords = points.map((p) => [scale.xScale(p.hour), scale.yScale(p.uv)] as [number, number]);
+  const n = coords.length;
+  const baseline = scale.baselineY;
+
   let d = `M ${coords[0]![0].toFixed(1)},${coords[0]![1].toFixed(1)}`;
 
-  for (let i = 0; i < coords.length - 1; i++) {
-    const [x0, y0] = coords[i]!;
-    const [x1, y1] = coords[i + 1]!;
-    const dx = (x1 - x0) / 2;
-    const cp1x = (x0 + dx).toFixed(1);
-    const cp1y = y0.toFixed(1);
-    const cp2x = (x1 - dx).toFixed(1);
-    const cp2y = y1.toFixed(1);
-    d += ` C ${cp1x},${cp1y} ${cp2x},${cp2y} ${x1.toFixed(1)},${y1.toFixed(1)}`;
+  for (let i = 0; i < n - 1; i++) {
+    const p0 = i > 0 ? coords[i - 1]! : [2 * coords[0]![0] - coords[1]![0], 2 * coords[0]![1] - coords[1]![1]] as [number, number];
+    const p1 = coords[i]!;
+    const p2 = coords[i + 1]!;
+    const p3 = i < n - 2 ? coords[i + 2]! : [2 * coords[n - 1]![0] - coords[n - 2]![0], 2 * coords[n - 1]![1] - coords[n - 2]![1]] as [number, number];
+
+    // Catmull-Rom to Cubic Bezier control points
+    const cp1x = p1[0] + (p2[0] - p0[0]) / 6;
+    let cp1y = p1[1] + (p2[1] - p0[1]) / 6;
+    const cp2x = p2[0] - (p3[0] - p1[0]) / 6;
+    let cp2y = p2[1] - (p3[1] - p1[1]) / 6;
+
+    // 若該區間前後均貼地（UV=0），強制平整避免過衝
+    if (p1[1] >= baseline - 0.1 && p2[1] >= baseline - 0.1) {
+      cp1y = baseline;
+      cp2y = baseline;
+    } else {
+      // 避免向下過衝低於基準線 (UV < 0)
+      cp1y = Math.min(cp1y, baseline);
+      cp2y = Math.min(cp2y, baseline);
+    }
+
+    d += ` C ${cp1x.toFixed(1)},${cp1y.toFixed(1)} ${cp2x.toFixed(1)},${cp2y.toFixed(1)} ${p2[0].toFixed(1)},${p2[1].toFixed(1)}`;
   }
 
   return d;
@@ -383,4 +436,85 @@ export function pointsToAreaPath(
   const base = baselineY.toFixed(1);
 
   return `${linePath} L ${lastX},${base} L ${firstX},${base} Z`;
+}
+
+export interface YAxisTick {
+  uvi: number;
+  label: string;
+}
+
+/**
+ * 計算 Y 軸均勻等距刻度（例如 0, 2, 4, 6 或 0, 3, 6, 9），徹底消除疏密不均問題。
+ */
+export function getEquidistantTicks(maxUv: number): { ticks: YAxisTick[]; topUv: number } {
+  let step = 2;
+  let topUv = 6;
+
+  if (maxUv <= 4) {
+    step = 2;
+    topUv = 4;
+  } else if (maxUv <= 6) {
+    step = 2;
+    topUv = 6;
+  } else if (maxUv <= 9) {
+    step = 3;
+    topUv = 9;
+  } else if (maxUv <= 12) {
+    step = 3;
+    topUv = 12;
+  } else {
+    step = 4;
+    topUv = 16;
+  }
+
+  const ticks: YAxisTick[] = [];
+  for (let u = 0; u <= topUv; u += step) {
+    ticks.push({
+      uvi: u,
+      label: String(u)
+    });
+  }
+
+  return { ticks, topUv };
+}
+
+export interface HourlyForecastItem {
+  hour: number;
+  timeLabel: string;
+  uv: number;
+  riskLevel: UvRiskLevel;
+  isPeak: boolean;
+  isCurrent: boolean;
+}
+
+/**
+ * 產生日間逐小時的 UV 明細資料（用於彈窗或時間軸展開檢視）。
+ */
+export function getHourlyForecastItems(
+  curve: IntradayUvCurveModel,
+  startHour = 6,
+  endHour = 18
+): HourlyForecastItem[] {
+  const currentHourFloor = Math.floor(curve.current.hour);
+  const items: HourlyForecastItem[] = [];
+
+  for (let h = startHour; h <= endHour; h++) {
+    const dummyDate = new Date(2026, 0, 1, h, 0, 0);
+    const uv = curve.uvAtTime(dummyDate);
+    const timeLabel = `${String(h).padStart(2, "0")}:00`;
+    const isPeak = curve.peakWindow
+      ? h >= Math.floor(curve.peakWindow.startHour) && h <= Math.ceil(curve.peakWindow.endHour)
+      : false;
+
+    items.push({
+      hour: h,
+      timeLabel,
+      uv,
+      riskLevel: riskLevelForUvi(uv),
+      isPeak,
+      isCurrent: curve.current.isDaytime && currentHourFloor === h
+    });
+  }
+
+  return items;
 }

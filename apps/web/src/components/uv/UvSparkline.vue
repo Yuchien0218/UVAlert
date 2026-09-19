@@ -39,8 +39,14 @@ const areaPath = computed(() =>
   pointsToAreaPath(props.curve.points, scale.value, props.height - 3)
 );
 
+const isWithinChartHours = computed(() => {
+  const [start, end] = props.curve.hourRange;
+  const h = props.curve.current.hour;
+  return h >= start && h <= end;
+});
+
 const currentPoint = computed(() => {
-  if (!props.curve.current.isDaytime) return null;
+  if (!isWithinChartHours.value) return null;
   return {
     x: scale.value.xScale(props.curve.current.hour),
     y: scale.value.yScale(props.curve.current.uv)

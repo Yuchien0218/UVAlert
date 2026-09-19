@@ -3,6 +3,7 @@ import { mount } from "@vue/test-utils";
 import { describe, expect, it } from "vitest";
 import { buildIntradayUvCurve } from "../../features/uv/solarUvCurve";
 import IntradayUvCurve from "./IntradayUvCurve.vue";
+import IntradayUvSheet from "./IntradayUvSheet.vue";
 import UvSparkline from "./UvSparkline.vue";
 
 describe("Intraday UV Components", () => {
@@ -46,7 +47,7 @@ describe("Intraday UV Components", () => {
   });
 
   describe("IntradayUvCurve", () => {
-    it("完整渲染時間軸、曲線與 WHO 門檻參考線", () => {
+    it("完整渲染時間軸、曲線與等距參考線", () => {
       const wrapper = mount(IntradayUvCurve, {
         props: { curve }
       });
@@ -56,7 +57,7 @@ describe("Intraday UV Components", () => {
       expect(wrapper.find(".intraday-uv__current").exists()).toBe(true);
       expect(wrapper.findAll(".intraday-uv__threshold-line").length).toBeGreaterThan(0);
       expect(wrapper.findAll(".intraday-uv__tick-label").length).toBeGreaterThan(0);
-      expect(wrapper.text()).toContain("尖峰防護時段");
+      expect(wrapper.text()).toContain("尖峰時段紫外線累積快速");
       expect(wrapper.text()).toContain("晴空強度趨勢示意");
     });
 
@@ -70,6 +71,30 @@ describe("Intraday UV Components", () => {
 
       const dots = wrapper.findAll(".intraday-uv__reapply-dot");
       expect(dots).toHaveLength(2);
+    });
+  });
+
+  describe("IntradayUvSheet", () => {
+    it("呈現日間逐小時預測與補擦紀錄", () => {
+      document.body.innerHTML = "";
+      const wrapper = mount(IntradayUvSheet, {
+        attachTo: document.body,
+        props: {
+          open: true,
+          curve,
+          regionName: "臺北市",
+          reapplyHours: [10.5]
+        }
+      });
+
+      const bodyText = document.body.textContent ?? "";
+      expect(bodyText).toContain("臺北市・今日 UV 走勢");
+      expect(bodyText).toContain("日間逐時指數");
+      expect(bodyText).toContain("今日補擦紀錄");
+      expect(bodyText).toContain("10:30");
+      expect(document.body.querySelectorAll(".intraday-uv-sheet__hour-chip").length).toBeGreaterThan(5);
+
+      wrapper.unmount();
     });
   });
 });
