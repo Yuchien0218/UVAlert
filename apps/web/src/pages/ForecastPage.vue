@@ -1,7 +1,14 @@
 <script setup lang="ts">
 import { computed, onMounted } from "vue";
 import FiveDayUvCard from "../components/uv/FiveDayUvCard.vue";
+import IntradayUvCard from "../components/uv/IntradayUvCard.vue";
 import TaiwanUvDistribution from "../components/uv/TaiwanUvDistribution.vue";
+import { useCurrentTime } from "../composables/useCurrentTime";
+import {
+  buildIntradayUvCurve,
+  resolveCoordinatesForRegion
+} from "../features/uv/solarUvCurve";
+import { toLocalDateKey } from "../features/uv/uvForecastRules";
 import { useWebAppServices } from "../app/injection";
 
 /**
@@ -14,6 +21,25 @@ import { useWebAppServices } from "../app/injection";
 const { uvForecast, boot } = useWebAppServices();
 
 const hasActiveSession = computed(() => boot?.currentSession?.value != null);
+const now = useCurrentTime();
+
+const todayForecast = computed(() => {
+  const days = uvForecast.forecast.value?.days ?? [];
+  const todayKey = toLocalDateKey(now.value);
+  return days.find((d) => d.localDate === todayKey) ?? days[0] ?? null;
+});
+
+const intradayCurve = computed(() => {
+  if (!todayForecast.value) return null;
+  const coords = resolveCoordinatesForRegion(uvForecast.region.value?.regionCode);
+  return buildIntradayUvCurve({
+    date: now.value,
+    now: now.value,
+    officialMaxUv: todayForecast.value.uvi,
+    latitude: coords.lat,
+    longitude: coords.lng
+  });
+});
 
 onMounted(() => {
   void uvForecast.ensureLoaded();
@@ -39,6 +65,12 @@ onMounted(() => {
       :error="uvForecast.error.value"
       :forecast="uvForecast.forecast.value"
       @refresh="uvForecast.refresh"
+    />
+
+    <IntradayUvCard
+      v-if="intradayCurve"
+      :curve="intradayCurve"
+      :region-name="uvForecast.region.value?.displayName"
     />
 
     <!--

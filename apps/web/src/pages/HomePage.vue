@@ -557,6 +557,7 @@ function handleEndSession(): void {
         :uvi="headlineDay?.uvi ?? null"
         :risk-level="headlineDay?.riskLevel ?? null"
         :region-name="uvForecast.region.value?.displayName ?? null"
+        :region-code="uvForecast.region.value?.regionCode ?? null"
         :show-region-setup="!hasRegion"
         :note="headlineNote"
       />
@@ -593,6 +594,7 @@ function handleEndSession(): void {
         :uvi="headlineDay?.uvi ?? null"
         :risk-level="headlineDay?.riskLevel ?? null"
         :region-name="uvForecast.region.value?.displayName ?? null"
+        :region-code="uvForecast.region.value?.regionCode ?? null"
         :show-region-setup="!hasRegion"
         :note="headlineNote"
       />

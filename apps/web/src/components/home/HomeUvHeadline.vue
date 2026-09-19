@@ -1,22 +1,23 @@
 <script setup lang="ts">
 import type { UvRiskLevel } from "@sunshield/contracts";
-import { computed } from "vue";
+import { computed, shallowRef } from "vue";
+import { useCurrentTime } from "../../composables/useCurrentTime";
+import {
+  buildIntradayUvCurve,
+  resolveCoordinatesForRegion
+} from "../../features/uv/solarUvCurve";
 import {
   getUvRiskLevelAdvice,
   getUvRiskLevelLabel
 } from "../../features/uv/uvForecastRules";
+import IntradayUvSheet from "../uv/IntradayUvSheet.vue";
+import UvSparkline from "../uv/UvSparkline.vue";
 
 /**
  * 首屏的 UV 標題區塊。
  *
- * **刻意不畫逐時長條圖。** wireframe 原本在這裡有一條當日 UV 曲線，但中央
- * 氣象署開放資料沒有逐時紫外線——`F-D0047-091` 與 `O-A0005-001` 都是一天
- * 一個值，逐時觀測資料集（`O-A0001-001`）完全不含紫外線欄位。畫出來的
- * 曲線只能是捏造的，違反 DESIGN.md 第九節「要顯示資料就顯示真的資料」。
- * 「一天中什麼時候最強」屬於衛教「了解今天的 UV」的教育型示意（Sitemap
- * §4.6），不放在資料畫面上。
- *
- * 同理拿掉「12:00 最強」——資料集沒有尖峰時段。
+ * 整合當前強度讀數與極簡一日走勢線（UvSparkline），點擊走勢線可
+ * 在原地展開完整鐘形曲線抽屜（IntradayUvSheet）。
  */
 
 const props = withDefaults(defineProps<{
@@ -27,6 +28,8 @@ const props = withDefaults(defineProps<{
   riskLevel: UvRiskLevel | null;
   /** 目前預報地區；有值時提供前往地區設定的入口。 */
   regionName?: string | null;
+  /** 目前預報地區代碼；用於推算代表性經緯度。 */
+  regionCode?: string | null;
   /** 無地區時是否提供精簡設定入口；提醒進行中使用，避免插入大型提示卡。 */
   showRegionSetup?: boolean;
   /**
@@ -38,10 +41,26 @@ const props = withDefaults(defineProps<{
   note: string | null;
 }>(), {
   regionName: null,
+  regionCode: null,
   showRegionSetup: false
 });
 
+const now = useCurrentTime();
+const sheetOpen = shallowRef(false);
+
 const hasValue = computed(() => props.uvi !== null && props.riskLevel !== null);
+
+const intradayCurve = computed(() => {
+  if (props.uvi === null) return null;
+  const coords = resolveCoordinatesForRegion(props.regionCode);
+  return buildIntradayUvCurve({
+    date: now.value,
+    now: now.value,
+    officialMaxUv: props.uvi,
+    latitude: coords.lat,
+    longitude: coords.lng
+  });
+});
 </script>
 
 <template>
@@ -88,17 +107,24 @@ const hasValue = computed(() => props.uvi !== null && props.riskLevel !== null);
       </div>
     </div>
 
-    <div
-      v-if="hasValue"
-      class="uv-headline__value"
-      :class="`uv-headline__value--${riskLevel}`"
-    >
-      <span class="stat-figure stat-figure--display uv-headline__figure">{{
-        uvi
-      }}</span>
-      <span class="uv-headline__level">
-        {{ getUvRiskLevelLabel(riskLevel!) }}
-      </span>
+    <div v-if="hasValue" class="uv-headline__main">
+      <div
+        class="uv-headline__value"
+        :class="`uv-headline__value--${riskLevel}`"
+      >
+        <span class="stat-figure stat-figure--display uv-headline__figure">{{
+          uvi
+        }}</span>
+        <span class="uv-headline__level">
+          {{ getUvRiskLevelLabel(riskLevel!) }}
+        </span>
+      </div>
+
+      <UvSparkline
+        v-if="intradayCurve"
+        :curve="intradayCurve"
+        @open="sheetOpen = true"
+      />
     </div>
 
     <p v-if="hasValue" class="uv-headline__advice">
@@ -110,6 +136,13 @@ const hasValue = computed(() => props.uvi !== null && props.riskLevel !== null);
       拿它當「沒資料」會讓使用者以為現在紫外線很低。
     -->
     <p v-else class="uv-headline__empty">無資料</p>
+
+    <IntradayUvSheet
+      :open="sheetOpen"
+      :curve="intradayCurve"
+      :region-name="regionName"
+      @close="sheetOpen = false"
+    />
   </section>
 </template>
 
@@ -153,6 +186,13 @@ const hasValue = computed(() => props.uvi !== null && props.riskLevel !== null);
   justify-content: space-between;
   align-items: baseline;
   gap: var(--space-2);
+}
+
+.uv-headline__main {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
 }
 
 .uv-headline__meta {
