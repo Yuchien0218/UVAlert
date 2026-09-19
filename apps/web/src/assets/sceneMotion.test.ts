@@ -44,7 +44,8 @@ const HOVERABLE = [
   ".choice-grid label:hover", // <label> 包著 radio，有 cursor: pointer
   ".time-option:hover", // <button>
   "button.event-row:hover .event-label", // 選擇器自己就寫明是 button
-  ".quick-protection__header:hover" // <button>
+  ".quick-protection__header:hover", // <button>
+  ".uv-sparkline--interactive:hover" // <button> 點擊展開一日走勢抽屜
 ];
 
 describe("不要有假的可點提示", () => {
