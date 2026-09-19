@@ -3,7 +3,6 @@ import { computed } from "vue";
 import {
   createChartScale,
   getEquidistantTicks,
-  pointsToAreaPath,
   pointsToSmoothPath,
   type IntradayUvCurveModel
 } from "../../features/uv/solarUvCurve";
@@ -39,9 +38,6 @@ const scale = computed(() =>
 const baselineY = chartHeight - padding.bottom;
 
 const linePath = computed(() => pointsToSmoothPath(props.curve.points, scale.value));
-const areaPath = computed(() =>
-  pointsToAreaPath(props.curve.points, scale.value, baselineY)
-);
 
 // 均勻等距水平參考線
 const thresholdLines = computed(() =>
@@ -128,19 +124,6 @@ const reapplyMarkers = computed(() =>
         role="img"
         aria-label="今日紫外線強度時間曲線圖"
       >
-        <defs>
-          <linearGradient
-            id="intraday-gradient"
-            x1="0"
-            y1="0"
-            x2="0"
-            y2="1"
-          >
-            <stop offset="0%" stop-color="var(--color-primary)" stop-opacity="0.28" />
-            <stop offset="100%" stop-color="var(--color-primary)" stop-opacity="0.02" />
-          </linearGradient>
-        </defs>
-
         <!-- 尖峰警戒區域背景遮罩 -->
         <g v-if="peakBox" class="intraday-uv__peak-zone">
           <rect
@@ -191,12 +174,7 @@ const reapplyMarkers = computed(() =>
           class="intraday-uv__axis-line"
         />
 
-        <!-- 曲線面積填充與主線條（Catmull-Rom Spline 光滑曲線） -->
-        <path
-          v-if="areaPath"
-          :d="areaPath"
-          fill="url(#intraday-gradient)"
-        />
+        <!-- 主線條（Catmull-Rom Spline 光滑曲線，無漸層） -->
         <path
           v-if="linePath"
           :d="linePath"

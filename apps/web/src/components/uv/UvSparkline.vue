@@ -2,7 +2,6 @@
 import { computed } from "vue";
 import {
   createChartScale,
-  pointsToAreaPath,
   pointsToSmoothPath,
   type IntradayUvCurveModel
 } from "../../features/uv/solarUvCurve";
@@ -35,9 +34,6 @@ const scale = computed(() =>
 );
 
 const linePath = computed(() => pointsToSmoothPath(props.curve.points, scale.value));
-const areaPath = computed(() =>
-  pointsToAreaPath(props.curve.points, scale.value, props.height - 3)
-);
 
 const isWithinChartHours = computed(() => {
   const [start, end] = props.curve.hourRange;
@@ -71,24 +67,6 @@ const currentPoint = computed(() => {
       class="uv-sparkline__svg"
       aria-hidden="true"
     >
-      <defs>
-        <linearGradient
-          id="sparkline-gradient"
-          x1="0"
-          y1="0"
-          x2="0"
-          y2="1"
-        >
-          <stop offset="0%" stop-color="var(--color-primary)" stop-opacity="0.25" />
-          <stop offset="100%" stop-color="var(--color-primary)" stop-opacity="0.02" />
-        </linearGradient>
-      </defs>
-
-      <path
-        v-if="areaPath"
-        :d="areaPath"
-        fill="url(#sparkline-gradient)"
-      />
       <path
         v-if="linePath"
         :d="linePath"
@@ -116,24 +94,6 @@ const currentPoint = computed(() => {
       :viewBox="`0 0 ${width} ${height}`"
       class="uv-sparkline__svg"
     >
-      <defs>
-        <linearGradient
-          id="sparkline-gradient-static"
-          x1="0"
-          y1="0"
-          x2="0"
-          y2="1"
-        >
-          <stop offset="0%" stop-color="var(--color-primary)" stop-opacity="0.25" />
-          <stop offset="100%" stop-color="var(--color-primary)" stop-opacity="0.02" />
-        </linearGradient>
-      </defs>
-
-      <path
-        v-if="areaPath"
-        :d="areaPath"
-        fill="url(#sparkline-gradient-static)"
-      />
       <path
         v-if="linePath"
         :d="linePath"
