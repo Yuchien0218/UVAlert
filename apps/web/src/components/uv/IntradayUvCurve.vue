@@ -368,6 +368,6 @@ const reapplyMarkers = computed(() =>
   color: var(--text-secondary);
   font-size: var(--font-size-caption);
   line-height: var(--line-height-caption);
-  text-align: center;
+  text-align: start;
 }
 </style>
