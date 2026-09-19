@@ -5,7 +5,6 @@ import type { IntradayUvCurveModel } from "../../features/uv/solarUvCurve";
 
 interface Props {
   curve: IntradayUvCurveModel | null;
-  regionName?: string | null | undefined;
   reapplyHours?: number[] | undefined;
 }
 
@@ -25,9 +24,6 @@ defineProps<Props>();
           今日 UV 時間走勢
         </h2>
       </div>
-      <span v-if="regionName" class="intraday-card__region" data-typography-role="supporting">
-        {{ regionName }}
-      </span>
     </header>
 
     <IntradayUvCurve
@@ -48,7 +44,6 @@ defineProps<Props>();
 .intraday-card__header {
   display: flex;
   align-items: center;
-  justify-content: space-between;
   gap: var(--space-3);
 }
 
@@ -60,9 +55,5 @@ defineProps<Props>();
 
 .intraday-card__title-group h2 {
   margin: 0;
-}
-
-.intraday-card__region {
-  color: var(--text-secondary);
 }
 </style>

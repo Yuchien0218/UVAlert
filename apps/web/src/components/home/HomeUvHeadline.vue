@@ -1,23 +1,13 @@
 <script setup lang="ts">
 import type { UvRiskLevel } from "@sunshield/contracts";
-import { computed, shallowRef } from "vue";
-import { useCurrentTime } from "../../composables/useCurrentTime";
-import {
-  buildIntradayUvCurve,
-  resolveCoordinatesForRegion
-} from "../../features/uv/solarUvCurve";
+import { computed } from "vue";
 import {
   getUvRiskLevelAdvice,
   getUvRiskLevelLabel
 } from "../../features/uv/uvForecastRules";
-import IntradayUvSheet from "../uv/IntradayUvSheet.vue";
-import UvSparkline from "../uv/UvSparkline.vue";
 
 /**
  * 首屏的 UV 標題區塊。
- *
- * 整合當前強度讀數與極簡一日走勢線（UvSparkline），點擊走勢線可
- * 在原地展開完整鐘形曲線抽屜（IntradayUvSheet）。
  */
 
 const props = withDefaults(defineProps<{
@@ -45,22 +35,7 @@ const props = withDefaults(defineProps<{
   showRegionSetup: false
 });
 
-const now = useCurrentTime();
-const sheetOpen = shallowRef(false);
-
 const hasValue = computed(() => props.uvi !== null && props.riskLevel !== null);
-
-const intradayCurve = computed(() => {
-  if (props.uvi === null) return null;
-  const coords = resolveCoordinatesForRegion(props.regionCode);
-  return buildIntradayUvCurve({
-    date: now.value,
-    now: now.value,
-    officialMaxUv: props.uvi,
-    latitude: coords.lat,
-    longitude: coords.lng
-  });
-});
 </script>
 
 <template>
@@ -119,12 +94,6 @@ const intradayCurve = computed(() => {
           {{ getUvRiskLevelLabel(riskLevel!) }}
         </span>
       </div>
-
-      <UvSparkline
-        v-if="intradayCurve"
-        :curve="intradayCurve"
-        @open="sheetOpen = true"
-      />
     </div>
 
     <p v-if="hasValue" class="uv-headline__advice">
@@ -136,13 +105,6 @@ const intradayCurve = computed(() => {
       拿它當「沒資料」會讓使用者以為現在紫外線很低。
     -->
     <p v-else class="uv-headline__empty">無資料</p>
-
-    <IntradayUvSheet
-      :open="sheetOpen"
-      :curve="intradayCurve"
-      :region-name="regionName"
-      @close="sheetOpen = false"
-    />
   </section>
 </template>
 

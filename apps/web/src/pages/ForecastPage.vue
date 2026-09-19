@@ -70,7 +70,6 @@ onMounted(() => {
     <IntradayUvCard
       v-if="intradayCurve"
       :curve="intradayCurve"
-      :region-name="uvForecast.region.value?.displayName"
     />
 
     <!--

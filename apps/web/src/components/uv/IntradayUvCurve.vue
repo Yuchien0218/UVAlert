@@ -23,7 +23,7 @@ const chartWidth = 340;
 const chartHeight = 180;
 const padding = { top: 28, right: 20, bottom: 28, left: 30 };
 
-// 採用均勻等距 Y 軸刻度配置（解決刻度疏密不均與缺少 0 基準線問題）
+// 均勻等距 Y 軸刻度配置
 const equidistantConfig = computed(() => getEquidistantTicks(props.curve.peak.uv));
 
 const scale = computed(() =>
@@ -52,11 +52,12 @@ const thresholdLines = computed(() =>
   }))
 );
 
-// X 軸時間標記（每 3 小時一格：06:00, 09:00, 12:00, 15:00, 18:00）
+// X 軸時間標記（24 小時等距標記：00:00, 06:00, 12:00, 18:00, 24:00）
 const timeTicks = computed(() => {
   const [start, end] = props.curve.hourRange;
+  const step = 6;
   const ticks: { hour: number; label: string; x: number }[] = [];
-  for (let h = Math.ceil(start / 3) * 3; h <= end; h += 3) {
+  for (let h = start; h <= end; h += step) {
     ticks.push({
       hour: h,
       label: `${String(h).padStart(2, "0")}:00`,
@@ -81,22 +82,27 @@ const peakBox = computed(() => {
   };
 });
 
-// 當前時間是否落在圖表 X 軸範圍內（05:00–19:00）
-const isWithinChartHours = computed(() => {
-  const [start, end] = props.curve.hourRange;
-  const h = props.curve.current.hour;
-  return h >= start && h <= end;
+// 當前時間標籤（純文字無 Emoji）
+const currentTimeLabel = computed(() => {
+  const h = Math.floor(props.curve.current.hour);
+  const m = Math.floor((props.curve.current.hour % 1) * 60);
+  return `${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}`;
 });
 
-// 現在時間位置指示點（全天候只要在日間視窗內皆顯示，避免夜間或清晨無標記的失落感）
+// 全天 24 小時目前所在時段的圓形標示（無論白天或夜晚，均精準定位）
 const currentPoint = computed(() => {
-  if (!isWithinChartHours.value) return null;
-  const x = scale.value.xScale(props.curve.current.hour);
+  const [start, end] = props.curve.hourRange;
+  const h = props.curve.current.hour;
+  if (h < start || h > end) return null;
+
+  const x = scale.value.xScale(h);
   const y = scale.value.yScale(props.curve.current.uv);
+
   return {
     x,
     y,
-    uv: props.curve.current.uv
+    uv: props.curve.current.uv,
+    isDaytime: props.curve.current.uv > 0
   };
 });
 
@@ -207,7 +213,7 @@ const reapplyMarkers = computed(() =>
           />
         </template>
 
-        <!-- 當前時間指示線與圓點（全天候提示現在位置） -->
+        <!-- 目前在哪個時段的圓形標示（全天 24 小時均能精確呈現） -->
         <g v-if="currentPoint" class="intraday-uv__current">
           <line
             :x1="currentPoint.x"
@@ -216,31 +222,33 @@ const reapplyMarkers = computed(() =>
             :y2="baselineY"
             class="intraday-uv__current-line"
           />
+          <!-- 圓形標示外圈光暈 -->
           <circle
             :cx="currentPoint.x"
             :cy="currentPoint.y"
-            r="4.5"
+            r="7"
+            class="intraday-uv__current-halo"
+          />
+          <!-- 圓形標示核心實心圓 -->
+          <circle
+            :cx="currentPoint.x"
+            :cy="currentPoint.y"
+            r="4"
             class="intraday-uv__current-dot"
           />
+          <!-- 標籤文字（無 Emoji） -->
           <text
             :x="currentPoint.x > chartWidth * 0.72 ? currentPoint.x - 8 : currentPoint.x + 8"
             :y="Math.max(padding.top + 6, currentPoint.y - 8)"
             :text-anchor="currentPoint.x > chartWidth * 0.72 ? 'end' : 'start'"
             class="intraday-uv__current-label"
           >
-            現在・UV {{ currentPoint.uv }}
-          </text>
-        </g>
-
-        <!-- 若處於夜間視窗之外，右上角貼心提示 -->
-        <g v-else-if="!isWithinChartHours" class="intraday-uv__night-badge">
-          <text
-            :x="chartWidth - padding.right"
-            :y="padding.top - 6"
-            text-anchor="end"
-            class="intraday-uv__night-text"
-          >
-            🌙 目前為夜間時段
+            <template v-if="currentPoint.isDaytime">
+              現在・UV {{ currentPoint.uv }}
+            </template>
+            <template v-else>
+              現在 {{ currentTimeLabel }}
+            </template>
           </text>
         </g>
 
@@ -260,22 +268,9 @@ const reapplyMarkers = computed(() =>
       </svg>
     </div>
 
-    <!-- 底部資訊：專注於防護行動建議，不再重複圖上的尖峰時段與峰值數字 -->
+    <!-- 底部資訊：移除文字區塊，僅保留最小字級之誠實註記（無 Emoji） -->
     <div class="intraday-uv__summary">
-      <div v-if="curve.peakWindow" class="intraday-uv__action-advice">
-        <span class="intraday-uv__advice-icon" aria-hidden="true">☀️</span>
-        <span data-typography-role="body" class="intraday-uv__advice-text">
-          尖峰時段紫外線累積快速，戶外活動建議加強遮蔭與防曬裝備。
-        </span>
-      </div>
-      <div v-else class="intraday-uv__action-advice">
-        <span class="intraday-uv__advice-icon" aria-hidden="true">🌿</span>
-        <span data-typography-role="body" class="intraday-uv__advice-text">
-          今日全天紫外線指數溫和，戶外日常活動無需過度防護。
-        </span>
-      </div>
-
-      <p class="intraday-uv__note" data-typography-role="supporting">
+      <p class="intraday-uv__note" data-typography-role="caption">
         ※ 晴空強度趨勢示意（依氣象署當日預報最高值校準），實際紫外線指數受即時雲量影響。
       </p>
     </div>
@@ -360,6 +355,11 @@ const reapplyMarkers = computed(() =>
   stroke-dasharray: 3 3;
 }
 
+.intraday-uv__current-halo {
+  fill: var(--color-primary);
+  opacity: 0.22;
+}
+
 .intraday-uv__current-dot {
   fill: var(--color-primary);
   stroke: var(--color-canvas);
@@ -373,13 +373,6 @@ const reapplyMarkers = computed(() =>
   font-weight: 600;
 }
 
-.intraday-uv__night-text {
-  fill: var(--text-secondary);
-  font-family: var(--font-family-supporting);
-  font-size: 10px;
-  user-select: none;
-}
-
 .intraday-uv__tick-label {
   fill: var(--text-secondary);
   font-family: var(--font-family-supporting);
@@ -389,36 +382,14 @@ const reapplyMarkers = computed(() =>
 
 .intraday-uv__summary {
   display: grid;
-  gap: var(--space-2);
   padding-top: var(--space-1);
-}
-
-.intraday-uv__action-advice {
-  display: flex;
-  align-items: flex-start;
-  gap: var(--space-2);
-  padding: var(--space-2) var(--space-3);
-  border-radius: var(--radius-sm);
-  background: color-mix(in srgb, var(--color-soon-soft) 45%, var(--color-surface-soft));
-}
-
-.intraday-uv__advice-icon {
-  font-size: var(--font-size-body);
-  line-height: var(--line-height-body);
-  flex-shrink: 0;
-}
-
-.intraday-uv__advice-text {
-  color: var(--text-primary);
-  font-size: var(--font-size-supporting);
-  line-height: var(--line-height-supporting);
 }
 
 .intraday-uv__note {
   margin: 0;
   color: var(--text-secondary);
-  font-size: var(--font-size-supporting);
-  line-height: var(--line-height-supporting);
+  font-size: var(--font-size-caption);
+  line-height: var(--line-height-caption);
   text-align: center;
 }
 </style>

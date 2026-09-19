@@ -55,10 +55,12 @@ describe("Intraday UV Components", () => {
       expect(wrapper.find("svg").exists()).toBe(true);
       expect(wrapper.find(".intraday-uv__curve-line").exists()).toBe(true);
       expect(wrapper.find(".intraday-uv__current").exists()).toBe(true);
+      expect(wrapper.find(".intraday-uv__current-dot").exists()).toBe(true);
+      expect(wrapper.find(".intraday-uv__current-halo").exists()).toBe(true);
       expect(wrapper.findAll(".intraday-uv__threshold-line").length).toBeGreaterThan(0);
       expect(wrapper.findAll(".intraday-uv__tick-label").length).toBeGreaterThan(0);
-      expect(wrapper.text()).toContain("尖峰時段紫外線累積快速");
       expect(wrapper.text()).toContain("晴空強度趨勢示意");
+      expect(wrapper.text()).not.toContain("尖峰時段紫外線累積快速");
     });
 
     it("支援渲染補擦紀錄標記點", () => {
