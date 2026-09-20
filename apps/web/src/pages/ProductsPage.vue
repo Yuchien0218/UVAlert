@@ -130,6 +130,8 @@ watch(
 const listContainerRef =
   shallowRef<ComponentPublicInstance | HTMLElement | null>(null);
 
+const dragOffsetY = ref(0);
+
 function getContainerEl(): HTMLElement | null {
   if (!listContainerRef.value) return null;
   if (listContainerRef.value instanceof HTMLElement) {
@@ -145,6 +147,17 @@ function startDrag(event: PointerEvent, index: number): void {
 
   const product = activeItems.value[index];
   if (!product) return;
+
+  const targetHandle = event.target as HTMLElement | null;
+  const pointerId = event.pointerId;
+  try {
+    targetHandle?.setPointerCapture?.(pointerId);
+  } catch {
+    // 某些環境可能不支援 setPointerCapture
+  }
+
+  let dragStartY = event.clientY;
+  dragOffsetY.value = 0;
 
   dragSource.value = "current";
   draggingProduct.value = product;
@@ -162,6 +175,9 @@ function startDrag(event: PointerEvent, index: number): void {
 
     const clientX = e.clientX;
     const clientY = e.clientY;
+
+    // 即時計算跟手位移
+    dragOffsetY.value = clientY - dragStartY;
 
     // 檢查是否移入收納投放區或既有的收納中區塊
     let overTarget = false;
@@ -206,28 +222,39 @@ function startDrag(event: PointerEvent, index: number): void {
       container.querySelectorAll(":scope > li")
     ) as HTMLElement[];
 
-    let targetIndex = draggedIndex.value;
+    const currentIndex = draggedIndex.value;
+    let targetIndex = currentIndex;
 
     for (let i = 0; i < listItems.length; i += 1) {
+      if (i === currentIndex) continue;
       const item = listItems[i];
       if (!item) continue;
       const rect = item.getBoundingClientRect();
-      if (clientY >= rect.top && clientY <= rect.bottom) {
+      const midY = rect.top + rect.height / 2;
+      if (i > currentIndex && clientY >= midY) {
+        targetIndex = i;
+      } else if (i < currentIndex && clientY <= midY) {
         targetIndex = i;
         break;
       }
     }
 
     if (
-      targetIndex !== draggedIndex.value &&
+      targetIndex !== currentIndex &&
       targetIndex >= 0 &&
       targetIndex < activeItems.value.length
     ) {
+      const itemHeight = listItems[targetIndex]?.offsetHeight ?? 72;
+      const slotDistance = itemHeight + 12;
+      const slotShift = (targetIndex - currentIndex) * slotDistance;
+
       const currentList = [...activeItems.value];
-      const [moved] = currentList.splice(draggedIndex.value, 1);
+      const [moved] = currentList.splice(currentIndex, 1);
       if (moved !== undefined) {
         currentList.splice(targetIndex, 0, moved);
         activeItems.value = currentList;
+        dragStartY += slotShift;
+        dragOffsetY.value = clientY - dragStartY;
         draggedIndex.value = targetIndex;
         if (typeof navigator !== "undefined" && "vibrate" in navigator) {
           navigator.vibrate?.(10);
@@ -237,6 +264,12 @@ function startDrag(event: PointerEvent, index: number): void {
   };
 
   const onPointerUp = () => {
+    try {
+      targetHandle?.releasePointerCapture?.(pointerId);
+    } catch {
+      // 忽略釋放失敗
+    }
+
     window.removeEventListener("pointermove", onPointerMove);
     window.removeEventListener("pointerup", onPointerUp);
     window.removeEventListener("pointercancel", onPointerUp);
@@ -247,6 +280,7 @@ function startDrag(event: PointerEvent, index: number): void {
     dragSource.value = null;
     draggedIndex.value = null;
     isOverArchiveZone.value = false;
+    dragOffsetY.value = 0;
 
     if (shouldArchive) {
       if (typeof navigator !== "undefined" && "vibrate" in navigator) {
@@ -273,6 +307,17 @@ function startDrag(event: PointerEvent, index: number): void {
 }
 
 function startDragFromPast(event: PointerEvent, product: ProductCatalogRecordV1): void {
+  const targetHandle = event.target as HTMLElement | null;
+  const pointerId = event.pointerId;
+  try {
+    targetHandle?.setPointerCapture?.(pointerId);
+  } catch {
+    // 某些環境可能不支援 setPointerCapture
+  }
+
+  let dragStartY = event.clientY;
+  dragOffsetY.value = 0;
+
   dragSource.value = "past";
   draggingProduct.value = product;
   isDragging.value = true;
@@ -289,6 +334,9 @@ function startDragFromPast(event: PointerEvent, product: ProductCatalogRecordV1)
 
     const clientX = e.clientX;
     const clientY = e.clientY;
+
+    // 即時計算跟手位移
+    dragOffsetY.value = clientY - dragStartY;
 
     let overTarget = false;
     if (restoreZoneRef.value) {
@@ -323,6 +371,12 @@ function startDragFromPast(event: PointerEvent, product: ProductCatalogRecordV1)
   };
 
   const onPointerUp = () => {
+    try {
+      targetHandle?.releasePointerCapture?.(pointerId);
+    } catch {
+      // 忽略釋放失敗
+    }
+
     window.removeEventListener("pointermove", onPointerMove);
     window.removeEventListener("pointerup", onPointerUp);
     window.removeEventListener("pointercancel", onPointerUp);
@@ -333,6 +387,7 @@ function startDragFromPast(event: PointerEvent, product: ProductCatalogRecordV1)
     dragSource.value = null;
     draggingProduct.value = null;
     isOverRestoreZone.value = false;
+    dragOffsetY.value = 0;
 
     if (shouldRestore) {
       if (typeof navigator !== "undefined" && "vibrate" in navigator) {
@@ -463,6 +518,7 @@ function startDragFromPast(event: PointerEvent, product: ProductCatalogRecordV1)
               v-for="(product, index) in activeItems"
               :key="product.productId"
               :class="{ 'is-dragging': isDragging && dragSource === 'current' && draggedIndex === index }"
+              :style="isDragging && dragSource === 'current' && draggedIndex === index ? { transform: `translate3d(0, ${dragOffsetY}px, 0) scale(1.045) rotate(-1.5deg)` } : undefined"
             >
               <GearListItem
                 :product="product"
@@ -557,6 +613,7 @@ function startDragFromPast(event: PointerEvent, product: ProductCatalogRecordV1)
               v-for="product in past"
               :key="product.productId"
               :class="{ 'is-dragging': isDragging && dragSource === 'past' && draggingProduct?.productId === product.productId }"
+              :style="isDragging && dragSource === 'past' && draggingProduct?.productId === product.productId ? { transform: `translate3d(0, ${dragOffsetY}px, 0) scale(1.045) rotate(-1.5deg)` } : undefined"
             >
               <GearListItem
                 :product="product"
@@ -692,20 +749,23 @@ section {
 .is-dragging {
   z-index: var(--z-drag);
   position: relative;
-  transform: scale(1.025);
+  transform: scale(1.045) rotate(-1.5deg);
   filter:
-    drop-shadow(0 4px 10px rgb(46 41 37 / 12%))
-    drop-shadow(0 14px 28px rgb(46 41 37 / 18%));
+    drop-shadow(0 6px 14px rgb(46 41 37 / 18%))
+    drop-shadow(0 16px 32px rgb(46 41 37 / 24%));
+  transition: none !important;
+  will-change: transform;
 }
 
 .is-dragging :deep(.gear-item-card) {
   border-color: var(--color-primary);
   background-color: var(--color-canvas);
+  box-shadow: 0 0 0 2px var(--color-primary);
 }
 
 .is-dragging :deep(.gear-item__handle) {
-  background-color: var(--color-hairline-soft);
-  color: var(--color-primary);
+  background-color: var(--color-primary);
+  color: var(--color-white);
 }
 
 .drop-action-zone,
