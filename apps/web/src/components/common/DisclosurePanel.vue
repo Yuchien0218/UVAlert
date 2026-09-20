@@ -75,33 +75,42 @@ function handleTransitionEnd(event: TransitionEvent): void {
 .disclosure {
   display: grid;
   grid-template-rows: 0fr;
-  transition: grid-template-rows var(--duration-fast) var(--ease-out);
+  transition: grid-template-rows 200ms var(--ease-accelerate);
 }
 
 .disclosure[data-open="true"] {
   grid-template-rows: 1fr;
+  transition: grid-template-rows 240ms var(--ease-emphasized);
 }
 
 /*
  * min-height: 0 是必要的——格線項目的預設 min-height 是 auto，會擋住
  * 0fr 把它壓到零，動畫看起來就完全沒發生。
  *
- * opacity 一起做：只有高度變化的話，內容會在極短的高度裡被壓扁再撐開，
- * 讀起來像被擠出來。高度負責「版面是連續的」，opacity 負責「轉場被看見」
- * ——正好是第十二節第一條說的那兩件事，而且同屬一個元素的同一個狀態改變，
- * 不違反第五條（一次只有一個元素在動）。
+ * 彈性呼吸節奏（2026-09-20）：
+ * 展開時高度先動（240ms，Material 3 減速曲線），文字延後 40ms 淡入（200ms），
+ * 讓內容在擁有足夠空間後才浮現，徹底避免文字被壓扁裁切的擠出感；
+ * 收合時文字俐落淡出（160ms 加速），隨後高度順暢閉合。
  */
 .disclosure__inner {
   min-height: 0;
   opacity: 0;
-  transition: opacity var(--duration-fast) var(--ease-out);
+  transition: opacity 160ms var(--ease-accelerate);
 }
 
 .disclosure[data-open="true"] .disclosure__inner {
   opacity: 1;
+  transition: opacity 200ms var(--ease-out) 40ms;
 }
 
 .disclosure__inner.is-clipped {
   overflow: hidden;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .disclosure,
+  .disclosure__inner {
+    transition: none;
+  }
 }
 </style>

@@ -556,44 +556,46 @@ onMounted(async () => {
     </section>
 
     <template v-else>
-      <ContextSelector
-        v-if="showContextSelector"
-        v-model="selectedContext"
-        @settled="handleContextSettled"
-      />
+      <Transition name="setup-step-swap" mode="out-in">
+        <ContextSelector
+          v-if="showContextSelector"
+          v-model="selectedContext"
+          @settled="handleContextSettled"
+        />
 
-      <!--
-        2026-08-31：摘要列補上情境圖示（使用者要求）。
-
-        收合之後這一行是整個情境步驟僅剩的視覺，只有兩段文字；補上圖示
-        之後它跟展開時的 ContextSelector 用同一顆幾何，讀者知道收起來的
-        是哪一個選項，而不只是讀到一個詞。
-
-        24px 而不是選擇器裡的 32px：那裡圖示是卡片主視覺，這裡是一行摘要
-        的行內記號（DESIGN.md 第八節的檔位）。
-      -->
-      <div v-else class="setup-step-summary">
         <!--
-          2026-08-31：圖示移到「情境」右邊（使用者要求）。
+          2026-08-31：摘要列補上情境圖示（使用者要求）。
 
-          原本是 `[icon] 情境 一般戶外`——圖示貼在欄位標籤前面，但它畫的是
-          **值**（一般戶外那顆山），不是「情境」這個欄位。移到標籤右邊之後
-          變成 `情境 [icon] 一般戶外`，圖示緊貼著它所描述的那個詞。
+          收合之後這一行是整個情境步驟僅剩的視覺，只有兩段文字；補上圖示
+          之後它跟展開時的 ContextSelector 用同一顆幾何，讀者知道收起來的
+          是哪一個選項，而不只是讀到一個詞。
+
+          24px 而不是選擇器裡的 32px：那裡圖示是卡片主視覺，這裡是一行摘要
+          的行內記號（DESIGN.md 第八節的檔位）。
         -->
-        <p class="setup-step-summary__value">
-          <span class="setup-step-summary__label">情境</span>
-          <Icon
-            v-if="context !== null"
-            class="setup-step-summary__icon"
-            :name="CONTEXT_ICONS[context]"
-            :size="24"
-          />
-          {{ context === null ? "" : CONTEXT_LABELS[context] }}
-        </p>
-        <button class="text-link" type="button" @click="editingContext = true">
-          更改
-        </button>
-      </div>
+        <div v-else class="setup-step-summary">
+          <!--
+            2026-08-31：圖示移到「情境」右邊（使用者要求）。
+
+            原本是 `[icon] 情境 一般戶外`——圖示貼在欄位標籤前面，但它畫的是
+            **值**（一般戶外那顆山），不是「情境」這個欄位。移到標籤右邊之後
+            變成 `情境 [icon] 一般戶外`，圖示緊貼著它所描述的那個詞。
+          -->
+          <p class="setup-step-summary__value">
+            <span class="setup-step-summary__label">情境</span>
+            <Icon
+              v-if="context !== null"
+              class="setup-step-summary__icon"
+              :name="CONTEXT_ICONS[context]"
+              :size="24"
+            />
+            {{ context === null ? "" : CONTEXT_LABELS[context] }}
+          </p>
+          <button class="text-link" type="button" @click="editingContext = true">
+            更改
+          </button>
+        </div>
+      </Transition>
 
       <p
         v-if="setup.saveStatus.value === 'error'"
@@ -759,6 +761,19 @@ onMounted(async () => {
 </template>
 
 <style scoped>
+.setup-step-swap-enter-active,
+.setup-step-swap-leave-active {
+  transition:
+    opacity var(--duration-fast) var(--ease-out),
+    transform var(--duration-fast) var(--ease-out);
+}
+
+.setup-step-swap-enter-from,
+.setup-step-swap-leave-to {
+  opacity: 0;
+  transform: translateY(-4px);
+}
+
 /*
  * 已完成步驟的一行摘要。刻意不做成卡片——它是「已經決定好的事」，不需要
  * 跟還要操作的區塊搶視覺份量；一條 hairline 就足以把它跟下方分開。

@@ -31,35 +31,30 @@ withDefaults(
 <template>
   <span class="disclosure-chevron" :class="{ 'is-open': open }">
     <Icon name="tool-chevron-right" :size="size" class="disclosure-chevron__icon" />
-    <Icon name="tool-chevron-down" :size="size" class="disclosure-chevron__icon" />
   </span>
 </template>
 
 <style scoped>
 .disclosure-chevron {
-  display: grid;
+  display: inline-grid;
   place-items: center;
 }
 
-/*
- * 兩顆同格。DOM 順序：右向在前、下向在後，所以展開態那顆畫在上面——
- * 不必動 z-index（下排導覽藥丸那次的教訓：負的 z-index 會沉到堆疊脈絡的
- * 背景底下）。這裡兩顆都是透明底，誰在上面其實只影響半透明那一瞬間。
- */
 .disclosure-chevron__icon {
-  grid-area: 1 / 1;
-  transition: opacity var(--duration-fast) var(--ease-out);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 240ms var(--ease-emphasized);
+  transform-origin: center center;
 }
 
-.disclosure-chevron__icon:last-child {
-  opacity: 0;
+.disclosure-chevron.is-open .disclosure-chevron__icon {
+  transform: rotate(90deg);
 }
 
-.disclosure-chevron.is-open .disclosure-chevron__icon:first-child {
-  opacity: 0;
-}
-
-.disclosure-chevron.is-open .disclosure-chevron__icon:last-child {
-  opacity: 1;
+@media (prefers-reduced-motion: reduce) {
+  .disclosure-chevron__icon {
+    transition: none;
+  }
 }
 </style>

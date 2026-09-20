@@ -130,8 +130,8 @@ function toggleGroup(key: GroupKey): void {
  * 選「一般戶外」這類直接情境時群組是**立刻**收的（留著會讀成兩個都選了，
  * 見 `selectDirect`），那一段收合與第 1 段同時跑，所以不必再等第 2 段。
  */
-const PICK_FEEDBACK_MS = 160;
-const PANEL_COLLAPSE_MS = 160;
+const PICK_FEEDBACK_MS = 140;
+const PANEL_COLLAPSE_MS = 200;
 
 /**
  * 正在收尾。
@@ -180,13 +180,9 @@ function selectSub(value: SessionContext): void {
  */
 function selectDirect(value: SessionContext): void {
   selectedContext.value = value;
-  /*
-   * 這裡的收合是**立刻**的，不等停頓——使用者選的是另一個大類，留著展開中
-   * 的子選項會讀成兩個都選了。那段收合動畫與「讓選取態畫出來」的停頓同時
-   * 跑，所以 `scheduleSettle(false)`：等一段就好，不用再等第二段。
-   */
+  const hadOpenGroup = openGroup.value !== null;
   openGroup.value = null;
-  scheduleSettle(false);
+  scheduleSettle(hadOpenGroup);
 }
 
 /**
@@ -289,36 +285,38 @@ const descriptionOpen = computed(
       切換群組時會有一個面板收合、另一個展開——那是同一個動作的兩半，不是
       第十二節規則五要擋的「兩個各自獨立的元素同時動」。
     -->
-    <DisclosurePanel
-      v-for="group in groups"
-      :key="group.key"
-      :open="openGroup === group.key"
-    >
-      <div :id="group.key + '-context-options'" class="context-detail">
-        <label
-          v-for="option in group.options"
-          :key="option.value"
-          class="context-suboption"
-          :class="{ 'option-selected': selectedContext === option.value }"
-        >
-          <input
-            type="radio"
-            name="setup-context"
-            :value="option.value"
-            :checked="selectedContext === option.value"
-            @change="selectSub(option.value)"
-          />
-          <span>
-            <strong>{{ option.label }}</strong>
-            <small>{{ option.description }}</small>
-          </span>
-        </label>
-      </div>
-    </DisclosurePanel>
+    <div class="context-drawers">
+      <DisclosurePanel
+        v-for="group in groups"
+        :key="group.key"
+        :open="openGroup === group.key"
+      >
+        <div :id="group.key + '-context-options'" class="context-detail">
+          <label
+            v-for="option in group.options"
+            :key="option.value"
+            class="context-suboption"
+            :class="{ 'option-selected': selectedContext === option.value }"
+          >
+            <input
+              type="radio"
+              name="setup-context"
+              :value="option.value"
+              :checked="selectedContext === option.value"
+              @change="selectSub(option.value)"
+            />
+            <span>
+              <strong>{{ option.label }}</strong>
+              <small>{{ option.description }}</small>
+            </span>
+          </label>
+        </div>
+      </DisclosurePanel>
 
-    <DisclosurePanel :open="descriptionOpen">
-      <p class="context-detail__description">{{ selectedDescription }}</p>
-    </DisclosurePanel>
+      <DisclosurePanel :open="descriptionOpen">
+        <p class="context-detail__description">{{ selectedDescription }}</p>
+      </DisclosurePanel>
+    </div>
   </fieldset>
 </template>
 
@@ -330,6 +328,11 @@ const descriptionOpen = computed(
   margin: 0;
   padding: 0;
   border: 0;
+}
+
+.context-drawers {
+  display: flex;
+  flex-direction: column;
 }
 
 /*
@@ -360,11 +363,13 @@ const descriptionOpen = computed(
   transition:
     background-color var(--duration-fast) var(--ease-out),
     border-color var(--duration-fast) var(--ease-out),
+    transform var(--duration-fast) var(--ease-out),
     filter var(--duration-fast) var(--ease-out);
 }
 
 /* 2026-09-04：原本 transition 與 :active 都沒有，選取瞬變、按下無回饋。 */
 .context-tile:active {
+  transform: scale(0.98);
   filter: brightness(var(--press-dim));
 }
 
@@ -444,12 +449,14 @@ const descriptionOpen = computed(
   transition:
     background-color var(--duration-fast) var(--ease-out),
     border-color var(--duration-fast) var(--ease-out),
+    transform var(--duration-fast) var(--ease-out),
     filter var(--duration-fast) var(--ease-out);
 }
 
 /* 同 .context-tile，但這顆沒有自己的底色，所以按壓要補底（見 app.css）。 */
 .context-suboption:active {
   background-color: var(--color-hairline);
+  transform: scale(0.98);
   filter: brightness(var(--press-dim));
 }
 

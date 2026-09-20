@@ -110,7 +110,7 @@ describe("ChevronLink", () => {
     template: "<i>{{ name }}</i>"
   };
 
-  it("展開用法用交叉淡入的 chevron，靠 is-open 表示方向", () => {
+  it("展開用法用平滑旋轉的 chevron，靠 is-open 表示展開狀態", () => {
     const closed = mount(ChevronLink, {
       props: { expanded: false, controls: "panel-1" },
       global: { stubs: { Icon: iconStub } }
@@ -120,10 +120,8 @@ describe("ChevronLink", () => {
       global: { stubs: { Icon: iconStub } }
     });
 
-    // 兩顆都在，方向由 is-open 決定。
     for (const wrapper of [closed, open]) {
       expect(wrapper.text()).toContain("tool-chevron-right");
-      expect(wrapper.text()).toContain("tool-chevron-down");
     }
 
     expect(closed.get(".disclosure-chevron").classes()).not.toContain("is-open");
