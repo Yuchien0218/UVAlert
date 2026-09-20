@@ -66,6 +66,7 @@ function listProduct(
     weight: null,
     hatStyle: null,
     uvProtection: null,
+    sortOrder: null,
     currentSnapshot: listSnapshot,
     snapshotFingerprint: fingerprintProductLabelSnapshot(listSnapshot),
     createdAt: "2026-08-01T08:00:00.000Z",
@@ -155,7 +156,8 @@ describe("元件 emit 有人接", () => {
     "resetError",
     "locate",
     "save",
-    "select"
+    "select",
+    "dragStart"
   ]);
 
   const files = discoverVueFiles(sourceRoot).sort();
@@ -304,5 +306,20 @@ describe("裝備詳情抽屜的開關", () => {
     await flushPromises();
 
     expect(sheet.props("product")).toBeNull();
+  });
+
+  it("有多件裝備時顯示拖曳手柄，只有一件時隱藏手柄", async () => {
+    const wrapperSingle = mountPage([listProduct({ productId: "p1" })]);
+    await flushPromises();
+    expect(wrapperSingle.find(".gear-item__handle").exists()).toBe(false);
+
+    const wrapperMulti = mountPage([
+      listProduct({ productId: "p1" }),
+      listProduct({ productId: "p2", displayName: "第二件裝備" })
+    ]);
+    await flushPromises();
+    const handles = wrapperMulti.findAll(".gear-item__handle");
+    expect(handles).toHaveLength(2);
+    expect(handles[0]?.attributes("aria-label")).toBe("拖曳調整順序");
   });
 });

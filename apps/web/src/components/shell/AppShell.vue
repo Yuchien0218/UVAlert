@@ -44,6 +44,7 @@ watch(
     <BrandHeader
       :region-name="uvForecast.region.value?.displayName ?? null"
       :uv-risk-level="headerUvDay?.riskLevel ?? null"
+      :hide-uv-entrance="route.path === '/forecast'"
     />
     <GlobalStatusBanner
       :phase="boot.phase.value"

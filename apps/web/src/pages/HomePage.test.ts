@@ -10,6 +10,7 @@ import { shallowReadonly, shallowRef } from "vue";
 import { createMemoryHistory, createRouter } from "vue-router";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { WebAppServices } from "../app/createWebAppServices";
+import { makeFiveDayUvForecast } from "@sunshield/test-fixtures";
 import { useWebAppServices } from "../app/injection";
 import HomeCountdown from "../components/home/HomeCountdown.vue";
 import IconLead from "../components/common/IconLead.vue";
@@ -89,6 +90,7 @@ interface Options {
   isEvening?: boolean;
   isAfterMidnight?: boolean;
   region?: { displayName: string } | null;
+  forecast?: FiveDayUvForecast | null;
   /**
    * 這次提醒的情境。水上活動入口只在情境是水上、或有進行中的水中區間時
    * 顯示（2026-09-03 裁決），而兩者都只存在於事件流裡——投影沒有這些欄位。
@@ -103,6 +105,7 @@ function mockServices(options: Options = {}): void {
     isEvening = false,
     isAfterMidnight = false,
     region = null,
+    forecast: customForecast = null,
     initialContext = "outdoor_general",
     contextEvents = []
   } = options;
@@ -123,7 +126,9 @@ function mockServices(options: Options = {}): void {
       ),
       error: shallowReadonly(shallowRef(null)),
       region: shallowReadonly(shallowRef(region)),
-      forecast: shallowReadonly(shallowRef(region === null ? null : forecast)),
+      forecast: shallowReadonly(
+        shallowRef(region === null ? null : (customForecast ?? forecast))
+      ),
       isEvening: shallowReadonly(shallowRef(isEvening)),
       isAfterMidnight: shallowReadonly(shallowRef(isAfterMidnight)),
       showEveningPrompt: shallowReadonly(shallowRef(false)),
@@ -678,6 +683,35 @@ describe("HomePage", () => {
       expect(
         wrapper.findComponent(HomeNightNotice).props("isAfterMidnight")
       ).toBe(true);
+    });
+
+    it("白天但預報無今日資料（傍晚日落時段提前切換）時，顯示明日 UV 預報而非無資料", async () => {
+      const tomorrowOnlyForecast = {
+        ...makeFiveDayUvForecast(),
+        days: [
+          {
+            localDate: "2099-01-02",
+            validFrom: "2099-01-01T22:00:00.000Z",
+            validTo: "2099-01-02T10:00:00.000Z",
+            uvi: 7,
+            riskLevel: "high" as const,
+            temperatureCelsius: 28
+          }
+        ]
+      };
+
+      mockServices({
+        isEvening: false,
+        region: { displayName: "臺中市 西區" },
+        forecast: tomorrowOnlyForecast
+      });
+
+      const wrapper = await mountHome();
+
+      expect(wrapper.findComponent(HomeUvHeadline).props("eyebrow")).toBe(
+        "明日 UV 預報"
+      );
+      expect(wrapper.findComponent(HomeUvHeadline).props("uvi")).toBe(7);
     });
 
     /**

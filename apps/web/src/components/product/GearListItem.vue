@@ -9,8 +9,19 @@ import {
   gearSafetyState
 } from "../../features/product/gearPresentation";
 
-const props = defineProps<{ product: ProductCatalogRecordV1 }>();
-defineEmits<{ open: [] }>();
+const props = withDefaults(
+  defineProps<{
+    product: ProductCatalogRecordV1;
+    draggable?: boolean;
+  }>(),
+  {
+    draggable: false
+  }
+);
+defineEmits<{
+  open: [];
+  dragStart: [event: PointerEvent];
+}>();
 
 const safety = computed(() => gearSafetyState(props.product));
 /**
@@ -32,51 +43,117 @@ const safetyNotice = computed((): string | null =>
 </script>
 
 <template>
-  <button class="gear-item" type="button" @click="$emit('open')">
-    <span class="gear-item__icon" aria-hidden="true">
-      <Icon :name="GEAR_CATEGORY_ICONS[product.gearCategory]" :size="32" />
-    </span>
+  <div class="gear-item-card" :class="{ 'gear-item-card--draggable': draggable }">
+    <button class="gear-item" type="button" @click="$emit('open')">
+      <span class="gear-item__icon" aria-hidden="true">
+        <Icon :name="GEAR_CATEGORY_ICONS[product.gearCategory]" :size="32" />
+      </span>
 
-    <div class="gear-item__body">
-      <p class="gear-item__category">
-        {{ GEAR_CATEGORY_LABELS[product.gearCategory] }}
-        <span
-          v-if="!affectsCountdown(product.gearCategory)"
-          class="gear-item__badge"
-          >僅供紀錄</span
+      <div class="gear-item__body">
+        <p class="gear-item__category">
+          {{ GEAR_CATEGORY_LABELS[product.gearCategory] }}
+          <span
+            v-if="!affectsCountdown(product.gearCategory)"
+            class="gear-item__badge"
+            >僅供紀錄</span
+          >
+        </p>
+        <strong class="gear-item__name user-text">{{ product.displayName }}</strong>
+        <!--
+          購買月份、到期日、個人附註與規格都只在詳情頁——清單的工作是「認出
+          是哪一件」，不是把所有欄位攤開（2026-08-31 使用者裁決）。
+        -->
+        <p
+          v-if="safetyNotice !== null"
+          class="gear-item__summary"
+          :class="`gear-item__summary--${safety.kind}`"
         >
-      </p>
-      <strong class="gear-item__name user-text">{{ product.displayName }}</strong>
-      <!--
-        購買月份、到期日、個人附註與規格都只在詳情頁——清單的工作是「認出
-        是哪一件」，不是把所有欄位攤開（2026-08-31 使用者裁決）。
-      -->
-      <p
-        v-if="safetyNotice !== null"
-        class="gear-item__summary"
-        :class="`gear-item__summary--${safety.kind}`"
+          {{ safetyNotice }}
+        </p>
+      </div>
+      <Icon name="tool-chevron-right" :size="20" />
+    </button>
+    <button
+      v-if="draggable"
+      class="gear-item__handle"
+      type="button"
+      aria-label="拖曳調整順序"
+      @pointerdown.stop="$emit('dragStart', $event)"
+    >
+      <svg
+        class="gear-item__handle-icon"
+        viewBox="0 0 20 20"
+        width="20"
+        height="20"
+        aria-hidden="true"
       >
-        {{ safetyNotice }}
-      </p>
-    </div>
-    <Icon name="tool-chevron-right" :size="20" />
-  </button>
+        <line
+          x1="4"
+          y1="7"
+          x2="16"
+          y2="7"
+          stroke="currentColor"
+          stroke-width="2.2"
+          stroke-linecap="round"
+        />
+        <line
+          x1="4"
+          y1="13"
+          x2="16"
+          y2="13"
+          stroke="currentColor"
+          stroke-width="2.2"
+          stroke-linecap="round"
+        />
+      </svg>
+    </button>
+  </div>
 </template>
 
 <style scoped>
+.gear-item-card {
+  display: flex;
+  align-items: stretch;
+  width: 100%;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-sm);
+  background: var(--surface-card, transparent);
+  box-sizing: border-box;
+}
+
 .gear-item {
   display: flex;
   align-items: center;
   gap: var(--space-3);
-  width: 100%;
+  flex: 1;
+  min-width: 0;
   padding: var(--space-4);
-  border: 1px solid var(--border-strong);
-  border-radius: var(--radius-sm);
+  border: none;
   background: transparent;
   color: var(--text-primary);
   text-align: start;
   cursor: pointer;
   min-height: var(--tap-target);
+}
+
+.gear-item__handle {
+  display: grid;
+  place-items: center;
+  flex: 0 0 44px;
+  width: 44px;
+  min-height: var(--tap-target);
+  padding: 0;
+  border: none;
+  border-left: 1px dashed var(--border-subtle);
+  background: transparent;
+  color: var(--text-secondary);
+  cursor: grab;
+  touch-action: none;
+  user-select: none;
+}
+
+.gear-item__handle:active {
+  cursor: grabbing;
 }
 
 .gear-item__icon {

@@ -25,6 +25,7 @@ export interface ProductSettingsController {
   archiveProduct(productId: string): Promise<boolean>;
   restoreProduct(productId: string): Promise<boolean>;
   deleteProduct(productId: string): Promise<boolean>;
+  reorderProducts(orderedIds: string[]): Promise<boolean>;
   refresh(): Promise<void>;
   dispose(): void;
 }
@@ -188,6 +189,35 @@ export function createProductSettingsController(
     return mutate((catalog) => catalog.deleteProduct(productId));
   }
 
+  async function reorderProducts(orderedIds: string[]): Promise<boolean> {
+    if (dependencies.catalog?.reorderProducts === undefined) return false;
+    try {
+      const productMap = new Map(
+        productsState.value.map((p) => [p.productId, p])
+      );
+      const newProducts: ProductCatalogRecordV1[] = [];
+      for (let index = 0; index < orderedIds.length; index += 1) {
+        const id = orderedIds[index];
+        if (id === undefined) continue;
+        const p = productMap.get(id);
+        if (p) {
+          newProducts.push({ ...p, sortOrder: index });
+          productMap.delete(id);
+        }
+      }
+      for (const remaining of productMap.values()) {
+        newProducts.push(remaining);
+      }
+      productsState.value = newProducts;
+      await dependencies.catalog.reorderProducts(orderedIds);
+      return true;
+    } catch {
+      const now = nowIso();
+      productsState.value = await dependencies.catalog.listProducts(now);
+      return false;
+    }
+  }
+
   async function refresh(): Promise<void> {
     loaded = false;
     await ensureLoaded();
@@ -230,6 +260,7 @@ export function createProductSettingsController(
     archiveProduct,
     restoreProduct,
     deleteProduct,
+    reorderProducts,
     refresh,
     dispose
   };

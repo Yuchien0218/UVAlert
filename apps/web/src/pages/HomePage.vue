@@ -133,13 +133,24 @@ const tomorrow = computed(() => findDay(1));
  *
  * 2026-09-12：半夜換日後（00:00–05:59）改看今日，標題顯示「今日 UV 預報」
  * （避免換日後使用者誤以為明日是指後天或搞混時間）。
+ *
+ * 2026-09-20：傍晚日落時段氣象署會下架今日日間資料並提前提供明日起預報，
+ * 此時若無今日資料則自動切換顯示明日預報，避免短暫出現「今日 UV 無資料」。
  */
-const headlineDay = computed(() =>
-  isNight.value && !isAfterMidnight.value ? tomorrow.value : today.value
-);
+const headlineDay = computed(() => {
+  if (isNight.value && !isAfterMidnight.value) {
+    return tomorrow.value ?? forecastDays.value[0] ?? null;
+  }
+  return today.value ?? tomorrow.value ?? forecastDays.value[0] ?? null;
+});
 
 const headlineEyebrow = computed(() => {
-  if (!isNight.value) return "今日 UV";
+  if (!isNight.value) {
+    if (today.value === null && (tomorrow.value !== null || forecastDays.value.length > 0)) {
+      return "明日 UV 預報";
+    }
+    return "今日 UV";
+  }
   return isAfterMidnight.value ? "今日 UV 預報" : "明日 UV 預報";
 });
 

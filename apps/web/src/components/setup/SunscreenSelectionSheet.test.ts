@@ -48,6 +48,7 @@ function makeProduct(
     weight: null,
     hatStyle: null,
     uvProtection: null,
+    sortOrder: null,
     currentSnapshot: snapshot1,
     snapshotFingerprint: fingerprintProductLabelSnapshot(snapshot1),
     createdAt: "2026-09-01T00:00:00.000Z",

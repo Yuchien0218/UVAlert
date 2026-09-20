@@ -615,6 +615,7 @@ const productPayload = object({
   hatStyle: optionalNull(textRule(0, 30)),
   uvProtection: optionalNull(choice("uv400", "100_percent", "uv380")),
   archivedAt: optionalNull(offsetInstant),
+  sortOrder: optionalNull(numberRule(-Infinity, Infinity, true)),
   createdAt: offsetInstant,
   updatedAt: offsetInstant,
   status: choice("active", "stopped")

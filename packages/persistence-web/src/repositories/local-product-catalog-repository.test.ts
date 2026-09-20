@@ -170,4 +170,56 @@ describe("LocalProductCatalogRepository", () => {
     expect(products[0]?.displayName).toBe("目前使用產品");
     expect(products[0]?.currentSnapshot).toEqual(snapshot);
   });
+
+  it("支援自訂拖曳排序，且更新裝備後順序位置保持不變", async () => {
+    const database = new SunshieldDatabase(
+      `catalog-reorder-${crypto.randomUUID()}`
+    );
+    databases.push(database);
+    const repository = new LocalProductCatalogRepository(database);
+
+    await repository.saveProduct({
+      productId: "prod-1",
+      displayName: "第一件",
+      gearCategory: "sunscreen",
+      snapshot: makeProductSnapshot(),
+      now: "2026-08-01T08:00:00.000Z"
+    });
+    await repository.saveProduct({
+      productId: "prod-2",
+      displayName: "第二件",
+      gearCategory: "sunscreen",
+      snapshot: makeProductSnapshot(),
+      now: "2026-08-01T08:01:00.000Z"
+    });
+    await repository.saveProduct({
+      productId: "prod-3",
+      displayName: "第三件",
+      gearCategory: "sunscreen",
+      snapshot: makeProductSnapshot(),
+      now: "2026-08-01T08:02:00.000Z"
+    });
+
+    // 拖曳將 prod-3 排在第一、prod-1 排第二、prod-2 排第三
+    await repository.reorderProducts(["prod-3", "prod-1", "prod-2"]);
+
+    let list = await repository.listProducts("2026-08-01T08:03:00.000Z");
+    expect(list.map((p) => p.productId)).toEqual(["prod-3", "prod-1", "prod-2"]);
+    expect(list.map((p) => p.sortOrder)).toEqual([0, 1, 2]);
+
+    // 編輯位於第二位的 prod-1（更新其名稱與時間戳）
+    await repository.saveProduct({
+      productId: "prod-1",
+      displayName: "第一件（已修改名稱）",
+      gearCategory: "sunscreen",
+      snapshot: makeProductSnapshot(),
+      now: "2026-08-01T09:00:00.000Z"
+    });
+
+    // 關鍵斷言：prod-1 絕不可因為 updatedAt 變成最新而跳到最前面，必須維持在原本的第二位
+    list = await repository.listProducts("2026-08-01T09:01:00.000Z");
+    expect(list.map((p) => p.productId)).toEqual(["prod-3", "prod-1", "prod-2"]);
+    expect(list[1]?.displayName).toBe("第一件（已修改名稱）");
+    expect(list[1]?.sortOrder).toBe(1);
+  });
 });

@@ -41,8 +41,6 @@ function styleFiles(dir: string, out: string[] = []): string[] {
  * 多一個就讓這條紅一次，逼人回來判斷它是不是又一個假提示。
  */
 const HOVERABLE = [
-  ".choice-grid label:hover", // <label> 包著 radio，有 cursor: pointer
-  ".time-option:hover", // <button>
   "button.event-row:hover .event-label", // 選擇器自己就寫明是 button
   ".quick-protection__header:hover", // <button>
   ".uv-sparkline--interactive:hover" // <button> 點擊展開一日走勢抽屜

@@ -50,7 +50,7 @@ describe("公開衛教頁", () => {
       global: { stubs: { RouterLink: { template: "<a><slot /></a>" } } }
     });
 
-    expect(wrapper.text()).toContain("防曬衛教");
+    expect(wrapper.text()).toContain("防曬生活編輯部");
     expect(wrapper.text()).toContain("了解今天的 UV");
     expect(wrapper.text()).toContain("出門前準備");
     expect(wrapper.text()).toContain("外出中的補擦");

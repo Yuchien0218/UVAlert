@@ -9,11 +9,14 @@ interface Props {
   regionName?: string | null;
   /** 是否已有可用 UV 預報（白天今日、夜間明日，由父層決定）。 */
   uvRiskLevel?: UvRiskLevel | null;
+  /** 是否隱藏右上角預報入口（例如在預報頁本身不需要自我連結）。 */
+  hideUvEntrance?: boolean;
 }
 
 const props = withDefaults(defineProps<Props>(), {
   regionName: null,
-  uvRiskLevel: null
+  uvRiskLevel: null,
+  hideUvEntrance: false
 });
 
 /**
@@ -28,7 +31,7 @@ const props = withDefaults(defineProps<Props>(), {
  * 頁首再放一次只是重複，還會跟 UV 搶同一個位置。
  */
 const showUv = computed(
-  () => props.regionName !== null && props.uvRiskLevel !== null
+  () => !props.hideUvEntrance && props.regionName !== null && props.uvRiskLevel !== null
 );
 
 </script>
@@ -47,17 +50,19 @@ const showUv = computed(
       -->
       <BrandLockup class="brand-header__logo" />
     </RouterLink>
-    <RouterLink
-      v-if="showUv"
-      class="brand-header__uv"
-      to="/forecast"
-    >
-      五日 UV 預報
-    </RouterLink>
+    <template v-if="!hideUvEntrance">
+      <RouterLink
+        v-if="showUv"
+        class="brand-header__uv"
+        to="/forecast"
+      >
+        五日 UV 預報
+      </RouterLink>
 
-    <RouterLink v-else class="brand-header__set-region" to="/forecast">
-      今日全臺UV分布
-    </RouterLink>
+      <RouterLink v-else class="brand-header__set-region" to="/forecast">
+        今日全臺UV分布
+      </RouterLink>
+    </template>
   </header>
 </template>
 

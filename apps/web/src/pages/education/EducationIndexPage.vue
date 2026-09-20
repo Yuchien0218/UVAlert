@@ -88,9 +88,8 @@ const robots = computed(() =>
     -->
     <header class="page-heading education-hero">
       <div class="education-hero__main">
-        <p class="page-heading__eyebrow">防曬生活編輯部</p>
         <h1 class="page-heading__title" data-typography-role="page-title">
-          防曬衛教
+          防曬生活編輯部
         </h1>
       </div>
 

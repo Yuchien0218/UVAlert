@@ -100,16 +100,25 @@ function getUnavailableMessage(error: UvForecastError): string {
     v-if="phase !== 'no_region'"
     id="five-day-uv"
     class="uv-forecast"
-    aria-label="未來五日 UV 預報"
+    aria-labelledby="five-day-uv-title"
   >
-    <!--
-      2026-08-31：拿掉卡片自己的 h2。這張卡只用在 /forecast，而那一頁的
-      h1 已經是「五日 UV 預報」——兩個標題講同一件事，使用者回饋重複。
-      無障礙名稱改用 aria-label 掛在 section 上，語意不受影響。
-    -->
-    <div class="uv-forecast__heading">
-      <Icon name="feature-uv-forecast" :size="24" />
-    </div>
+    <header class="uv-forecast__header">
+      <h2
+        id="five-day-uv-title"
+        class="uv-forecast__title"
+        data-typography-role="section-title"
+      >
+        五日 UV 預報
+      </h2>
+
+      <div v-if="forecast" class="uv-forecast__region">
+        <Icon name="feature-uv-forecast" :size="20" />
+        <strong>{{ forecast.region.displayName }}</strong>
+        <span v-if="phase === 'cached'" class="uv-forecast__badge">
+          已儲存資料
+        </span>
+      </div>
+    </header>
 
     <div
       v-if="phase === 'idle' || phase === 'loading'"
@@ -138,13 +147,6 @@ function getUnavailableMessage(error: UvForecastError): string {
     </div>
 
     <template v-else>
-      <div class="uv-forecast__meta">
-        <strong>{{ forecast.region.displayName }}</strong>
-        <span v-if="phase === 'cached'" class="uv-forecast__badge">
-          已儲存資料
-        </span>
-      </div>
-
       <ol class="uv-forecast__days" aria-label="未來五日白日時段紫外線預報">
         <li
           v-for="day in forecast.days"
@@ -200,23 +202,33 @@ function getUnavailableMessage(error: UvForecastError): string {
 <style scoped>
 .uv-forecast {
   display: grid;
-  gap: var(--space-5);
-  padding-top: var(--space-5);
-  border-top: 1px solid var(--border-subtle);
+  gap: var(--space-4);
   scroll-margin-top: var(--space-6);
 }
 
-.uv-forecast__heading,
-.uv-forecast__meta {
+.uv-forecast__header {
   display: flex;
-  align-items: start;
+  align-items: center;
   justify-content: space-between;
-  gap: var(--space-4);
+  gap: var(--space-3);
 }
 
 .uv-forecast__title {
   margin: 0;
-  font-size: var(--font-size-section-title);
+}
+
+.uv-forecast__region {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  color: var(--text-primary);
+}
+
+.uv-forecast__region strong {
+  font-size: var(--font-size-body);
+  font-weight: 600;
+  line-height: var(--line-height-body);
+  color: var(--text-primary);
 }
 
 .uv-forecast__state {
@@ -227,8 +239,7 @@ function getUnavailableMessage(error: UvForecastError): string {
   line-height: var(--line-height-body);
 }
 
-.uv-forecast__state strong,
-.uv-forecast__meta strong {
+.uv-forecast__state strong {
   display: block;
   margin: 0;
   color: var(--text-primary);
@@ -252,10 +263,6 @@ function getUnavailableMessage(error: UvForecastError): string {
   padding: var(--space-3) var(--space-4);
   font-size: var(--font-size-body);
   font-weight: 500;
-}
-
-.uv-forecast__meta {
-  align-items: center;
 }
 
 .uv-forecast__badge {

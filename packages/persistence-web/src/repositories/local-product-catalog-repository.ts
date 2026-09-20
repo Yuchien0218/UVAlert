@@ -29,6 +29,16 @@ export class LocalProductCatalogRepository implements ProductCatalogPort {
       const record = await this.#normalize(row, now);
       if (record !== null) records.push(record);
     }
+    records.sort((a, b) => {
+      const orderA = typeof a.sortOrder === "number" ? a.sortOrder : null;
+      const orderB = typeof b.sortOrder === "number" ? b.sortOrder : null;
+      if (orderA !== null && orderB !== null) {
+        return orderA - orderB;
+      }
+      if (orderA !== null && orderB === null) return -1;
+      if (orderA === null && orderB !== null) return 1;
+      return b.updatedAt.localeCompare(a.updatedAt);
+    });
     return records;
   }
 
@@ -57,6 +67,19 @@ export class LocalProductCatalogRepository implements ProductCatalogPort {
     const existing = await this.#database.SunscreenProducts.get(
       input.productId
     );
+    let sortOrder =
+      input.sortOrder !== undefined
+        ? input.sortOrder
+        : (existing?.sortOrder ?? null);
+    if (sortOrder === null && existing === undefined) {
+      const all = await this.#database.SunscreenProducts.toArray();
+      const maxOrder = all.reduce((max, r) => {
+        return typeof r.sortOrder === "number" && r.sortOrder > max
+          ? r.sortOrder
+          : max;
+      }, -1);
+      sortOrder = maxOrder + 1;
+    }
     const record = ProductCatalogRecordV1Schema.parse({
       schemaVersion: PRODUCT_CATALOG_RECORD_VERSION,
       productId: input.productId,
@@ -80,6 +103,7 @@ export class LocalProductCatalogRepository implements ProductCatalogPort {
       hatStyle: input.hatStyle ?? null,
       uvProtection: input.uvProtection ?? null,
       archivedAt: existing?.archivedAt ?? null,
+      sortOrder,
       createdAt: existing?.createdAt ?? input.now,
       updatedAt: input.now,
       status: "active"
@@ -112,6 +136,26 @@ export class LocalProductCatalogRepository implements ProductCatalogPort {
 
   async deleteProduct(productId: string): Promise<void> {
     await this.#database.SunscreenProducts.delete(productId);
+  }
+
+  async reorderProducts(orderedIds: string[]): Promise<void> {
+    await this.#database.transaction(
+      "rw",
+      this.#database.SunscreenProducts,
+      async () => {
+        for (let index = 0; index < orderedIds.length; index += 1) {
+          const id = orderedIds[index];
+          if (id === undefined) continue;
+          const existing = await this.#database.SunscreenProducts.get(id);
+          if (existing !== undefined) {
+            await this.#database.SunscreenProducts.put({
+              ...existing,
+              sortOrder: index
+            });
+          }
+        }
+      }
+    );
   }
 
   async #patch(
@@ -153,7 +197,8 @@ export class LocalProductCatalogRepository implements ProductCatalogPort {
             purchaseMonth: null,
             expiryDate: null,
             note: null,
-            archivedAt: null
+            archivedAt: null,
+            sortOrder: null
           };
 
     const expiryStatus = deriveExpiryStatus(candidate.expiryDate, now);
@@ -222,6 +267,7 @@ export class LocalProductCatalogRepository implements ProductCatalogPort {
         expiryDate: null,
         note: null,
         archivedAt: null,
+        sortOrder: null,
         createdAt: parsed.data.capturedAt,
         updatedAt: parsed.data.capturedAt,
         status: "active"

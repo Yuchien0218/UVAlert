@@ -338,6 +338,8 @@ export const ProductCatalogRecordV1Schema = z.object({
   uvProtection: UvProtectionSchema.nullable().default(null),
   /** 「過去用過」的時間戳，不進 reducer。 */
   archivedAt: z.string().datetime({ offset: true }).nullable().default(null),
+  /** 自訂排序序號，數字越小越前面。選填，預設為 null。不進 reducer。 */
+  sortOrder: z.number().int().nullable().default(null),
   createdAt: z.string().datetime({ offset: true }),
   updatedAt: z.string().datetime({ offset: true }),
   status: z.enum(["active", "stopped"])

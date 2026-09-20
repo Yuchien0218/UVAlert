@@ -2,13 +2,14 @@
 import Icon from "../components/icons/Icon.vue";
 import BroadcastLoader from "../components/feedback/BroadcastLoader.vue";
 import EmptyStateCard from "../components/common/EmptyStateCard.vue";
-import { computed, onMounted, shallowRef } from "vue";
+import { computed, onMounted, ref, shallowRef, watch } from "vue";
 import { useRouter } from "vue-router";
 import { useWebAppServices } from "../app/injection";
 import IconButton from "../components/common/IconButton.vue";
 import GearDetailSheet from "../components/product/GearDetailSheet.vue";
 import GearListItem from "../components/product/GearListItem.vue";
 import { GEAR_CATEGORY_LABELS } from "../features/product/gearPresentation";
+import type { ProductCatalogRecordV1 } from "@sunshield/contracts";
 
 /**
  * S-11 我的防曬裝備。
@@ -93,6 +94,109 @@ function closeGear(): void {
 function editGear(productId: string): void {
   openProductId.value = null;
   void router.push({ name: "product-edit", params: { id: productId } });
+}
+
+// 拖曳排序支援
+const activeItems = ref<ProductCatalogRecordV1[]>([]);
+const isDragging = shallowRef(false);
+const draggedIndex = shallowRef<number | null>(null);
+
+watch(
+  current,
+  (val) => {
+    if (!isDragging.value) {
+      activeItems.value = [...val];
+    }
+  },
+  { immediate: true }
+);
+
+const listContainerRef = shallowRef<HTMLElement | null>(null);
+
+function startDrag(event: PointerEvent, index: number): void {
+  if (activeItems.value.length <= 1) return;
+
+  const handle = event.currentTarget as HTMLElement | null;
+  if (!handle) return;
+
+  isDragging.value = true;
+  draggedIndex.value = index;
+
+  try {
+    handle.setPointerCapture(event.pointerId);
+  } catch {
+    // ignore
+  }
+
+  if (typeof navigator !== "undefined" && "vibrate" in navigator) {
+    navigator.vibrate?.(10);
+  }
+
+  const onPointerMove = (e: PointerEvent) => {
+    if (!isDragging.value || draggedIndex.value === null) return;
+    const container = listContainerRef.value;
+    if (!container) return;
+
+    const listItems = Array.from(
+      container.querySelectorAll(":scope > li")
+    ) as HTMLElement[];
+
+    const clientY = e.clientY;
+    let targetIndex = draggedIndex.value;
+
+    for (let i = 0; i < listItems.length; i += 1) {
+      const item = listItems[i];
+      if (!item) continue;
+      const rect = item.getBoundingClientRect();
+      if (clientY >= rect.top && clientY <= rect.bottom) {
+        targetIndex = i;
+        break;
+      }
+    }
+
+    if (targetIndex !== draggedIndex.value) {
+      const currentList = [...activeItems.value];
+      const [moved] = currentList.splice(draggedIndex.value, 1);
+      if (moved !== undefined) {
+        currentList.splice(targetIndex, 0, moved);
+        activeItems.value = currentList;
+        draggedIndex.value = targetIndex;
+        if (typeof navigator !== "undefined" && "vibrate" in navigator) {
+          navigator.vibrate?.(10);
+        }
+      }
+    }
+  };
+
+  const onPointerUp = (e: PointerEvent) => {
+    handle.removeEventListener("pointermove", onPointerMove);
+    handle.removeEventListener("pointerup", onPointerUp);
+    handle.removeEventListener("pointercancel", onPointerUp);
+    try {
+      if (handle.hasPointerCapture(e.pointerId)) {
+        handle.releasePointerCapture(e.pointerId);
+      }
+    } catch {
+      // ignore
+    }
+
+    isDragging.value = false;
+    draggedIndex.value = null;
+
+    const newOrderedIds = activeItems.value.map((p) => p.productId);
+    const oldIds = current.value.map((p) => p.productId);
+    const hasChanged =
+      newOrderedIds.length !== oldIds.length ||
+      newOrderedIds.some((id, idx) => id !== oldIds[idx]);
+
+    if (hasChanged) {
+      void productSettings.reorderProducts(newOrderedIds);
+    }
+  };
+
+  handle.addEventListener("pointermove", onPointerMove);
+  handle.addEventListener("pointerup", onPointerUp);
+  handle.addEventListener("pointercancel", onPointerUp);
 }
 </script>
 
@@ -189,18 +293,33 @@ function editGear(productId: string): void {
             <h2 id="gear-current-title" data-typography-role="section-title">
               使用中
             </h2>
+            <span v-if="activeItems.length > 1" class="gear-section-hint">
+              可拖曳調整順序
+            </span>
           </div>
-          <p v-if="current.length === 0" class="section-empty">
+          <p v-if="activeItems.length === 0" class="section-empty">
             目前沒有使用中的裝備。
           </p>
-          <ul v-else class="gear-list">
-            <li v-for="product in current" :key="product.productId">
+          <TransitionGroup
+            v-else
+            ref="listContainerRef"
+            tag="ul"
+            name="gear-flip"
+            class="gear-list"
+          >
+            <li
+              v-for="(product, index) in activeItems"
+              :key="product.productId"
+              :class="{ 'is-dragging': isDragging && draggedIndex === index }"
+            >
               <GearListItem
                 :product="product"
+                :draggable="activeItems.length > 1"
                 @open="openGear(product.productId)"
+                @drag-start="startDrag($event, index)"
               />
             </li>
-          </ul>
+          </TransitionGroup>
         </section>
 
         <!--
@@ -252,6 +371,7 @@ function editGear(productId: string): void {
               <GearListItem
                 :product="product"
                 @open="openGear(product.productId)"
+                @drag-start="() => {}"
               />
             </li>
           </ul>
@@ -348,6 +468,11 @@ section {
   font-size: var(--font-size-caption);
 }
 
+.gear-section-hint {
+  color: var(--text-secondary);
+  font-size: var(--font-size-caption);
+}
+
 .section-empty {
   color: var(--text-secondary);
   line-height: var(--line-height-body);
@@ -359,6 +484,16 @@ section {
   margin: 0;
   padding: 0;
   list-style: none;
+  position: relative;
 }
 
+.gear-flip-move {
+  transition: transform var(--duration-fast) var(--ease-out);
+}
+
+.is-dragging {
+  z-index: var(--z-drag);
+  position: relative;
+  filter: drop-shadow(0 6px 16px rgb(0 0 0 / 15%));
+}
 </style>

@@ -57,6 +57,17 @@ describe("BrandHeader", () => {
         ).toContain("/forecast");
       }
     });
+
+    it("hideUvEntrance 為 true 時不顯示預報入口", () => {
+      for (const props of [
+        { regionName: "臺中市西區", uvRiskLevel: "low", hideUvEntrance: true },
+        { hideUvEntrance: true }
+      ]) {
+        const wrapper = mountHeader(props);
+        expect(wrapper.find(".brand-header__uv").exists()).toBe(false);
+        expect(wrapper.find(".brand-header__set-region").exists()).toBe(false);
+      }
+    });
   });
 });
 

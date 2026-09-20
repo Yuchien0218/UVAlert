@@ -209,6 +209,8 @@ export interface SaveProductInput {
   hatStyle?: string | null;
   /** 2026-09-11：純紀錄，不進 reducer。太陽眼鏡抗 UV 規格（例如 uv400、100_percent、uv380）。 */
   uvProtection?: UvProtection | null;
+  /** 自訂排序序號，選填。不進 reducer。 */
+  sortOrder?: number | null;
   now: string;
 }
 
@@ -290,6 +292,8 @@ export interface ProductCatalogPort {
   /** 從「過去紀錄」恢復；安全狀態被封鎖的產品不得走這條。 */
   restoreProduct(productId: string, now: string): Promise<void>;
   deleteProduct(productId: string): Promise<void>;
+  /** 依傳入的產品 ID 清單順序更新自訂排序序號。 */
+  reorderProducts(orderedIds: string[]): Promise<void>;
 }
 
 export interface RegionPreferencePort {

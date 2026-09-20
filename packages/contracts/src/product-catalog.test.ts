@@ -101,6 +101,7 @@ describe("ProductCatalogRecordV1Schema", () => {
     // 2026-09-01 新增的兩欄同樣走 .default(null)，舊紀錄不需要遷移。
     expect(result.size).toBeNull();
     expect(result.color).toBeNull();
+    expect(result.sortOrder).toBeNull();
     // 既有資料不能在解析過程中被動到。
     expect(result.gearCategory).toBe("eyewear");
     expect(result.purchaseMonth).toBe("2026-07");

@@ -53,6 +53,7 @@ function product(
     weight: null,
     hatStyle: null,
     uvProtection: null,
+    sortOrder: null,
     currentSnapshot: snapshot,
     snapshotFingerprint: fingerprintProductLabelSnapshot(snapshot),
     createdAt: "2026-08-01T08:00:00.000Z",

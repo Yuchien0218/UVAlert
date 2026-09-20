@@ -234,6 +234,7 @@ const descriptionOpen = computed(
         v-for="option in directOptions"
         :key="option.value"
         class="context-tile"
+        :class="{ 'option-selected': selectedContext === option.value }"
       >
         <input
           class="context-tile__input"
@@ -252,7 +253,8 @@ const descriptionOpen = computed(
         :key="group.key"
         class="context-tile context-tile--group"
         :class="{
-          'context-tile--active': groupOf(selectedContext) === group.key
+          'context-tile--active': groupOf(selectedContext) === group.key,
+          'option-selected': groupOf(selectedContext) === group.key
         }"
         type="button"
         :aria-expanded="openGroup === group.key"

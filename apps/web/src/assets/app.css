@@ -1044,15 +1044,6 @@ textarea {
 }
 
 /*
- * 2026-08-24：hover 原本是 --border-subtle，跟改版後的「已選取」底色
- * 剛好同一個值——滑過未選項目會長得像已選取。改用更淺的 hairline-soft
- * 拉開差別。
- */
-.choice-grid label:hover {
-  background-color: var(--color-hairline-soft);
-}
-
-/*
  * 2026-09-04：0.85 → var(--press-dim)（0.92）。全站四處按壓變暗原本各自
  * 寫死，只有這裡是 0.85。收斂到 0.92 的理由見 packages/ui/src/styles.css
  * 的 --press-dim 註解——0.85 在暖象牙底上會讀成「變成灰色」而不是「被按下」。
@@ -1366,11 +1357,6 @@ p.prose-block {
     background-color var(--duration-fast) var(--ease-out),
     border-color var(--duration-fast) var(--ease-out),
     filter var(--duration-fast) var(--ease-out);
-}
-
-/* 理由同 .choice-grid label:hover——避免 hover 跟已選取同色。 */
-.time-option:hover {
-  background-color: var(--color-hairline-soft);
 }
 
 .time-option:active {

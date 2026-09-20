@@ -54,11 +54,9 @@ onMounted(() => {
 
 <template>
   <div class="page-stack">
-    <header class="page-heading">
-      <h1 class="page-heading__title" data-typography-role="page-title">
-        五日 UV 預報
-      </h1>
-    </header>
+    <h1 class="screen-reader-only" data-typography-role="page-title">
+      五日 UV 預報
+    </h1>
 
     <FiveDayUvCard
       :phase="uvForecast.phase.value"
