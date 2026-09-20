@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import Icon from "../icons/Icon.vue";
 import IntradayUvCurve from "./IntradayUvCurve.vue";
 import type { IntradayUvCurveModel } from "../../features/uv/solarUvCurve";
 
@@ -18,12 +17,9 @@ defineProps<Props>();
     aria-labelledby="intraday-card-title"
   >
     <header class="intraday-card__header">
-      <div class="intraday-card__title-group">
-        <Icon name="feature-uv-forecast" :size="20" />
-        <h2 id="intraday-card-title" data-typography-role="section-title">
-          今日 UV 時間走勢
-        </h2>
-      </div>
+      <h2 id="intraday-card-title" data-typography-role="section-title">
+        今日 UV 走勢
+      </h2>
     </header>
 
     <IntradayUvCurve
@@ -44,16 +40,9 @@ defineProps<Props>();
 .intraday-card__header {
   display: flex;
   align-items: center;
-  gap: var(--space-3);
 }
 
-.intraday-card__title-group {
-  display: flex;
-  align-items: center;
-  gap: var(--space-2);
-}
-
-.intraday-card__title-group h2 {
+.intraday-card__header h2 {
   margin: 0;
 }
 </style>
