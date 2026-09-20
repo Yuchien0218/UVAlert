@@ -679,6 +679,12 @@ section {
   position: relative;
 }
 
+.gear-list > li {
+  transition:
+    transform var(--duration-fast) var(--ease-out),
+    filter var(--duration-fast) var(--ease-out);
+}
+
 .gear-flip-move {
   transition: transform var(--duration-fast) var(--ease-out);
 }
@@ -686,7 +692,20 @@ section {
 .is-dragging {
   z-index: var(--z-drag);
   position: relative;
-  filter: drop-shadow(0 6px 16px rgb(0 0 0 / 15%));
+  transform: scale(1.025);
+  filter:
+    drop-shadow(0 4px 10px rgb(46 41 37 / 12%))
+    drop-shadow(0 14px 28px rgb(46 41 37 / 18%));
+}
+
+.is-dragging :deep(.gear-item-card) {
+  border-color: var(--color-primary);
+  background-color: var(--color-canvas);
+}
+
+.is-dragging :deep(.gear-item__handle) {
+  background-color: var(--color-hairline-soft);
+  color: var(--color-primary);
 }
 
 .drop-action-zone,

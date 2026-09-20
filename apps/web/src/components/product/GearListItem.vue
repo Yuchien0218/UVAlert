@@ -121,6 +121,9 @@ const safetyNotice = computed((): string | null =>
   border-radius: var(--radius-sm);
   background: var(--surface-card, transparent);
   box-sizing: border-box;
+  transition:
+    border-color var(--duration-fast) var(--ease-out),
+    background-color var(--duration-fast) var(--ease-out);
 }
 
 .gear-item {
@@ -152,10 +155,15 @@ const safetyNotice = computed((): string | null =>
   cursor: grab;
   touch-action: none;
   user-select: none;
+  transition:
+    background-color var(--duration-fast) var(--ease-out),
+    color var(--duration-fast) var(--ease-out);
 }
 
 .gear-item__handle:active {
   cursor: grabbing;
+  background-color: var(--color-hairline-soft);
+  color: var(--color-primary);
 }
 
 .gear-item__icon {
