@@ -19,8 +19,8 @@ const props = withDefaults(defineProps<Props>(), {
 });
 
 const chartWidth = 340;
-const chartHeight = 180;
-const padding = { top: 28, right: 20, bottom: 28, left: 30 };
+const chartHeight = 186;
+const padding = { top: 34, right: 20, bottom: 28, left: 30 };
 
 // 均勻等距 Y 軸刻度配置
 const equidistantConfig = computed(() => getEquidistantTicks(props.curve.peak.uv));
@@ -100,6 +100,33 @@ const currentPoint = computed(() => {
   };
 });
 
+// 貼在點正上方的小圓角對話泡泡配置（永遠不與曲線或尖峰標籤碰撞）
+const bubbleConfig = computed(() => {
+  if (!currentPoint.value) return null;
+
+  const width = 76;
+  const height = 24;
+  const radius = 9;
+  const gap = 7; // 與圓點的垂直間隔
+
+  // 水平置中對齊圓點，並限制左右邊界防裁切
+  const minX = padding.left - 4;
+  const maxX = chartWidth - padding.right - width + 4;
+  const idealX = currentPoint.value.x - width / 2;
+  const x = Math.max(minX, Math.min(maxX, idealX));
+
+  // 永遠位於圓點正上方（曲線正上方必為空，且尖峰已搬出圖表，保證不撞線）
+  const y = Math.max(2, currentPoint.value.y - height - gap);
+
+  return {
+    x,
+    y,
+    width,
+    height,
+    radius
+  };
+});
+
 // 補擦紀錄標記
 const reapplyMarkers = computed(() =>
   props.reapplyHours.map((hour) => {
@@ -115,6 +142,13 @@ const reapplyMarkers = computed(() =>
 
 <template>
   <div class="intraday-uv" :class="{ 'intraday-uv--compact': compact }">
+    <!-- 尖峰文字移出圖表區，成為頂部獨立說明列，不與浮動的「現在」標籤競爭內部空間 -->
+    <div v-if="peakBox" class="intraday-uv__header">
+      <span class="intraday-uv__peak-header-label">
+        尖峰 {{ peakBox.startLabel }}–{{ peakBox.endLabel }}
+      </span>
+    </div>
+
     <div class="intraday-uv__chart-wrapper">
       <svg
         :viewBox="`0 0 ${chartWidth} ${chartHeight}`"
@@ -122,7 +156,7 @@ const reapplyMarkers = computed(() =>
         role="img"
         aria-label="今日紫外線強度時間曲線圖"
       >
-        <!-- 尖峰警戒區域背景遮罩 -->
+        <!-- 尖峰警戒區域背景遮罩（灰色遮罩保留，文字已移出） -->
         <g v-if="peakBox" class="intraday-uv__peak-zone">
           <rect
             :x="peakBox.x"
@@ -132,14 +166,6 @@ const reapplyMarkers = computed(() =>
             rx="4"
             class="intraday-uv__peak-rect"
           />
-          <text
-            :x="peakBox.x + peakBox.width / 2"
-            :y="peakBox.y - 4"
-            class="intraday-uv__peak-label"
-            text-anchor="middle"
-          >
-            尖峰 {{ peakBox.startLabel }}–{{ peakBox.endLabel }}
-          </text>
         </g>
 
         <!-- 等距水平參考線 -->
@@ -189,11 +215,12 @@ const reapplyMarkers = computed(() =>
           />
         </template>
 
-        <!-- 目前所在時段的圓形標示（日間呈現，與圓點水平齊平，數值為整數） -->
-        <g v-if="currentPoint" class="intraday-uv__current">
+        <!-- 目前所在時段：正上方對話泡泡標籤與時間參考線 -->
+        <g v-if="currentPoint && bubbleConfig" class="intraday-uv__current">
+          <!-- 從泡泡底部接下去到 X 軸的參考線，兼作現在時間參考線 -->
           <line
             :x1="currentPoint.x"
-            :y1="Math.min(currentPoint.y, baselineY)"
+            :y1="bubbleConfig.y + bubbleConfig.height"
             :x2="currentPoint.x"
             :y2="baselineY"
             class="intraday-uv__current-line"
@@ -212,15 +239,25 @@ const reapplyMarkers = computed(() =>
             r="4"
             class="intraday-uv__current-dot"
           />
-          <!-- 標籤文字（與圓點高度一致、貼在點旁，不與頂部尖峰標籤擠在一起） -->
-          <text
-            :x="currentPoint.x > chartWidth * 0.72 ? currentPoint.x - 10 : currentPoint.x + 10"
-            :y="currentPoint.y + 4"
-            :text-anchor="currentPoint.x > chartWidth * 0.72 ? 'end' : 'start'"
-            class="intraday-uv__current-label"
-          >
-            現在・UV {{ currentPoint.uv }}
-          </text>
+          <!-- 貼在點正上方的小圓角對話泡泡標籤 -->
+          <g class="intraday-uv__bubble">
+            <rect
+              :x="bubbleConfig.x"
+              :y="bubbleConfig.y"
+              :width="bubbleConfig.width"
+              :height="bubbleConfig.height"
+              :rx="bubbleConfig.radius"
+              class="intraday-uv__bubble-bg"
+            />
+            <text
+              :x="bubbleConfig.x + bubbleConfig.width / 2"
+              :y="bubbleConfig.y + bubbleConfig.height / 2 + 4"
+              class="intraday-uv__bubble-text"
+              text-anchor="middle"
+            >
+              現在・UV {{ currentPoint.uv }}
+            </text>
+          </g>
         </g>
 
         <!-- X 軸時間標記 -->
@@ -267,9 +304,23 @@ const reapplyMarkers = computed(() =>
   background: transparent;
 }
 
+.intraday-uv__header {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.intraday-uv__peak-header-label {
+  color: var(--color-primary-text);
+  font-family: var(--font-family-supporting);
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+
 .intraday-uv__chart-wrapper {
   width: 100%;
-  overflow: hidden;
+  overflow: visible;
 }
 
 .intraday-uv__svg {
@@ -282,13 +333,6 @@ const reapplyMarkers = computed(() =>
 .intraday-uv__peak-rect {
   fill: var(--color-soon-soft);
   opacity: 0.65;
-}
-
-.intraday-uv__peak-label {
-  fill: var(--color-primary-text);
-  font-family: var(--font-family-supporting);
-  font-size: 10px;
-  font-weight: 600;
 }
 
 .intraday-uv__threshold-line {
@@ -340,11 +384,20 @@ const reapplyMarkers = computed(() =>
   stroke-width: 2;
 }
 
-.intraday-uv__current-label {
-  fill: var(--color-primary-text);
+.intraday-uv__bubble-bg {
+  fill: color-mix(in srgb, var(--color-primary) 70%, var(--color-canvas));
+  stroke: var(--color-primary);
+  stroke-width: 0.75;
+  stroke-opacity: 0.35;
+}
+
+.intraday-uv__bubble-text {
+  fill: var(--color-on-primary);
   font-family: var(--font-family-supporting);
   font-size: 11px;
   font-weight: 600;
+  letter-spacing: 0.02em;
+  user-select: none;
 }
 
 .intraday-uv__tick-label {

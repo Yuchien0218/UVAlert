@@ -54,9 +54,13 @@ describe("Intraday UV Components", () => {
 
       expect(wrapper.find("svg").exists()).toBe(true);
       expect(wrapper.find(".intraday-uv__curve-line").exists()).toBe(true);
+      expect(wrapper.find(".intraday-uv__header").exists()).toBe(true);
+      expect(wrapper.find(".intraday-uv__peak-header-label").text()).toContain("尖峰");
       expect(wrapper.find(".intraday-uv__current").exists()).toBe(true);
       expect(wrapper.find(".intraday-uv__current-dot").exists()).toBe(true);
       expect(wrapper.find(".intraday-uv__current-halo").exists()).toBe(true);
+      expect(wrapper.find(".intraday-uv__bubble").exists()).toBe(true);
+      expect(wrapper.find(".intraday-uv__bubble-text").text()).toContain("現在・UV");
       expect(wrapper.findAll(".intraday-uv__threshold-line").length).toBeGreaterThan(0);
       expect(wrapper.findAll(".intraday-uv__tick-label").length).toBeGreaterThan(0);
       expect(wrapper.text()).toContain("晴空強度趨勢示意");
