@@ -106,15 +106,12 @@ watch(() => props.phase, checkDismiss, { immediate: true });
 }
 
 .splash-fade-leave-active {
-  transition:
-    opacity var(--duration-base) var(--ease-out),
-    transform var(--duration-base) var(--ease-out);
+  transition: opacity var(--duration-base) var(--ease-out);
   pointer-events: none;
 }
 
 .splash-fade-leave-to {
   opacity: 0;
-  transform: scale(1.03);
 }
 
 @keyframes splash-sun-pulse {

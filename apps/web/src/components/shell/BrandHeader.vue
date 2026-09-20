@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onMounted, onUnmounted, ref } from "vue";
+import { computed } from "vue";
 
 import type { UvRiskLevel } from "@sunshield/contracts";
 import BrandLockup from "./BrandLockup.vue";
@@ -33,25 +33,6 @@ const props = withDefaults(defineProps<Props>(), {
 const showUv = computed(
   () => !props.hideUvEntrance && props.regionName !== null && props.uvRiskLevel !== null
 );
-
-const isBroadcasting = ref(false);
-let broadcastTimer: ReturnType<typeof setTimeout> | null = null;
-
-function triggerBroadcast(): void {
-  if (isBroadcasting.value) return;
-  isBroadcasting.value = true;
-  broadcastTimer = setTimeout(() => {
-    isBroadcasting.value = false;
-  }, 450);
-}
-
-onMounted(() => {
-  triggerBroadcast();
-});
-
-onUnmounted(() => {
-  if (broadcastTimer) clearTimeout(broadcastTimer);
-});
 </script>
 
 <template>
@@ -60,17 +41,13 @@ onUnmounted(() => {
       class="brand-header__brand"
       to="/"
       aria-label="防曬晴報員提醒頁"
-      @click="triggerBroadcast"
     >
       <!--
         2026-08-23 換成正式 Logo（docs/design/logo/uvalert-lockup-horizontal.svg）。
         2026-09-01 抽成 `BrandLockup.vue`——分享卡也要放同一個 lockup，複製一份
         會讓同一組 Illustrator 幾何有兩個副本。
       -->
-      <BrandLockup
-        class="brand-header__logo"
-        :class="{ 'brand-header__logo--active': isBroadcasting }"
-      />
+      <BrandLockup class="brand-header__logo" />
     </RouterLink>
     <template v-if="!hideUvEntrance">
       <RouterLink
@@ -132,13 +109,16 @@ onUnmounted(() => {
   min-height: var(--tap-target);
   color: var(--text-primary);
   text-decoration: none;
-  transition: transform var(--duration-fast) var(--ease-out);
+  transition:
+    transform var(--duration-fast) var(--ease-out),
+    opacity var(--duration-fast) var(--ease-out);
   touch-action: manipulation;
   -webkit-tap-highlight-color: transparent;
 }
 
 .brand-header__brand:active {
-  transform: scale(0.96);
+  transform: scale(0.97);
+  opacity: 0.82;
 }
 
 .brand-header__logo {
@@ -147,103 +127,9 @@ onUnmounted(() => {
   flex: 0 0 auto;
 }
 
-.brand-header__logo :deep(circle) {
-  transform-origin: 6px 15.94px;
-}
-
-.brand-header__logo--active :deep(circle) {
-  animation: logo-sun-pulse var(--duration-base) var(--ease-out);
-}
-
-.brand-header__logo--active :deep(path:nth-of-type(1)) {
-  animation: logo-ray-sweep-1 var(--duration-base) var(--ease-out);
-}
-
-.brand-header__logo--active :deep(path:nth-of-type(2)) {
-  animation: logo-ray-sweep-2 var(--duration-base) var(--ease-out);
-}
-
-.brand-header__logo--active :deep(path:nth-of-type(3)) {
-  animation: logo-ray-sweep-3 var(--duration-base) var(--ease-out);
-}
-
-@keyframes logo-sun-pulse {
-  0%,
-  100% {
-    transform: scale(1);
-  }
-
-  30% {
-    transform: scale(0.88);
-  }
-
-  65% {
-    transform: scale(1.08);
-  }
-}
-
-@keyframes logo-ray-sweep-1 {
-  0%,
-  100% {
-    opacity: 1;
-    transform: translateX(0);
-  }
-
-  25% {
-    opacity: 0.35;
-    transform: translateX(-0.5px);
-  }
-
-  55% {
-    opacity: 1;
-    transform: translateX(1px);
-  }
-}
-
-@keyframes logo-ray-sweep-2 {
-  0%,
-  100% {
-    opacity: 1;
-    transform: translateX(0);
-  }
-
-  40% {
-    opacity: 0.35;
-    transform: translateX(-0.5px);
-  }
-
-  70% {
-    opacity: 1;
-    transform: translateX(1px);
-  }
-}
-
-@keyframes logo-ray-sweep-3 {
-  0%,
-  100% {
-    opacity: 1;
-    transform: translateX(0);
-  }
-
-  55% {
-    opacity: 0.35;
-    transform: translateX(-0.5px);
-  }
-
-  85% {
-    opacity: 1;
-    transform: translateX(1px);
-  }
-}
-
 @media (prefers-reduced-motion: reduce) {
   .brand-header__brand {
     transition: none;
-  }
-
-  .brand-header__logo--active :deep(circle),
-  .brand-header__logo--active :deep(path) {
-    animation: none;
   }
 }
 
