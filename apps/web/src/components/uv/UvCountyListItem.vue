@@ -36,9 +36,10 @@ const fillStyle = computed(() => ({
   grid-template-columns: minmax(0, 1fr) auto;
   align-items: center;
   overflow: hidden;
-  /* 使用者裁決：高度 30px（1.875rem）。縣市項目為純資訊展示非點擊控制項，不套用 44px tap-target。 */
-  height: 1.875rem;
-  padding: var(--uv-distribution-item-padding-block) var(--uv-distribution-item-padding-inline);
+  /* 使用者裁決：高度 32px（2rem）。縣市項目為純資訊展示非點擊控制項，不套用 44px tap-target。 */
+  height: 2rem;
+  padding-block: 0;
+  padding-inline: var(--uv-distribution-item-padding-inline);
   border-radius: var(--uv-distribution-item-radius);
   background: var(--color-surface-soft);
 }
