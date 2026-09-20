@@ -7,6 +7,7 @@ primaryQuestion: "去海邊時，怎麼兼顧皮膚防護與海洋環境？"
 status: draft
 reviewStatus: needs-professional-review
 lastReviewed: 2026-08-16
+coverImage: "/images/education/articles/ocean-friendly-sun-protection-at-beach.jpg"
 ---
 
 ## 先說結論

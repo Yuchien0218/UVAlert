@@ -7,6 +7,7 @@ primaryQuestion: "曬傷或脫皮後，什麼時候才能再曬太陽？"
 status: draft
 reviewStatus: needs-professional-review
 lastReviewed: 2026-08-16
+coverImage: "/images/education/articles/when-to-return-to-sun-after-sunburn.jpg"
 ---
 
 ## 先說結論

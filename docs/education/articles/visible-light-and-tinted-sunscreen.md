@@ -7,6 +7,7 @@ primaryQuestion: "潤色防曬可以防藍光嗎？"
 status: draft
 reviewStatus: needs-professional-review
 lastReviewed: 2026-08-16
+coverImage: "/images/education/articles/visible-light-and-tinted-sunscreen.jpg"
 ---
 
 ## 先說結論

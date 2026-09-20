@@ -7,6 +7,7 @@ primaryQuestion: "哪些藥會讓皮膚更容易曬傷？需要停藥嗎？"
 status: draft
 reviewStatus: needs-professional-review
 lastReviewed: 2026-08-16
+coverImage: "/images/education/articles/medications-and-sun-sensitivity.jpg"
 ---
 
 ## 先說結論

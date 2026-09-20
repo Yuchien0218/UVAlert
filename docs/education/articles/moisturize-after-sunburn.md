@@ -7,6 +7,7 @@ primaryQuestion: "曬傷後可以擦什麼保濕？蘆薈或乳液都可以嗎�
 status: draft
 reviewStatus: needs-professional-review
 lastReviewed: 2026-08-16
+coverImage: "/images/education/articles/moisturize-after-sunburn.jpg"
 ---
 
 ## 先說結論

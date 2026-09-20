@@ -7,6 +7,7 @@ primaryQuestion: "皮膚曬紅或輕微曬傷後，第一步要做什麼？"
 status: draft
 reviewStatus: needs-professional-review
 lastReviewed: 2026-08-16
+coverImage: "/images/education/articles/what-to-do-for-mild-sunburn.jpg"
 ---
 
 ## 先說結論

@@ -7,6 +7,7 @@ primaryQuestion: "防曬乳和防蚊液應該先擦哪一個？"
 status: draft
 reviewStatus: needs-professional-review
 lastReviewed: 2026-08-16
+coverImage: "/images/education/articles/sunscreen-and-insect-repellent-order.jpg"
 ---
 
 ## 先說結論

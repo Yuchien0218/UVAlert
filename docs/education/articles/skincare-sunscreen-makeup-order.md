@@ -7,6 +7,7 @@ primaryQuestion: "保養品、防曬乳和底妝的正確順序是什麼？"
 status: draft
 reviewStatus: needs-professional-review
 lastReviewed: 2026-08-16
+coverImage: "/images/education/articles/skincare-sunscreen-makeup-order.jpg"
 ---
 
 ## 先說結論

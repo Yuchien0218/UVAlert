@@ -7,6 +7,7 @@ primaryQuestion: "曬傷到什麼程度需要看醫師？"
 status: draft
 reviewStatus: needs-professional-review
 lastReviewed: 2026-08-16
+coverImage: "/images/education/articles/when-sunburn-needs-medical-care.jpg"
 ---
 
 ## 先說結論

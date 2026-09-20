@@ -7,6 +7,7 @@ primaryQuestion: "防曬乳中的成分真的會傷害珊瑚嗎？"
 status: draft
 reviewStatus: needs-professional-review
 lastReviewed: 2026-08-16
+coverImage: "/images/education/articles/sunscreen-and-coral-reefs.jpg"
 ---
 
 ## 先說結論

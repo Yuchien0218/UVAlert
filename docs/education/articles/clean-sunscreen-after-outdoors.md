@@ -7,6 +7,7 @@ primaryQuestion: "回家後要怎麼把防曬清潔乾淨？"
 status: draft
 reviewStatus: needs-professional-review
 lastReviewed: 2026-08-16
+coverImage: "/images/education/articles/clean-sunscreen-after-outdoors.jpg"
 ---
 
 ## 先說結論

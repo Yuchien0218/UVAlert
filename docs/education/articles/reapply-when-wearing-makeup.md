@@ -7,6 +7,7 @@ primaryQuestion: "帶妝時要怎麼補擦防曬？"
 status: draft
 reviewStatus: needs-professional-review
 lastReviewed: 2026-08-16
+coverImage: "/images/education/articles/reapply-when-wearing-makeup.jpg"
 ---
 
 ## 先說結論

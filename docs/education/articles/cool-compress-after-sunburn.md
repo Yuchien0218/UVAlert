@@ -7,6 +7,7 @@ primaryQuestion: "曬傷後可以直接用冰塊冰敷嗎？"
 status: draft
 reviewStatus: needs-professional-review
 lastReviewed: 2026-08-16
+coverImage: "/images/education/articles/cool-compress-after-sunburn.jpg"
 ---
 
 ## 先說結論

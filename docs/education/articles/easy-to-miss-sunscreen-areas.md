@@ -7,6 +7,7 @@ primaryQuestion: "補擦防曬時，哪些部位最容易忘記？"
 status: draft
 reviewStatus: needs-professional-review
 lastReviewed: 2026-08-16
+coverImage: "/images/education/articles/easy-to-miss-sunscreen-areas.jpg"
 ---
 
 ## 先說結論

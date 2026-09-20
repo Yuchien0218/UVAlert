@@ -7,6 +7,7 @@ primaryQuestion: "要在戶外待一整天，防曬和休息該怎麼安排？"
 status: draft
 reviewStatus: needs-professional-review
 lastReviewed: 2026-08-16
+coverImage: "/images/education/articles/long-outdoor-day-sun-plan.jpg"
 ---
 
 ## 先說結論

@@ -7,6 +7,7 @@ primaryQuestion: "擦完防曬後皮膚不舒服，應該繼續擦還是先洗�
 status: draft
 reviewStatus: needs-professional-review
 lastReviewed: 2026-08-16
+coverImage: "/images/education/articles/sunscreen-irritation.jpg"
 ---
 
 ## 先說結論

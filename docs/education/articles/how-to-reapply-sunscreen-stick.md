@@ -7,6 +7,7 @@ primaryQuestion: "防曬棒需要來回塗幾次，才能完成補擦？"
 status: draft
 reviewStatus: needs-professional-review
 lastReviewed: 2026-08-16
+coverImage: "/images/education/articles/how-to-reapply-sunscreen-stick.jpg"
 ---
 
 ## 先說結論

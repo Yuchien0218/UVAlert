@@ -7,6 +7,7 @@ primaryQuestion: "App 顯示的 UV 是預報還是實際觀測？"
 status: draft
 reviewStatus: needs-professional-review
 lastReviewed: 2026-08-16
+coverImage: "/images/education/articles/uv-forecast-and-observation.jpg"
 ---
 
 ## 先說結論

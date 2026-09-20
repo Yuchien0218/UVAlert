@@ -7,6 +7,7 @@ primaryQuestion: "物理性、化學性和混合型防曬，哪一種比較好�
 status: draft
 reviewStatus: needs-professional-review
 lastReviewed: 2026-08-16
+coverImage: "/images/education/articles/mineral-chemical-hybrid-sunscreen.jpg"
 ---
 
 ## 先說結論

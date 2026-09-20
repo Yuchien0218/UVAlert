@@ -7,6 +7,7 @@ primaryQuestion: "防曬噴霧直接噴一下就完成補擦了嗎？"
 status: draft
 reviewStatus: needs-professional-review
 lastReviewed: 2026-08-16
+coverImage: "/images/education/articles/how-to-reapply-sunscreen-spray.jpg"
 ---
 
 ## 先說結論

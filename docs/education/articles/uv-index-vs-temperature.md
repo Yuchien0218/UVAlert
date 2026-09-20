@@ -7,6 +7,7 @@ primaryQuestion: "天氣不熱時，紫外線也會很強嗎？"
 status: draft
 reviewStatus: needs-professional-review
 lastReviewed: 2026-08-16
+coverImage: "/images/education/articles/uv-index-vs-temperature.jpg"
 ---
 
 ## 先說結論

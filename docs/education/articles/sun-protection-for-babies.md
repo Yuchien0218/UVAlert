@@ -7,6 +7,7 @@ primaryQuestion: "未滿 6 個月的嬰兒可以擦防曬乳嗎？"
 status: draft
 reviewStatus: needs-professional-review
 lastReviewed: 2026-08-16
+coverImage: "/images/education/articles/sun-protection-for-babies.jpg"
 ---
 
 ## 先說結論

@@ -7,6 +7,7 @@ primaryQuestion: "曬後紅、刺、癢，怎麼分辨是曬傷還是防曬造�
 status: draft
 reviewStatus: needs-professional-review
 lastReviewed: 2026-08-16
+coverImage: "/images/education/articles/red-stinging-itchy-skin-three-steps.jpg"
 ---
 
 ## 先說結論

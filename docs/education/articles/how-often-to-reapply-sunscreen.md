@@ -7,6 +7,7 @@ primaryQuestion: "防曬乳通常多久需要補擦？"
 status: draft
 reviewStatus: needs-professional-review
 lastReviewed: 2026-08-16
+coverImage: "/images/education/articles/how-often-to-reapply-sunscreen.jpg"
 ---
 
 ## 先說結論

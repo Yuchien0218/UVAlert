@@ -7,6 +7,7 @@ primaryQuestion: "先曬黑一點，之後是不是比較不容易曬傷？"
 status: draft
 reviewStatus: needs-professional-review
 lastReviewed: 2026-08-16
+coverImage: "/images/education/articles/tan-is-skin-damage.jpg"
 ---
 
 ## 先說結論

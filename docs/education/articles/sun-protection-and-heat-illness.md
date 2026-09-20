@@ -7,6 +7,7 @@ primaryQuestion: "擦防曬乳可以預防中暑或熱傷害嗎？"
 status: draft
 reviewStatus: needs-professional-review
 lastReviewed: 2026-08-16
+coverImage: "/images/education/articles/sun-protection-and-heat-illness.jpg"
 ---
 
 ## 先說結論

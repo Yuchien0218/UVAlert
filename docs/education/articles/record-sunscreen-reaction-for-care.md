@@ -7,6 +7,7 @@ primaryQuestion: "防曬造成不舒服時，要記錄哪些資訊？"
 status: draft
 reviewStatus: needs-professional-review
 lastReviewed: 2026-08-16
+coverImage: "/images/education/articles/record-sunscreen-reaction-for-care.jpg"
 ---
 
 ## 先說結論

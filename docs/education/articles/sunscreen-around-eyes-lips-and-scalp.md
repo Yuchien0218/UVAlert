@@ -7,6 +7,7 @@ primaryQuestion: "防曬乳可以擦在眼皮、嘴唇和頭皮嗎？"
 status: draft
 reviewStatus: needs-professional-review
 lastReviewed: 2026-08-16
+coverImage: "/images/education/articles/sunscreen-around-eyes-lips-and-scalp.jpg"
 ---
 
 ## 先說結論

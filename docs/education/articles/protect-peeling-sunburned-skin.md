@@ -7,6 +7,7 @@ primaryQuestion: "曬後脫皮或緊繃時，可以把皮撕掉或繼續擦防�
 status: draft
 reviewStatus: needs-professional-review
 lastReviewed: 2026-08-16
+coverImage: "/images/education/articles/protect-peeling-sunburned-skin.jpg"
 ---
 
 ## 先說結論

@@ -7,6 +7,7 @@ primaryQuestion: "破皮、脫皮或曬傷的地方可以擦防曬乳嗎？"
 status: draft
 reviewStatus: needs-professional-review
 lastReviewed: 2026-08-16
+coverImage: "/images/education/articles/sunscreen-on-damaged-skin.jpg"
 ---
 
 ## 先說結論

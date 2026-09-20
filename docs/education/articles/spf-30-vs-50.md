@@ -7,6 +7,7 @@ primaryQuestion: "SPF 30 和 SPF 50 應該選哪一個？"
 status: draft
 reviewStatus: needs-professional-review
 lastReviewed: 2026-08-16
+coverImage: "/images/education/articles/spf-30-vs-50.jpg"
 ---
 
 ## 先說結論

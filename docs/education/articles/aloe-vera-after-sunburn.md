@@ -7,6 +7,7 @@ primaryQuestion: "曬傷後擦蘆薈可以讓皮膚立刻恢復嗎？"
 status: draft
 reviewStatus: needs-professional-review
 lastReviewed: 2026-08-16
+coverImage: "/images/education/articles/aloe-vera-after-sunburn.jpg"
 ---
 
 ## 先說結論

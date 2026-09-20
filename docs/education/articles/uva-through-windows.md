@@ -7,6 +7,7 @@ primaryQuestion: "待在窗邊或車內還需要防曬嗎？"
 status: draft
 reviewStatus: needs-professional-review
 lastReviewed: 2026-08-16
+coverImage: "/images/education/articles/uva-through-windows.jpg"
 ---
 
 ## 先說結論
