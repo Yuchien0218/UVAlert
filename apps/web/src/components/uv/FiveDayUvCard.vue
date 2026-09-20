@@ -14,6 +14,7 @@ import {
   formatMonthDayTime,
   formatWeekday
 } from "../../helpers/datetime";
+import BroadcastLoader from "../feedback/BroadcastLoader.vue";
 
 interface Props {
   phase: UvForecastPhase;
@@ -122,9 +123,10 @@ function getUnavailableMessage(error: UvForecastError): string {
 
     <div
       v-if="phase === 'idle' || phase === 'loading'"
-      class="uv-forecast__state"
+      class="uv-forecast__state uv-forecast__state--loading"
       role="status"
     >
+      <BroadcastLoader label="正在讀取白日時段預報…" />
       <strong>正在讀取白日時段預報…</strong>
       <span>不會影響目前的本機補擦提醒。</span>
     </div>
@@ -237,6 +239,12 @@ function getUnavailableMessage(error: UvForecastError): string {
   gap: var(--space-3);
   color: var(--text-secondary);
   line-height: var(--line-height-body);
+}
+
+.uv-forecast__state--loading {
+  justify-items: center;
+  text-align: center;
+  padding: var(--space-4) 0;
 }
 
 .uv-forecast__state strong {

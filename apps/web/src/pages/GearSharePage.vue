@@ -12,6 +12,7 @@ import Icon from "../components/icons/Icon.vue";
 import GearShareCard, {
   type GearShareCardData
 } from "../components/product/GearShareCard.vue";
+import BroadcastLoader from "../components/feedback/BroadcastLoader.vue";
 
 /**
  * 「我的防曬裝備」分享頁。
@@ -220,7 +221,12 @@ function goBack(): void {
       <p>存成圖片或直接分享你的防曬清單，價格預設不會印在卡片上。</p>
     </header>
 
-    <GearShareCard :data="cardData" :show-price="showPrice" />
+    <div class="share-page__preview-wrap">
+      <GearShareCard :data="cardData" :show-price="showPrice" />
+      <div v-if="busy" class="share-page__busy-overlay" role="status">
+        <BroadcastLoader label="正在產生卡片圖片…" />
+      </div>
+    </div>
 
     <!--
       價格開關（2026-09-01 使用者裁決：**預設關**）。
@@ -314,6 +320,21 @@ function goBack(): void {
   align-items: center;
   justify-content: center;
   gap: var(--space-2);
+}
+
+.share-page__preview-wrap {
+  position: relative;
+}
+
+.share-page__busy-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: color-mix(in srgb, var(--color-canvas) 85%, transparent);
+  border-radius: var(--radius-md);
+  backdrop-filter: blur(2px);
 }
 
 .share-page__toggle {
