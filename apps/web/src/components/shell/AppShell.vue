@@ -2,6 +2,7 @@
 import { computed, nextTick, useTemplateRef, watch } from "vue";
 import { useRoute } from "vue-router";
 import { useWebAppServices } from "../../app/injection";
+import AppSplashScreen from "./AppSplashScreen.vue";
 import BottomNavigation from "./BottomNavigation.vue";
 import BrandHeader from "./BrandHeader.vue";
 import GlobalStatusBanner from "./GlobalStatusBanner.vue";
@@ -41,6 +42,7 @@ watch(
     class="app-shell"
     :class="{ 'app-shell--with-navigation': navigationVisible }"
   >
+    <AppSplashScreen :phase="boot.phase.value" />
     <BrandHeader
       :region-name="uvForecast.region.value?.displayName ?? null"
       :uv-risk-level="headerUvDay?.riskLevel ?? null"

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed } from "vue";
+import { computed, onMounted, onUnmounted, ref } from "vue";
 
 import type { UvRiskLevel } from "@sunshield/contracts";
 import BrandLockup from "./BrandLockup.vue";
@@ -34,6 +34,24 @@ const showUv = computed(
   () => !props.hideUvEntrance && props.regionName !== null && props.uvRiskLevel !== null
 );
 
+const isBroadcasting = ref(false);
+let broadcastTimer: ReturnType<typeof setTimeout> | null = null;
+
+function triggerBroadcast(): void {
+  if (isBroadcasting.value) return;
+  isBroadcasting.value = true;
+  broadcastTimer = setTimeout(() => {
+    isBroadcasting.value = false;
+  }, 450);
+}
+
+onMounted(() => {
+  triggerBroadcast();
+});
+
+onUnmounted(() => {
+  if (broadcastTimer) clearTimeout(broadcastTimer);
+});
 </script>
 
 <template>
@@ -42,13 +60,17 @@ const showUv = computed(
       class="brand-header__brand"
       to="/"
       aria-label="防曬晴報員提醒頁"
+      @click="triggerBroadcast"
     >
       <!--
         2026-08-23 換成正式 Logo（docs/design/logo/uvalert-lockup-horizontal.svg）。
         2026-09-01 抽成 `BrandLockup.vue`——分享卡也要放同一個 lockup，複製一份
         會讓同一組 Illustrator 幾何有兩個副本。
       -->
-      <BrandLockup class="brand-header__logo" />
+      <BrandLockup
+        class="brand-header__logo"
+        :class="{ 'brand-header__logo--active': isBroadcasting }"
+      />
     </RouterLink>
     <template v-if="!hideUvEntrance">
       <RouterLink
@@ -110,32 +132,119 @@ const showUv = computed(
   min-height: var(--tap-target);
   color: var(--text-primary);
   text-decoration: none;
+  transition: transform var(--duration-fast) var(--ease-out);
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
 }
 
-/*
- * 2026-08-23：使用者要求放大，英文副標「UVAlert」拿掉，只留 Logo。
- *
- * 2026-08-30：高度從 3.25rem(52px) 改成 2rem(32px)，因為**長寬比變了**。
- * 使用者重新匯出 lockup 時裁掉了四周留白，viewBox 從 `0 0 243 84`
- * （比例 2.89）變成 `0 0 168.44 31.61`（比例 5.33）。同樣設 52px 高，
- * 寬度會從 150px 變成 277px——實測把「前往地區設定」擠成兩行。
- *
- * 32px 高 → 171px 寬。舊版扣掉留白後的圖形實際視覺寬是 101px，所以這仍
- * 比先前大一截（符合 2026-08-23 那次「要求放大」的方向），同時在 390px
- * 視窗下留得住右側連結（171 ＋ 連結 73 ＋ gap 16 ＝ 260 < 可用的 358）。
- *
- * 2026-08-31：使用者回饋 32px 那版「太大了」，裁決 1.6rem(25.6px)
- * → 136px 寬。這比舊版 lockup 的實際渲染寬（150px）更小一些，也就是
- * 比 2026-08-30 換圖之前還收斂。
- *
- * 順帶說明一個容易誤判的地方：換圖後看起來變大，**不是有人刻意放大過**
- * ——是裁掉四周留白之後，同樣的高度換到了更多圖形。所以「調回原本大小」
- * 在數字上不等於「調回原本的 height」。
- */
+.brand-header__brand:active {
+  transform: scale(0.96);
+}
+
 .brand-header__logo {
   height: 1.6rem;
   width: auto;
   flex: 0 0 auto;
+}
+
+.brand-header__logo :deep(circle) {
+  transform-origin: 6px 15.94px;
+}
+
+.brand-header__logo--active :deep(circle) {
+  animation: logo-sun-pulse var(--duration-base) var(--ease-out);
+}
+
+.brand-header__logo--active :deep(path:nth-of-type(1)) {
+  animation: logo-ray-sweep-1 var(--duration-base) var(--ease-out);
+}
+
+.brand-header__logo--active :deep(path:nth-of-type(2)) {
+  animation: logo-ray-sweep-2 var(--duration-base) var(--ease-out);
+}
+
+.brand-header__logo--active :deep(path:nth-of-type(3)) {
+  animation: logo-ray-sweep-3 var(--duration-base) var(--ease-out);
+}
+
+@keyframes logo-sun-pulse {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+
+  30% {
+    transform: scale(0.88);
+  }
+
+  65% {
+    transform: scale(1.08);
+  }
+}
+
+@keyframes logo-ray-sweep-1 {
+  0%,
+  100% {
+    opacity: 1;
+    transform: translateX(0);
+  }
+
+  25% {
+    opacity: 0.35;
+    transform: translateX(-0.5px);
+  }
+
+  55% {
+    opacity: 1;
+    transform: translateX(1px);
+  }
+}
+
+@keyframes logo-ray-sweep-2 {
+  0%,
+  100% {
+    opacity: 1;
+    transform: translateX(0);
+  }
+
+  40% {
+    opacity: 0.35;
+    transform: translateX(-0.5px);
+  }
+
+  70% {
+    opacity: 1;
+    transform: translateX(1px);
+  }
+}
+
+@keyframes logo-ray-sweep-3 {
+  0%,
+  100% {
+    opacity: 1;
+    transform: translateX(0);
+  }
+
+  55% {
+    opacity: 0.35;
+    transform: translateX(-0.5px);
+  }
+
+  85% {
+    opacity: 1;
+    transform: translateX(1px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .brand-header__brand {
+    transition: none;
+  }
+
+  .brand-header__logo--active :deep(circle),
+  .brand-header__logo--active :deep(path) {
+    animation: none;
+  }
 }
 
 /* 沒有 UV 可顯示時的出口，樣式跟 UV 一致，只是不帶風險色。 */
