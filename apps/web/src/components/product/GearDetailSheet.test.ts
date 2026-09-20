@@ -386,12 +386,12 @@ describe("GearDetailSheet", () => {
       expect(findButton("移至收納")).toBeDefined();
     });
 
-    it("收納中的裝備，主 CTA 是記錄使用中，呼叫 restoreProduct", async () => {
+    it("收納中的裝備，主 CTA 是移至使用中，呼叫 restoreProduct", async () => {
       const { restoreProduct } = await mountSheet(
         makeProduct({ status: "stopped" })
       );
 
-      const button = findButton("記錄使用中");
+      const button = findButton("移至使用中");
       expect(button).toBeDefined();
       expect(sheetText()).not.toContain("移至收納");
 
@@ -402,9 +402,9 @@ describe("GearDetailSheet", () => {
 
     /*
      * 安全狀態被封鎖的裝備不提供恢復（S-13）——同配方新批次要另建紀錄，
-     * 不能用「記錄使用中」繞過異常回報。
+     * 不能用「移至使用中」繞過異常回報。
      */
-    it("被安全狀態封鎖的收納裝備，不提供記錄使用中", async () => {
+    it("被安全狀態封鎖的收納裝備，不提供移至使用中", async () => {
       const blockedSnapshot = makeProductSnapshot({
         conditionStatus: "abnormal_reported"
       });
@@ -416,7 +416,7 @@ describe("GearDetailSheet", () => {
         })
       );
 
-      expect(sheetText()).not.toContain("記錄使用中");
+      expect(sheetText()).not.toContain("移至使用中");
       expect(sheetText()).toContain("同配方的新批次請另建一筆新紀錄");
     });
   });

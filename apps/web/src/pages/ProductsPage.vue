@@ -485,7 +485,7 @@ function startDragFromPast(event: PointerEvent, product: ProductCatalogRecordV1)
               <Icon name="tool-download" :size="24" />
             </span>
             <p class="drop-action-zone__text">
-              {{ isOverArchiveZone ? "放開手柄立即移至收納" : "拖曳至此移至收納（收藏）" }}
+              {{ isOverArchiveZone ? "放開移至收納" : "移至收納" }}
             </p>
           </div>
 
@@ -501,7 +501,7 @@ function startDragFromPast(event: PointerEvent, product: ProductCatalogRecordV1)
               <Icon name="tool-refresh" :size="24" />
             </span>
             <p class="drop-action-zone__text">
-              {{ isOverRestoreZone ? "放開手柄立即恢復使用" : "拖曳至此恢復使用（移至使用中）" }}
+              {{ isOverRestoreZone ? "放開移至使用中" : "移至使用中" }}
             </p>
           </div>
         </section>
@@ -550,7 +550,7 @@ function startDragFromPast(event: PointerEvent, product: ProductCatalogRecordV1)
           </div>
           <!-- 2026-09-01：詳情頁已改成抽屜，這句不能再指向一個不存在的頁。 -->
           <p class="section-empty">
-            這些裝備不會用於新的提醒，點選或向上拖曳即可恢復使用。
+            這些裝備不會用於新的提醒，點選或向上拖曳可移至使用中。
           </p>
           <ul class="gear-list">
             <li
@@ -561,7 +561,7 @@ function startDragFromPast(event: PointerEvent, product: ProductCatalogRecordV1)
               <GearListItem
                 :product="product"
                 :draggable="true"
-                drag-label="拖曳恢復使用"
+                drag-label="移至使用中"
                 @open="openGear(product.productId)"
                 @drag-start="startDragFromPast($event, product)"
               />

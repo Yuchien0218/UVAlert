@@ -334,6 +334,6 @@ describe("裝備詳情抽屜的開關", () => {
     expect(pastSection.exists()).toBe(true);
     const pastHandle = pastSection.find(".gear-item__handle");
     expect(pastHandle.exists()).toBe(true);
-    expect(pastHandle.attributes("aria-label")).toBe("拖曳恢復使用");
+    expect(pastHandle.attributes("aria-label")).toBe("移至使用中");
   });
 });

@@ -344,7 +344,7 @@ async function handleDelete(): Promise<void> {
           :disabled="isBusy"
           @click="handleRestore"
         >
-          記錄使用中
+          移至使用中
         </button>
         <button
           v-else-if="!isArchived"
