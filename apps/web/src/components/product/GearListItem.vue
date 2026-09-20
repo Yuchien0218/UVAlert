@@ -13,9 +13,11 @@ const props = withDefaults(
   defineProps<{
     product: ProductCatalogRecordV1;
     draggable?: boolean;
+    dragLabel?: string;
   }>(),
   {
-    draggable: false
+    draggable: false,
+    dragLabel: "拖曳調整順序"
   }
 );
 defineEmits<{
@@ -77,7 +79,7 @@ const safetyNotice = computed((): string | null =>
       v-if="draggable"
       class="gear-item__handle"
       type="button"
-      aria-label="拖曳調整順序"
+      :aria-label="dragLabel"
       @pointerdown.stop.prevent="$emit('dragStart', $event)"
     >
       <svg

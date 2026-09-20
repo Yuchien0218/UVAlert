@@ -103,14 +103,19 @@ function editGear(productId: string): void {
   void router.push({ name: "product-edit", params: { id: productId } });
 }
 
-// 拖曳排序與拖曳收納支援
+// 拖曳排序與拖曳收納/恢復支援
 const activeItems = ref<ProductCatalogRecordV1[]>([]);
 const isDragging = shallowRef(false);
+const dragSource = shallowRef<"current" | "past" | null>(null);
 const draggedIndex = shallowRef<number | null>(null);
+const draggingProduct = shallowRef<ProductCatalogRecordV1 | null>(null);
 const isOverArchiveZone = shallowRef(false);
+const isOverRestoreZone = shallowRef(false);
 
 const archiveZoneRef = shallowRef<HTMLElement | null>(null);
 const pastZoneRef = shallowRef<HTMLElement | null>(null);
+const restoreZoneRef = shallowRef<HTMLElement | null>(null);
+const currentSectionRef = shallowRef<HTMLElement | null>(null);
 
 watch(
   current,
@@ -138,12 +143,15 @@ function getContainerEl(): HTMLElement | null {
 function startDrag(event: PointerEvent, index: number): void {
   if (activeItems.value.length === 0) return;
 
-  const draggingProduct = activeItems.value[index];
-  if (!draggingProduct) return;
+  const product = activeItems.value[index];
+  if (!product) return;
 
+  dragSource.value = "current";
+  draggingProduct.value = product;
   isDragging.value = true;
   draggedIndex.value = index;
   isOverArchiveZone.value = false;
+  isOverRestoreZone.value = false;
 
   if (typeof navigator !== "undefined" && "vibrate" in navigator) {
     navigator.vibrate?.(10);
@@ -236,6 +244,7 @@ function startDrag(event: PointerEvent, index: number): void {
     const shouldArchive = isOverArchiveZone.value;
 
     isDragging.value = false;
+    dragSource.value = null;
     draggedIndex.value = null;
     isOverArchiveZone.value = false;
 
@@ -243,7 +252,7 @@ function startDrag(event: PointerEvent, index: number): void {
       if (typeof navigator !== "undefined" && "vibrate" in navigator) {
         navigator.vibrate?.([15, 50, 15]);
       }
-      void productSettings.archiveProduct(draggingProduct.productId);
+      void productSettings.archiveProduct(product.productId);
       return;
     }
 
@@ -255,6 +264,81 @@ function startDrag(event: PointerEvent, index: number): void {
 
     if (hasChanged) {
       void productSettings.reorderProducts(newOrderedIds);
+    }
+  };
+
+  window.addEventListener("pointermove", onPointerMove, { passive: false });
+  window.addEventListener("pointerup", onPointerUp);
+  window.addEventListener("pointercancel", onPointerUp);
+}
+
+function startDragFromPast(event: PointerEvent, product: ProductCatalogRecordV1): void {
+  dragSource.value = "past";
+  draggingProduct.value = product;
+  isDragging.value = true;
+  draggedIndex.value = null;
+  isOverRestoreZone.value = false;
+  isOverArchiveZone.value = false;
+
+  if (typeof navigator !== "undefined" && "vibrate" in navigator) {
+    navigator.vibrate?.(10);
+  }
+
+  const onPointerMove = (e: PointerEvent) => {
+    if (!isDragging.value || dragSource.value !== "past") return;
+
+    const clientX = e.clientX;
+    const clientY = e.clientY;
+
+    let overTarget = false;
+    if (restoreZoneRef.value) {
+      const rect = restoreZoneRef.value.getBoundingClientRect();
+      if (
+        clientY >= rect.top - 15 &&
+        clientY <= rect.bottom + 15 &&
+        clientX >= rect.left - 10 &&
+        clientX <= rect.right + 10
+      ) {
+        overTarget = true;
+      }
+    }
+    if (!overTarget && currentSectionRef.value) {
+      const rect = currentSectionRef.value.getBoundingClientRect();
+      if (
+        clientY >= rect.top &&
+        clientY <= rect.bottom &&
+        clientX >= rect.left &&
+        clientX <= rect.right
+      ) {
+        overTarget = true;
+      }
+    }
+
+    if (overTarget !== isOverRestoreZone.value) {
+      isOverRestoreZone.value = overTarget;
+      if (overTarget && typeof navigator !== "undefined" && "vibrate" in navigator) {
+        navigator.vibrate?.(20);
+      }
+    }
+  };
+
+  const onPointerUp = () => {
+    window.removeEventListener("pointermove", onPointerMove);
+    window.removeEventListener("pointerup", onPointerUp);
+    window.removeEventListener("pointercancel", onPointerUp);
+
+    const shouldRestore = isOverRestoreZone.value;
+
+    isDragging.value = false;
+    dragSource.value = null;
+    draggingProduct.value = null;
+    isOverRestoreZone.value = false;
+
+    if (shouldRestore) {
+      if (typeof navigator !== "undefined" && "vibrate" in navigator) {
+        navigator.vibrate?.([15, 50, 15]);
+      }
+      void productSettings.restoreProduct(product.productId);
     }
   };
 
@@ -352,7 +436,11 @@ function startDrag(event: PointerEvent, index: number): void {
           僅供防護紀錄。新增具備標示的防曬乳即可為你建立補擦倒數。
         </p>
 
-        <section aria-labelledby="gear-current-title">
+        <section
+          ref="currentSectionRef"
+          aria-labelledby="gear-current-title"
+          :class="{ 'gear-current--drop-active': isDragging && dragSource === 'past' && isOverRestoreZone }"
+        >
           <div class="gear-section-heading">
             <h2 id="gear-current-title" data-typography-role="section-title">
               使用中
@@ -374,7 +462,7 @@ function startDrag(event: PointerEvent, index: number): void {
             <li
               v-for="(product, index) in activeItems"
               :key="product.productId"
-              :class="{ 'is-dragging': isDragging && draggedIndex === index }"
+              :class="{ 'is-dragging': isDragging && dragSource === 'current' && draggedIndex === index }"
             >
               <GearListItem
                 :product="product"
@@ -385,18 +473,35 @@ function startDrag(event: PointerEvent, index: number): void {
             </li>
           </TransitionGroup>
 
+          <!-- 拖曳至收納投放提示區（由使用中向下拖） -->
           <div
-            v-if="isDragging"
+            v-if="isDragging && dragSource === 'current'"
             ref="archiveZoneRef"
-            class="drop-archive-zone"
-            :class="{ 'drop-archive-zone--active': isOverArchiveZone }"
+            class="drop-action-zone drop-archive-zone"
+            :class="{ 'drop-action-zone--active': isOverArchiveZone }"
             aria-live="polite"
           >
-            <span class="drop-archive-zone__icon">
+            <span class="drop-action-zone__icon">
               <Icon name="tool-download" :size="24" />
             </span>
-            <p class="drop-archive-zone__text">
+            <p class="drop-action-zone__text">
               {{ isOverArchiveZone ? "放開手柄立即移至收納" : "拖曳至此移至收納（收藏）" }}
+            </p>
+          </div>
+
+          <!-- 拖曳恢復使用投放提示區（由收納中向上拖） -->
+          <div
+            v-if="isDragging && dragSource === 'past'"
+            ref="restoreZoneRef"
+            class="drop-action-zone drop-restore-zone"
+            :class="{ 'drop-action-zone--active': isOverRestoreZone }"
+            aria-live="polite"
+          >
+            <span class="drop-action-zone__icon">
+              <Icon name="tool-refresh" :size="24" />
+            </span>
+            <p class="drop-action-zone__text">
+              {{ isOverRestoreZone ? "放開手柄立即恢復使用" : "拖曳至此恢復使用（移至使用中）" }}
             </p>
           </div>
         </section>
@@ -434,7 +539,7 @@ function startDrag(event: PointerEvent, index: number): void {
           v-if="past.length > 0"
           class="gear-past"
           ref="pastZoneRef"
-          :class="{ 'gear-past--drop-active': isDragging && isOverArchiveZone }"
+          :class="{ 'gear-past--drop-active': isDragging && dragSource === 'current' && isOverArchiveZone }"
           aria-labelledby="gear-past-title"
         >
           <div class="gear-section-heading">
@@ -445,14 +550,20 @@ function startDrag(event: PointerEvent, index: number): void {
           </div>
           <!-- 2026-09-01：詳情頁已改成抽屜，這句不能再指向一個不存在的頁。 -->
           <p class="section-empty">
-            這些裝備不會用於新的提醒，點選即可恢復使用。
+            這些裝備不會用於新的提醒，點選或向上拖曳即可恢復使用。
           </p>
           <ul class="gear-list">
-            <li v-for="product in past" :key="product.productId">
+            <li
+              v-for="product in past"
+              :key="product.productId"
+              :class="{ 'is-dragging': isDragging && dragSource === 'past' && draggingProduct?.productId === product.productId }"
+            >
               <GearListItem
                 :product="product"
+                :draggable="true"
+                drag-label="拖曳恢復使用"
                 @open="openGear(product.productId)"
-                @drag-start="() => {}"
+                @drag-start="startDragFromPast($event, product)"
               />
             </li>
           </ul>
@@ -578,6 +689,7 @@ section {
   filter: drop-shadow(0 6px 16px rgb(0 0 0 / 15%));
 }
 
+.drop-action-zone,
 .drop-archive-zone {
   margin-top: var(--space-3);
   padding: var(--space-4);
@@ -596,6 +708,7 @@ section {
     transform var(--duration-fast) var(--ease-out);
 }
 
+.drop-action-zone--active,
 .drop-archive-zone--active {
   border-color: var(--color-primary);
   background-color: var(--color-surface-cream-strong);
@@ -603,19 +716,22 @@ section {
   transform: scale(1.02);
 }
 
+.drop-action-zone__icon,
 .drop-archive-zone__icon {
   display: inline-flex;
   align-items: center;
   justify-content: center;
 }
 
+.drop-action-zone__text,
 .drop-archive-zone__text {
   margin: 0;
   font-size: var(--font-size-body);
   font-weight: 500;
 }
 
-.gear-past--drop-active {
+.gear-past--drop-active,
+.gear-current--drop-active {
   border-radius: var(--radius-md);
   background-color: var(--color-surface-cream-strong);
   transition: background-color var(--duration-fast) var(--ease-out);

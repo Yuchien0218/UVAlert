@@ -322,4 +322,18 @@ describe("裝備詳情抽屜的開關", () => {
     expect(handles).toHaveLength(2);
     expect(handles[0]?.attributes("aria-label")).toBe("拖曳調整順序");
   });
+
+  it("收納中有裝備時顯示拖曳恢復手柄", async () => {
+    const wrapper = mountPage([
+      listProduct({ productId: "p1" }),
+      listProduct({ productId: "p2", archivedAt: "2026-09-01T00:00:00.000Z" })
+    ]);
+    await flushPromises();
+
+    const pastSection = wrapper.find(".gear-past");
+    expect(pastSection.exists()).toBe(true);
+    const pastHandle = pastSection.find(".gear-item__handle");
+    expect(pastHandle.exists()).toBe(true);
+    expect(pastHandle.attributes("aria-label")).toBe("拖曳恢復使用");
+  });
 });
