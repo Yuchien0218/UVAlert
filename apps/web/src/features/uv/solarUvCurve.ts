@@ -443,8 +443,17 @@ export interface YAxisTick {
   label: string;
 }
 
+function formatUvTickLabel(u: number): string {
+  if (u === 0) return "0";
+  if (u <= 2) return `${u} 低`;
+  if (u <= 5) return `${u} 中`;
+  if (u <= 7) return `${u} 高`;
+  if (u <= 10) return `${u} 過量`;
+  return `${u} 危險`;
+}
+
 /**
- * 計算 Y 軸均勻等距刻度（例如 0, 2, 4, 6 或 0, 3, 6, 9），徹底消除疏密不均問題。
+ * 計算 Y 軸均勻等距刻度（例如 0, 2, 4, 6 或 0, 3, 6, 9），附帶風險等級提示，消除疏密不均。
  */
 export function getEquidistantTicks(maxUv: number): { ticks: YAxisTick[]; topUv: number } {
   let step = 2;
@@ -471,7 +480,7 @@ export function getEquidistantTicks(maxUv: number): { ticks: YAxisTick[]; topUv:
   for (let u = 0; u <= topUv; u += step) {
     ticks.push({
       uvi: u,
-      label: String(u)
+      label: formatUvTickLabel(u)
     });
   }
 

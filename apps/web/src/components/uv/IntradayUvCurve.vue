@@ -20,9 +20,9 @@ const props = withDefaults(defineProps<Props>(), {
 
 const chartWidth = 340;
 const chartHeight = 186;
-const padding = { top: 34, right: 20, bottom: 28, left: 30 };
+const padding = { top: 34, right: 20, bottom: 28, left: 36 };
 
-// 均勻等距 Y 軸刻度配置
+// 均勻等距 Y 軸刻度配置（包含數值與風險等級文字）
 const equidistantConfig = computed(() => getEquidistantTicks(props.curve.peak.uv));
 
 const scale = computed(() =>
@@ -85,6 +85,19 @@ const isWithinChartHours = computed(() => {
   return h >= start && h <= end;
 });
 
+// 頂部說明列文字（白天顯示尖峰區間，非日照時段明確說明狀態，消除未載入疑慮）
+const headerLabel = computed(() => {
+  if (!props.curve.peakWindow) return null;
+  const { startLabel, endLabel } = props.curve.peakWindow;
+  if (!isWithinChartHours.value) {
+    if (props.curve.current.hour >= 18) {
+      return `今日日照已結束（尖峰 ${startLabel}–${endLabel}）`;
+    }
+    return `今日尚未日出（預計尖峰 ${startLabel}–${endLabel}）`;
+  }
+  return `尖峰 ${startLabel}–${endLabel}`;
+});
+
 // 日間所在時段的圓形標示（數值四捨五入為整數，與全站一致）
 const currentPoint = computed(() => {
   if (!isWithinChartHours.value) return null;
@@ -100,14 +113,14 @@ const currentPoint = computed(() => {
   };
 });
 
-// 貼在點正上方的小圓角對話泡泡配置（永遠不與曲線或尖峰標籤碰撞）
+// 貼在點正上方的一體化對話泡泡配置（帶向下箭頭指標，指向圓點）
 const bubbleConfig = computed(() => {
   if (!currentPoint.value) return null;
 
   const width = 76;
   const height = 24;
   const radius = 9;
-  const gap = 7; // 與圓點的垂直間隔
+  const gap = 8; // 與圓點的垂直間隔
 
   // 水平置中對齊圓點，並限制左右邊界防裁切
   const minX = padding.left - 4;
@@ -118,12 +131,18 @@ const bubbleConfig = computed(() => {
   // 永遠位於圓點正上方（曲線正上方必為空，且尖峰已搬出圖表，保證不撞線）
   const y = Math.max(2, currentPoint.value.y - height - gap);
 
+  // 指標尖端的水平位置與垂直端點（指向圓點上方）
+  const pointerX = Math.max(x + radius, Math.min(x + width - radius, currentPoint.value.x));
+  const pointerBottomY = currentPoint.value.y - 4;
+
   return {
     x,
     y,
     width,
     height,
-    radius
+    radius,
+    pointerX,
+    pointerBottomY
   };
 });
 
@@ -142,10 +161,10 @@ const reapplyMarkers = computed(() =>
 
 <template>
   <div class="intraday-uv" :class="{ 'intraday-uv--compact': compact }">
-    <!-- 尖峰文字移出圖表區，成為頂部獨立說明列，不與浮動的「現在」標籤競爭內部空間 -->
-    <div v-if="peakBox" class="intraday-uv__header">
+    <!-- 頂部獨立說明列：尖峰時段或非日照時段狀態說明 -->
+    <div v-if="headerLabel" class="intraday-uv__header">
       <span class="intraday-uv__peak-header-label">
-        尖峰 {{ peakBox.startLabel }}–{{ peakBox.endLabel }}
+        {{ headerLabel }}
       </span>
     </div>
 
@@ -168,7 +187,7 @@ const reapplyMarkers = computed(() =>
           />
         </g>
 
-        <!-- 等距水平參考線 -->
+        <!-- 等距水平參考線（附帶風險等級文字） -->
         <g class="intraday-uv__thresholds">
           <template v-for="line in thresholdLines" :key="line.uvi">
             <line
@@ -215,12 +234,12 @@ const reapplyMarkers = computed(() =>
           />
         </template>
 
-        <!-- 目前所在時段：正上方對話泡泡標籤與時間參考線 -->
+        <!-- 目前所在時段：一體化對話泡泡標籤與時間參考線 -->
         <g v-if="currentPoint && bubbleConfig" class="intraday-uv__current">
-          <!-- 從泡泡底部接下去到 X 軸的參考線，兼作現在時間參考線 -->
+          <!-- 從圓點下方接下去到 X 軸的參考線，兼作現在時間參考線 -->
           <line
             :x1="currentPoint.x"
-            :y1="bubbleConfig.y + bubbleConfig.height"
+            :y1="currentPoint.y + 4"
             :x2="currentPoint.x"
             :y2="baselineY"
             class="intraday-uv__current-line"
@@ -239,7 +258,7 @@ const reapplyMarkers = computed(() =>
             r="4"
             class="intraday-uv__current-dot"
           />
-          <!-- 貼在點正上方的小圓角對話泡泡標籤 -->
+          <!-- 貼在點正上方的小圓角對話泡泡標籤（帶下指向尖角） -->
           <g class="intraday-uv__bubble">
             <rect
               :x="bubbleConfig.x"
@@ -248,6 +267,11 @@ const reapplyMarkers = computed(() =>
               :height="bubbleConfig.height"
               :rx="bubbleConfig.radius"
               class="intraday-uv__bubble-bg"
+            />
+            <!-- 泡泡底部指向圓點的指標尖角 -->
+            <polygon
+              :points="`${bubbleConfig.pointerX - 4},${bubbleConfig.y + bubbleConfig.height - 0.5} ${bubbleConfig.pointerX + 4},${bubbleConfig.y + bubbleConfig.height - 0.5} ${bubbleConfig.pointerX},${bubbleConfig.pointerBottomY}`"
+              class="intraday-uv__bubble-pointer"
             />
             <text
               :x="bubbleConfig.x + bubbleConfig.width / 2"
@@ -384,8 +408,12 @@ const reapplyMarkers = computed(() =>
   stroke-width: 2;
 }
 
-.intraday-uv__bubble-bg {
+.intraday-uv__bubble-bg,
+.intraday-uv__bubble-pointer {
   fill: color-mix(in srgb, var(--color-primary) 70%, var(--color-canvas));
+}
+
+.intraday-uv__bubble-bg {
   stroke: var(--color-primary);
   stroke-width: 0.75;
   stroke-opacity: 0.35;

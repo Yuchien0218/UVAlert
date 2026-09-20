@@ -60,8 +60,10 @@ describe("Intraday UV Components", () => {
       expect(wrapper.find(".intraday-uv__current-dot").exists()).toBe(true);
       expect(wrapper.find(".intraday-uv__current-halo").exists()).toBe(true);
       expect(wrapper.find(".intraday-uv__bubble").exists()).toBe(true);
+      expect(wrapper.find(".intraday-uv__bubble-pointer").exists()).toBe(true);
       expect(wrapper.find(".intraday-uv__bubble-text").text()).toContain("現在・UV");
       expect(wrapper.findAll(".intraday-uv__threshold-line").length).toBeGreaterThan(0);
+      expect(wrapper.find(".intraday-uv__threshold-label").text()).toMatch(/(中|高|過量|危險|0)/);
       expect(wrapper.findAll(".intraday-uv__tick-label").length).toBeGreaterThan(0);
       expect(wrapper.text()).toContain("晴空強度趨勢示意");
       expect(wrapper.text()).not.toContain("尖峰時段紫外線累積快速");

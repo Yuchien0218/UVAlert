@@ -163,18 +163,21 @@ describe("solarUvCurve", () => {
   });
 
   describe("等距刻度與逐小時明細輔助函數", () => {
-    it("正確生成均勻等距的 Y 軸刻度", () => {
+    it("正確生成均勻等距的 Y 軸刻度與風險等級文字", () => {
       const { ticks: ticksLow, topUv: topLow } = getEquidistantTicks(5);
       expect(topLow).toBe(6);
       expect(ticksLow.map((t) => t.uvi)).toEqual([0, 2, 4, 6]);
+      expect(ticksLow.map((t) => t.label)).toEqual(["0", "2 低", "4 中", "6 高"]);
 
       const { ticks: ticksHigh, topUv: topHigh } = getEquidistantTicks(8);
       expect(topHigh).toBe(9);
       expect(ticksHigh.map((t) => t.uvi)).toEqual([0, 3, 6, 9]);
+      expect(ticksHigh.map((t) => t.label)).toEqual(["0", "3 中", "6 高", "9 過量"]);
 
       const { ticks: ticksExtreme, topUv: topExtreme } = getEquidistantTicks(11);
       expect(topExtreme).toBe(12);
       expect(ticksExtreme.map((t) => t.uvi)).toEqual([0, 3, 6, 9, 12]);
+      expect(ticksExtreme.map((t) => t.label)).toEqual(["0", "3 中", "6 高", "9 過量", "12 危險"]);
     });
 
     it("正確生成日間逐小時預估清單", () => {
