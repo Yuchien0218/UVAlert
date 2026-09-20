@@ -78,7 +78,7 @@ const safetyNotice = computed((): string | null =>
       class="gear-item__handle"
       type="button"
       aria-label="拖曳調整順序"
-      @pointerdown.stop="$emit('dragStart', $event)"
+      @pointerdown.stop.prevent="$emit('dragStart', $event)"
     >
       <svg
         class="gear-item__handle-icon"

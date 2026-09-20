@@ -2,7 +2,14 @@
 import Icon from "../components/icons/Icon.vue";
 import BroadcastLoader from "../components/feedback/BroadcastLoader.vue";
 import EmptyStateCard from "../components/common/EmptyStateCard.vue";
-import { computed, onMounted, ref, shallowRef, watch } from "vue";
+import {
+  computed,
+  onMounted,
+  ref,
+  shallowRef,
+  watch,
+  type ComponentPublicInstance
+} from "vue";
 import { useRouter } from "vue-router";
 import { useWebAppServices } from "../app/injection";
 import IconButton from "../components/common/IconButton.vue";
@@ -111,22 +118,24 @@ watch(
   { immediate: true }
 );
 
-const listContainerRef = shallowRef<HTMLElement | null>(null);
+const listContainerRef =
+  shallowRef<ComponentPublicInstance | HTMLElement | null>(null);
+
+function getContainerEl(): HTMLElement | null {
+  if (!listContainerRef.value) return null;
+  if (listContainerRef.value instanceof HTMLElement) {
+    return listContainerRef.value;
+  }
+  return listContainerRef.value.$el instanceof HTMLElement
+    ? listContainerRef.value.$el
+    : null;
+}
 
 function startDrag(event: PointerEvent, index: number): void {
   if (activeItems.value.length <= 1) return;
 
-  const handle = event.currentTarget as HTMLElement | null;
-  if (!handle) return;
-
   isDragging.value = true;
   draggedIndex.value = index;
-
-  try {
-    handle.setPointerCapture(event.pointerId);
-  } catch {
-    // ignore
-  }
 
   if (typeof navigator !== "undefined" && "vibrate" in navigator) {
     navigator.vibrate?.(10);
@@ -134,7 +143,7 @@ function startDrag(event: PointerEvent, index: number): void {
 
   const onPointerMove = (e: PointerEvent) => {
     if (!isDragging.value || draggedIndex.value === null) return;
-    const container = listContainerRef.value;
+    const container = getContainerEl();
     if (!container) return;
 
     const listItems = Array.from(
@@ -154,7 +163,11 @@ function startDrag(event: PointerEvent, index: number): void {
       }
     }
 
-    if (targetIndex !== draggedIndex.value) {
+    if (
+      targetIndex !== draggedIndex.value &&
+      targetIndex >= 0 &&
+      targetIndex < activeItems.value.length
+    ) {
       const currentList = [...activeItems.value];
       const [moved] = currentList.splice(draggedIndex.value, 1);
       if (moved !== undefined) {
@@ -168,17 +181,10 @@ function startDrag(event: PointerEvent, index: number): void {
     }
   };
 
-  const onPointerUp = (e: PointerEvent) => {
-    handle.removeEventListener("pointermove", onPointerMove);
-    handle.removeEventListener("pointerup", onPointerUp);
-    handle.removeEventListener("pointercancel", onPointerUp);
-    try {
-      if (handle.hasPointerCapture(e.pointerId)) {
-        handle.releasePointerCapture(e.pointerId);
-      }
-    } catch {
-      // ignore
-    }
+  const onPointerUp = () => {
+    window.removeEventListener("pointermove", onPointerMove);
+    window.removeEventListener("pointerup", onPointerUp);
+    window.removeEventListener("pointercancel", onPointerUp);
 
     isDragging.value = false;
     draggedIndex.value = null;
@@ -194,9 +200,9 @@ function startDrag(event: PointerEvent, index: number): void {
     }
   };
 
-  handle.addEventListener("pointermove", onPointerMove);
-  handle.addEventListener("pointerup", onPointerUp);
-  handle.addEventListener("pointercancel", onPointerUp);
+  window.addEventListener("pointermove", onPointerMove, { passive: false });
+  window.addEventListener("pointerup", onPointerUp);
+  window.addEventListener("pointercancel", onPointerUp);
 }
 </script>
 
