@@ -162,7 +162,6 @@ const safetyNotice = computed((): string | null =>
 
 .gear-item__handle:active {
   cursor: grabbing;
-  background-color: var(--color-hairline-soft);
   color: var(--color-primary);
 }
 

@@ -170,6 +170,14 @@ function startDrag(event: PointerEvent, index: number): void {
     navigator.vibrate?.(10);
   }
 
+  // 快取單個項目的槽位高度，避免在 pointermove 中進行高頻 DOM 查詢與 Reflow
+  const container = getContainerEl();
+  const listItems = container
+    ? (Array.from(container.querySelectorAll(":scope > li")) as HTMLElement[])
+    : [];
+  const initialItem = listItems[index];
+  const itemSlotHeight = initialItem ? initialItem.offsetHeight + 12 : 84;
+
   const onPointerMove = (e: PointerEvent) => {
     if (!isDragging.value || draggedIndex.value === null) return;
 
@@ -214,40 +222,22 @@ function startDrag(event: PointerEvent, index: number): void {
     // 若正在懸停在收納區，不進行清單內換位
     if (isOverArchiveZone.value) return;
 
-    // 在清單內部進行換位
-    const container = getContainerEl();
-    if (!container) return;
-
-    const listItems = Array.from(
-      container.querySelectorAll(":scope > li")
-    ) as HTMLElement[];
-
+    // 在清單內部進行換位：純數值計算防抖，零 Reflow，流暢不卡頓
     const currentIndex = draggedIndex.value;
+    const currentListLen = activeItems.value.length;
+    if (currentListLen <= 1) return;
+
+    const distance = clientY - dragStartY;
     let targetIndex = currentIndex;
 
-    for (let i = 0; i < listItems.length; i += 1) {
-      if (i === currentIndex) continue;
-      const item = listItems[i];
-      if (!item) continue;
-      const rect = item.getBoundingClientRect();
-      const midY = rect.top + rect.height / 2;
-      if (i > currentIndex && clientY >= midY) {
-        targetIndex = i;
-      } else if (i < currentIndex && clientY <= midY) {
-        targetIndex = i;
-        break;
-      }
+    if (distance > itemSlotHeight * 0.55 && currentIndex < currentListLen - 1) {
+      targetIndex = currentIndex + 1;
+    } else if (distance < -itemSlotHeight * 0.55 && currentIndex > 0) {
+      targetIndex = currentIndex - 1;
     }
 
-    if (
-      targetIndex !== currentIndex &&
-      targetIndex >= 0 &&
-      targetIndex < activeItems.value.length
-    ) {
-      const itemHeight = listItems[targetIndex]?.offsetHeight ?? 72;
-      const slotDistance = itemHeight + 12;
-      const slotShift = (targetIndex - currentIndex) * slotDistance;
-
+    if (targetIndex !== currentIndex) {
+      const slotShift = (targetIndex - currentIndex) * itemSlotHeight;
       const currentList = [...activeItems.value];
       const [moved] = currentList.splice(currentIndex, 1);
       if (moved !== undefined) {
@@ -518,7 +508,7 @@ function startDragFromPast(event: PointerEvent, product: ProductCatalogRecordV1)
               v-for="(product, index) in activeItems"
               :key="product.productId"
               :class="{ 'is-dragging': isDragging && dragSource === 'current' && draggedIndex === index }"
-              :style="isDragging && dragSource === 'current' && draggedIndex === index ? { transform: `translate3d(0, ${dragOffsetY}px, 0) scale(1.045) rotate(-1.5deg)` } : undefined"
+              :style="isDragging && dragSource === 'current' && draggedIndex === index ? { transform: `translate3d(0, ${dragOffsetY}px, 0) scale(1.02)` } : undefined"
             >
               <GearListItem
                 :product="product"
@@ -613,7 +603,7 @@ function startDragFromPast(event: PointerEvent, product: ProductCatalogRecordV1)
               v-for="product in past"
               :key="product.productId"
               :class="{ 'is-dragging': isDragging && dragSource === 'past' && draggingProduct?.productId === product.productId }"
-              :style="isDragging && dragSource === 'past' && draggingProduct?.productId === product.productId ? { transform: `translate3d(0, ${dragOffsetY}px, 0) scale(1.045) rotate(-1.5deg)` } : undefined"
+              :style="isDragging && dragSource === 'past' && draggingProduct?.productId === product.productId ? { transform: `translate3d(0, ${dragOffsetY}px, 0) scale(1.02)` } : undefined"
             >
               <GearListItem
                 :product="product"
@@ -749,10 +739,8 @@ section {
 .is-dragging {
   z-index: var(--z-drag);
   position: relative;
-  transform: scale(1.045) rotate(-1.5deg);
-  filter:
-    drop-shadow(0 6px 14px rgb(46 41 37 / 18%))
-    drop-shadow(0 16px 32px rgb(46 41 37 / 24%));
+  transform: scale(1.02);
+  filter: drop-shadow(0 4px 10px rgb(46 41 37 / 10%));
   transition: none !important;
   will-change: transform;
 }
@@ -760,12 +748,10 @@ section {
 .is-dragging :deep(.gear-item-card) {
   border-color: var(--color-primary);
   background-color: var(--color-canvas);
-  box-shadow: 0 0 0 2px var(--color-primary);
 }
 
 .is-dragging :deep(.gear-item__handle) {
-  background-color: var(--color-primary);
-  color: var(--color-white);
+  color: var(--color-primary);
 }
 
 .drop-action-zone,
