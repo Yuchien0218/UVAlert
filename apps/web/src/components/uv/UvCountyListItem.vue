@@ -56,6 +56,7 @@ const fillStyle = computed(() => ({
 .uv-county-item__name,
 .uv-county-item__value {
   position: relative;
+  line-height: 1;
 }
 
 .uv-county-item__name {
@@ -63,7 +64,6 @@ const fillStyle = computed(() => ({
   font-family: var(--font-family-supporting);
   font-size: var(--font-size-supporting);
   font-weight: var(--font-weight-supporting);
-  line-height: var(--line-height-supporting);
   letter-spacing: var(--letter-spacing-supporting);
 }
 
