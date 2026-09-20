@@ -78,9 +78,9 @@ describe("solarUvCurve", () => {
       expect(curve.peak.hour).toBeGreaterThanOrEqual(11.5);
       expect(curve.peak.hour).toBeLessThanOrEqual(12.5);
 
-      // 清晨 05:00 應接近 0
+      // 清晨 06:00 應在低量級範圍
       const morningPoint = curve.points[0]!;
-      expect(morningPoint.uv).toBeLessThan(1.0);
+      expect(morningPoint.uv).toBeLessThanOrEqual(1.5);
     });
 
     it("識別出 10:00–14:00 前後的高峰警戒區間", () => {

@@ -203,8 +203,8 @@ export function buildIntradayUvCurve(options: BuildCurveOptions): IntradayUvCurv
     latitude = DEFAULT_TAIWAN_COORDINATES.lat,
     longitude = DEFAULT_TAIWAN_COORDINATES.lng,
     timezoneOffsetHours = 8,
-    startHour = 0,
-    endHour = 24,
+    startHour = 6,
+    endHour = 18,
     stepMinutes = 60,
     exponent = 1.2
   } = options;

@@ -48,10 +48,10 @@ const thresholdLines = computed(() =>
   }))
 );
 
-// X 軸時間標記（24 小時等距標記：00:00, 06:00, 12:00, 18:00, 24:00）
+// X 軸時間標記（日間等距標記：06:00, 09:00, 12:00, 15:00, 18:00）
 const timeTicks = computed(() => {
   const [start, end] = props.curve.hourRange;
-  const step = 6;
+  const step = 3;
   const ticks: { hour: number; label: string; x: number }[] = [];
   for (let h = start; h <= end; h += step) {
     ticks.push({
@@ -78,27 +78,25 @@ const peakBox = computed(() => {
   };
 });
 
-// 當前時間標籤（純文字無 Emoji）
-const currentTimeLabel = computed(() => {
-  const h = Math.floor(props.curve.current.hour);
-  const m = Math.floor((props.curve.current.hour % 1) * 60);
-  return `${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}`;
-});
-
-// 全天 24 小時目前所在時段的圓形標示（無論白天或夜晚，均精準定位）
-const currentPoint = computed(() => {
+// 當前時間是否落在日間圖表範圍內（06:00–18:00）
+const isWithinChartHours = computed(() => {
   const [start, end] = props.curve.hourRange;
   const h = props.curve.current.hour;
-  if (h < start || h > end) return null;
+  return h >= start && h <= end;
+});
 
+// 日間所在時段的圓形標示（數值四捨五入為整數，與全站一致）
+const currentPoint = computed(() => {
+  if (!isWithinChartHours.value) return null;
+
+  const h = props.curve.current.hour;
   const x = scale.value.xScale(h);
   const y = scale.value.yScale(props.curve.current.uv);
 
   return {
     x,
     y,
-    uv: props.curve.current.uv,
-    isDaytime: props.curve.current.uv > 0
+    uv: Math.round(props.curve.current.uv)
   };
 });
 
@@ -191,7 +189,7 @@ const reapplyMarkers = computed(() =>
           />
         </template>
 
-        <!-- 目前在哪個時段的圓形標示（全天 24 小時均能精確呈現） -->
+        <!-- 目前所在時段的圓形標示（日間呈現，與圓點水平齊平，數值為整數） -->
         <g v-if="currentPoint" class="intraday-uv__current">
           <line
             :x1="currentPoint.x"
@@ -214,19 +212,14 @@ const reapplyMarkers = computed(() =>
             r="4"
             class="intraday-uv__current-dot"
           />
-          <!-- 標籤文字（無 Emoji） -->
+          <!-- 標籤文字（與圓點高度一致、貼在點旁，不與頂部尖峰標籤擠在一起） -->
           <text
-            :x="currentPoint.x > chartWidth * 0.72 ? currentPoint.x - 8 : currentPoint.x + 8"
-            :y="Math.max(padding.top + 6, currentPoint.y - 8)"
+            :x="currentPoint.x > chartWidth * 0.72 ? currentPoint.x - 10 : currentPoint.x + 10"
+            :y="currentPoint.y + 4"
             :text-anchor="currentPoint.x > chartWidth * 0.72 ? 'end' : 'start'"
             class="intraday-uv__current-label"
           >
-            <template v-if="currentPoint.isDaytime">
-              現在・UV {{ currentPoint.uv }}
-            </template>
-            <template v-else>
-              現在 {{ currentTimeLabel }}
-            </template>
+            現在・UV {{ currentPoint.uv }}
           </text>
         </g>
 
@@ -246,8 +239,11 @@ const reapplyMarkers = computed(() =>
       </svg>
     </div>
 
-    <!-- 底部資訊：移除文字區塊，僅保留最小字級之誠實註記（無 Emoji） -->
+    <!-- 底部資訊：夜間時以文字帶過，並附最小字級之靠左註記 -->
     <div class="intraday-uv__summary">
+      <p v-if="!isWithinChartHours" class="intraday-uv__night-note" data-typography-role="caption">
+        目前為夜間時段，紫外線指數為 0。
+      </p>
       <p class="intraday-uv__note" data-typography-role="caption">
         ※ 晴空強度趨勢示意（依氣象署當日預報最高值校準），實際紫外線指數受即時雲量影響。
       </p>
@@ -360,7 +356,16 @@ const reapplyMarkers = computed(() =>
 
 .intraday-uv__summary {
   display: grid;
+  gap: var(--space-1);
   padding-top: var(--space-1);
+}
+
+.intraday-uv__night-note {
+  margin: 0;
+  color: var(--text-secondary);
+  font-size: var(--font-size-caption);
+  line-height: var(--line-height-caption);
+  text-align: start;
 }
 
 .intraday-uv__note {
