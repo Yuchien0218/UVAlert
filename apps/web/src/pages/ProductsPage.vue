@@ -103,10 +103,14 @@ function editGear(productId: string): void {
   void router.push({ name: "product-edit", params: { id: productId } });
 }
 
-// 拖曳排序支援
+// 拖曳排序與拖曳收納支援
 const activeItems = ref<ProductCatalogRecordV1[]>([]);
 const isDragging = shallowRef(false);
 const draggedIndex = shallowRef<number | null>(null);
+const isOverArchiveZone = shallowRef(false);
+
+const archiveZoneRef = shallowRef<HTMLElement | null>(null);
+const pastZoneRef = shallowRef<HTMLElement | null>(null);
 
 watch(
   current,
@@ -132,10 +136,14 @@ function getContainerEl(): HTMLElement | null {
 }
 
 function startDrag(event: PointerEvent, index: number): void {
-  if (activeItems.value.length <= 1) return;
+  if (activeItems.value.length === 0) return;
+
+  const draggingProduct = activeItems.value[index];
+  if (!draggingProduct) return;
 
   isDragging.value = true;
   draggedIndex.value = index;
+  isOverArchiveZone.value = false;
 
   if (typeof navigator !== "undefined" && "vibrate" in navigator) {
     navigator.vibrate?.(10);
@@ -143,6 +151,46 @@ function startDrag(event: PointerEvent, index: number): void {
 
   const onPointerMove = (e: PointerEvent) => {
     if (!isDragging.value || draggedIndex.value === null) return;
+
+    const clientX = e.clientX;
+    const clientY = e.clientY;
+
+    // 檢查是否移入收納投放區或既有的收納中區塊
+    let overTarget = false;
+    if (archiveZoneRef.value) {
+      const rect = archiveZoneRef.value.getBoundingClientRect();
+      if (
+        clientY >= rect.top - 10 &&
+        clientY <= rect.bottom + 10 &&
+        clientX >= rect.left &&
+        clientX <= rect.right
+      ) {
+        overTarget = true;
+      }
+    }
+    if (!overTarget && pastZoneRef.value) {
+      const rect = pastZoneRef.value.getBoundingClientRect();
+      if (
+        clientY >= rect.top &&
+        clientY <= rect.bottom &&
+        clientX >= rect.left &&
+        clientX <= rect.right
+      ) {
+        overTarget = true;
+      }
+    }
+
+    if (overTarget !== isOverArchiveZone.value) {
+      isOverArchiveZone.value = overTarget;
+      if (overTarget && typeof navigator !== "undefined" && "vibrate" in navigator) {
+        navigator.vibrate?.(20);
+      }
+    }
+
+    // 若正在懸停在收納區，不進行清單內換位
+    if (isOverArchiveZone.value) return;
+
+    // 在清單內部進行換位
     const container = getContainerEl();
     if (!container) return;
 
@@ -150,7 +198,6 @@ function startDrag(event: PointerEvent, index: number): void {
       container.querySelectorAll(":scope > li")
     ) as HTMLElement[];
 
-    const clientY = e.clientY;
     let targetIndex = draggedIndex.value;
 
     for (let i = 0; i < listItems.length; i += 1) {
@@ -186,8 +233,19 @@ function startDrag(event: PointerEvent, index: number): void {
     window.removeEventListener("pointerup", onPointerUp);
     window.removeEventListener("pointercancel", onPointerUp);
 
+    const shouldArchive = isOverArchiveZone.value;
+
     isDragging.value = false;
     draggedIndex.value = null;
+    isOverArchiveZone.value = false;
+
+    if (shouldArchive) {
+      if (typeof navigator !== "undefined" && "vibrate" in navigator) {
+        navigator.vibrate?.([15, 50, 15]);
+      }
+      void productSettings.archiveProduct(draggingProduct.productId);
+      return;
+    }
 
     const newOrderedIds = activeItems.value.map((p) => p.productId);
     const oldIds = current.value.map((p) => p.productId);
@@ -326,6 +384,21 @@ function startDrag(event: PointerEvent, index: number): void {
               />
             </li>
           </TransitionGroup>
+
+          <div
+            v-if="isDragging"
+            ref="archiveZoneRef"
+            class="drop-archive-zone"
+            :class="{ 'drop-archive-zone--active': isOverArchiveZone }"
+            aria-live="polite"
+          >
+            <span class="drop-archive-zone__icon">
+              <Icon name="tool-download" :size="24" />
+            </span>
+            <p class="drop-archive-zone__text">
+              {{ isOverArchiveZone ? "放開手柄立即移至收納" : "拖曳至此移至收納（收藏）" }}
+            </p>
+          </div>
         </section>
 
         <!--
@@ -360,6 +433,8 @@ function startDrag(event: PointerEvent, index: number): void {
         <section
           v-if="past.length > 0"
           class="gear-past"
+          ref="pastZoneRef"
+          :class="{ 'gear-past--drop-active': isDragging && isOverArchiveZone }"
           aria-labelledby="gear-past-title"
         >
           <div class="gear-section-heading">
@@ -501,5 +576,48 @@ section {
   z-index: var(--z-drag);
   position: relative;
   filter: drop-shadow(0 6px 16px rgb(0 0 0 / 15%));
+}
+
+.drop-archive-zone {
+  margin-top: var(--space-3);
+  padding: var(--space-4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  border: 2px dashed var(--border-subtle);
+  border-radius: var(--radius-md);
+  background-color: var(--surface-soft);
+  color: var(--text-secondary);
+  transition:
+    border-color var(--duration-fast) var(--ease-out),
+    background-color var(--duration-fast) var(--ease-out),
+    color var(--duration-fast) var(--ease-out),
+    transform var(--duration-fast) var(--ease-out);
+}
+
+.drop-archive-zone--active {
+  border-color: var(--color-primary);
+  background-color: var(--color-surface-cream-strong);
+  color: var(--color-primary-text);
+  transform: scale(1.02);
+}
+
+.drop-archive-zone__icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.drop-archive-zone__text {
+  margin: 0;
+  font-size: var(--font-size-body);
+  font-weight: 500;
+}
+
+.gear-past--drop-active {
+  border-radius: var(--radius-md);
+  background-color: var(--color-surface-cream-strong);
+  transition: background-color var(--duration-fast) var(--ease-out);
 }
 </style>
