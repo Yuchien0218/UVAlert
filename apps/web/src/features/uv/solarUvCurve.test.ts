@@ -6,6 +6,7 @@ import {
   getDayOfYear,
   getEquidistantTicks,
   getHourlyForecastItems,
+  getUvVisualTokenForUvi,
   pointsToAreaPath,
   pointsToSmoothPath,
   resolveCoordinatesForRegion,
@@ -198,6 +199,15 @@ describe("solarUvCurve", () => {
       expect(noon).toBeDefined();
       expect(noon!.isCurrent).toBe(true);
       expect(noon!.uv).toBeGreaterThan(5);
+    });
+
+    it("正確依 UV 指數對應至五級視覺色 Token", () => {
+      expect(getUvVisualTokenForUvi(1)).toBe("--color-uvi-visual-low");
+      expect(getUvVisualTokenForUvi(2)).toBe("--color-uvi-visual-low");
+      expect(getUvVisualTokenForUvi(4)).toBe("--color-uvi-visual-moderate");
+      expect(getUvVisualTokenForUvi(7)).toBe("--color-uvi-visual-high");
+      expect(getUvVisualTokenForUvi(9)).toBe("--color-uvi-visual-very-high");
+      expect(getUvVisualTokenForUvi(12)).toBe("--color-uvi-visual-extreme");
     });
   });
 });

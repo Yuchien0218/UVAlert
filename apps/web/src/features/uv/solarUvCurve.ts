@@ -18,6 +18,22 @@ export function riskLevelForUvi(uvi: number): UvRiskLevel {
   return "extreme";
 }
 
+export const UV_RISK_VISUAL_TOKENS: Readonly<Record<UvRiskLevel, string>> = {
+  low: "--color-uvi-visual-low",
+  moderate: "--color-uvi-visual-moderate",
+  high: "--color-uvi-visual-high",
+  very_high: "--color-uvi-visual-very-high",
+  extreme: "--color-uvi-visual-extreme"
+};
+
+/**
+ * 依 UV 指數取得對應的風險等級視覺色 Design Token。
+ */
+export function getUvVisualTokenForUvi(uvi: number): string {
+  const risk = riskLevelForUvi(uvi);
+  return UV_RISK_VISUAL_TOKENS[risk];
+}
+
 /**
  * 臺灣各縣市代表經緯度對照表（用於太陽仰角計算，避免存取或留存使用者真實 GPS）。
  */

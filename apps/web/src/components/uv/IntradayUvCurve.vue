@@ -3,6 +3,7 @@ import { computed } from "vue";
 import {
   createChartScale,
   getEquidistantTicks,
+  getUvVisualTokenForUvi,
   pointsToSmoothPath,
   type IntradayUvCurveModel
 } from "../../features/uv/solarUvCurve";
@@ -98,18 +99,20 @@ const headerLabel = computed(() => {
   return `尖峰 ${startLabel}–${endLabel}`;
 });
 
-// 日間所在時段的圓形標示（數值四捨五入為整數，與全站一致）
+// 日間所在時段的圓形標示（數值四捨五入為整數，圓點顏色對應 UV 風險等級色）
 const currentPoint = computed(() => {
   if (!isWithinChartHours.value) return null;
 
   const h = props.curve.current.hour;
   const x = scale.value.xScale(h);
   const y = scale.value.yScale(props.curve.current.uv);
+  const uv = Math.round(props.curve.current.uv);
 
   return {
     x,
     y,
-    uv: Math.round(props.curve.current.uv)
+    uv,
+    visualToken: getUvVisualTokenForUvi(props.curve.current.uv)
   };
 });
 
@@ -235,7 +238,11 @@ const reapplyMarkers = computed(() =>
         </template>
 
         <!-- 目前所在時段：一體化對話泡泡標籤與時間參考線 -->
-        <g v-if="currentPoint && bubbleConfig" class="intraday-uv__current">
+        <g
+          v-if="currentPoint && bubbleConfig"
+          class="intraday-uv__current"
+          :style="{ '--current-uv-color': `var(${currentPoint.visualToken})` }"
+        >
           <!-- 從圓點下方接下去到 X 軸的參考線，兼作現在時間參考線 -->
           <line
             :x1="currentPoint.x"
@@ -251,7 +258,7 @@ const reapplyMarkers = computed(() =>
             r="7"
             class="intraday-uv__current-halo"
           />
-          <!-- 圓形標示核心實心圓 -->
+          <!-- 圓形標示核心實心圓（對應 UV 風險色） -->
           <circle
             :cx="currentPoint.x"
             :cy="currentPoint.y"
@@ -398,12 +405,12 @@ const reapplyMarkers = computed(() =>
 }
 
 .intraday-uv__current-halo {
-  fill: var(--color-primary);
-  opacity: 0.22;
+  fill: var(--current-uv-color, var(--color-primary));
+  opacity: 0.28;
 }
 
 .intraday-uv__current-dot {
-  fill: var(--color-primary);
+  fill: var(--current-uv-color, var(--color-primary));
   stroke: var(--color-canvas);
   stroke-width: 2;
 }

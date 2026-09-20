@@ -56,7 +56,9 @@ describe("Intraday UV Components", () => {
       expect(wrapper.find(".intraday-uv__curve-line").exists()).toBe(true);
       expect(wrapper.find(".intraday-uv__header").exists()).toBe(true);
       expect(wrapper.find(".intraday-uv__peak-header-label").text()).toContain("尖峰");
-      expect(wrapper.find(".intraday-uv__current").exists()).toBe(true);
+      const currentGroup = wrapper.find(".intraday-uv__current");
+      expect(currentGroup.exists()).toBe(true);
+      expect(currentGroup.attributes("style")).toContain("--current-uv-color");
       expect(wrapper.find(".intraday-uv__current-dot").exists()).toBe(true);
       expect(wrapper.find(".intraday-uv__current-halo").exists()).toBe(true);
       expect(wrapper.find(".intraday-uv__bubble").exists()).toBe(true);
