@@ -35,4 +35,14 @@ describe("AppSplashScreen", () => {
 
     expect(wrapper.find(".app-splash-screen").exists()).toBe(false);
   });
+
+  it("防曬晴報員字標（wordmark）不帶有任何動畫，僅太陽標記（mark）動效", () => {
+    const fs = require("node:fs");
+    const source = fs.readFileSync("apps/web/src/components/shell/AppSplashScreen.vue", "utf8");
+    // 確保 path 動畫只針對 g[data-part="mark"]
+    expect(source).toContain('g[data-part="mark"] path');
+    expect(source).not.toMatch(/:deep\(path:nth-of-type/);
+    expect(source).toContain('g[data-part="wordmark"] path');
+    expect(source).toContain("animation: none !important");
+  });
 });

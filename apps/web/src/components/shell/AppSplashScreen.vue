@@ -77,25 +77,32 @@ watch(() => props.phase, checkDismiss, { immediate: true });
   width: auto;
 }
 
-.app-splash-screen__logo :deep(circle) {
+.app-splash-screen__logo :deep(g[data-part="mark"] circle) {
   transform-origin: 6px 15.94px;
   animation: splash-sun-pulse var(--duration-loader-cycle) var(--ease-in-out)
     infinite;
 }
 
-.app-splash-screen__logo :deep(path:nth-of-type(1)) {
+.app-splash-screen__logo :deep(g[data-part="mark"] path:nth-of-type(1)) {
   animation: splash-ray-sweep-1 var(--duration-loader-cycle) var(--ease-in-out)
     infinite;
 }
 
-.app-splash-screen__logo :deep(path:nth-of-type(2)) {
+.app-splash-screen__logo :deep(g[data-part="mark"] path:nth-of-type(2)) {
   animation: splash-ray-sweep-2 var(--duration-loader-cycle) var(--ease-in-out)
     infinite;
 }
 
-.app-splash-screen__logo :deep(path:nth-of-type(3)) {
+.app-splash-screen__logo :deep(g[data-part="mark"] path:nth-of-type(3)) {
   animation: splash-ray-sweep-3 var(--duration-loader-cycle) var(--ease-in-out)
     infinite;
+}
+
+/* 文字部分（wordmark）嚴格保證 100% 靜態，絕無任何位移、透明度或動畫 */
+.app-splash-screen__logo :deep(g[data-part="wordmark"] path) {
+  animation: none !important;
+  opacity: 1 !important;
+  transform: none !important;
 }
 
 .app-splash-screen__tagline {
