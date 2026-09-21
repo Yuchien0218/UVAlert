@@ -59,8 +59,54 @@ const HTML_TEMPLATE = `<!DOCTYPE html>
 
     const easeInOut = cubicBezier(0.65, 0, 0.35, 1);
 
-    function evaluateAnimation(p) {
-      // 1. Sun pulse (scale & opacity)
+    /** 最早期的經典純透明度動畫（BroadcastLoader 規範：零位移、零縮放） */
+    function evaluateAnimationClassic(p) {
+      // 1. 太陽圓點蓄能（Core Charge）
+      let sunOpacity = 1;
+      if (p > 0.64 && p <= 0.86) {
+        const prog = easeInOut((p - 0.64) / 0.22);
+        sunOpacity = 1 + (0.45 - 1) * prog;
+      } else if (p > 0.86) {
+        const prog = easeInOut((p - 0.86) / 0.14);
+        sunOpacity = 0.45 + (1 - 0.45) * prog;
+      }
+
+      // 2. 射線掃描（Ray Sweep）：10% 快速亮起、48% 緩慢暗下留有餘暉、其餘停頓
+      function sweepOpacity(phase) {
+        if (phase <= 0.10) {
+          const prog = easeInOut(phase / 0.10);
+          return 0.22 + (1 - 0.22) * prog;
+        } else if (phase <= 0.48) {
+          const prog = easeInOut((phase - 0.10) / 0.38);
+          return 1 + (0.22 - 1) * prog;
+        } else {
+          return 0.22;
+        }
+      }
+
+      // 射線非等距延遲（0s, 0.14s, 0.24s）
+      const d1 = 0;
+      const d2 = 0.14 / 1.5;
+      const d3 = 0.24 / 1.5;
+
+      const phase1 = ((p - d1) % 1 + 1) % 1;
+      const phase2 = ((p - d2) % 1 + 1) % 1;
+      const phase3 = ((p - d3) % 1 + 1) % 1;
+
+      return {
+        sunScale: 1, // 嚴格零縮放
+        sunOpacity,
+        ray1Tx: 0,   // 嚴格零位移
+        ray1Opacity: sweepOpacity(phase1),
+        ray2Tx: 0,   // 嚴格零位移
+        ray2Opacity: sweepOpacity(phase2),
+        ray3Tx: 0,   // 嚴格零位移
+        ray3Opacity: sweepOpacity(phase3)
+      };
+    }
+
+    /** 開屏微動態版本（含 1.5px 掃描與 scale 呼吸） */
+    function evaluateAnimationMotion(p) {
       let sunScale = 1;
       let sunOpacity = 1;
       if (p <= 0.30) {
@@ -77,7 +123,6 @@ const HTML_TEMPLATE = `<!DOCTYPE html>
         sunOpacity = 1;
       }
 
-      // 2. Ray 1
       let ray1Tx = 0;
       let ray1Opacity = 0.35;
       if (p <= 0.25) {
@@ -90,7 +135,6 @@ const HTML_TEMPLATE = `<!DOCTYPE html>
         ray1Opacity = 1 + (0.35 - 1) * prog;
       }
 
-      // 3. Ray 2
       let ray2Tx = 0;
       let ray2Opacity = 0.35;
       if (p <= 0.40) {
@@ -103,7 +147,6 @@ const HTML_TEMPLATE = `<!DOCTYPE html>
         ray2Opacity = 1 + (0.35 - 1) * prog;
       }
 
-      // 4. Ray 3
       let ray3Tx = 0;
       let ray3Opacity = 0.35;
       if (p <= 0.55) {
@@ -174,8 +217,8 @@ const HTML_TEMPLATE = `<!DOCTYPE html>
     }
 
     async function renderGif(config) {
-      const { name, variant, width, height, background, frames = 45, fps = 30 } = config;
-      updateStatus(\`Rendering \${name} (\${width}x\${height}, \${frames} frames)...\`);
+      const { name, variant, mode = 'classic', width, height, background, frames = 45, fps = 30 } = config;
+      updateStatus(\`Rendering \${name} (\${mode}, \${width}x\${height}, \${frames} frames)...\`);
 
       const canvas = document.createElement('canvas');
       canvas.width = width;
@@ -187,7 +230,7 @@ const HTML_TEMPLATE = `<!DOCTYPE html>
 
       for (let i = 0; i < frames; i++) {
         const p = i / frames;
-        const anim = evaluateAnimation(p);
+        const anim = mode === 'motion' ? evaluateAnimationMotion(p) : evaluateAnimationClassic(p);
         const svgString = buildSvg({ variant, anim });
         const img = await svgToImage(svgString, width, height);
 
@@ -229,10 +272,12 @@ const HTML_TEMPLATE = `<!DOCTYPE html>
 
     async function runAll() {
       try {
-        // 1. 橫式完整 Logo・暖象牙米底（社群分享、簡報、橫幅最佳）
+        // === 最一開始經典版（零位移、零縮放、純透明度變化，BroadcastLoader 規範） ===
+        // 1. 橫式完整 Logo・象牙暖底
         await renderGif({
           name: 'uvalert-logo-horizontal-cream.gif',
           variant: 'full',
+          mode: 'classic',
           width: 842,
           height: 158,
           background: '#FAF5EC',
@@ -240,10 +285,11 @@ const HTML_TEMPLATE = `<!DOCTYPE html>
           fps: 30
         });
 
-        // 2. 橫式完整 Logo・透明底（可自由疊加於任何底色）
+        // 2. 橫式完整 Logo・透明底
         await renderGif({
           name: 'uvalert-logo-horizontal-transparent.gif',
           variant: 'full',
+          mode: 'classic',
           width: 842,
           height: 158,
           background: null,
@@ -251,10 +297,11 @@ const HTML_TEMPLATE = `<!DOCTYPE html>
           fps: 30
         });
 
-        // 3. 正方形太陽標記・暖象牙米底（512x512 社群頭像、大頭貼、貼圖）
+        // 3. 正方形標記・象牙暖底（512x512）
         await renderGif({
           name: 'uvalert-mark-square-cream.gif',
           variant: 'mark',
+          mode: 'classic',
           width: 512,
           height: 512,
           background: '#FAF5EC',
@@ -262,10 +309,56 @@ const HTML_TEMPLATE = `<!DOCTYPE html>
           fps: 30
         });
 
-        // 4. 正方形太陽標記・透明底（512x512 貼圖、動態 Favicon）
+        // 4. 正方形標記・透明底（512x512）
         await renderGif({
           name: 'uvalert-mark-square-transparent.gif',
           variant: 'mark',
+          mode: 'classic',
+          width: 512,
+          height: 512,
+          background: null,
+          frames: 45,
+          fps: 30
+        });
+
+        // === 開屏微動態版（含 1.5px 掃描與 scale 呼吸） ===
+        await renderGif({
+          name: 'uvalert-logo-horizontal-motion-cream.gif',
+          variant: 'full',
+          mode: 'motion',
+          width: 842,
+          height: 158,
+          background: '#FAF5EC',
+          frames: 45,
+          fps: 30
+        });
+
+        await renderGif({
+          name: 'uvalert-logo-horizontal-motion-transparent.gif',
+          variant: 'full',
+          mode: 'motion',
+          width: 842,
+          height: 158,
+          background: null,
+          frames: 45,
+          fps: 30
+        });
+
+        await renderGif({
+          name: 'uvalert-mark-square-motion-cream.gif',
+          variant: 'mark',
+          mode: 'motion',
+          width: 512,
+          height: 512,
+          background: '#FAF5EC',
+          frames: 45,
+          fps: 30
+        });
+
+        await renderGif({
+          name: 'uvalert-mark-square-motion-transparent.gif',
+          variant: 'mark',
+          mode: 'motion',
           width: 512,
           height: 512,
           background: null,
