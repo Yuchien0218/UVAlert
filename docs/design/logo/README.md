@@ -8,10 +8,14 @@
 
 ## 這裡有什麼
 
-| 檔案                            | 說明                                                     |
-| ------------------------------- | -------------------------------------------------------- |
-| `uvalert-lockup-horizontal.ai`  | **真實來源**。Illustrator 原始檔，含可編輯圖層           |
-| `uvalert-lockup-horizontal.svg` | 由上面匯出並整理的正式資產。字標已轉外框，不依賴字體安裝 |
+| 檔案                                    | 說明                                                     |
+| --------------------------------------- | -------------------------------------------------------- |
+| `uvalert-lockup-horizontal.ai`          | **真實來源**。Illustrator 原始檔，含可編輯圖層           |
+| `uvalert-lockup-horizontal.svg`         | 由上面匯出並整理的正式資產。字標已轉外框，不依賴字體安裝 |
+| `uvalert-logo-horizontal-cream.gif`       | 橫式完整 Logo 動畫（30fps，842×158，品牌象牙暖底）       |
+| `uvalert-logo-horizontal-transparent.gif` | 橫式完整 Logo 動畫（30fps，842×158，透明底）             |
+| `uvalert-mark-square-cream.gif`           | 正方形純標記動畫（30fps，512×512，品牌象牙暖底）         |
+| `uvalert-mark-square-transparent.gif`     | 正方形純標記動畫（30fps，512×512，透明底）               |
 
 圖標單獨使用時，用 [`../logo-concepts/06-broadcast-mark-outlined.svg`](../logo-concepts/06-broadcast-mark-outlined.svg)（以及同資料夾的 filled／dark-surface／app icon 點陣輸出）。那些是 06 播報印記定案後的產線資產，仍然有效。
 
