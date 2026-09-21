@@ -14,10 +14,10 @@ const mainElement = useTemplateRef<HTMLElement>("mainElement");
 const navigationVisible = computed(() => route.meta.hideNavigation !== true);
 
 /**
- * 頁首右上角的 UV 指數（2026-08-24 使用者裁決，取代原本的「本機提醒」）。
+ * 頁首右上角的天氣與地區摘要（地點・氣溫・降雨機率）。
  *
- * 白天顯示今日、夜間顯示明日——跟首頁 HomeUvHeadline 同一條規則：夜間看
- * 「今天的 UV」沒有行動價值，今天已經過完了。
+ * 白天顯示今日、夜間顯示明日——跟首頁同一條規則：夜間看今日氣象與 UV
+ * 沒有行動價值，今天已經過完了。全站（含預報頁）常駐呈現。
  */
 const isNight = computed(() => uvForecast.isEvening.value);
 
@@ -49,7 +49,6 @@ watch(
       :temperature-celsius="headerUvDay?.temperatureCelsius ?? null"
       :precipitation-probability-percent="headerUvDay?.precipitationProbabilityPercent ?? null"
       :uv-risk-level="headerUvDay?.riskLevel ?? null"
-      :hide-uv-entrance="route.path === '/forecast'"
     />
     <GlobalStatusBanner
       :phase="boot.phase.value"
