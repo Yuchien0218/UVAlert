@@ -6,6 +6,7 @@ import AppSplashScreen from "./AppSplashScreen.vue";
 import BottomNavigation from "./BottomNavigation.vue";
 import BrandHeader from "./BrandHeader.vue";
 import GlobalStatusBanner from "./GlobalStatusBanner.vue";
+import BackToTopButton from "../common/BackToTopButton.vue";
 
 const { boot, uvForecast } = useWebAppServices();
 const route = useRoute();
@@ -62,6 +63,7 @@ watch(
       <slot />
     </main>
     <BottomNavigation v-if="navigationVisible" />
+    <BackToTopButton :has-navigation="navigationVisible" />
   </div>
 </template>
 
