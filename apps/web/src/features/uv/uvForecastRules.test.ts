@@ -137,7 +137,8 @@ function buildDays(start: Date, count: number) {
       validTo: to.toISOString(),
       uvi: 7,
       riskLevel: "high" as const,
-      temperatureCelsius: 30
+      temperatureCelsius: 30,
+      precipitationProbabilityPercent: 20
     };
   });
 }

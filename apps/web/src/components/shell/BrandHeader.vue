@@ -5,9 +5,13 @@ import type { UvRiskLevel } from "@sunshield/contracts";
 import BrandLockup from "./BrandLockup.vue";
 
 interface Props {
-  /** 目前地區名稱。與 riskLevel 同時有值時，右上角顯示五日預報入口。 */
+  /** 目前地區名稱。 */
   regionName?: string | null;
-  /** 是否已有可用 UV 預報（白天今日、夜間明日，由父層決定）。 */
+  /** 氣溫（攝氏）。 */
+  temperatureCelsius?: number | null;
+  /** 12 小時降雨機率（%）。 */
+  precipitationProbabilityPercent?: number | null;
+  /** 是否已有可用 UV 預報（白天今日、夜間明日，由父層決定）。相容保留。 */
   uvRiskLevel?: UvRiskLevel | null;
   /** 是否隱藏右上角預報入口（例如在預報頁本身不需要自我連結）。 */
   hideUvEntrance?: boolean;
@@ -15,24 +19,34 @@ interface Props {
 
 const props = withDefaults(defineProps<Props>(), {
   regionName: null,
+  temperatureCelsius: null,
+  precipitationProbabilityPercent: null,
   uvRiskLevel: null,
   hideUvEntrance: false
 });
 
 /**
- * 2026-09-13 使用者裁決：地區與風險等級移到提醒頁的 UV 區塊；頁首右上角
- * 改成「五日 UV 預報」，讓它明確讀成導覽入口而非重複的狀態資訊。
- *
- * 沒有 UV 可顯示時（沒設定地區，或預報讀不到）顯示「今日全臺UV分布」，
- * 連到 /forecast。
- *
- * 2026-08-24 一併移除原本的 tone／狀態點（提醒進行中／快到補擦時間／
- * 建議現在補擦）。那組資訊現在整份都在首頁看得到（倒數、部位狀態清單），
- * 頁首再放一次只是重複，還會跟 UV 搶同一個位置。
+ * 右上角天氣與地區摘要：
+ * - 若有地區與氣溫、降雨機率：「地區 30°・降雨 20%」
+ * - 若有地區與氣溫：「地區 30°」
+ * - 若僅有地區：「地區」
  */
-const showUv = computed(
-  () => !props.hideUvEntrance && props.regionName !== null && props.uvRiskLevel !== null
-);
+const weatherLabel = computed(() => {
+  if (props.hideUvEntrance || !props.regionName) return null;
+  const parts: string[] = [props.regionName];
+  if (props.temperatureCelsius !== null && props.temperatureCelsius !== undefined) {
+    parts.push(`${Math.round(props.temperatureCelsius)}°`);
+  }
+  if (
+    props.precipitationProbabilityPercent !== null &&
+    props.precipitationProbabilityPercent !== undefined
+  ) {
+    parts.push(`降雨 ${Math.round(props.precipitationProbabilityPercent)}%`);
+  }
+  return parts.length > 1
+    ? `${parts[0]} ${parts.slice(1).join("・")}`
+    : parts[0]!;
+});
 </script>
 
 <template>
@@ -51,11 +65,12 @@ const showUv = computed(
     </RouterLink>
     <template v-if="!hideUvEntrance">
       <RouterLink
-        v-if="showUv"
+        v-if="weatherLabel"
         class="brand-header__uv"
         to="/forecast"
+        :aria-label="`查看天氣與預報：${weatherLabel}`"
       >
-        五日 UV 預報
+        {{ weatherLabel }}
       </RouterLink>
 
       <RouterLink v-else class="brand-header__set-region" to="/forecast">
@@ -158,6 +173,8 @@ const showUv = computed(
 .brand-header__uv {
   display: inline-flex;
   align-items: center;
+  justify-content: flex-end;
+  max-width: 58vw;
   min-height: var(--tap-target);
   padding: var(--space-3) 0;
   color: var(--text-secondary);
@@ -165,6 +182,9 @@ const showUv = computed(
   font-weight: 500;
   line-height: 1.2;
   text-decoration: none;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 </style>

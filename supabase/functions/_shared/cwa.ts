@@ -27,6 +27,7 @@ export type UvForecastPayload = {
     uvi: number;
     riskLevel: "low" | "moderate" | "high" | "very_high" | "extreme";
     temperatureCelsius: number | null;
+    precipitationProbabilityPercent: number | null;
   }>;
 };
 
@@ -78,7 +79,7 @@ export function buildCwaRequestUrl(options: {
   // Only request the two fields needed by UVAlert.  The region is selected
   // from the returned Geocode so a caller cannot make arbitrary location
   // names reach the upstream service.
-  url.searchParams.set("ElementName", "平均溫度,紫外線指數");
+  url.searchParams.set("ElementName", "平均溫度,紫外線指數,12小時降雨機率");
   return url.toString();
 }
 
@@ -206,6 +207,19 @@ export function mapCwaForecast(
           "CWA temperature times"
         ).map((item) => asObject(item, "CWA temperature time"));
 
+  const popElement = elements.find((element) =>
+    ["12小時降雨機率", "PoP12h", "pop12h"].includes(
+      String(element.ElementName ?? element.elementName ?? "")
+    )
+  );
+  const popTimes =
+    popElement === undefined
+      ? []
+      : asArray(
+          popElement.Time ?? popElement.time,
+          "CWA PoP times"
+        ).map((item) => asObject(item, "CWA PoP time"));
+
   const daysByDate = new Map<string, UvForecastPayload["days"][number]>();
   for (const time of uvTimes) {
     const startSource = readString(time.StartTime ?? time.startTime);
@@ -237,6 +251,11 @@ export function mapCwaForecast(
       riskLevel: riskLevelFor(uvi),
       temperatureCelsius: readTemperature(
         temperatureTimes,
+        startSource,
+        endSource
+      ),
+      precipitationProbabilityPercent: readPrecipitationProbability(
+        popTimes,
         startSource,
         endSource
       )
@@ -319,13 +338,21 @@ export function parseCachedForecast(input: unknown): UvForecastPayload {
     ) {
       throw new CwaMappingError("INVALID_RESPONSE");
     }
+    const pop = (day as Record<string, unknown>).precipitationProbabilityPercent ?? null;
+    if (
+      pop !== null &&
+      (typeof pop !== "number" || !Number.isFinite(pop) || (pop as number) < 0 || (pop as number) > 100)
+    ) {
+      throw new CwaMappingError("INVALID_RESPONSE");
+    }
     return {
       localDate: assertDate(day.localDate),
       validFrom: normalizeInstant(day.validFrom, "validFrom"),
       validTo: normalizeInstant(day.validTo, "validTo"),
       uvi,
       riskLevel: riskLevelFor(uvi),
-      temperatureCelsius: temperature as number | null
+      temperatureCelsius: temperature as number | null,
+      precipitationProbabilityPercent: pop as number | null
     } satisfies UvForecastPayload["days"][number];
   });
   if (parsedDays.length < 1 || parsedDays.length > 5) {
@@ -367,6 +394,30 @@ function readTemperature(
   if (value === null || value === "" || value === "--") return null;
   const parsed = Number(value);
   return Number.isFinite(parsed) ? parsed : null;
+}
+
+function readPrecipitationProbability(
+  times: Record<string, unknown>[],
+  start: string,
+  end: string
+): number | null {
+  const match = times.find((time) =>
+    time.StartTime === start || time.startTime === start
+      ? time.EndTime === end || time.endTime === end
+      : false
+  );
+  if (match === undefined) return null;
+  const value = readElementValue(match, [
+    "ProbabilityOfPrecipitation",
+    "probabilityOfPrecipitation",
+    "PoP12h",
+    "pop12h",
+    "value",
+    "Value"
+  ]);
+  if (value === null || value === "" || value === "--" || value === " ") return null;
+  const parsed = Number(value);
+  return Number.isFinite(parsed) && parsed >= 0 && parsed <= 100 ? Math.round(parsed) : null;
 }
 
 function readElementValue(

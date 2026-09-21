@@ -58,7 +58,19 @@ export const DaytimeUvForecastSchema = z
      * 純資訊，**不進 reducer**：溫度不影響補擦倒數。資料可能缺，
      * 缺的時候是 null，UI 必須整欄不顯示而不是顯示 0 或「--」。
      */
-    temperatureCelsius: z.number().nullable().default(null)
+    temperatureCelsius: z.number().nullable().default(null),
+    /**
+     * 12 小時降雨機率（0–100%），來自 CWA F-D0047-091。
+     *
+     * 純資訊，**不進 reducer**。資料可能缺，缺的時候為 null。
+     */
+    precipitationProbabilityPercent: z
+      .number()
+      .int()
+      .min(0)
+      .max(100)
+      .nullable()
+      .default(null)
   })
   .superRefine((value, context) => {
     if (Date.parse(value.validFrom) >= Date.parse(value.validTo)) {

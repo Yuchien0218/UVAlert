@@ -44,7 +44,7 @@ withDefaults(
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  transition: transform 240ms var(--ease-emphasized);
+  transition: transform var(--duration-disclosure-enter) var(--ease-emphasized);
   transform-origin: center center;
 }
 

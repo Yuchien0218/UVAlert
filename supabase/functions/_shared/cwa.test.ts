@@ -53,6 +53,16 @@ function makeCwaResponse(
                     EndTime: day.end,
                     ElementValue: [{ Temperature: day.temperature }]
                   }))
+                },
+                {
+                  ElementName: "12小時降雨機率",
+                  Time: days.map((day, index) => ({
+                    StartTime: day.start,
+                    EndTime: day.end,
+                    ElementValue: [
+                      { ProbabilityOfPrecipitation: String(20 + index * 10) }
+                    ]
+                  }))
                 }
               ]
             }
@@ -80,7 +90,8 @@ describe("CWA UV boundary", () => {
       validTo: "2026-08-17T10:00:00.000Z",
       uvi: 8,
       riskLevel: "very_high",
-      temperatureCelsius: 30
+      temperatureCelsius: 30,
+      precipitationProbabilityPercent: 20
     });
   });
 
@@ -173,7 +184,9 @@ describe("CWA UV boundary", () => {
     expect(result).toEqual({ status: 304, etag: "etag-1", payload: null });
     const url = new URL(buildCwaRequestUrl({ apiKey: "secret-key" }));
     expect(url.searchParams.get("format")).toBe("JSON");
-    expect(url.searchParams.get("ElementName")).toBe("平均溫度,紫外線指數");
+    expect(url.searchParams.get("ElementName")).toBe(
+      "平均溫度,紫外線指數,12小時降雨機率"
+    );
     expect(url.searchParams.has("elementName")).toBe(false);
   });
 

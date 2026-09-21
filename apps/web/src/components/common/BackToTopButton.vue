@@ -78,10 +78,6 @@ onBeforeUnmount(() => {
   );
 }
 
-.back-to-top:hover {
-  background-color: var(--color-surface-cream-strong);
-}
-
 .back-to-top:active {
   background-color: var(--color-hairline);
   filter: brightness(var(--press-dim));

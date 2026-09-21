@@ -26,7 +26,8 @@ function makeForecast() {
         validTo: "2026-08-17T10:00:00.000Z",
         uvi: 8,
         riskLevel: "very_high" as const,
-        temperatureCelsius: 30
+        temperatureCelsius: 30,
+        precipitationProbabilityPercent: null
       }
     ]
   };

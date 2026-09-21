@@ -75,12 +75,12 @@ function handleTransitionEnd(event: TransitionEvent): void {
 .disclosure {
   display: grid;
   grid-template-rows: 0fr;
-  transition: grid-template-rows 200ms var(--ease-accelerate);
+  transition: grid-template-rows var(--duration-disclosure-leave) var(--ease-accelerate);
 }
 
 .disclosure[data-open="true"] {
   grid-template-rows: 1fr;
-  transition: grid-template-rows 240ms var(--ease-emphasized);
+  transition: grid-template-rows var(--duration-disclosure-enter) var(--ease-emphasized);
 }
 
 /*
@@ -95,12 +95,12 @@ function handleTransitionEnd(event: TransitionEvent): void {
 .disclosure__inner {
   min-height: 0;
   opacity: 0;
-  transition: opacity 160ms var(--ease-accelerate);
+  transition: opacity var(--duration-fast) var(--ease-accelerate);
 }
 
 .disclosure[data-open="true"] .disclosure__inner {
   opacity: 1;
-  transition: opacity 200ms var(--ease-out) 40ms;
+  transition: opacity var(--duration-disclosure-leave) var(--ease-out) var(--duration-disclosure-delay);
 }
 
 .disclosure__inner.is-clipped {

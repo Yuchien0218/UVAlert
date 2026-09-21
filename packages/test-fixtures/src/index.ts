@@ -216,7 +216,8 @@ export function makeFiveDayUvForecast(
       validTo: "2026-07-31T10:00:00.000Z",
       uvi: 8,
       riskLevel: "very_high",
-      temperatureCelsius: 34
+      temperatureCelsius: 34,
+      precipitationProbabilityPercent: 20
     },
     {
       localDate: "2026-08-01",
@@ -224,7 +225,8 @@ export function makeFiveDayUvForecast(
       validTo: "2026-08-01T10:00:00.000Z",
       uvi: 7,
       riskLevel: "high",
-      temperatureCelsius: 32
+      temperatureCelsius: 32,
+      precipitationProbabilityPercent: 10
     },
     {
       localDate: "2026-08-02",
@@ -232,7 +234,8 @@ export function makeFiveDayUvForecast(
       validTo: "2026-08-02T10:00:00.000Z",
       uvi: 5,
       riskLevel: "moderate",
-      temperatureCelsius: 29
+      temperatureCelsius: 29,
+      precipitationProbabilityPercent: 30
     },
     {
       localDate: "2026-08-03",
@@ -240,7 +243,8 @@ export function makeFiveDayUvForecast(
       validTo: "2026-08-03T10:00:00.000Z",
       uvi: 11,
       riskLevel: "extreme",
-      temperatureCelsius: 36
+      temperatureCelsius: 36,
+      precipitationProbabilityPercent: 0
     },
     {
       localDate: "2026-08-04",
@@ -248,7 +252,8 @@ export function makeFiveDayUvForecast(
       validTo: "2026-08-04T10:00:00.000Z",
       uvi: 2,
       riskLevel: "low",
-      temperatureCelsius: 24
+      temperatureCelsius: 24,
+      precipitationProbabilityPercent: 60
     }
   ];
 

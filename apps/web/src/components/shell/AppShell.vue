@@ -46,6 +46,8 @@ watch(
     <AppSplashScreen :phase="boot.phase.value" />
     <BrandHeader
       :region-name="uvForecast.region.value?.displayName ?? null"
+      :temperature-celsius="headerUvDay?.temperatureCelsius ?? null"
+      :precipitation-probability-percent="headerUvDay?.precipitationProbabilityPercent ?? null"
       :uv-risk-level="headerUvDay?.riskLevel ?? null"
       :hide-uv-entrance="route.path === '/forecast'"
     />

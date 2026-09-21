@@ -18,17 +18,16 @@ function mountHeader(props: Record<string, unknown> = {}) {
 
 describe("BrandHeader", () => {
   /* 2026-09-13：狀態資訊移回 UV 區塊，頁首改成明確的預報入口。 */
-  describe("UV 預報入口", () => {
-    it("有地區與風險等級時顯示五日 UV 預報，並連到預報頁", () => {
+  describe("天氣與預報入口", () => {
+    it("有地區時顯示地區、氣溫與降雨機率，並連到預報頁", () => {
       const wrapper = mountHeader({
         regionName: "臺中市西區",
-        uvRiskLevel: "low"
+        temperatureCelsius: 28.4,
+        precipitationProbabilityPercent: 30
       });
 
       const uv = wrapper.get(".brand-header__uv");
-      expect(uv.text()).toBe("五日 UV 預報");
-      expect(uv.text()).not.toContain("臺中市西區");
-      expect(uv.text()).not.toContain("低量級");
+      expect(uv.text()).toBe("臺中市西區 28°・降雨 30%");
       expect(
         wrapper
           .findAllComponents(RouterLinkStub)
@@ -36,13 +35,25 @@ describe("BrandHeader", () => {
       ).toContain("/forecast");
     });
 
+    it("無氣溫或降雨時優雅降級顯示", () => {
+      const withTempOnly = mountHeader({
+        regionName: "臺南市中西區",
+        temperatureCelsius: 32
+      });
+      expect(withTempOnly.get(".brand-header__uv").text()).toBe("臺南市中西區 32°");
+
+      const withRegionOnly = mountHeader({
+        regionName: "高雄市左營區"
+      });
+      expect(withRegionOnly.get(".brand-header__uv").text()).toBe("高雄市左營區");
+    });
+
     /*
-     * 沒有 UV 可顯示時改為顯示「今日全臺UV分布」，連到 /forecast。
+     * 沒有地區可顯示時改為顯示「今日全臺UV分布」，連到 /forecast。
      */
-    it("沒有地區或預報時顯示今日全臺UV分布的出口", () => {
+    it("沒有地區時顯示今日全臺UV分布的出口", () => {
       for (const props of [
         { uvRiskLevel: "high" },
-        { regionName: "臺中市" },
         {}
       ]) {
         const wrapper = mountHeader(props);

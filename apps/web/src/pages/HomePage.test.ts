@@ -695,7 +695,8 @@ describe("HomePage", () => {
             validTo: "2099-01-02T10:00:00.000Z",
             uvi: 7,
             riskLevel: "high" as const,
-            temperatureCelsius: 28
+            temperatureCelsius: 28,
+            precipitationProbabilityPercent: 10
           }
         ]
       };
