@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed } from "vue";
+import ChevronLink from "../components/common/ChevronLink.vue";
 import Icon from "../components/icons/Icon.vue";
 import type { IconName } from "../generated/icons.generated";
 import {
@@ -105,17 +106,18 @@ const entries = computed(() =>
     </header>
 
     <nav class="entry-list" aria-label="更多項目">
-      <RouterLink
+      <ChevronLink
         v-for="entry in entries"
         :key="entry.to"
         class="entry"
         :to="entry.to"
+        tone="var(--text-primary)"
       >
         <Icon :name="entry.icon" :size="32" />
         <span>
           <strong>{{ entry.label }}</strong>
         </span>
-      </RouterLink>
+      </ChevronLink>
     </nav>
 
     <nav class="policy-links" aria-label="公開政策">
@@ -134,12 +136,12 @@ const entries = computed(() =>
 .entry {
   display: grid;
   min-height: var(--tap-target);
-  grid-template-columns: auto minmax(0, 1fr);
+  grid-template-columns: auto minmax(0, 1fr) auto;
   align-items: center;
   gap: var(--space-4);
-  padding: var(--space-4);
+  padding: var(--space-3) var(--space-4);
   border: 1px solid var(--border-subtle);
-  border-radius: var(--radius-lg);
+  border-radius: var(--radius-md);
   background: var(--surface-primary);
   color: inherit;
   text-decoration: none;
@@ -149,12 +151,21 @@ const entries = computed(() =>
   .entry-list {
     grid-template-columns: 1fr 1fr;
   }
+
+  .entry {
+    padding: var(--space-4);
+    border-radius: var(--radius-lg);
+  }
 }
 
 .entry strong {
   display: block;
   font-weight: 500;
   line-height: 1.4;
+}
+
+.entry :deep(.chevron-link__chevron) {
+  color: var(--text-secondary);
 }
 
 .policy-links {

@@ -1,7 +1,13 @@
 // @vitest-environment happy-dom
+import { readFileSync } from "node:fs";
 import { mount } from "@vue/test-utils";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import BackToTopButton from "./BackToTopButton.vue";
+
+const SOURCE = readFileSync(
+  "apps/web/src/components/common/BackToTopButton.vue",
+  "utf8"
+);
 
 describe("BackToTopButton", () => {
   beforeEach(() => {
@@ -59,6 +65,12 @@ describe("BackToTopButton", () => {
 
     const button = wrapper.get("button");
     expect(button.classes()).toContain("back-to-top--with-navigation");
+  });
+
+  it("桌面版使用全站閱讀殼層計算水平位置", () => {
+    expect(SOURCE).toMatch(
+      /@media \(min-width: 48rem\)[\s\S]*?\.back-to-top\s*\{[^}]*var\(--reading-shell-max\)/
+    );
   });
 
   it("卸載時清除 scroll 事件監聽", () => {

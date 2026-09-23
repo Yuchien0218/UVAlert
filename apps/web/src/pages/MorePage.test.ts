@@ -93,6 +93,32 @@ describe("公開政策入口", () => {
   });
 });
 
+describe("不同寬度的入口版型", () => {
+  const source = readFileSync("apps/web/src/pages/MorePage.vue", "utf8");
+
+  it("窄畫面使用帶方向提示的精簡導覽列", () => {
+    const wrapper = mountPage();
+
+    expect(wrapper.findAll(".entry")).toHaveLength(8);
+    expect(source).toContain("<ChevronLink");
+    expect(source).toMatch(
+      /\.entry\s*\{[^}]*padding:\s*var\(--space-3\) var\(--space-4\);/s
+    );
+    expect(source).toMatch(
+      /\.entry\s*\{[^}]*border-radius:\s*var\(--radius-md\);/s
+    );
+  });
+
+  it("桌面版回到兩欄卡片比例", () => {
+    expect(source).toMatch(
+      /@media \(min-width: 48rem\)[\s\S]*?\.entry-list\s*\{[^}]*grid-template-columns:\s*1fr 1fr;/
+    );
+    expect(source).toMatch(
+      /@media \(min-width: 48rem\)[\s\S]*?\.entry\s*\{[^}]*padding:\s*var\(--space-4\);/
+    );
+  });
+});
+
 /**
  * **拿掉說明的代價，由目的頁承擔。**
  *

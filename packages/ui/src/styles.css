@@ -442,6 +442,9 @@
    * --content-max，兩者不互相挾制。
    */
   --app-shell-max: 30rem;
+  /* 全站桌面外框，以及避免卡片、清單與長文跟著撐滿的內層內容上限。 */
+  --reading-shell-max: 42rem;
+  --page-content-max: 34rem;
   --content-max: 47rem;
   /*
    * 單一控制項的寬度上限（2026-09-04）。

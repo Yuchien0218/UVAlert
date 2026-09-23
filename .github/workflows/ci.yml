@@ -18,6 +18,8 @@ jobs:
     name: Typecheck, test, and lint
     runs-on: ubuntu-latest
     timeout-minutes: 15
+    env:
+      TZ: Asia/Taipei
 
     steps:
       - name: Checkout repository

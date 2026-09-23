@@ -21,6 +21,12 @@ const bottomNavigation = withoutComments(
 const productsPage = withoutComments(
   readFileSync("apps/web/src/pages/ProductsPage.vue", "utf8")
 );
+const appCss = withoutComments(
+  readFileSync("apps/web/src/assets/app.css", "utf8")
+);
+const router = withoutComments(
+  readFileSync("apps/web/src/router/index.ts", "utf8")
+);
 
 describe("桌面 App Shell 版面", () => {
   it("以共用殼層上限置中，不讓桌面沿用整個視窗寬度", () => {
@@ -34,6 +40,29 @@ describe("桌面 App Shell 版面", () => {
     expect(cssRule(bottomNavigation, ".bottom-nav")).toContain(
       "max-width: var(--app-shell-max);"
     );
+  });
+
+  it("桌面斷點讓所有頁面統一使用閱讀外框寬度", () => {
+    expect(appShell).toMatch(
+      /@media \(min-width: 48rem\) \{[\s\S]*?\.app-shell\s*\{[^}]*width:\s*min\(100%, var\(--reading-shell-max\)\);/
+    );
+  });
+
+  it("底部導覽在桌面跟隨同一個外框寬度", () => {
+    expect(bottomNavigation).toMatch(
+      /@media \(min-width: 48rem\) \{[\s\S]*?\.bottom-nav\s*\{[^}]*max-width:\s*var\(--reading-shell-max\);/
+    );
+  });
+
+  it("內層頁面內容限制為中等寬度並置中", () => {
+    const pageStack = cssRule(appCss, ".page-stack");
+
+    expect(pageStack).toContain("max-width: var(--page-content-max);");
+    expect(pageStack).toContain("margin-inline: auto;");
+  });
+
+  it("路由不再各自決定桌面外框寬度", () => {
+    expect(router).not.toContain("wideLayout");
   });
 
   it("裝備頁的新增裝備 CTA 使用置中的共用頁面主要動作", () => {

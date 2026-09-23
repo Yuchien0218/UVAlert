@@ -95,7 +95,8 @@ describe("衛教分類頁的分隔線", () => {
    * stack gap 的大小也會過——那時線又回到「上下一樣遠」，等於沒改。
    */
   it("線貼著標題區，不是浮在兩段中間", () => {
-    const rule = /\.education-heading \{([^}]*)\}/.exec(read(CATEGORY))?.[1] ?? "";
+    const rule =
+      /\.education-heading \{([^}]*)\}/.exec(read(CATEGORY))?.[1] ?? "";
 
     expect(rule).toContain("padding-bottom: var(--space-4);");
   });
@@ -163,7 +164,9 @@ describe("附錄的字級與項目符號", () => {
     expect(article).toMatch(
       /\.education-related-list \{[^}]*font-size: var\(--font-size-supporting\);/
     );
-    expect(article).toMatch(/\.education-related-list \{[^}]*list-style: disc;/);
+    expect(article).toMatch(
+      /\.education-related-list \{[^}]*list-style: disc;/
+    );
   });
 
   /*
@@ -206,6 +209,12 @@ describe("附錄的字級與項目符號", () => {
   it("正文維持內文字級", () => {
     expect(read(ARTICLE)).toMatch(
       /\.education-article-body \{[^}]*font-size: var\(--font-size-body\);/
+    );
+  });
+
+  it("桌面正文維持舒適行長並置中", () => {
+    expect(read(ARTICLE)).toMatch(
+      /\.education-article-body \{[^}]*max-width: 38em;[^}]*margin-inline: auto;/
     );
   });
 });

@@ -51,7 +51,10 @@ onBeforeUnmount(() => {
 .back-to-top {
   position: fixed;
   z-index: var(--z-nav);
-  right: max(var(--space-4), calc((100vw - var(--app-shell-max)) / 2 + var(--space-4)));
+  right: max(
+    var(--space-4),
+    calc((100vw - var(--app-shell-max)) / 2 + var(--space-4))
+  );
   bottom: calc(var(--space-4) + env(safe-area-inset-bottom));
   display: inline-flex;
   align-items: center;
@@ -76,6 +79,15 @@ onBeforeUnmount(() => {
   bottom: calc(
     var(--bottom-nav-height) + var(--space-4) + env(safe-area-inset-bottom)
   );
+}
+
+@media (min-width: 48rem) {
+  .back-to-top {
+    right: max(
+      var(--space-4),
+      calc((100vw - var(--reading-shell-max)) / 2 + var(--space-4))
+    );
+  }
 }
 
 .back-to-top:active {

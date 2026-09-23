@@ -55,7 +55,8 @@
 .page-stack {
   display: grid;
   gap: var(--page-stack-gap);
-  max-width: var(--content-max);
+  width: 100%;
+  max-width: var(--page-content-max);
   margin-inline: auto;
 }
 
