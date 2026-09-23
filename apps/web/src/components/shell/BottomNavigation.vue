@@ -84,6 +84,12 @@ function navigationLabel(to: string, label: string): string {
   background: var(--page-background);
 }
 
+@media (min-width: 48rem) {
+  .bottom-nav {
+    max-width: var(--reading-shell-max);
+  }
+}
+
 /*
  * 選取態＝藥丸底 ＋ 標籤變深。**2026-09-04 推翻了 2026-08-23 的「不換色」。**
  *

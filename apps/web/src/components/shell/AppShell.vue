@@ -47,7 +47,9 @@ watch(
     <BrandHeader
       :region-name="uvForecast.region.value?.displayName ?? null"
       :temperature-celsius="headerUvDay?.temperatureCelsius ?? null"
-      :precipitation-probability-percent="headerUvDay?.precipitationProbabilityPercent ?? null"
+      :precipitation-probability-percent="
+        headerUvDay?.precipitationProbabilityPercent ?? null
+      "
       :uv-risk-level="headerUvDay?.riskLevel ?? null"
     />
     <GlobalStatusBanner
@@ -98,6 +100,7 @@ watch(
 
 @media (min-width: 48rem) {
   .app-shell {
+    width: min(100%, var(--reading-shell-max));
     box-shadow: none;
   }
 }

@@ -278,8 +278,9 @@ const relatedArticles = computed(() =>
 }
 
 .education-article-body {
-  max-width: 44rem;
+  max-width: 38em;
   min-width: 0;
+  margin-inline: auto;
   font-size: var(--font-size-body);
   line-height: var(--line-height-body);
 }

@@ -82,6 +82,8 @@ const SPACING_MAP: Record<string, string> = {
  */
 const LAYOUT_MAP: Record<string, string> = {
   "app-shell-max": "--app-shell-max",
+  "reading-shell-max": "--reading-shell-max",
+  "page-content-max": "--page-content-max",
   "content-max": "--content-max",
   "control-max": "--control-max",
   "tap-target": "--tap-target"
@@ -295,13 +297,7 @@ const REFERENCEABLE = [
 
 // --- 測試 ---
 
-const SECTIONS = [
-  "colors",
-  "rounded",
-  "spacing",
-  "layout",
-  "motion"
-] as const;
+const SECTIONS = ["colors", "rounded", "spacing", "layout", "motion"] as const;
 
 describe("UV 分布視覺化 token", () => {
   it.each(UV_DISTRIBUTION_TOKENS)("%s 解析為 %s", (name, expected) => {
