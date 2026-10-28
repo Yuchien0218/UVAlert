@@ -618,7 +618,7 @@ async function remove(): Promise<void> {
           role="status"
           aria-live="polite"
         >
-          ✨ 已由 AI 辨識填入，請確認後儲存
+          已由照片自動帶入，請確認後儲存
         </span>
       </div>
 
@@ -633,7 +633,7 @@ async function remove(): Promise<void> {
 
       <!-- AI 辨識備註提示（如反光、日期預估等） -->
       <p v-if="aiNotes" class="field-helper ai-scan-notes">
-        💡 辨識備註：{{ aiNotes }}
+        辨識備註：{{ aiNotes }}
       </p>
 
       <button
@@ -643,7 +643,7 @@ async function remove(): Promise<void> {
         type="button"
         @click="showPhotoScanner = true"
       >
-        📷 拍照辨識自動填表
+        拍照辨識規格
       </button>
 
       <GearPhotoScannerSheet
@@ -1308,8 +1308,9 @@ p {
   align-items: center;
   padding: var(--space-1) var(--space-2);
   border-radius: var(--radius-xs, 4px);
-  background: var(--color-tracking-soft, #fff3e0);
-  color: var(--color-tracking, #e65100);
+  background: var(--color-surface-soft);
+  color: var(--color-primary-text);
+  border: 1px solid var(--color-hairline);
   font-size: var(--font-size-caption);
   line-height: 1.4;
 }

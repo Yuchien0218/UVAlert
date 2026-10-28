@@ -95,6 +95,11 @@ describe("GearPhotoScannerSheet 靜態結構", () => {
     // 規格要求告知使用者照片不落盤
     expect(code).toContain("不會儲存");
   });
+
+  it("介面與說明文字嚴格禁止使用 Emoji", () => {
+    const emojiRegex = /[\u{1F300}-\u{1F9FF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}]/u;
+    expect(code).not.toMatch(emojiRegex);
+  });
 });
 
 // ===========================

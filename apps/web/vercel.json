@@ -2,6 +2,10 @@
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "routes": [
     {
+      "src": "/v1/parse-sunscreen-label",
+      "dest": "https://ykfdnltaqpdytmrszbbk.supabase.co/functions/v1/parse-sunscreen-label"
+    },
+    {
       "handle": "filesystem"
     },
     {

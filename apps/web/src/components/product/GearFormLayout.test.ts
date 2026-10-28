@@ -386,4 +386,12 @@ describe("拍照辨識自動填表整合（Task 5）", () => {
     expect(code).toContain("未檢測到防曬產品標示");
     expect(code).toContain("辨識備註");
   });
+
+  it("拍照速填區塊嚴格禁止使用 Emoji", () => {
+    const scanSectionIdx = code.indexOf("photo-scan-section");
+    expect(scanSectionIdx).toBeGreaterThan(-1);
+    const scanSectionCode = code.slice(scanSectionIdx, scanSectionIdx + 1500);
+    const emojiRegex = /[\u{1F300}-\u{1F9FF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}]/u;
+    expect(scanSectionCode).not.toMatch(emojiRegex);
+  });
 });

@@ -3,7 +3,7 @@ export interface CompressImageOptions {
   maxDimension?: number;
   /** 輸出品質（0 到 1），預設 0.8 */
   quality?: number;
-  /** 輸出 MIME 類型，預設 image/webp */
+  /** 輸出 MIME 類型，預設 image/jpeg */
   mimeType?: "image/webp" | "image/jpeg";
 }
 
@@ -74,7 +74,7 @@ export async function compressImageFile(
   const {
     maxDimension = 1280,
     quality = 0.8,
-    mimeType = "image/webp"
+    mimeType = "image/jpeg"
   } = options;
 
   const dataUrl = await readFileAsDataUrl(file);

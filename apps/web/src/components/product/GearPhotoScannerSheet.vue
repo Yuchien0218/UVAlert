@@ -4,6 +4,7 @@ import type { GearCategory } from "@sunshield/contracts";
 import type { ParseSunscreenLabelResponse } from "@sunshield/contracts";
 import InlineLoader from "../feedback/InlineLoader.vue";
 import { compressImageFile } from "../../helpers/imageCompress";
+import { resolveParseSunscreenLabelEndpoint } from "../../helpers/parseSunscreenLabelEndpoint";
 
 /**
  * 防曬乳外包裝拍照辨識 Sheet 元件。
@@ -88,8 +89,8 @@ async function startScan(): Promise<void> {
       images.push(backImageDataUrl.value);
     }
 
-    const apiBase = import.meta.env.VITE_API_BASE_URL ?? "/v1";
-    const response = await fetch(`${apiBase}/parse-sunscreen-label`, {
+    const endpoint = resolveParseSunscreenLabelEndpoint();
+    const response = await fetch(endpoint, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -124,7 +125,6 @@ async function startScan(): Promise<void> {
       規格書（2026-10-27）明確要求此說明，降低使用疑慮。
     -->
     <p class="scanner-privacy-note">
-      <span class="scanner-privacy-icon" aria-hidden="true">🔒</span>
       照片僅用於 AI 辨識，<strong>不會儲存</strong>於伺服器。
     </p>
 
@@ -147,7 +147,7 @@ async function startScan(): Promise<void> {
             class="photo-slot__thumbnail"
           />
           <span v-else class="photo-slot__placeholder" aria-hidden="true">
-            📷
+            未拍攝正面
           </span>
         </div>
         <!--
@@ -184,7 +184,7 @@ async function startScan(): Promise<void> {
             class="photo-slot__thumbnail"
           />
           <span v-else class="photo-slot__placeholder" aria-hidden="true">
-            📋
+            未拍攝背面
           </span>
         </div>
         <input
@@ -242,21 +242,14 @@ async function startScan(): Promise<void> {
 }
 
 .scanner-privacy-note {
-  display: flex;
-  align-items: center;
-  gap: var(--space-2);
-  padding: var(--space-3);
+  padding: var(--space-2) var(--space-3);
   border-radius: var(--radius-sm);
-  background: var(--color-surface-card);
-  color: var(--text-secondary);
-  font-size: var(--font-size-supporting);
+  background: var(--color-surface-soft);
+  color: var(--color-muted);
+  border: 1px solid var(--color-hairline);
+  font-size: var(--font-size-caption);
   line-height: var(--line-height-body);
   margin: 0;
-}
-
-.scanner-privacy-icon {
-  flex: none;
-  font-size: 1rem;
 }
 
 /* 兩個照片卡槽並排 */
@@ -293,8 +286,9 @@ async function startScan(): Promise<void> {
 }
 
 .photo-slot__badge--required {
-  background: var(--color-tracking-soft, #fff3e0);
-  color: var(--color-tracking, #e65100);
+  background: var(--color-surface-soft);
+  color: var(--color-primary-text);
+  border: 1px solid var(--color-hairline);
 }
 
 .photo-slot__preview {
@@ -302,9 +296,9 @@ async function startScan(): Promise<void> {
   align-items: center;
   justify-content: center;
   aspect-ratio: 3 / 4;
-  border: 1.5px dashed var(--border-subtle);
+  border: 1px dashed var(--color-hairline);
   border-radius: var(--radius-sm);
-  background: var(--color-surface-card);
+  background: var(--color-surface-soft);
   overflow: hidden;
   transition: border-color var(--duration-fast) var(--ease-out);
 }
@@ -321,8 +315,8 @@ async function startScan(): Promise<void> {
 }
 
 .photo-slot__placeholder {
-  font-size: 2rem;
-  opacity: 0.4;
+  font-size: var(--font-size-caption);
+  color: var(--color-muted);
 }
 
 /* 隱藏原生 file input，以 label 為觸發器 */
@@ -352,24 +346,5 @@ async function startScan(): Promise<void> {
   gap: var(--space-2);
 }
 
-/* button--secondary 若全域尚未定義，提供預設樣式 */
-:where(.button--secondary) {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  padding: var(--space-2) var(--space-4);
-  border: 1px solid var(--border-strong);
-  border-radius: var(--radius-sm);
-  background: transparent;
-  color: var(--text-primary);
-  font-size: var(--font-size-body);
-  cursor: pointer;
-  transition:
-    background-color var(--duration-fast) var(--ease-out),
-    filter var(--duration-fast) var(--ease-out);
-}
 
-:where(.button--secondary):active {
-  filter: brightness(var(--press-dim));
-}
 </style>
