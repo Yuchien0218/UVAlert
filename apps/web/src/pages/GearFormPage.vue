@@ -2,6 +2,7 @@
 import { computed } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import GearForm from "../components/product/GearForm.vue";
+import { clearGearFormDraft } from "../features/product/gearFormDraft";
 import IconButton from "../components/common/IconButton.vue";
 
 /**
@@ -37,6 +38,7 @@ async function handleSaved(): Promise<void> {
 }
 
 function handleCancel(): void {
+  clearGearFormDraft();
   void router.back();
 }
 

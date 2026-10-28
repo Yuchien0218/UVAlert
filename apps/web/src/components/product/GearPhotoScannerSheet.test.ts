@@ -56,10 +56,9 @@ describe("GearPhotoScannerSheet 靜態結構", () => {
     expect(source).toContain('id="photo-back"');
   });
 
-  it("正面 input 標有 capture 屬性以支援行動裝置相機", () => {
-    // 守正面輸入框有 capture="environment"（對準後鏡頭）
-    // 用 source（未 strip）以免 image/* 的 /* 被誤吃
-    expect(source).toMatch(/id="photo-front"[\s\S]{0,300}capture="environment"/);
+  it("input 不強制綁定 capture 屬性以避免行動裝置相機佔用記憶體導致頁面重載", () => {
+    // 不綁 capture="environment"，由行動裝置彈出原生選單（拍照或選相簿）
+    expect(source).not.toContain('capture="environment"');
   });
 
   it("包含「開始辨識」觸發按鈕", () => {

@@ -60,7 +60,12 @@ async function onFrontFileChange(event: Event): Promise<void> {
   const input = event.target as HTMLInputElement;
   const file = input.files?.[0];
   if (!file) return;
-  frontImageDataUrl.value = await compressImageFile(file);
+  scanError.value = null;
+  try {
+    frontImageDataUrl.value = await compressImageFile(file);
+  } catch {
+    scanError.value = "讀取正面照片時發生問題，請重新選擇清晰照片。";
+  }
 }
 
 /**
@@ -70,7 +75,12 @@ async function onBackFileChange(event: Event): Promise<void> {
   const input = event.target as HTMLInputElement;
   const file = input.files?.[0];
   if (!file) return;
-  backImageDataUrl.value = await compressImageFile(file);
+  scanError.value = null;
+  try {
+    backImageDataUrl.value = await compressImageFile(file);
+  } catch {
+    scanError.value = "讀取背面照片時發生問題，請重新選擇清晰照片。";
+  }
 }
 
 /**
@@ -151,14 +161,13 @@ async function startScan(): Promise<void> {
           </span>
         </div>
         <!--
-          capture="environment" 指定後鏡頭，防曬乳包裝通常需要清楚拍到標示。
+          指定後鏡頭，防曬乳包裝通常需要清楚拍到標示。
           行動裝置上開啟相機 App；桌機則開啟檔案選擇。
         -->
         <input
           id="photo-front"
           type="file"
           accept="image/*"
-          capture="environment"
           class="photo-slot__input screen-reader-only"
           @change="onFrontFileChange"
         />
@@ -191,7 +200,6 @@ async function startScan(): Promise<void> {
           id="photo-back"
           type="file"
           accept="image/*"
-          capture="environment"
           class="photo-slot__input screen-reader-only"
           @change="onBackFileChange"
         />

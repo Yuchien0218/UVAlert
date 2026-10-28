@@ -23,6 +23,11 @@ import {
   UV_PROTECTION_LABELS
 } from "../../features/product/gearPresentation";
 import { parseSpfInput } from "../../features/product/parseSpfInput";
+import {
+  clearGearFormDraft,
+  loadGearFormDraft,
+  saveGearFormDraft
+} from "../../features/product/gearFormDraft";
 
 /**
  * S-12 新增防曬裝備／S-13 編輯防曬裝備的表單本體。
@@ -260,7 +265,43 @@ onMounted(async () => {
    * props.productId 分辨：新增模式本來就沒有 record，那是正常的。
    */
   if (record === null) {
-    if (props.productId !== null) emit("notFound");
+    if (props.productId !== null) {
+      emit("notFound");
+      return;
+    }
+    // 新增模式：若存在暫存草稿，自動還原資料
+    const draft = loadGearFormDraft();
+    if (draft) {
+      gearCategory.value = draft.gearCategory ?? "sunscreen";
+      displayName.value =
+        draft.displayName ?? defaultDisplayName(gearCategory.value);
+      purchaseMonth.value = draft.purchaseMonth ?? "";
+      expiryDate.value = draft.expiryDate ?? "";
+      note.value = draft.note ?? "";
+      priceTwd.value = draft.priceTwd ?? "";
+      usageRating.value = draft.usageRating ?? "";
+      spfInput.value = draft.spfInput ?? "";
+      paGradeInput.value = draft.paGradeInput ?? "";
+      if (draft.snapshotForm) {
+        snapshotForm.value = { ...draft.snapshotForm };
+      }
+      size.value = draft.size ?? "";
+      color.value = draft.color ?? "";
+      volume.value = draft.volume ?? "";
+      formulation.value = draft.formulation ?? "";
+      protectionType.value = draft.protectionType ?? "";
+      upf.value = draft.upf ?? "";
+      shadingRate.value = draft.shadingRate ?? "";
+      weight.value = draft.weight ?? "";
+      hatStyle.value = draft.hatStyle ?? "";
+      uvProtection.value = draft.uvProtection ?? "";
+      aiFilledFields.value = draft.aiFilledFields ?? [];
+      aiNotes.value = draft.aiNotes ?? null;
+      aiScanWarning.value = draft.aiScanWarning ?? null;
+      if (draft.showPhotoScanner) {
+        showPhotoScanner.value = true;
+      }
+    }
     return;
   }
   gearCategory.value = record.gearCategory;
@@ -424,6 +465,70 @@ function onPhotoDetected(
   showPhotoScanner.value = false;
 }
 
+
+/**
+ * 監聽表單欄位與狀態變更，在新增模式下自動同步暫存至 sessionStorage。
+ * 避免行動裝置相機或記憶體回收造成資料遺失。
+ */
+watch(
+  [
+    gearCategory,
+    displayName,
+    purchaseMonth,
+    expiryDate,
+    note,
+    priceTwd,
+    usageRating,
+    spfInput,
+    paGradeInput,
+    snapshotForm,
+    size,
+    color,
+    volume,
+    formulation,
+    protectionType,
+    upf,
+    shadingRate,
+    weight,
+    hatStyle,
+    uvProtection,
+    aiFilledFields,
+    aiNotes,
+    aiScanWarning,
+    showPhotoScanner
+  ],
+  () => {
+    if (props.productId !== null) return;
+    saveGearFormDraft({
+      gearCategory: gearCategory.value,
+      displayName: displayName.value,
+      purchaseMonth: purchaseMonth.value,
+      expiryDate: expiryDate.value,
+      note: note.value,
+      priceTwd: priceTwd.value,
+      usageRating: usageRating.value,
+      spfInput: spfInput.value,
+      paGradeInput: paGradeInput.value,
+      snapshotForm: snapshotForm.value,
+      size: size.value,
+      color: color.value,
+      volume: volume.value,
+      formulation: formulation.value,
+      protectionType: protectionType.value,
+      upf: upf.value,
+      shadingRate: shadingRate.value,
+      weight: weight.value,
+      hatStyle: hatStyle.value,
+      uvProtection: uvProtection.value,
+      aiFilledFields: aiFilledFields.value,
+      aiNotes: aiNotes.value,
+      aiScanWarning: aiScanWarning.value,
+      showPhotoScanner: showPhotoScanner.value
+    });
+  },
+  { deep: true }
+);
+
 async function save(): Promise<void> {
   localError.value = validate();
   if (localError.value !== null) return;
@@ -509,6 +614,11 @@ async function save(): Promise<void> {
     localError.value =
       "沒有儲存，輸入仍會保留，可以再試一次。";
     return;
+  }
+
+  // 儲存成功後清除草稿暫存
+  if (props.productId === null) {
+    clearGearFormDraft();
   }
 
   emit("saved");

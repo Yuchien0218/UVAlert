@@ -64,6 +64,8 @@ async function readFileAsDataUrl(file: File | Blob): Promise<string> {
 /**
  * 將圖片檔案等比縮放並壓縮為 WebP 或 JPEG 之 Base64 Data URL。
  *
+ * 優先使用 URL.createObjectURL(file) 載入圖片以避免在記憶體建立龐大的原始 Base64 字串，
+ * 載入完成或失敗後立即呼叫 URL.revokeObjectURL 釋放記憶體。
  * 若執行環境缺少 Canvas 2D 支援（如測試環境或老舊瀏覽器），
  * 自動優雅降級為原始檔案之 Data URL。
  */
@@ -77,17 +79,34 @@ export async function compressImageFile(
     mimeType = "image/jpeg"
   } = options;
 
-  const dataUrl = await readFileAsDataUrl(file);
-
-  // 若不在瀏覽器環境或沒有 document，直接回傳
-  if (typeof document === "undefined") {
-    return dataUrl;
+  // 若不在瀏覽器環境或環境不支援 Canvas 2D，直接降級回傳原始檔案之 Data URL
+  if (
+    typeof document === "undefined" ||
+    typeof window === "undefined" ||
+    !document.createElement("canvas").getContext?.("2d")
+  ) {
+    return readFileAsDataUrl(file);
   }
 
+  const hasObjectURL =
+    typeof URL !== "undefined" && typeof URL.createObjectURL === "function";
+
   return new Promise<string>((resolve) => {
+    const objectUrl = hasObjectURL ? URL.createObjectURL(file) : null;
     const img = new Image();
 
+    const cleanup = () => {
+      if (objectUrl && typeof URL.revokeObjectURL === "function") {
+        try {
+          URL.revokeObjectURL(objectUrl);
+        } catch {
+          // ignore
+        }
+      }
+    };
+
     img.onload = () => {
+      cleanup();
       try {
         const { width, height } = calculateTargetDimensions(
           img.naturalWidth || img.width,
@@ -101,8 +120,7 @@ export async function compressImageFile(
 
         const ctx = canvas.getContext("2d");
         if (!ctx) {
-          // happy-dom 或無 2D context 時降級
-          resolve(dataUrl);
+          readFileAsDataUrl(file).then(resolve).catch(() => resolve(""));
           return;
         }
 
@@ -110,15 +128,23 @@ export async function compressImageFile(
         const compressedDataUrl = canvas.toDataURL(mimeType, quality);
         resolve(compressedDataUrl);
       } catch {
-        resolve(dataUrl);
+        readFileAsDataUrl(file).then(resolve).catch(() => resolve(""));
       }
     };
 
     img.onerror = () => {
-      // 圖片載入失敗時降級回傳原始 dataUrl
-      resolve(dataUrl);
+      cleanup();
+      readFileAsDataUrl(file).then(resolve).catch(() => resolve(""));
     };
 
-    img.src = dataUrl;
+    if (objectUrl) {
+      img.src = objectUrl;
+    } else {
+      readFileAsDataUrl(file)
+        .then((dataUrl) => {
+          img.src = dataUrl;
+        })
+        .catch(() => resolve(""));
+    }
   });
 }

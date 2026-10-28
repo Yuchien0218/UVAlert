@@ -394,4 +394,9 @@ describe("拍照辨識自動填表整合（Task 5）", () => {
     const emojiRegex = /[\u{1F300}-\u{1F9FF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}]/u;
     expect(scanSectionCode).not.toMatch(emojiRegex);
   });
+  it("整合 sessionStorage 草稿暫存機制以防止行動裝置重載流失資料", () => {
+    expect(code).toContain("loadGearFormDraft");
+    expect(code).toContain("saveGearFormDraft");
+    expect(code).toContain("clearGearFormDraft");
+  });
 });

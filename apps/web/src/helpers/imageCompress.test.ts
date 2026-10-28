@@ -125,4 +125,64 @@ describe("compressImageFile", () => {
       vi.restoreAllMocks();
     }
   });
+
+  it("uses URL.createObjectURL and revokes it to minimize memory usage", async () => {
+    const file = new File(["dummy-image-bytes"], "photo.jpg", {
+      type: "image/jpeg"
+    });
+
+    const mockCtx = { drawImage: vi.fn() };
+    const mockToDataURL = vi
+      .fn()
+      .mockReturnValue("data:image/jpeg;base64,mocked_jpeg_data");
+
+    const origCreateElement = document.createElement.bind(document);
+    vi.spyOn(document, "createElement").mockImplementation((tagName: string) => {
+      if (tagName === "canvas") {
+        const canvas = origCreateElement("canvas");
+        canvas.getContext = vi.fn().mockReturnValue(mockCtx);
+        canvas.toDataURL = mockToDataURL;
+        return canvas;
+      }
+      return origCreateElement(tagName);
+    });
+
+    const createObjectURLSpy = vi
+      .spyOn(URL, "createObjectURL")
+      .mockReturnValue("blob:mock-url");
+    const revokeObjectURLSpy = vi
+      .spyOn(URL, "revokeObjectURL")
+      .mockImplementation(() => {});
+
+    const origImage = globalThis.Image;
+    class MockImage {
+      width = 1000;
+      height = 1000;
+      naturalWidth = 1000;
+      naturalHeight = 1000;
+      #src = "";
+      onload: (() => void) | null = null;
+      onerror: (() => void) | null = null;
+      get src() {
+        return this.#src;
+      }
+      set src(value: string) {
+        this.#src = value;
+        setTimeout(() => {
+          this.onload?.();
+        }, 0);
+      }
+    }
+    globalThis.Image = MockImage as unknown as typeof Image;
+
+    try {
+      const result = await compressImageFile(file);
+      expect(result).toBe("data:image/jpeg;base64,mocked_jpeg_data");
+      expect(createObjectURLSpy).toHaveBeenCalledWith(file);
+      expect(revokeObjectURLSpy).toHaveBeenCalledWith("blob:mock-url");
+    } finally {
+      globalThis.Image = origImage;
+      vi.restoreAllMocks();
+    }
+  });
 });
