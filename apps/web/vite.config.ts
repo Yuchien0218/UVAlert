@@ -33,6 +33,11 @@ export default defineConfig({
         target: "https://ykfdnltaqpdytmrszbbk.supabase.co/functions/v1/line-subscription",
         changeOrigin: true,
         rewrite: (path) => path.replace(/^\/v1\/line-subscription/, "")
+      },
+      "/v1/parse-sunscreen-label": {
+        target: "https://ykfdnltaqpdytmrszbbk.supabase.co/functions/v1/parse-sunscreen-label",
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/v1\/parse-sunscreen-label/, "")
       }
     }
   }

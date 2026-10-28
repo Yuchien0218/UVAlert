@@ -318,3 +318,72 @@ describe("防曬乳三項規格", () => {
     expect(code).not.toContain("不從膚感推測");
   });
 });
+
+/*
+ * 2026-10-27：防曬乳外包裝拍照辨識自動填表（Task 5）靜態守門。
+ *
+ * 規格書（docs/superpowers/specs/2026-10-27-gear-packaging-photo-fill-design.md）
+ * 要求：
+ * 1. 拍照速填按鈕只在 gearCategory === 'sunscreen' 條件下存在。
+ * 2. 按鈕觸發後開啟 GearPhotoScannerSheet。
+ * 3. 成功解析後有「已由照片自動填入」或「由 AI 辨識填入」類型提示。
+ */
+describe("拍照辨識自動填表整合（Task 5）", () => {
+  /*
+   * 全局約束（規格書 §4.1）：只對 sunscreen 品類啟用拍照速填。
+   * 其他品類（衣物、帽子、陽傘、眼鏡）包裝格式不同，不得誤觸。
+   *
+   * 守門方式：比對 GearPhotoScannerSheet 元件只出現在 v-if/showSunscreenFields
+   * 或 needsLabelFields 的條件範圍內。
+   */
+  it("GearPhotoScannerSheet 只在 sunscreen 條件下渲染", () => {
+    // GearPhotoScannerSheet 必須存在（已整合）
+    expect(code).toContain("GearPhotoScannerSheet");
+
+    /*
+     * 找 template 裡 <GearPhotoScannerSheet 元件使用，而非 import 語句。
+     * import 語句前方只有空 script，不會有 needsLabelFields。
+     *
+     * 策略：找到 template 裡 "<GearPhotoScannerSheet" 的位置，
+     * 再取其前 1000 字元，確認前方有 needsLabelFields 或 showSunscreenFields。
+     */
+    const templateTagIdx = code.indexOf("<GearPhotoScannerSheet");
+    expect(templateTagIdx, "GearPhotoScannerSheet 元件標籤必須出現在 template 中").toBeGreaterThan(-1);
+
+    // 取元件標籤前方 1000 字元（涵蓋外層 v-if section）
+    const contextBefore = code.slice(Math.max(0, templateTagIdx - 1000), templateTagIdx);
+    // 外層 section 必須有 needsLabelFields 條件限制
+    expect(contextBefore).toMatch(/needsLabelFields|showSunscreenFields/);
+  });
+
+  /*
+   * 成功解析後須標示「由 AI 辨識填入」類型提示，讓使用者知道欄位來源。
+   * 設計規格：自動填入的欄位加上提示 badge，讓使用者確認後才視為最終值。
+   */
+  it("成功辨識後有「AI 辨識」填入提示標記", () => {
+    expect(code).toContain("AI 辨識");
+  });
+
+  /*
+   * onPhotoDetected（或類似名稱）處理器必須把結果帶入表單欄位。
+   * 守的是邏輯接線而不是函式名稱——對齊 contracts 的欄位名稱。
+   */
+  it("辨識完成後將 spf、paGrade 等欄位填入表單", () => {
+    // detected 事件的 handler 必須操作到 spfInput 與 paGradeInput
+    const handlerIdx = code.search(/function.*photo|onPhoto|handlePhoto|detected/i);
+    expect(handlerIdx).toBeGreaterThan(-1);
+    // handler 後方必須有 spfInput 或 paGradeInput 的賦值
+    const afterHandler = code.slice(handlerIdx);
+    expect(afterHandler).toMatch(/spfInput|paGradeInput/);
+  });
+
+  /*
+   * 規格書 §七 錯誤退避：
+   * 1. 拍攝非防曬乳物品時，顯示「未檢測到防曬產品標示」，不變更表單。
+   * 2. 支援顯示 AI 備註（反光、有效期限推估等）。
+   */
+  it("非防曬乳物品拍攝時呈現提示，且支援 AI 辨識備註", () => {
+    expect(code).toContain("未檢測到防曬產品標示");
+    expect(code).toContain("辨識備註");
+  });
+});

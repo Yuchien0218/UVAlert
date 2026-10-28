@@ -7,6 +7,7 @@ import DisclosureChevron from "../common/DisclosureChevron.vue";
 import DisclosurePanel from "../common/DisclosurePanel.vue";
 import InlineLoader from "../feedback/InlineLoader.vue";
 import ProductSnapshotEditor from "./ProductSnapshotEditor.vue";
+import GearPhotoScannerSheet from "./GearPhotoScannerSheet.vue";
 import {
   makeSessionOnlyProductSnapshot,
   productSnapshotToFormValue,
@@ -144,6 +145,32 @@ const localError = shallowRef<string | null>(null);
 const confirmingDelete = shallowRef(false);
 
 /**
+ * 拍照辨識 Sheet 開關。
+ *
+ * 只在 gearCategory === "sunscreen" 時才會出現觸發按鈕，
+ * 父層（這裡）負責條件渲染。
+ */
+const showPhotoScanner = shallowRef(false);
+
+/**
+ * AI 辨識填入的欄位集合。
+ *
+ * 辨識成功後，把填入的欄位名稱記下，用於在表單顯示「由 AI 辨識填入」提示。
+ * 清空（空陣列）代表沒有任何欄位是由 AI 填入的（或使用者已手動覆寫）。
+ */
+const aiFilledFields = shallowRef<string[]>([]);
+
+/**
+ * AI 辨識填入的備註（如反光、日期預估等）。
+ */
+const aiNotes = shallowRef<string | null>(null);
+
+/**
+ * AI 辨識警示訊息（如拍攝非防曬乳物品等）。
+ */
+const aiScanWarning = shallowRef<string | null>(null);
+
+/**
  * 「我的紀錄」的收合狀態。
  *
  * 新增時預設收合——那五個欄位在建檔當下多半還不知道（價格要翻收據、
@@ -271,6 +298,11 @@ watch(gearCategory, (next) => {
   if (props.productId !== null) return;
   if (!isDefaultDisplayName(displayName.value)) return;
   displayName.value = defaultDisplayName(next);
+  // 品類切換時關閉拍照 Sheet 並清除 AI 填入狀態
+  showPhotoScanner.value = false;
+  aiFilledFields.value = [];
+  aiNotes.value = null;
+  aiScanWarning.value = null;
 });
 
 function validate(): string | null {
@@ -308,6 +340,88 @@ function validate(): string | null {
     return "PA 標示請控制在 20 個字以內。";
   }
   return null;
+}
+
+/**
+ * 處理拍照辨識完成事件。
+ *
+ * 將 AI 辨識結果對應至各表單欄位，並記錄哪些欄位是由 AI 辨識填入的，
+ * 以便在表單上顯示「由 AI 辨識填入」標記提醒使用者確認。
+ *
+ * 規格書（2026-10-27）要求：照片辨識僅填寫，不直接儲存；
+ * 使用者仍需自行確認後點「儲存」。
+ */
+function onPhotoDetected(
+  result: import("@sunshield/contracts").ParseSunscreenLabelResponse
+): void {
+  aiScanWarning.value = null;
+  aiNotes.value = result.notes;
+
+  // 規格書（2026-10-27 §七）：若非防曬乳包裝，不更動表單數值，並顯示提示
+  if (!result.sunscreenClaimConfirmed) {
+    aiScanWarning.value = "未檢測到防曬產品標示，請確認拍攝的是防曬乳包裝。";
+    showPhotoScanner.value = false;
+    return;
+  }
+
+  const filled: string[] = [];
+
+  if (result.displayName !== null && isDefaultDisplayName(displayName.value)) {
+    displayName.value = result.displayName;
+    filled.push("displayName");
+  }
+
+  if (result.spf !== null) {
+    spfInput.value = String(result.spf);
+    filled.push("spf");
+  }
+
+  if (result.paGrade !== null) {
+    paGradeInput.value = result.paGrade;
+    filled.push("paGrade");
+  }
+
+  if (result.waterResistanceStatus !== "unknown") {
+    snapshotForm.value = {
+      ...snapshotForm.value,
+      waterResistance: result.waterResistanceStatus
+    };
+    filled.push("waterResistance");
+  }
+
+  if (result.reapplicationIntervalMinutes !== null) {
+    snapshotForm.value = {
+      ...snapshotForm.value,
+      intervalAnswer: "explicit",
+      intervalMinutes: result.reapplicationIntervalMinutes
+    };
+    filled.push("reapplicationInterval");
+  }
+
+  if (result.preExposureWaitMinutes !== null) {
+    snapshotForm.value = {
+      ...snapshotForm.value,
+      waitAnswer: "explicit",
+      waitMinutes: result.preExposureWaitMinutes
+    };
+    filled.push("preExposureWait");
+  }
+
+  if (result.expiryDate !== null) {
+    expiryDate.value = result.expiryDate;
+    filled.push("expiryDate");
+  }
+
+  if (result.sunscreenClaimConfirmed) {
+    snapshotForm.value = {
+      ...snapshotForm.value,
+      claimAnswer: "yes"
+    };
+    filled.push("claim");
+  }
+
+  aiFilledFields.value = filled;
+  showPhotoScanner.value = false;
 }
 
 async function save(): Promise<void> {
@@ -483,6 +597,61 @@ async function remove(): Promise<void> {
         原本它同時罩著暱稱與 SPF／PA，所以寫成「這些」。
       -->
       <p class="field-helper">即使同名，系統會視為不同裝備。</p>
+    </section>
+
+    <!--
+      2026-10-27：拍照速填入口。
+      只在防曬乳品類（needsLabelFields）下顯示，其他品類不觸發。
+      使用者可拍下正面（必要）與背面（選填）包裝，由 AI 辨識後自動填表。
+      操作完成後這個卡片消失，欄位已有值。
+    -->
+    <section v-if="needsLabelFields" class="app-card photo-scan-section">
+      <div class="photo-scan-header">
+        <h2 data-typography-role="card-title">拍照速填</h2>
+        <!--
+          AI 辨識填入提示 badge：辨識結果填入後顯示，提醒使用者確認欄位值。
+          使用者手動修改後不消失（aiFilledFields 僅在下次辨識或切品類時重置）。
+        -->
+        <span
+          v-if="aiFilledFields.length > 0"
+          class="ai-filled-badge"
+          role="status"
+          aria-live="polite"
+        >
+          ✨ 已由 AI 辨識填入，請確認後儲存
+        </span>
+      </div>
+
+      <p v-if="!showPhotoScanner" class="field-helper">
+        拍下防曬乳正面包裝，AI 辨識將自動填入規格。
+      </p>
+
+      <!-- 拍攝非防曬乳物品時的警示訊息 -->
+      <p v-if="aiScanWarning" class="form-error" role="alert">
+        {{ aiScanWarning }}
+      </p>
+
+      <!-- AI 辨識備註提示（如反光、日期預估等） -->
+      <p v-if="aiNotes" class="field-helper ai-scan-notes">
+        💡 辨識備註：{{ aiNotes }}
+      </p>
+
+      <button
+        v-if="!showPhotoScanner"
+        id="photo-scan-open"
+        class="button button--secondary"
+        type="button"
+        @click="showPhotoScanner = true"
+      >
+        📷 拍照辨識自動填表
+      </button>
+
+      <GearPhotoScannerSheet
+        v-if="showPhotoScanner"
+        :gear-category="gearCategory"
+        @detected="onPhotoDetected"
+        @cancel="showPhotoScanner = false"
+      />
     </section>
 
     <!--
@@ -1104,5 +1273,44 @@ p {
 
 .danger-zone h2 {
   font-size: var(--font-size-card-title);
+}
+
+/* 2026-10-27：拍照速填卡片 */
+.photo-scan-section {
+  /* app-card 已提供 gap 與 padding */
+}
+
+.photo-scan-header {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  flex-wrap: wrap;
+}
+
+.photo-scan-header h2 {
+  margin: 0;
+  font-size: var(--font-size-card-title);
+  font-weight: var(--font-weight-card-title);
+}
+
+/*
+ * AI 辨識填入提示 badge。
+ * 辨識成功後出現，提醒使用者欄位已由 AI 填入，請確認後儲存。
+ * 使用暖色系 token（tracking）以區別於一般說明文字。
+ */
+.ai-scan-notes {
+  margin: 0;
+  color: var(--text-secondary);
+}
+
+.ai-filled-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: var(--space-1) var(--space-2);
+  border-radius: var(--radius-xs, 4px);
+  background: var(--color-tracking-soft, #fff3e0);
+  color: var(--color-tracking, #e65100);
+  font-size: var(--font-size-caption);
+  line-height: 1.4;
 }
 </style>

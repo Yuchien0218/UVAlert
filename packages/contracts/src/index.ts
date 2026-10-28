@@ -9,3 +9,4 @@ export * from "./setup-draft";
 export * from "./weather";
 export * from "./sync";
 export * from "./feedback";
+export * from "./parse-sunscreen-label";
