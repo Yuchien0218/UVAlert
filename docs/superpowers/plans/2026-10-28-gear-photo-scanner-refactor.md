@@ -47,6 +47,6 @@
 
 ### Batch 5: 部署至正式站並進行端到端檢查
 **目標**：送出 commit 並推送至 GitHub main，等待 Vercel 部署完成，進行正式站驗證。
-- [ ] **Step 5.1**: 執行全套件檢查（`pnpm check`）。
-- [ ] **Step 5.2**: Commit 並 push 到 GitHub `main`。
-- [ ] **Step 5.3**: 驗證 Vercel 正式站部署狀態並確認實際請求不再回傳 405。
+- [x] **Step 5.1**: 執行全套件檢查（`pnpm check`，8,318 項測試全數通過）。
+- [x] **Step 5.2**: Commit 並 push 到 GitHub `main`（Commit `d8ff730`）。
+- [x] **Step 5.3**: 驗證 Vercel 正式站部署狀態並確認實際請求不再回傳 405（實測已能正確連線至 Supabase 並回傳格式校驗訊息）。
