@@ -52,8 +52,9 @@ const DEFAULT_SYSTEM_PROMPT = `你是一位專業的化妝品包裝與防曬規�
 8. sunscreenClaimConfirmed: (boolean) 是否明確為防曬產品（true 或 false）。
 9. notes: (string | null) 任何反光、不確定或需使用者留意的簡短提示（繁體中文，50 字內）。`;
 
-const DEFAULT_GEMINI_MODEL = "gemini-2.5-flash";
+const DEFAULT_GEMINI_MODEL = "gemini-3.5-flash-lite";
 const DEFAULT_OPENROUTER_MODEL = "openai/gpt-4o-mini";
+const UPSTREAM_TIMEOUT_MS = 45_000;
 
 const defaultLimiter = new SlidingWindowRateLimiter({
   maxRequests: 30,
@@ -80,6 +81,64 @@ function parseImageForGemini(img: string): { mimeType: string; data: string } {
     mimeType: "image/jpeg",
     data: img.replace(/\s+/gu, "")
   };
+}
+
+async function discoverActiveGeminiFlashModels(
+  fetchUpstream: ParseSunscreenLabelDependencies["fetchUpstream"],
+  apiKey: string,
+  excludeModel: string
+): Promise<string[]> {
+  try {
+    const res = await fetchUpstream(
+      "https://generativelanguage.googleapis.com/v1beta/models?pageSize=100",
+      {
+        method: "GET",
+        headers: { "x-goog-api-key": apiKey },
+        signal: AbortSignal.timeout(10_000)
+      }
+    );
+    if (!res.ok) return [];
+    const data = (await res.json()) as {
+      models?: Array<{
+        name?: string;
+        supportedGenerationMethods?: string[];
+      }>;
+    };
+    const candidates = (data.models ?? [])
+      .filter(
+        (m) =>
+          typeof m.name === "string" &&
+          Array.isArray(m.supportedGenerationMethods) &&
+          m.supportedGenerationMethods.includes("generateContent") &&
+          /gemini.*flash/iu.test(m.name) &&
+          !/tts|audio|live|imagen|image|embedding|robotics|thinking-exp/iu.test(
+            m.name
+          )
+      )
+      .map((m) => (m.name as string).replace(/^models\//u, ""))
+      .filter((id) => id !== excludeModel);
+
+    if (candidates.length === 0) return [];
+    // 優先選取具明確版本號之穩定 flash-lite 模型（免費額度最高、延遲最低），其次為穩定標準 flash
+    const rankCandidate = (id: string): number => {
+      const isVersioned = /^gemini-\d/iu.test(id);
+      const isPreview = /preview|exp/iu.test(id);
+      const isLite = /lite/iu.test(id);
+      if (isVersioned && !isPreview && isLite) return 0;
+      if (isVersioned && !isPreview && !isLite) return 1;
+      if (isVersioned && isPreview && isLite) return 2;
+      if (isVersioned && isPreview && !isLite) return 3;
+      return isLite ? 4 : 5;
+    };
+    candidates.sort((a, b) => {
+      const rankDiff = rankCandidate(a) - rankCandidate(b);
+      if (rankDiff !== 0) return rankDiff;
+      return b.localeCompare(a, undefined, { numeric: true });
+    });
+    return candidates;
+  } catch {
+    return [];
+  }
 }
 
 function classifyUpstreamError(
@@ -146,6 +205,7 @@ export function createParseSunscreenLabelHandler(
   dependencies: ParseSunscreenLabelDependencies
 ) {
   const limiter = dependencies.limiter ?? defaultLimiter;
+  let cachedDiscoveredGeminiModel: string | null = null;
 
   return async function handleParseSunscreenLabel(
     request: Request
@@ -242,20 +302,33 @@ export function createParseSunscreenLabelHandler(
     const useGemini = Boolean(geminiApiKey);
 
     let upstreamResponse: Response;
+    let preReadUpstreamErrorText: string | undefined;
+    let usedModel = "";
     try {
       if (useGemini && geminiApiKey) {
-        const geminiModel =
-          sanitizeSecret(dependencies.readSecret("GEMINI_MODEL")) ??
+        const configuredGeminiModel = sanitizeSecret(
+          dependencies.readSecret("GEMINI_MODEL")
+        );
+        const initialModel =
+          configuredGeminiModel ??
+          cachedDiscoveredGeminiModel ??
           DEFAULT_GEMINI_MODEL;
-        const geminiEndpoint = `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(geminiModel)}:generateContent`;
 
-        upstreamResponse = await dependencies.fetchUpstream(geminiEndpoint, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            "x-goog-api-key": geminiApiKey
-          },
-          body: JSON.stringify({
+        const buildGeminiPayload = (
+          modelId: string,
+          includeThinkingConfig: boolean
+        ): string => {
+          // flash-lite 與 2.0 系列預設已為極速推論，不需額外傳遞 thinkingConfig 避免相容性重試
+          const needsLowThinking =
+            includeThinkingConfig &&
+            !/lite|^gemini-2\.0|^gemini-1\./iu.test(modelId);
+          const thinkingConfig = !needsLowThinking
+            ? undefined
+            : /^gemini-2\.5/iu.test(modelId)
+              ? { thinkingBudget: 0 }
+              : { thinkingLevel: "low" };
+
+          return JSON.stringify({
             systemInstruction: {
               parts: [{ text: DEFAULT_SYSTEM_PROMPT }]
             },
@@ -271,14 +344,71 @@ export function createParseSunscreenLabelHandler(
             ],
             generationConfig: {
               responseMimeType: "application/json",
-              temperature: 0.1
+              temperature: 0.1,
+              ...(thinkingConfig ? { thinkingConfig } : {})
             }
-          })
-        });
+          });
+        };
+
+        const callGemini = async (
+          modelId: string
+        ): Promise<{ response: Response; errorText?: string }> => {
+          usedModel = modelId;
+          const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(modelId)}:generateContent`;
+          const res = await dependencies.fetchUpstream(endpoint, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              "x-goog-api-key": geminiApiKey
+            },
+            body: buildGeminiPayload(modelId, true),
+            signal: AbortSignal.timeout(UPSTREAM_TIMEOUT_MS)
+          });
+          if (res.status === 400) {
+            const errText = await res.text().catch(() => "");
+            if (/thinking/iu.test(errText)) {
+              const retryRes = await dependencies.fetchUpstream(endpoint, {
+                method: "POST",
+                headers: {
+                  "Content-Type": "application/json",
+                  "x-goog-api-key": geminiApiKey
+                },
+                body: buildGeminiPayload(modelId, false),
+                signal: AbortSignal.timeout(UPSTREAM_TIMEOUT_MS)
+              });
+              return { response: retryRes };
+            }
+            return { response: res, errorText: errText };
+          }
+          return { response: res };
+        };
+
+        let attempt = await callGemini(initialModel);
+
+        // 若預設模型版本已退役回傳 404，自動查詢該金鑰可用之最新 Flash 模型並依序重試
+        if (attempt.response.status === 404 && !configuredGeminiModel) {
+          const fallbackModels = await discoverActiveGeminiFlashModels(
+            dependencies.fetchUpstream,
+            geminiApiKey,
+            initialModel
+          );
+          for (const fallbackModel of fallbackModels.slice(0, 3)) {
+            await attempt.response.body?.cancel().catch(() => undefined);
+            attempt = await callGemini(fallbackModel);
+            if (attempt.response.status !== 404) {
+              cachedDiscoveredGeminiModel = fallbackModel;
+              break;
+            }
+          }
+        }
+
+        upstreamResponse = attempt.response;
+        preReadUpstreamErrorText = attempt.errorText;
       } else {
         const openRouterModel =
           sanitizeSecret(dependencies.readSecret("OPENROUTER_MODEL")) ??
           DEFAULT_OPENROUTER_MODEL;
+        usedModel = openRouterModel;
         const imageContents = images.map((img) => ({
           type: "image_url",
           image_url: {
@@ -312,24 +442,31 @@ export function createParseSunscreenLabelHandler(
       }
     } catch (error) {
       console.error("Vision upstream fetch error:", error);
-      return toResponse(
-        errorResponse({
-          status: 502,
-          code: "UPSTREAM_ERROR",
-          message: "連線至辨識服務失敗，請檢查網路連線"
-        })
-      );
+      const isTimeout =
+        error instanceof Error &&
+        (error.name === "TimeoutError" || error.name === "AbortError");
+      const err = errorResponse({
+        status: 502,
+        code: "UPSTREAM_ERROR",
+        message: isTimeout
+          ? "視覺辨識服務回應逾時，請稍後再試"
+          : "連線至辨識服務失敗，請檢查網路連線"
+      });
+      if (usedModel) err.headers["X-Vision-Model"] = usedModel;
+      return toResponse(err);
     }
 
     if (!upstreamResponse.ok) {
-      const upstreamText = await upstreamResponse.text().catch(() => "");
+      const upstreamText =
+        preReadUpstreamErrorText ??
+        (await upstreamResponse.text().catch(() => ""));
       console.error(
         useGemini ? "Gemini HTTP error:" : "OpenRouter HTTP error:",
         upstreamResponse.status
       );
-      return toResponse(
-        classifyUpstreamError(upstreamResponse.status, upstreamText)
-      );
+      const err = classifyUpstreamError(upstreamResponse.status, upstreamText);
+      if (usedModel) err.headers["X-Vision-Model"] = usedModel;
+      return toResponse(err);
     }
 
     let upstreamJson: unknown;
@@ -349,11 +486,14 @@ export function createParseSunscreenLabelHandler(
       ? ((
           upstreamJson as {
             candidates?: Array<{
-              content?: { parts?: Array<{ text?: string }> };
+              content?: {
+                parts?: Array<{ text?: string; thought?: boolean }>;
+              };
             }>;
           }
         )?.candidates?.[0]?.content?.parts
-          ?.map((part) => part.text ?? "")
+          ?.filter((part) => !part.thought)
+          .map((part) => part.text ?? "")
           .join("") ?? "")
       : ((
           upstreamJson as {
@@ -380,7 +520,10 @@ export function createParseSunscreenLabelHandler(
     }
 
     const sanitized = sanitizeResult(parsedResult);
-    return jsonResponse(sanitized, 200, corsHeaders(request));
+    return jsonResponse(sanitized, 200, {
+      ...corsHeaders(request),
+      ...(usedModel ? { "X-Vision-Model": usedModel } : {})
+    });
   };
 }
 

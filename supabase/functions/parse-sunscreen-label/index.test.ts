@@ -169,7 +169,10 @@ describe("parse-sunscreen-label handler", () => {
       RequestInit
     ];
     expect(url).toBe(
-      "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent"
+      "https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash-lite:generateContent"
+    );
+    expect(response.headers.get("X-Vision-Model")).toBe(
+      "gemini-3.5-flash-lite"
     );
     const headers = init.headers as Record<string, string>;
     expect(headers["x-goog-api-key"]).toBe("AIza-real-key");
@@ -178,11 +181,88 @@ describe("parse-sunscreen-label handler", () => {
     expect(parsedBody.generationConfig.responseMimeType).toBe(
       "application/json"
     );
+    expect(parsedBody.generationConfig.thinkingConfig).toBeUndefined();
     expect(parsedBody.contents[0].parts).toEqual([
       expect.objectContaining({ text: expect.stringContaining("防曬乳包裝照片") }),
       { inlineData: { mimeType: "image/jpeg", data: "FRONT_B64" } },
       { inlineData: { mimeType: "image/png", data: "BACK_B64" } }
     ]);
+  });
+
+  it("auto-discovers active Gemini Flash model via /v1beta/models when default model returns 404 and ignores thought parts", async () => {
+    const fetchUpstream = vi.fn(async (input: RequestInfo | URL) => {
+      const url = String(input);
+      if (url.includes("gemini-3.5-flash-lite:generateContent")) {
+        return new Response(
+          JSON.stringify({
+            error: {
+              code: 404,
+              message: "models/gemini-3.5-flash-lite is not found"
+            }
+          }),
+          { status: 404, headers: { "Content-Type": "application/json" } }
+        );
+      }
+      if (url.endsWith("/v1beta/models?pageSize=100")) {
+        return new Response(
+          JSON.stringify({
+            models: [
+              {
+                name: "models/text-embedding-004",
+                supportedGenerationMethods: ["embedContent"]
+              },
+              {
+                name: "models/gemini-3.9-flash-image",
+                supportedGenerationMethods: ["generateContent"]
+              },
+              {
+                name: "models/gemini-flash-latest",
+                supportedGenerationMethods: ["generateContent"]
+              },
+              {
+                name: "models/gemini-3.9-flash",
+                supportedGenerationMethods: ["generateContent"]
+              }
+            ]
+          }),
+          { status: 200, headers: { "Content-Type": "application/json" } }
+        );
+      }
+      if (url.includes("gemini-3.9-flash:generateContent")) {
+        return new Response(
+          JSON.stringify({
+            candidates: [
+              {
+                content: {
+                  parts: [
+                    { thought: true, text: "Internal reasoning about SPF 32..." },
+                    { text: JSON.stringify(MOCK_SUNSCREEN_RESULT) }
+                  ]
+                }
+              }
+            ]
+          }),
+          { status: 200, headers: { "Content-Type": "application/json" } }
+        );
+      }
+      return new Response("Unexpected URL", { status: 500 });
+    });
+
+    const handler = createParseSunscreenLabelHandler(
+      makeDependencies({ fetchUpstream })
+    );
+
+    const response = await handler(
+      makeRequest("POST", {
+        images: ["data:image/jpeg;base64,FRONT_B64"],
+        clientLocalTime: "2026-11-01T22:25:00+08:00"
+      })
+    );
+
+    expect(response.status).toBe(200);
+    const data = await response.json();
+    expect(data.displayName).toBe("NOV 娜芙 防曬水凝乳 SPF32");
+    expect(fetchUpstream).toHaveBeenCalledTimes(3);
   });
 
   it("classifies Gemini 400 API_KEY_INVALID as UPSTREAM_AUTH_ERROR and 429 as RATE_LIMITED", async () => {
