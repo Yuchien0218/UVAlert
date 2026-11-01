@@ -52,6 +52,9 @@ const DEFAULT_SYSTEM_PROMPT = `你是一位專業的化妝品包裝與防曬規�
 8. sunscreenClaimConfirmed: (boolean) 是否明確為防曬產品（true 或 false）。
 9. notes: (string | null) 任何反光、不確定或需使用者留意的簡短提示（繁體中文，50 字內）。`;
 
+const DEFAULT_GEMINI_MODEL = "gemini-2.5-flash";
+const DEFAULT_OPENROUTER_MODEL = "openai/gpt-4o-mini";
+
 const defaultLimiter = new SlidingWindowRateLimiter({
   maxRequests: 30,
   windowMs: 60 * 60 * 1000 // 1 小時 30 次
@@ -63,15 +66,35 @@ function sanitizeSecret(raw: string | undefined): string | undefined {
   return cleaned.length > 0 ? cleaned : undefined;
 }
 
+function parseImageForGemini(img: string): { mimeType: string; data: string } {
+  const match = /^data:(image\/[a-zA-Z0-9.+-]+);base64,([\s\S]+)$/u.exec(
+    img.trim()
+  );
+  if (match) {
+    return {
+      mimeType: match[1],
+      data: match[2].replace(/\s+/gu, "")
+    };
+  }
+  return {
+    mimeType: "image/jpeg",
+    data: img.replace(/\s+/gu, "")
+  };
+}
+
 function classifyUpstreamError(
   upstreamStatus: number,
   upstreamText: string
 ): ErrorResponse {
-  if (upstreamStatus === 401) {
+  if (
+    upstreamStatus === 401 ||
+    (upstreamStatus === 400 &&
+      /API_KEY_INVALID|API key not valid/iu.test(upstreamText))
+  ) {
     return errorResponse({
       status: 502,
       code: "UPSTREAM_AUTH_ERROR",
-      message: "視覺辨識金鑰無效或已失效（HTTP 401）"
+      message: "視覺辨識金鑰無效或已失效，請檢查金鑰設定"
     });
   }
   if (
@@ -197,64 +220,98 @@ export function createParseSunscreenLabelHandler(
       );
     }
 
-    // 檢查並清理 API 金鑰（去除誤帶的空白或引號）
-    const apiKey = sanitizeSecret(
+    // 優先使用免費額度充裕之 Google AI Studio GEMINI_API_KEY；若未設定才退回 OPENROUTER_API_KEY
+    const geminiApiKey = sanitizeSecret(
+      dependencies.readSecret("GEMINI_API_KEY")
+    );
+    const openRouterApiKey = sanitizeSecret(
       dependencies.readSecret("OPENROUTER_API_KEY")
     );
-    if (!apiKey) {
+
+    if (!geminiApiKey && !openRouterApiKey) {
       return toResponse(
         errorResponse({
           status: 500,
           code: "CONFIG_ERROR",
-          message: "OPENROUTER_API_KEY 未設定"
+          message: "GEMINI_API_KEY 未設定"
         })
       );
     }
 
-    const model =
-      sanitizeSecret(dependencies.readSecret("OPENROUTER_MODEL")) ??
-      "openai/gpt-4o-mini";
-
-    // 組裝 OpenRouter 視覺多模態請求
-    const imageContents = images.map((img) => ({
-      type: "image_url",
-      image_url: {
-        url: img.startsWith("data:") ? img : `data:image/jpeg;base64,${img}`
-      }
-    }));
-
-    const userMessageContent = [
-      {
-        type: "text",
-        text: `請分析所附的防曬乳包裝照片。當前客戶端時間為 ${clientLocalTime}。請依照要求回傳 JSON 物件。`
-      },
-      ...imageContents
-    ];
+    const promptText = `請分析所附的防曬乳包裝照片。當前客戶端時間為 ${clientLocalTime}。請依照要求回傳 JSON 物件。`;
+    const useGemini = Boolean(geminiApiKey);
 
     let upstreamResponse: Response;
     try {
-      upstreamResponse = await dependencies.fetchUpstream(
-        "https://openrouter.ai/api/v1/chat/completions",
-        {
+      if (useGemini && geminiApiKey) {
+        const geminiModel =
+          sanitizeSecret(dependencies.readSecret("GEMINI_MODEL")) ??
+          DEFAULT_GEMINI_MODEL;
+        const geminiEndpoint = `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(geminiModel)}:generateContent`;
+
+        upstreamResponse = await dependencies.fetchUpstream(geminiEndpoint, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
-            Authorization: `Bearer ${apiKey}`,
-            "HTTP-Referer": "https://uvalert.tw",
-            "X-Title": "UVAlert"
+            "x-goog-api-key": geminiApiKey
           },
           body: JSON.stringify({
-            model,
-            messages: [
-              { role: "system", content: DEFAULT_SYSTEM_PROMPT },
-              { role: "user", content: userMessageContent }
+            systemInstruction: {
+              parts: [{ text: DEFAULT_SYSTEM_PROMPT }]
+            },
+            contents: [
+              {
+                parts: [
+                  { text: promptText },
+                  ...images.map((img) => ({
+                    inlineData: parseImageForGemini(img)
+                  }))
+                ]
+              }
             ],
-            response_format: { type: "json_object" }
+            generationConfig: {
+              responseMimeType: "application/json",
+              temperature: 0.1
+            }
           })
-        }
-      );
+        });
+      } else {
+        const openRouterModel =
+          sanitizeSecret(dependencies.readSecret("OPENROUTER_MODEL")) ??
+          DEFAULT_OPENROUTER_MODEL;
+        const imageContents = images.map((img) => ({
+          type: "image_url",
+          image_url: {
+            url: img.startsWith("data:") ? img : `data:image/jpeg;base64,${img}`
+          }
+        }));
+
+        upstreamResponse = await dependencies.fetchUpstream(
+          "https://openrouter.ai/api/v1/chat/completions",
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${openRouterApiKey}`,
+              "HTTP-Referer": "https://uvalert.tw",
+              "X-Title": "UVAlert"
+            },
+            body: JSON.stringify({
+              model: openRouterModel,
+              messages: [
+                { role: "system", content: DEFAULT_SYSTEM_PROMPT },
+                {
+                  role: "user",
+                  content: [{ type: "text", text: promptText }, ...imageContents]
+                }
+              ],
+              response_format: { type: "json_object" }
+            })
+          }
+        );
+      }
     } catch (error) {
-      console.error("OpenRouter fetch error:", error);
+      console.error("Vision upstream fetch error:", error);
       return toResponse(
         errorResponse({
           status: 502,
@@ -266,7 +323,10 @@ export function createParseSunscreenLabelHandler(
 
     if (!upstreamResponse.ok) {
       const upstreamText = await upstreamResponse.text().catch(() => "");
-      console.error("OpenRouter HTTP error:", upstreamResponse.status);
+      console.error(
+        useGemini ? "Gemini HTTP error:" : "OpenRouter HTTP error:",
+        upstreamResponse.status
+      );
       return toResponse(
         classifyUpstreamError(upstreamResponse.status, upstreamText)
       );
@@ -285,9 +345,21 @@ export function createParseSunscreenLabelHandler(
       );
     }
 
-    const contentText =
-      (upstreamJson as { choices?: Array<{ message?: { content?: string } }> })
-        ?.choices?.[0]?.message?.content ?? "";
+    const contentText = useGemini
+      ? ((
+          upstreamJson as {
+            candidates?: Array<{
+              content?: { parts?: Array<{ text?: string }> };
+            }>;
+          }
+        )?.candidates?.[0]?.content?.parts
+          ?.map((part) => part.text ?? "")
+          .join("") ?? "")
+      : ((
+          upstreamJson as {
+            choices?: Array<{ message?: { content?: string } }>;
+          }
+        )?.choices?.[0]?.message?.content ?? "");
 
     let parsedResult: unknown;
     try {

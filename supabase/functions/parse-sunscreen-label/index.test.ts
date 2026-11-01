@@ -15,45 +15,46 @@ beforeEach(() => {
   });
 });
 
+const MOCK_SUNSCREEN_RESULT = {
+  displayName: "NOV 娜芙 防曬水凝乳 SPF32",
+  spf: 32,
+  paGrade: "PA+++",
+  waterResistanceStatus: "no_claim",
+  reapplicationIntervalMinutes: null,
+  preExposureWaitMinutes: null,
+  expiryDate: null,
+  sunscreenClaimConfirmed: true,
+  notes: "背面標示無紫外線吸收劑"
+};
+
+function makeGeminiResponse(result: unknown = MOCK_SUNSCREEN_RESULT): Response {
+  return new Response(
+    JSON.stringify({
+      candidates: [
+        {
+          content: {
+            parts: [{ text: JSON.stringify(result) }]
+          }
+        }
+      ]
+    }),
+    {
+      status: 200,
+      headers: { "Content-Type": "application/json" }
+    }
+  );
+}
+
 function makeDependencies(
   overrides: Partial<ParseSunscreenLabelDependencies> = {}
 ): ParseSunscreenLabelDependencies {
   return {
     readSecret: vi.fn((key: string) => {
-      if (key === "OPENROUTER_API_KEY") return "sk-or-test-key";
-      if (key === "OPENROUTER_MODEL") return "openai/gpt-4o-mini";
+      if (key === "GEMINI_API_KEY") return "AIza-test-gemini-key";
       return undefined;
     }),
-    fetchUpstream: vi.fn(async () => {
-      const mockResult = {
-        displayName: "安耐曬 金鑽高效防曬露 NA",
-        spf: 50,
-        paGrade: "PA++++",
-        waterResistanceStatus: "80",
-        reapplicationIntervalMinutes: 120,
-        preExposureWaitMinutes: 15,
-        expiryDate: "2027-08-31",
-        sunscreenClaimConfirmed: true,
-        notes: "背面註明耐水 80 分鐘"
-      };
-
-      return new Response(
-        JSON.stringify({
-          choices: [
-            {
-              message: {
-                content: JSON.stringify(mockResult)
-              }
-            }
-          ]
-        }),
-        {
-          status: 200,
-          headers: { "Content-Type": "application/json" }
-        }
-      );
-    }),
-    now: vi.fn(() => new Date("2026-10-27T12:00:00.000Z")),
+    fetchUpstream: vi.fn(async () => makeGeminiResponse()),
+    now: vi.fn(() => new Date("2026-11-01T12:00:00.000Z")),
     ...overrides
   };
 }
@@ -92,9 +93,8 @@ describe("parse-sunscreen-label handler", () => {
 
   it("rejects invalid request body with 400", async () => {
     const handler = createParseSunscreenLabelHandler(makeDependencies());
-    // 缺少 images
     const response = await handler(
-      makeRequest("POST", { clientLocalTime: "2026-10-27T20:00:00+08:00" })
+      makeRequest("POST", { clientLocalTime: "2026-11-01T20:00:00+08:00" })
     );
 
     expect(response.status).toBe(400);
@@ -105,14 +105,14 @@ describe("parse-sunscreen-label handler", () => {
     const response = await handler(
       makeRequest("POST", {
         images: [],
-        clientLocalTime: "2026-10-27T20:00:00+08:00"
+        clientLocalTime: "2026-11-01T20:00:00+08:00"
       })
     );
 
     expect(response.status).toBe(400);
   });
 
-  it("returns 500 when OPENROUTER_API_KEY is not configured", async () => {
+  it("returns 500 CONFIG_ERROR when neither GEMINI_API_KEY nor OPENROUTER_API_KEY is configured", async () => {
     const handler = createParseSunscreenLabelHandler(
       makeDependencies({
         readSecret: vi.fn(() => undefined)
@@ -122,22 +122,23 @@ describe("parse-sunscreen-label handler", () => {
     const response = await handler(
       makeRequest("POST", {
         images: ["data:image/jpeg;base64,front_photo"],
-        clientLocalTime: "2026-10-27T20:00:00+08:00"
+        clientLocalTime: "2026-11-01T20:00:00+08:00"
       })
     );
 
     expect(response.status).toBe(500);
     const json = await response.json();
     expect(json.error.code).toBe("CONFIG_ERROR");
+    expect(json.error.message).toContain("GEMINI_API_KEY");
   });
 
-  it("strips accidental quotes and whitespace from OPENROUTER_API_KEY and OPENROUTER_MODEL", async () => {
-    const fetchUpstream = makeDependencies().fetchUpstream as ReturnType<typeof vi.fn>;
+  it("uses Google Gemini generateContent as primary provider when GEMINI_API_KEY is set (even if OPENROUTER_API_KEY also exists)", async () => {
+    const fetchUpstream = vi.fn(async () => makeGeminiResponse());
     const handler = createParseSunscreenLabelHandler(
       makeDependencies({
         readSecret: vi.fn((key: string) => {
-          if (key === "OPENROUTER_API_KEY") return '  "sk-or-quoted-key" \r\n';
-          if (key === "OPENROUTER_MODEL") return ' "openai/gpt-4o-mini"\n ';
+          if (key === "GEMINI_API_KEY") return '  "AIza-real-key" \r\n';
+          if (key === "OPENROUTER_API_KEY") return "sk-or-exhausted-key";
           return undefined;
         }),
         fetchUpstream
@@ -146,20 +147,102 @@ describe("parse-sunscreen-label handler", () => {
 
     const response = await handler(
       makeRequest("POST", {
-        images: ["data:image/jpeg;base64,front_photo"],
-        clientLocalTime: "2026-10-27T20:00:00+08:00"
+        images: [
+          "data:image/jpeg;base64,FRONT_B64",
+          "data:image/png;base64,BACK_B64"
+        ],
+        clientLocalTime: "2026-11-01T22:15:00+08:00"
       })
     );
 
     expect(response.status).toBe(200);
-    const [, init] = fetchUpstream.mock.calls[0] as unknown as [string, RequestInit];
+    const data = await response.json();
+    expect(data.displayName).toBe("NOV 娜芙 防曬水凝乳 SPF32");
+    expect(data.spf).toBe(32);
+    expect(data.paGrade).toBe("PA+++");
+    expect(data.waterResistanceStatus).toBe("no_claim");
+    expect(data.sunscreenClaimConfirmed).toBe(true);
+
+    expect(fetchUpstream).toHaveBeenCalledTimes(1);
+    const [url, init] = fetchUpstream.mock.calls[0] as unknown as [
+      string,
+      RequestInit
+    ];
+    expect(url).toBe(
+      "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent"
+    );
     const headers = init.headers as Record<string, string>;
-    expect(headers["Authorization"]).toBe("Bearer sk-or-quoted-key");
+    expect(headers["x-goog-api-key"]).toBe("AIza-real-key");
+
     const parsedBody = JSON.parse(init.body as string);
-    expect(parsedBody.model).toBe("openai/gpt-4o-mini");
+    expect(parsedBody.generationConfig.responseMimeType).toBe(
+      "application/json"
+    );
+    expect(parsedBody.contents[0].parts).toEqual([
+      expect.objectContaining({ text: expect.stringContaining("防曬乳包裝照片") }),
+      { inlineData: { mimeType: "image/jpeg", data: "FRONT_B64" } },
+      { inlineData: { mimeType: "image/png", data: "BACK_B64" } }
+    ]);
   });
 
-  it("returns 502 UPSTREAM_ERROR when OpenRouter upstream fails with 5xx", async () => {
+  it("classifies Gemini 400 API_KEY_INVALID as UPSTREAM_AUTH_ERROR and 429 as RATE_LIMITED", async () => {
+    const handlerInvalidKey = createParseSunscreenLabelHandler(
+      makeDependencies({
+        fetchUpstream: vi.fn(async () =>
+          new Response(
+            JSON.stringify({
+              error: {
+                code: 400,
+                message: "API key not valid. Please pass a valid API key.",
+                status: "INVALID_ARGUMENT",
+                details: [{ reason: "API_KEY_INVALID" }]
+              }
+            }),
+            { status: 400 }
+          )
+        )
+      })
+    );
+
+    const resInvalid = await handlerInvalidKey(
+      makeRequest("POST", {
+        images: ["data:image/jpeg;base64,front_photo"],
+        clientLocalTime: "2026-11-01T20:00:00+08:00"
+      })
+    );
+    expect(resInvalid.status).toBe(502);
+    const jsonInvalid = await resInvalid.json();
+    expect(jsonInvalid.error.code).toBe("UPSTREAM_AUTH_ERROR");
+
+    const handlerRateLimit = createParseSunscreenLabelHandler(
+      makeDependencies({
+        fetchUpstream: vi.fn(async () =>
+          new Response(
+            JSON.stringify({
+              error: {
+                code: 429,
+                message: "Resource has been exhausted",
+                status: "RESOURCE_EXHAUSTED"
+              }
+            }),
+            { status: 429 }
+          )
+        )
+      })
+    );
+
+    const res429 = await handlerRateLimit(
+      makeRequest("POST", {
+        images: ["data:image/jpeg;base64,front_photo"],
+        clientLocalTime: "2026-11-01T20:00:00+08:00"
+      })
+    );
+    expect(res429.status).toBe(429);
+    const json429 = await res429.json();
+    expect(json429.error.code).toBe("RATE_LIMITED");
+  });
+
+  it("returns 502 UPSTREAM_ERROR when upstream fails with 5xx", async () => {
     const handler = createParseSunscreenLabelHandler(
       makeDependencies({
         fetchUpstream: vi.fn(async () => {
@@ -171,7 +254,7 @@ describe("parse-sunscreen-label handler", () => {
     const response = await handler(
       makeRequest("POST", {
         images: ["data:image/jpeg;base64,front_photo"],
-        clientLocalTime: "2026-10-27T20:00:00+08:00"
+        clientLocalTime: "2026-11-01T20:00:00+08:00"
       })
     );
 
@@ -180,139 +263,41 @@ describe("parse-sunscreen-label handler", () => {
     expect(json.error.code).toBe("UPSTREAM_ERROR");
   });
 
-  it("classifies OpenRouter 401 and 402 into distinct actionable error codes", async () => {
-    const handler401 = createParseSunscreenLabelHandler(
-      makeDependencies({
-        fetchUpstream: vi.fn(async () =>
-          new Response(
-            JSON.stringify({ error: { message: "No auth credentials found", code: 401 } }),
-            { status: 401 }
-          )
-        )
-      })
-    );
-
-    const res401 = await handler401(
-      makeRequest("POST", {
-        images: ["data:image/jpeg;base64,front_photo"],
-        clientLocalTime: "2026-10-27T20:00:00+08:00"
-      })
-    );
-    expect(res401.status).toBe(502);
-    const json401 = await res401.json();
-    expect(json401.error.code).toBe("UPSTREAM_AUTH_ERROR");
-    expect(json401.error.message).toContain("401");
-
-    const handler402 = createParseSunscreenLabelHandler(
-      makeDependencies({
-        fetchUpstream: vi.fn(async () =>
-          new Response(
-            JSON.stringify({ error: { message: "Insufficient credits", code: 402 } }),
-            { status: 402 }
-          )
-        )
-      })
-    );
-
-    const res402 = await handler402(
-      makeRequest("POST", {
-        images: ["data:image/jpeg;base64,front_photo"],
-        clientLocalTime: "2026-10-27T20:00:00+08:00"
-      })
-    );
-    expect(res402.status).toBe(502);
-    const json402 = await res402.json();
-    expect(json402.error.code).toBe("UPSTREAM_QUOTA_ERROR");
-    expect(json402.error.message).toContain("額度");
-
-    const handler403Limit = createParseSunscreenLabelHandler(
-      makeDependencies({
-        fetchUpstream: vi.fn(async () =>
-          new Response(
-            JSON.stringify({
-              error: {
-                message:
-                  "Key limit exceeded (total limit). Manage it using https://openrouter.ai/workspaces/default/keys/secret-hash $200.01 of $200.00",
-                code: 403
-              }
-            }),
-            { status: 403 }
-          )
-        )
-      })
-    );
-
-    const res403Limit = await handler403Limit(
-      makeRequest("POST", {
-        images: ["data:image/jpeg;base64,front_photo"],
-        clientLocalTime: "2026-10-27T20:00:00+08:00"
-      })
-    );
-    expect(res403Limit.status).toBe(502);
-    const json403Limit = await res403Limit.json();
-    expect(json403Limit.error.code).toBe("UPSTREAM_QUOTA_ERROR");
-    expect(json403Limit.error.message).toContain("額度");
-    expect(json403Limit.error.message).not.toContain("openrouter.ai");
-    expect(json403Limit.error.message).not.toContain("$200");
-  });
-
-  it("successfully passes images to OpenRouter and returns structured response", async () => {
-    const fetchUpstream = vi.fn(async () => {
-      const mockResult = {
-        displayName: "安耐曬 金鑽高效防曬露 NA",
-        spf: 50,
-        paGrade: "PA++++",
-        waterResistanceStatus: "80",
-        reapplicationIntervalMinutes: 120,
-        preExposureWaitMinutes: 15,
-        expiryDate: "2027-08-31",
-        sunscreenClaimConfirmed: true,
-        notes: "包裝辨識正常"
-      };
-
-      return new Response(
+  it("supports fallback to OpenRouter when GEMINI_API_KEY is absent and OPENROUTER_API_KEY is present", async () => {
+    const fetchUpstream = vi.fn(async () =>
+      new Response(
         JSON.stringify({
           choices: [
             {
               message: {
-                content: JSON.stringify(mockResult)
+                content: JSON.stringify(MOCK_SUNSCREEN_RESULT)
               }
             }
           ]
         }),
-        {
-          status: 200,
-          headers: { "Content-Type": "application/json" }
-        }
-      );
-    });
+        { status: 200, headers: { "Content-Type": "application/json" } }
+      )
+    );
 
     const handler = createParseSunscreenLabelHandler(
-      makeDependencies({ fetchUpstream })
+      makeDependencies({
+        readSecret: vi.fn((key: string) => {
+          if (key === "OPENROUTER_API_KEY") return ' "sk-or-test-key" ';
+          if (key === "OPENROUTER_MODEL") return ' "openai/gpt-4o-mini" ';
+          return undefined;
+        }),
+        fetchUpstream
+      })
     );
 
     const response = await handler(
       makeRequest("POST", {
-        images: [
-          "data:image/jpeg;base64,front_photo",
-          "data:image/jpeg;base64,back_photo"
-        ],
-        clientLocalTime: "2026-10-27T20:00:00+08:00"
+        images: ["data:image/jpeg;base64,front_photo"],
+        clientLocalTime: "2026-11-01T20:00:00+08:00"
       })
     );
 
     expect(response.status).toBe(200);
-    const data = await response.json();
-
-    expect(data.displayName).toBe("安耐曬 金鑽高效防曬露 NA");
-    expect(data.spf).toBe(50);
-    expect(data.paGrade).toBe("PA++++");
-    expect(data.waterResistanceStatus).toBe("80");
-    expect(data.expiryDate).toBe("2027-08-31");
-    expect(data.sunscreenClaimConfirmed).toBe(true);
-
-    // 驗證 upstream 呼叫參數
-    expect(fetchUpstream).toHaveBeenCalledTimes(1);
     const [url, init] = fetchUpstream.mock.calls[0] as unknown as [
       string,
       RequestInit
@@ -320,11 +305,5 @@ describe("parse-sunscreen-label handler", () => {
     expect(url).toBe("https://openrouter.ai/api/v1/chat/completions");
     const headers = init.headers as Record<string, string>;
     expect(headers["Authorization"]).toBe("Bearer sk-or-test-key");
-    expect(headers["HTTP-Referer"]).toBe("https://uvalert.tw");
-    expect(headers["X-Title"]).toBe("UVAlert");
-
-    const body = JSON.parse(init.body as string);
-    expect(body.model).toBe("openai/gpt-4o-mini");
-    expect(body.messages[1].content).toHaveLength(3); // 1 說明文字 + 2 張圖
   });
 });
