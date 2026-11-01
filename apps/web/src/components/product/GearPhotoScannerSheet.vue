@@ -20,6 +20,11 @@ import {
   compressImageFile
 } from "../../helpers/imageCompress";
 import {
+  applyCameraZoom,
+  openSharpRearCameraStream,
+  retriggerCameraAutofocus
+} from "../../helpers/liveCameraStream";
+import {
   readSunscreenScanErrorMessage,
   resolveParseSunscreenLabelEndpoint
 } from "../../helpers/parseSunscreenLabelEndpoint";
@@ -67,6 +72,8 @@ const backImageDataUrl = ref<string | null>(
 /** 頁內即時鏡頭狀態 */
 const activeCameraSlot = shallowRef<"front" | "back" | null>(null);
 const isStartingCamera = shallowRef(false);
+const supportsTwoXZoom = shallowRef(false);
+const currentZoom = shallowRef<1 | 2>(1);
 const liveVideoEl = ref<HTMLVideoElement | null>(null);
 const frontFileInputEl = ref<HTMLInputElement | null>(null);
 const backFileInputEl = ref<HTMLInputElement | null>(null);
@@ -108,6 +115,8 @@ function stopLiveCamera(): void {
   }
   activeCameraSlot.value = null;
   isStartingCamera.value = false;
+  supportsTwoXZoom.value = false;
+  currentZoom.value = 1;
 }
 
 onBeforeUnmount(() => {
@@ -133,26 +142,21 @@ async function openLiveCamera(slot: "front" | "back"): Promise<void> {
   activeCameraSlot.value = slot;
 
   try {
-    const stream = await navigator.mediaDevices.getUserMedia({
-      video: {
-        facingMode: { ideal: "environment" },
-        width: { ideal: 1280 },
-        height: { ideal: 960 }
-      },
-      audio: false
-    });
+    const session = await openSharpRearCameraStream(navigator.mediaDevices);
 
     if (activeCameraSlot.value === null) {
-      for (const track of stream.getTracks()) {
+      for (const track of session.stream.getTracks()) {
         track.stop();
       }
       return;
     }
 
-    activeStream = stream;
+    activeStream = session.stream;
+    supportsTwoXZoom.value = session.supportsTwoXZoom;
+    currentZoom.value = 1;
     await nextTick();
     if (liveVideoEl.value) {
-      liveVideoEl.value.srcObject = stream;
+      liveVideoEl.value.srcObject = session.stream;
       void Promise.resolve(liveVideoEl.value.play?.()).catch(() => undefined);
     }
   } catch {
@@ -164,14 +168,27 @@ async function openLiveCamera(slot: "front" | "back"): Promise<void> {
   }
 }
 
+async function setCameraZoom(level: 1 | 2): Promise<void> {
+  if (!activeStream) return;
+  const applied = await applyCameraZoom(activeStream, level);
+  if (applied) {
+    currentZoom.value = level;
+  }
+}
+
+function handleTapFocus(): void {
+  if (!activeStream) return;
+  void retriggerCameraAutofocus(activeStream);
+}
+
 function captureFromLiveCamera(): void {
   const slot = activeCameraSlot.value;
   const video = liveVideoEl.value;
   if (!slot || !video) return;
 
   const dataUrl = captureVideoFrameToDataUrl(video, {
-    maxDimension: 1024,
-    quality: 0.75
+    maxDimension: 1440,
+    quality: 0.85
   });
 
   if (!dataUrl) {
@@ -289,13 +306,42 @@ async function startScan(): Promise<void> {
 
     <!-- 頁內即時鏡頭取景框：不跳離瀏覽器，避免行動裝置外部相機觸發分頁重整 -->
     <div v-if="activeCameraSlot !== null" class="live-camera">
-      <p class="live-camera__status" role="status" aria-live="polite">
-        {{
-          activeCameraSlot === "front"
-            ? "正在拍攝：正面包裝（必要）"
-            : "正面已完成，接著可翻面拍攝背面包裝（選填）"
-        }}
-      </p>
+      <div class="live-camera__header">
+        <p class="live-camera__status" role="status" aria-live="polite">
+          {{
+            activeCameraSlot === "front"
+              ? "正在拍攝：正面包裝（必要）"
+              : "正面已完成，接著可翻面拍攝背面包裝（選填）"
+          }}
+        </p>
+        <div
+          v-if="supportsTwoXZoom"
+          class="live-camera__zoom-group"
+          role="group"
+          aria-label="鏡頭焦段切換"
+        >
+          <button
+            id="scanner-zoom-1x"
+            type="button"
+            class="live-camera__zoom-btn"
+            :class="{ 'option-selected': currentZoom === 1 }"
+            :aria-pressed="currentZoom === 1"
+            @click="setCameraZoom(1)"
+          >
+            1x
+          </button>
+          <button
+            id="scanner-zoom-2x"
+            type="button"
+            class="live-camera__zoom-btn"
+            :class="{ 'option-selected': currentZoom === 2 }"
+            :aria-pressed="currentZoom === 2"
+            @click="setCameraZoom(2)"
+          >
+            2x
+          </button>
+        </div>
+      </div>
       <div class="live-camera__viewport">
         <video
           id="scanner-live-video"
@@ -304,8 +350,16 @@ async function startScan(): Promise<void> {
           autoplay
           playsinline
           muted
+          @click="handleTapFocus"
         />
       </div>
+      <p class="live-camera__focus-tip field-helper">
+        {{
+          supportsTwoXZoom
+            ? "點按畫面可重新對焦；若近拍小字微霧，可切至 2x 並拉遠約 15 公分。"
+            : "點按畫面可重新對焦；若近拍小字微霧，請將手機拉遠約 15 公分對焦。"
+        }}
+      </p>
       <div class="button-group">
         <button
           id="scanner-shutter-btn"
@@ -474,12 +528,57 @@ async function startScan(): Promise<void> {
   background: var(--color-surface-card);
 }
 
+.live-camera__header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+}
+
 .live-camera__status {
   margin: 0;
   font-size: var(--font-size-supporting);
   font-weight: var(--font-weight-emphasis);
   line-height: var(--line-height-supporting);
   color: var(--text-emphasis);
+}
+
+.live-camera__zoom-group {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+}
+
+.live-camera__zoom-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: var(--tap-target);
+  min-height: var(--tap-target);
+  padding: 0 var(--space-3);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-pill);
+  background: transparent;
+  color: var(--text-primary);
+  font-size: var(--font-size-caption);
+  font-weight: var(--font-weight-emphasis);
+  line-height: var(--line-height-caption);
+  text-align: center;
+  cursor: pointer;
+  transition:
+    background-color var(--duration-fast) var(--ease-out),
+    border-color var(--duration-fast) var(--ease-out),
+    filter var(--duration-fast) var(--ease-out);
+}
+
+.live-camera__zoom-btn.option-selected {
+  border-color: var(--color-muted);
+  background: var(--color-hairline);
+}
+
+.live-camera__zoom-btn:active {
+  filter: brightness(var(--press-dim));
 }
 
 .live-camera__viewport {
@@ -497,6 +596,11 @@ async function startScan(): Promise<void> {
   width: 100%;
   height: 100%;
   object-fit: cover;
+  cursor: pointer;
+}
+
+.live-camera__focus-tip {
+  margin: 0;
 }
 
 /* 兩個照片卡槽並排 */

@@ -338,6 +338,79 @@ describe("GearPhotoScannerSheet 動態行為", () => {
     ).toBeUndefined();
   });
 
+  it("開啟鏡頭時請求 1080p 並啟用 continuous 自動對焦，支援硬體變焦時提供 1x／2x 切換與點按重新對焦", async () => {
+    const { captureVideoFrameToDataUrl } = await import(
+      "../../helpers/imageCompress"
+    );
+    const stopTrack = vi.fn();
+    const applyConstraints = vi.fn().mockResolvedValue(undefined);
+    const getCapabilities = vi.fn(() => ({
+      focusMode: ["single-shot", "continuous"],
+      zoom: { min: 1, max: 4 }
+    }));
+    const baseStream =
+      typeof MediaStream !== "undefined" ? new MediaStream() : {};
+    const fakeStream = Object.assign(baseStream, {
+      getTracks: () => [
+        { stop: stopTrack, applyConstraints, getCapabilities }
+      ],
+      getVideoTracks: () => [
+        { stop: stopTrack, applyConstraints, getCapabilities }
+      ]
+    }) as unknown as MediaStream;
+    const getUserMedia = vi.fn().mockResolvedValue(fakeStream);
+    Object.defineProperty(window.navigator, "mediaDevices", {
+      value: { getUserMedia, enumerateDevices: vi.fn().mockResolvedValue([]) },
+      configurable: true
+    });
+
+    const wrapper = mount(GearPhotoScannerSheet, {
+      props: { gearCategory: "sunscreen" }
+    });
+
+    await wrapper.find("#photo-front-camera-btn").trigger("click");
+    await flushPromises();
+
+    expect(getUserMedia).toHaveBeenCalledWith({
+      video: {
+        facingMode: { ideal: "environment" },
+        width: { ideal: 1920 },
+        height: { ideal: 1080 }
+      },
+      audio: false
+    });
+    expect(applyConstraints).toHaveBeenCalledWith({
+      advanced: [{ focusMode: "continuous" }]
+    });
+
+    const zoom2xBtn = wrapper.find("#scanner-zoom-2x");
+    expect(zoom2xBtn.exists()).toBe(true);
+    await zoom2xBtn.trigger("click");
+    await flushPromises();
+    expect(applyConstraints).toHaveBeenCalledWith({
+      advanced: [{ zoom: 2 }]
+    });
+    expect(zoom2xBtn.attributes("aria-pressed")).toBe("true");
+
+    // 點按取景畫面可重新觸發自動對焦
+    applyConstraints.mockClear();
+    await wrapper.find("#scanner-live-video").trigger("click");
+    await flushPromises();
+    expect(applyConstraints).toHaveBeenCalledWith({
+      advanced: [{ focusMode: "continuous" }]
+    });
+
+    // 快門擷取採用 1440px / 0.85 高清晰度設定
+    await wrapper.find("#scanner-shutter-btn").trigger("click");
+    await flushPromises();
+    expect(captureVideoFrameToDataUrl).toHaveBeenCalledWith(
+      expect.anything(),
+      { maxDimension: 1440, quality: 0.85 }
+    );
+
+    wrapper.unmount();
+  });
+
   it("getUserMedia 權限遭拒時顯示相簿選圖引導且不拋出未捕捉錯誤", async () => {
     const getUserMedia = vi
       .fn()
