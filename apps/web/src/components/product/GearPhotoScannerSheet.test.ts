@@ -106,7 +106,10 @@ describe("GearPhotoScannerSheet 靜態結構", () => {
 // ===========================
 
 vi.mock("../../helpers/imageCompress", () => ({
-  compressImageFile: vi.fn().mockResolvedValue("data:image/webp;base64,MOCK")
+  compressImageFile: vi.fn().mockResolvedValue("data:image/webp;base64,MOCK"),
+  captureVideoFrameToDataUrl: vi
+    .fn()
+    .mockReturnValue("data:image/jpeg;base64,LIVE_SHOT")
 }));
 
 vi.mock("../../app/injection", () => ({
@@ -117,6 +120,7 @@ vi.mock("../../app/injection", () => ({
 const mockFetch = vi.fn();
 
 beforeEach(() => {
+  window.sessionStorage.clear();
   vi.stubGlobal("fetch", mockFetch);
   mockFetch.mockReset();
 });
@@ -287,5 +291,118 @@ describe("GearPhotoScannerSheet 動態行為", () => {
     const alertText = wrapper.find('[role="alert"]').text();
     expect(alertText).toContain("Internal Server Error");
     expect(alertText).not.toContain("[object Object]");
+  });
+
+  it("支援 getUserMedia 時以頁內即時鏡頭連拍正反面，不跳離頁面且拍完立即釋放鏡頭軌", async () => {
+    const stopTrack = vi.fn();
+    const baseStream =
+      typeof MediaStream !== "undefined" ? new MediaStream() : {};
+    const fakeStream = Object.assign(baseStream, {
+      getTracks: () => [{ stop: stopTrack }]
+    }) as unknown as MediaStream;
+    const getUserMedia = vi.fn().mockResolvedValue(fakeStream);
+    Object.defineProperty(window.navigator, "mediaDevices", {
+      value: { getUserMedia },
+      configurable: true
+    });
+
+    const wrapper = mount(GearPhotoScannerSheet, {
+      props: { gearCategory: "sunscreen" }
+    });
+
+    await wrapper.find("#photo-front-camera-btn").trigger("click");
+    await flushPromises();
+
+    expect(getUserMedia).toHaveBeenCalledWith({
+      video: expect.objectContaining({
+        facingMode: { ideal: "environment" }
+      }),
+      audio: false
+    });
+    expect(wrapper.find("#scanner-live-video").exists()).toBe(true);
+
+    // 拍下正面 -> 自動切換為待拍背面，鏡頭維持開啟避免重複授權
+    await wrapper.find("#scanner-shutter-btn").trigger("click");
+    await flushPromises();
+    expect(stopTrack).not.toHaveBeenCalled();
+    expect(wrapper.find("#scanner-live-video").exists()).toBe(true);
+
+    // 拍下背面 -> 正反面皆完成，自動關閉頁內鏡頭並停止 MediaStreamTrack
+    await wrapper.find("#scanner-shutter-btn").trigger("click");
+    await flushPromises();
+    expect(stopTrack).toHaveBeenCalledTimes(1);
+    expect(wrapper.find("#scanner-live-video").exists()).toBe(false);
+    expect(wrapper.findAll(".photo-slot__thumbnail")).toHaveLength(2);
+    expect(
+      wrapper.find("#photo-scan-submit").attributes("disabled")
+    ).toBeUndefined();
+  });
+
+  it("getUserMedia 權限遭拒時顯示相簿選圖引導且不拋出未捕捉錯誤", async () => {
+    const getUserMedia = vi
+      .fn()
+      .mockRejectedValue(new Error("Permission denied"));
+    Object.defineProperty(window.navigator, "mediaDevices", {
+      value: { getUserMedia },
+      configurable: true
+    });
+
+    const wrapper = mount(GearPhotoScannerSheet, {
+      props: { gearCategory: "sunscreen" }
+    });
+
+    await wrapper.find("#photo-front-camera-btn").trigger("click");
+    await flushPromises();
+
+    expect(wrapper.find("#scanner-live-video").exists()).toBe(false);
+    expect(wrapper.find('[role="alert"]').text()).toContain("相簿");
+  });
+
+  it("拍攝或選圖後自動暫存至 sessionStorage，即使分頁重整重新掛載仍完整還原正反面預覽，取消時一併清除", async () => {
+    const wrapper1 = mount(GearPhotoScannerSheet, {
+      props: { gearCategory: "sunscreen" }
+    });
+
+    const frontInput = wrapper1.find<HTMLInputElement>("#photo-front");
+    Object.defineProperty(frontInput.element, "files", {
+      value: { 0: makeFile("front.jpg"), length: 1 },
+      configurable: true
+    });
+    await frontInput.trigger("change");
+    await flushPromises();
+    expect(frontInput.element.value).toBe("");
+
+    const backInput = wrapper1.find<HTMLInputElement>("#photo-back");
+    Object.defineProperty(backInput.element, "files", {
+      value: { 0: makeFile("back.jpg"), length: 1 },
+      configurable: true
+    });
+    await backInput.trigger("change");
+    await flushPromises();
+    expect(backInput.element.value).toBe("");
+
+    // 模擬 Android 分頁重整：卸載舊元件並重新掛載新實例
+    wrapper1.unmount();
+
+    const wrapper2 = mount(GearPhotoScannerSheet, {
+      props: { gearCategory: "sunscreen" }
+    });
+    await flushPromises();
+
+    expect(wrapper2.findAll(".photo-slot__thumbnail")).toHaveLength(2);
+    expect(
+      wrapper2.find("#photo-scan-submit").attributes("disabled")
+    ).toBeUndefined();
+
+    // 點擊取消應清除暫存照片
+    const cancelBtn = wrapper2
+      .findAll("button")
+      .find((b) => b.text() === "取消");
+    await cancelBtn!.trigger("click");
+
+    const wrapper3 = mount(GearPhotoScannerSheet, {
+      props: { gearCategory: "sunscreen" }
+    });
+    expect(wrapper3.findAll(".photo-slot__thumbnail")).toHaveLength(0);
   });
 });

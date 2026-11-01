@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import BottomSheet from "../common/BottomSheet.vue";
+import { clearGearFormDraft } from "../../features/product/gearFormDraft";
 import GearForm from "../product/GearForm.vue";
 
 /**
@@ -21,6 +22,7 @@ const emit = defineEmits<{
 }>();
 
 function close(): void {
+  clearGearFormDraft();
   emit("close");
 }
 

@@ -2,10 +2,13 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import {
   clearGearFormDraft,
+  clearScannerPhotosDraft,
   GEAR_FORM_DRAFT_STORAGE_KEY,
   type GearFormDraftState,
   loadGearFormDraft,
-  saveGearFormDraft
+  loadScannerPhotosDraft,
+  saveGearFormDraft,
+  saveScannerPhotosDraft
 } from "./gearFormDraft";
 
 describe("gearFormDraft", () => {
@@ -75,26 +78,67 @@ describe("gearFormDraft", () => {
   });
 
   it("gracefully catches exceptions when sessionStorage.setItem throws", () => {
-    vi.spyOn(window.sessionStorage, "setItem").mockImplementation(() => {
-      throw new Error("QuotaExceededError");
-    });
-
-    expect(() => saveGearFormDraft(sampleDraft)).not.toThrow();
+    const spy = vi
+      .spyOn(window.sessionStorage, "setItem")
+      .mockImplementation(() => {
+        throw new Error("QuotaExceededError");
+      });
+    try {
+      expect(() => saveGearFormDraft(sampleDraft)).not.toThrow();
+    } finally {
+      spy.mockRestore();
+    }
   });
 
   it("gracefully catches exceptions when sessionStorage.getItem throws", () => {
-    vi.spyOn(window.sessionStorage, "getItem").mockImplementation(() => {
-      throw new Error("SecurityError");
-    });
-
-    expect(loadGearFormDraft()).toBeNull();
+    const spy = vi
+      .spyOn(window.sessionStorage, "getItem")
+      .mockImplementation(() => {
+        throw new Error("SecurityError");
+      });
+    try {
+      expect(loadGearFormDraft()).toBeNull();
+    } finally {
+      spy.mockRestore();
+    }
   });
 
   it("gracefully catches exceptions when sessionStorage.removeItem throws", () => {
-    vi.spyOn(window.sessionStorage, "removeItem").mockImplementation(() => {
-      throw new Error("SecurityError");
+    const spy = vi
+      .spyOn(window.sessionStorage, "removeItem")
+      .mockImplementation(() => {
+        throw new Error("SecurityError");
+      });
+    try {
+      expect(() => clearGearFormDraft()).not.toThrow();
+    } finally {
+      spy.mockRestore();
+    }
+  });
+
+  it("saves, loads, and clears scanner front/back photos in sessionStorage, and clearGearFormDraft clears both", () => {
+    expect(loadScannerPhotosDraft()).toBeNull();
+
+    saveScannerPhotosDraft({
+      frontImageDataUrl: "data:image/jpeg;base64,FRONT",
+      backImageDataUrl: "data:image/jpeg;base64,BACK"
     });
 
-    expect(() => clearGearFormDraft()).not.toThrow();
+    expect(loadScannerPhotosDraft()).toEqual({
+      frontImageDataUrl: "data:image/jpeg;base64,FRONT",
+      backImageDataUrl: "data:image/jpeg;base64,BACK"
+    });
+
+    clearScannerPhotosDraft();
+    expect(loadScannerPhotosDraft()).toBeNull();
+
+    saveGearFormDraft(sampleDraft);
+    saveScannerPhotosDraft({
+      frontImageDataUrl: "data:image/jpeg;base64,FRONT_2",
+      backImageDataUrl: null
+    });
+    clearGearFormDraft();
+    expect(loadGearFormDraft()).toBeNull();
+    expect(loadScannerPhotosDraft()).toBeNull();
   });
 });

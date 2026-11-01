@@ -1,6 +1,10 @@
 // @vitest-environment happy-dom
 import { describe, expect, it, vi } from "vitest";
-import { calculateTargetDimensions, compressImageFile } from "./imageCompress";
+import {
+  calculateTargetDimensions,
+  captureVideoFrameToDataUrl,
+  compressImageFile
+} from "./imageCompress";
 
 describe("calculateTargetDimensions", () => {
   it("keeps original dimensions when both width and height are within maxDimension", () => {
@@ -182,6 +186,99 @@ describe("compressImageFile", () => {
       expect(revokeObjectURLSpy).toHaveBeenCalledWith("blob:mock-url");
     } finally {
       globalThis.Image = origImage;
+      vi.restoreAllMocks();
+    }
+  });
+
+  it("prefers createImageBitmap when available, calls bitmap.close() immediately, and zeroes canvas dimensions to free GPU memory", async () => {
+    const file = new File(["dummy-image-bytes"], "photo.jpg", {
+      type: "image/jpeg"
+    });
+
+    const mockCtx = { drawImage: vi.fn() };
+    const mockToDataURL = vi
+      .fn()
+      .mockReturnValue("data:image/jpeg;base64,from_bitmap");
+    let createdCanvas: HTMLCanvasElement | null = null;
+
+    const origCreateElement = document.createElement.bind(document);
+    vi.spyOn(document, "createElement").mockImplementation((tagName: string) => {
+      if (tagName === "canvas") {
+        const canvas = origCreateElement("canvas");
+        canvas.getContext = vi.fn().mockReturnValue(mockCtx);
+        canvas.toDataURL = mockToDataURL;
+        createdCanvas = canvas;
+        return canvas;
+      }
+      return origCreateElement(tagName);
+    });
+
+    const closeSpy = vi.fn();
+    const createImageBitmapSpy = vi.fn().mockResolvedValue({
+      width: 4032,
+      height: 3024,
+      close: closeSpy
+    });
+    vi.stubGlobal("createImageBitmap", createImageBitmapSpy);
+
+    try {
+      const result = await compressImageFile(file);
+      expect(result).toBe("data:image/jpeg;base64,from_bitmap");
+      expect(createImageBitmapSpy).toHaveBeenCalledWith(file);
+      expect(closeSpy).toHaveBeenCalledTimes(1);
+      expect(createdCanvas).not.toBeNull();
+      expect(createdCanvas!.width).toBe(0);
+      expect(createdCanvas!.height).toBe(0);
+    } finally {
+      vi.unstubAllGlobals();
+      vi.restoreAllMocks();
+    }
+  });
+});
+
+describe("captureVideoFrameToDataUrl", () => {
+  it("captures scaled JPEG frame from HTMLVideoElement and zeroes canvas dimensions afterward", () => {
+    const mockCtx = { drawImage: vi.fn() };
+    const mockToDataURL = vi
+      .fn()
+      .mockReturnValue("data:image/jpeg;base64,video_frame");
+    let createdCanvas: HTMLCanvasElement | null = null;
+
+    const origCreateElement = document.createElement.bind(document);
+    vi.spyOn(document, "createElement").mockImplementation((tagName: string) => {
+      if (tagName === "canvas") {
+        const canvas = origCreateElement("canvas");
+        canvas.getContext = vi.fn().mockReturnValue(mockCtx);
+        canvas.toDataURL = mockToDataURL;
+        createdCanvas = canvas;
+        return canvas;
+      }
+      return origCreateElement(tagName);
+    });
+
+    try {
+      const fakeVideo = {
+        videoWidth: 1920,
+        videoHeight: 1440
+      } as HTMLVideoElement;
+
+      const dataUrl = captureVideoFrameToDataUrl(fakeVideo, {
+        maxDimension: 1024,
+        quality: 0.75
+      });
+
+      expect(dataUrl).toBe("data:image/jpeg;base64,video_frame");
+      expect(mockCtx.drawImage).toHaveBeenCalledWith(
+        fakeVideo,
+        0,
+        0,
+        1024,
+        768
+      );
+      expect(mockToDataURL).toHaveBeenCalledWith("image/jpeg", 0.75);
+      expect(createdCanvas!.width).toBe(0);
+      expect(createdCanvas!.height).toBe(0);
+    } finally {
       vi.restoreAllMocks();
     }
   });
