@@ -1,6 +1,7 @@
 import {
   corsHeaders,
   errorResponse,
+  type ErrorResponse,
   jsonResponse,
   toResponse
 } from "../_shared/http.ts";
@@ -55,6 +56,68 @@ const defaultLimiter = new SlidingWindowRateLimiter({
   maxRequests: 30,
   windowMs: 60 * 60 * 1000 // 1 小時 30 次
 });
+
+function sanitizeSecret(raw: string | undefined): string | undefined {
+  if (raw === undefined) return undefined;
+  const cleaned = raw.trim().replace(/^["']+|["']+$/g, "").trim();
+  return cleaned.length > 0 ? cleaned : undefined;
+}
+
+function classifyUpstreamError(
+  upstreamStatus: number,
+  upstreamText: string
+): ErrorResponse {
+  if (upstreamStatus === 401) {
+    return errorResponse({
+      status: 502,
+      code: "UPSTREAM_AUTH_ERROR",
+      message: "視覺辨識金鑰無效或已失效（HTTP 401）"
+    });
+  }
+  if (
+    upstreamStatus === 402 ||
+    (upstreamStatus === 403 &&
+      /key limit exceeded|credit limit|insufficient credits/iu.test(
+        upstreamText
+      ))
+  ) {
+    return errorResponse({
+      status: 502,
+      code: "UPSTREAM_QUOTA_ERROR",
+      message: "視覺辨識金鑰已達額度上限或餘額不足"
+    });
+  }
+  if (upstreamStatus === 403) {
+    return errorResponse({
+      status: 502,
+      code: "UPSTREAM_AUTH_ERROR",
+      message: "視覺辨識服務拒絕存取（HTTP 403）"
+    });
+  }
+  if (upstreamStatus === 429) {
+    return errorResponse({
+      status: 429,
+      code: "RATE_LIMITED",
+      message: "視覺辨識服務目前請求較多，請稍後再試"
+    });
+  }
+  if (
+    upstreamStatus === 400 ||
+    upstreamStatus === 404 ||
+    upstreamStatus === 422
+  ) {
+    return errorResponse({
+      status: 502,
+      code: "UPSTREAM_REQUEST_ERROR",
+      message: `視覺辨識請求格式或模型設定不相容（HTTP ${upstreamStatus}）`
+    });
+  }
+  return errorResponse({
+    status: 502,
+    code: "UPSTREAM_ERROR",
+    message: `視覺辨識服務暫時無法回應（HTTP ${upstreamStatus}），請稍後再試`
+  });
+}
 
 export function createParseSunscreenLabelHandler(
   dependencies: ParseSunscreenLabelDependencies
@@ -134,8 +197,10 @@ export function createParseSunscreenLabelHandler(
       );
     }
 
-    // 檢查 API 金鑰
-    const apiKey = dependencies.readSecret("OPENROUTER_API_KEY");
+    // 檢查並清理 API 金鑰（去除誤帶的空白或引號）
+    const apiKey = sanitizeSecret(
+      dependencies.readSecret("OPENROUTER_API_KEY")
+    );
     if (!apiKey) {
       return toResponse(
         errorResponse({
@@ -147,7 +212,8 @@ export function createParseSunscreenLabelHandler(
     }
 
     const model =
-      dependencies.readSecret("OPENROUTER_MODEL") ?? "openai/gpt-4o-mini";
+      sanitizeSecret(dependencies.readSecret("OPENROUTER_MODEL")) ??
+      "openai/gpt-4o-mini";
 
     // 組裝 OpenRouter 視覺多模態請求
     const imageContents = images.map((img) => ({
@@ -199,17 +265,10 @@ export function createParseSunscreenLabelHandler(
     }
 
     if (!upstreamResponse.ok) {
-      console.error(
-        "OpenRouter HTTP error:",
-        upstreamResponse.status,
-        await upstreamResponse.text().catch(() => "")
-      );
+      const upstreamText = await upstreamResponse.text().catch(() => "");
+      console.error("OpenRouter HTTP error:", upstreamResponse.status);
       return toResponse(
-        errorResponse({
-          status: 502,
-          code: "UPSTREAM_ERROR",
-          message: "視覺辨識服務暫時無法回應，請稍後再試"
-        })
+        classifyUpstreamError(upstreamResponse.status, upstreamText)
       );
     }
 

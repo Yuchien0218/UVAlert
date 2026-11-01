@@ -1,5 +1,8 @@
 import { describe, expect, it, vi } from "vitest";
-import { resolveParseSunscreenLabelEndpoint } from "./parseSunscreenLabelEndpoint";
+import {
+  readSunscreenScanErrorMessage,
+  resolveParseSunscreenLabelEndpoint
+} from "./parseSunscreenLabelEndpoint";
 
 describe("resolveParseSunscreenLabelEndpoint", () => {
   it("自訂 baseUrl 優先採用", () => {
@@ -39,5 +42,43 @@ describe("resolveParseSunscreenLabelEndpoint", () => {
     expect(resolveParseSunscreenLabelEndpoint({ isDev: false })).toBe(
       "https://test-project.supabase.co/functions/v1/parse-sunscreen-label"
     );
+  });
+});
+
+describe("readSunscreenScanErrorMessage", () => {
+  it("解析標準 _shared/http.ts 的 { error: { code, message } } 結構", () => {
+    expect(
+      readSunscreenScanErrorMessage(
+        {
+          error: {
+            code: "UPSTREAM_ERROR",
+            message: "視覺辨識服務暫時無法回應，請稍後再試"
+          }
+        },
+        502
+      )
+    ).toBe("視覺辨識服務暫時無法回應，請稍後再試");
+  });
+
+  it("相容 { error: string } 字串結構", () => {
+    expect(
+      readSunscreenScanErrorMessage({ error: "Bad Gateway" }, 502)
+    ).toBe("Bad Gateway");
+  });
+
+  it("相容 Supabase 網關層 { message: string } 結構", () => {
+    expect(
+      readSunscreenScanErrorMessage({ message: "Invalid JWT" }, 401)
+    ).toBe("Invalid JWT");
+  });
+
+  it("當 error 為無 message 的未知物件時退回 HTTP 狀態碼，絕不回傳 [object Object]", () => {
+    const msg = readSunscreenScanErrorMessage({ error: { foo: "bar" } }, 502);
+    expect(msg).toBe("HTTP 502");
+    expect(msg).not.toContain("[object Object]");
+  });
+
+  it("當 body 為 null 或非物件時退回 HTTP 狀態碼", () => {
+    expect(readSunscreenScanErrorMessage(null, 500)).toBe("HTTP 500");
   });
 });

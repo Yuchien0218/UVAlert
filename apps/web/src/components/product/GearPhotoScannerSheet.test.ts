@@ -229,7 +229,40 @@ describe("GearPhotoScannerSheet 動態行為", () => {
     expect(emitted?.[0]?.[0]).toMatchObject({ spf: 50, paGrade: "PA++++" });
   });
 
-  it("辨識失敗時顯示錯誤訊息，不 emit detected", async () => {
+  it("辨識失敗時正確顯示後端 ErrorResponseData 物件內的錯誤訊息，不出現 [object Object]", async () => {
+    mockFetch.mockResolvedValue({
+      ok: false,
+      status: 502,
+      json: () =>
+        Promise.resolve({
+          error: {
+            code: "UPSTREAM_ERROR",
+            message: "視覺辨識服務暫時無法回應，請稍後再試"
+          }
+        })
+    });
+
+    const wrapper = mount(GearPhotoScannerSheet, {
+      props: { gearCategory: "sunscreen" }
+    });
+    const frontInput = wrapper.find<HTMLInputElement>("#photo-front");
+    Object.defineProperty(frontInput.element, "files", {
+      value: { 0: makeFile(), length: 1 },
+      configurable: true
+    });
+    await frontInput.trigger("change");
+    await flushPromises();
+
+    await wrapper.find("#photo-scan-submit").trigger("click");
+    await flushPromises();
+
+    expect(wrapper.emitted("detected")).toBeUndefined();
+    const alertText = wrapper.find('[role="alert"]').text();
+    expect(alertText).toContain("視覺辨識服務暫時無法回應，請稍後再試");
+    expect(alertText).not.toContain("[object Object]");
+  });
+
+  it("辨識失敗且後端回傳純字串或無法解析 JSON 時也能優雅顯示錯誤", async () => {
     mockFetch.mockResolvedValue({
       ok: false,
       status: 500,
@@ -251,6 +284,8 @@ describe("GearPhotoScannerSheet 動態行為", () => {
     await flushPromises();
 
     expect(wrapper.emitted("detected")).toBeUndefined();
-    expect(wrapper.html()).toContain("辨識");
+    const alertText = wrapper.find('[role="alert"]').text();
+    expect(alertText).toContain("Internal Server Error");
+    expect(alertText).not.toContain("[object Object]");
   });
 });

@@ -131,7 +131,35 @@ describe("parse-sunscreen-label handler", () => {
     expect(json.error.code).toBe("CONFIG_ERROR");
   });
 
-  it("returns 502 when OpenRouter upstream fails", async () => {
+  it("strips accidental quotes and whitespace from OPENROUTER_API_KEY and OPENROUTER_MODEL", async () => {
+    const fetchUpstream = makeDependencies().fetchUpstream as ReturnType<typeof vi.fn>;
+    const handler = createParseSunscreenLabelHandler(
+      makeDependencies({
+        readSecret: vi.fn((key: string) => {
+          if (key === "OPENROUTER_API_KEY") return '  "sk-or-quoted-key" \r\n';
+          if (key === "OPENROUTER_MODEL") return ' "openai/gpt-4o-mini"\n ';
+          return undefined;
+        }),
+        fetchUpstream
+      })
+    );
+
+    const response = await handler(
+      makeRequest("POST", {
+        images: ["data:image/jpeg;base64,front_photo"],
+        clientLocalTime: "2026-10-27T20:00:00+08:00"
+      })
+    );
+
+    expect(response.status).toBe(200);
+    const [, init] = fetchUpstream.mock.calls[0] as unknown as [string, RequestInit];
+    const headers = init.headers as Record<string, string>;
+    expect(headers["Authorization"]).toBe("Bearer sk-or-quoted-key");
+    const parsedBody = JSON.parse(init.body as string);
+    expect(parsedBody.model).toBe("openai/gpt-4o-mini");
+  });
+
+  it("returns 502 UPSTREAM_ERROR when OpenRouter upstream fails with 5xx", async () => {
     const handler = createParseSunscreenLabelHandler(
       makeDependencies({
         fetchUpstream: vi.fn(async () => {
@@ -150,6 +178,82 @@ describe("parse-sunscreen-label handler", () => {
     expect(response.status).toBe(502);
     const json = await response.json();
     expect(json.error.code).toBe("UPSTREAM_ERROR");
+  });
+
+  it("classifies OpenRouter 401 and 402 into distinct actionable error codes", async () => {
+    const handler401 = createParseSunscreenLabelHandler(
+      makeDependencies({
+        fetchUpstream: vi.fn(async () =>
+          new Response(
+            JSON.stringify({ error: { message: "No auth credentials found", code: 401 } }),
+            { status: 401 }
+          )
+        )
+      })
+    );
+
+    const res401 = await handler401(
+      makeRequest("POST", {
+        images: ["data:image/jpeg;base64,front_photo"],
+        clientLocalTime: "2026-10-27T20:00:00+08:00"
+      })
+    );
+    expect(res401.status).toBe(502);
+    const json401 = await res401.json();
+    expect(json401.error.code).toBe("UPSTREAM_AUTH_ERROR");
+    expect(json401.error.message).toContain("401");
+
+    const handler402 = createParseSunscreenLabelHandler(
+      makeDependencies({
+        fetchUpstream: vi.fn(async () =>
+          new Response(
+            JSON.stringify({ error: { message: "Insufficient credits", code: 402 } }),
+            { status: 402 }
+          )
+        )
+      })
+    );
+
+    const res402 = await handler402(
+      makeRequest("POST", {
+        images: ["data:image/jpeg;base64,front_photo"],
+        clientLocalTime: "2026-10-27T20:00:00+08:00"
+      })
+    );
+    expect(res402.status).toBe(502);
+    const json402 = await res402.json();
+    expect(json402.error.code).toBe("UPSTREAM_QUOTA_ERROR");
+    expect(json402.error.message).toContain("額度");
+
+    const handler403Limit = createParseSunscreenLabelHandler(
+      makeDependencies({
+        fetchUpstream: vi.fn(async () =>
+          new Response(
+            JSON.stringify({
+              error: {
+                message:
+                  "Key limit exceeded (total limit). Manage it using https://openrouter.ai/workspaces/default/keys/secret-hash $200.01 of $200.00",
+                code: 403
+              }
+            }),
+            { status: 403 }
+          )
+        )
+      })
+    );
+
+    const res403Limit = await handler403Limit(
+      makeRequest("POST", {
+        images: ["data:image/jpeg;base64,front_photo"],
+        clientLocalTime: "2026-10-27T20:00:00+08:00"
+      })
+    );
+    expect(res403Limit.status).toBe(502);
+    const json403Limit = await res403Limit.json();
+    expect(json403Limit.error.code).toBe("UPSTREAM_QUOTA_ERROR");
+    expect(json403Limit.error.message).toContain("額度");
+    expect(json403Limit.error.message).not.toContain("openrouter.ai");
+    expect(json403Limit.error.message).not.toContain("$200");
   });
 
   it("successfully passes images to OpenRouter and returns structured response", async () => {

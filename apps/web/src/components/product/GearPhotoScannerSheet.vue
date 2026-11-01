@@ -4,7 +4,10 @@ import type { GearCategory } from "@sunshield/contracts";
 import type { ParseSunscreenLabelResponse } from "@sunshield/contracts";
 import InlineLoader from "../feedback/InlineLoader.vue";
 import { compressImageFile } from "../../helpers/imageCompress";
-import { resolveParseSunscreenLabelEndpoint } from "../../helpers/parseSunscreenLabelEndpoint";
+import {
+  readSunscreenScanErrorMessage,
+  resolveParseSunscreenLabelEndpoint
+} from "../../helpers/parseSunscreenLabelEndpoint";
 
 /**
  * 防曬乳外包裝拍照辨識 Sheet 元件。
@@ -110,9 +113,12 @@ async function startScan(): Promise<void> {
     });
 
     if (!response.ok) {
-      const body = await response.json().catch(() => ({}));
-      const detail = (body as { error?: string }).error ?? `HTTP ${response.status}`;
-      scanError.value = `辨識失敗：${detail}。請確認照片清晰，或手動填寫。`;
+      const body = await response.json().catch(() => null);
+      const detail = readSunscreenScanErrorMessage(
+        body,
+        response.status
+      ).replace(/[。.]$/u, "");
+      scanError.value = `辨識失敗：${detail}。可稍後再試或改為手動填寫。`;
       return;
     }
 

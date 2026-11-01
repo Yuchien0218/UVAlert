@@ -40,3 +40,40 @@ export function resolveParseSunscreenLabelEndpoint(options: {
   // 正式環境一律直連 Supabase Edge Function 端點
   return PRODUCTION_SUPABASE_EDGE_FUNCTION;
 }
+
+/**
+ * 解析後端 Edge Function 回傳之錯誤訊息。
+ *
+ * 對齊 `_shared/http.ts` 之 `{ error: { code, message } }` 契約（同 `BrowserFeedbackClient`），
+ * 同時相容 `{ error: string }` 與網關層 `{ message: string }`，確保絕不將物件轉成 `[object Object]`。
+ */
+export function readSunscreenScanErrorMessage(
+  body: unknown,
+  status: number
+): string {
+  if (typeof body === "object" && body !== null) {
+    if ("error" in body) {
+      const errField = (body as { error: unknown }).error;
+      if (
+        typeof errField === "object" &&
+        errField !== null &&
+        "message" in errField &&
+        typeof (errField as { message: unknown }).message === "string" &&
+        (errField as { message: string }).message.trim().length > 0
+      ) {
+        return (errField as { message: string }).message.trim();
+      }
+      if (typeof errField === "string" && errField.trim().length > 0) {
+        return errField.trim();
+      }
+    }
+    if (
+      "message" in body &&
+      typeof (body as { message: unknown }).message === "string" &&
+      (body as { message: string }).message.trim().length > 0
+    ) {
+      return (body as { message: string }).message.trim();
+    }
+  }
+  return `HTTP ${status}`;
+}
